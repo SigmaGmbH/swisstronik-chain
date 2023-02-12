@@ -3,12 +3,6 @@ package cmd
 import (
 	"errors"
 	"github.com/SigmaGmbH/evm-module/encoding"
-	"github.com/cosmos/cosmos-sdk/simapp/params"
-	"io"
-	"os"
-	"path/filepath"
-	"strings"
-
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/config"
@@ -19,6 +13,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/server"
 	serverconfig "github.com/cosmos/cosmos-sdk/server/config"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
+	"github.com/cosmos/cosmos-sdk/simapp/params"
 	"github.com/cosmos/cosmos-sdk/snapshots"
 	snapshottypes "github.com/cosmos/cosmos-sdk/snapshots/types"
 	"github.com/cosmos/cosmos-sdk/store"
@@ -35,6 +30,11 @@ import (
 	tmcli "github.com/tendermint/tendermint/libs/cli"
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
+	"io"
+	"os"
+	"path/filepath"
+	"strings"
+
 	// this line is used by starport scaffolding # root/moduleImport
 
 	evmmoduleclient "github.com/SigmaGmbH/evm-module/client"
@@ -110,7 +110,7 @@ func initRootCmd(
 
 	rootCmd.AddCommand(
 		evmmoduleclient.ValidateChainID(
-			InitCmd(app.ModuleBasics, app.DefaultNodeHome),
+			genutilcli.InitCmd(app.ModuleBasics, app.DefaultNodeHome),
 		),
 		genutilcli.CollectGenTxsCmd(banktypes.GenesisBalancesIterator{}, app.DefaultNodeHome),
 		genutilcli.MigrateGenesisCmd(),
@@ -154,7 +154,6 @@ func initRootCmd(
 
 	// add rosetta
 	rootCmd.AddCommand(server.RosettaCommand(encodingConfig.InterfaceRegistry, encodingConfig.Codec))
-
 }
 
 // queryCommand returns the sub-command to send queries to the app
