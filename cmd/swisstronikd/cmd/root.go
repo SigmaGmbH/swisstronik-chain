@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"errors"
+	"github.com/SigmaGmbH/evm-module/encoding"
+	"github.com/cosmos/cosmos-sdk/simapp/params"
 	"io"
 	"os"
 	"path/filepath"
@@ -35,15 +37,18 @@ import (
 	dbm "github.com/tendermint/tm-db"
 	// this line is used by starport scaffolding # root/moduleImport
 
+	evmmoduleclient "github.com/SigmaGmbH/evm-module/client"
+	evmmoduleserver "github.com/SigmaGmbH/evm-module/server"
+	srvflags "github.com/SigmaGmbH/evm-module/server/flags"
 	"swisstronik/app"
 	appparams "swisstronik/app/params"
 )
 
 // NewRootCmd creates a new root command for a Cosmos SDK application
-func NewRootCmd() (*cobra.Command, appparams.EncodingConfig) {
-	encodingConfig := app.MakeEncodingConfig()
+func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
+	encodingConfig := encoding.MakeConfig(app.ModuleBasics)
 	initClientCtx := client.Context{}.
-		WithCodec(encodingConfig.Marshaler).
+		WithCodec(encodingConfig.Codec).
 		WithInterfaceRegistry(encodingConfig.InterfaceRegistry).
 		WithTxConfig(encodingConfig.TxConfig).
 		WithLegacyAmino(encodingConfig.Amino).
@@ -54,7 +59,7 @@ func NewRootCmd() (*cobra.Command, appparams.EncodingConfig) {
 
 	rootCmd := &cobra.Command{
 		Use:   app.Name + "d",
-		Short: "Start swisstronik node",
+		Short: "Swisstronik Daemon",
 		PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
 			// set the default command outputs
 			cmd.SetOut(cmd.OutOrStdout())
@@ -98,13 +103,15 @@ func initTendermintConfig() *tmcfg.Config {
 
 func initRootCmd(
 	rootCmd *cobra.Command,
-	encodingConfig appparams.EncodingConfig,
+	encodingConfig params.EncodingConfig,
 ) {
 	// Set config
 	initSDKConfig()
 
 	rootCmd.AddCommand(
-		genutilcli.InitCmd(app.ModuleBasics, app.DefaultNodeHome),
+		evmmoduleclient.ValidateChainID(
+			genutilcli.InitCmd(app.ModuleBasics, app.DefaultNodeHome),
+		),
 		genutilcli.CollectGenTxsCmd(banktypes.GenesisBalancesIterator{}, app.DefaultNodeHome),
 		genutilcli.MigrateGenesisCmd(),
 		genutilcli.GenTxCmd(
@@ -116,20 +123,18 @@ func initRootCmd(
 		genutilcli.ValidateGenesisCmd(app.ModuleBasics),
 		AddGenesisAccountCmd(app.DefaultNodeHome),
 		tmcli.NewCompletionCmd(rootCmd, true),
+		evmmoduleclient.NewTestnetCmd(app.ModuleBasics, banktypes.GenesisBalancesIterator{}),
 		debug.Cmd(),
 		config.Cmd(),
 		// this line is used by starport scaffolding # root/commands
 	)
 
-	a := appCreator{
-		encodingConfig,
-	}
+	a := appCreator{encodingConfig}
 
 	// add server commands
-	server.AddCommands(
+	evmmoduleserver.AddCommands(
 		rootCmd,
-		app.DefaultNodeHome,
-		a.newApp,
+		evmmoduleserver.NewDefaultStartOptions(a.newApp, app.DefaultNodeHome),
 		a.appExport,
 		addModuleInitFlags,
 	)
@@ -141,6 +146,15 @@ func initRootCmd(
 		txCommand(),
 		keys.Commands(app.DefaultNodeHome),
 	)
+
+	rootCmd, err := srvflags.AddTxFlags(rootCmd)
+	if err != nil {
+		panic(err)
+	}
+
+	// add rosetta
+	rootCmd.AddCommand(server.RosettaCommand(encodingConfig.InterfaceRegistry, encodingConfig.Codec))
+
 }
 
 // queryCommand returns the sub-command to send queries to the app
@@ -217,7 +231,7 @@ func overwriteFlagDefaults(c *cobra.Command, defaults map[string]string) {
 }
 
 type appCreator struct {
-	encodingConfig appparams.EncodingConfig
+	encodingConfig params.EncodingConfig
 }
 
 // newApp creates a new Cosmos SDK app
@@ -258,6 +272,7 @@ func (a appCreator) newApp(
 		cast.ToUint32(appOpts.Get(server.FlagStateSyncSnapshotKeepRecent)),
 	)
 
+	igniteEncodingConfig := convertEncodingConfig(a.encodingConfig)
 	return app.New(
 		logger,
 		db,
@@ -266,7 +281,7 @@ func (a appCreator) newApp(
 		skipUpgradeHeights,
 		cast.ToString(appOpts.Get(flags.FlagHome)),
 		cast.ToUint(appOpts.Get(server.FlagInvCheckPeriod)),
-		a.encodingConfig,
+		igniteEncodingConfig,
 		appOpts,
 		baseapp.SetPruning(pruningOpts),
 		baseapp.SetMinGasPrices(cast.ToString(appOpts.Get(server.FlagMinGasPrices))),
@@ -297,6 +312,7 @@ func (a appCreator) appExport(
 		return servertypes.ExportedApp{}, errors.New("application home not set")
 	}
 
+	igniteEncodingConfig := convertEncodingConfig(a.encodingConfig)
 	app := app.New(
 		logger,
 		db,
@@ -305,7 +321,7 @@ func (a appCreator) appExport(
 		map[int64]bool{},
 		homePath,
 		uint(1),
-		a.encodingConfig,
+		igniteEncodingConfig,
 		appOpts,
 	)
 
@@ -350,4 +366,14 @@ func initAppConfig() (string, interface{}) {
 	customAppTemplate := serverconfig.DefaultConfigTemplate
 
 	return customAppTemplate, customAppConfig
+}
+
+// convertEncodingConfig converts default cosmos encoding config to ignite format
+func convertEncodingConfig(config params.EncodingConfig) appparams.EncodingConfig {
+	return appparams.EncodingConfig{
+		InterfaceRegistry: config.InterfaceRegistry,
+		Marshaler:         config.Codec,
+		TxConfig:          config.TxConfig,
+		Amino:             config.Amino,
+	}
 }
