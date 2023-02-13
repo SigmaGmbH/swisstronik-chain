@@ -3,6 +3,7 @@ package app
 import (
 	"github.com/SigmaGmbH/evm-module/x/evm"
 	"github.com/SigmaGmbH/evm-module/x/feemarket"
+	"github.com/cosmos/cosmos-sdk/x/auth/posthandler"
 	"github.com/gorilla/mux"
 	"github.com/rakyll/statik/fs"
 	"io"
@@ -678,12 +679,13 @@ func New(
 		slashingtypes.ModuleName,
 		govtypes.ModuleName,
 		minttypes.ModuleName,
-		crisistypes.ModuleName,
-		genutiltypes.ModuleName,
 		ibctransfertypes.ModuleName,
 		ibchost.ModuleName,
 		evmtypes.ModuleName,
 		feemarkettypes.ModuleName,
+		// NOTE: feemarket need to be initialized before genutil module:
+		// gentx transactions use MinGasPriceDecorator.AnteHandle
+		genutiltypes.ModuleName,
 		icatypes.ModuleName,
 		evidencetypes.ModuleName,
 		authz.ModuleName,
@@ -693,6 +695,7 @@ func New(
 		upgradetypes.ModuleName,
 		vestingtypes.ModuleName,
 		swisstronikmoduletypes.ModuleName,
+		crisistypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/initGenesis
 	)
 
@@ -741,6 +744,8 @@ func New(
 	app.SetBeginBlocker(app.BeginBlocker)
 	app.SetEndBlocker(app.EndBlocker)
 
+	app.setPostHandler()
+
 	if loadLatest {
 		if err := app.LoadLatestVersion(); err != nil {
 			tmos.Exit(err.Error())
@@ -773,6 +778,17 @@ func (app *App) setAnteHandler(txConfig client.TxConfig, maxGasWanted uint64) {
 	}
 
 	app.SetAnteHandler(anteHandler)
+}
+
+func (app *App) setPostHandler() {
+	postHandler, err := posthandler.NewPostHandler(
+		posthandler.HandlerOptions{},
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	app.SetPostHandler(postHandler)
 }
 
 // Name returns the name of the App
