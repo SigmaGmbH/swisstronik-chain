@@ -39,6 +39,7 @@ import (
 
 	evmmoduleclient "github.com/SigmaGmbH/evm-module/client"
 	evmmoduleserver "github.com/SigmaGmbH/evm-module/server"
+	evmserverconfig "github.com/SigmaGmbH/evm-module/server/config"
 	srvflags "github.com/SigmaGmbH/evm-module/server/flags"
 	"swisstronik/app"
 	appparams "swisstronik/app/params"
@@ -340,6 +341,10 @@ func initAppConfig() (string, interface{}) {
 
 	type CustomAppConfig struct {
 		serverconfig.Config
+
+		EVM     evmserverconfig.EVMConfig     `mapstructure:"evm"`
+		JSONRPC evmserverconfig.JSONRPCConfig `mapstructure:"json-rpc"`
+		TLS     evmserverconfig.TLSConfig     `mapstructure:"tls"`
 	}
 
 	// Optionally allow the chain developer to overwrite the SDK's default
@@ -360,9 +365,12 @@ func initAppConfig() (string, interface{}) {
 	srvCfg.MinGasPrices = "0stake"
 
 	customAppConfig := CustomAppConfig{
-		Config: *srvCfg,
+		Config:  *srvCfg,
+		EVM:     *evmserverconfig.DefaultEVMConfig(),
+		JSONRPC: *evmserverconfig.DefaultJSONRPCConfig(),
+		TLS:     *evmserverconfig.DefaultTLSConfig(),
 	}
-	customAppTemplate := serverconfig.DefaultConfigTemplate
+	customAppTemplate := serverconfig.DefaultConfigTemplate + evmserverconfig.DefaultConfigTemplate
 
 	return customAppTemplate, customAppConfig
 }

@@ -83,6 +83,12 @@ github.com/Shopify/sarama v1.19.0/go.mod h1:FVkBWblsNy7DGZRfXLU0O9RCGt5g3g3yEuWX
 github.com/Shopify/toxiproxy v2.1.4+incompatible/go.mod h1:OXgGpZ6Cli1/URJOF1DMxUHB2q5Ap20/P/eIdh4G0pI=
 github.com/SigmaGmbH/evm-module v0.0.0-20230210144454-3c5fa2791583 h1:8CP2W/wE89ah2Qb6OkpiIcKBInE7rx+JaUdo8N7BZZw=
 github.com/SigmaGmbH/evm-module v0.0.0-20230210144454-3c5fa2791583/go.mod h1:a1IrSGqVHNogk5I1CERaEQNJEWv79jZglrT7w1cBqY0=
+github.com/SigmaGmbH/evm-module v0.0.0-20230213113606-944825d0f3b8 h1:D2DKScTDP+2PNWRBT6QLjkduCkK559QiAy27WOPpcXU=
+github.com/SigmaGmbH/evm-module v0.0.0-20230213113606-944825d0f3b8/go.mod h1:a1IrSGqVHNogk5I1CERaEQNJEWv79jZglrT7w1cBqY0=
+github.com/SigmaGmbH/evm-module v0.0.0-20230213133827-533a8fe82304 h1:S4USoPCvwi41sY3ufjdMOLZKoi4zsFskP+oa6L1XI4U=
+github.com/SigmaGmbH/evm-module v0.0.0-20230213133827-533a8fe82304/go.mod h1:a1IrSGqVHNogk5I1CERaEQNJEWv79jZglrT7w1cBqY0=
+github.com/SigmaGmbH/evm-module v0.0.0-20230213135003-34038073f18d h1:2p+fW1x+v+c0Yz0G3vGcQZiCe/q/HtSbRdp8l5S6FGQ=
+github.com/SigmaGmbH/evm-module v0.0.0-20230213135003-34038073f18d/go.mod h1:a1IrSGqVHNogk5I1CERaEQNJEWv79jZglrT7w1cBqY0=
 github.com/SigmaGmbH/librustgo v0.0.0-20230209113653-0ce4d86b9f9e h1:teZluJTOB0SnzCECtGu+58x9YBaymg486RvKPHBGVXc=
 github.com/SigmaGmbH/librustgo v0.0.0-20230209113653-0ce4d86b9f9e/go.mod h1:ugppH+kBiV2tLpb+pfi4Jggz+demVTLQDL8Tj3+vuVI=
 github.com/StackExchange/wmi v0.0.0-20180116203802-5d049714c4a6 h1:fLjPD/aNc3UIOA6tDi6QXUemppXK3P9BI7mr2hd6gx8=
