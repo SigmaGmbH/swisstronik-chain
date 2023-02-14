@@ -726,6 +726,8 @@ func New(
 		ibc.NewAppModule(app.IBCKeeper),
 		transferModule,
 		swisstronikModule,
+		feemarket.NewAppModule(app.FeeMarketKeeper, feeMarketSs),
+		evm.NewAppModule(app.EvmKeeper, app.AccountKeeper, evmSs),
 		// this line is used by starport scaffolding # stargate/app/appModule
 	)
 	app.sm.RegisterStoreDecoders()
@@ -738,11 +740,8 @@ func New(
 	// initialize BaseApp
 	app.SetInitChainer(app.InitChainer)
 	app.SetBeginBlocker(app.BeginBlocker)
-
-	app.setAnteHandler(encodingConfig.TxConfig, cast.ToUint64(appOpts.Get(srvflags.EVMMaxTxGasWanted)))
-	app.SetInitChainer(app.InitChainer)
-	app.SetBeginBlocker(app.BeginBlocker)
 	app.SetEndBlocker(app.EndBlocker)
+	app.setAnteHandler(encodingConfig.TxConfig, cast.ToUint64(appOpts.Get(srvflags.EVMMaxTxGasWanted)))
 
 	app.setPostHandler()
 
