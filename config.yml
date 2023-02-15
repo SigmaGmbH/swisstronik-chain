@@ -20,4 +20,4 @@ validators:
 - name: alice
   bonded: 100000000stake
 genesis:
-  chain_id: "swisstronik_9000-1"
+  chain_id: "swisstronik_4141-1"

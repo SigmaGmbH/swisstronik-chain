@@ -364,10 +364,12 @@ func initAppConfig() (string, interface{}) {
 	// In simapp, we set the min gas prices to 0.
 	srvCfg.MinGasPrices = "0stake"
 
+	cJSONRPCConfig := evmserverconfig.DefaultJSONRPCConfig()
+	cJSONRPCConfig.Address = "127.0.0.1:8535"
 	customAppConfig := CustomAppConfig{
 		Config:  *srvCfg,
 		EVM:     *evmserverconfig.DefaultEVMConfig(),
-		JSONRPC: *evmserverconfig.DefaultJSONRPCConfig(),
+		JSONRPC: *cJSONRPCConfig,
 		TLS:     *evmserverconfig.DefaultTLSConfig(),
 	}
 	customAppTemplate := serverconfig.DefaultConfigTemplate + evmserverconfig.DefaultConfigTemplate
