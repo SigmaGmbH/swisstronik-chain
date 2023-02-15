@@ -126,7 +126,6 @@ func initRootCmd(
 		evmmoduleclient.NewTestnetCmd(app.ModuleBasics, banktypes.GenesisBalancesIterator{}),
 		debug.Cmd(),
 		config.Cmd(),
-		ConvertAddressCmd(),
 		// this line is used by starport scaffolding # root/commands
 	)
 
