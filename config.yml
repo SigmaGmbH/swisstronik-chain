@@ -1,13 +1,12 @@
 version: 1
 accounts:
 - name: alice
+  mnemonic: "entry garbage bike poem grunt negative easily annual miss happy license blur false fringe program picture inner tape dismiss eagle include quality drill master"
   coins:
   - 200000000000000000000swtr
-  - 200000000000000000000stake
 - name: bob
   coins:
   - 200000000000000000000swtr
-  - 200000000000000000000stake
 client:
   openapi:
     path: docs/static/openapi.yml
@@ -15,9 +14,12 @@ faucet:
   name: bob
   coins:
   - 500000swtr
-  - 100000stake
 validators:
 - name: alice
-  bonded: 100000000stake
+  bonded: 100000000swtr
 genesis:
   chain_id: "swisstronik_4141-1"
+  app_state:
+    staking:
+      params:
+        bond_denom: "swtr"
