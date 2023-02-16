@@ -23,3 +23,6 @@ genesis:
     staking:
       params:
         bond_denom: "swtr"
+  consensus_params:
+    block:
+      max_gas: "20000000"
