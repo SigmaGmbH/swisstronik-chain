@@ -3,7 +3,7 @@ module swisstronik
 go 1.19
 
 require (
-	github.com/SigmaGmbH/evm-module v0.0.0-20230215165729-59a70d149ee4
+	github.com/SigmaGmbH/evm-module v0.0.0-20230216150547-512b884f0b75
 	github.com/cosmos/cosmos-sdk v0.46.9
 	github.com/cosmos/ibc-go/v6 v6.1.0
 	github.com/gogo/protobuf v1.3.3
