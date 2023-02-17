@@ -81,12 +81,6 @@ github.com/OneOfOne/xxhash v1.2.2 h1:KMrpdQIwFcEqXDklaen+P1axHaj9BSKzvpUUfnHldSE
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/Shopify/sarama v1.19.0/go.mod h1:FVkBWblsNy7DGZRfXLU0O9RCGt5g3g3yEuWXgklEdEo=
 github.com/Shopify/toxiproxy v2.1.4+incompatible/go.mod h1:OXgGpZ6Cli1/URJOF1DMxUHB2q5Ap20/P/eIdh4G0pI=
-github.com/SigmaGmbH/evm-module v0.0.0-20230215165729-59a70d149ee4 h1:Ab0l8s1rcHH35atYFtkYwagfAxKgs5//f2nklQxnhBU=
-github.com/SigmaGmbH/evm-module v0.0.0-20230215165729-59a70d149ee4/go.mod h1:a1IrSGqVHNogk5I1CERaEQNJEWv79jZglrT7w1cBqY0=
-github.com/SigmaGmbH/evm-module v0.0.0-20230216134553-0198af7f3804 h1:ICRiCRm7cdYT5nf6xpp9ccZDY6CfQBPQPngrgIcA16Y=
-github.com/SigmaGmbH/evm-module v0.0.0-20230216134553-0198af7f3804/go.mod h1:a1IrSGqVHNogk5I1CERaEQNJEWv79jZglrT7w1cBqY0=
-github.com/SigmaGmbH/evm-module v0.0.0-20230216135601-7306ee9bb931 h1:peD931EztIzpBqRtwCwL1eHmOQBLzllYDfYYf3kITFU=
-github.com/SigmaGmbH/evm-module v0.0.0-20230216135601-7306ee9bb931/go.mod h1:a1IrSGqVHNogk5I1CERaEQNJEWv79jZglrT7w1cBqY0=
 github.com/SigmaGmbH/evm-module v0.0.0-20230216150547-512b884f0b75 h1:Femi7Ai0CluXC1qmE1+Ms0t1yWOsCeqchNzNcIRuDEc=
 github.com/SigmaGmbH/evm-module v0.0.0-20230216150547-512b884f0b75/go.mod h1:a1IrSGqVHNogk5I1CERaEQNJEWv79jZglrT7w1cBqY0=
 github.com/SigmaGmbH/librustgo v0.0.0-20230209113653-0ce4d86b9f9e h1:teZluJTOB0SnzCECtGu+58x9YBaymg486RvKPHBGVXc=

@@ -125,7 +125,7 @@ import (
 )
 
 const (
-	AccountAddressPrefix = "tronik"
+	AccountAddressPrefix = "swtr"
 	Name                 = "swisstronik"
 )
 
