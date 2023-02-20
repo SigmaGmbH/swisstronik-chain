@@ -1,7 +1,10 @@
 {
-  "name": "hardhat-project",
+  "name": "solidity-test",
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^2.0.1",
     "hardhat": "^2.12.7"
+  },
+  "scripts": {
+    "test": "hardhat test --network tronik"
   }
 }
