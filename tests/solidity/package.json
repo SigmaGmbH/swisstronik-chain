@@ -5,6 +5,10 @@
     "hardhat": "^2.12.7"
   },
   "scripts": {
+    "compile": "hardhat compile",
     "test": "hardhat test --network tronik"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.8.1"
   }
 }
