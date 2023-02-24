@@ -7,6 +7,10 @@ module.exports = {
     "tronik": {
       url: "http://127.0.0.1:8535",
       accounts: ["0xC516DC17D909EFBB64A0C4A9EE1720E10D47C1BF3590A257D86EEB5FFC644D43"]
+    },
+    "local": {
+      url: "http://127.0.0.1:8545",
+      mnemonic: "gesture inject test cycle original hollow east ridge hen combine junk child bacon zero hope comfort vacuum milk pitch cage oppose unhappy lunar seat", 
     }
   }
 };
