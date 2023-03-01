@@ -29,8 +29,8 @@ describe('ERC20', () => {
         const senderBalanceAfter = await tokenContract.balanceOf(sender.address)
         const receiverBalanceAfter = await tokenContract.balanceOf(receiver.address)
 
-        expect(senderBalanceAfter).to.be.equal(senderBalanceBefore - amountToTransfer)
-        expect(receiverBalanceAfter).to.be.equal(receiverBalanceBefore + amountToTransfer)
+        expect(senderBalanceAfter.toNumber()).to.be.equal(senderBalanceBefore.toNumber() - amountToTransfer)
+        expect(receiverBalanceAfter.toNumber()).to.be.equal(receiverBalanceBefore.toNumber() + amountToTransfer)
     })
 
     it('ERC20 transferFrom', async () => {
@@ -42,17 +42,17 @@ describe('ERC20', () => {
             .withArgs(sender.address, receiver.address, amountToTransfer)
 
         const senderBalanceBefore = await tokenContract.balanceOf(sender.address)
-        const receiverBalanceBefore = await tokenContract.balanceOf(receiverAddress)
+        const receiverBalanceBefore = await tokenContract.balanceOf(receiver.address)
 
-        await expect(tokenContract.connect(receiver).transferFrom(sender.address, amountToTransfer))
+        await expect(tokenContract.connect(receiver).transferFrom(sender.address, receiver.address, amountToTransfer))
             .to.emit(tokenContract, "Transfer")
             .withArgs(sender.address, receiver.address, amountToTransfer)
 
         const senderBalanceAfter = await tokenContract.balanceOf(sender.address)
-        const receiverBalanceAfter = await tokenContract.balanceOf(receiverAddress)
+        const receiverBalanceAfter = await tokenContract.balanceOf(receiver.address)
 
-        expect(senderBalanceAfter).to.be.equal(senderBalanceBefore - amountToTransfer)
-        expect(receiverBalanceAfter).to.be.equal(receiverBalanceBefore + amountToTransfer)
+        expect(senderBalanceAfter.toNumber()).to.be.equal(senderBalanceBefore.toNumber() - amountToTransfer)
+        expect(receiverBalanceAfter.toNumber()).to.be.equal(receiverBalanceBefore.toNumber() + amountToTransfer)
     })
 
     it('Cannot exceed balance during transfer', async () => {
@@ -65,9 +65,9 @@ describe('ERC20', () => {
 
     it('Cannot transfer more than approved', async () => {
         const [sender, receiver] = await ethers.getSigners()
-        const amountToTransfer = 100
+        const amountToTransfer = 1000000000000
 
-        await expect(tokenContract.connect(receiver).transferFrom(sender.address, amountToTransfer))
+        await expect(tokenContract.connect(receiver).transferFrom(sender.address, receiver.address, amountToTransfer))
             .to.be.revertedWith("ERC20: insufficient allowance")
     })
 })
