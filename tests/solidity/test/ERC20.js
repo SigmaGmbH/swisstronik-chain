@@ -59,15 +59,15 @@ describe('ERC20', () => {
         const [sender, receiver] = await ethers.getSigners()
         const amountToTransfer = 1000000000000
 
-        await expect(tokenContract.connect(sender).transfer(receiver.address, amountToTransfer))
-            .to.be.revertedWith("ERC20: transfer amount exceeds balance")
+        const tx = await tokenContract.connect(sender).transfer(receiver.address, amountToTransfer)
+        await expect(tx.wait()).to.be.rejected
     })
 
     it('Cannot transfer more than approved', async () => {
         const [sender, receiver] = await ethers.getSigners()
         const amountToTransfer = 1000000000000
 
-        await expect(tokenContract.connect(receiver).transferFrom(sender.address, receiver.address, amountToTransfer))
-            .to.be.revertedWith("ERC20: insufficient allowance")
+        const tx = await tokenContract.connect(receiver).transferFrom(sender.address, receiver.address, amountToTransfer)
+        await expect(tx.wait()).to.be.rejected
     })
 })

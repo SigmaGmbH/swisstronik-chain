@@ -15,6 +15,7 @@ module.exports = {
         "local": {
             url: "http://127.0.0.1:8545",
             mnemonic: "gesture inject test cycle original hollow east ridge hen combine junk child bacon zero hope comfort vacuum milk pitch cage oppose unhappy lunar seat",
+            gas: 3_000_000
         },
     }
 };
