@@ -9,6 +9,7 @@ describe('Message calls', () => {
 
     it('Contracts should be able to interact', async () => {
         const TEST_ITERATIONS = 30
-        await contract.benchmarkMessageCall(TEST_ITERATIONS)
+        const tx = await contract.benchmarkMessageCall(TEST_ITERATIONS)
+        await tx.wait()
     })
 })
