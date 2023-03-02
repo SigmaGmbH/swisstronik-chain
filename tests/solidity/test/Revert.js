@@ -1,4 +1,5 @@
 const {expect} = require("chai");
+const {ethers} = require("hardhat")
 
 // This is a test only for debug purpose.
 // It will be removed, when issue with incorrect revert messages will be solved

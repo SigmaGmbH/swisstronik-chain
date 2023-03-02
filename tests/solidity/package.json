@@ -6,7 +6,8 @@
   },
   "scripts": {
     "compile": "hardhat compile",
-    "test": "hardhat test --network tronik",
+    "test": "hardhat test",
+    "test:tronik": "hardhat test --network tronik",
     "test:local": "hardhat test --network local"
   },
   "dependencies": {
