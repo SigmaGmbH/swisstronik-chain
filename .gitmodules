@@ -1,0 +1,3 @@
+[submodule "evm-module"]
+	path = evm-module
+	url = https://github.com/SigmaGmbH/evm-module.git
