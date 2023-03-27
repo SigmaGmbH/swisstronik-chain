@@ -16,7 +16,7 @@ require (
 	github.com/spf13/cast v1.5.0
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/pflag v1.0.5
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.2
 	github.com/tendermint/tendermint v0.34.26
 	github.com/tendermint/tm-db v0.6.7
 	google.golang.org/genproto v0.0.0-20230223222841-637eb2293923
@@ -181,7 +181,7 @@ require (
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/api v0.110.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/protobuf v1.28.2-0.20220831092852-f930b1dc76e8 // indirect
+	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
@@ -190,8 +190,8 @@ require (
 )
 
 replace (
-	github.com/SigmaGmbH/evm-module v0.0.0-20230223171716-f5890001f1b9 => ./evm-module
-	github.com/SigmaGmbH/librustgo v0.0.0-20230222112759-bffe044347fc => ./evm-module/librustgo
+	github.com/SigmaGmbH/evm-module v0.0.0-20230223171716-f5890001f1b9 => ../evm-module
+	github.com/SigmaGmbH/librustgo v0.0.0-20230222112759-bffe044347fc => ../evm-module/librustgo
 	github.com/confio/ics23/go => github.com/cosmos/cosmos-sdk/ics23/go v0.8.0
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
 	github.com/tendermint/tendermint => github.com/informalsystems/tendermint v0.34.26
