@@ -122,6 +122,8 @@ import (
 	evmtypes "github.com/SigmaGmbH/evm-module/x/evm/types"
 	feemarketkeeper "github.com/SigmaGmbH/evm-module/x/feemarket/keeper"
 	feemarkettypes "github.com/SigmaGmbH/evm-module/x/feemarket/types"
+
+	attestationmodule "github.com/SigmaGmbH/evm-module/x/attestation"
 )
 
 const (
@@ -179,6 +181,7 @@ var (
 		swisstronikmodule.AppModuleBasic{},
 		evm.AppModuleBasic{},
 		feemarket.AppModuleBasic{},
+		attestationmodule.AppModuleBasic{},
 		// this line is used by starport scaffolding # stargate/app/moduleBasic
 	)
 

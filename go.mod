@@ -1,6 +1,6 @@
 module swisstronik
 
-go 1.19
+go 1.18
 
 require (
 	github.com/SigmaGmbH/evm-module v0.0.0-20230223171716-f5890001f1b9
