@@ -15,7 +15,7 @@ describe('ERC20', () => {
     let tokenContract
     const provider = new ethers.providers.JsonRpcProvider('http://localhost:8535')
     const senderPrivateKey = '0xC516DC17D909EFBB64A0C4A9EE1720E10D47C1BF3590A257D86EEB5FFC644D43'
-    const receiverPrivateKey = '0xD9B4808CEBBB85114D77FCB89CDE28FE5C422A9B42305E90FBE09F7B6D5A0C63'
+    const receiverPrivateKey = '0x831052AB296006AA0366652BC01C2CA8E46621555E9F45FA353C80523225F756'
 
     before(async () => {
         const ERC20 = await ethers.getContractFactory('ERC20Token')
@@ -47,15 +47,9 @@ describe('ERC20', () => {
         const [sender, receiver] = await ethers.getSigners()
         const amountToTransfer = 100
 
-        // const senderBalanceBefore = await tokenContract.balanceOf(sender.address)
         const senderBalanceBefore = await getTokenBalance(provider, senderPrivateKey, tokenContract, sender.address)
-
-        // const receiverBalanceBefore = await tokenContract.balanceOf(receiver.address)
         const receiverBalanceBefore = await getTokenBalance(provider, receiverPrivateKey, tokenContract, receiver.address)
 
-        // await expect(tokenContract.connect(sender).transfer(receiver.address, amountToTransfer))
-        //     .to.emit(tokenContract, "Transfer")
-        //     .withArgs(sender.address, receiver.address, amountToTransfer)
         const tx = await sendShieldedTransaction(
             provider,
             senderPrivateKey,
@@ -66,9 +60,7 @@ describe('ERC20', () => {
         const logs = receipt.logs.map(log => tokenContract.interface.parseLog(log))
         expect(logs.some(log => log.name === 'Transfer' && log.args[0] == sender.address && log.args[1] == receiver.address && log.args[2].toNumber() == amountToTransfer)).to.be.true
 
-        // const senderBalanceAfter = await tokenContract.balanceOf(sender.address)
         const senderBalanceAfter = await getTokenBalance(provider, senderPrivateKey, tokenContract, sender.address)
-        // const receiverBalanceAfter = await tokenContract.balanceOf(receiver.address)
         const receiverBalanceAfter = await getTokenBalance(provider, receiverPrivateKey, tokenContract, receiver.address)
 
         expect(senderBalanceAfter.toNumber()).to.be.equal(senderBalanceBefore.toNumber() - amountToTransfer)
