@@ -15,20 +15,26 @@ describe('Counter', () => {
     })
 
     it('DEBUG', async () => {
+        // There was a problem with default provider from ethers
+        const signers = await ethers.getSigners()
+        const provider = new ethers.providers.JsonRpcProvider('http://localhost:8535')
+        const balance = await provider.getBalance(signers[0].address)
+        console.log('balance: ', balance, 'for account: ', signers[0].address)
         const countBeforeResponse = await sendShieldedQuery(
+            provider,
             signerPrivateKey,
             counterContract.address,
             counterContract.interface.encodeFunctionData("counter", [])
         );
         const countBefore = counterContract.interface.decodeFunctionResult("counter", countBeforeResponse)
-        console.log(countBefore)
 
-        // const txResponse = await sendShieldedTransaction(
-        //     signerPrivateKey,
-        //     counterContract.address,
-        //     counterContract.interface.encodeFunctionData("add", [])
-        // )
-        // console.log('resp: ', txResponse)
+        const txResponse = await sendShieldedTransaction(
+            provider,
+            signerPrivateKey,
+            counterContract.address,
+            counterContract.interface.encodeFunctionData("add", [])
+        )
+        console.log('resp: ', txResponse)
     })
 
     // it('Should add', async () => {

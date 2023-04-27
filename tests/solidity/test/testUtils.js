@@ -3,10 +3,9 @@ const {getNodePublicKey, encryptECDH, stringToU8a, deriveEncryptionKey, USER_KEY
 
 var nodePublicKey
 
-module.exports.sendShieldedTransaction = async (privateKey, destination, data, value) => {
+module.exports.sendShieldedTransaction = async (provider, privateKey, destination, data, value) => {
     // Construct signer from private key
     const wallet = new ethers.Wallet(privateKey)
-    const provider = ethers.getDefaultProvider()
     const signer = wallet.connect(provider)
 
     // Create encryption key
@@ -37,9 +36,7 @@ module.exports.sendShieldedTransaction = async (privateKey, destination, data, v
     })
 }
 
-module.exports.sendShieldedQuery = async (privateKey, destination, data, value) => {
-    const provider = ethers.getDefaultProvider()
-
+module.exports.sendShieldedQuery = async (provider, privateKey, destination, data, value) => {
     // Create encryption key
     const encryptionPrivateKey = deriveEncryptionKey(privateKey, stringToU8a(USER_KEY_PREFIX))
 
