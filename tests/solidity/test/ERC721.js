@@ -75,34 +75,58 @@ describe('ERC721', () => {
         expect(ownerOfItem).to.be.equal(user.address)
     })
 
-    // it('Should be able to transfer an NFT', async () => {
-    //     const [user, receiver] = await ethers.getSigners()
-    //     const itemId = 0
+    it('Should be able to transfer an NFT', async () => {
+        const [user, receiver] = await ethers.getSigners()
+        const itemId = 0
 
-    //     await expect(nftContract.connect(user).transferFrom(user.address, receiver.address, itemId))
-    //         .to.emit(nftContract, 'Transfer')
-    //         .withArgs(user.address, receiver.address, itemId)
+        const tx = await sendShieldedTransaction(
+            provider,
+            senderPrivateKey,
+            nftContract.address,
+            nftContract.interface.encodeFunctionData("transferFrom", [user.address, receiver.address, itemId])
+        )
+        const receipt = await tx.wait()
+        const logs = receipt.logs.map(log => nftContract.interface.parseLog(log))
+        expect(logs.some(log => log.name === 'Transfer' && log.args[0] == user.address && log.args[1] == receiver.address && log.args[2].toNumber() == itemId)).to.be.true
 
-    //     const userBalance = await nftContract.balanceOf(user.address)
-    //     expect(userBalance).to.be.equal(0)
+        const userBalance = await getTokenBalance(provider, senderPrivateKey, nftContract, user.address)
+        expect(userBalance).to.be.equal(0)
 
-    //     const receiverBalance = await nftContract.balanceOf(receiver.address)
-    //     expect(receiverBalance).to.be.equal(1)
+        const receiverBalance = await getTokenBalance(provider, receiverPrivateKey, nftContract, receiver.address)
+        expect(receiverBalance).to.be.equal(1)
 
-    //     const ownerOfItem = await nftContract.ownerOf(itemId)
-    //     expect(ownerOfItem).to.be.equal(receiver.address)
-    // })
+        const ownerOfItem = await getOwnerOf(provider, receiverPrivateKey, nftContract, itemId)
+        expect(ownerOfItem).to.be.equal(receiver.address)
+    })
 
-    // it('Cannot transfer unapproved NFT', async () => {
-    //     const itemId = 0
-    //     const [wrongSender, receiver] = await ethers.getSigners()
-    //     const tx = await nftContract.connect(wrongSender).transferFrom(receiver.address, wrongSender.address, itemId)
-    //     await expect(tx.wait()).to.be.rejected
-    // })
+    it('Cannot transfer unapproved NFT', async () => {
+        const itemId = 0
+        const [wrongSender, receiver] = await ethers.getSigners()
 
-    // it('Should return metadata URI for NFT', async () => {
-    //     const itemId = 0
-    //     const metadataURI = await nftContract.tokenURI(itemId)
-    //     expect(metadataURI).to.be.equal("http://nftstorage.com/item/1")
-    // })
+        let failed = false
+        try {
+            await sendShieldedTransaction(
+                provider,
+                senderPrivateKey,
+                tokenContract.address,
+                tokenContract.interface.encodeFunctionData("transferFrom", [receiver.address, wrongSender.address, itemId])
+            )
+        } catch {
+            failed = true
+        }
+
+        expect(failed).to.be.true
+    })
+
+    it('Should return metadata URI for NFT', async () => {
+        const itemId = 0
+        const metadataURIResponse = await sendShieldedQuery(
+            provider,
+            senderPrivateKey,
+            nftContract.address,
+            nftContract.interface.encodeFunctionData("tokenURI", [itemId])
+        );
+        const metadataURI = nftContract.interface.decodeFunctionResult("tokenURI", metadataURIResponse)[0]
+        expect(metadataURI).to.be.equal("http://nftstorage.com/item/1")
+    })
 })
