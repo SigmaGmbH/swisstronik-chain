@@ -6,6 +6,7 @@ const {sendShieldedTransaction, sendShieldedQuery} = require("./testUtils")
 
 describe('Counter', () => {
     let counterContract
+    const provider = new ethers.providers.JsonRpcProvider('http://localhost:8535')
     const signerPrivateKey = '0xC516DC17D909EFBB64A0C4A9EE1720E10D47C1BF3590A257D86EEB5FFC644D43'
 
     before(async () => {
@@ -14,12 +15,7 @@ describe('Counter', () => {
         await counterContract.deployed()
     })
 
-    it('DEBUG', async () => {
-        // There was a problem with default provider from ethers
-        const signers = await ethers.getSigners()
-        const provider = new ethers.providers.JsonRpcProvider('http://localhost:8535')
-        const balance = await provider.getBalance(signers[0].address)
-        console.log('balance: ', balance, 'for account: ', signers[0].address)
+    it('Should add', async () => {
         const countBeforeResponse = await sendShieldedQuery(
             provider,
             signerPrivateKey,
@@ -28,13 +24,25 @@ describe('Counter', () => {
         );
         const countBefore = counterContract.interface.decodeFunctionResult("counter", countBeforeResponse)
 
-        const txResponse = await sendShieldedTransaction(
+        const tx = await sendShieldedTransaction(
             provider,
             signerPrivateKey,
             counterContract.address,
             counterContract.interface.encodeFunctionData("add", [])
         )
-        console.log('resp: ', txResponse)
+        const receipt = await tx.wait()
+        const logs = receipt.logs.map(log => counterContract.interface.parseLog(log))
+        expect(logs.some(log => log.name === 'Added')).to.be.true
+        expect(logs.some(log => log.name === 'Changed')).to.be.true
+
+        const countAfterResponse = await sendShieldedQuery(
+            provider,
+            signerPrivateKey,
+            counterContract.address,
+            counterContract.interface.encodeFunctionData("counter", [])
+        );
+        const countAfter = counterContract.interface.decodeFunctionResult("counter", countAfterResponse)
+        expect(countAfter[0].toNumber()).to.be.equal(countBefore[0].toNumber() + 1)
     })
 
     // it('Should add', async () => {
