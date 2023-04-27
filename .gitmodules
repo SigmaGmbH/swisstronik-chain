@@ -1,0 +1,3 @@
+[submodule "external/swisstronik.js"]
+	path = external/swisstronik.js
+	url = https://github.com/SigmaGmbH/swisstronik.js.git
