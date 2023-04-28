@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package swisstronik.vesting;
+
+import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
+
+option go_package = "swisstronik/x/vesting/types";
+
+// Msg defines the Msg service.
+service Msg {
+  rpc CreateMonthlyVestingAccount (MsgCreateMonthlyVestingAccount) returns (MsgCreateMonthlyVestingAccountResponse);
+}
+message MsgCreateMonthlyVestingAccount {
+  string creator   = 1;
+  string toAddress = 2;
+  int64 start_time = 3;
+  repeated cosmos.base.v1beta1.Coin amount = 4 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+  int64 month     = 5;
+}
+
+message MsgCreateMonthlyVestingAccountResponse {}
+

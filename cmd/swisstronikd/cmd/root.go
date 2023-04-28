@@ -2,6 +2,11 @@ package cmd
 
 import (
 	"errors"
+	"io"
+	"os"
+	"path/filepath"
+	"strings"
+
 	"github.com/SigmaGmbH/evm-module/encoding"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -29,19 +34,16 @@ import (
 	tmcli "github.com/tendermint/tendermint/libs/cli"
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
-	"io"
-	"os"
-	"path/filepath"
-	"strings"
 
 	// this line is used by starport scaffolding # root/moduleImport
+
+	"swisstronik/app"
+	appparams "swisstronik/app/params"
 
 	evmmoduleclient "github.com/SigmaGmbH/evm-module/client"
 	evmmoduleserver "github.com/SigmaGmbH/evm-module/server"
 	evmserverconfig "github.com/SigmaGmbH/evm-module/server/config"
 	srvflags "github.com/SigmaGmbH/evm-module/server/flags"
-	"swisstronik/app"
-	appparams "swisstronik/app/params"
 )
 
 // NewRootCmd creates a new root command for a Cosmos SDK application
@@ -106,7 +108,7 @@ func initRootCmd(
 	encodingConfig params.EncodingConfig,
 ) {
 	// Set config
-	initSDKConfig()
+	InitSDKConfig()
 
 	rootCmd.AddCommand(
 		evmmoduleclient.ValidateChainID(
