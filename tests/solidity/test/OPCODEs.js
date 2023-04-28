@@ -1,7 +1,10 @@
-const {expect} = require('chai')
+const { expect } = require('chai')
+const { sendShieldedTransaction } = require("./testUtils")
 
 describe('OPCODE test', () => {
     let contractInstance
+    const provider = new ethers.providers.JsonRpcProvider('http://localhost:8535')
+    const signerPrivateKey = '0xC516DC17D909EFBB64A0C4A9EE1720E10D47C1BF3590A257D86EEB5FFC644D43'
 
     beforeEach(async () => {
         const OpcodesContract = await ethers.getContractFactory('OpCodes')
@@ -10,12 +13,34 @@ describe('OPCODE test', () => {
     })
 
     it('Should throw invalid op code', async () => {
-        const tx = await contractInstance.test_invalid()
-        await expect(tx.wait()).to.be.rejected
+        let failed = false
+        try {
+            await sendShieldedTransaction(
+                provider,
+                signerPrivateKey,
+                contractInstance.address,
+                contractInstance.interface.encodeFunctionData("test_invalid", [])
+            )
+        } catch {
+            failed = true
+        }
+
+        expect(failed).to.be.true
     })
 
     it('Should revert', async () => {
-        const tx = await contractInstance.test_revert()
-        await expect(tx.wait()).to.be.rejected
+        let failed = false
+        try {
+            await sendShieldedTransaction(
+                provider,
+                signerPrivateKey,
+                contractInstance.address,
+                contractInstance.interface.encodeFunctionData("test_revert", [])
+            )
+        } catch {
+            failed = true
+        }
+
+        expect(failed).to.be.true
     })
 });

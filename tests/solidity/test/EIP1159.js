@@ -1,4 +1,4 @@
-const {expect} = require('chai')
+const { expect } = require('chai')
 
 it('Should send a transaction with EIP-1559 flag', async function () {
     const [sender, receiver] = await ethers.getSigners()
