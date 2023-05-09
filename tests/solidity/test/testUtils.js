@@ -1,5 +1,5 @@
 const {ethers} = require('hardhat')
-const {getNodePublicKey, encryptECDH, stringToU8a, deriveEncryptionKey, USER_KEY_PREFIX, hexToU8a, u8aToHex} = require('swisstronik.js')
+const {getNodePublicKey, encryptECDH, decryptECDH, stringToU8a, deriveEncryptionKey, USER_KEY_PREFIX, hexToU8a, u8aToHex} = require('swisstronik.js')
 
 var nodePublicKey
 
@@ -52,13 +52,20 @@ module.exports.sendShieldedQuery = async (provider, privateKey, destination, dat
     // Encrypt data
     const encryptionResult = encryptECDH(encryptionPrivateKey, hexToU8a(nodePublicKey), hexToU8a(data))
     if (!encryptionResult.result) {
-        throw new Error(`Encryption error. Reason: ${encryptedData.error}`)
+        throw new Error(`Encryption error. Reason: ${encryptionResult.error}`)
     }
     const encryptedData = encryptionResult.result
 
-    return provider.call({
+    const response = await provider.call({
         to: destination,
         data: u8aToHex(encryptedData),
         value
     })
+
+    const decryptionResult = decryptECDH(encryptionPrivateKey, hexToU8a(nodePublicKey), hexToU8a(response))
+    if (!decryptionResult.result) {
+        throw new Error(`Decryption error. Reason: ${decryptionResult.error}`)
+    }
+
+    return decryptionResult.result
 }
