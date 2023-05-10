@@ -1,4 +1,6 @@
 version: 1
+build:
+  main: cmd/swisstronikd/
 accounts:
 - name: alice
   mnemonic: "entry garbage bike poem grunt negative easily annual miss happy license blur false fringe program picture inner tape dismiss eagle include quality drill master"
