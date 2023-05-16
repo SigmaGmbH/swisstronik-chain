@@ -1,6 +1,6 @@
 VERSION := 1.0.0
 COMMIT := $(shell git log -1 --format='%H')
-CHAIN_HOME ?= $(HOME)/.swisstronik
+CHAIN_HOME ?= $(HOME)/.swisstronik-enclave
 
 ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=swisstronik \
 	-X github.com/cosmos/cosmos-sdk/version.ServerName=swisstronikd \
