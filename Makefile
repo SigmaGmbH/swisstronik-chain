@@ -1,5 +1,6 @@
 VERSION := 1.0.0
 COMMIT := $(shell git log -1 --format='%H')
+ENCLAVE_HOME ?= $(HOME)/.swisstronik-enclave
 
 ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=swisstronik \
 	-X github.com/cosmos/cosmos-sdk/version.ServerName=swisstronikd \
@@ -17,6 +18,9 @@ PROJECT_NAME = $(shell git remote get-url origin | xargs basename -s .git)
 
 all: install
 
+debug:
+	@echo $(CHAIN_HOME)
+
 init:
 	@git submodule update --init --recursive
 
@@ -30,7 +34,7 @@ build-linux:
 	GOOS=linux GOARCH=$(if $(findstring aarch64,$(shell uname -m)) || $(findstring arm64,$(shell uname -m)),arm64,amd64) $(MAKE) build
 
 build-enclave:
-	SGX_MODE=SW $(MAKE) -C external/evm-module build-librustgo
+	$(MAKE) -C external/evm-module build-librustgo
 
 go.sum: go.mod
 	@echo "--> Ensure dependencies have not been modified"
