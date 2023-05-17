@@ -43,4 +43,7 @@ go.sum: go.mod
 test:
 	go test --cover -short -p 1 ./...
 
-.PHONY: all install build build-linux build-enclave test
+build-docker-local:
+	docker build -f docker/localnode.Dockerfile -t swisstronik .
+
+.PHONY: all install build build-linux build-enclave test build-docker-local
