@@ -216,6 +216,7 @@ func init() {
 	}
 
 	DefaultNodeHome = filepath.Join(userHomeDir, "."+Name)
+	RegisterCoinDenominations()
 }
 
 // App extends an ABCI application, but with most of its parameters exported.
@@ -998,4 +999,9 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 // SimulationManager implements the SimulationApp interface
 func (app *App) SimulationManager() *module.SimulationManager {
 	return app.sm
+}
+
+func RegisterCoinDenominations() {
+	_ = sdk.RegisterDenom("swtr", sdk.OneDec())
+	_ = sdk.RegisterDenom("uswtr", sdk.NewDecWithPrec(1, 18))
 }
