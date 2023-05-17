@@ -19,3 +19,16 @@ Build a chain
 ```sh
 make build
 ```
+
+## Docker
+
+### Local development node
+To build a Docker image, that contains binary for local Swisstronik node, run the following command:
+```sh
+make build-docker-local
+```
+This will create an image with the name `swisstronik`. Now it is possible to run the `swisstronikd` binary in the container, 
+e.g. checking stored keys:
+```sh
+docker run -it --rm swisstronik swisstronikd keys list
+```
