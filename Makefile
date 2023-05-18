@@ -18,9 +18,6 @@ PROJECT_NAME = $(shell git remote get-url origin | xargs basename -s .git)
 
 all: install
 
-debug:
-	@echo $(CHAIN_HOME)
-
 init:
 	@git submodule update --init --recursive
 
