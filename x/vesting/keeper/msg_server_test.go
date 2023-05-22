@@ -21,8 +21,8 @@ var (
 	to1AddrAcc = sdk.AccAddress([]byte(to1Addr))
 
 	to2Addr    = "swtr13gvyhac4qwtqjkdpzxzarlvpsz3zxld5v2ae58"
-	zeroCoin   = sdk.NewInt64Coin("swtr", 0)
-	periodCoin = sdk.NewInt64Coin("swtr", 200000000)
+	zeroCoin   = sdk.NewInt64Coin("uswtr", 0)
+	periodCoin = sdk.NewInt64Coin("uswtr", 200000000)
 )
 
 func TestCreatingMonthlyVestingAccount(t *testing.T) {

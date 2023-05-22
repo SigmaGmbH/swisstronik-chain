@@ -5,13 +5,13 @@ accounts:
 - name: alice
   mnemonic: "entry garbage bike poem grunt negative easily annual miss happy license blur false fringe program picture inner tape dismiss eagle include quality drill master"
   coins:
-  - 200000000000000000000swtr
+  - 200000000000000000000uswtr
 - name: bob
   coins:
-  - 200000000000000000000swtr
+  - 200000000000000000000uswtr
 - name: jane
   coins:
-    - 200000000000000000000swtr
+    - 200000000000000000000uswtr
   mnemonic: "cargo ramp supreme review change various throw air figure humble soft steel slam pole betray inhale already dentist enough away office apple sample glue"
 client:
   openapi:
@@ -19,16 +19,16 @@ client:
 faucet:
   name: bob
   coins:
-  - 500000swtr
+  - 500000uswtr
 validators:
 - name: alice
-  bonded: 100000000swtr
+  bonded: 100000000uswtr
 genesis:
   chain_id: "swisstronik_4141-1"
   app_state:
     staking:
       params:
-        bond_denom: "swtr"
+        bond_denom: "uswtr"
   consensus_params:
     block:
       max_gas: "20000000"
