@@ -23,6 +23,11 @@ make build
 ## Docker
 
 ### Local development node
+Before building ensure that you initialized all submodules. You can do that by running:
+```sh
+make init
+```
+
 To build a Docker image, that contains binary for local Swisstronik node, run the following command:
 ```sh
 make build-docker-local
