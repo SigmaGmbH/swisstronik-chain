@@ -38,6 +38,8 @@ sed -i 's/pruning-keep-recent = "0"/pruning-keep-recent = "2"/g' "$APP_TOML"
 sed -i 's/pruning-interval = "0"/pruning-interval = "10"/g' "$APP_TOML"
 sed -i 's/127.0.0.1:26657/0.0.0.0:26657/g' "$CONFIG"
 sed -i 's/cors_allowed_origins\s*=\s*\[\]/cors_allowed_origins = ["*",]/g' "$CONFIG"
+# Enable prometheus on genesis node
+sed -i 's/prometheus = false/prometheus = true/g' "$CONFIG"
 jq '.app_state["evm"]["params"]["evm_denom"]="uswtr"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
 jq '.consensus_params["block"]["max_gas"]="10000000000"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
 jq '.app_state["feemarket"]["last_block_gas"]="10000000000"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
