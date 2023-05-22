@@ -27,6 +27,7 @@ RUN go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 ENV GO_PATH="/root/go"
 ENV PATH="${PATH}:/${GO_PATH}/bin"
 
+RUN make init
 RUN SGX_MODE=SW make build-enclave
 RUN make build
 
