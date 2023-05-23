@@ -18,9 +18,6 @@ PROJECT_NAME = $(shell git remote get-url origin | xargs basename -s .git)
 
 all: install
 
-debug:
-	@echo $(CHAIN_HOME)
-
 init:
 	@git submodule update --init --recursive
 
@@ -43,4 +40,7 @@ go.sum: go.mod
 test:
 	go test --cover -short -p 1 ./...
 
-.PHONY: all install build build-linux build-enclave test
+build-docker-local:
+	docker build -f docker/localnode.Dockerfile -t swisstronik .
+
+.PHONY: all install build build-linux build-enclave test build-docker-local
