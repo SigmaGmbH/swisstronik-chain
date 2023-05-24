@@ -28,3 +28,32 @@ services:
       - grafana-data:/var/lib/grafana
     restart: unless-stopped
 
+  aesm:
+    build:
+      dockerfile: ./docker/aesm.Dockerfile
+    devices:
+      - /dev/sgx_enclave
+      - /dev/sgx_provision
+    volumes:
+      - /tmp/aesmd:/var/run/aesmd
+    restart: always
+    
+  node:
+    build:
+      dockerfile: ./docker/node.Dockerfile
+      target: node
+      context: .
+    devices:
+      - /dev/sgx_enclave
+      - /dev/sgx_provision
+    depends_on:
+      - aesm
+    volumes:
+      - /tmp/aesmd:/var/run/aesmd
+      - /home/mikkysnow/.swisstronik:/root/.swisstronik
+    ports:
+      - "26656:26656"
+      - "26657:26657"
+      - "1317:1317"
+    command: swisstronikd start
+    restart: always
