@@ -11,7 +11,7 @@ services:
     image: prom/prometheus:latest
     container_name: prometheus
     ports:
-      - "0.0.0.0:9999:9090"
+      - "9999:9090"
     restart: unless-stopped
     volumes:
       - prometheus-data:/prometheus
