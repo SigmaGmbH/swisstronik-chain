@@ -40,6 +40,7 @@ jq '.consensus_params["block"]["max_gas"]="10000000"' "$GENESIS" >"$TMP_GENESIS"
 
 # enable prometheus metrics
 sed -i 's/prometheus = false/prometheus = true/' "$CONFIG"
+sed -i 's/127.0.0.1:26657/0.0.0.0:26657/g' "$CONFIG"
 sed -i 's/prometheus-retention-time  = "0"/prometheus-retention-time  = "1000000000000"/g' "$APP_TOML"
 sed -i 's/enabled = false/enabled = true/g' "$APP_TOML"
 
