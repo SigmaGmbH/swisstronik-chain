@@ -39,6 +39,7 @@ services:
     restart: always
 
   hw-node:
+    container_name: swisstronik_hw_node
     build:
       dockerfile: ./docker/node.Dockerfile
       target: hw-node
@@ -64,6 +65,7 @@ services:
     restart: always
 
   local-node:
+    container_name: swisstronik_local
     build:
       dockerfile: ./docker/node.Dockerfile
       target: local-node
