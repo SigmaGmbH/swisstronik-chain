@@ -37,3 +37,34 @@ e.g. checking stored keys:
 ```sh
 docker run -it --rm swisstronik swisstronikd keys list
 ```
+
+### Monitoring
+
+#### Enable monitoring
+To enable monitoring for your node, first check if prometheus is enabled (`prometheus = true`) in `config.toml`,
+located at `$HOME/.swisstronik/config` by default. To enable it, simply run:
+```sh
+sed -i 's/prometheus = false/prometheus = true/g' <YOUR-NODE-HOMEDIR>/config/config.toml
+```
+Also, you need to enable telemetry in `app.toml`. To enable it, change `enabled` to `true` 
+```
+[telemetry]
+  enable-hostname = false
+  enable-hostname-label = false
+  enable-service-label = false
+  enabled = false 
+  global-labels = []
+  prometheus-retention-time = 0
+  service-name = ""
+```
+
+Then you need to restart your node. After that you should be able to access the tendermint metrics (default port is 26660)
+
+#### Configure Prometheus Targets
+Update target with address of your node in `monitoring/prometheus.yml`. This will tell prometheus from where it should obtain metrics
+
+#### Setup Prometheus and Grafana
+You can start docker containers with prometheus and grafana using docker-compose. To do it, run:
+```sh
+docker-compose run up -d
+```

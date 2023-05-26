@@ -7,12 +7,11 @@ source ~/.profile
 cargo install protobuf-codegen --version "2.8.1" -f
 go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@latest
 source /opt/intel/sgxsdk/environment
-sudo rm -rf $HOME/chain
-git clone --recurse-submodules https://github.com/SigmaGmbH/chain.git
 cd $HOME/chain/ && go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 cd $HOME/chain/ && go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 cd $HOME/chain/external/evm-module && go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 cd $HOME/chain/external/evm-module && go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+cd $HOME/chain/ && make init
 cd $HOME/chain/ && SGX_MODE=SW make build-enclave
 cd $HOME/chain/ && make install
 export DAEMON_NAME=swisstronikd
