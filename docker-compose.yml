@@ -57,6 +57,9 @@ services:
       - "26656:26656"
       - "26657:26657"
       - "1317:1317"
+      - "8535:8535"
+      - "8546:8546"
+      - "8999:8999"
     command: swisstronikd start
     restart: always
 
