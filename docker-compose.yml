@@ -81,3 +81,4 @@ services:
     environment:
       - SGX_MODE=SW
     command: "swisstronikd start --minimum-gas-prices=0uswtr --json-rpc.api eth,txpool,personal,net,debug,web3 --api.enable --enclave.address 0.0.0.0:8999 --json-rpc.address 0.0.0.0:8535 --json-rpc.ws-address 0.0.0.0:8546"
+    restart: always
