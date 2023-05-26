@@ -80,7 +80,7 @@ FROM ubuntu:22.04 as local-node
 
 WORKDIR /root
 
-RUN apt-get update && apt-get install -y jq bc
+RUN apt-get update && apt-get install -y jq
 
 COPY --from=compile-chain /root/chain/build/swisstronikd /usr/local/bin/swisstronikd
 COPY --from=compile-chain /root/.swisstronik-enclave /root/.swisstronik-enclave
