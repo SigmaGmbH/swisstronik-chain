@@ -28,3 +28,57 @@ services:
       - grafana-data:/var/lib/grafana
     restart: unless-stopped
 
+  aesm:
+    build:
+      dockerfile: ./docker/aesm.Dockerfile
+    devices:
+      - /dev/sgx_enclave
+      - /dev/sgx_provision
+    volumes:
+      - /tmp/aesmd:/var/run/aesmd
+    restart: always
+
+  hw-node:
+    container_name: swisstronik_hw_node
+    build:
+      dockerfile: ./docker/node.Dockerfile
+      target: hw-node
+      context: .
+      args:
+        - SGX_MODE=HW
+    devices:
+      - /dev/sgx_enclave
+      - /dev/sgx_provision
+    depends_on:
+      - aesm
+    volumes:
+      - /tmp/aesmd:/var/run/aesmd
+    ports:
+      - "26656:26656"
+      - "26657:26657"
+      - "1317:1317"
+      - "8535:8535"
+      - "8546:8546"
+      - "8999:8999"
+    command: swisstronikd start
+    restart: always
+
+  local-node:
+    container_name: swisstronik_local
+    build:
+      dockerfile: ./docker/node.Dockerfile
+      target: local-node
+      context: .
+      args:
+        - SGX_MODE=SW
+    ports:
+      - "26656:26656"
+      - "26657:26657"
+      - "1317:1317"
+      - "8535:8535"
+      - "8546:8546"
+      - "8999:8999"
+    environment:
+      - SGX_MODE=SW
+    command: "swisstronikd start --minimum-gas-prices=0uswtr --json-rpc.api eth,txpool,personal,net,debug,web3 --api.enable --enclave.address 0.0.0.0:8999 --json-rpc.address 0.0.0.0:8535 --json-rpc.ws-address 0.0.0.0:8546"
+    restart: always
