@@ -33,6 +33,5 @@ jobs:
           push: true
           context: .
           file: ./docker/node.Dockerfile
-          build-args:
-            - SGX_MODE=SW
+          build-args: SGX_MODE=SW
           tags: ghcr.io/sigmagmbh/chain:latest,ghcr.io/sigmagmbh/chain:${{ steps.get_version.outputs.version-without-v }}
