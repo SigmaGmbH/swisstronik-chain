@@ -13,7 +13,7 @@ const getTokenBalance = async (provider, privateKey, contract, address) => {
 
 describe('ERC20', () => {
     let tokenContract
-    const provider = new ethers.providers.JsonRpcProvider('http://localhost:8535')
+    const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545')
     const senderPrivateKey = '0xC516DC17D909EFBB64A0C4A9EE1720E10D47C1BF3590A257D86EEB5FFC644D43'
     const receiverPrivateKey = '0x831052AB296006AA0366652BC01C2CA8E46621555E9F45FA353C80523225F756'
 
