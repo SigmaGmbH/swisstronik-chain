@@ -41,6 +41,6 @@ test:
 	go test --cover -short -p 1 ./...
 
 build-docker-local:
-	docker build -f docker/localnode.Dockerfile -t swisstronik .
+	docker build -f docker/node.Dockerfile -t swisstronik --target=local-node .
 
 .PHONY: all install build build-linux build-enclave test build-docker-local
