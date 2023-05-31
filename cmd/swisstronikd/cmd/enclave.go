@@ -13,7 +13,7 @@ import (
 
 const flagShouldReset = "reset"
 
-// InitEnclaveCmd returns init-enclave cobra Command.
+// RequestMasterKeyCmd returns request-master-key cobra Command.
 func RequestMasterKeyCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "request-master-key [bootstrap-node-address]",
@@ -51,7 +51,7 @@ func RequestMasterKeyCmd() *cobra.Command {
 	return cmd
 }
 
-// InitEnclaveCmd returns init-enclave cobra Command.
+// CreateMasterKey returns create-master-key cobra Command.
 func CreateMasterKey() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create-master-key",
