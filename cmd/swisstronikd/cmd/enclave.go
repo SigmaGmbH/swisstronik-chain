@@ -18,10 +18,7 @@ func RequestMasterKeyCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "request-master-key [bootstrap-node-address]",
 		Short: "Requests master key from bootstrap node",
-		Long: `Initializes SGX enclave by passing process of Remote Attestation agains bootstrap node.
-		If remote attestation was successful, bootstrap node shares encrypted master key with this node.
-		Process of Remote Attestation is performed over pure TCP protocol.
-		`,
+		Long: `Initializes SGX enclave by passing process of Remote Attestation agains bootstrap node. If remote attestation was successful, bootstrap node shares encrypted master key with this node. Process of Remote Attestation is performed over pure TCP protocol.`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx := client.GetClientContextFromCmd(cmd)
