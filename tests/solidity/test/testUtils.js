@@ -13,7 +13,7 @@ module.exports.sendShieldedTransaction = async (provider, privateKey, destinatio
 
     // Obtain node public key if not presents
     if (!nodePublicKey) {
-        const nodePublicKeyResponse = await getNodePublicKey('http://127.0.0.1:8535')
+        const nodePublicKeyResponse = await getNodePublicKey('http://127.0.0.1:8545')
         if (!nodePublicKeyResponse.publicKey) {
             throw new Error(`Cannot obtain node public key. Reason: ${nodePublicKeyResponse.error}`)
         }
@@ -42,7 +42,7 @@ module.exports.sendShieldedQuery = async (provider, privateKey, destination, dat
 
     // Obtain node public key if not presents
     if (!nodePublicKey) {
-        const nodePublicKeyResponse = await getNodePublicKey('http://127.0.0.1:8535')
+        const nodePublicKeyResponse = await getNodePublicKey('http://127.0.0.1:8545')
         if (!nodePublicKeyResponse.publicKey) {
             throw new Error(`Cannot obtain node public key. Reason: ${nodePublicKeyResponse.error}`)
         }

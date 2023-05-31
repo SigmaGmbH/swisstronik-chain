@@ -3,7 +3,7 @@ const { sendShieldedTransaction, sendShieldedQuery } = require("./testUtils")
 
 describe('Initializable', () => {
     let lifecycle
-    const provider = new ethers.providers.JsonRpcProvider('http://localhost:8535')
+    const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545')
     const senderPrivateKey = '0xC516DC17D909EFBB64A0C4A9EE1720E10D47C1BF3590A257D86EEB5FFC644D43'
 
     beforeEach(async () => {
