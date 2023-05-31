@@ -10,15 +10,14 @@ FROM base as compile-base
 RUN apt-get install -y protobuf-compiler curl
 
 # Install rust
-RUN curl https://sh.rustup.rs -sSf | bash -s -- -y > /dev/null 2>&1
-ENV PATH="/root/.cargo/bin:${PATH}"
-
-RUN cargo install protobuf-codegen --version "2.8.1" -f > /dev/null 2>&1
-
-# Install golang
+ENV PATH="/usr/local/go/bin:/go/bin:/root/.cargo/bin:${PATH}"
 ENV GOROOT=/usr/local/go
 ENV GOPATH=/go/
-ENV PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
+
+RUN curl https://sh.rustup.rs -sSf | bash -s -- -y > /dev/null 2>&1
+RUN cargo install protobuf-codegen --version "2.8.1" -f
+ 
+# Install golang
 ADD https://go.dev/dl/go1.19.linux-amd64.tar.gz go.linux-amd64.tar.gz
 RUN tar -C /usr/local -xzf go.linux-amd64.tar.gz && rm go.linux-amd64.tar.gz
 RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && \
@@ -29,13 +28,7 @@ RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && \
 ############ Compile enclave & chain
 FROM compile-base as compile-chain
 
-RUN apt-get install -y automake autoconf build-essential libtool git
-
-WORKDIR /root
-
-COPY . ./chain
-
-WORKDIR /root/chain
+RUN apt-get install -y automake autoconf build-essential libtool git 
 
 ARG SGX_MODE=HW
 ENV SGX_MODE=${SGX_MODE}
@@ -44,7 +37,9 @@ ENV PATH="${PATH}:${SGX_SDK}/bin:${SGX_SDK}/bin/x64"
 ENV PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${SGX_SDK}/pkgconfig"
 ENV LD_LIBRARY_PATH="/opt/intel/sgxsdk/sdk_libs:${LD_LIBRARY_PATH}"
 
-RUN SGX_MODE=${SGX_MODE} make build-enclave
+COPY . /root/chain
+WORKDIR /root/chain
+RUN	make build-enclave
 RUN make build
 
 
@@ -65,9 +60,9 @@ CMD ["swisstronikd"]
 ############ Node binary in Software Mode
 FROM ubuntu:22.04 as local-node
 
-WORKDIR /root
-
-RUN apt-get update && apt-get install -y jq
+RUN apt-get update 
+RUN apt-get install -y jq 
+RUN rm -rf /var/lib/apt/lists/* 
 
 COPY --from=compile-chain /root/chain/build/swisstronikd /usr/local/bin/swisstronikd
 COPY --from=compile-chain /root/.swisstronik-enclave /root/.swisstronik-enclave
