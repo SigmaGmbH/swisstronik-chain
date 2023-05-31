@@ -25,7 +25,7 @@ install: go.sum
 	go install -mod=readonly $(BUILD_FLAGS) ./cmd/swisstronikd
 
 build: go.sum
-	go build -mod=mod $(BUILD_FLAGS) -o build/swisstronikd ./cmd/swisstronikd
+	go build -mod=mod $(BUILD_FLAGS)  -tags osusergo,netgo -o build/swisstronikd ./cmd/swisstronikd
 
 build-linux:
 	GOOS=linux GOARCH=$(if $(findstring aarch64,$(shell uname -m)) || $(findstring arm64,$(shell uname -m)),arm64,amd64) $(MAKE) build
@@ -41,6 +41,6 @@ test:
 	go test --cover -short -p 1 ./...
 
 build-docker-local:
-	docker build -f docker/localnode.Dockerfile -t swisstronik .
+	docker build -f docker/node.Dockerfile -t swisstronik --target=local-node --build-arg SGX_MODE=SW .
 
 .PHONY: all install build build-linux build-enclave test build-docker-local
