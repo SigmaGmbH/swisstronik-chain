@@ -1,20 +1,7 @@
 ############ Install Intel SGX SDK & SGX PSW
-FROM ubuntu:22.04 as base
-
-WORKDIR /root
-
-RUN apt-get update && apt-get install build-essential wget libssl-dev libcurl4-openssl-dev libprotobuf-dev -y
-RUN mkdir sgx && mkdir /etc/init
-ADD https://download.01.org/intel-sgx/sgx-linux/2.19/distro/ubuntu22.04-server/sgx_linux_x64_sdk_2.19.100.3.bin ./sgx
-RUN chmod +x ./sgx/sgx_linux_x64_sdk_2.19.100.3.bin
-RUN ./sgx/sgx_linux_x64_sdk_2.19.100.3.bin --prefix /opt/intel
-RUN echo "source /opt/intel/sgxsdk/environment" >> /root/.bashrc && rm -rf ./sgx/*
-
-RUN echo 'deb [arch=amd64] https://download.01.org/intel-sgx/sgx_repo/ubuntu jammy main' | tee /etc/apt/sources.list.d/intelsgx.list
+FROM ghcr.io/initc3/linux-sgx:2.19-jammy as base
 RUN wget -qO - https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | apt-key add -
 RUN apt-get update
-RUN apt-get install -y libsgx-launch libsgx-urts libsgx-epid libsgx-quote-ex libsgx-dcap-ql sgx-aesm-service libsgx-aesm-launch-plugin libsgx-aesm-epid-plugin
-
 
 
 ############ Compilation base
