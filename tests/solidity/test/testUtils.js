@@ -39,7 +39,7 @@ module.exports.sendShieldedTransaction = async (provider, privateKey, destinatio
         to: destination,
         data: u8aToHex(encryptedData),
         value,
-        gasLimit: 10000000000,
+        gasPrice: 10,
     })
 }
 

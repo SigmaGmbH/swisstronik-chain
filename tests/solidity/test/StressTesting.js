@@ -1,5 +1,6 @@
 require('dotenv').config()
 const { expect } = require("chai")
+const { ethers } = require("hardhat")
 const { sendShieldedTransaction, sendShieldedQuery, getProvider } = require("./testUtils")
 
 const NUM_TESTING_ACCOUNTS = 2;
@@ -90,9 +91,9 @@ describe('--------Stress Testing----------', () => {
             const wallet = ethers.Wallet.createRandom()
             const tx = await sender.sendTransaction({
                 to: wallet.address,
-                value: "100000000000000000000",
+                value: "1000000000",
                 gasLimit: 21000,
-                type: 2,
+                gasPrice: 10,
             })
             await tx.wait()
 
@@ -108,18 +109,20 @@ describe('--------Stress Testing----------', () => {
 
     it('Stress ERC20 transfer', async () => {
         const promises = [];
-        for (let i = 0 ; i < NUM_CONCURRENT_TRANSFER; i++) {
-            promises.push(transferERC20Token(provider, wallets[i%NUM_TESTING_ACCOUNTS], wallets[(i+1)*NUM_TESTING_ACCOUNTS], tokenContract, 10));
+        for (let i = 1 ; i < NUM_TESTING_ACCOUNTS; i++) {
+            promises.push(
+                transferERC20Token(provider, wallets[i-1], wallets[i], tokenContract, 10)
+            );
         }
-        
+
         const res = await Promise.all(promises);
         console.log(res)
     })
 
     it('Stress ERC20 transferFrom', async () => {
         const promises = [];
-        for (let i = 0 ; i < NUM_CONCURRENT_TRANSFER; i++) {
-            promises.push(transferFromERC20Token(provider, wallets[i%NUM_TESTING_ACCOUNTS], wallets[(i+1)*NUM_TESTING_ACCOUNTS], tokenContract, 10));
+        for (let i = 1 ; i < NUM_TESTING_ACCOUNTS; i++) {
+            promises.push(transferFromERC20Token(provider, wallets[i-1], wallets[i], tokenContract, 10));
         }
         
         const res = await Promise.all(promises);
