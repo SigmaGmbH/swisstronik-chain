@@ -23,9 +23,9 @@ const getOwnerOf = async (provider, privateKey, contract, itemId) => {
 
 describe('ERC721', () => {
     let nftContract
-    const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545')
-    const senderPrivateKey = '0xC516DC17D909EFBB64A0C4A9EE1720E10D47C1BF3590A257D86EEB5FFC644D43'
-    const receiverPrivateKey = '0x831052AB296006AA0366652BC01C2CA8E46621555E9F45FA353C80523225F756'
+    const provider = new ethers.providers.JsonRpcProvider('http://***REMOVED***:8545')
+    const senderPrivateKey = '87D17E1D032E65CA33435C35144457EE1F12B8B4E706C6795728E998780AFCD8'
+    const receiverPrivateKey = '247991D4707FE6C67756C90BD324EE4508E12DD7ED0DEF003281345781605204'
 
     before(async () => {
         const ERC721 = await ethers.getContractFactory('ERC721Token')
