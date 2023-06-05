@@ -1,9 +1,10 @@
+require('dotenv').config()
 const { expect } = require('chai')
-const { sendShieldedTransaction } = require("../test/testUtils")
+const { sendShieldedTransaction, getProvider } = require("../test/testUtils")
 
 it('Should emit events correctly', async () => {
-    const provider = new ethers.providers.JsonRpcProvider('http://***REMOVED***:8545')
-    const signerPrivateKey = '87D17E1D032E65CA33435C35144457EE1F12B8B4E706C6795728E998780AFCD8'
+    const provider = getProvider()
+    const signerPrivateKey = process.env.FIRST_PRIVATE_KEY
 
     const EventsContract = await ethers.getContractFactory('EventTest')
     const eventInstance = await EventsContract.deploy()

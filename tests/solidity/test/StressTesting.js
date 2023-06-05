@@ -1,9 +1,9 @@
+require('dotenv').config()
 const { expect } = require("chai")
-const { sendShieldedTransaction, sendShieldedQuery } = require("./testUtils")
+const { sendShieldedTransaction, sendShieldedQuery, getProvider } = require("./testUtils")
 
 const NUM_TESTING_ACCOUNTS = 2;
 const NUM_CONCURRENT_TRANSFER = 2;
-const JSON_RPC_ENDPOINT = 'http://***REMOVED***:8545';
 
 const getTokenBalance = async (provider, privateKey, contract, address) => {
     const balanceResponse = await sendShieldedQuery(
@@ -70,8 +70,8 @@ const transferFromERC20Token  = async (provider, sender, receiver, tokenContract
 
 describe('--------Stress Testing----------', () => {
     let tokenContract
-    const provider = new ethers.providers.JsonRpcProvider(JSON_RPC_ENDPOINT)
-    const senderPrivateKey = '87D17E1D032E65CA33435C35144457EE1F12B8B4E706C6795728E998780AFCD8'
+    const provider = getProvider()
+    const senderPrivateKey = process.env.FIRST_PRIVATE_KEY
 
     let wallets = [];
 

@@ -1,9 +1,10 @@
-const { sendShieldedTransaction } = require("./testUtils")
+require('dotenv').config()
+const { sendShieldedTransaction, getProvider } = require("./testUtils")
 
 describe('Message calls', () => {
     let contract
-    const provider = new ethers.providers.JsonRpcProvider('http://***REMOVED***:8545')
-    const signerPrivateKey = '87D17E1D032E65CA33435C35144457EE1F12B8B4E706C6795728E998780AFCD8'
+    const provider = getProvider()
+    const signerPrivateKey = process.env.FIRST_PRIVATE_KEY
 
     before(async () => {
         const TestContract = await ethers.getContractFactory('TestMessageCall')

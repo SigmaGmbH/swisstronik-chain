@@ -4,19 +4,11 @@ require("@nomicfoundation/hardhat-toolbox");
 module.exports = {
     solidity: "0.8.17",
     networks: {
-        "tronik": {
+        tronik: {
             url: "http://***REMOVED***:8545",
             accounts: [
-                "87D17E1D032E65CA33435C35144457EE1F12B8B4E706C6795728E998780AFCD8",
-                "247991D4707FE6C67756C90BD324EE4508E12DD7ED0DEF003281345781605204",
-            ],
-            gas: 3_000_000
-        },
-        "local": {
-            url: "http://***REMOVED***:8545",
-            accounts: [
-                "87D17E1D032E65CA33435C35144457EE1F12B8B4E706C6795728E998780AFCD8",
-                "247991D4707FE6C67756C90BD324EE4508E12DD7ED0DEF003281345781605204",
+                "0xC516DC17D909EFBB64A0C4A9EE1720E10D47C1BF3590A257D86EEB5FFC644D43",
+                "0x831052AB296006AA0366652BC01C2CA8E46621555E9F45FA353C80523225F756",
             ],
             gas: 3_000_000
         },

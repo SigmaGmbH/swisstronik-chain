@@ -1,5 +1,6 @@
+require('dotenv').config()
 const { expect } = require("chai")
-const { sendShieldedTransaction, sendShieldedQuery } = require("../test/testUtils")
+const { sendShieldedTransaction, sendShieldedQuery, getProvider } = require("../test/testUtils")
 
 const getTokenBalance = async (provider, privateKey, contract, address) => {
     const balanceResponse = await sendShieldedQuery(
@@ -13,9 +14,9 @@ const getTokenBalance = async (provider, privateKey, contract, address) => {
 
 describe('ERC20', () => {
     let tokenContract
-    const provider = new ethers.providers.JsonRpcProvider('http://***REMOVED***:8545')
-    const senderPrivateKey = '87D17E1D032E65CA33435C35144457EE1F12B8B4E706C6795728E998780AFCD8'
-    const receiverPrivateKey = '247991D4707FE6C67756C90BD324EE4508E12DD7ED0DEF003281345781605204'
+    const provider = getProvider()
+    const senderPrivateKey = process.env.FIRST_PRIVATE_KEY
+    const receiverPrivateKey = process.env.SECOND_PRIVATE_KEY
 
     before(async () => {
         const ERC20 = await ethers.getContractFactory('ERC20Token')
