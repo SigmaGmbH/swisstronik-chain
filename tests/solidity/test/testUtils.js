@@ -1,7 +1,13 @@
+require('dotenv').config()
+
 const {ethers} = require('hardhat')
 const {getNodePublicKey, encryptECDH, decryptECDH, stringToU8a, deriveEncryptionKey, USER_KEY_PREFIX, hexToU8a, u8aToHex} = require('swisstronik.js')
 
 var nodePublicKey
+
+module.exports.getProvider = () => {
+    return new ethers.providers.JsonRpcProvider(process.env.NODE_RPC || 'http://localhost:8545')
+}
 
 module.exports.sendShieldedTransaction = async (provider, privateKey, destination, data, value) => {
     // Construct signer from private key
@@ -13,7 +19,7 @@ module.exports.sendShieldedTransaction = async (provider, privateKey, destinatio
 
     // Obtain node public key if not presents
     if (!nodePublicKey) {
-        const nodePublicKeyResponse = await getNodePublicKey('http://127.0.0.1:8545')
+        const nodePublicKeyResponse = await getNodePublicKey(this.getProvider().connection.url)
         if (!nodePublicKeyResponse.publicKey) {
             throw new Error(`Cannot obtain node public key. Reason: ${nodePublicKeyResponse.error}`)
         }
@@ -32,7 +38,8 @@ module.exports.sendShieldedTransaction = async (provider, privateKey, destinatio
         from: signer.address,
         to: destination,
         data: u8aToHex(encryptedData),
-        value
+        value,
+        gasPrice: 10,
     })
 }
 
@@ -42,7 +49,7 @@ module.exports.sendShieldedQuery = async (provider, privateKey, destination, dat
 
     // Obtain node public key if not presents
     if (!nodePublicKey) {
-        const nodePublicKeyResponse = await getNodePublicKey('http://127.0.0.1:8545')
+        const nodePublicKeyResponse = await getNodePublicKey(this.getProvider().connection.url)
         if (!nodePublicKeyResponse.publicKey) {
             throw new Error(`Cannot obtain node public key. Reason: ${nodePublicKeyResponse.error}`)
         }

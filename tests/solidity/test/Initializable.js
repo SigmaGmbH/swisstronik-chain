@@ -1,10 +1,11 @@
+require('dotenv').config()
 const { expect } = require('chai')
-const { sendShieldedTransaction, sendShieldedQuery } = require("./testUtils")
+const { sendShieldedTransaction, sendShieldedQuery, getProvider } = require("./testUtils")
 
 describe('Initializable', () => {
     let lifecycle
-    const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545')
-    const senderPrivateKey = '0xC516DC17D909EFBB64A0C4A9EE1720E10D47C1BF3590A257D86EEB5FFC644D43'
+    const provider = getProvider()
+    const senderPrivateKey = process.env.FIRST_PRIVATE_KEY
 
     beforeEach(async () => {
         const LifecycleMock = await ethers.getContractFactory('LifecycleMock')

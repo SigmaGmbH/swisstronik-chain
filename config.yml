@@ -24,11 +24,14 @@ validators:
 - name: alice
   bonded: 100000000uswtr
 genesis:
-  chain_id: "swisstronik_4141-1"
+  chain_id: "swisstronik_1291-1"
   app_state:
+    feemarket:
+      params:
+        base_fee: "7"
     staking:
       params:
         bond_denom: "uswtr"
   consensus_params:
     block:
-      max_gas: "20000000"
+      max_gas: "20000000"   
