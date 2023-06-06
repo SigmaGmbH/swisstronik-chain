@@ -78,7 +78,7 @@ describe('--------Stress Testing----------', () => {
     before(async () => {
         console.log("-------Preparing random wallets--------")
         const ERC20 = await ethers.getContractFactory('ERC20Token')
-        tokenContract = await ERC20.deploy('test token', 'TT', 10000000)
+        tokenContract = await ERC20.deploy('test token', 'TT', 10000000, {gasLimit: 2000000})
         await tokenContract.deployed()
         
         const [sender] = await ethers.getSigners()

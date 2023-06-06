@@ -8,7 +8,7 @@ describe('Message calls', () => {
 
     before(async () => {
         const TestContract = await ethers.getContractFactory('TestMessageCall')
-        contract = await TestContract.deploy()
+        contract = await TestContract.deploy({gasLimit: 1000000})
         await contract.deployed()
     })
 
