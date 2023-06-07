@@ -140,13 +140,6 @@ async function main() {
         startERC20BalanceRequestLoop(contract)
         startBalanceRequestLoop()
     }
-
-    startERC20BalanceRequestLoop(contract)
-    startERC20BalanceRequestLoop(contract)
-
-    // Basic eth_requests
-
-    // startFundsSendingLoop()
 }
 
 main()
