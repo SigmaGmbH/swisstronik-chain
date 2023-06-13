@@ -26,25 +26,6 @@ async function requestBalance() {
     }
 }
 
-// Initial wallet sends some funds to random wallet, then
-// random wallet sends it back
-async function sendFundsBetweenWallets() {
-    const senderWallet = new Wallet(process.env.FIRST_PRIVATE_KEY, getProvider())
-    const receiverWallet = Wallet.createRandom(getProvider()) 
-    console.log(`Sending 100 uswtr from ${senderWallet.address} to ${receiverWallet.address}`)
-    const tx = await senderWallet.sendTransaction({
-        to: receiverWallet.address,
-        value: 100
-    })
-    await tx.wait(1)
-
-    const backTx = await receiverWallet.sendTransaction({
-        to: senderWallet.address,
-        value: 100
-    })
-    await backTx.wait(1)
-}
-
 // Deploys sample ERC20 contract
 async function deployERC20() {
     const metadata = JSON.parse(fs.readFileSync('contracts/ERC20Token.json'))
@@ -119,13 +100,6 @@ async function startBalanceRequestLoop() {
     while (true) {
         await new Promise(r => setTimeout(r, 100));
         requestBalance()
-    }
-}
-
-async function startFundsSendingLoop() {
-    while (true) {
-        await new Promise(r => setTimeout(r, 200));
-        await sendFundsBetweenWallets()
     }
 }
 
