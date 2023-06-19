@@ -9,7 +9,7 @@ describe('Initializable', () => {
 
     beforeEach(async () => {
         const LifecycleMock = await ethers.getContractFactory('LifecycleMock')
-        lifecycle = await LifecycleMock.deploy()
+        lifecycle = await LifecycleMock.deploy({gasLimit: 1000000})
         await lifecycle.deployed()
     })
 

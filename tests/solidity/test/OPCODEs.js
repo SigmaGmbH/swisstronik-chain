@@ -9,19 +9,20 @@ describe('OPCODE test', () => {
 
     beforeEach(async () => {
         const OpcodesContract = await ethers.getContractFactory('OpCodes')
-        contractInstance = await OpcodesContract.deploy()
+        contractInstance = await OpcodesContract.deploy({gasLimit: 1000000})
         await contractInstance.deployed()
     })
 
     it('Should throw invalid op code', async () => {
         let failed = false
         try {
-            await sendShieldedTransaction(
+            const tx = await sendShieldedTransaction(
                 provider,
                 signerPrivateKey,
                 contractInstance.address,
                 contractInstance.interface.encodeFunctionData("test_invalid", [])
             )
+            await tx.wait()
         } catch {
             failed = true
         }
@@ -32,12 +33,13 @@ describe('OPCODE test', () => {
     it('Should revert', async () => {
         let failed = false
         try {
-            await sendShieldedTransaction(
+            const tx = await sendShieldedTransaction(
                 provider,
                 signerPrivateKey,
                 contractInstance.address,
                 contractInstance.interface.encodeFunctionData("test_revert", [])
             )
+            await tx.wait()
         } catch {
             failed = true
         }

@@ -30,7 +30,7 @@ describe('ERC721', () => {
 
     before(async () => {
         const ERC721 = await ethers.getContractFactory('ERC721Token')
-        nftContract = await ERC721.deploy('test token', 'TT')
+        nftContract = await ERC721.deploy('test token', 'TT', {gasLimit: 2500000})
         await nftContract.deployed()
     })
 

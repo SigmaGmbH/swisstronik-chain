@@ -10,7 +10,7 @@ describe('Counter', () => {
 
     before(async () => {
         const Counter = await ethers.getContractFactory('Counter')
-        counterContract = await Counter.deploy()
+        counterContract = await Counter.deploy({gasLimit: 1000000})
         await counterContract.deployed()
     })
 
@@ -76,12 +76,13 @@ describe('Counter', () => {
     it('Should revert correctly', async () => {
         let failed = false
         try {
-            await sendShieldedTransaction(
+            const tx = await sendShieldedTransaction(
                 provider,
                 signerPrivateKey,
                 counterContract.address,
                 counterContract.interface.encodeFunctionData("subtract", [])
             )
+            await tx.wait()
         } catch {
             failed = true
         }

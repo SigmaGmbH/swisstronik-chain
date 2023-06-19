@@ -7,7 +7,7 @@ it('Should emit events correctly', async () => {
     const signerPrivateKey = process.env.FIRST_PRIVATE_KEY
 
     const EventsContract = await ethers.getContractFactory('EventTest')
-    const eventInstance = await EventsContract.deploy()
+    const eventInstance = await EventsContract.deploy({gasLimit: 1000000})
     await eventInstance.deployed()
 
     const tx = await sendShieldedTransaction(

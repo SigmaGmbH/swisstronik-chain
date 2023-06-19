@@ -7,7 +7,7 @@ it('Should revert', async () => {
     const signerPrivateKey = process.env.FIRST_PRIVATE_KEY
 
     const RevertContract = await ethers.getContractFactory('TestRevert')
-    const revertContract = await RevertContract.deploy()
+    const revertContract = await RevertContract.deploy({gasLimit: 1000000})
     await revertContract.deployed()
 
     const trySetTx = await sendShieldedTransaction(
