@@ -16,7 +16,7 @@ contract PrivateSWTR is PERC20 {
     }
 
     /// @notice Regular `balanceOf` function is disabled to force users to use `balanceOfWithSignature` function
-    function balanceOf(address account) public view override returns (uint256) {
+    function balanceOf(/* address account*/) public view override returns (uint256) {
         revert("PSWTR: Public balanceOf was disabled");
     }
 
