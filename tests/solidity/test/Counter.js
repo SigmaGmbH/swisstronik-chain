@@ -1,31 +1,28 @@
-require('dotenv').config()
 const { expect } = require("chai");
 const { ethers } = require("hardhat")
 const { sendShieldedTransaction, sendShieldedQuery, getProvider } = require("./testUtils")
 
 describe('Counter', () => {
     let counterContract
-    const provider = getProvider()
-    const signerPrivateKey = process.env.FIRST_PRIVATE_KEY
 
     before(async () => {
         const Counter = await ethers.getContractFactory('Counter')
-        counterContract = await Counter.deploy({gasLimit: 1000000})
+        counterContract = await Counter.deploy()
         await counterContract.deployed()
     })
 
     it('Should add', async () => {
+        const [signer] = await ethers.getSigners()
+
         const countBeforeResponse = await sendShieldedQuery(
-            provider,
-            signerPrivateKey,
+            signer.provider,
             counterContract.address,
             counterContract.interface.encodeFunctionData("counter", [])
         );
         const countBefore = counterContract.interface.decodeFunctionResult("counter", countBeforeResponse)
 
         const tx = await sendShieldedTransaction(
-            provider,
-            signerPrivateKey,
+            signer,
             counterContract.address,
             counterContract.interface.encodeFunctionData("add", [])
         )
@@ -35,8 +32,7 @@ describe('Counter', () => {
         expect(logs.some(log => log.name === 'Changed')).to.be.true
 
         const countAfterResponse = await sendShieldedQuery(
-            provider,
-            signerPrivateKey,
+            signer.provider,
             counterContract.address,
             counterContract.interface.encodeFunctionData("counter", [])
         );
@@ -45,17 +41,17 @@ describe('Counter', () => {
     })
 
     it('Should subtract', async () => {
+        const [signer] = await ethers.getSigners()
+
         const countBeforeResponse = await sendShieldedQuery(
-            provider,
-            signerPrivateKey,
+            signer.provider,
             counterContract.address,
             counterContract.interface.encodeFunctionData("counter", [])
         );
         const countBefore = counterContract.interface.decodeFunctionResult("counter", countBeforeResponse)
 
         const tx = await sendShieldedTransaction(
-            provider,
-            signerPrivateKey,
+            signer,
             counterContract.address,
             counterContract.interface.encodeFunctionData("subtract", [])
         )
@@ -64,8 +60,7 @@ describe('Counter', () => {
         expect(logs.some(log => log.name === 'Changed')).to.be.true
 
         const countAfterResponse = await sendShieldedQuery(
-            provider,
-            signerPrivateKey,
+            signer.provider,
             counterContract.address,
             counterContract.interface.encodeFunctionData("counter", [])
         );
@@ -74,11 +69,12 @@ describe('Counter', () => {
     })
 
     it('Should revert correctly', async () => {
+        const [signer] = await ethers.getSigners()
+
         let failed = false
         try {
             const tx = await sendShieldedTransaction(
-                provider,
-                signerPrivateKey,
+                signer,
                 counterContract.address,
                 counterContract.interface.encodeFunctionData("subtract", [])
             )
