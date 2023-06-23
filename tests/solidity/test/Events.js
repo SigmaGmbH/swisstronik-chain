@@ -1,18 +1,15 @@
-require('dotenv').config()
 const { expect } = require('chai')
-const { sendShieldedTransaction, getProvider } = require("../test/testUtils")
+const { sendShieldedTransaction } = require("../test/testUtils")
 
 it('Should emit events correctly', async () => {
-    const provider = getProvider()
-    const signerPrivateKey = process.env.FIRST_PRIVATE_KEY
+    const [signer] = await ethers.getSigners()
 
     const EventsContract = await ethers.getContractFactory('EventTest')
-    const eventInstance = await EventsContract.deploy({gasLimit: 1000000})
+    const eventInstance = await EventsContract.deploy()
     await eventInstance.deployed()
 
     const tx = await sendShieldedTransaction(
-        provider,
-        signerPrivateKey,
+        signer,
         eventInstance.address,
         eventInstance.interface.encodeFunctionData("storeWithEvent", [888])
     )

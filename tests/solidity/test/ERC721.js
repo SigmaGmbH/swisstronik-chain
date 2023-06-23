@@ -1,21 +1,18 @@
-require('dotenv').config()
 const { expect } = require("chai")
-const { sendShieldedTransaction, sendShieldedQuery, getProvider } = require("./testUtils")
+const { sendShieldedTransaction, sendShieldedQuery } = require("./testUtils")
 
-const getTokenBalance = async (provider, privateKey, contract, address) => {
+const getTokenBalance = async (contract, address) => {
     const balanceResponse = await sendShieldedQuery(
-        provider,
-        privateKey,
+        ethers.provider,
         contract.address,
         contract.interface.encodeFunctionData("balanceOf", [address])
     );
     return contract.interface.decodeFunctionResult("balanceOf", balanceResponse)[0]
 }
 
-const getOwnerOf = async (provider, privateKey, contract, itemId) => {
+const getOwnerOf = async (contract, itemId) => {
     const ownerResponse = await sendShieldedQuery(
-        provider,
-        privateKey,
+        ethers.provider,
         contract.address,
         contract.interface.encodeFunctionData("ownerOf", [itemId])
     );
@@ -24,20 +21,16 @@ const getOwnerOf = async (provider, privateKey, contract, itemId) => {
 
 describe('ERC721', () => {
     let nftContract
-    const provider = getProvider()
-    const senderPrivateKey = process.env.FIRST_PRIVATE_KEY
-    const receiverPrivateKey = process.env.SECOND_PRIVATE_KEY
 
     before(async () => {
         const ERC721 = await ethers.getContractFactory('ERC721Token')
-        nftContract = await ERC721.deploy('test token', 'TT', {gasLimit: 2500000})
+        nftContract = await ERC721.deploy('test token', 'TT')
         await nftContract.deployed()
     })
 
     it('Should return correct token name and symbol', async () => {
         const nameResponse = await sendShieldedQuery(
-            provider,
-            senderPrivateKey,
+            ethers.provider,
             nftContract.address,
             nftContract.interface.encodeFunctionData("name", [])
         );
@@ -45,8 +38,7 @@ describe('ERC721', () => {
         expect(name).to.be.equal('test token')
 
         const symbolResponse = await sendShieldedQuery(
-            provider,
-            senderPrivateKey,
+            ethers.provider,
             nftContract.address,
             nftContract.interface.encodeFunctionData("symbol", [])
         );
@@ -60,8 +52,7 @@ describe('ERC721', () => {
         const expectedItemId = 0
 
         const tx = await sendShieldedTransaction(
-            provider,
-            senderPrivateKey,
+            user,
             nftContract.address,
             nftContract.interface.encodeFunctionData("createItem", [user.address, tokenURI])
         )
@@ -69,10 +60,10 @@ describe('ERC721', () => {
         const logs = receipt.logs.map(log => nftContract.interface.parseLog(log))
         expect(logs.some(log => log.name === 'Transfer' && log.args[0] == ethers.constants.AddressZero && log.args[1] == user.address && log.args[2].toNumber() == expectedItemId)).to.be.true
 
-        const userBalance = await getTokenBalance(provider, senderPrivateKey, nftContract, user.address)
+        const userBalance = await getTokenBalance(nftContract, user.address)
         expect(userBalance).to.be.equal(1)
 
-        const ownerOfItem = await getOwnerOf(provider, senderPrivateKey, nftContract, expectedItemId)
+        const ownerOfItem = await getOwnerOf(nftContract, expectedItemId)
         expect(ownerOfItem).to.be.equal(user.address)
     })
 
@@ -81,8 +72,7 @@ describe('ERC721', () => {
         const itemId = 0
 
         const tx = await sendShieldedTransaction(
-            provider,
-            senderPrivateKey,
+            user,
             nftContract.address,
             nftContract.interface.encodeFunctionData("transferFrom", [user.address, receiver.address, itemId])
         )
@@ -90,13 +80,13 @@ describe('ERC721', () => {
         const logs = receipt.logs.map(log => nftContract.interface.parseLog(log))
         expect(logs.some(log => log.name === 'Transfer' && log.args[0] == user.address && log.args[1] == receiver.address && log.args[2].toNumber() == itemId)).to.be.true
 
-        const userBalance = await getTokenBalance(provider, senderPrivateKey, nftContract, user.address)
+        const userBalance = await getTokenBalance(nftContract, user.address)
         expect(userBalance).to.be.equal(0)
 
-        const receiverBalance = await getTokenBalance(provider, receiverPrivateKey, nftContract, receiver.address)
+        const receiverBalance = await getTokenBalance(nftContract, receiver.address)
         expect(receiverBalance).to.be.equal(1)
 
-        const ownerOfItem = await getOwnerOf(provider, receiverPrivateKey, nftContract, itemId)
+        const ownerOfItem = await getOwnerOf(nftContract, itemId)
         expect(ownerOfItem).to.be.equal(receiver.address)
     })
 
@@ -106,14 +96,14 @@ describe('ERC721', () => {
 
         let failed = false
         try {
-            await sendShieldedTransaction(
-                provider,
-                senderPrivateKey,
-                tokenContract.address,
-                tokenContract.interface.encodeFunctionData("transferFrom", [receiver.address, wrongSender.address, itemId])
+            const tx = await sendShieldedTransaction(
+                wrongSender,
+                nftContract.address,
+                nftContract.interface.encodeFunctionData("transferFrom", [receiver.address, wrongSender.address, itemId])
             )
-        } catch {
-            failed = true
+            await tx.wait()
+        } catch (e) {
+            failed = e.reason.indexOf('reverted') !== -1
         }
 
         expect(failed).to.be.true
@@ -122,8 +112,7 @@ describe('ERC721', () => {
     it('Should return metadata URI for NFT', async () => {
         const itemId = 0
         const metadataURIResponse = await sendShieldedQuery(
-            provider,
-            senderPrivateKey,
+            ethers.provider,
             nftContract.address,
             nftContract.interface.encodeFunctionData("tokenURI", [itemId])
         );

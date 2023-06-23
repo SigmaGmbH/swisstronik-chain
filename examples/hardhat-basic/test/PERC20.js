@@ -7,7 +7,7 @@ const getTokenBalance = async (signer, contract) => {
     const signature = await signer.signMessage(messageHashBinary)
 
     const balanceResponse = await sendShieldedQuery(
-        signer,
+        signer.provider,
         contract.address,
         contract.interface.encodeFunctionData("balanceOfWithSignature", [signer.address, signature])
     );
