@@ -1,6 +1,6 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat")
-const { sendShieldedTransaction, sendShieldedQuery, getProvider } = require("./testUtils")
+const { sendShieldedTransaction, sendShieldedQuery } = require("./testUtils")
 
 describe('Counter', () => {
     let counterContract
@@ -79,8 +79,8 @@ describe('Counter', () => {
                 counterContract.interface.encodeFunctionData("subtract", [])
             )
             await tx.wait()
-        } catch {
-            failed = true
+        } catch (e) {
+            failed = e.reason.indexOf('reverted') !== -1
         }
 
         expect(failed).to.be.true
