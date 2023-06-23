@@ -2,7 +2,6 @@
   "name": "solidity-test",
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^1.0.2",
-    "dotenv": "^16.1.4",
     "hardhat": "^2.12.7"
   },
   "scripts": {
