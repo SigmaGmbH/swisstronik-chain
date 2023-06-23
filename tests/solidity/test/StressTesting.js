@@ -2,7 +2,7 @@ const { expect } = require("chai")
 const { ethers } = require("hardhat")
 const { sendShieldedTransaction, sendShieldedQuery } = require("./testUtils")
 
-const NUM_TESTING_ACCOUNTS = 2;
+const NUM_TESTING_ACCOUNTS = 50;
 
 const getTokenBalance = async (contract, address) => {
     const balanceResponse = await sendShieldedQuery(
