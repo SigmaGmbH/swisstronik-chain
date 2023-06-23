@@ -12,7 +12,8 @@ module.exports.sendShieldedTransaction = async (signer, destination, data, value
         from: signer.address,
         to: destination,
         data: encryptedData,
-        value
+        value,
+        gasPrice: 0 // We're using 0 gas price in tests 
     })
 }
 
