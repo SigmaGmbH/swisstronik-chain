@@ -1,11 +1,9 @@
-require('dotenv').config()
 const { expect } = require("chai")
-const { sendShieldedTransaction, sendShieldedQuery, getProvider } = require("../test/testUtils")
+const { sendShieldedTransaction, sendShieldedQuery } = require("../test/testUtils")
 
-const getTokenBalance = async (provider, privateKey, contract, address) => {
+const getTokenBalance = async (contract, address) => {
     const balanceResponse = await sendShieldedQuery(
-        provider,
-        privateKey,
+        ethers.provider,
         contract.address,
         contract.interface.encodeFunctionData("balanceOf", [address])
     );
@@ -14,20 +12,16 @@ const getTokenBalance = async (provider, privateKey, contract, address) => {
 
 describe('ERC20', () => {
     let tokenContract
-    const provider = getProvider()
-    const senderPrivateKey = process.env.FIRST_PRIVATE_KEY
-    const receiverPrivateKey = process.env.SECOND_PRIVATE_KEY
 
     before(async () => {
         const ERC20 = await ethers.getContractFactory('ERC20Token')
-        tokenContract = await ERC20.deploy('test token', 'TT', 10000, {gasLimit: 2000000})
+        tokenContract = await ERC20.deploy('test token', 'TT', 10000)
         await tokenContract.deployed()
     })
 
     it('Should return correct name and symbol', async () => {
         const nameResponse = await sendShieldedQuery(
-            provider,
-            senderPrivateKey,
+            ethers.provider,
             tokenContract.address,
             tokenContract.interface.encodeFunctionData("name", [])
         );
@@ -35,8 +29,7 @@ describe('ERC20', () => {
         expect(name).to.be.equal('test token')
 
         const symbolResponse = await sendShieldedQuery(
-            provider,
-            senderPrivateKey,
+            ethers.provider,
             tokenContract.address,
             tokenContract.interface.encodeFunctionData("symbol", [])
         );
@@ -48,12 +41,11 @@ describe('ERC20', () => {
         const [sender, receiver] = await ethers.getSigners()
         const amountToTransfer = 100
 
-        const senderBalanceBefore = await getTokenBalance(provider, senderPrivateKey, tokenContract, sender.address)
-        const receiverBalanceBefore = await getTokenBalance(provider, receiverPrivateKey, tokenContract, receiver.address)
+        const senderBalanceBefore = await getTokenBalance(tokenContract, sender.address)
+        const receiverBalanceBefore = await getTokenBalance(tokenContract, receiver.address)
 
         const tx = await sendShieldedTransaction(
-            provider,
-            senderPrivateKey,
+            sender,
             tokenContract.address,
             tokenContract.interface.encodeFunctionData("transfer", [receiver.address, amountToTransfer])
         )
@@ -61,8 +53,8 @@ describe('ERC20', () => {
         const logs = receipt.logs.map(log => tokenContract.interface.parseLog(log))
         expect(logs.some(log => log.name === 'Transfer' && log.args[0] == sender.address && log.args[1] == receiver.address && log.args[2].toNumber() == amountToTransfer)).to.be.true
 
-        const senderBalanceAfter = await getTokenBalance(provider, senderPrivateKey, tokenContract, sender.address)
-        const receiverBalanceAfter = await getTokenBalance(provider, receiverPrivateKey, tokenContract, receiver.address)
+        const senderBalanceAfter = await getTokenBalance(tokenContract, sender.address)
+        const receiverBalanceAfter = await getTokenBalance(tokenContract, receiver.address)
 
         expect(senderBalanceAfter.toNumber()).to.be.equal(senderBalanceBefore.toNumber() - amountToTransfer)
         expect(receiverBalanceAfter.toNumber()).to.be.equal(receiverBalanceBefore.toNumber() + amountToTransfer)
@@ -73,8 +65,7 @@ describe('ERC20', () => {
         const amountToTransfer = 100
 
         const approveTx = await sendShieldedTransaction(
-            provider,
-            senderPrivateKey,
+            sender,
             tokenContract.address,
             tokenContract.interface.encodeFunctionData("approve", [receiver.address, amountToTransfer])
         )
@@ -82,12 +73,11 @@ describe('ERC20', () => {
         const approveTxLogs = approveTxReceipt.logs.map(log => tokenContract.interface.parseLog(log))
         expect(approveTxLogs.some(log => log.name === 'Approval' && log.args[0] == sender.address && log.args[1] == receiver.address && log.args[2].toNumber() == amountToTransfer)).to.be.true
 
-        const senderBalanceBefore = await getTokenBalance(provider, senderPrivateKey, tokenContract, sender.address)
-        const receiverBalanceBefore = await getTokenBalance(provider, receiverPrivateKey, tokenContract, receiver.address)
+        const senderBalanceBefore = await getTokenBalance(tokenContract, sender.address)
+        const receiverBalanceBefore = await getTokenBalance(tokenContract, receiver.address)
 
         const transferTx = await sendShieldedTransaction(
-            provider,
-            receiverPrivateKey,
+            receiver,
             tokenContract.address,
             tokenContract.interface.encodeFunctionData("transferFrom", [sender.address, receiver.address, amountToTransfer])
         )
@@ -95,28 +85,27 @@ describe('ERC20', () => {
         const transferTxLogs = transferTxReceipt.logs.map(log => tokenContract.interface.parseLog(log))
         expect(transferTxLogs.some(log => log.name === 'Transfer' && log.args[0] == sender.address && log.args[1] == receiver.address && log.args[2].toNumber() == amountToTransfer)).to.be.true
 
-        const senderBalanceAfter = await getTokenBalance(provider, senderPrivateKey, tokenContract, sender.address)
-        const receiverBalanceAfter = await getTokenBalance(provider, receiverPrivateKey, tokenContract, receiver.address)
+        const senderBalanceAfter = await getTokenBalance(tokenContract, sender.address)
+        const receiverBalanceAfter = await getTokenBalance(tokenContract, receiver.address)
 
         expect(senderBalanceAfter.toNumber()).to.be.equal(senderBalanceBefore.toNumber() - amountToTransfer)
         expect(receiverBalanceAfter.toNumber()).to.be.equal(receiverBalanceBefore.toNumber() + amountToTransfer)
     })
 
     it('Cannot exceed balance during transfer', async () => {
-        const [sender, receiver] = await ethers.getSigners()
+        const [_, receiver] = await ethers.getSigners()
         const amountToTransfer = 1000000000000
 
         let failed = false
         try {
             const tx = await sendShieldedTransaction(
-                provider,
-                senderPrivateKey,
+                receiver,
                 tokenContract.address,
                 tokenContract.interface.encodeFunctionData("transfer", [receiver.address, amountToTransfer])
             )
             await tx.wait()
-        } catch {
-            failed = true
+        } catch (e) {
+            failed = e.reason.indexOf('reverted') !== -1
         }
 
         expect(failed).to.be.true
@@ -129,14 +118,13 @@ describe('ERC20', () => {
         let failed = false
         try {
             const tx = await sendShieldedTransaction(
-                provider,
-                receiverPrivateKey,
+                receiver,
                 tokenContract.address,
                 tokenContract.interface.encodeFunctionData("transferFrom", [sender.address, receiver.address, amountToTransfer])
             )
             await tx.wait()
-        } catch {
-            failed = true
+        } catch (e) {
+            failed = e.reason.indexOf('reverted') !== -1
         }
 
         expect(failed).to.be.true
