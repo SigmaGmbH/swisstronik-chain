@@ -1,26 +1,21 @@
-require('dotenv').config()
 const { expect } = require('chai')
-const { sendShieldedTransaction, sendShieldedQuery, getProvider } = require("./testUtils")
+const { sendShieldedTransaction, sendShieldedQuery } = require("./testUtils")
 
 it('Should revert', async () => {
-    const provider = getProvider()
-    const signerPrivateKey = process.env.FIRST_PRIVATE_KEY
-
+    const [signer] = await ethers.getSigners()
     const RevertContract = await ethers.getContractFactory('TestRevert')
-    const revertContract = await RevertContract.deploy({gasLimit: 1000000})
+    const revertContract = await RevertContract.deploy()
     await revertContract.deployed()
 
     const trySetTx = await sendShieldedTransaction(
-        provider,
-        signerPrivateKey,
+        signer,
         revertContract.address,
         revertContract.interface.encodeFunctionData("try_set", [10])
     )
     await trySetTx.wait()
 
     const queryAResponse = await sendShieldedQuery(
-        provider,
-        signerPrivateKey,
+        ethers.provider,
         revertContract.address,
         revertContract.interface.encodeFunctionData("query_a", [])
     );
@@ -28,8 +23,7 @@ it('Should revert', async () => {
     expect(queryAResult).to.be.equal(0)
 
     const queryBResponse = await sendShieldedQuery(
-        provider,
-        signerPrivateKey,
+        ethers.provider,
         revertContract.address,
         revertContract.interface.encodeFunctionData("query_b", [])
     );
@@ -37,8 +31,7 @@ it('Should revert', async () => {
     expect(queryBResult).to.be.equal(10)
 
     const queryCResponse = await sendShieldedQuery(
-        provider,
-        signerPrivateKey,
+        ethers.provider,
         revertContract.address,
         revertContract.interface.encodeFunctionData("query_c", [])
     );
@@ -46,16 +39,14 @@ it('Should revert', async () => {
     expect(queryCResult).to.be.equal(10)
 
     const setTx = await sendShieldedTransaction(
-        provider,
-        signerPrivateKey,
+        signer,
         revertContract.address,
         revertContract.interface.encodeFunctionData("set", [10])
     )
     await setTx.wait()
 
     const response = await sendShieldedQuery(
-        provider,
-        signerPrivateKey,
+        ethers.provider,
         revertContract.address,
         revertContract.interface.encodeFunctionData("query_a", [])
     );

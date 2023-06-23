@@ -24,7 +24,7 @@
     "ethers": "^5.4.7",
     "hardhat-gas-reporter": "^1.0.8",
     "solidity-coverage": "^0.7.22",
-    "swisstronik.js": "file:../../external/swisstronik.js",
+    "@swisstronik/swisstronik.js": "file:../../external/swisstronik.js",
     "ts-node": ">=8.0.0",
     "typechain": "^8.1.0",
     "typescript": ">=4.5.0"

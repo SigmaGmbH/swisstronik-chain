@@ -1,22 +1,18 @@
-require('dotenv').config()
 const { expect } = require('chai')
-const { sendShieldedTransaction, sendShieldedQuery, getProvider } = require("./testUtils")
+const { sendShieldedTransaction, sendShieldedQuery } = require("./testUtils")
 
 describe('Initializable', () => {
     let lifecycle
-    const provider = getProvider()
-    const senderPrivateKey = process.env.FIRST_PRIVATE_KEY
 
     beforeEach(async () => {
         const LifecycleMock = await ethers.getContractFactory('LifecycleMock')
-        lifecycle = await LifecycleMock.deploy({gasLimit: 1000000})
+        lifecycle = await LifecycleMock.deploy()
         await lifecycle.deployed()
     })
 
     it('is not initialized', async () => {
         const response = await sendShieldedQuery(
-            provider,
-            senderPrivateKey,
+            ethers.provider,
             lifecycle.address,
             lifecycle.interface.encodeFunctionData("hasInitialized", [])
         );
@@ -26,8 +22,7 @@ describe('Initializable', () => {
 
     it('is not petrified', async () => {
         const response = await sendShieldedQuery(
-            provider,
-            senderPrivateKey,
+            ethers.provider,
             lifecycle.address,
             lifecycle.interface.encodeFunctionData("isPetrified", [])
         );
@@ -37,9 +32,9 @@ describe('Initializable', () => {
 
     describe('> Initialized', () => {
         beforeEach(async () => {
+            const [signer] = await ethers.getSigners()
             const tx = await sendShieldedTransaction(
-                provider,
-                senderPrivateKey,
+                signer,
                 lifecycle.address,
                 lifecycle.interface.encodeFunctionData("initializeMock", [])
             )
@@ -48,8 +43,7 @@ describe('Initializable', () => {
 
         it('is initialized', async () => {
             const response = await sendShieldedQuery(
-                provider,
-                senderPrivateKey,
+                ethers.provider,
                 lifecycle.address,
                 lifecycle.interface.encodeFunctionData("hasInitialized", [])
             );
@@ -59,8 +53,7 @@ describe('Initializable', () => {
 
         it('is not petrified', async () => {
             const response = await sendShieldedQuery(
-                provider,
-                senderPrivateKey,
+                ethers.provider,
                 lifecycle.address,
                 lifecycle.interface.encodeFunctionData("isPetrified", [])
             );
@@ -69,32 +62,32 @@ describe('Initializable', () => {
         })
 
         it('cannot be re-initialized', async () => {
+            const [signer] = await ethers.getSigners()
             let failed = false
             try {
                 await sendShieldedTransaction(
-                    provider,
-                    receiverPrivateKey,
+                    signer,
                     lifecycle.address,
                     lifecycle.interface.encodeFunctionData("initializeMock", [])
                 )
-            } catch {
-                failed = true
+            } catch (e) {
+                failed = e.reason.indexOf('reverted') !== -1
             }
     
             expect(failed).to.be.true
         })
 
         it('cannot be petrified', async () => {
+            const [signer] = await ethers.getSigners()
             let failed = false
             try {
                 await sendShieldedTransaction(
-                    provider,
-                    receiverPrivateKey,
+                    signer,
                     lifecycle.address,
                     lifecycle.interface.encodeFunctionData("petrifyMock", [])
                 )
-            } catch {
-                failed = true
+            } catch (e) {
+                failed = e.reason.indexOf('reverted') !== -1
             }
     
             expect(failed).to.be.true
@@ -103,9 +96,9 @@ describe('Initializable', () => {
 
     describe('> Petrified', () => {
         beforeEach(async () => {
+            const [signer] = await ethers.getSigners()
             const tx = await sendShieldedTransaction(
-                provider,
-                senderPrivateKey,
+                signer,
                 lifecycle.address,
                 lifecycle.interface.encodeFunctionData("petrifyMock", [])
             )
@@ -114,8 +107,7 @@ describe('Initializable', () => {
 
         it('is not initialized', async () => {
             const response = await sendShieldedQuery(
-                provider,
-                senderPrivateKey,
+                ethers.provider,
                 lifecycle.address,
                 lifecycle.interface.encodeFunctionData("hasInitialized", [])
             );
@@ -125,26 +117,24 @@ describe('Initializable', () => {
 
         it('is petrified', async () => {
             const response = await sendShieldedQuery(
-                provider,
-                senderPrivateKey,
+                ethers.provider,
                 lifecycle.address,
-                lifecycle.interface.encodeFunctionData("isPetrified", [])
-            );
+                lifecycle.interface.encodeFunctionData("isPetrified", []))
             const petrified = lifecycle.interface.decodeFunctionResult("isPetrified", response)[0]
             expect(petrified).to.be.true
         })
 
         it('cannot be petrified again', async () => {
+            const [signer] = await ethers.getSigners()
             let failed = false
             try {
                 await sendShieldedTransaction(
-                    provider,
-                    receiverPrivateKey,
+                    signer,
                     lifecycle.address,
                     lifecycle.interface.encodeFunctionData("petrifyMock", [])
                 )
-            } catch {
-                failed = true
+            } catch (e) {
+                failed = e.reason.indexOf('reverted') !== -1
             }
     
             expect(failed).to.be.true
@@ -152,13 +142,12 @@ describe('Initializable', () => {
 
         it('has initialization block in the future', async () => {
             const petrifiedBlockResponse = await sendShieldedQuery(
-                provider,
-                senderPrivateKey,
+                ethers.provider,
                 lifecycle.address,
                 lifecycle.interface.encodeFunctionData("getInitializationBlock", [])
             );
             const petrifiedBlock = lifecycle.interface.decodeFunctionResult("getInitializationBlock", petrifiedBlockResponse)[0]
-            const blockNumber = await provider.getBlockNumber()
+            const blockNumber = await ethers.provider.getBlockNumber()
             expect(petrifiedBlock).to.be.greaterThan(blockNumber)
         })
     })

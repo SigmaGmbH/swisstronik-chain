@@ -1,11 +1,4 @@
-require('dotenv').config()
-
-const {ethers} = require('hardhat')
 const { encryptDataField, decryptNodeResponse } = require('@swisstronik/swisstronik.js')
-
-module.exports.getProvider = () => {
-    return new ethers.providers.JsonRpcProvider(process.env.NODE_RPC || 'http://localhost:8545')
-}
 
 module.exports.sendShieldedTransaction = async (signer, destination, data, value) => {
     // Encrypt transaction data
