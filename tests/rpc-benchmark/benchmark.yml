@@ -1,0 +1,15 @@
+---
+
+concurrency: 4
+base: '{{ URL }}'
+iterations: 3000
+rampup: 5
+
+plan:
+  - name: View call method
+    request:
+      url: /
+      method: POST
+      body: '{"jsonrpc": "2.0", "id": "1", "method": "query", "params": {"request_type": "call_function", "account_id": "nearoverflow.testnet", "method_name": "list_questions", "args_base64": "", "finality": "final"}}'
+      headers:
+        Content-Type: 'application/json'
