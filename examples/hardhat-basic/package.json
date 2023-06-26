@@ -6,7 +6,8 @@
   },
   "scripts": {
     "compile": "hardhat compile",
-    "test": "hardhat test --network tronik"
+    "test": "hardhat test --network localTronik",
+    "deploy": "hardhat run --network localTronik scripts/deploy.js"
   },
   "dependencies": {
     "@ethersproject/providers": "^5.4.7",

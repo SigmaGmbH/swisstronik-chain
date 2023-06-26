@@ -4,7 +4,7 @@ require("@nomicfoundation/hardhat-toolbox");
 module.exports = {
     solidity: "0.8.17",
     networks: {
-        tronik: {
+        localTronik: {
             url: "http://localhost:8545",
             accounts: [
                 "C516DC17D909EFBB64A0C4A9EE1720E10D47C1BF3590A257D86EEB5FFC644D43",
