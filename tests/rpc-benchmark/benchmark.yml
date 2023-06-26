@@ -6,10 +6,10 @@ iterations: 3000
 rampup: 5
 
 plan:
-  - name: View call method
+  - name: eth_getBalance method
     request:
       url: /
       method: POST
-      body: '{"jsonrpc": "2.0", "id": "1", "method": "query", "params": {"request_type": "call_function", "account_id": "nearoverflow.testnet", "method_name": "list_questions", "args_base64": "", "finality": "final"}}'
+      body: '{"method": "eth_getBalance", "params": ["0x8D97689C9818892B700e27F316cc3E41e17fBeb9", "latest"], "id": 1, "jsonrpc": "2.0"}'
       headers:
         Content-Type: 'application/json'

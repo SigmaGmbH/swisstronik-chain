@@ -15,17 +15,8 @@
     $ sudo apt install -y build-essential pkg-config libssl-dev
     ```
 
-* Clone this repo
-
-    ```bash
-    $ git clone https://github.com/near/jsonrpc-benchmark
-    ```
-
 * Navigate to the folder and run `drill`
 
     ```bash
-    $ cd jsonrpc-benchmark/
-    $ chmod a+x run.sh
-    $ URL="http://localhost:3030" ./run.sh # to run each method sequentially
-    $ drill --benchmark benchmark.yml --stats # to run the methods concurrently
+    $ URL="http://localhost:3030" drill --quiet --benchmark benchmark.yml --stats
     ```
