@@ -1,9 +1,9 @@
 require('dotenv').config()
 const ethers = require('ethers') 
 const fs = require('fs')
-const {decryptNodeResponse} = require('@swisstronik/swisstronik.js')
+const {getNodePublicKey, encryptECDH, decryptECDH, stringToU8a, deriveEncryptionKey, USER_KEY_PREFIX, hexToU8a, u8aToHex} = require('swisstronik.js')
 
-let provider
+let nodePublicKey, provider
 
 const NUM_PARALLEL = 3
 
@@ -20,7 +20,7 @@ async function requestBalance() {
         const wallet = ethers.Wallet.createRandom(getProvider())
         console.log(`request eth_balance for ${wallet.address}`)
         const balance = await getProvider().getBalance(wallet.address)
-        console.log('eth_getBalance success. Balance ', balance)
+        console.log('eth_getBalance success')
     } catch {
         console.log('eth_getBalance failed')
     }
@@ -38,21 +38,38 @@ async function deployERC20() {
     return contract
 }
 
-const sendShieldedQuery = async (provider, destination, data) => {
-    // Encrypt call data
-    const [encryptedData, usedEncryptedKey] = await encryptDataField(
-        provider.connection.url,
-        data
-    )
+async function sendShieldedQuery(provider, privateKey, destination, data, value) {
+    // Create encryption key
+    const encryptionPrivateKey = deriveEncryptionKey(privateKey, stringToU8a(USER_KEY_PREFIX))
 
-    // Do call
+    // Obtain node public key if not presents
+    if (!nodePublicKey) {
+        const nodePublicKeyResponse = await getNodePublicKey(getProvider().connection.url)
+        if (!nodePublicKeyResponse.publicKey) {
+            throw new Error(`Cannot obtain node public key. Reason: ${nodePublicKeyResponse.error}`)
+        }
+        nodePublicKey = nodePublicKeyResponse.publicKey
+    }
+
+    // Encrypt data
+    const encryptionResult = encryptECDH(encryptionPrivateKey, hexToU8a(nodePublicKey), hexToU8a(data))
+    if (!encryptionResult.result) {
+        throw new Error(`Encryption error. Reason: ${encryptionResult.error}`)
+    }
+    const encryptedData = encryptionResult.result
+
     const response = await provider.call({
         to: destination,
-        data: encryptedData,
+        data: u8aToHex(encryptedData),
+        value
     })
 
-    // Decrypt call result
-    return await decryptNodeResponse(provider.connection.url, response, usedEncryptedKey)
+    const decryptionResult = decryptECDH(encryptionPrivateKey, hexToU8a(nodePublicKey), hexToU8a(response))
+    if (!decryptionResult.result) {
+        throw new Error(`Decryption error. Reason: ${decryptionResult.error}`)
+    }
+
+    return decryptionResult.result
 }
 
 async function requestERC20Balance(contract) {
@@ -91,7 +108,6 @@ async function main() {
     console.log('Deploying test ERC20')
     const contract = await deployERC20()
     console.log(`ERC20 deployed with address: ${contract.address}`)
-
 
     for (let i=0; i<NUM_PARALLEL; i++) {
         startERC20BalanceRequestLoop(contract)
