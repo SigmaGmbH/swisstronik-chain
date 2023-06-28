@@ -1,102 +1,102 @@
 require('dotenv').config()
-const ethers = require('ethers') 
+const ethers = require('ethers')
 const fs = require('fs')
-const {decryptNodeResponse} = require('@swisstronik/swisstronik.js')
+const { encryptDataField } = require('@swisstronik/swisstronik.js')
 
-let provider
+const provider = new ethers.providers.JsonRpcProvider(process.env.NODE_RPC || 'http://localhost:8545')
+const initialWallet = new ethers.Wallet(process.env.FIRST_PRIVATE_KEY, provider)
 
-const NUM_PARALLEL = 3
+const NUM_TESTING_ACCOUNTS = 50
 
-function getProvider() {
-    if (!provider) {
-        provider = new ethers.providers.JsonRpcProvider(process.env.NODE_RPC || 'http://localhost:8545')
-    }
-    return provider
-}
-
-// Creates promise for eth_balance request
-async function requestBalance() {
+async function transferERC20Token(sender, receiverAddress, tokenContract, amountToTransfer) {
     try {
-        const wallet = ethers.Wallet.createRandom(getProvider())
-        console.log(`request eth_balance for ${wallet.address}`)
-        const balance = await getProvider().getBalance(wallet.address)
-        console.log('eth_getBalance success. Balance ', balance)
+        const tx = await sendShieldedTransaction(
+            sender,
+            tokenContract.address,
+            tokenContract.interface.encodeFunctionData("transfer", [receiverAddress, amountToTransfer])
+        )
+        await tx.wait()
+        return true
     } catch {
-        console.log('eth_getBalance failed')
+        return false
     }
 }
 
 // Deploys sample ERC20 contract
 async function deployERC20() {
     const metadata = JSON.parse(fs.readFileSync('contracts/ERC20Token.json'))
-    const senderWallet = new ethers.Wallet(process.env.FIRST_PRIVATE_KEY, getProvider())
-    const factory = new ethers.ContractFactory(metadata.abi, metadata.bytecode, senderWallet);
+    const factory = new ethers.ContractFactory(metadata.abi, metadata.bytecode, initialWallet);
 
-    const contract = await factory.deploy('test token', 'TT', 10000000);
+    const contract = await factory.deploy('test token', 'TT', 1000000000);
     await contract.deployed()
 
     return contract
 }
 
-const sendShieldedQuery = async (provider, destination, data) => {
-    // Encrypt call data
-    const [encryptedData, usedEncryptedKey] = await encryptDataField(
-        provider.connection.url,
+async function sendShieldedTransaction(signer, destination, data, value) {
+    // Encrypt transaction data
+    const [encryptedData] = await encryptDataField(
+        signer.provider.connection.url,
         data
     )
 
-    // Do call
-    const response = await provider.call({
+    // Construct and sign transaction with encrypted data
+    return await signer.sendTransaction({
+        from: signer.address,
         to: destination,
         data: encryptedData,
+        value,
+        gasPrice: 0 // We're using 0 gas price in tests 
     })
-
-    // Decrypt call result
-    return await decryptNodeResponse(provider.connection.url, response, usedEncryptedKey)
 }
 
-async function requestERC20Balance(contract) {
-    try {
-        const wallet = ethers.Wallet.createRandom(getProvider())
-        console.log(`request erc20 balance for ${wallet.address}`)
-        const balanceResponse = await sendShieldedQuery(
-            getProvider(),
-            wallet.privateKey,
-            contract.address,
-            contract.interface.encodeFunctionData("balanceOf", [wallet.address])
-        );
-        const balance = contract.interface.decodeFunctionResult("balanceOf", balanceResponse)[0]
-        console.log('erc20_balance success')
-    } catch {
-        console.log('erc20_balance failed')
-    }
+function parseHrtimeToSeconds(hrtime) {
+    return (hrtime[0] + (hrtime[1] / 1e9)).toFixed(5);
 }
 
-async function startERC20BalanceRequestLoop(contract) {
-    while (true) {
-        await new Promise(r => setTimeout(r, 100));
-        requestERC20Balance(contract)
-    }
+function outputResult(res, elapsedTime) {
+    const succeed = res.filter(e => e)
+    const successRate = Math.floor(succeed.length / res.length * 100)
+    console.log(`Success rate: ${successRate}%`)
+    console.log(`Time per tx: `, elapsedTime / res.length)
 }
 
-async function startBalanceRequestLoop() {
-    while (true) {
-        await new Promise(r => setTimeout(r, 100));
-        requestBalance()
-    }
-}
 
-// Deploys test ERC20 contract and starts to send different eth_calls to it
 async function main() {
     console.log('Deploying test ERC20')
-    const contract = await deployERC20()
-    console.log(`ERC20 deployed with address: ${contract.address}`)
+    const tokenContract = await deployERC20()
+    console.log(`ERC20 deployed with address: ${tokenContract.address}`)
 
+    // prepare NUM_TESTING_ACCOUNTS accounts and prefund it
+    const wallets = []
+    for (let i = 0; i < NUM_TESTING_ACCOUNTS; i++) {
+        const wallet = ethers.Wallet.createRandom().connect(provider)
 
-    for (let i=0; i<NUM_PARALLEL; i++) {
-        startERC20BalanceRequestLoop(contract)
-        startBalanceRequestLoop()
+        const tx = await initialWallet.sendTransaction({
+            to: wallet.address,
+            value: "1000000000"
+        })
+        await tx.wait()
+
+        // Transfer ERC20 token
+        await transferERC20Token(initialWallet, wallet.address, tokenContract, 10000)
+        console.log("Wallet", (i + 1), "is ready among", NUM_TESTING_ACCOUNTS, "wallets. Address:", wallet.address)
+        wallets.push(wallet)
     }
+
+    console.log('Wallets are ready')
+
+    const startTime = process.hrtime();
+    const promises = [];
+    for (let i = 1 ; i < NUM_TESTING_ACCOUNTS; i++) {
+        promises.push(
+            transferERC20Token(wallets[i-1], wallets[i].address, tokenContract, 10)
+        );
+    }
+
+    const res = await Promise.all(promises);
+    const elapsedSeconds = parseHrtimeToSeconds(process.hrtime(startTime));
+    outputResult(res, elapsedSeconds)
 }
 
 main()

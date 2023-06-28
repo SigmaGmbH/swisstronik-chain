@@ -9,8 +9,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@swisstronik/swisstronik.js": "^1.0.0",
     "dotenv": "^16.1.4",
-    "ethers": "^5.4.7",
-    "swisstronik.js": "file:../../external/swisstronik.js"
+    "ethers": "^5.4.7"
   }
 }
