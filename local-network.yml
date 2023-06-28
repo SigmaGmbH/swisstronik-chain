@@ -13,12 +13,15 @@ services:
     ports:
       - "26656-26657:26656-26657"
     volumes:
-      - .testnets/node0/swisstronikd:/swisstronikd:Z  
+      - .testnets/node0/swisstronikd:/swisstronikd  
     command:
-      - "swisstronikd start --home /swisstronikd"
+    - "swisstronikd"
+    - "start"
+    - "--home"
+    - "/swisstronikd"
     networks:
       localnet:
-        ipv4_address: 192.167.10.2      
+        ipv4_address: 192.167.10.1      
 
   node1:
     container_name: node1
@@ -32,12 +35,15 @@ services:
     ports:
       - "26659-26660:26656-26657"
     volumes:
-      - .testnets/node1/swisstronikd:/swisstronikd:Z  
+      - .testnets/node1/swisstronikd:/swisstronikd  
     command:
-      - "swisstronikd start --home /swisstronikd"
+      - "swisstronikd"
+      - "start"
+      - "--home"
+      - "/swisstronikd"
     networks:
       localnet:
-        ipv4_address: 192.167.10.3
+        ipv4_address: 192.167.10.2
 
   node2:
     container_name: node2
@@ -51,12 +57,15 @@ services:
     ports:
       - "26661-26662:26656-26657"
     volumes:
-      - .testnets/node2/swisstronikd:/swisstronikd:Z  
+      - .testnets/node2/swisstronikd:/swisstronikd  
     command:
-      - "swisstronikd start --home /swisstronikd"
+      - "swisstronikd"
+      - "start"
+      - "--home"
+      - "/swisstronikd"
     networks:
       localnet:
-        ipv4_address: 192.167.10.4
+        ipv4_address: 192.167.10.3
 
   node3:
     container_name: node3
@@ -70,12 +79,15 @@ services:
     ports:
       - "26663-26664:26656-26657"
     volumes:
-      - .testnets/node3/swisstronikd:/swisstronikd:Z  
+      - .testnets/node3/swisstronikd:/swisstronikd  
     command:
-      - "swisstronikd start --home /swisstronikd"
+      - "swisstronikd"
+      - "start"
+      - "--home"
+      - "/swisstronikd"
     networks:
       localnet:
-        ipv4_address: 192.167.10.5
+        ipv4_address: 192.167.10.4
 
 networks:
   localnet:
