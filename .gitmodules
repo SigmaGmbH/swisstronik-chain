@@ -4,6 +4,3 @@
 [submodule "external/evm-module"]
 	path = external/evm-module
 	url = https://github.com/SigmaGmbH/evm-module.git
-[submodule "external/cometbft"]
-	path = external/cometbft
-	url = https://github.com/SigmaGmbH/cometbft
