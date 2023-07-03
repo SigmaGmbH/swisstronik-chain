@@ -6,7 +6,7 @@ const { encryptDataField } = require('@swisstronik/swisstronik.js')
 const provider = new ethers.providers.JsonRpcProvider(process.env.NODE_RPC || 'http://localhost:8545')
 const initialWallet = new ethers.Wallet(process.env.FIRST_PRIVATE_KEY, provider)
 
-const NUM_TESTING_ACCOUNTS = 50
+const NUM_TESTING_ACCOUNTS = 20
 
 async function transferERC20Token(sender, receiverAddress, tokenContract, amountToTransfer) {
     try {
