@@ -6,3 +6,4 @@ release/
 .DS_Store
 *swtr_seed
 build/
+.testnets/

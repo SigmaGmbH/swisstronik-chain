@@ -1,0 +1,98 @@
+version: '3'
+
+services:
+  node0:
+    container_name: node0
+    image: swtr-node
+    build:
+      dockerfile: ./docker/node.Dockerfile
+      target: local-node
+      context: .
+      args:
+        - SGX_MODE=SW
+    ports:
+      - "26656-26657:26656-26657"
+    volumes:
+      - .testnets/node0/swisstronikd:/swisstronikd  
+    command:
+    - "swisstronikd"
+    - "start"
+    - "--home"
+    - "/swisstronikd"
+    networks:
+      localnet:
+        ipv4_address: 192.167.10.1      
+
+  node1:
+    container_name: node1
+    image: swtr-node
+    build:
+      dockerfile: ./docker/node.Dockerfile
+      target: local-node
+      context: .
+      args:
+        - SGX_MODE=SW
+    ports:
+      - "26659-26660:26656-26657"
+    volumes:
+      - .testnets/node1/swisstronikd:/swisstronikd  
+    command:
+      - "swisstronikd"
+      - "start"
+      - "--home"
+      - "/swisstronikd"
+    networks:
+      localnet:
+        ipv4_address: 192.167.10.2
+
+  node2:
+    container_name: node2
+    image: swtr-node
+    build:
+      dockerfile: ./docker/node.Dockerfile
+      target: local-node
+      context: .
+      args:
+        - SGX_MODE=SW
+    ports:
+      - "26661-26662:26656-26657"
+    volumes:
+      - .testnets/node2/swisstronikd:/swisstronikd  
+    command:
+      - "swisstronikd"
+      - "start"
+      - "--home"
+      - "/swisstronikd"
+    networks:
+      localnet:
+        ipv4_address: 192.167.10.3
+
+  node3:
+    container_name: node3
+    image: swtr-node
+    build:
+      dockerfile: ./docker/node.Dockerfile
+      target: local-node
+      context: .
+      args:
+        - SGX_MODE=SW
+    ports:
+      - "26663-26664:26656-26657"
+    volumes:
+      - .testnets/node3/swisstronikd:/swisstronikd  
+    command:
+      - "swisstronikd"
+      - "start"
+      - "--home"
+      - "/swisstronikd"
+    networks:
+      localnet:
+        ipv4_address: 192.167.10.4
+
+networks:
+  localnet:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.167.10.0/16

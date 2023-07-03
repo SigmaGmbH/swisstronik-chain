@@ -40,6 +40,17 @@ e.g. checking stored keys:
 docker run -it --rm swisstronik swisstronikd keys list
 ```
 
+### Local testnet
+To setup local test network with multiple validators, run:
+```sh
+swisstronikd testnet init-files --starting-ip-address 192.167.10.1 --chain-id swisstronik_1291-1
+```
+
+Then run:
+```sh
+docker-compose -f local-network.yml up
+```
+
 ### Monitoring
 
 #### Enable monitoring
