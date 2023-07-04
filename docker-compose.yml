@@ -103,4 +103,4 @@ services:
       - "8546:8546"
     env_file:
       - docker.env
-    command: "swisstronikd start --json-rpc.api eth,txpool,net,debug,web3 --json-rpc.address 0.0.0.0:8545 --json-rpc.ws-address 0.0.0.0:8546 --minimum-gas-prices 0uswtr --home /swisstronik --p2p.seeds=${SEED_NODE}"    
+    command: "swisstronikd start --json-rpc.api eth,txpool,net,debug,web3 --json-rpc.address 0.0.0.0:8545 --json-rpc.ws-address 0.0.0.0:8546 --minimum-gas-prices 0uswtr --home /swisstronik --p2p.seeds=${SEED_NODE} --enclave.enable=false --rpc.laddr=tcp://0.0.0.0:26657 --metrics --pruning=nothing --api.enable"    

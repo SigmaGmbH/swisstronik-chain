@@ -86,4 +86,10 @@ ARG NODE_URL
 RUN swisstronikd init ${MONIKER} --chain-id ${CHAIN_ID} --overwrite --home /swisstronik
 RUN curl ${NODE_URL}/genesis? | jq ".result.genesis" > /swisstronik/config/genesis.json
 
+# enable prometheus metrics
+RUN sed -i 's/prometheus = false/prometheus = true/' /swisstronik/config/config.toml && \
+	sed -i 's/127.0.0.1:26657/0.0.0.0:26657/g' /swisstronik/config/config.toml && \
+	sed -i 's/prometheus-retention-time  = "0"/prometheus-retention-time  = "1000000000000"/g' /swisstronik/config/app.toml && \
+	sed -i 's/enabled = false/enabled = true/g' /swisstronik/config/app.toml
+
 CMD ["swisstronikd"]
