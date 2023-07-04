@@ -40,5 +40,6 @@ jobs:
           tags: ghcr.io/sigmagmbh/chain:latest,ghcr.io/sigmagmbh/chain:${{ steps.get_version.outputs.version-without-v }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          target: local-node
           secrets: |
             GIT_AUTH_TOKEN=${{ secrets.ACTIONS_GITHUB_TOKEN }}
