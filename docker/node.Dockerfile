@@ -61,7 +61,7 @@ CMD ["swisstronikd"]
 FROM ubuntu:22.04 as local-node
 
 RUN apt-get update 
-RUN apt-get install -y jq 
+RUN apt-get install -y jq curl
 RUN rm -rf /var/lib/apt/lists/* 
 
 COPY --from=compile-chain /root/chain/build/swisstronikd /usr/bin/swisstronikd
@@ -73,5 +73,17 @@ COPY --from=compile-chain /root/chain/scripts/local-node.sh /root/local-node.sh
 RUN /bin/bash /root/local-node.sh
 
 EXPOSE 26656 26657 1317 9090 8535 8546 8999
+
+CMD ["swisstronikd"]
+
+########### Local node #################
+FROM local-node as full-node
+
+ARG MONIKER=fullnode
+ARG CHAIN_ID=swisstronik_1291-1
+ARG NODE_URL
+
+RUN swisstronikd init ${MONIKER} --chain-id ${CHAIN_ID} --overwrite --home /swisstronik
+RUN curl ${NODE_URL}/genesis? | jq ".result.genesis" > /swisstronik/config/genesis.json
 
 CMD ["swisstronikd"]

@@ -82,3 +82,25 @@ services:
       - SGX_MODE=SW
     command: "swisstronikd start --minimum-gas-prices=0uswtr --json-rpc.api eth,txpool,personal,net,debug,web3 --api.enable --enclave.address 0.0.0.0:8999 --json-rpc.address 0.0.0.0:8535 --json-rpc.ws-address 0.0.0.0:8546"
     restart: always
+
+  full-node:
+    container_name: swtr_full_node
+    build: 
+      dockerfile: ./docker/node.Dockerfile
+      target: full-node
+      context: .
+      args:
+        - SGX_MODE=SW
+        - NODE_URL=${NODE_URL}
+        - MONIKER=${MONIKER}
+        - CHAIN_ID=${CHAIN_ID}
+        - SEED_NODE=${SEED_NODE}
+    ports: 
+      - "26656-26657:26656-26657"
+      - "26660:26660"
+      - "1317:1317"
+      - "8545:8545"
+      - "8546:8546"
+    env_file:
+      - docker.env
+    command: "swisstronikd start --json-rpc.api eth,txpool,net,debug,web3 --json-rpc.address 0.0.0.0:8545 --json-rpc.ws-address 0.0.0.0:8546 --minimum-gas-prices 0uswtr --home /swisstronik --p2p.seeds=${SEED_NODE}"    
