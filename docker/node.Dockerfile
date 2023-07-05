@@ -30,7 +30,7 @@ FROM compile-base as compile-chain
 
 RUN apt-get install -y automake autoconf build-essential libtool git 
 
-ARG SGX_MODE=HW
+ARG SGX_MODE
 ENV SGX_MODE=${SGX_MODE}
 ENV SGX_SDK="/opt/intel/sgxsdk"
 ENV PATH="${PATH}:${SGX_SDK}/bin:${SGX_SDK}/bin/x64"
