@@ -31,6 +31,7 @@ services:
   aesm:
     build:
       dockerfile: ./docker/aesm.Dockerfile
+      context: .
     devices:
       - /dev/sgx_enclave
       - /dev/sgx_provision
