@@ -14,6 +14,7 @@ function getProvider() {
 // Subscribe new block data
 async function subscribeNewBlockData() {
     const provider = getProvider()
+    console.log(await provider.getBlockNumber());
     provider.on("block", async (blockNumber) => {
         const block = await provider.getBlock(blockNumber);
         console.log("New block:", block);

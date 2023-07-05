@@ -1,11 +1,10 @@
-# Stress tester for JSON-RPC
+# Websocket tester for JSON-RPC
 
-This folder contains emitter of eth_calls and requests to various JSON-RPC endpoints to check
-if our node can handle some load. This is not a final version, during the development it will be extended
+This folder contains a WebSocket event listener for the new block with transactions using ether.js Websocketprovider. Its purpose is to fetch a new block with transactions and output it to the console to verify if our node is running and its websocket connection is stable. Please note that this is not the final version; it will be further extended during development.
 
 ## Build & run
 
-Create `.env` file with private keys of funded accounts and address of node
+Create `.env` file with websocket endpoint.
 ```sh
 cp .env.example .env
 ```
