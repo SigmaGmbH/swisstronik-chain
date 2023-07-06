@@ -4,6 +4,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"swisstronik/app"
+	cmdcfg "github.com/SigmaGmbH/evm-module/cmd/config"
 )
 
 func InitSDKConfig() {
@@ -19,5 +20,8 @@ func InitSDKConfig() {
 	config.SetBech32PrefixForAccount(app.AccountAddressPrefix, accountPubKeyPrefix)
 	config.SetBech32PrefixForValidator(validatorAddressPrefix, validatorPubKeyPrefix)
 	config.SetBech32PrefixForConsensusNode(consNodeAddressPrefix, consNodePubKeyPrefix)
+
+	cmdcfg.SetBech32Prefixes(config)
+	cmdcfg.SetBip44CoinType(config)
 	config.Seal()
 }
