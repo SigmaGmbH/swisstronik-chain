@@ -44,6 +44,8 @@ sed -i 's/127.0.0.1:26657/0.0.0.0:26657/g' "$CONFIG"
 sed -i 's/prometheus-retention-time  = "0"/prometheus-retention-time  = "1000000000000"/g' "$APP_TOML"
 sed -i 's/enabled = false/enabled = true/g' "$APP_TOML"
 
+# set min gas price
+sed -i 's/minimum-gas-prices = ""/minimum-gas-prices = "0uswtr"/' "$APP_TOML"
 
 # Change proposal periods to pass within a reasonable time for local testing
 sed -i.bak 's/"max_deposit_period": "172800s"/"max_deposit_period": "30s"/g' "$HOMEDIR"/config/genesis.json
