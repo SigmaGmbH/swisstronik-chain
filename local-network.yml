@@ -12,6 +12,7 @@ services:
         - SGX_MODE=SW
     ports:
       - "26656-26657:26656-26657"
+      - "8545-8546:8545-8546"
     volumes:
       - .testnets/node0/swisstronikd:/swisstronikd  
     command:
