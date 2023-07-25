@@ -1,7 +1,7 @@
 #!/bin/bash
 # Require 2 parameters
 # $1 = moniker and wallet name
-# $2 = RPC URL (Example http://***REMOVED***:26657)
+# $2 = RPC URL (Example http://localhost:26657)
 
 HOMEDIR="$HOME/.swisstronik"
 CONFIG=$HOMEDIR/config/config.toml

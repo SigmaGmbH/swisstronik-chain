@@ -5,8 +5,8 @@ go 1.18
 require (
 	cosmossdk.io/errors v1.0.0-beta.7
 	cosmossdk.io/math v1.0.0-rc.0
-	github.com/SigmaGmbH/evm-module v0.0.0-20230223171716-f5890001f1b9
-	github.com/SigmaGmbH/librustgo v0.0.0-20230222112759-bffe044347fc
+	github.com/SigmaGmbH/evm-module v0.0.1
+	github.com/SigmaGmbH/librustgo v0.0.2-0.20230725120829-f1a254f14ac6
 	github.com/armon/go-metrics v0.4.1
 	github.com/cosmos/cosmos-sdk v0.46.12
 	github.com/cosmos/ibc-go/v6 v6.1.0
@@ -196,8 +196,8 @@ require (
 )
 
 replace (
-	github.com/SigmaGmbH/evm-module v0.0.0-20230223171716-f5890001f1b9 => ./external/evm-module
-	github.com/SigmaGmbH/librustgo v0.0.0-20230222112759-bffe044347fc => ./external/evm-module/librustgo
+	github.com/SigmaGmbH/evm-module v0.0.1 => ./external/evm-module
+	github.com/SigmaGmbH/librustgo v0.0.2-0.20230725120829-f1a254f14ac6 => ./external/evm-module/librustgo
 	github.com/confio/ics23/go => github.com/cosmos/cosmos-sdk/ics23/go v0.8.0
 	// use Cosmos-SDK fork to enable Ledger functionality
 	github.com/cosmos/cosmos-sdk => github.com/cosmos/cosmos-sdk v0.46.13
