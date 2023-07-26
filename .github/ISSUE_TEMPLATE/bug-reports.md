@@ -9,7 +9,7 @@ Clearly state and describe the identified bug or vulnerability.
 - OS Name & version
 - CPU Name & Brand
 - Go version
-- Rust versions
+- Rust version
 - SGX version (optional)
 [] Docker environment
 
