@@ -11,8 +11,7 @@ Clearly state and describe the identified bug or vulnerability.
 - Go version
 - Rust version
 - SGX version (optional)
-- [] Docker environment
-
+- \[ \] Docker environment
 
 ### 3. **Steps to Reproduce** 
 Provide clear and concise instructions to reproduce the reported bug or vulnerability.
