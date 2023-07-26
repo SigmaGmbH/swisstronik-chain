@@ -38,5 +38,4 @@ ____
 ## Swisstronik internal use only
 - [ ] Not duplicate issue
 - [ ] Appropriate labels applied
-- [ ] Appropriate contributors tagged
-- [ ] Contributor assigned/self-assigned
+
