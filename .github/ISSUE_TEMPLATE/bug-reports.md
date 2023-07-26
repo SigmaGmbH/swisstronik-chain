@@ -6,11 +6,13 @@ Please use this template to report bugs or vulnerabilities. Fill out all the sec
 Clearly state and describe the identified bug or vulnerability.
 
 ### 2. **Hardware and Software Specifications** 
-- Software: [e.g., Name, Version]
-- Operating System: [e.g., Windows 10, macOS Big Sur, Ubuntu 20.04]
-- Browser: [if applicable]
-- Processor: [e.g., Intel Core i5, AMD Ryzen 7]
-- Other relevant components: [e.g., graphics card, RAM]
+- OS Name & version
+- CPU Name & Brand
+- Go version
+- Rust versions
+- SGX version (optional)
+[] Docker environment
+
 
 ### 3. **Steps to Reproduce** 
 Provide clear and concise instructions to reproduce the reported bug or vulnerability.
@@ -25,9 +27,15 @@ Analyze the potential consequences of the bug or vulnerability on users, develop
 Specify the severity and priority of the bug/vulnerability (e.g., High, Medium, Low, Critical) if applicable.
 
 ### 7. **Choose the Right Label** 
-Choose the suitable tag or label that precisely represents the nature of the issue being resolved, indicating its specific category, such as "blockchain core" or "Intel SGX & Encryption."
+Choose the suitable tag or label that precisely represents the nature of the issue being resolved, indicating its specific category
 
 ### 8. **Additional Context** 
 (Optional)Share any relevant context, screenshots, logs, or error messages that can facilitate problem-solving and comprehensive understanding.
 
 Thank you for contributing to the improvement of our project!👨‍💻👩‍💻
+
+## Swisstronik internal use only
+- [ ] Not duplicate issue
+- [ ] Appropriate labels applied
+- [ ] Appropriate contributors tagged
+- [ ] Contributor assigned/self-assigned
