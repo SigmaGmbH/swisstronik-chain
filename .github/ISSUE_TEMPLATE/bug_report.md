@@ -37,8 +37,9 @@ Choose the suitable label/s that represents the nature of the issue being resolv
 ### 7. **Additional Context** 
 (Optional)Share any relevant context, screenshots, logs, or error messages that can facilitate problem-solving and comprehensive understanding.
 
-Thank you for contributing to the improvement of our project!👨‍💻👩‍💻
+____
 
+Thank you for contributing to the improvement of our project!👨‍💻👩‍💻
 ____
 
 ## Swisstronik internal use only
