@@ -34,6 +34,8 @@ Choose the suitable tag or label that precisely represents the nature of the iss
 
 Thank you for contributing to the improvement of our project!👨‍💻👩‍💻
 
+____
+
 ## Swisstronik internal use only
 - [ ] Not duplicate issue
 - [ ] Appropriate labels applied
