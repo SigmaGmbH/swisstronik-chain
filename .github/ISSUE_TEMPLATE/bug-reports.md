@@ -32,7 +32,7 @@ Choose the suitable tag or label that precisely represents the nature of the iss
 ### 8. **Additional Context** 
 (Optional)Share any relevant context, screenshots, logs, or error messages that can facilitate problem-solving and comprehensive understanding.
 
-Thank you for contributing to the improvement of our project!👨‍💻👩‍💻
+**Thank you for contributing to the improvement of our project!**👨‍💻👩‍💻
 
 ____
 
