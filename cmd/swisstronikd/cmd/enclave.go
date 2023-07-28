@@ -23,6 +23,7 @@ func EnclaveCmd() *cobra.Command {
 
 	cmd.AddCommand(RequestMasterKeyCmd())
 	cmd.AddCommand(CreateMasterKey())
+	cmd.AddCommand(StartAttestationServer())
 
 	return cmd
 }
@@ -86,6 +87,21 @@ func CreateMasterKey() *cobra.Command {
 	}
 
 	cmd.Flags().Bool(flagShouldReset, false, "reset already existing master key. Default: false")
+
+	return cmd
+}
+
+// StartAttestationServer returns start-attestation-server cobra Command.
+func StartAttestationServer() *cobra.Command {
+	cmd := &cobra.Command{
+		Use: "start-attestation-server [port]",
+		Short: "Starts attestation server",
+		Long: "Start server for Intel SGX Remote Attestation to share master key with new nodes",
+		Args: cobra.ExactArgs(2),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return nil
+		},
+	}
 
 	return cmd
 }
