@@ -94,12 +94,15 @@ func CreateMasterKey() *cobra.Command {
 // StartAttestationServer returns start-attestation-server cobra Command.
 func StartAttestationServer() *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "start-attestation-server [port]",
+		Use: "start-attestation-server [address-with-port]",
 		Short: "Starts attestation server",
 		Long: "Start server for Intel SGX Remote Attestation to share master key with new nodes",
-		Args: cobra.ExactArgs(2),
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return nil
+			if err := librustgo.StartSeedServer(args[0]); err != nil {
+				return err
+			}
+			return server.WaitForQuitSignals()
 		},
 	}
 
