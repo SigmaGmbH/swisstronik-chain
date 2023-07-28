@@ -13,6 +13,21 @@ import (
 
 const flagShouldReset = "reset"
 
+// Cmd creates a CLI main command
+func EnclaveCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "enclave",
+		Short: "Commands for interaction with Swisstronik SGX Enclave",
+		RunE:  client.ValidateCmd,
+	}
+
+	cmd.AddCommand(RequestMasterKeyCmd())
+	cmd.AddCommand(CreateMasterKey())
+	cmd.AddCommand(StartAttestationServer())
+
+	return cmd
+}
+
 // RequestMasterKeyCmd returns request-master-key cobra Command.
 func RequestMasterKeyCmd() *cobra.Command {
 	cmd := &cobra.Command{
@@ -72,6 +87,24 @@ func CreateMasterKey() *cobra.Command {
 	}
 
 	cmd.Flags().Bool(flagShouldReset, false, "reset already existing master key. Default: false")
+
+	return cmd
+}
+
+// StartAttestationServer returns start-attestation-server cobra Command.
+func StartAttestationServer() *cobra.Command {
+	cmd := &cobra.Command{
+		Use: "start-attestation-server [address-with-port]",
+		Short: "Starts attestation server",
+		Long: "Start server for Intel SGX Remote Attestation to share master key with new nodes",
+		Args: cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := librustgo.StartSeedServer(args[0]); err != nil {
+				return err
+			}
+			return server.WaitForQuitSignals()
+		},
+	}
 
 	return cmd
 }
