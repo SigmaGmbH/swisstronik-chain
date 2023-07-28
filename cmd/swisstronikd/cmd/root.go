@@ -128,8 +128,7 @@ func initRootCmd(
 		evmmoduleclient.NewTestnetCmd(app.ModuleBasics, banktypes.GenesisBalancesIterator{}),
 		debug.Cmd(),
 		config.Cmd(),
-		RequestMasterKeyCmd(),
-		CreateMasterKey(),
+		EnclaveCmd(),
 		// this line is used by starport scaffolding # root/commands
 	)
 

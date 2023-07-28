@@ -13,6 +13,20 @@ import (
 
 const flagShouldReset = "reset"
 
+// Cmd creates a CLI main command
+func EnclaveCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "enclave",
+		Short: "Commands for interaction with Swisstronik SGX Enclave",
+		RunE:  client.ValidateCmd,
+	}
+
+	cmd.AddCommand(RequestMasterKeyCmd())
+	cmd.AddCommand(CreateMasterKey())
+
+	return cmd
+}
+
 // RequestMasterKeyCmd returns request-master-key cobra Command.
 func RequestMasterKeyCmd() *cobra.Command {
 	cmd := &cobra.Command{
