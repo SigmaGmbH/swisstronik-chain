@@ -37,7 +37,7 @@ jobs:
           platforms: linux/amd64
           file: ./docker/node.Dockerfile
           build-args: SGX_MODE=SW
-          tags: ghcr.io/sigmagmbh/chain:latest,ghcr.io/sigmagmbh/chain:${{ steps.get_version.outputs.version-without-v }}
+          tags: ghcr.io/sigmagmbh/swisstronik-chain:latest,ghcr.io/sigmagmbh/swisstronik-chain:${{ steps.get_version.outputs.version-without-v }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           secrets: |
