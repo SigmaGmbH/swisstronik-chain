@@ -52,7 +52,7 @@ COPY --from=compile-chain /root/.swisstronik-enclave /root/.swisstronik-enclave
 COPY --from=compile-chain /root/chain/external/evm-module/librustgo/internal/api/libsgx_wrapper.x86_64.so /lib/x86_64-linux-gnu/libsgx_wrapper.x86_64.so
 COPY --from=compile-chain /opt/intel /opt/intel
 
-EXPOSE 26656 26657 1317 9090 8535 8546 8999
+EXPOSE 26656 26657 1317 9090 8545 8546 8999
 CMD ["swisstronikd"]
 
 
@@ -72,6 +72,6 @@ COPY --from=compile-chain /root/chain/scripts/local-node.sh /root/local-node.sh
 
 RUN /bin/bash /root/local-node.sh
 
-EXPOSE 26656 26657 1317 9090 8535 8546 8999
+EXPOSE 26656 26657 1317 9090 8545 8546 8999
 
 CMD ["swisstronikd"]
