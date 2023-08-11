@@ -4,7 +4,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"swisstronik/app"
-	cmdcfg "github.com/SigmaGmbH/evm-module/cmd/config"
+	evmtypes "github.com/SigmaGmbH/evm-module/types"
 )
 
 func InitSDKConfig() {
@@ -15,13 +15,17 @@ func InitSDKConfig() {
 	consNodeAddressPrefix := app.AccountAddressPrefix + "valcons"
 	consNodePubKeyPrefix := app.AccountAddressPrefix + "valconspub"
 
-	// Set and seal config
 	config := sdk.GetConfig()
+
+	// Set global prefixes to be used when serializing addresses and public keys to bech32 string
 	config.SetBech32PrefixForAccount(app.AccountAddressPrefix, accountPubKeyPrefix)
 	config.SetBech32PrefixForValidator(validatorAddressPrefix, validatorPubKeyPrefix)
 	config.SetBech32PrefixForConsensusNode(consNodeAddressPrefix, consNodePubKeyPrefix)
 
-	cmdcfg.SetBech32Prefixes(config)
-	cmdcfg.SetBip44CoinType(config)
+	// Set global coin type to be used in HD wallets
+	config.SetCoinType(evmtypes.Bip44CoinType)
+	config.SetPurpose(sdk.Purpose)                      
+
+	// Set and seal config
 	config.Seal()
 }
