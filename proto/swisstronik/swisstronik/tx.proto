@@ -1,7 +1,0 @@
-syntax = "proto3";
-package swisstronik.swisstronik;
-
-option go_package = "swisstronik/x/swisstronik/types";
-
-// Msg defines the Msg service.
-service Msg {}
