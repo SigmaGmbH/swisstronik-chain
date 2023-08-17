@@ -34,3 +34,48 @@ module.exports.sendShieldedQuery = async (provider, destination, data, value) =>
     // Decrypt call result
     return await decryptNodeResponse(provider.connection.url, response, usedEncryptedKey)
 }
+
+// wallet should contain connected provider
+module.exports.sendSignedShieldedQuery = async (wallet, destination, data, value) => {
+    if (!wallet.provider) {
+        throw new Error("signer doesn't contain connected provider")
+    }
+
+    // Encrypt call data
+    const [encryptedData, usedEncryptedKey] = await encryptDataField(
+        wallet.provider.connection.url,
+        data
+    )
+
+    // We treat signed call as a transaction, but it will be sent using eth_call
+    const callData = {
+        from: wallet.address,
+        to: destination,
+        data: encryptedData,
+        value,
+    }
+    // Extract signature values
+    const signedRawCallData = await wallet.signTransaction(callData)
+    const decoded = ethers.utils.RLP.decode(signedRawCallData)
+    const v = decoded[6]
+    const r = decoded[7]
+    const s = decoded[8]
+
+    // Construct call with signature values
+    const signedCallData = {
+        from: wallet.address,
+        to: destination,
+        data: encryptedData,
+        value: "0x0",
+        v: v,
+        r: r,
+        s: s,
+    }
+
+    // Do call
+    const response = await wallet.provider.send('eth_call', [signedCallData, "latest"])
+
+    // Decrypt call result
+    return await decryptNodeResponse(wallet.provider.connection.url, response, usedEncryptedKey)
+
+}
