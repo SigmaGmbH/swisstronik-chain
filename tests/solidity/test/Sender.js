@@ -31,7 +31,6 @@ describe('Recover sender in query', () => {
             senderWallet,
             senderContract.address,
             senderContract.interface.encodeFunctionData("getSender", []),
-            0
         );
     
         const result = senderContract.interface.decodeFunctionResult("getSender", req)[0]
