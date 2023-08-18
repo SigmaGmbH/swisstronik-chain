@@ -52,7 +52,6 @@ module.exports.sendSignedShieldedQuery = async (wallet, destination, data) => {
 
     // We treat signed call as a transaction, but it will be sent using eth_call
     const callData = {
-        from: wallet.address,
         to: destination,
         data: encryptedData,
         chainId: networkInfo.chainId,
@@ -64,7 +63,6 @@ module.exports.sendSignedShieldedQuery = async (wallet, destination, data) => {
 
     // Construct call with signature values
     const signedCallData = {
-        from: wallet.address,
         to: decoded.to,
         data: decoded.data,
         v: ethers.utils.hexValue(decoded.v),
