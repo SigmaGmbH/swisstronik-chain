@@ -1,0 +1,22 @@
+name: Copy issue to Bug_Bounty_1.0
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  copy_issue:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Copy Issue to Bug_Bounty_v1 Repo
+        env:
+          MAIN_REPO_TOKEN: ${{ secrets.ISSUES_BB }}
+          MAIN_REPO: SigmaGmbH/Bug-Bounty-1.0
+        run: |
+          TITLE="${{ github.event.issue.title }}"
+          ORIGIN_REPO_URL="${{ github.event.issue.html_url }}"
+
+          # Create the new issue in the "bug_bounty_1.0 repository with the title and the link in the body
+          ISSUE_BODY="Original Issue can be found [here]($ORIGIN_REPO_URL)"
+          curl -X POST -H "Authorization: token $MAIN_REPO_TOKEN" \
+          -d "{\"title\":\"[External Issue] $TITLE\",\"body\":\"$ISSUE_BODY\"}" \
+          "https://api.github.com/repos/$MAIN_REPO/issues"

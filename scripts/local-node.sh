@@ -38,9 +38,13 @@ jq '.app_state["evm"]["params"]["evm_denom"]="uswtr"' "$GENESIS" >"$TMP_GENESIS"
 jq '.app_state["inflation"]["params"]["mint_denom"]="uswtr"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
 jq '.consensus_params["block"]["max_gas"]="10000000"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
 
+# expose ports
+sed -i 's/127.0.0.1:26657/0.0.0.0:26657/g' "$CONFIG"
+sed -i 's/127.0.0.1:8545/0.0.0.0:8545/g' "$APP_TOML"
+sed -i 's/127.0.0.1:8546/0.0.0.0:8546/g' "$APP_TOML"
+
 # enable prometheus metrics
 sed -i 's/prometheus = false/prometheus = true/' "$CONFIG"
-sed -i 's/127.0.0.1:26657/0.0.0.0:26657/g' "$CONFIG"
 sed -i 's/prometheus-retention-time  = "0"/prometheus-retention-time  = "1000000000000"/g' "$APP_TOML"
 sed -i 's/enabled = false/enabled = true/g' "$APP_TOML"
 
