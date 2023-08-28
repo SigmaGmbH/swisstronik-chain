@@ -12,7 +12,7 @@ Install submodules by running
 make init 
 ```
 
-Build an enclave. For testing purposes you can build enclave in simulation mode by adding `SGX_MODE=SW` 
+Build an enclave. For testing purposes you can build enclave in simulation mode by adding `SGX_MODE=SW`. To specify path for output with compiled enclave you can use `ENCLAVE_HOME` env arg.
 ```sh
 make build-enclave
 ```
