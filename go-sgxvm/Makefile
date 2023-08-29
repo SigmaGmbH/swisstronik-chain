@@ -139,13 +139,6 @@ run_go:
 	$(call go_build)
 	@go run ./cmd/demo/main.go
 
-# This is debug command and it will be removed soon
-debug_seed:
-	$(call sgx_build)
-	$(call wrapper_build)
-	$(call go_build)
-	@go test -test.run=TestSeedExchange
-
 clean:
 	$(call sgx_clean)
 	@echo "Cleaning wrapper target"
