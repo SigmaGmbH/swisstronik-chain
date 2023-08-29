@@ -1,0 +1,10 @@
+[package]
+name = "evm-precompile-bn128"
+version = "1.0.0-dev"
+edition = "2021"
+description = "BN128 precompiles for EVM"
+
+[dependencies]
+primitive-types = { version = "^0.12", default-features = false }
+substrate-bn = { version = "0.6.0", default-featuresc = false }
+precompile-std = { version = "1.0.0-dev", path = "../precompile-std" }

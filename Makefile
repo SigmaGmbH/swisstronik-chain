@@ -82,7 +82,7 @@ build-linux:
 	GOOS=linux GOARCH=$(if $(findstring aarch64,$(shell uname -m)) || $(findstring arm64,$(shell uname -m)),arm64,amd64) $(MAKE) build
 
 build-enclave:
-	$(MAKE) -C external/evm-module/librustgo build_go
+	$(MAKE) -C go-sgxvm build_go
 
 go.sum: go.mod
 	@echo "--> Ensure dependencies have not been modified"

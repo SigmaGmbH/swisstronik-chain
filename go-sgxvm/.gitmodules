@@ -1,0 +1,3 @@
+[submodule "sgx-sdk"]
+	path = sgx-sdk
+	url = https://github.com/apache/incubator-teaclave-sgx-sdk.git

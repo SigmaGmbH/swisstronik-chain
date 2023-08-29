@@ -21,7 +21,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/std"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	cryptocodec "github.com/SigmaGmbH/evm-module/crypto/codec"
+	cryptocodec "swisstronik/crypto/codec"
 	"swisstronik/types"
 )
 

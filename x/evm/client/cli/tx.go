@@ -27,8 +27,8 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
-	rpctypes "github.com/SigmaGmbH/evm-module/rpc/types"
-	"github.com/SigmaGmbH/evm-module/x/evm/types"
+	rpctypes "swisstronik/rpc/types"
+	"swisstronik/x/evm/types"
 )
 
 // GetTxCmd returns the transaction commands for this module

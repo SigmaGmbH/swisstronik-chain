@@ -35,12 +35,12 @@ import (
 	mintypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
-	"github.com/SigmaGmbH/evm-module/crypto/hd"
-	"github.com/SigmaGmbH/evm-module/server/config"
-	evmmoduletypes "github.com/SigmaGmbH/evm-module/types"
-	evmtypes "github.com/SigmaGmbH/evm-module/x/evm/types"
+	"swisstronik/crypto/hd"
+	"swisstronik/server/config"
+	evmmoduletypes "swisstronik/types"
+	evmtypes "swisstronik/x/evm/types"
 
-	"github.com/SigmaGmbH/evm-module/testutil/network"
+	"swisstronik/testutil/network"
 	cmtproto "github.com/tendermint/tendermint/proto/tendermint/types"
 	tmtypes "github.com/tendermint/tendermint/types"
 	"time"

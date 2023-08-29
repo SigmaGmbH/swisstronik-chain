@@ -12,8 +12,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
-	cryptocodec "github.com/SigmaGmbH/evm-module/crypto/codec"
-	"github.com/SigmaGmbH/evm-module/crypto/ethsecp256k1"
+	cryptocodec "swisstronik/crypto/codec"
+	"swisstronik/crypto/ethsecp256k1"
 	evmcodec "swisstronik/encoding/codec"
 	"swisstronik/types"
 )

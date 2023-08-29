@@ -3,7 +3,7 @@ package types_test
 import (
 	"testing"
 
-	"github.com/SigmaGmbH/evm-module/tests"
+	"swisstronik/tests"
 	"swisstronik/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/require"

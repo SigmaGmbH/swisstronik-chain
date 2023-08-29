@@ -15,9 +15,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 
-	cryptocodec "github.com/SigmaGmbH/evm-module/crypto/codec"
-	enccodec "github.com/SigmaGmbH/evm-module/encoding/codec"
-	ethermint "github.com/SigmaGmbH/evm-module/types"
+	cryptocodec "swisstronik/crypto/codec"
+	enccodec "swisstronik/encoding/codec"
+	ethermint "swisstronik/types"
 )
 
 var TestCodec amino.Codec
