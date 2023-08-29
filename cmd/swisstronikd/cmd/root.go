@@ -34,11 +34,11 @@ import (
 	tmcli "github.com/tendermint/tendermint/libs/cli"
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
+	simappparams "github.com/cosmos/cosmos-sdk/simapp/params"
 
 	// this line is used by starport scaffolding # root/moduleImport
 
 	"swisstronik/app"
-	appparams "swisstronik/app/params"
 
 	evmmoduleclient "swisstronik/client"
 	evmmoduleserver "swisstronik/server"
@@ -273,7 +273,6 @@ func (a appCreator) newApp(
 		cast.ToUint32(appOpts.Get(server.FlagStateSyncSnapshotKeepRecent)),
 	)
 
-	igniteEncodingConfig := convertEncodingConfig(a.encodingConfig)
 	return app.New(
 		logger,
 		db,
@@ -282,7 +281,7 @@ func (a appCreator) newApp(
 		skipUpgradeHeights,
 		cast.ToString(appOpts.Get(flags.FlagHome)),
 		cast.ToUint(appOpts.Get(server.FlagInvCheckPeriod)),
-		igniteEncodingConfig,
+		a.encodingConfig,
 		appOpts,
 		baseapp.SetPruning(pruningOpts),
 		baseapp.SetMinGasPrices(cast.ToString(appOpts.Get(server.FlagMinGasPrices))),
@@ -360,10 +359,10 @@ func initAppConfig() (string, interface{}) {
 }
 
 // convertEncodingConfig converts default cosmos encoding config to ignite format
-func convertEncodingConfig(config params.EncodingConfig) appparams.EncodingConfig {
-	return appparams.EncodingConfig{
+func convertEncodingConfig(config params.EncodingConfig) simappparams.EncodingConfig {
+	return simappparams.EncodingConfig{
 		InterfaceRegistry: config.InterfaceRegistry,
-		Marshaler:         config.Codec,
+		Codec:         config.Codec,
 		TxConfig:          config.TxConfig,
 		Amino:             config.Amino,
 	}
