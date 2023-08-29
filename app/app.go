@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/SigmaGmbH/evm-module/x/evm"
-	"github.com/SigmaGmbH/evm-module/x/feemarket"
+	"swisstronik/x/evm"
+	"swisstronik/x/feemarket"
 	"github.com/cosmos/cosmos-sdk/x/auth/posthandler"
 	"github.com/gorilla/mux"
 	"github.com/rakyll/statik/fs"
@@ -116,13 +116,13 @@ import (
 	appparams "swisstronik/app/params"
 	"swisstronik/docs"
 
-	evmante "github.com/SigmaGmbH/evm-module/app/ante"
-	srvflags "github.com/SigmaGmbH/evm-module/server/flags"
-	evmcommontypes "github.com/SigmaGmbH/evm-module/types"
-	evmkeeper "github.com/SigmaGmbH/evm-module/x/evm/keeper"
-	evmtypes "github.com/SigmaGmbH/evm-module/x/evm/types"
-	feemarketkeeper "github.com/SigmaGmbH/evm-module/x/feemarket/keeper"
-	feemarkettypes "github.com/SigmaGmbH/evm-module/x/feemarket/types"
+	evmante "swisstronik/app/ante"
+	srvflags "swisstronik/server/flags"
+	evmcommontypes "swisstronik/types"
+	evmkeeper "swisstronik/x/evm/keeper"
+	evmtypes "swisstronik/x/evm/types"
+	feemarketkeeper "swisstronik/x/feemarket/keeper"
+	feemarkettypes "swisstronik/x/feemarket/types"
 )
 
 const (
