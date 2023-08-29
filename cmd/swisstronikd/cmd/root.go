@@ -7,11 +7,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/SigmaGmbH/evm-module/encoding"
+	"swisstronik/encoding"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/config"
-	// "github.com/cosmos/cosmos-sdk/client/debug"
+
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/rpc"
 	"github.com/cosmos/cosmos-sdk/server"
@@ -40,10 +40,10 @@ import (
 	"swisstronik/app"
 	appparams "swisstronik/app/params"
 
-	evmmoduleclient "github.com/SigmaGmbH/evm-module/client"
-	evmmoduleserver "github.com/SigmaGmbH/evm-module/server"
-	evmserverconfig "github.com/SigmaGmbH/evm-module/server/config"
-	srvflags "github.com/SigmaGmbH/evm-module/server/flags"
+	evmmoduleclient "swisstronik/client"
+	evmmoduleserver "swisstronik/server"
+	evmserverconfig "swisstronik/server/config"
+	srvflags "swisstronik/server/flags"
 )
 
 // NewRootCmd creates a new root command for a Cosmos SDK application
