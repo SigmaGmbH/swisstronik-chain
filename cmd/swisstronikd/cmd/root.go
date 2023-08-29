@@ -312,7 +312,6 @@ func (a appCreator) appExport(
 		return servertypes.ExportedApp{}, errors.New("application home not set")
 	}
 
-	igniteEncodingConfig := convertEncodingConfig(a.encodingConfig)
 	app := app.New(
 		logger,
 		db,
@@ -321,7 +320,7 @@ func (a appCreator) appExport(
 		map[int64]bool{},
 		homePath,
 		uint(1),
-		igniteEncodingConfig,
+		a.encodingConfig,
 		appOpts,
 	)
 

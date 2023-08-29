@@ -14,6 +14,7 @@ import (
 	tmtypes "github.com/tendermint/tendermint/types"
 
 	"swisstronik/app"
+	"swisstronik/encoding"
 )
 
 func init() {
@@ -55,8 +56,6 @@ func BenchmarkSimulation(b *testing.B) {
 		require.NoError(b, err)
 	})
 
-	encoding := app.MakeEncodingConfig()
-
 	app := app.New(
 		logger,
 		db,
@@ -65,7 +64,7 @@ func BenchmarkSimulation(b *testing.B) {
 		map[int64]bool{},
 		app.DefaultNodeHome,
 		0,
-		encoding,
+		encoding.MakeConfig(app.ModuleBasics),
 		simapp.EmptyAppOptions{},
 	)
 

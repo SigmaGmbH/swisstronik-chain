@@ -44,7 +44,7 @@ type KeeperTestSuite struct {
 	suite.Suite
 
 	ctx         sdk.Context
-	app         *app.EthermintApp
+	app         *app.App
 	queryClient types.QueryClient
 	address     common.Address
 	consAddress sdk.ConsAddress
