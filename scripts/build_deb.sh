@@ -5,14 +5,14 @@ set -e
 
 rm -rf /tmp/swisstronik-build
 
-mkdir -p /tmp/swisstronik-build/deb/$(DEB_BIN_DIR)
-cp -f ./swisstronikd /tmp/swisstronik-build/deb/$(DEB_BIN_DIR)/swisstronikd
-chmod +x /tmp/swisstronik-build/deb/$(DEB_BIN_DIR)/swisstronikd
+mkdir -p /tmp/swisstronik-build/deb/"$DEB_BIN_DIR"
+cp -f ./swisstronikd /tmp/swisstronik-build/deb/"$DEB_BIN_DIR"/swisstronikd
+chmod +x /tmp/swisstronik-build/deb/"$DEB_BIN_DIR"/swisstronikd
 
-mkdir -p /tmp/swisstronik-build/deb/$(DEB_LIB_DIR)
+mkdir -p /tmp/swisstronik-build/deb/"$DEB_LIB_DIR"
 
-cp -f /usr/lib/.swisstronik-enclave/* /tmp/swisstronik-build/deb/$(DEB_LIB_DIR)/
-chmod +x /tmp/swisstronik-build/deb/$(DEB_LIB_DIR)/lib*.so
+cp -f /usr/lib/.swisstronik-enclave/* /tmp/swisstronik-build/deb/"$DEB_LIB_DIR"/
+chmod +x /tmp/swisstronik-build/deb/"$DEB_LIB_DIR"/lib*.so
 
 mkdir -p /tmp/swisstronik-build/deb/DEBIAN
 cp ./deployment/deb/control /tmp/swisstronik-build/deb/DEBIAN/control
@@ -26,7 +26,7 @@ chmod 755 /tmp/swisstronik-build/deb/DEBIAN/postrm
 cp ./deployment/deb/triggers /tmp/swisstronik-build/deb/DEBIAN/triggers
 chmod 755 /tmp/swisstronik-build/deb/DEBIAN/triggers
 dpkg-deb --build /tmp/swisstronik-build/deb/ .
--rm -rf /tmp/swisstronik-build
+rm -rf /tmp/swisstronik-build
 
 cp ./swisstronik_"$VERSION"_amd64.deb /build/
 
