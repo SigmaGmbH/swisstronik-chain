@@ -43,6 +43,32 @@ RUN	make build-enclave
 RUN make build
 
 
+############ Node binary for deb package
+FROM compile-base as build-deb
+
+ARG BUILD_VERSION="v1.0.0"
+ENV VERSION=${BUILD_VERSION}
+ARG DEB_BIN_DIR=/usr/local/bin
+ENV DEB_BIN_DIR=${DEB_BIN_DIR}
+ARG DEB_LIB_DIR=/usr/lib
+ENV DEB_LIB_DIR=${DEB_LIB_DIR}
+
+# Install ca-certificates
+WORKDIR /root
+
+# Copy over binaries from the build-env
+COPY --from=compile-chain /root/chain/build/swisstronikd swisstronikd
+COPY --from=compile-chain /root/.swisstronik-enclave /usr/lib/.swisstronik-enclave
+COPY --from=compile-chain /root/chain/external/evm-module/librustgo/internal/api/libsgx_wrapper.x86_64.so /usr/lib/x86_64-linux-gnu/libsgx_wrapper.x86_64.so
+COPY --from=compile-chain /opt/intel/sgxsdk/sdk_libs/* /usr/lib/x86_64-linux-gnu/
+
+COPY ./deb ./deb
+COPY ./scripts/build_deb.sh .
+
+RUN chmod +x build_deb.sh
+
+CMD ["/bin/bash", "build_deb.sh"]
+
 
 ############ Node binary in Hardware Mode
 FROM base as hw-node
