@@ -46,7 +46,8 @@ async function sendShieldedTransaction(signer, destination, data, value) {
         to: destination,
         data: encryptedData,
         value,
-        gasPrice: 0 // We're using 0 gas price in tests 
+        gasLimit: 300_000,
+        gasPrice: 7 // We're using 0 gas price in tests 
     })
 }
 

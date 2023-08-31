@@ -12,7 +12,7 @@ Install submodules by running
 make init 
 ```
 
-Build an enclave. For testing purposes you can build enclave in simulation mode by adding `SGX_MODE=SW` 
+Build an enclave. For testing purposes you can build enclave in simulation mode by adding `SGX_MODE=SW`. To specify path for output with compiled enclave you can use `ENCLAVE_HOME` env arg.
 ```sh
 make build-enclave
 ```
@@ -43,7 +43,7 @@ docker run -it --rm swisstronik swisstronikd keys list
 ### Local testnet
 To setup local test network with multiple validators, run:
 ```sh
-swisstronikd testnet init-files --starting-ip-address 192.167.10.1 --chain-id swisstronik_1291-1
+swisstronikd testnet init-config --starting-ip-address 192.167.10.1 --chain-id swisstronik_1291-1
 ```
 
 Then run:

@@ -74,4 +74,4 @@ swisstronikd collect-gentxs --home "$HOMEDIR"
 swisstronikd validate-genesis --home "$HOMEDIR"
 
 # Initialize master key
-swisstronikd create-master-key
+swisstronikd enclave create-master-key
