@@ -17,9 +17,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	rpctypes "github.com/SigmaGmbH/evm-module/rpc/types"
-	ethermint "github.com/SigmaGmbH/evm-module/types"
-	evmtypes "github.com/SigmaGmbH/evm-module/x/evm/types"
+	rpctypes "swisstronik/rpc/types"
+	ethermint "swisstronik/types"
+	evmtypes "swisstronik/x/evm/types"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"

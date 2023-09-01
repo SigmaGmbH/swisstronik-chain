@@ -1,0 +1,18 @@
+[package]
+name = "internal_types"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+ethereum = { version = "^0.14", default-features = false }
+sgx_tstd = { version="1.1.5", git = "https://github.com/apache/teaclave-sgx-sdk.git", branch="master" }
+rlp-derive = "0.1.0"
+rlp = { version = "0.5.1", default-features = false }
+
+[dev-dependencies]
+primitive-types = { version = "0.12.1", default-features = false, features = ["rlp"] }
+
+[patch."https://github.com/apache/teaclave-sgx-sdk.git"]
+sgx_tstd = { version = "1.1.5", git = "https://github.com/haerdib/incubator-teaclave-sgx-sdk", branch = "master"}
+sgx_trts = { version = "1.1.5", git = "https://github.com/haerdib/incubator-teaclave-sgx-sdk", branch = "master"}
+sgx_types = { version = "1.1.5", git = "https://github.com/haerdib/incubator-teaclave-sgx-sdk", branch = "master"}

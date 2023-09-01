@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package node.node;
+
+option go_package = "./";
+
+message InitializeMasterKeyRequest { bool shouldReset = 1; }
+
+message InitializeMasterKeyResponse {}
+
+message StartSeedServerRequest { int32 fd = 1; }
+
+message StartSeedServerResponse {}
+
+message NodeSeedRequest {
+  int32 fd = 1;
+  string hostname = 2;
+}
+
+message NodeSeedResponse {}
+
+message IsInitializedRequest {}
+message IsInitializedResponse { bool isInitialized = 1; }
+
+message SetupRequest {
+  oneof req {
+    InitializeMasterKeyRequest initializeMasterKey = 1;
+    StartSeedServerRequest startSeedServer = 2;
+    NodeSeedRequest nodeSeed = 3;
+    IsInitializedRequest isInitialized = 4;
+  }
+}

@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/SigmaGmbH/evm-module/x/evm"
-	"github.com/SigmaGmbH/evm-module/x/feemarket"
+	"swisstronik/x/evm"
+	"swisstronik/x/feemarket"
 	"github.com/cosmos/cosmos-sdk/x/auth/posthandler"
 	"github.com/gorilla/mux"
 	"github.com/rakyll/statik/fs"
@@ -97,6 +97,7 @@ import (
 	ibcclient "github.com/cosmos/ibc-go/v6/modules/core/02-client"
 	ibcclientclient "github.com/cosmos/ibc-go/v6/modules/core/02-client/client"
 	ibcclienttypes "github.com/cosmos/ibc-go/v6/modules/core/02-client/types"
+	ibctestingtypes "github.com/cosmos/ibc-go/v6/testing/types"
 	ibcporttypes "github.com/cosmos/ibc-go/v6/modules/core/05-port/types"
 	ibchost "github.com/cosmos/ibc-go/v6/modules/core/24-host"
 	ibckeeper "github.com/cosmos/ibc-go/v6/modules/core/keeper"
@@ -113,16 +114,17 @@ import (
 
 	// this line is used by starport scaffolding # stargate/app/moduleImport
 
-	appparams "swisstronik/app/params"
+	simappparams "github.com/cosmos/cosmos-sdk/simapp/params"
 	"swisstronik/docs"
+	"swisstronik/encoding"
 
-	evmante "github.com/SigmaGmbH/evm-module/app/ante"
-	srvflags "github.com/SigmaGmbH/evm-module/server/flags"
-	evmcommontypes "github.com/SigmaGmbH/evm-module/types"
-	evmkeeper "github.com/SigmaGmbH/evm-module/x/evm/keeper"
-	evmtypes "github.com/SigmaGmbH/evm-module/x/evm/types"
-	feemarketkeeper "github.com/SigmaGmbH/evm-module/x/feemarket/keeper"
-	feemarkettypes "github.com/SigmaGmbH/evm-module/x/feemarket/types"
+	evmante "swisstronik/app/ante"
+	srvflags "swisstronik/server/flags"
+	evmcommontypes "swisstronik/types"
+	evmkeeper "swisstronik/x/evm/keeper"
+	evmtypes "swisstronik/x/evm/types"
+	feemarketkeeper "swisstronik/x/feemarket/keeper"
+	feemarkettypes "swisstronik/x/feemarket/types"
 )
 
 const (
@@ -277,11 +279,11 @@ func New(
 	skipUpgradeHeights map[int64]bool,
 	homePath string,
 	invCheckPeriod uint,
-	encodingConfig appparams.EncodingConfig,
+	encodingConfig simappparams.EncodingConfig,
 	appOpts servertypes.AppOptions,
 	baseAppOptions ...func(*baseapp.BaseApp),
 ) *App {
-	appCodec := encodingConfig.Marshaler
+	appCodec := encodingConfig.Codec
 	cdc := encodingConfig.Amino
 	interfaceRegistry := encodingConfig.InterfaceRegistry
 
@@ -787,6 +789,37 @@ func (app *App) setPostHandler() {
 	}
 
 	app.SetPostHandler(postHandler)
+}
+
+// GetBaseApp implements the TestingApp interface.
+func (app *App) GetBaseApp() *baseapp.BaseApp {
+	return app.BaseApp
+}
+
+// GetStakingKeeper implements the TestingApp interface.
+func (app *App) GetStakingKeeper() ibctestingtypes.StakingKeeper {
+	return app.StakingKeeper
+}
+
+// GetStakingKeeperSDK implements the TestingApp interface.
+func (app *App) GetStakingKeeperSDK() stakingkeeper.Keeper {
+	return app.StakingKeeper
+}
+
+// GetIBCKeeper implements the TestingApp interface.
+func (app *App) GetIBCKeeper() *ibckeeper.Keeper {
+	return app.IBCKeeper
+}
+
+// GetScopedIBCKeeper implements the TestingApp interface.
+func (app *App) GetScopedIBCKeeper() capabilitykeeper.ScopedKeeper {
+	return app.ScopedIBCKeeper
+}
+
+// GetTxConfig implements the TestingApp interface.
+func (app *App) GetTxConfig() client.TxConfig {
+	cfg := encoding.MakeConfig(ModuleBasics)
+	return cfg.TxConfig
 }
 
 // Name returns the name of the App

@@ -103,6 +103,13 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/x/auth/vesting"
 	vestingtypes "github.com/cosmos/cosmos-sdk/x/auth/vesting/types"
+	evmkeeper "swisstronik/x/evm/keeper"
+	evmmoduletypes "swisstronik/x/evm/types"
+	feemarketkeeper "swisstronik/x/feemarket/keeper"
+	feemarkettypes "swisstronik/x/feemarket/types"
+
+	"swisstronik/x/evm"
+	"swisstronik/x/feemarket"
 )
 
 const (
@@ -137,6 +144,8 @@ var (
 		authzmodule.AppModuleBasic{},
 		groupmodule.AppModuleBasic{},
 		nftmodule.AppModuleBasic{},
+		evm.AppModuleBasic{},
+		feemarket.AppModuleBasic{},
 		vesting.AppModuleBasic{},
 		vestingmodule.AppModuleBasic{},
 	)
@@ -150,6 +159,7 @@ var (
 		stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
 		govtypes.ModuleName:            {authtypes.Burner},
 		nft.ModuleName:                 nil,
+		evmmoduletypes.ModuleName:            {authtypes.Minter, authtypes.Burner}, // used for secure addition and subtraction of balance using module account
 	}
 )
 
@@ -191,6 +201,8 @@ type SimApp struct {
 	FeeGrantKeeper   feegrantkeeper.Keeper
 	GroupKeeper      groupkeeper.Keeper
 	NFTKeeper        nftkeeper.Keeper
+	EVMKeeper		 *evmkeeper.Keeper
+	FeeMarketKeeper  feemarketkeeper.Keeper
 
 	VestingKeeper vestingmodulekeeper.Keeper
 	// the module manager
@@ -232,7 +244,8 @@ func NewSimApp(
 		minttypes.StoreKey, distrtypes.StoreKey, slashingtypes.StoreKey,
 		govtypes.StoreKey, paramstypes.StoreKey, upgradetypes.StoreKey, feegrant.StoreKey,
 		evidencetypes.StoreKey, capabilitytypes.StoreKey,
-		authzkeeper.StoreKey, nftkeeper.StoreKey, group.StoreKey, vestingmoduletypes.StoreKey,
+		authzkeeper.StoreKey, nftkeeper.StoreKey, group.StoreKey, 
+		vestingmoduletypes.StoreKey, evmmoduletypes.StoreKey, feemarkettypes.StoreKey,
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	// NOTE: The testingkey is just mounted for testing purposes. Actual applications should
@@ -311,6 +324,19 @@ func NewSimApp(
 	// set the governance module account as the authority for conducting upgrades
 	app.UpgradeKeeper = upgradekeeper.NewKeeper(skipUpgradeHeights, keys[upgradetypes.StoreKey], appCodec, homePath, app.BaseApp, authtypes.NewModuleAddress(govtypes.ModuleName).String())
 
+	feeMarketSs := app.GetSubspace(feemarkettypes.ModuleName)
+	app.FeeMarketKeeper = feemarketkeeper.NewKeeper(
+		appCodec, authtypes.NewModuleAddress(govtypes.ModuleName),
+		keys[feemarkettypes.StoreKey], tkeys[feemarkettypes.TransientKey], feeMarketSs,
+	)
+
+	// Set authority to x/gov module account to only expect the module account to update params
+	evmSs := app.GetSubspace(evmmoduletypes.ModuleName)
+	app.EVMKeeper = evmkeeper.NewKeeper(
+		appCodec, keys[evmmoduletypes.StoreKey], tkeys[evmmoduletypes.TransientKey], authtypes.NewModuleAddress(govtypes.ModuleName),
+		app.AccountKeeper, app.BankKeeper, app.StakingKeeper, app.FeeMarketKeeper, evmSs,
+	)
+
 	// Register the proposal types
 	// Deprecated: Avoid adding new handlers, instead use the new proposal flow
 	// by granting the governance module the right to execute the message.
@@ -385,6 +411,8 @@ func NewSimApp(
 		authzmodule.NewAppModule(appCodec, app.AuthzKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
 		groupmodule.NewAppModule(appCodec, app.GroupKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
 		nftmodule.NewAppModule(appCodec, app.NFTKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
+		feemarket.NewAppModule(app.FeeMarketKeeper, feeMarketSs),
+		evm.NewAppModule(app.EVMKeeper, app.AccountKeeper, evmSs),
 		vestingModule,
 	)
 
@@ -394,14 +422,14 @@ func NewSimApp(
 	// NOTE: staking module is required if HistoricalEntries param > 0
 	// NOTE: capability module's beginblocker must come before any modules using capabilities (e.g. IBC)
 	app.mm.SetOrderBeginBlockers(
-		upgradetypes.ModuleName, capabilitytypes.ModuleName, minttypes.ModuleName, distrtypes.ModuleName, slashingtypes.ModuleName,
+		upgradetypes.ModuleName, evmmoduletypes.ModuleName, feemarkettypes.ModuleName, capabilitytypes.ModuleName, minttypes.ModuleName, distrtypes.ModuleName, slashingtypes.ModuleName,
 		evidencetypes.ModuleName, stakingtypes.ModuleName,
 		authtypes.ModuleName, banktypes.ModuleName, govtypes.ModuleName, crisistypes.ModuleName, genutiltypes.ModuleName,
 		authz.ModuleName, feegrant.ModuleName, nft.ModuleName, group.ModuleName,
 		paramstypes.ModuleName, vestingtypes.ModuleName, vestingmoduletypes.ModuleName,
 	)
 	app.mm.SetOrderEndBlockers(
-		crisistypes.ModuleName, govtypes.ModuleName, stakingtypes.ModuleName,
+		crisistypes.ModuleName, govtypes.ModuleName, stakingtypes.ModuleName, evmmoduletypes.ModuleName, feemarkettypes.ModuleName,
 		capabilitytypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName, distrtypes.ModuleName,
 		slashingtypes.ModuleName, minttypes.ModuleName,
 		genutiltypes.ModuleName, evidencetypes.ModuleName, authz.ModuleName,
@@ -418,6 +446,7 @@ func NewSimApp(
 	app.mm.SetOrderInitGenesis(
 		capabilitytypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName, distrtypes.ModuleName, stakingtypes.ModuleName,
 		slashingtypes.ModuleName, govtypes.ModuleName, minttypes.ModuleName, crisistypes.ModuleName,
+		evmmoduletypes.ModuleName, feemarkettypes.ModuleName,
 		genutiltypes.ModuleName, evidencetypes.ModuleName, authz.ModuleName,
 		feegrant.ModuleName, nft.ModuleName, group.ModuleName,
 		paramstypes.ModuleName, upgradetypes.ModuleName, vestingtypes.ModuleName, vestingmoduletypes.ModuleName,

@@ -13,6 +13,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
+	"swisstronik/testutil"
 )
 
 var (
@@ -30,7 +31,8 @@ func TestCreatingMonthlyVestingAccount(t *testing.T) {
 
 	// setup the app
 	app, genAcc := simapp.Setup(t, false)
-	ctx := app.BaseApp.NewContext(false, tmproto.Header{})
+	
+	ctx := app.BaseApp.NewContext(false, tmproto.Header{ChainID: "swisstronik_1291-1"})
 	msgServer := keeper.NewMsgServerImpl(app.VestingKeeper)
 
 	toAcc := app.AccountKeeper.NewAccountWithAddress(ctx, to1AddrAcc)
@@ -38,6 +40,10 @@ func TestCreatingMonthlyVestingAccount(t *testing.T) {
 
 	existingAddr := genAcc.GetAddress().String()
 	toAddr := toAcc.GetAddress().String()
+
+	// prefund account
+	coinsToMint := sdk.NewCoins(periodCoin)
+	testutil.FundAccount(app.BankKeeper, ctx, genAcc.GetAddress(), coinsToMint)
 
 	testCases := []struct {
 		name      string

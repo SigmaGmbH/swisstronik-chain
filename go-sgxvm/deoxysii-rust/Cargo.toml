@@ -1,0 +1,27 @@
+[package]
+name = "deoxysii"
+version = "0.2.4"
+authors = ["Oasis Labs Inc. <info@oasislabs.com>"]
+description = "Deoxys-II-256-128 MRAE primitives for Rust"
+repository = "https://github.com/oasisprotocol/deoxysii-rust"
+license = "MIT"
+edition = "2021"
+
+[dependencies]
+subtle = { version = "2.4", default-features=false }
+thiserror-no-std = "2.0.2"
+zeroize = { version = "1.3", features = ["zeroize_derive"] }
+sgx_tstd = { version = "1.1.5", git = "https://github.com/apache/teaclave-sgx-sdk.git", tag="v1.1.5", features = ["net", "backtrace"]  }
+
+[patch."https://github.com/apache/teaclave-sgx-sdk.git"]
+sgx_tstd = { version = "1.1.5", git = "https://github.com/haerdib/incubator-teaclave-sgx-sdk", branch = "master"}
+
+[dev-dependencies]
+base64 = "0.13"
+criterion = "0.1.0"
+rand = "0.8"
+serde_json = "1.0"
+
+[[bench]]
+name = "mrae"
+harness = false
