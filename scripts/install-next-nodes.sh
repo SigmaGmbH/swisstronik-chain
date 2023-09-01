@@ -29,7 +29,7 @@ sudo rm -rf $HOMEDIR
 cd $HOME/chain/ && git pull
 cd $HOME/chain/ && SGX_MODE=SW make build-enclave
 cd $HOME/chain/ && make install
-swisstronikd init $MONIKER --chain-id swisstronik_4141-1
+swisstronikd init $MONIKER --chain-id swisstronik_1291-1
 swisstronikd keys add $MONIKER --keyring-backend test
 curl $RPC/genesis? | jq ".result.genesis" > $HOMEDIR/config/genesis.json
 swisstronikd config node $RPC
