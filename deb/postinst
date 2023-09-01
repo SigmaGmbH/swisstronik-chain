@@ -45,7 +45,5 @@ EOF
 
 systemctl daemon-reload
 
-mkdir -p "/opt/swisstronik/.sgx_secrets"
-chown -R "$SUDO_USER":"$SUDO_USER" "/opt/swisstronik/.sgx_secrets"
-mkdir -p "/opt/swisstronik/.swisstronik/.node"
-mkdir -p "$(eval echo ~"$SUDO_USER")/.sgx_secrets"
+mkdir -p "/opt/swisstronik/"
+chown -R "$SUDO_USER":"$SUDO_USER" "/opt/swisstronik/"

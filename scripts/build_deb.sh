@@ -12,18 +12,18 @@ chmod +x /tmp/swisstronik-build/deb/"$DEB_BIN_DIR"/swisstronikd
 mkdir -p /tmp/swisstronik-build/deb/"$DEB_LIB_DIR"
 
 cp -f /usr/lib/.swisstronik-enclave/* /tmp/swisstronik-build/deb/"$DEB_LIB_DIR"/
-chmod +x /tmp/swisstronik-build/deb/"$DEB_LIB_DIR"/lib*.so
+chmod +x /tmp/swisstronik-build/deb/"$DEB_LIB_DIR"/*.so
 
 mkdir -p /tmp/swisstronik-build/deb/DEBIAN
-cp ./deployment/deb/control /tmp/swisstronik-build/deb/DEBIAN/control
+cp deb/control /tmp/swisstronik-build/deb/DEBIAN/control
 printf "Version: " >> /tmp/swisstronik-build/deb/DEBIAN/control
-printf "$(VERSION)" >> /tmp/swisstronik-build/deb/DEBIAN/control
+printf "$VERSION" >> /tmp/swisstronik-build/deb/DEBIAN/control
 echo "" >> /tmp/swisstronik-build/deb/DEBIAN/control
-cp ./deployment/deb/postinst /tmp/swisstronik-build/deb/DEBIAN/postinst
+cp deb/postinst /tmp/swisstronik-build/deb/DEBIAN/postinst
 chmod 755 /tmp/swisstronik-build/deb/DEBIAN/postinst
-cp ./deployment/deb/postrm /tmp/swisstronik-build/deb/DEBIAN/postrm
+cp deb/postrm /tmp/swisstronik-build/deb/DEBIAN/postrm
 chmod 755 /tmp/swisstronik-build/deb/DEBIAN/postrm
-cp ./deployment/deb/triggers /tmp/swisstronik-build/deb/DEBIAN/triggers
+cp deb/triggers /tmp/swisstronik-build/deb/DEBIAN/triggers
 chmod 755 /tmp/swisstronik-build/deb/DEBIAN/triggers
 dpkg-deb --build /tmp/swisstronik-build/deb/ .
 rm -rf /tmp/swisstronik-build
