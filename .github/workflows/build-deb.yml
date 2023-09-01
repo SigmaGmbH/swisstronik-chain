@@ -47,5 +47,5 @@ jobs:
           cp build/swisstronik_1.0.0_amd64.deb swisstronik_1.0.0_amd64.deb
       - uses: actions/upload-artifact@v3
         with:
-          name: swisstronik_${{ steps.get_version.outputs.VERSION }}_amd64.deb
-          path: swisstronik_${{ steps.get_version.outputs.VERSION }}_amd64.deb
+          name: swisstronik_1.0.0_amd64.deb
+          path: swisstronik_1.0.0_amd64.deb
