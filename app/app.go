@@ -112,6 +112,10 @@ import (
 	vestingmodulekeeper "swisstronik/x/vesting/keeper"
 	vestingmoduletypes "swisstronik/x/vesting/types"
 
+	didmodule "swisstronik/x/did"
+	didmodulekeeper "swisstronik/x/did/keeper"
+	didmoduletypes "swisstronik/x/did/types"
+
 	// this line is used by starport scaffolding # stargate/app/moduleImport
 
 	simappparams "github.com/cosmos/cosmos-sdk/simapp/params"
@@ -181,6 +185,7 @@ var (
 		evm.AppModuleBasic{},
 		feemarket.AppModuleBasic{},
 		vestingmodule.AppModuleBasic{},
+		didmodule.AppModuleBasic{},
 		// this line is used by starport scaffolding # stargate/app/moduleBasic
 	)
 
@@ -260,6 +265,7 @@ type App struct {
 	FeeMarketKeeper   feemarketkeeper.Keeper
 
 	VestingKeeper vestingmodulekeeper.Keeper
+	DIDKeeper     didmodulekeeper.Keeper
 	// this line is used by starport scaffolding # stargate/app/keeperDeclaration
 
 	// mm is the module manager
@@ -305,7 +311,7 @@ func New(
 		ibctransfertypes.StoreKey, icahosttypes.StoreKey, capabilitytypes.StoreKey, group.StoreKey,
 		icacontrollertypes.StoreKey,
 		evmtypes.StoreKey, feemarkettypes.StoreKey,
-		vestingmoduletypes.StoreKey,
+		vestingmoduletypes.StoreKey, didmoduletypes.StoreKey,
 		// this line is used by starport scaffolding # stargate/app/storeKey
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey, evmtypes.TransientKey, feemarkettypes.TransientKey)
@@ -540,6 +546,14 @@ func New(
 	)
 	vestingModule := vestingmodule.NewAppModule(appCodec, app.VestingKeeper, app.AccountKeeper, app.BankKeeper)
 
+	app.DIDKeeper = *didmodulekeeper.NewKeeper(
+		appCodec,
+		keys[didmoduletypes.StoreKey],
+		keys[didmoduletypes.MemStoreKey],
+		app.GetSubspace(didmoduletypes.ModuleName),
+	)
+	didModule := didmodule.NewAppModule(appCodec, app.DIDKeeper)
+
 	// this line is used by starport scaffolding # stargate/app/keeperDefinition
 
 	/**** IBC Routing ****/
@@ -607,6 +621,7 @@ func New(
 		feemarket.NewAppModule(app.FeeMarketKeeper, feeMarketSs),
 		evm.NewAppModule(app.EvmKeeper, app.AccountKeeper, evmSs),
 		vestingModule,
+		didModule,
 		// this line is used by starport scaffolding # stargate/app/appModule
 	)
 
@@ -638,6 +653,7 @@ func New(
 		group.ModuleName,
 		paramstypes.ModuleName,
 		vestingmoduletypes.ModuleName,
+		didmoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/beginBlockers
 	)
 
@@ -664,6 +680,7 @@ func New(
 		paramstypes.ModuleName,
 		upgradetypes.ModuleName,
 		vestingmoduletypes.ModuleName,
+		didmoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/endBlockers
 	)
 
@@ -697,6 +714,7 @@ func New(
 		upgradetypes.ModuleName,
 		crisistypes.ModuleName,
 		vestingmoduletypes.ModuleName,
+		didmoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/initGenesis
 	)
 
@@ -729,6 +747,7 @@ func New(
 		feemarket.NewAppModule(app.FeeMarketKeeper, feeMarketSs),
 		evm.NewAppModule(app.EvmKeeper, app.AccountKeeper, evmSs),
 		vestingModule,
+		didModule,
 		// this line is used by starport scaffolding # stargate/app/appModule
 	)
 	app.sm.RegisterStoreDecoders()
@@ -1001,6 +1020,7 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 	paramsKeeper.Subspace(evmtypes.ModuleName).WithKeyTable(evmtypes.ParamKeyTable())
 	paramsKeeper.Subspace(feemarkettypes.ModuleName).WithKeyTable(feemarkettypes.ParamKeyTable())
 	paramsKeeper.Subspace(vestingmoduletypes.ModuleName)
+	paramsKeeper.Subspace(didmoduletypes.ModuleName)
 	// this line is used by starport scaffolding # stargate/app/paramSubspace
 
 	return paramsKeeper

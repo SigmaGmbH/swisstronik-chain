@@ -1,9 +1,9 @@
 syntax = "proto3";
-package swisstronik.vesting;
+package swisstronik.did;
 
 import "gogoproto/gogo.proto";
 
-option go_package = "swisstronik/x/vesting/types";
+option go_package = "swisstronik/x/did/types";
 
 // Params defines the parameters for the module.
 message Params { option (gogoproto.goproto_stringer) = false; }

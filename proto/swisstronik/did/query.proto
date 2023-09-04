@@ -1,0 +1,116 @@
+syntax = "proto3";
+
+package swisstronik.did;
+
+import "swisstronik/did/document.proto";
+import "google/api/annotations.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
+
+option go_package = "swisstronik/x/did/types";
+
+service Query {
+  // Fetch latest version of a DID Document for a given DID
+  rpc DIDDocument(QueryDIDDocumentRequest) returns (QueryDIDDocumentResponse) {
+    option (google.api.http) = {
+      get : "/swtr/did/{id}"
+    };
+  }
+
+  // Fetch specific version of a DID Document for a given DID
+  rpc DIDDocumentVersion(QueryDIDDocumentVersionRequest)
+      returns (QueryDIDDocumentVersionResponse) {
+    option (google.api.http) = {
+      get : "/swtr/did/{id}/version/{version}"
+    };
+  }
+
+  // Fetch list of all versions of DID Documents for a given DID
+  rpc AllDIDDocumentVersionsMetadata(QueryAllDIDDocumentVersionsMetadataRequest)
+      returns (QueryAllDIDDocumentVersionsMetadataResponse) {
+    option (google.api.http) = {
+      get : "/swtr/did/{id}/versions"
+    };
+  }
+}
+
+// QueryDIDDocumentRequest is the request type for the Query/DIDDocument method
+message QueryDIDDocumentRequest {
+  // DID unique identifier of the DID Document to fetch.
+  // UUID-style DIDs as well as Indy-style DID are supported.
+  //
+  // Format: did:swtr:<unique-identifier>
+  //
+  // Examples:
+  // - did:swtr:c82f2b02-bdab-4dd7-b833-3e143745d612
+  // - did:swtr:wGHEXrZvJxR8vw5P3UWH1j
+  string id = 1;
+}
+
+// QueryDIDDocumentResponse is the response type for the Query/DIDDocument
+// method
+message QueryDIDDocumentResponse {
+  // Successful resolution of the DID Document returns the following:
+  // - did_doc is the latest version of the DID Document
+  // - metadata is is the DID Document metadata associated with the latest
+  // version of the DID Document
+  DIDDocumentWithMetadata value = 1;
+}
+
+// QueryDIDDocumentVersionRequest is the request type for the
+// Query/DIDDocumentVersion method
+message QueryDIDDocumentVersionRequest {
+  // DID unique identifier of the DID Document to fetch.
+  // UUID-style DIDs as well as Indy-style DID are supported.
+  //
+  // Format: did:swtr:<unique-identifier>
+  //
+  // Examples:
+  // - did:swtr:c82f2b02-bdab-4dd7-b833-3e143745d612
+  // - did:swtr:wGHEXrZvJxR8vw5P3UWH1j
+  string id = 1;
+
+  // Unique version identifier of the DID Document to fetch.
+  // Returns the specified version of the DID Document.
+  //
+  // Format: <uuid>
+  //
+  // Example: 93f2573c-eca9-4098-96cb-a1ec676a29ed
+  string version = 2;
+}
+
+// QueryDIDDocumentVersionResponse is the response type for the
+// Query/DIDDocumentVersion method
+message QueryDIDDocumentVersionResponse {
+  // Successful resolution of the DID Document returns the following:
+  // - did_doc is the requested version of the DID Document
+  // - metadata is DID Document metadata associated with the requested version
+  // of the DID Document
+  DIDDocumentWithMetadata value = 1;
+}
+
+// QueryAllDIDDocumentVersionsMetadataRequest is the request type for the
+// Query/AllDIDDocumentVersionsMetadata method
+message QueryAllDIDDocumentVersionsMetadataRequest {
+  // DID unique identifier of the DID Document to fetch version metadata.
+  // UUID-style DIDs as well as Indy-style DID are supported.
+  //
+  // Format: did:swtr:<unique-identifier>
+  //
+  // Examples:
+  // - did:swtr:c82f2b02-bdab-4dd7-b833-3e143745d612
+  // - did:swtr:wGHEXrZvJxR8vw5P3UWH1j
+  string id = 1;
+
+  // pagination defines an optional pagination for the request.
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+// QueryAllDIDDocumentVersionsMetadataResponse is the response type for the
+// Query/AllDIDDocumentVersionsMetadata method
+message QueryAllDIDDocumentVersionsMetadataResponse {
+  // versions is the list of all versions of the requested DID Document
+  repeated Metadata versions = 1;
+
+  // pagination defines the pagination in the response.
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
