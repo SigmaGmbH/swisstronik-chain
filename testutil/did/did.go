@@ -10,7 +10,10 @@ import (
 	"encoding/json"
 	"math/big"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"swisstronik/x/did/types"
+	"swisstronik/x/did/keeper"
 )
 
 const (
@@ -115,7 +118,7 @@ func RandString(lenght int) string {
 	return string(b)
 }
 
-func CreateDIDMessage(payload *types.MsgCreateDIDDocumentPayload, signInputs []SignInput) *types.MsgCreateDIDDocument {
+func CreateDID(ctx sdk.Context, didKeeper keeper.Keeper, payload *types.MsgCreateDIDDocumentPayload, signInputs []SignInput) (*types.MsgCreateDIDDocumentResponse, error) {
 	signBytes := payload.GetSignBytes()
 	signatures := make([]*types.SignInfo, 0, len(signInputs))
 
@@ -128,8 +131,82 @@ func CreateDIDMessage(payload *types.MsgCreateDIDDocumentPayload, signInputs []S
 		})
 	}
 
-	return &types.MsgCreateDIDDocument{
+	msg := &types.MsgCreateDIDDocument{
 		Payload:    payload,
 		Signatures: signatures,
 	}
+
+	return didKeeper.CreateDIDDocument(sdk.WrapSDKContext(ctx), msg)
+}
+
+func DefaultDIDDocumentWithDID(did string) DIDDocumentInfo {
+	_, _, collectionID := types.MustSplitDID(did)
+
+	keyPair := GenerateKeyPair()
+	keyID := did + "#key-1"
+
+	payload := &types.MsgCreateDIDDocumentPayload{
+		Id: did,
+		VerificationMethod: []*types.VerificationMethod{
+			{
+				Id:                     keyID,
+				VerificationMethodType: types.Ed25519VerificationKey2020Type,
+				Controller:             did,
+				VerificationMaterial:   GenerateEd25519VerificationKey2020VerificationMaterial(keyPair.Public),
+			},
+		},
+		Authentication: []string{keyID},
+		VersionId:      uuid.NewString(),
+	}
+
+	signInput := SignInput{
+		VerificationMethodID: keyID,
+		Key:                  keyPair.Private,
+	}
+
+	return DIDDocumentInfo{
+		Did:          did,
+		CollectionID: collectionID,
+		KeyPair:      keyPair,
+		KeyID:        keyID,
+		Msg:          payload,
+		SignInput:    signInput,
+	}
+}
+
+func DefaultDIDDocumentWithRandomDID() DIDDocumentInfo {
+	did := GenerateDID(Base58_16bytes)
+	return DefaultDIDDocumentWithDID(did)
+}
+
+func CreateCustomDIDDocument(ctx sdk.Context, didKeeper keeper.Keeper, info DIDDocumentInfo) (CreatedDIDDocumentInfo, error) {
+	created, err := CreateDID(ctx, didKeeper, info.Msg, []SignInput{info.SignInput})
+	if err != nil {
+		return CreatedDIDDocumentInfo{}, err
+	}
+
+	return CreatedDIDDocumentInfo{
+		DIDDocumentInfo: info,
+		VersionID:  created.Value.Metadata.VersionId,
+	}, nil
+}
+
+func CreateDefaultDID(ctx sdk.Context, didKeeper keeper.Keeper) (CreatedDIDDocumentInfo, error) {
+	did := DefaultDIDDocumentWithRandomDID()
+	return CreateCustomDIDDocument(ctx, didKeeper, did)
+}
+
+func CreateDIDDocumentWithExternalControllers(ctx sdk.Context, didKeeper keeper.Keeper, controllers []string, signInputs []SignInput) (CreatedDIDDocumentInfo, error) {
+	did := DefaultDIDDocumentWithRandomDID()
+	did.Msg.Controller = append(did.Msg.Controller, controllers...)
+
+	created, err := CreateDID(ctx, didKeeper, did.Msg, append(signInputs, did.SignInput))
+	if err != nil {
+		return CreatedDIDDocumentInfo{}, err
+	}
+
+	return CreatedDIDDocumentInfo{
+		DIDDocumentInfo: did,
+		VersionID:  created.Value.Metadata.VersionId,
+	}, nil
 }
