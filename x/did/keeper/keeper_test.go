@@ -669,7 +669,7 @@ func (suite *KeeperTestSuite) TestCannotUpdateDocumentWithoutControllerSignature
 
 func (suite *KeeperTestSuite) TestReplaceControllerWithBothSignatures() {
 	suite.Setup(suite.T())
-	
+
 	first, err := didutil.CreateDefaultDID(suite.ctx, suite.keeper)
 	suite.Require().NoError(err)
 	second, err := didutil.CreateDefaultDID(suite.ctx, suite.keeper)
@@ -790,7 +790,6 @@ func (suite *KeeperTestSuite) TestCannotAddControllerWithOnlyOneSignature() {
 		VersionId: uuid.NewString(),
 	}
 
-
 	onlyExistingControllerSignature := []didutil.SignInput{
 		first.SignInput,
 	}
@@ -804,3 +803,312 @@ func (suite *KeeperTestSuite) TestCannotAddControllerWithOnlyOneSignature() {
 	suite.Require().ErrorContains(err, fmt.Sprintf("there should be at least one signature by %s (previous version): signature is required but not found", first.Did))
 }
 
+func (suite *KeeperTestSuite) TestUpdateWithSameVerificationMethod() {
+	controller, err := didutil.CreateDefaultDID(suite.ctx, suite.keeper)
+	suite.Require().NoError(err)
+	subject, err := didutil.CreateDIDDocumentWithExternalControllers(suite.ctx, suite.keeper, []string{controller.Did}, []didutil.SignInput{controller.SignInput})
+	suite.Require().NoError(err)
+
+	payload := &types.MsgUpdateDIDDocumentPayload{
+		Id:         subject.Did,
+		Controller: []string{controller.Did},
+		VerificationMethod: []*types.VerificationMethod{
+			{
+				Id:                     subject.KeyID,
+				VerificationMethodType: types.Ed25519VerificationKey2020Type,
+				Controller:             subject.Did,
+				VerificationMaterial:   didutil.GenerateEd25519VerificationKey2020VerificationMaterial(subject.KeyPair.Public),
+			},
+		},
+		Authentication:  []string{subject.KeyID},
+		AssertionMethod: []string{subject.KeyID},
+		VersionId:       uuid.NewString(),
+	}
+
+	signatures := []didutil.SignInput{
+		controller.SignInput,
+	}
+
+	_, err = didutil.UpdateDIDDocument(suite.ctx, suite.keeper, payload, signatures)
+	suite.Require().NoError(err)
+
+	created, err := didutil.GetDIDDocument(suite.ctx, suite.keeper, subject.Did)
+	suite.Require().NoError(err)
+	suite.Require().Equal(payload.ToDidDoc(), *created.Value.DidDoc)
+}
+
+func (suite *KeeperTestSuite) TestUpdateKeyForVerificationMethod() {
+	did, err := didutil.CreateDefaultDID(suite.ctx, suite.keeper)
+	suite.Require().NoError(err)
+
+	newKeyPair := didutil.GenerateKeyPair()
+	payload := &types.MsgUpdateDIDDocumentPayload{
+		Id: did.Did,
+		VerificationMethod: []*types.VerificationMethod{
+			{
+				Id:                     did.KeyID,
+				VerificationMethodType: types.Ed25519VerificationKey2020Type,
+				Controller:             did.Did,
+				VerificationMaterial:   didutil.GenerateEd25519VerificationKey2020VerificationMaterial(newKeyPair.Public),
+			},
+		},
+		VersionId: uuid.NewString(),
+	}
+
+	onlyNewSignature := []didutil.SignInput{did.SignInput}
+	_, err = didutil.UpdateDIDDocument(suite.ctx, suite.keeper, payload, onlyNewSignature)
+	suite.Require().ErrorContains(err, fmt.Sprintf("there should be at least one valid signature by %s (new version): invalid signature detected", did.Did))
+
+	onlyPreviousSignature := []didutil.SignInput{{
+		VerificationMethodID: did.KeyID,
+		Key:                  newKeyPair.Private,
+	}}
+	_, err = didutil.UpdateDIDDocument(suite.ctx, suite.keeper, payload, onlyPreviousSignature)
+	suite.Require().ErrorContains(err, fmt.Sprintf("there should be at least one valid signature by %s (previous version): invalid signature detected", did.Did))
+
+	correctSignatures := []didutil.SignInput{
+		did.SignInput, // Old signature
+		{
+			VerificationMethodID: did.KeyID, // New signature
+			Key:                  newKeyPair.Private,
+		},
+	}
+
+	_, err = didutil.UpdateDIDDocument(suite.ctx, suite.keeper, payload, correctSignatures)
+	suite.Require().NoError(err)
+
+	created, err := didutil.GetDIDDocument(suite.ctx, suite.keeper, did.Did)
+	suite.Require().NoError(err)
+	suite.Require().Equal(*created.Value.DidDoc, payload.ToDidDoc())
+}
+
+func (suite *KeeperTestSuite) TestUpdateController() {
+	subject, err := didutil.CreateDefaultDID(suite.ctx, suite.keeper)
+	suite.Require().NoError(err)
+	controller, err := didutil.CreateDefaultDID(suite.ctx, suite.keeper)
+	suite.Require().NoError(err)
+
+	payload := &types.MsgUpdateDIDDocumentPayload{
+		Id: subject.Did,
+		VerificationMethod: []*types.VerificationMethod{
+			{
+				Id:                     subject.KeyID,
+				VerificationMethodType: types.Ed25519VerificationKey2020Type,
+				Controller:             controller.Did,
+				VerificationMaterial:   didutil.GenerateEd25519VerificationKey2020VerificationMaterial(subject.KeyPair.Public),
+			},
+		},
+		Authentication: []string{subject.KeyID},
+		VersionId:      uuid.NewString(),
+	}
+
+	onlyPreviousControllerSignature := []didutil.SignInput{controller.SignInput}
+	_, err = didutil.UpdateDIDDocument(suite.ctx, suite.keeper, payload, onlyPreviousControllerSignature)
+	suite.Require().ErrorContains(err, fmt.Sprintf("there should be at least one signature by %s (previous version): signature is required but not found", subject.Did))
+
+	onlyNewControllerSignature := []didutil.SignInput{subject.SignInput}
+	_, err = didutil.UpdateDIDDocument(suite.ctx, suite.keeper, payload, onlyNewControllerSignature)
+	suite.Require().ErrorContains(err, fmt.Sprintf("there should be at least one signature by %s: signature is required but not found", controller.Did))
+
+	correctSignatures := []didutil.SignInput{subject.SignInput, controller.SignInput}
+	_, err = didutil.UpdateDIDDocument(suite.ctx, suite.keeper, payload, correctSignatures)
+	suite.Require().NoError(err)
+
+	updated, err := didutil.GetDIDDocument(suite.ctx, suite.keeper, subject.Did)
+	suite.Require().NoError(err)
+	suite.Require().Equal(payload.ToDidDoc(), *updated.Value.DidDoc)
+}
+
+func (suite *KeeperTestSuite) TestUpdateVerificationMethodID() {
+	subject, err := didutil.CreateDefaultDID(suite.ctx, suite.keeper)
+	suite.Require().NoError(err)
+	newKeyID := subject.Did + "#key-2"
+
+	payload := &types.MsgUpdateDIDDocumentPayload{
+		Id: subject.Did,
+		VerificationMethod: []*types.VerificationMethod{
+			{
+				Id:                     newKeyID,
+				VerificationMethodType: types.Ed25519VerificationKey2020Type,
+				Controller:             subject.Did,
+				VerificationMaterial:   didutil.GenerateEd25519VerificationKey2020VerificationMaterial(subject.KeyPair.Public),
+			},
+		},
+		Authentication: []string{subject.KeyID},
+		VersionId:      uuid.NewString(),
+	}
+
+	signatureWithoutNewVerificationMethod := []didutil.SignInput{subject.SignInput}
+	_, err = didutil.UpdateDIDDocument(suite.ctx, suite.keeper, payload, signatureWithoutNewVerificationMethod)
+	suite.Require().ErrorContains(err, fmt.Sprintf("there should be at least one valid signature by %s (new version): invalid signature detected", subject.Did))
+
+	signatureWithoutPreviousVerificationMethod := []didutil.SignInput{
+		{
+			VerificationMethodID: newKeyID,
+			Key:                  subject.KeyPair.Private,
+		},
+	}
+
+	_, err = didutil.UpdateDIDDocument(suite.ctx, suite.keeper, payload, signatureWithoutPreviousVerificationMethod)
+	suite.Require().ErrorContains(err, fmt.Sprintf("there should be at least one valid signature by %s (previous version): invalid signature detected", subject.Did))
+
+	correctSignatures := []didutil.SignInput{
+		{
+			VerificationMethodID: newKeyID,
+			Key:                  subject.KeyPair.Private,
+		},
+		subject.SignInput,
+	}
+
+	_, err = didutil.UpdateDIDDocument(suite.ctx, suite.keeper, payload, correctSignatures)
+	suite.Require().NoError(err)
+
+	updated, err := didutil.GetDIDDocument(suite.ctx, suite.keeper, subject.Did)
+	suite.Require().NoError(err)
+	suite.Require().Equal(payload.ToDidDoc(), *updated.Value.DidDoc)
+}
+
+func (suite *KeeperTestSuite) TestUpdateAddNewVerificationMethod() {
+	subject, err := didutil.CreateDefaultDID(suite.ctx, suite.keeper)
+	suite.Require().NoError(err)
+
+	newKeyID := subject.Did + "#key-2"
+	newKey := didutil.GenerateKeyPair()
+
+	payload := &types.MsgUpdateDIDDocumentPayload{
+		Id: subject.Did,
+		VerificationMethod: []*types.VerificationMethod{
+			{
+				Id:                     subject.KeyID,
+				VerificationMethodType: types.Ed25519VerificationKey2020Type,
+				Controller:             subject.Did,
+				VerificationMaterial:   didutil.GenerateEd25519VerificationKey2020VerificationMaterial(subject.KeyPair.Public),
+			},
+			{
+				Id:                     newKeyID,
+				VerificationMethodType: types.Ed25519VerificationKey2020Type,
+				Controller:             subject.Did,
+				VerificationMaterial:   didutil.GenerateEd25519VerificationKey2020VerificationMaterial(newKey.Public),
+			},
+		},
+		Authentication: []string{subject.KeyID},
+		VersionId:      uuid.NewString(),
+	}
+
+	signatureWithOnlyNewVerificationMethod := []didutil.SignInput{
+		{
+			VerificationMethodID: newKeyID,
+			Key:                  newKey.Private,
+		},
+	}
+
+	_, err = didutil.UpdateDIDDocument(suite.ctx, suite.keeper, payload, signatureWithOnlyNewVerificationMethod)
+	suite.Require().ErrorContains(err, fmt.Sprintf("there should be at least one valid signature by %s (previous version): invalid signature detected", subject.Did))
+
+	correctSignature := []didutil.SignInput{
+		subject.SignInput,
+	}
+	_, err = didutil.UpdateDIDDocument(suite.ctx, suite.keeper, payload, correctSignature)
+	suite.Require().NoError(err)
+
+	created, err := didutil.GetDIDDocument(suite.ctx, suite.keeper, subject.Did)
+	suite.Require().NoError(err)
+	suite.Require().Equal(payload.ToDidDoc(), *created.Value.DidDoc)
+}
+
+func (suite *KeeperTestSuite) TestRemoveVerificationMethod() {
+	subject, err := didutil.CreateDefaultDID(suite.ctx, suite.keeper)
+	suite.Require().NoError(err)
+
+	secondKeyID := subject.Did + "#key-2"
+	secondKey := didutil.GenerateKeyPair()
+	secondSignInput := didutil.SignInput{
+		VerificationMethodID: secondKeyID,
+		Key:                  secondKey.Private,
+	}
+
+	addSecondKeyPayload := &types.MsgUpdateDIDDocumentPayload{
+		Id: subject.Did,
+		VerificationMethod: []*types.VerificationMethod{
+			{
+				Id:                     subject.KeyID,
+				VerificationMethodType: types.Ed25519VerificationKey2020Type,
+				Controller:             subject.Did,
+				VerificationMaterial:   didutil.GenerateEd25519VerificationKey2020VerificationMaterial(subject.KeyPair.Public),
+			},
+			{
+				Id:                     secondKeyID,
+				VerificationMethodType: types.Ed25519VerificationKey2020Type,
+				Controller:             subject.Did,
+				VerificationMaterial:   didutil.GenerateEd25519VerificationKey2020VerificationMaterial(secondKey.Public),
+			},
+		},
+		Authentication: []string{subject.KeyID},
+		VersionId:      uuid.NewString(),
+	}
+
+	_, err = didutil.UpdateDIDDocument(suite.ctx, suite.keeper, addSecondKeyPayload, []didutil.SignInput{subject.SignInput})
+	suite.Require().NoError(err)
+
+	payload := &types.MsgUpdateDIDDocumentPayload{
+		Id: subject.Did,
+		VerificationMethod: []*types.VerificationMethod{
+			{
+				Id:                     subject.KeyID,
+				VerificationMethodType: types.Ed25519VerificationKey2020Type,
+				Controller:             subject.Did,
+				VerificationMaterial:   didutil.GenerateEd25519VerificationKey2020VerificationMaterial(subject.KeyPair.Public),
+			},
+		},
+		Authentication: []string{subject.KeyID},
+		VersionId:      uuid.NewString(),
+	}
+
+	signatureWithRemovedMethod := []didutil.SignInput{secondSignInput}
+	_, err = didutil.UpdateDIDDocument(suite.ctx, suite.keeper, payload, signatureWithRemovedMethod)
+	suite.Require().ErrorContains(err, fmt.Sprintf("there should be at least one valid signature by %s (new version): invalid signature detected", subject.Did))
+
+	correctSignature := []didutil.SignInput{
+		subject.SignInput,
+	}
+	_, err = didutil.UpdateDIDDocument(suite.ctx, suite.keeper, payload, correctSignature)
+	suite.Require().NoError(err)
+
+	created, err := didutil.GetDIDDocument(suite.ctx, suite.keeper, subject.Did)
+	suite.Require().NoError(err)
+	suite.Require().Equal(payload.ToDidDoc(), *created.Value.DidDoc)
+}
+
+func (suite *KeeperTestSuite) TestCannotUpdateDeactivatedDID() {
+	subject, err := didutil.CreateDefaultDID(suite.ctx, suite.keeper)
+	suite.Require().NoError(err)
+
+	updatePayload := &types.MsgUpdateDIDDocumentPayload{
+		Id: subject.Did,
+		VerificationMethod: []*types.VerificationMethod{
+			{
+				Id:                     subject.DIDDocumentInfo.KeyID,
+				VerificationMethodType: types.Ed25519VerificationKey2020Type,
+				Controller:             subject.DIDDocumentInfo.Did,
+				VerificationMaterial:   didutil.GenerateEd25519VerificationKey2020VerificationMaterial(subject.DIDDocumentInfo.KeyPair.Public),
+			},
+		},
+		Authentication: []string{subject.KeyID},
+		VersionId:      uuid.NewString(),
+	}
+
+	// Deactivate DID
+	deactivatePayload := &types.MsgDeactivateDIDDocumentPayload{
+		Id:        subject.Did,
+		VersionId: uuid.NewString(),
+	}
+	signatures := []didutil.SignInput{subject.DIDDocumentInfo.SignInput}
+	res, err := didutil.DeactivateDIDDocument(suite.ctx, suite.keeper, deactivatePayload, signatures)
+	suite.Require().NoError(err)
+	suite.Require().True(res.Value.Metadata.Deactivated)
+
+	// Update deactivated DID
+	signatures = []didutil.SignInput{subject.SignInput}
+	_, err = didutil.UpdateDIDDocument(suite.ctx, suite.keeper, updatePayload, signatures)
+	suite.Require().ErrorContains(err, subject.DIDDocumentInfo.Did + ": DID Document already deactivated")
+}
