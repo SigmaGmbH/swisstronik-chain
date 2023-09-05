@@ -110,6 +110,10 @@ import (
 
 	"swisstronik/x/evm"
 	"swisstronik/x/feemarket"
+
+	didmodule "swisstronik/x/did"
+	didmodulekeeper "swisstronik/x/did/keeper"
+	didmoduletypes "swisstronik/x/did/types"
 )
 
 const (
@@ -148,6 +152,7 @@ var (
 		feemarket.AppModuleBasic{},
 		vesting.AppModuleBasic{},
 		vestingmodule.AppModuleBasic{},
+		didmodule.AppModuleBasic{},
 	)
 
 	// module account permissions
@@ -159,7 +164,7 @@ var (
 		stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
 		govtypes.ModuleName:            {authtypes.Burner},
 		nft.ModuleName:                 nil,
-		evmmoduletypes.ModuleName:            {authtypes.Minter, authtypes.Burner}, // used for secure addition and subtraction of balance using module account
+		evmmoduletypes.ModuleName:      {authtypes.Minter, authtypes.Burner}, // used for secure addition and subtraction of balance using module account
 	}
 )
 
@@ -203,8 +208,9 @@ type SimApp struct {
 	NFTKeeper        nftkeeper.Keeper
 	EVMKeeper		 *evmkeeper.Keeper
 	FeeMarketKeeper  feemarketkeeper.Keeper
+	VestingKeeper    vestingmodulekeeper.Keeper
+	DIDKeeper		 didmodulekeeper.Keeper
 
-	VestingKeeper vestingmodulekeeper.Keeper
 	// the module manager
 	mm *module.Manager
 
@@ -246,6 +252,7 @@ func NewSimApp(
 		evidencetypes.StoreKey, capabilitytypes.StoreKey,
 		authzkeeper.StoreKey, nftkeeper.StoreKey, group.StoreKey, 
 		vestingmoduletypes.StoreKey, evmmoduletypes.StoreKey, feemarkettypes.StoreKey,
+		didmoduletypes.StoreKey,
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	// NOTE: The testingkey is just mounted for testing purposes. Actual applications should
@@ -381,6 +388,14 @@ func NewSimApp(
 	)
 	vestingModule := vestingmodule.NewAppModule(appCodec, app.VestingKeeper, app.AccountKeeper, app.BankKeeper)
 
+	app.DIDKeeper = *didmodulekeeper.NewKeeper(
+		appCodec,
+		keys[didmoduletypes.StoreKey],
+		keys[didmoduletypes.MemStoreKey],
+		app.GetSubspace(didmoduletypes.ModuleName),
+	)
+	didModule := didmodule.NewAppModule(appCodec, app.DIDKeeper)
+
 	/****  Module Options ****/
 
 	// NOTE: we may consider parsing `appOpts` inside module constructors. For the moment
@@ -414,6 +429,7 @@ func NewSimApp(
 		feemarket.NewAppModule(app.FeeMarketKeeper, feeMarketSs),
 		evm.NewAppModule(app.EVMKeeper, app.AccountKeeper, evmSs),
 		vestingModule,
+		didModule,
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that
@@ -426,7 +442,7 @@ func NewSimApp(
 		evidencetypes.ModuleName, stakingtypes.ModuleName,
 		authtypes.ModuleName, banktypes.ModuleName, govtypes.ModuleName, crisistypes.ModuleName, genutiltypes.ModuleName,
 		authz.ModuleName, feegrant.ModuleName, nft.ModuleName, group.ModuleName,
-		paramstypes.ModuleName, vestingtypes.ModuleName, vestingmoduletypes.ModuleName,
+		paramstypes.ModuleName, vestingtypes.ModuleName, vestingmoduletypes.ModuleName, didmoduletypes.ModuleName,
 	)
 	app.mm.SetOrderEndBlockers(
 		crisistypes.ModuleName, govtypes.ModuleName, stakingtypes.ModuleName, evmmoduletypes.ModuleName, feemarkettypes.ModuleName,
@@ -434,7 +450,7 @@ func NewSimApp(
 		slashingtypes.ModuleName, minttypes.ModuleName,
 		genutiltypes.ModuleName, evidencetypes.ModuleName, authz.ModuleName,
 		feegrant.ModuleName, nft.ModuleName, group.ModuleName,
-		paramstypes.ModuleName, upgradetypes.ModuleName, vestingtypes.ModuleName, vestingmoduletypes.ModuleName,
+		paramstypes.ModuleName, upgradetypes.ModuleName, vestingtypes.ModuleName, vestingmoduletypes.ModuleName, didmoduletypes.ModuleName,
 	)
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -449,7 +465,7 @@ func NewSimApp(
 		evmmoduletypes.ModuleName, feemarkettypes.ModuleName,
 		genutiltypes.ModuleName, evidencetypes.ModuleName, authz.ModuleName,
 		feegrant.ModuleName, nft.ModuleName, group.ModuleName,
-		paramstypes.ModuleName, upgradetypes.ModuleName, vestingtypes.ModuleName, vestingmoduletypes.ModuleName,
+		paramstypes.ModuleName, upgradetypes.ModuleName, vestingtypes.ModuleName, vestingmoduletypes.ModuleName, didmoduletypes.ModuleName,
 	)
 
 	// Uncomment if you want to set a custom migration order here.
@@ -707,6 +723,7 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 	paramsKeeper.Subspace(govtypes.ModuleName).WithKeyTable(govv1.ParamKeyTable())
 	paramsKeeper.Subspace(crisistypes.ModuleName)
 	paramsKeeper.Subspace(vestingmoduletypes.ModuleName)
+	paramsKeeper.Subspace(didmoduletypes.ModuleName)
 
 	return paramsKeeper
 }
