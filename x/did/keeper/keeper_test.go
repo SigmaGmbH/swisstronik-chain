@@ -570,3 +570,237 @@ func (suite *KeeperTestSuite) TestShouldDeactivateDID() {
 		suite.Require().True(version.Deactivated)
 	}
 }
+
+func (suite *KeeperTestSuite) TestUpdateCreatesNewVersion() {
+	suite.Setup(suite.T())
+
+	first, err := didutil.CreateDefaultDID(suite.ctx, suite.keeper)
+	suite.Require().NoError(err)
+
+	second, err := didutil.CreateDIDDocumentWithExternalControllers(
+		suite.ctx,
+		suite.keeper,
+		[]string{first.Did}, []didutil.SignInput{first.SignInput},
+	)
+	suite.Require().NoError(err)
+
+	payload := &types.MsgUpdateDIDDocumentPayload{
+		Id:         second.Did,
+		Controller: []string{first.Did},
+		VerificationMethod: []*types.VerificationMethod{
+			{
+				Id:                     second.KeyID,
+				VerificationMethodType: types.Ed25519VerificationKey2020Type,
+				Controller:             second.Did,
+				VerificationMaterial:   didutil.GenerateEd25519VerificationKey2020VerificationMaterial(second.KeyPair.Public),
+			},
+		},
+		Authentication:  []string{second.KeyID},
+		AssertionMethod: []string{second.KeyID},
+		VersionId:       uuid.NewString(),
+	}
+
+	signatures := []didutil.SignInput{first.SignInput}
+
+	_, err = didutil.UpdateDIDDocument(suite.ctx, suite.keeper, payload, signatures)
+	suite.Require().NoError(err)
+
+	// check latest version
+	created, err := didutil.GetDIDDocument(suite.ctx, suite.keeper, second.Did)
+	suite.Require().NoError(err)
+	suite.Require().Equal(payload.ToDidDoc(), *created.Value.DidDoc)
+
+	// query the first version
+	v1, err := didutil.GetDIDDocumentVersion(suite.ctx, suite.keeper, second.Did, second.VersionID)
+	suite.Require().NoError(err)
+	suite.Require().Equal(second.Msg.ToDidDoc(), *v1.Value.DidDoc)
+	suite.Require().Equal(second.VersionID, v1.Value.Metadata.VersionId)
+	suite.Require().Equal(payload.VersionId, v1.Value.Metadata.NextVersionId)
+
+	// query the second version
+	v2, err := didutil.GetDIDDocumentVersion(suite.ctx, suite.keeper, second.Did, payload.VersionId)
+	suite.Require().NoError(err)
+	suite.Require().Equal(payload.ToDidDoc(), *v2.Value.DidDoc)
+	suite.Require().Equal(payload.VersionId, v2.Value.Metadata.VersionId)
+	suite.Require().Equal(second.VersionID, v2.Value.Metadata.PreviousVersionId)
+
+	// query all versions
+	versions, err := didutil.GetAllDIDVersionsMetadata(suite.ctx, suite.keeper, second.Did)
+	suite.Require().NoError(err)
+	suite.Require().Len(versions.Versions, 2)
+	suite.Require().Contains(versions.Versions, v1.Value.Metadata)
+	suite.Require().Contains(versions.Versions, v2.Value.Metadata)
+}
+
+func (suite *KeeperTestSuite) TestCannotUpdateDocumentWithoutControllerSignature() {
+	suite.Setup(suite.T())
+
+	first, err := didutil.CreateDefaultDID(suite.ctx, suite.keeper)
+	suite.Require().NoError(err)
+
+	second, err := didutil.CreateDIDDocumentWithExternalControllers(
+		suite.ctx,
+		suite.keeper,
+		[]string{first.Did}, []didutil.SignInput{first.SignInput},
+	)
+	suite.Require().NoError(err)
+
+	payload := &types.MsgUpdateDIDDocumentPayload{
+		Id:         second.Did,
+		Controller: []string{first.Did},
+		VerificationMethod: []*types.VerificationMethod{
+			{
+				Id:                     second.KeyID,
+				VerificationMethodType: types.Ed25519VerificationKey2020Type,
+				Controller:             second.Did,
+				VerificationMaterial:   didutil.GenerateEd25519VerificationKey2020VerificationMaterial(second.KeyPair.Public),
+			},
+		},
+		Authentication:  []string{second.KeyID},
+		AssertionMethod: []string{second.KeyID},
+		VersionId:       uuid.NewString(),
+	}
+
+	signatures := []didutil.SignInput{}
+
+	_, err = didutil.UpdateDIDDocument(suite.ctx, suite.keeper, payload, signatures)
+	suite.Require().ErrorContains(err, fmt.Sprintf("there should be at least one signature by %s: signature is required but not found", first.Did))
+}
+
+func (suite *KeeperTestSuite) TestReplaceControllerWithBothSignatures() {
+	suite.Setup(suite.T())
+	
+	first, err := didutil.CreateDefaultDID(suite.ctx, suite.keeper)
+	suite.Require().NoError(err)
+	second, err := didutil.CreateDefaultDID(suite.ctx, suite.keeper)
+	suite.Require().NoError(err)
+
+	payload := &types.MsgUpdateDIDDocumentPayload{
+		Id:         first.Did,
+		Controller: []string{second.Did},
+		VerificationMethod: []*types.VerificationMethod{
+			{
+				Id:                     first.KeyID,
+				VerificationMethodType: types.Ed25519VerificationKey2020Type,
+				Controller:             first.Did,
+				VerificationMaterial:   didutil.GenerateEd25519VerificationKey2020VerificationMaterial(first.KeyPair.Public),
+			},
+		},
+		VersionId: uuid.NewString(),
+	}
+
+	signatures := []didutil.SignInput{
+		first.SignInput,
+		second.SignInput,
+	}
+
+	_, err = didutil.UpdateDIDDocument(suite.ctx, suite.keeper, payload, signatures)
+	suite.Require().NoError(err)
+
+	updated, err := didutil.GetDIDDocument(suite.ctx, suite.keeper, first.Did)
+	suite.Require().NoError(err)
+	suite.Require().Equal(payload.ToDidDoc(), *updated.Value.DidDoc)
+}
+
+func (suite *KeeperTestSuite) TestCannotReplaceControllerWithOnlyOneSignature() {
+	suite.Setup(suite.T())
+
+	first, err := didutil.CreateDefaultDID(suite.ctx, suite.keeper)
+	suite.Require().NoError(err)
+	second, err := didutil.CreateDefaultDID(suite.ctx, suite.keeper)
+	suite.Require().NoError(err)
+
+	payload := &types.MsgUpdateDIDDocumentPayload{
+		Id:         first.Did,
+		Controller: []string{second.Did},
+		VerificationMethod: []*types.VerificationMethod{
+			{
+				Id:                     first.KeyID,
+				VerificationMethodType: types.Ed25519VerificationKey2020Type,
+				Controller:             first.Did,
+				VerificationMaterial:   didutil.GenerateEd25519VerificationKey2020VerificationMaterial(first.KeyPair.Public),
+			},
+		},
+		VersionId: uuid.NewString(),
+	}
+
+	onlyNewControllerSignatures := []didutil.SignInput{
+		second.SignInput,
+	}
+	_, err = didutil.UpdateDIDDocument(suite.ctx, suite.keeper, payload, onlyNewControllerSignatures)
+	suite.Require().ErrorContains(err, fmt.Sprintf("there should be at least one signature by %s (previous version): signature is required but not found", first.Did))
+
+	onlyPreviousControllerSignatures := []didutil.SignInput{
+		first.SignInput,
+	}
+	_, err = didutil.UpdateDIDDocument(suite.ctx, suite.keeper, payload, onlyPreviousControllerSignatures)
+	suite.Require().ErrorContains(err, fmt.Sprintf("there should be at least one signature by %s: signature is required but not found", second.Did))
+}
+
+func (suite *KeeperTestSuite) TestAddControllerWithBothSignatures() {
+	first, err := didutil.CreateDefaultDID(suite.ctx, suite.keeper)
+	suite.Require().NoError(err)
+	second, err := didutil.CreateDefaultDID(suite.ctx, suite.keeper)
+	suite.Require().NoError(err)
+
+	payload := &types.MsgUpdateDIDDocumentPayload{
+		Id:         first.Did,
+		Controller: []string{first.Did, second.Did},
+		VerificationMethod: []*types.VerificationMethod{
+			{
+				Id:                     first.KeyID,
+				VerificationMethodType: types.Ed25519VerificationKey2020Type,
+				Controller:             first.Did,
+				VerificationMaterial:   didutil.GenerateEd25519VerificationKey2020VerificationMaterial(first.KeyPair.Public),
+			},
+		},
+		VersionId: uuid.NewString(),
+	}
+
+	signatures := []didutil.SignInput{
+		first.SignInput,
+		second.SignInput,
+	}
+
+	_, err = didutil.UpdateDIDDocument(suite.ctx, suite.keeper, payload, signatures)
+	suite.Require().NoError(err)
+
+	updated, err := didutil.GetDIDDocument(suite.ctx, suite.keeper, first.Did)
+	suite.Require().NoError(err)
+	suite.Require().Equal(payload.ToDidDoc(), *updated.Value.DidDoc)
+}
+
+func (suite *KeeperTestSuite) TestCannotAddControllerWithOnlyOneSignature() {
+	first, err := didutil.CreateDefaultDID(suite.ctx, suite.keeper)
+	suite.Require().NoError(err)
+	second, err := didutil.CreateDefaultDID(suite.ctx, suite.keeper)
+	suite.Require().NoError(err)
+
+	payload := &types.MsgUpdateDIDDocumentPayload{
+		Id:         first.Did,
+		Controller: []string{first.Did, second.Did},
+		VerificationMethod: []*types.VerificationMethod{
+			{
+				Id:                     first.KeyID,
+				VerificationMethodType: types.Ed25519VerificationKey2020Type,
+				Controller:             first.Did,
+				VerificationMaterial:   didutil.GenerateEd25519VerificationKey2020VerificationMaterial(first.KeyPair.Public),
+			},
+		},
+		VersionId: uuid.NewString(),
+	}
+
+
+	onlyExistingControllerSignature := []didutil.SignInput{
+		first.SignInput,
+	}
+	_, err = didutil.UpdateDIDDocument(suite.ctx, suite.keeper, payload, onlyExistingControllerSignature)
+	suite.Require().ErrorContains(err, fmt.Sprintf("there should be at least one signature by %s: signature is required but not found", second.Did))
+
+	onlyNewControllerSignature := []didutil.SignInput{
+		second.SignInput,
+	}
+	_, err = didutil.UpdateDIDDocument(suite.ctx, suite.keeper, payload, onlyNewControllerSignature)
+	suite.Require().ErrorContains(err, fmt.Sprintf("there should be at least one signature by %s (previous version): signature is required but not found", first.Did))
+}
+

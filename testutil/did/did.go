@@ -1,19 +1,20 @@
 package did
 
 import (
-	"github.com/google/uuid"
-	"github.com/lestrrat-go/jwx/jwk"
-	"github.com/mr-tron/base58"
-	"github.com/multiformats/go-multibase"
 	"crypto/ed25519"
 	"crypto/rand"
 	"encoding/json"
 	"math/big"
 
+	"github.com/google/uuid"
+	"github.com/lestrrat-go/jwx/jwk"
+	"github.com/mr-tron/base58"
+	"github.com/multiformats/go-multibase"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"swisstronik/x/did/types"
 	"swisstronik/x/did/keeper"
+	"swisstronik/x/did/types"
 )
 
 const (
@@ -230,4 +231,37 @@ func DeactivateDIDDocument(ctx sdk.Context, keeper keeper.Keeper, payload *types
 	}
 
 	return keeper.DeactivateDIDDocument(sdk.WrapSDKContext(ctx), msg)
+}
+
+func UpdateDIDDocument(ctx sdk.Context, keeper keeper.Keeper, payload *types.MsgUpdateDIDDocumentPayload, signInputs []SignInput) (*types.MsgUpdateDIDDocumentResponse, error) {
+	signBytes := payload.GetSignBytes()
+	signatures := make([]*types.SignInfo, 0, len(signInputs))
+
+	for _, input := range signInputs {
+		signature := ed25519.Sign(input.Key, signBytes)
+
+		signatures = append(signatures, &types.SignInfo{
+			VerificationMethodId: input.VerificationMethodID,
+			Signature:            signature,
+		})
+	}
+
+	msg := &types.MsgUpdateDIDDocument{
+		Payload:    payload,
+		Signatures: signatures,
+	}
+
+	return keeper.UpdateDIDDocument(sdk.WrapSDKContext(ctx), msg)
+}
+
+func GetDIDDocument(ctx sdk.Context, keeper keeper.Keeper, did string) (*types.QueryDIDDocumentResponse, error) {
+	return keeper.DIDDocument(sdk.WrapSDKContext(ctx), &types.QueryDIDDocumentRequest{Id: did})
+} 
+
+func GetDIDDocumentVersion(ctx sdk.Context, keeper keeper.Keeper, did string, version string) (*types.QueryDIDDocumentVersionResponse, error) {
+	return keeper.DIDDocumentVersion(sdk.WrapSDKContext(ctx), &types.QueryDIDDocumentVersionRequest{Id: did, Version: version})
+}
+
+func GetAllDIDVersionsMetadata(ctx sdk.Context, keeper keeper.Keeper, did string) (*types.QueryAllDIDDocumentVersionsMetadataResponse, error) {
+	return keeper.AllDIDDocumentVersionsMetadata(sdk.WrapSDKContext(ctx), &types.QueryAllDIDDocumentVersionsMetadataRequest{Id: did})
 }
