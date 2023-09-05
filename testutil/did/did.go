@@ -210,3 +210,24 @@ func CreateDIDDocumentWithExternalControllers(ctx sdk.Context, didKeeper keeper.
 		VersionID:  created.Value.Metadata.VersionId,
 	}, nil
 }
+
+func DeactivateDIDDocument(ctx sdk.Context, keeper keeper.Keeper, payload *types.MsgDeactivateDIDDocumentPayload, signInputs []SignInput) (*types.MsgDeactivateDIDDocumentResponse, error) {
+	signBytes := payload.GetSignBytes()
+	signatures := make([]*types.SignInfo, 0, len(signInputs))
+
+	for _, input := range signInputs {
+		signature := ed25519.Sign(input.Key, signBytes)
+
+		signatures = append(signatures, &types.SignInfo{
+			VerificationMethodId: input.VerificationMethodID,
+			Signature:            signature,
+		})
+	}
+
+	msg := &types.MsgDeactivateDIDDocument{
+		Payload:    payload,
+		Signatures: signatures,
+	}
+
+	return keeper.DeactivateDIDDocument(sdk.WrapSDKContext(ctx), msg)
+}

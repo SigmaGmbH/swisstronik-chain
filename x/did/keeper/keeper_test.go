@@ -483,27 +483,27 @@ func (suite *KeeperTestSuite) TestShouldCreateWithMixedCases() {
 	didPrefix := "did:swtr:"
 
 	testCases := []struct {
-		name string
-		input string
-		result string 
-	} {
+		name   string
+		input  string
+		result string
+	}{
 		{
-			name: "lowercase UUID",
-			input: didPrefix + "a86f9cae-0902-4a7c-a144-96b60ced2fc9",
+			name:   "lowercase UUID",
+			input:  didPrefix + "a86f9cae-0902-4a7c-a144-96b60ced2fc9",
 			result: didPrefix + "a86f9cae-0902-4a7c-a144-96b60ced2fc9",
 		},
 		{
-			name: "Uppercase UUID",
+			name:   "Uppercase UUID",
 			input:  didPrefix + "A86F9CAE-0902-4A7C-A144-96B60CED2FC9",
 			result: didPrefix + "a86f9cae-0902-4a7c-a144-96b60ced2fc9",
 		},
 		{
-			name: "Mixed case UUID",
+			name:   "Mixed case UUID",
 			input:  didPrefix + "A86F9CAE-0902-4a7c-a144-96b60ced2FC9",
 			result: didPrefix + "a86f9cae-0902-4a7c-a144-96b60ced2fc9",
 		},
 		{
-			name: "Indy-style ID",
+			name:   "Indy-style ID",
 			input:  didPrefix + "zABCDEFG123456789abcd",
 			result: didPrefix + "zABCDEFG123456789abcd",
 		},
@@ -529,7 +529,7 @@ func (suite *KeeperTestSuite) TestShouldCreateWithMixedCases() {
 				},
 				VersionId: uuid.NewString(),
 			}
-	
+
 			signatures := []didutil.SignInput{
 				{
 					VerificationMethodID: keyID,
@@ -544,5 +544,29 @@ func (suite *KeeperTestSuite) TestShouldCreateWithMixedCases() {
 			suite.Require().NoError(err)
 			suite.Require().Equal(resp.Value.DidDoc.Id, tc.result)
 		})
+	}
+}
+
+func (suite *KeeperTestSuite) TestShouldDeactivateDID() {
+	did, err := didutil.CreateDefaultDID(suite.ctx, suite.keeper)
+	suite.Require().NoError(err)
+
+	payload := &types.MsgDeactivateDIDDocumentPayload{
+		Id:        did.Did,
+		VersionId: uuid.NewString(),
+	}
+
+	signatures := []didutil.SignInput{did.DIDDocumentInfo.SignInput}
+
+	res, err := didutil.DeactivateDIDDocument(suite.ctx, suite.keeper, payload, signatures)
+	suite.Require().NoError(err)
+	suite.Require().True(res.Value.Metadata.Deactivated)
+
+	// Check that all versions are deactivated
+	versions, err := suite.keeper.AllDIDDocumentVersionsMetadata(suite.goCtx, &types.QueryAllDIDDocumentVersionsMetadataRequest{Id: did.Did})
+	suite.Require().NoError(err)
+
+	for _, version := range versions.Versions {
+		suite.Require().True(version.Deactivated)
 	}
 }
