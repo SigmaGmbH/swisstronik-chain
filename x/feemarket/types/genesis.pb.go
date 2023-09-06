@@ -27,8 +27,8 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 type GenesisState struct {
 	// params defines all the parameters of the feemarket module.
 	Params Params `protobuf:"bytes,1,opt,name=params,proto3" json:"params"`
-	// last_block_gas is the amount of gas wanted on the last block before the upgrade.
-	// Zero by default.
+	// last_block_gas is the amount of gas wanted on the last block before the
+	// upgrade. Zero by default.
 	LastBlockGas uint64 `protobuf:"varint,2,opt,name=last_block_gas,json=lastBlockGas,proto3" json:"last_block_gas,omitempty"`
 }
 
