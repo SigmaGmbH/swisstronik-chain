@@ -145,6 +145,7 @@ type EVMBackend interface {
 	TraceBlock(height rpctypes.BlockNumber, config *evmtypes.TraceConfig, block *tmrpctypes.ResultBlock) ([]*evmtypes.TxTraceResult, error)
 }
 
+// DIDBackend implements the functionality shared within did namespaces
 type DIDBackend interface {
 	DIDResolve(blockNrOrHash rpctypes.BlockNumberOrHash, Id string) (*didtypes.DIDDocumentWithMetadata, error)
 }

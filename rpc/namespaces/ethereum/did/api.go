@@ -33,7 +33,7 @@ type API struct {
 	backend backend.DIDBackend
 }
 
-// NewPrivateAPI creates an instance of the Miner API.
+// NewPrivateAPI creates an instance of the DID API.
 func NewPrivateAPI(
 	ctx *server.Context,
 	backend backend.DIDBackend,
@@ -45,7 +45,7 @@ func NewPrivateAPI(
 	}
 }
 
-// SetEtherbase sets the etherbase of the miner
+// Resolve function gets did document for id
 func (api *API) Resolve(blockNrOrHash rpctypes.BlockNumberOrHash, Id string) (*didtypes.DIDDocumentWithMetadata, error) {
 	api.logger.Debug("did_resolve", "block number or hash", blockNrOrHash, "DID Id", Id)
 	return api.backend.DIDResolve(blockNrOrHash, Id)
