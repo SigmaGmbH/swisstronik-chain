@@ -24,6 +24,9 @@ import (
 	"swisstronik/server/config"
 	ethermint "swisstronik/types"
 	evmtypes "swisstronik/x/evm/types"
+
+	didtypes "swisstronik/x/did/types"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	"github.com/cosmos/cosmos-sdk/server"
@@ -42,6 +45,7 @@ import (
 type BackendI interface { //nolint: revive
 	CosmosBackend
 	EVMBackend
+	DIDBackend
 }
 
 // CosmosBackend implements the functionality shared within cosmos namespaces
@@ -139,6 +143,10 @@ type EVMBackend interface {
 	// Tracing
 	TraceTransaction(hash common.Hash, config *evmtypes.TraceConfig) (interface{}, error)
 	TraceBlock(height rpctypes.BlockNumber, config *evmtypes.TraceConfig, block *tmrpctypes.ResultBlock) ([]*evmtypes.TxTraceResult, error)
+}
+
+type DIDBackend interface {
+	DIDResolve(blockNrOrHash rpctypes.BlockNumberOrHash, Id string) (*didtypes.DIDDocumentWithMetadata, error)
 }
 
 var _ BackendI = (*Backend)(nil)

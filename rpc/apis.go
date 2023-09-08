@@ -25,6 +25,7 @@ import (
 
 	"swisstronik/rpc/backend"
 	"swisstronik/rpc/namespaces/ethereum/debug"
+	"swisstronik/rpc/namespaces/ethereum/did"
 	"swisstronik/rpc/namespaces/ethereum/eth"
 	"swisstronik/rpc/namespaces/ethereum/eth/filters"
 	"swisstronik/rpc/namespaces/ethereum/miner"
@@ -54,6 +55,8 @@ const (
 	DebugNamespace    = "debug"
 	MinerNamespace    = "miner"
 	UtilsNamespace    = "utils"
+
+	DidNamespace = "did"
 
 	apiVersion = "1.0"
 )
@@ -172,10 +175,26 @@ func init() {
 				},
 			}
 		},
-		UtilsNamespace: func(_ *server.Context, 
-			_ client.Context, 
-			_ *rpcclient.WSClient, 
-			_ bool, 
+		DidNamespace: func(ctx *server.Context,
+			clientCtx client.Context,
+			_ *rpcclient.WSClient,
+			allowUnprotectedTxs bool,
+			indexer ethermint.EVMTxIndexer,
+		) []rpc.API {
+			didBackend := backend.NewBackend(ctx, ctx.Logger, clientCtx, allowUnprotectedTxs, indexer)
+			return []rpc.API{
+				{
+					Namespace: DidNamespace,
+					Version:   apiVersion,
+					Service:   did.NewPrivateAPI(ctx, didBackend),
+					Public:    true,
+				},
+			}
+		},
+		UtilsNamespace: func(_ *server.Context,
+			_ client.Context,
+			_ *rpcclient.WSClient,
+			_ bool,
 			_ ethermint.EVMTxIndexer,
 		) []rpc.API {
 			return []rpc.API{
