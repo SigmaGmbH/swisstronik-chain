@@ -13,9 +13,36 @@ import (
 	didtypes "swisstronik/x/did/types"
 )
 
-type JsonSignInfo struct {
-	VerificationMethodId string `json:"verificationMethodId"`
-	PrivateKey ed25519.PrivateKey `json:"privKey"`
+type DIDDocument struct {
+	Context              []string             `json:"context"`
+	ID                   string               `json:"id"`
+	Controller           []string             `json:"controller,omitempty"`
+	VerificationMethod   []VerificationMethod `json:"verificationMethod,omitempty"`
+	Authentication       []string             `json:"authentication,omitempty"`
+	AssertionMethod      []string             `json:"assertionMethod,omitempty"`
+	CapabilityInvocation []string             `json:"capabilityInvocation,omitempty"`
+	CapabilityDelegation []string             `json:"capabilityDelegation,omitempty"`
+	KeyAgreement         []string             `json:"keyAgreement,omitempty"`
+	Service              []Service            `json:"service,omitempty"`
+	AlsoKnownAs          []string             `json:"alsoKnownAs,omitempty"`
+}
+
+type VerificationMethod map[string]any
+
+type PayloadWithSignInputs struct {
+	Payload    json.RawMessage
+	SignInputs []SignInput
+}
+
+type SignInput struct {
+	VerificationMethodID string
+	PrivKey              ed25519.PrivateKey
+}
+
+type Service struct {
+	ID              string   `json:"id"`
+	Type            string   `json:"type"`
+	ServiceEndpoint []string `json:"serviceEndpoint"`
 }
 
 // Cmd creates a CLI main command
@@ -96,33 +123,35 @@ func SampleDIDDocument() *cobra.Command {
 			did := didutil.GenerateDID(didutil.Base58_16bytes)
 			keyId := did + "#key1" 
 
+			// Construct verification method
+			verificationMethod := make(map[string]any)
+			verificationMethod["id"] = keyId
+			verificationMethod["type"] = didtypes.Ed25519VerificationKey2020Type
+			verificationMethod["controller"] = did
+			verificationMethod["publicKeyMultibase"] = didutil.GenerateEd25519VerificationKey2020VerificationMaterial(publicKey)
+
 			// Construct DID document
-			document := didtypes.DIDDocument{
+			document := DIDDocument{
 				Context: []string{"https://www.w3.org/ns/did/v1"},
-				Id: did,
+				ID: did,
 				Authentication: []string{keyId},
-				VerificationMethod: []*didtypes.VerificationMethod{
-					{
-						Id: keyId,
-						VerificationMethodType: didtypes.Ed25519VerificationKey2018Type,
-						Controller: did,
-						VerificationMaterial: didutil.GenerateEd25519VerificationKey2018VerificationMaterial(publicKey),
-					},
-				},
+				VerificationMethod: []VerificationMethod{verificationMethod},
+			}
+
+			encodedDocument, err := json.Marshal(document)
+			if err != nil {
+				return err
 			}
 
 			// Construct sign inputs
-			signInputs := JsonSignInfo {
-				VerificationMethodId: keyId,
-				PrivateKey: privateKey,
+			signInputs := SignInput {
+				VerificationMethodID: keyId,
+				PrivKey: privateKey,
 			}
 
-			result := struct {
-				Document didtypes.DIDDocument `json:"payload"`
-				SignInputs []JsonSignInfo `json:"signInputs"`		
-			} {
-				Document: document,
-				SignInputs: []JsonSignInfo{signInputs},
+			result := PayloadWithSignInputs{
+				Payload: encodedDocument,
+				SignInputs: []SignInput{signInputs},
 			}
 
 			encodedResult, err := json.Marshal(result)
