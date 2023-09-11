@@ -128,6 +128,7 @@ func initRootCmd(
 		NewTestnetCmd(app.ModuleBasics, banktypes.GenesisBalancesIterator{}),
 		config.Cmd(),
 		EnclaveCmd(),
+		DebugCmd(),
 		// this line is used by starport scaffolding # root/commands
 	)
 
