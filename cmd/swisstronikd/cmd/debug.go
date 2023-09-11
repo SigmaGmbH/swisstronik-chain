@@ -11,12 +11,11 @@ import (
 	"github.com/spf13/cobra"
 	didutil "swisstronik/testutil/did"
 	didtypes "swisstronik/x/did/types"
-	"github.com/multiformats/go-multibase"
 )
 
 type JsonSignInfo struct {
 	VerificationMethodId string `json:"verificationMethodId"`
-	PrivateKey string `json:"privKey"`
+	PrivateKey ed25519.PrivateKey `json:"privKey"`
 }
 
 // Cmd creates a CLI main command
@@ -93,38 +92,29 @@ func SampleDIDDocument() *cobra.Command {
 				publicKey = privateKey.Public().(ed25519.PublicKey)
 			}
 
-			// Generate random DID 
+			// Generate random DID and key id
 			did := didutil.GenerateDID(didutil.Base58_16bytes)
-			
-			// Generate verification method
-			verificationMethodId := did + "#key1"
-			multibasePublicKeyBytes := []byte{0xed, 0x01}
-			multibasePublicKeyBytes = append(multibasePublicKeyBytes, publicKey...)
-			verificationMaterial, err := multibase.Encode(multibase.Base58BTC, multibasePublicKeyBytes)
-			if err != nil {
-				return err
-			}
-
-			verificationMethod := didtypes.NewVerificationMethod(
-				verificationMethodId,
-				"Ed25519VerificationKey2020",
-				did,
-				verificationMaterial,
-			)
+			keyId := did + "#key1" 
 
 			// Construct DID document
 			document := didtypes.DIDDocument{
 				Context: []string{"https://www.w3.org/ns/did/v1"},
 				Id: did,
-				Controller: []string{did},
-				VerificationMethod: []*didtypes.VerificationMethod{verificationMethod},
-				Authentication: []string{verificationMethodId},
+				Authentication: []string{keyId},
+				VerificationMethod: []*didtypes.VerificationMethod{
+					{
+						Id: keyId,
+						VerificationMethodType: didtypes.Ed25519VerificationKey2018Type,
+						Controller: did,
+						VerificationMaterial: didutil.GenerateEd25519VerificationKey2018VerificationMaterial(publicKey),
+					},
+				},
 			}
 
 			// Construct sign inputs
 			signInputs := JsonSignInfo {
-				VerificationMethodId: verificationMethodId,
-				PrivateKey: base64.StdEncoding.EncodeToString(privateKey),
+				VerificationMethodId: keyId,
+				PrivateKey: privateKey,
 			}
 
 			result := struct {
