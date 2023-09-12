@@ -31,7 +31,7 @@ var _ = Describe("Message for DID updating", func() {
 			TestCaseMsgDeactivateDID{
 				msg: &MsgDeactivateDIDDocument{
 					Payload: &MsgDeactivateDIDDocumentPayload{
-						Id:        "did:cheqd:testnet:zABCDEFG123456789abcd",
+						Id:        "did:swtr:testnet:zABCDEFG123456789abcd",
 						VersionId: uuid.NewString(),
 					},
 					Signatures: nil,
@@ -44,13 +44,13 @@ var _ = Describe("Message for DID updating", func() {
 			TestCaseMsgDeactivateDID{
 				msg: &MsgDeactivateDIDDocument{
 					Payload: &MsgDeactivateDIDDocumentPayload{
-						Id:        "did:cheqdttt:testnet:zABCDEFG123456789abcd",
+						Id:        "did:swtrttt:testnet:zABCDEFG123456789abcd",
 						VersionId: uuid.NewString(),
 					},
 					Signatures: nil,
 				},
 				isValid:  false,
-				errorMsg: "payload: (id: did method must be: cheqd.).: basic validation failed",
+				errorMsg: "payload: (id: did method must be: swtr.).: basic validation failed",
 			}),
 
 		Entry(

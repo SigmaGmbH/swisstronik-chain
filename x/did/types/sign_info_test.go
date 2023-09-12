@@ -30,7 +30,7 @@ var _ = Describe("SignInfo tests", func() {
 			"Positive case",
 			TestCaseSignInfoStruct{
 				si: SignInfo{
-					VerificationMethodId: "did:cheqd:zABCDEFG123456789abcd#method1",
+					VerificationMethodId: "did:swtr:zABCDEFG123456789abcd#method1",
 					Signature:            []byte("aaa="),
 				},
 				isValid:  true,
@@ -41,7 +41,7 @@ var _ = Describe("SignInfo tests", func() {
 			"Namespace is not allowed",
 			TestCaseSignInfoStruct{
 				si: SignInfo{
-					VerificationMethodId: "did:cheqd:zABCDEFG123456789abcd#service1",
+					VerificationMethodId: "did:swtr:zABCDEFG123456789abcd#service1",
 					Signature:            []byte("DIDCommMessaging"),
 				},
 				allowedNamespaces: []string{"mainnet"},
@@ -67,11 +67,11 @@ var _ = Describe("Full SignInfo duplicates tests", func() {
 			TestCaseSignInfosStruct{
 				signInfos: []*SignInfo{
 					{
-						VerificationMethodId: "did:cheqd:zABCDEFG123456789abcd#method1",
+						VerificationMethodId: "did:swtr:zABCDEFG123456789abcd#method1",
 						Signature:            []byte("aaa="),
 					},
 					{
-						VerificationMethodId: "did:cheqd:zABCDEFG123456789abcd#method1",
+						VerificationMethodId: "did:swtr:zABCDEFG123456789abcd#method1",
 						Signature:            []byte("bbb="),
 					},
 				},
@@ -83,11 +83,11 @@ var _ = Describe("Full SignInfo duplicates tests", func() {
 			TestCaseSignInfosStruct{
 				signInfos: []*SignInfo{
 					{
-						VerificationMethodId: "did:cheqd:zABCDEFG123456789abcd#method1",
+						VerificationMethodId: "did:swtr:zABCDEFG123456789abcd#method1",
 						Signature:            []byte("aaa="),
 					},
 					{
-						VerificationMethodId: "did:cheqd:zABCDEFG123456789abcd#method1",
+						VerificationMethodId: "did:swtr:zABCDEFG123456789abcd#method1",
 						Signature:            []byte("bbb="),
 					},
 				},
@@ -99,11 +99,11 @@ var _ = Describe("Full SignInfo duplicates tests", func() {
 			TestCaseSignInfosStruct{
 				signInfos: []*SignInfo{
 					{
-						VerificationMethodId: "did:cheqd:zABCDEFG123456789abcd#method1",
+						VerificationMethodId: "did:swtr:zABCDEFG123456789abcd#method1",
 						Signature:            []byte("aaa="),
 					},
 					{
-						VerificationMethodId: "did:cheqd:zABCDEFG123456789abcd#method1",
+						VerificationMethodId: "did:swtr:zABCDEFG123456789abcd#method1",
 						Signature:            []byte("aaa="),
 					},
 				},
@@ -115,15 +115,15 @@ var _ = Describe("Full SignInfo duplicates tests", func() {
 			TestCaseSignInfosStruct{
 				signInfos: []*SignInfo{
 					{
-						VerificationMethodId: "did:cheqd:zABCDEFG123456789abcd#method1",
+						VerificationMethodId: "did:swtr:zABCDEFG123456789abcd#method1",
 						Signature:            []byte("aaa="),
 					},
 					{
-						VerificationMethodId: "did:cheqd:zABCDEFG123456789abcd#method1",
+						VerificationMethodId: "did:swtr:zABCDEFG123456789abcd#method1",
 						Signature:            []byte("aaa="),
 					},
 					{
-						VerificationMethodId: "did:cheqd:zABCDEFG123456789abcd#method1",
+						VerificationMethodId: "did:swtr:zABCDEFG123456789abcd#method1",
 						Signature:            []byte("aaa="),
 					},
 				},
