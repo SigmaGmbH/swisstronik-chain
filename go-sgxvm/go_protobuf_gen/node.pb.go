@@ -374,6 +374,7 @@ type SetupRequest struct {
 	unknownFields protoimpl.UnknownFields
 
 	// Types that are assignable to Req:
+	//
 	//	*SetupRequest_InitializeMasterKey
 	//	*SetupRequest_StartSeedServer
 	//	*SetupRequest_NodeSeed
