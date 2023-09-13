@@ -8,8 +8,8 @@ import (
 
 // SplitDIDURLRegexp ...
 // That for groups:
-// Example: did:swtr:testnet:fafdsffq11213343/path-to-s/ome-external-resource?query#key1???
-// 1 - [^/?#]* - all the symbols except / and ? and # . This is the DID part                      (did:swtr:testnet:fafdsffq11213343)
+// Example: did:swtr:fafdsffq11213343/path-to-s/ome-external-resource?query#key1???
+// 1 - [^/?#]* - all the symbols except / and ? and # . This is the DID part                      (did:swtr:fafdsffq11213343)
 // 2 - [^?#]*  - all the symbols except ? and #. it means te section started from /, path-abempty (/path-to-s/ome-external-resource)
 // 3 - \?([^#]*) - group for `query` part but with ? symbol 									  (?query)
 // 4 - [^#]*     - group inside query string, match only exact query                              (query)

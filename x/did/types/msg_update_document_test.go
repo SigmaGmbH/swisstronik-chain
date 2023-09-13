@@ -30,16 +30,16 @@ var _ = Describe("Message for DID updating", func() {
 			TestCaseMsgUpdateDID{
 				msg: &MsgUpdateDIDDocument{
 					Payload: &MsgUpdateDIDDocumentPayload{
-						Id: "did:swtr:testnet:zABCDEFG123456789abcd",
+						Id: "did:swtr:zABCDEFG123456789abcd",
 						VerificationMethod: []*VerificationMethod{
 							{
-								Id:                     "did:swtr:testnet:zABCDEFG123456789abcd#key1",
+								Id:                     "did:swtr:zABCDEFG123456789abcd#key1",
 								VerificationMethodType: "Ed25519VerificationKey2020",
-								Controller:             "did:swtr:testnet:zABCDEFG123456789abcd",
+								Controller:             "did:swtr:zABCDEFG123456789abcd",
 								VerificationMaterial:   ValidEd25519VerificationKey2020VerificationMaterial,
 							},
 						},
-						Authentication: []string{"did:swtr:testnet:zABCDEFG123456789abcd#key1", "did:swtr:testnet:zABCDEFG123456789abcd#aaa"},
+						Authentication: []string{"did:swtr:zABCDEFG123456789abcd#key1", "did:swtr:zABCDEFG123456789abcd#aaa"},
 						VersionId:      "version1",
 					},
 					Signatures: nil,
@@ -52,16 +52,16 @@ var _ = Describe("Message for DID updating", func() {
 			TestCaseMsgUpdateDID{
 				msg: &MsgUpdateDIDDocument{
 					Payload: &MsgUpdateDIDDocumentPayload{
-						Id: "did:swtr:testnet:zABCDEFG123456789abcd",
+						Id: "did:swtr:zABCDEFG123456789abcd",
 						VerificationMethod: []*VerificationMethod{
 							{
-								Id:                     "did:swtr:testnet:zABCDEFG123456789abcd#key1",
+								Id:                     "did:swtr:zABCDEFG123456789abcd#key1",
 								VerificationMethodType: "Ed25519VerificationKey2020",
-								Controller:             "did:swtr:testnet:zABCDEFG123456789abcd",
+								Controller:             "did:swtr:zABCDEFG123456789abcd",
 								VerificationMaterial:   ValidEd25519VerificationKey2020VerificationMaterial,
 							},
 						},
-						Authentication: []string{"did:swtr:testnet:zABCDEFG123456789abcd#key1", "did:swtr:testnet:zABCDEFG123456789abcd#key1"},
+						Authentication: []string{"did:swtr:zABCDEFG123456789abcd#key1", "did:swtr:zABCDEFG123456789abcd#key1"},
 						VersionId:      "version1",
 					},
 					Signatures: nil,
@@ -74,16 +74,16 @@ var _ = Describe("Message for DID updating", func() {
 			TestCaseMsgUpdateDID{
 				msg: &MsgUpdateDIDDocument{
 					Payload: &MsgUpdateDIDDocumentPayload{
-						Id: "did:swtr:testnet:zABCDEFG123456789abcd",
+						Id: "did:swtr:zABCDEFG123456789abcd",
 						VerificationMethod: []*VerificationMethod{
 							{
-								Id:                     "did:swtr:testnet:zABCDEFG123456789abcd#key1",
+								Id:                     "did:swtr:zABCDEFG123456789abcd#key1",
 								VerificationMethodType: "Ed25519VerificationKey2020",
-								Controller:             "did:swtr:testnet:zABCDEFG123456789abcd",
+								Controller:             "did:swtr:zABCDEFG123456789abcd",
 								VerificationMaterial:   ValidEd25519VerificationKey2020VerificationMaterial,
 							},
 						},
-						Authentication: []string{"did:swtr:testnet:zABCDEFG123456789abcd#key1", "did:swtr:testnet:zABCDEFG123456789abcd#aaa"},
+						Authentication: []string{"did:swtr:zABCDEFG123456789abcd#key1", "did:swtr:zABCDEFG123456789abcd#aaa"},
 					},
 					Signatures: nil,
 				},

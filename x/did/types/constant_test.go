@@ -5,8 +5,8 @@ import (
 )
 
 var (
-	ValidTestDID   = "did:swtr:testnet:zABCDEFG123456789abcd"
-	ValidTestDID2  = "did:swtr:testnet:zABCDEFG987654321abcd"
+	ValidTestDID   = "did:swtr:zABCDEFG123456789abcd"
+	ValidTestDID2  = "did:swtr:zABCDEFG987654321abcd"
 	InvalidTestDID = "badDid"
 )
 
