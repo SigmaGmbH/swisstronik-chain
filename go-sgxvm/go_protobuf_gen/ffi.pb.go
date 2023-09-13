@@ -440,7 +440,7 @@ func (x *Topic) GetInner() []byte {
 
 // Log represents an protobuf compatible Ethereum Log that defines a contract
 // log event.
-// Copied from `devnet/proto``
+// Copied from `devnet/proto“
 type Log struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -1564,6 +1564,7 @@ type CosmosRequest struct {
 	unknownFields protoimpl.UnknownFields
 
 	// Types that are assignable to Req:
+	//
 	//	*CosmosRequest_GetAccount
 	//	*CosmosRequest_InsertAccount
 	//	*CosmosRequest_ContainsKey
@@ -2169,6 +2170,7 @@ type FFIRequest struct {
 	unknownFields protoimpl.UnknownFields
 
 	// Types that are assignable to Req:
+	//
 	//	*FFIRequest_CallRequest
 	//	*FFIRequest_CreateRequest
 	//	*FFIRequest_PublicKeyRequest
