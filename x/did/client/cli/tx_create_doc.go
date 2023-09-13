@@ -1,13 +1,14 @@
 package cli
 
 import (
+	"encoding/json"
 	"swisstronik/x/did/types"
-	"github.com/spf13/cobra"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/google/uuid"
-	"encoding/json"
+	"github.com/spf13/cobra"
 )
 
 func CmdCreateDIDDocument() *cobra.Command {
@@ -144,10 +145,6 @@ Example payload file:
 
 	// add custom / override flags
 	cmd.Flags().String(FlagVersionID, "", "Version ID of the DID Document")
-
-	_ = cmd.MarkFlagRequired(flags.FlagFees)
-	_ = cmd.MarkFlagRequired(flags.FlagGas)
-	_ = cmd.MarkFlagRequired(flags.FlagGasAdjustment)
 
 	return cmd
 }

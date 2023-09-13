@@ -25,6 +25,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client"
 
+	didtypes "swisstronik/x/did/types"
 	evmtypes "swisstronik/x/evm/types"
 	feemarkettypes "swisstronik/x/feemarket/types"
 )
@@ -36,15 +37,17 @@ import (
 type QueryClient struct {
 	tx.ServiceClient
 	evmtypes.QueryClient
-	FeeMarket feemarkettypes.QueryClient
+	FeeMarket      feemarkettypes.QueryClient
+	DidQueryClient didtypes.QueryClient
 }
 
 // NewQueryClient creates a new gRPC query client
 func NewQueryClient(clientCtx client.Context) *QueryClient {
 	return &QueryClient{
-		ServiceClient: tx.NewServiceClient(clientCtx),
-		QueryClient:   evmtypes.NewQueryClient(clientCtx),
-		FeeMarket:     feemarkettypes.NewQueryClient(clientCtx),
+		ServiceClient:  tx.NewServiceClient(clientCtx),
+		QueryClient:    evmtypes.NewQueryClient(clientCtx),
+		FeeMarket:      feemarkettypes.NewQueryClient(clientCtx),
+		DidQueryClient: didtypes.NewQueryClient(clientCtx),
 	}
 }
 
