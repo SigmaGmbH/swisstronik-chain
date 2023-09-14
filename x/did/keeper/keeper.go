@@ -549,17 +549,17 @@ func (k Keeper) GetResource(ctx *sdk.Context, collectionID string, id string) (t
 	}, nil
 }
 
-func (k Keeper) GetResourceMetadata(ctx *sdk.Context, collectionID string, id string) (types.Metadata, error) {
+func (k Keeper) GetResourceMetadata(ctx *sdk.Context, collectionID string, id string) (types.ResourceMetadata, error) {
 	if !k.HasResource(ctx, collectionID, id) {
-		return types.Metadata{}, sdkerrors.ErrNotFound.Wrap("resource " + collectionID + ":" + id)
+		return types.ResourceMetadata{}, sdkerrors.ErrNotFound.Wrap("resource " + collectionID + ":" + id)
 	}
 
 	store := ctx.KVStore(k.storeKey)
 
 	metadataBytes := store.Get(types.GetResourceMetadataKey(collectionID, id))
-	var metadata types.Metadata
+	var metadata types.ResourceMetadata
 	if err := k.cdc.Unmarshal(metadataBytes, &metadata); err != nil {
-		return types.Metadata{}, sdkerrors.ErrInvalidType.Wrap(err.Error())
+		return types.ResourceMetadata{}, sdkerrors.ErrInvalidType.Wrap(err.Error())
 	}
 
 	return metadata, nil
@@ -571,16 +571,16 @@ func (k Keeper) HasResource(ctx *sdk.Context, collectionID string, id string) bo
 	return store.Has(types.GetResourceMetadataKey(collectionID, id))
 }
 
-func (k Keeper) GetResourceCollection(ctx *sdk.Context, collectionID string) []*types.Metadata {
+func (k Keeper) GetResourceCollection(ctx *sdk.Context, collectionID string) []*types.ResourceMetadata {
 	store := ctx.KVStore(k.storeKey)
 	iterator := sdk.KVStorePrefixIterator(store, types.GetResourceMetadataCollectionPrefix(collectionID))
 
-	var resources []*types.Metadata
+	var resources []*types.ResourceMetadata
 
 	defer closeIteratorOrPanic(iterator)
 
 	for ; iterator.Valid(); iterator.Next() {
-		var val types.Metadata
+		var val types.ResourceMetadata
 		k.cdc.MustUnmarshal(iterator.Value(), &val)
 		resources = append(resources, &val)
 

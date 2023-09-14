@@ -1,9 +1,9 @@
 package did
 
 import (
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"swisstronik/x/did/keeper"
 	"swisstronik/x/did/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // InitGenesis initializes module's state from a provided genesis
@@ -11,7 +11,7 @@ import (
 func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState *types.GenesisState) {
 	// Set params
 	k.SetParams(ctx, genState.Params)
-	
+
 	// Set DID documents
 	for _, versionSet := range genState.VersionSets {
 		for _, didDoc := range versionSet.DidDocs {
@@ -22,7 +22,14 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState *types.GenesisState)
 		}
 
 		err := k.SetLatestDIDDocumentVersion(&ctx, versionSet.DidDocs[0].DidDoc.Id, versionSet.LatestVersion)
-		if err !=   nil {
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	// Set DID resources
+	for _, resource := range genState.Resources {
+		if err := k.SetResource(&ctx, resource); err != nil {
 			panic(err)
 		}
 	}
@@ -34,9 +41,16 @@ func ExportGenesis(ctx sdk.Context, k keeper.Keeper) *types.GenesisState {
 	if err != nil {
 		panic(err)
 	}
+
+	resourceList, err := k.GetAllResources(&ctx)
+	if err != nil {
+		panic(err.Error())
+	}
+
 	genesis := types.GenesisState{
-		VersionSets:  docs,
-		Params: k.GetParams(ctx),
+		VersionSets: docs,
+		Resources:   resourceList,
+		Params:      k.GetParams(ctx),
 	}
 
 	return &genesis
