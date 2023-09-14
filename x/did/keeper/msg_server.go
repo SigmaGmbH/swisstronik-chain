@@ -2,6 +2,9 @@ package keeper
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"fmt"
 	"reflect"
 	"swisstronik/x/did/types"
 
@@ -9,6 +12,11 @@ import (
 )
 
 var _ types.MsgServer = &Keeper{}
+
+const (
+	DefaultAlternativeURITemplate    = "did:swtr:%s/resources/%s"
+	DefaultAlternaticeURIDescription = "did-url"
+)
 
 // NewMsgServer returns an implementation of the MsgServer interface for the provided Keeper.
 func NewMsgServer(keeper Keeper) types.MsgServer {
@@ -214,6 +222,65 @@ func (k Keeper) UpdateDIDDocument(goCtx context.Context, msg *types.MsgUpdateDID
 	}, nil
 }
 
+func (k Keeper) CreateResource(goCtx context.Context, msg *types.MsgCreateResource) (*types.MsgCreateResourceResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// Remember bytes before modifying payload
+	signBytes := msg.Payload.GetSignBytes()
+
+	msg.Normalize()
+
+	// Validate corresponding DIDDoc exists
+	did := types.JoinDID(types.DIDMethod, msg.Payload.CollectionId)
+	didDoc, err := k.GetLatestDIDDocument(&ctx, did)
+	if err != nil {
+		return nil, err
+	}
+
+	// Validate DID is not deactivated
+	if didDoc.Metadata.Deactivated {
+		return nil, types.ErrDIDDocumentDeactivated.Wrap(did)
+	}
+
+	// Validate Resource doesn't exist
+	if k.HasResource(&ctx, msg.Payload.CollectionId, msg.Payload.Id) {
+		return nil, types.ErrResourceExists.Wrap(msg.Payload.Id)
+	}
+
+	// We can use the same signers as for DID creation because didDoc stays the same
+	signers := GetSignerDIDsForDIDCreation(*didDoc.DidDoc)
+	err = VerifyAllSignersHaveAllValidSignatures(&k, &ctx, map[string]types.DIDDocumentWithMetadata{},
+		signBytes, signers, msg.Signatures)
+	if err != nil {
+		return nil, err
+	}
+
+	// Build Resource
+	resource := msg.Payload.ToResource()
+	checksum := sha256.Sum256(resource.Resource.Data)
+	resource.Metadata.Checksum = hex.EncodeToString(checksum[:])
+	resource.Metadata.Created = ctx.BlockTime()
+	resource.Metadata.MediaType = types.DetectMediaType(resource.Resource.Data)
+
+	// Add default resource alternative url
+	defaultAlternativeURL := types.AlternativeUri{
+		Uri:         fmt.Sprintf(DefaultAlternativeURITemplate, msg.Payload.CollectionId, msg.Payload.Id),
+		Description: DefaultAlternaticeURIDescription,
+	}
+	resource.Metadata.AlsoKnownAs = append(resource.Metadata.AlsoKnownAs, &defaultAlternativeURL)
+
+	// Persist resource
+	err = k.AddNewResourceVersion(&ctx, &resource)
+	if err != nil {
+		return nil, types.ErrInternal.Wrapf(err.Error())
+	}
+
+	// Build and return response
+	return &types.MsgCreateResourceResponse{
+		Resource: resource.Metadata,
+	}, nil
+}
+
 func DuplicateSignatures(signatures []*types.SignInfo, didToDuplicate string, newDid string) []*types.SignInfo {
 	result := make([]*types.SignInfo, 0, len(signatures))
 
@@ -279,4 +346,3 @@ func GetSignerDIDsForDIDUpdate(existingDidDoc types.DIDDocument, updatedDidDoc t
 
 	return types.UniqueSorted(signers)
 }
-

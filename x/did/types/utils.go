@@ -1,6 +1,9 @@
 package types
 
-import "sort"
+import (
+	"sort"
+	"github.com/gabriel-vasile/mimetype"
+)
 
 func IndexOf(array []string, searchElement string, fromIndex int) int {
 	for i, v := range array[fromIndex:] {
@@ -99,4 +102,12 @@ func UniqueSorted(ls []string) []string {
 
 func StrBytes(p string) []byte {
 	return []byte(p)
+}
+
+func DetectMediaType(data []byte) string {
+	mimetype.SetLimit(0) // No limit, whole file content used.
+
+	// The result is always a valid MIME type, with application/octet-stream
+	// returned when identification failed.
+	return mimetype.Detect(data).String()
 }
