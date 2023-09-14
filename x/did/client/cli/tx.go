@@ -33,6 +33,7 @@ func GetTxCmd() *cobra.Command {
 		CmdCreateDIDDocument(),
 		CmdUpdateDIDDocument(),
 		CmdDeactivateDIDDocument(),
+		CmdCreateResource(),
 	)
 
 	return cmd
