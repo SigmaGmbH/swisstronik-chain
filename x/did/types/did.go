@@ -38,14 +38,8 @@ func MustSplitDID(did string) (method string, namespace string, id string) {
 	return
 }
 
-func JoinDID(method, namespace, id string) string {
-	res := "did:" + method
-
-	if namespace != "" {
-		res = res + ":" + namespace
-	}
-
-	return res + ":" + id
+func JoinDID(method, id string) string {
+	return "did:" + method + ":" + id
 }
 
 func ReplaceDIDInDIDURL(didURL string, oldDid string, newDid string) string {
@@ -102,12 +96,10 @@ func IsValidDID(did string, method string, allowedNamespaces []string) bool {
 	return err == nil
 }
 
-// Normalization
-
 func NormalizeDID(did string) string {
-	method, namespace, id := MustSplitDID(did)
+	method, _, id := MustSplitDID(did)
 	id = NormalizeID(id)
-	return JoinDID(method, namespace, id)
+	return JoinDID(method, id)
 }
 
 func NormalizeDIDList(didList []string) []string {

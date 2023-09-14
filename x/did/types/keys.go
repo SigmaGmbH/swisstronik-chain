@@ -13,11 +13,14 @@ const (
 	// MemStoreKey defines the in-memory store key
 	MemStoreKey = "mem_did"
 
-	DIDMethod 			= "swtr"
+	DIDMethod                = "swtr"
 	LatestDocumentVersionKey = "did-latest:"
 	DocumentVersionKey       = "did-version:"
 	DocumentCountKey         = "did-count:"
-	UpdatedPostfix			 = "-updated"
+	UpdatedPostfix           = "-updated"
+	ResourceMetadataKey      = "resource-metadata:"
+	ResourceDataKey          = "resource-data:"
+	ResourceCountKey         = "resource-count:"
 )
 
 func KeyPrefix(p string) []byte {
@@ -38,4 +41,16 @@ func GetLatestDocumentVersionPrefix() []byte {
 
 func GetDocumentVersionsPrefix(did string) []byte {
 	return []byte(DocumentVersionKey + did + ":")
+}
+
+func GetResourceMetadataKey(collectionID string, id string) []byte {
+	return []byte(ResourceMetadataKey + collectionID + ":" + id)
+}
+
+func GetResourceDataKey(collectionID string, id string) []byte {
+	return []byte(ResourceDataKey + collectionID + ":" + id)
+}
+
+func GetResourceMetadataCollectionPrefix(collectionID string) []byte {
+	return []byte(ResourceMetadataKey + collectionID + ":")
 }

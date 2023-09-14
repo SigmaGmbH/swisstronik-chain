@@ -219,3 +219,21 @@ func IsUUID() *CustomErrorRule {
 		return ValidateUUID(casted)
 	})
 }
+
+func (au AlternativeUri) Validate() error {
+	return validation.ValidateStruct(&au,
+		validation.Field(&au.Uri, validation.Required, validation.Length(1, 256)),
+		validation.Field(&au.Description, validation.Length(1, 128)),
+	)
+}
+
+func ValidAlternativeURI() *CustomErrorRule {
+	return NewCustomErrorRule(func(value interface{}) error {
+		casted, ok := value.(AlternativeUri)
+		if !ok {
+			panic("ValidAlternativeUri must be only applied on AlternativeUri properties")
+		}
+
+		return casted.Validate()
+	})
+}
