@@ -177,6 +177,81 @@ func SampleDIDDocument() *cobra.Command {
 	return cmd
 }
 
+func SampleDIDResource() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "sample-did-resource [base64-encoded-ed25519-private-key]",
+		Short: "Generates sample DID resource ready to be stored in DID resource registry",
+		Long: `Generates sample DID resource, which is ready to be stored in DID resource registry. 
+		If private key was not provided, this command will generate random ed25519 keypair`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			var (
+				privateKey ed25519.PrivateKey
+				publicKey  ed25519.PublicKey
+				err        error
+			)
+			// Check if private key was provided.
+			if len(args) != 1 {
+				publicKey, privateKey, err = ed25519.GenerateKey(rand.Reader)
+				if err != nil {
+					return err
+				}
+			} else {
+				privateKeyBytes, err := base64.StdEncoding.DecodeString(args[0])
+				if err != nil {
+					return err
+				}
+				privateKey = ed25519.PrivateKey(privateKeyBytes)
+				publicKey = privateKey.Public().(ed25519.PublicKey)
+			}
+
+			// Generate random DID and key id
+			did := didutil.GenerateDID(didutil.Base58_16bytes)
+			keyId := did + "#key1"
+
+			// Construct verification method
+			verificationMethod := make(map[string]any)
+			verificationMethod["id"] = keyId
+			verificationMethod["type"] = didtypes.Ed25519VerificationKey2020Type
+			verificationMethod["controller"] = did
+			verificationMethod["publicKeyMultibase"] = didutil.GenerateEd25519VerificationKey2020VerificationMaterial(publicKey)
+
+			// Construct DID document
+			document := DIDDocument{
+				Context:            []string{"https://www.w3.org/ns/did/v1"},
+				ID:                 did,
+				Authentication:     []string{keyId},
+				VerificationMethod: []VerificationMethod{verificationMethod},
+			}
+
+			encodedDocument, err := json.Marshal(document)
+			if err != nil {
+				return err
+			}
+
+			// Construct sign inputs
+			signInputs := SignInput{
+				VerificationMethodID: keyId,
+				PrivKey:              privateKey,
+			}
+
+			result := PayloadWithSignInputs{
+				Payload:    encodedDocument,
+				SignInputs: []SignInput{signInputs},
+			}
+
+			encodedResult, err := json.Marshal(result)
+			if err != nil {
+				return err
+			}
+
+			_, err = fmt.Fprintln(cmd.OutOrStdout(), string(encodedResult))
+			return err
+		},
+	}
+
+	return cmd
+}
+
 func ConvertAddressCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "convert-address [address]",
