@@ -6,6 +6,7 @@ package types
 import (
 	context "context"
 	fmt "fmt"
+	_ "github.com/cosmos/gogoproto/gogoproto"
 	grpc1 "github.com/gogo/protobuf/grpc"
 	proto "github.com/gogo/protobuf/proto"
 	grpc "google.golang.org/grpc"
@@ -190,6 +191,62 @@ func (m *MsgDeactivateDIDDocument) GetSignatures() []*SignInfo {
 	return nil
 }
 
+// MsgCreateResource defines the MsgCreateResource request type.
+// It describes the parameters of a request for creating a resource.
+type MsgCreateResource struct {
+	// Payload containing the resource to be created.
+	Payload *MsgCreateResourcePayload `protobuf:"bytes,1,opt,name=payload,proto3" json:"payload,omitempty"`
+	// Signatures of the corresponding DID Document's controller(s).
+	Signatures []*SignInfo `protobuf:"bytes,2,rep,name=signatures,proto3" json:"signatures,omitempty"`
+}
+
+func (m *MsgCreateResource) Reset()         { *m = MsgCreateResource{} }
+func (m *MsgCreateResource) String() string { return proto.CompactTextString(m) }
+func (*MsgCreateResource) ProtoMessage()    {}
+func (*MsgCreateResource) Descriptor() ([]byte, []int) {
+	return fileDescriptor_bf79adfa645a7210, []int{3}
+}
+func (m *MsgCreateResource) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgCreateResource) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgCreateResource.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgCreateResource) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgCreateResource.Merge(m, src)
+}
+func (m *MsgCreateResource) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgCreateResource) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgCreateResource.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgCreateResource proto.InternalMessageInfo
+
+func (m *MsgCreateResource) GetPayload() *MsgCreateResourcePayload {
+	if m != nil {
+		return m.Payload
+	}
+	return nil
+}
+
+func (m *MsgCreateResource) GetSignatures() []*SignInfo {
+	if m != nil {
+		return m.Signatures
+	}
+	return nil
+}
+
 // SignInfo defines the structure of a DID Document controller's signature
 type SignInfo struct {
 	// Verification method ID of the DID Controller
@@ -202,7 +259,7 @@ func (m *SignInfo) Reset()         { *m = SignInfo{} }
 func (m *SignInfo) String() string { return proto.CompactTextString(m) }
 func (*SignInfo) ProtoMessage()    {}
 func (*SignInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_bf79adfa645a7210, []int{3}
+	return fileDescriptor_bf79adfa645a7210, []int{4}
 }
 func (m *SignInfo) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -304,7 +361,7 @@ func (m *MsgCreateDIDDocumentPayload) Reset()         { *m = MsgCreateDIDDocumen
 func (m *MsgCreateDIDDocumentPayload) String() string { return proto.CompactTextString(m) }
 func (*MsgCreateDIDDocumentPayload) ProtoMessage()    {}
 func (*MsgCreateDIDDocumentPayload) Descriptor() ([]byte, []int) {
-	return fileDescriptor_bf79adfa645a7210, []int{4}
+	return fileDescriptor_bf79adfa645a7210, []int{5}
 }
 func (m *MsgCreateDIDDocumentPayload) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -427,7 +484,7 @@ func (m *MsgCreateDIDDocumentResponse) Reset()         { *m = MsgCreateDIDDocume
 func (m *MsgCreateDIDDocumentResponse) String() string { return proto.CompactTextString(m) }
 func (*MsgCreateDIDDocumentResponse) ProtoMessage()    {}
 func (*MsgCreateDIDDocumentResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_bf79adfa645a7210, []int{5}
+	return fileDescriptor_bf79adfa645a7210, []int{6}
 }
 func (m *MsgCreateDIDDocumentResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -524,7 +581,7 @@ func (m *MsgUpdateDIDDocumentPayload) Reset()         { *m = MsgUpdateDIDDocumen
 func (m *MsgUpdateDIDDocumentPayload) String() string { return proto.CompactTextString(m) }
 func (*MsgUpdateDIDDocumentPayload) ProtoMessage()    {}
 func (*MsgUpdateDIDDocumentPayload) Descriptor() ([]byte, []int) {
-	return fileDescriptor_bf79adfa645a7210, []int{6}
+	return fileDescriptor_bf79adfa645a7210, []int{7}
 }
 func (m *MsgUpdateDIDDocumentPayload) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -646,7 +703,7 @@ func (m *MsgUpdateDIDDocumentResponse) Reset()         { *m = MsgUpdateDIDDocume
 func (m *MsgUpdateDIDDocumentResponse) String() string { return proto.CompactTextString(m) }
 func (*MsgUpdateDIDDocumentResponse) ProtoMessage()    {}
 func (*MsgUpdateDIDDocumentResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_bf79adfa645a7210, []int{7}
+	return fileDescriptor_bf79adfa645a7210, []int{8}
 }
 func (m *MsgUpdateDIDDocumentResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -697,7 +754,7 @@ func (m *MsgDeactivateDIDDocumentPayload) Reset()         { *m = MsgDeactivateDI
 func (m *MsgDeactivateDIDDocumentPayload) String() string { return proto.CompactTextString(m) }
 func (*MsgDeactivateDIDDocumentPayload) ProtoMessage()    {}
 func (*MsgDeactivateDIDDocumentPayload) Descriptor() ([]byte, []int) {
-	return fileDescriptor_bf79adfa645a7210, []int{8}
+	return fileDescriptor_bf79adfa645a7210, []int{9}
 }
 func (m *MsgDeactivateDIDDocumentPayload) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -741,7 +798,7 @@ func (m *MsgDeactivateDIDDocumentPayload) GetVersionId() string {
 }
 
 // MsgDeactivateDIDDocumentResponse defines response type for
-// Msg/DeactivateDIDDocument.
+// MsgDeactivateDIDDocument.
 type MsgDeactivateDIDDocumentResponse struct {
 	// Return the deactivated DID Document with metadata
 	Value *DIDDocumentWithMetadata `protobuf:"bytes,1,opt,name=value,proto3" json:"value,omitempty"`
@@ -751,7 +808,7 @@ func (m *MsgDeactivateDIDDocumentResponse) Reset()         { *m = MsgDeactivateD
 func (m *MsgDeactivateDIDDocumentResponse) String() string { return proto.CompactTextString(m) }
 func (*MsgDeactivateDIDDocumentResponse) ProtoMessage()    {}
 func (*MsgDeactivateDIDDocumentResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_bf79adfa645a7210, []int{9}
+	return fileDescriptor_bf79adfa645a7210, []int{10}
 }
 func (m *MsgDeactivateDIDDocumentResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -787,10 +844,174 @@ func (m *MsgDeactivateDIDDocumentResponse) GetValue() *DIDDocumentWithMetadata {
 	return nil
 }
 
+// MsgCreateResourcePayload defines the structure of the payload for creating a resource.
+type MsgCreateResourcePayload struct {
+	// data is a byte-representation of the actual Data the user wants to store.
+	Data []byte `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
+	// collection_id is an identifier of the DidDocument the resource belongs to.
+	// Format: <unique-identifier>
+	//
+	// Examples:
+	// - c82f2b02-bdab-4dd7-b833-3e143745d612
+	// - wGHEXrZvJxR8vw5P3UWH1j
+	CollectionId string `protobuf:"bytes,2,opt,name=collection_id,json=collectionId,proto3" json:"resourceCollectionId"`
+	// id is a unique id of the resource.
+	// Format: <uuid>
+	Id string `protobuf:"bytes,3,opt,name=id,proto3" json:"resourceId"`
+	// name is a human-readable name of the resource.
+	// Format: <string>
+	//
+	// Does not change between different versions.
+	// Example: PassportSchema, EducationTrustRegistry
+	Name string `protobuf:"bytes,4,opt,name=name,proto3" json:"resourceName"`
+	// version is a version of the resource.
+	// Format: <string>
+	// Stored as a string. OPTIONAL.
+	//
+	// Example: 1.0.0, v2.1.0
+	Version string `protobuf:"bytes,5,opt,name=version,proto3" json:"resourceVersion"`
+	// resource_type is a type of the resource.
+	// Format: <string>
+	//
+	// This is NOT the same as the resource's media type.
+	// Example: AnonCredsSchema, StatusList2021
+	ResourceType string `protobuf:"bytes,6,opt,name=resource_type,json=resourceType,proto3" json:"resourceType"`
+	// also_known_as is a list of URIs that can be used to get the resource.
+	AlsoKnownAs []*AlternativeUri `protobuf:"bytes,7,rep,name=also_known_as,json=alsoKnownAs,proto3" json:"resourceAlternativeUri"`
+}
+
+func (m *MsgCreateResourcePayload) Reset()         { *m = MsgCreateResourcePayload{} }
+func (m *MsgCreateResourcePayload) String() string { return proto.CompactTextString(m) }
+func (*MsgCreateResourcePayload) ProtoMessage()    {}
+func (*MsgCreateResourcePayload) Descriptor() ([]byte, []int) {
+	return fileDescriptor_bf79adfa645a7210, []int{11}
+}
+func (m *MsgCreateResourcePayload) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgCreateResourcePayload) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgCreateResourcePayload.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgCreateResourcePayload) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgCreateResourcePayload.Merge(m, src)
+}
+func (m *MsgCreateResourcePayload) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgCreateResourcePayload) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgCreateResourcePayload.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgCreateResourcePayload proto.InternalMessageInfo
+
+func (m *MsgCreateResourcePayload) GetData() []byte {
+	if m != nil {
+		return m.Data
+	}
+	return nil
+}
+
+func (m *MsgCreateResourcePayload) GetCollectionId() string {
+	if m != nil {
+		return m.CollectionId
+	}
+	return ""
+}
+
+func (m *MsgCreateResourcePayload) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+func (m *MsgCreateResourcePayload) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *MsgCreateResourcePayload) GetVersion() string {
+	if m != nil {
+		return m.Version
+	}
+	return ""
+}
+
+func (m *MsgCreateResourcePayload) GetResourceType() string {
+	if m != nil {
+		return m.ResourceType
+	}
+	return ""
+}
+
+func (m *MsgCreateResourcePayload) GetAlsoKnownAs() []*AlternativeUri {
+	if m != nil {
+		return m.AlsoKnownAs
+	}
+	return nil
+}
+
+type MsgCreateResourceResponse struct {
+	// Return the created resource metadata.
+	Resource *ResourceMetadata `protobuf:"bytes,1,opt,name=resource,proto3" json:"linkedResourceMetadata"`
+}
+
+func (m *MsgCreateResourceResponse) Reset()         { *m = MsgCreateResourceResponse{} }
+func (m *MsgCreateResourceResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgCreateResourceResponse) ProtoMessage()    {}
+func (*MsgCreateResourceResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_bf79adfa645a7210, []int{12}
+}
+func (m *MsgCreateResourceResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgCreateResourceResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgCreateResourceResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgCreateResourceResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgCreateResourceResponse.Merge(m, src)
+}
+func (m *MsgCreateResourceResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgCreateResourceResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgCreateResourceResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgCreateResourceResponse proto.InternalMessageInfo
+
+func (m *MsgCreateResourceResponse) GetResource() *ResourceMetadata {
+	if m != nil {
+		return m.Resource
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterType((*MsgCreateDIDDocument)(nil), "swisstronik.did.MsgCreateDIDDocument")
 	proto.RegisterType((*MsgUpdateDIDDocument)(nil), "swisstronik.did.MsgUpdateDIDDocument")
 	proto.RegisterType((*MsgDeactivateDIDDocument)(nil), "swisstronik.did.MsgDeactivateDIDDocument")
+	proto.RegisterType((*MsgCreateResource)(nil), "swisstronik.did.MsgCreateResource")
 	proto.RegisterType((*SignInfo)(nil), "swisstronik.did.SignInfo")
 	proto.RegisterType((*MsgCreateDIDDocumentPayload)(nil), "swisstronik.did.MsgCreateDIDDocumentPayload")
 	proto.RegisterType((*MsgCreateDIDDocumentResponse)(nil), "swisstronik.did.MsgCreateDIDDocumentResponse")
@@ -798,54 +1019,72 @@ func init() {
 	proto.RegisterType((*MsgUpdateDIDDocumentResponse)(nil), "swisstronik.did.MsgUpdateDIDDocumentResponse")
 	proto.RegisterType((*MsgDeactivateDIDDocumentPayload)(nil), "swisstronik.did.MsgDeactivateDIDDocumentPayload")
 	proto.RegisterType((*MsgDeactivateDIDDocumentResponse)(nil), "swisstronik.did.MsgDeactivateDIDDocumentResponse")
+	proto.RegisterType((*MsgCreateResourcePayload)(nil), "swisstronik.did.MsgCreateResourcePayload")
+	proto.RegisterType((*MsgCreateResourceResponse)(nil), "swisstronik.did.MsgCreateResourceResponse")
 }
 
 func init() { proto.RegisterFile("swisstronik/did/tx.proto", fileDescriptor_bf79adfa645a7210) }
 
 var fileDescriptor_bf79adfa645a7210 = []byte{
-	// 668 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x56, 0xcd, 0x6e, 0xd3, 0x4c,
-	0x14, 0xad, 0x93, 0xb6, 0x69, 0x6e, 0xfa, 0xf3, 0x75, 0xbe, 0x16, 0x86, 0x52, 0x4c, 0x94, 0xaa,
-	0x28, 0x95, 0x20, 0xa5, 0x29, 0x1b, 0x36, 0x48, 0x85, 0x08, 0x29, 0xa0, 0x48, 0x95, 0xf9, 0x93,
-	0x58, 0x34, 0x9a, 0x66, 0x6e, 0xd3, 0x51, 0x5c, 0x4f, 0xe4, 0x99, 0xa4, 0xcd, 0x5b, 0xb0, 0x42,
-	0x62, 0xc9, 0xdb, 0xb0, 0xac, 0x58, 0xb1, 0x44, 0xed, 0x8b, 0xa0, 0xf8, 0x27, 0x35, 0xb6, 0x0b,
-	0x11, 0xca, 0x0e, 0x96, 0x39, 0xf7, 0x9c, 0x3b, 0xc7, 0xd7, 0xc7, 0xb9, 0x03, 0x54, 0x9d, 0x0a,
-	0xa5, 0xb4, 0x2b, 0x1d, 0xd1, 0xd9, 0xe6, 0x82, 0x6f, 0xeb, 0xb3, 0x4a, 0xd7, 0x95, 0x5a, 0x92,
-	0xa5, 0x48, 0xa5, 0xc2, 0x05, 0x5f, 0x33, 0xe3, 0x54, 0x2e, 0x5b, 0xbd, 0x13, 0x74, 0xb4, 0x2f,
-	0x28, 0x7d, 0x32, 0x60, 0xa5, 0xa1, 0xda, 0xcf, 0x5c, 0x64, 0x1a, 0x6b, 0xf5, 0x5a, 0x2d, 0x28,
-	0x93, 0xe7, 0x90, 0xeb, 0xb2, 0x81, 0x2d, 0x19, 0xa7, 0x46, 0xd1, 0x28, 0x17, 0xaa, 0xf7, 0x2b,
-	0xb1, 0xde, 0x95, 0x34, 0xdd, 0xbe, 0xaf, 0xb1, 0x42, 0x31, 0x79, 0x0c, 0xa0, 0x44, 0xdb, 0x61,
-	0xba, 0xe7, 0xa2, 0xa2, 0x99, 0x62, 0xb6, 0x5c, 0xa8, 0xde, 0x4a, 0xb4, 0x7a, 0x25, 0xda, 0x4e,
-	0xdd, 0x39, 0x92, 0x56, 0x84, 0x1c, 0x7a, 0x7b, 0xd3, 0xe5, 0x7f, 0xe4, 0x2d, 0xa1, 0x9b, 0xa4,
-	0xb7, 0xcf, 0x06, 0xd0, 0x86, 0x6a, 0xd7, 0x90, 0xb5, 0xb4, 0xe8, 0xc7, 0xfc, 0xbd, 0x88, 0xfb,
-	0x7b, 0x98, 0xe6, 0x2f, 0x55, 0x3b, 0x49, 0x8f, 0x07, 0x30, 0x17, 0xe2, 0xe4, 0x11, 0xdc, 0xe8,
-	0xa3, 0x2b, 0x8e, 0x44, 0x8b, 0x69, 0x21, 0x9d, 0xe6, 0x09, 0xea, 0x63, 0xc9, 0x9b, 0xc2, 0x77,
-	0x98, 0xb7, 0x56, 0xa2, 0xd5, 0x86, 0x57, 0xac, 0x73, 0xb2, 0x0e, 0xf9, 0x51, 0x3f, 0x9a, 0x29,
-	0x1a, 0xe5, 0x79, 0xeb, 0x0a, 0x28, 0x7d, 0x9c, 0x86, 0xdb, 0xbf, 0xc8, 0x00, 0xa1, 0x90, 0x6b,
-	0x49, 0x47, 0xe3, 0x99, 0xa6, 0x46, 0x31, 0x5b, 0xce, 0x5b, 0xe1, 0x4f, 0xb2, 0x08, 0x19, 0xc1,
-	0xbd, 0x86, 0x79, 0x2b, 0x23, 0x38, 0x31, 0x01, 0x86, 0x25, 0x57, 0xda, 0x36, 0xba, 0x34, 0xeb,
-	0x91, 0x23, 0x08, 0x79, 0x0d, 0xff, 0xa7, 0xb8, 0xa7, 0xd3, 0xde, 0x34, 0x36, 0x12, 0xd3, 0x78,
-	0x9b, 0x78, 0x16, 0x8b, 0x24, 0x9f, 0x8f, 0xdc, 0x83, 0x45, 0xd6, 0xd3, 0xc7, 0xe8, 0xe8, 0x00,
-	0xa7, 0x33, 0xde, 0xc9, 0x31, 0x94, 0x6c, 0xc1, 0x7f, 0x4c, 0x29, 0x74, 0xa3, 0x47, 0xcf, 0x7a,
-	0xcc, 0xa5, 0x11, 0x1e, 0xb4, 0xdc, 0x85, 0xd5, 0x16, 0xeb, 0xb2, 0x43, 0x61, 0x0b, 0x3d, 0x68,
-	0x0a, 0xa7, 0x2f, 0x83, 0xce, 0x39, 0x8f, 0xbf, 0x72, 0x55, 0xac, 0x8f, 0x6a, 0x31, 0x11, 0x47,
-	0x1b, 0xdb, 0xbe, 0x68, 0x2e, 0x2e, 0xaa, 0x8d, 0x6a, 0x64, 0x03, 0x16, 0x3a, 0x38, 0x68, 0xb2,
-	0xb6, 0x8b, 0x38, 0x1c, 0x3a, 0xcd, 0x7b, 0xe4, 0xf9, 0x0e, 0x0e, 0xf6, 0x42, 0x8c, 0x54, 0x21,
-	0xa7, 0xd0, 0xed, 0x8b, 0x16, 0x52, 0xf0, 0x66, 0x45, 0x93, 0xc9, 0xf1, 0xeb, 0x56, 0x48, 0x24,
-	0x25, 0x58, 0x60, 0xb6, 0x92, 0xcd, 0x8e, 0x23, 0x4f, 0x9d, 0x26, 0x53, 0xb4, 0xe0, 0x35, 0x2e,
-	0x0c, 0xc1, 0x97, 0x43, 0x6c, 0x4f, 0x91, 0x3b, 0x00, 0x7d, 0x74, 0xd5, 0x70, 0x1e, 0x82, 0xd3,
-	0x79, 0xef, 0x3d, 0xe6, 0x03, 0xa4, 0xce, 0x4b, 0x07, 0xb0, 0x9e, 0x96, 0x0b, 0x0b, 0x55, 0x57,
-	0x3a, 0x0a, 0xc9, 0x13, 0x98, 0xe9, 0x33, 0xbb, 0x87, 0xc1, 0xd7, 0x51, 0x4e, 0x98, 0x8a, 0x88,
-	0xde, 0x09, 0x7d, 0xdc, 0x40, 0xcd, 0x38, 0xd3, 0xcc, 0xf2, 0x65, 0x61, 0xf0, 0xae, 0xfb, 0xc0,
-	0xff, 0x05, 0xef, 0xef, 0x0e, 0x5e, 0x22, 0x17, 0x13, 0x0b, 0xde, 0x3e, 0xdc, 0xfd, 0xcd, 0x1f,
-	0x77, 0x90, 0x30, 0x63, 0x94, 0xb0, 0x9f, 0x1d, 0x67, 0xe2, 0x8e, 0x0f, 0xa1, 0x78, 0x5d, 0xc7,
-	0x49, 0xb9, 0xae, 0x7e, 0xcd, 0x40, 0xb6, 0xa1, 0xda, 0x44, 0xc0, 0x72, 0x72, 0xcf, 0x6f, 0x8e,
-	0xb5, 0xd6, 0xd7, 0x1e, 0x8c, 0x45, 0x1b, 0x59, 0x16, 0xb0, 0x9c, 0x5c, 0xdb, 0x9b, 0x63, 0x6d,
-	0xe9, 0xf4, 0xa3, 0xae, 0x7f, 0xa7, 0x3d, 0x58, 0x4d, 0xdf, 0xc2, 0x5b, 0x63, 0x2f, 0xdd, 0xb5,
-	0x9d, 0xb1, 0xa9, 0xe1, 0xb1, 0x4f, 0x77, 0xbe, 0x5c, 0x98, 0xc6, 0xf9, 0x85, 0x69, 0x7c, 0xbf,
-	0x30, 0x8d, 0x0f, 0x97, 0xe6, 0xd4, 0xf9, 0xa5, 0x39, 0xf5, 0xed, 0xd2, 0x9c, 0x7a, 0x7f, 0x33,
-	0x7a, 0xe5, 0x3a, 0xf3, 0xef, 0x67, 0x83, 0x2e, 0xaa, 0xc3, 0x59, 0xef, 0xca, 0xb5, 0xfb, 0x23,
-	0x00, 0x00, 0xff, 0xff, 0x45, 0x16, 0x2b, 0x4e, 0xbf, 0x09, 0x00, 0x00,
+	// 926 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x57, 0x41, 0x6f, 0xe3, 0x44,
+	0x14, 0xae, 0x93, 0xb4, 0x69, 0x5e, 0xd3, 0x76, 0x3b, 0x64, 0x77, 0x67, 0xc3, 0xe2, 0x84, 0x2c,
+	0x8b, 0x52, 0x04, 0x2d, 0xed, 0xc2, 0x81, 0x03, 0x48, 0x6d, 0x23, 0xa4, 0x80, 0x82, 0x56, 0x66,
+	0x77, 0x11, 0x1c, 0x36, 0x4c, 0x3d, 0xb3, 0xee, 0x28, 0xae, 0x1d, 0x79, 0x26, 0xd9, 0xe6, 0xca,
+	0x2f, 0x40, 0x42, 0x42, 0xe2, 0xc8, 0x7f, 0xe0, 0x47, 0xec, 0x71, 0x8f, 0x9c, 0x22, 0xd4, 0xde,
+	0xfa, 0x2b, 0x90, 0xc7, 0x1e, 0xaf, 0x6b, 0xa7, 0x34, 0x42, 0xb9, 0xc1, 0xcd, 0x7e, 0xef, 0xfb,
+	0xde, 0xfb, 0xfc, 0xe6, 0x4b, 0xfc, 0x0c, 0x58, 0xbc, 0xe4, 0x42, 0xc8, 0xc0, 0xf7, 0xf8, 0x60,
+	0x97, 0x72, 0xba, 0x2b, 0xcf, 0x76, 0x86, 0x81, 0x2f, 0x7d, 0xb4, 0x99, 0xca, 0xec, 0x50, 0x4e,
+	0xeb, 0x66, 0x16, 0x4a, 0x7d, 0x7b, 0x74, 0xca, 0x3c, 0x19, 0x11, 0xf2, 0xf9, 0x80, 0x09, 0x7f,
+	0x14, 0xd8, 0x2c, 0xce, 0xd7, 0x1c, 0xdf, 0xf1, 0xd5, 0xe5, 0x6e, 0x78, 0x15, 0x45, 0x5b, 0xbf,
+	0x19, 0x50, 0xeb, 0x09, 0xe7, 0x28, 0x60, 0x44, 0xb2, 0x4e, 0xb7, 0xd3, 0x89, 0x8b, 0xa2, 0x2f,
+	0xa1, 0x3c, 0x24, 0x13, 0xd7, 0x27, 0x14, 0x1b, 0x4d, 0xa3, 0xbd, 0xb6, 0xff, 0xe1, 0x4e, 0x46,
+	0xd1, 0xce, 0x2c, 0xde, 0xe3, 0x88, 0x63, 0x69, 0x32, 0xfa, 0x0c, 0x40, 0x70, 0xc7, 0x23, 0x72,
+	0x14, 0x30, 0x81, 0x0b, 0xcd, 0x62, 0x7b, 0x6d, 0xff, 0x5e, 0xae, 0xd4, 0xb7, 0xdc, 0xf1, 0xba,
+	0xde, 0x0b, 0xdf, 0x4a, 0x81, 0xb5, 0xb6, 0xa7, 0x43, 0xfa, 0xaf, 0xb4, 0xe5, 0x78, 0x8b, 0xd4,
+	0xf6, 0xbb, 0x01, 0xb8, 0x27, 0x9c, 0x0e, 0x23, 0xb6, 0xe4, 0xe3, 0x8c, 0xbe, 0xaf, 0xb2, 0xfa,
+	0x3e, 0x9e, 0xa5, 0x6f, 0x26, 0x77, 0x91, 0x1a, 0x7f, 0x31, 0x60, 0x2b, 0x39, 0x23, 0x2b, 0x76,
+	0x03, 0x3a, 0xca, 0x8a, 0xdb, 0xbe, 0xfe, 0x60, 0x35, 0x69, 0x91, 0xaa, 0x9e, 0xc3, 0xaa, 0x8e,
+	0xa3, 0x4f, 0xe0, 0xce, 0x98, 0x05, 0xfc, 0x05, 0xb7, 0x89, 0xe4, 0xbe, 0xd7, 0x3f, 0x65, 0xf2,
+	0xc4, 0xa7, 0x7d, 0x1e, 0x49, 0xab, 0x58, 0xb5, 0x74, 0xb6, 0xa7, 0x92, 0x5d, 0x8a, 0xee, 0x43,
+	0x25, 0xa9, 0x87, 0x0b, 0x4d, 0xa3, 0x5d, 0xb5, 0xde, 0x04, 0x5a, 0xbf, 0x96, 0xe0, 0xed, 0x7f,
+	0x70, 0x26, 0xc2, 0x50, 0xb6, 0x7d, 0x4f, 0xb2, 0x33, 0x89, 0x8d, 0x66, 0xb1, 0x5d, 0xb1, 0xf4,
+	0x2d, 0xda, 0x80, 0x02, 0xa7, 0xaa, 0x60, 0xc5, 0x2a, 0x70, 0x8a, 0x4c, 0x80, 0x30, 0x15, 0xf8,
+	0xae, 0xcb, 0x02, 0x5c, 0x54, 0xe0, 0x54, 0x04, 0x3d, 0x81, 0xb7, 0x66, 0xa8, 0xc7, 0x25, 0x35,
+	0x8d, 0x07, 0xb9, 0x69, 0x3c, 0xcb, 0x3d, 0x8b, 0x85, 0xf2, 0xcf, 0x87, 0xde, 0x87, 0x0d, 0x32,
+	0x92, 0x27, 0xcc, 0x93, 0x71, 0x1c, 0x2f, 0xab, 0xce, 0x99, 0x28, 0xda, 0x86, 0x5b, 0x44, 0x08,
+	0x16, 0xa4, 0x5b, 0xaf, 0x28, 0xe4, 0x66, 0x12, 0x8f, 0x4b, 0x3e, 0x82, 0xdb, 0x36, 0x19, 0x92,
+	0x63, 0xee, 0x72, 0x39, 0xe9, 0x73, 0x6f, 0xec, 0xc7, 0x95, 0xcb, 0x0a, 0x5f, 0x7b, 0x93, 0xec,
+	0x26, 0xb9, 0x0c, 0x89, 0x32, 0x97, 0x39, 0x11, 0x69, 0x35, 0x4b, 0xea, 0x24, 0x39, 0xf4, 0x00,
+	0xd6, 0x07, 0x6c, 0xd2, 0x27, 0x4e, 0xc0, 0x58, 0x38, 0x74, 0x5c, 0x51, 0xe0, 0xea, 0x80, 0x4d,
+	0x0e, 0x74, 0x0c, 0xed, 0x43, 0x59, 0xb0, 0x60, 0xcc, 0x6d, 0x86, 0x41, 0xcd, 0x0a, 0xe7, 0x9d,
+	0x13, 0xe5, 0x2d, 0x0d, 0x44, 0x2d, 0x58, 0x27, 0xae, 0xf0, 0xfb, 0x03, 0xcf, 0x7f, 0xe9, 0xf5,
+	0x89, 0xc0, 0x6b, 0xaa, 0xf0, 0x5a, 0x18, 0xfc, 0x3a, 0x8c, 0x1d, 0x08, 0xf4, 0x0e, 0xc0, 0x98,
+	0x05, 0x22, 0x9c, 0x07, 0xa7, 0xb8, 0xaa, 0xce, 0xb1, 0x12, 0x47, 0xba, 0xb4, 0xf5, 0x1c, 0xee,
+	0xcf, 0xf2, 0x85, 0xc5, 0xc4, 0xd0, 0xf7, 0x04, 0x43, 0x5f, 0xc0, 0xf2, 0x98, 0xb8, 0x23, 0x16,
+	0xff, 0x2c, 0xda, 0x39, 0x51, 0x29, 0xd2, 0x77, 0x5c, 0x9e, 0xf4, 0x98, 0x24, 0x94, 0x48, 0x62,
+	0x45, 0x34, 0x6d, 0xbc, 0xeb, 0xfe, 0x76, 0xfe, 0x37, 0xde, 0x7f, 0xdb, 0x78, 0x39, 0x5f, 0x2c,
+	0xcc, 0x78, 0x8f, 0xa1, 0x71, 0xc3, 0xeb, 0x24, 0x76, 0x98, 0x91, 0x38, 0xec, 0xaa, 0xe2, 0x42,
+	0x56, 0xf1, 0x31, 0x34, 0xaf, 0xab, 0xb8, 0x30, 0xd5, 0x3f, 0x15, 0xd5, 0x1b, 0x74, 0xe6, 0x8b,
+	0x06, 0x21, 0x28, 0x85, 0x58, 0x55, 0xbb, 0x6a, 0xa9, 0x6b, 0xf4, 0x39, 0xac, 0xdb, 0xa1, 0xff,
+	0x6d, 0x99, 0x96, 0x7d, 0x88, 0x2f, 0xa7, 0x8d, 0x9a, 0xde, 0x75, 0x8e, 0x12, 0x40, 0x97, 0x5a,
+	0x55, 0x3b, 0x75, 0x87, 0x4c, 0x35, 0x82, 0xa2, 0xe2, 0x6c, 0x5c, 0x4e, 0x1b, 0xa0, 0x39, 0x5d,
+	0xaa, 0x46, 0xf2, 0x1e, 0x94, 0x3c, 0x72, 0xca, 0x70, 0x49, 0x21, 0x6e, 0x5d, 0x4e, 0x1b, 0x55,
+	0x8d, 0xf8, 0x86, 0x9c, 0x32, 0x4b, 0x65, 0xd1, 0x1e, 0x94, 0xe3, 0x31, 0xe1, 0x65, 0x05, 0xbc,
+	0xfb, 0x6a, 0xda, 0x30, 0x2e, 0xa7, 0x8d, 0x4d, 0x0d, 0x7e, 0x16, 0xa5, 0x2d, 0x8d, 0x43, 0x9f,
+	0xc2, 0xba, 0xce, 0xf5, 0xe5, 0x64, 0xc8, 0xf0, 0x4a, 0xbe, 0xc3, 0x93, 0xc9, 0x90, 0x59, 0x57,
+	0xee, 0x90, 0x9d, 0x35, 0x5e, 0x59, 0x59, 0xb6, 0x91, 0x9b, 0xf3, 0x81, 0x2b, 0x59, 0xe0, 0x11,
+	0xc9, 0xc7, 0xec, 0x69, 0xc0, 0x0f, 0xcd, 0x58, 0xd0, 0x1d, 0x5d, 0xed, 0x6a, 0xfe, 0x8a, 0x73,
+	0x5b, 0x63, 0xb8, 0x97, 0x3b, 0x83, 0xe4, 0x84, 0xbf, 0x87, 0x55, 0x5d, 0x23, 0x3e, 0xe4, 0x77,
+	0x73, 0xcd, 0x35, 0x49, 0x9f, 0xee, 0x61, 0x3d, 0x6c, 0xed, 0x72, 0x6f, 0xc0, 0x68, 0x36, 0x67,
+	0x25, 0xe5, 0xf6, 0xff, 0x28, 0x42, 0xb1, 0x27, 0x1c, 0xc4, 0x61, 0x2b, 0xbf, 0x7a, 0x3e, 0x9c,
+	0x6b, 0xd3, 0xac, 0x7f, 0x34, 0x17, 0x2c, 0x79, 0x1a, 0x0e, 0x5b, 0xf9, 0x4d, 0xf2, 0xe1, 0x5c,
+	0x8b, 0xe3, 0xec, 0x56, 0xd7, 0xff, 0xa0, 0x47, 0x70, 0x7b, 0xf6, 0x62, 0xb8, 0x3d, 0xf7, 0x1e,
+	0x58, 0xdf, 0x9b, 0x1b, 0x9a, 0xb4, 0xfd, 0x11, 0x36, 0x32, 0xbb, 0x5e, 0xeb, 0xe6, 0xd5, 0xae,
+	0xfe, 0xc1, 0xcd, 0x18, 0xdd, 0xe1, 0x70, 0xef, 0xd5, 0xb9, 0x69, 0xbc, 0x3e, 0x37, 0x8d, 0xbf,
+	0xce, 0x4d, 0xe3, 0xe7, 0x0b, 0x73, 0xe9, 0xf5, 0x85, 0xb9, 0xf4, 0xe7, 0x85, 0xb9, 0xf4, 0xc3,
+	0xdd, 0xf4, 0xd7, 0xc7, 0x59, 0xf4, 0x29, 0x33, 0x19, 0x32, 0x71, 0xbc, 0xa2, 0xbe, 0x33, 0x1e,
+	0xfd, 0x1d, 0x00, 0x00, 0xff, 0xff, 0x72, 0xe8, 0x9d, 0x32, 0xea, 0x0c, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -863,6 +1102,7 @@ type MsgClient interface {
 	CreateDIDDocument(ctx context.Context, in *MsgCreateDIDDocument, opts ...grpc.CallOption) (*MsgCreateDIDDocumentResponse, error)
 	UpdateDIDDocument(ctx context.Context, in *MsgUpdateDIDDocument, opts ...grpc.CallOption) (*MsgUpdateDIDDocumentResponse, error)
 	DeactivateDIDDocument(ctx context.Context, in *MsgDeactivateDIDDocument, opts ...grpc.CallOption) (*MsgDeactivateDIDDocumentResponse, error)
+	CreateResource(ctx context.Context, in *MsgCreateResource, opts ...grpc.CallOption) (*MsgCreateResourceResponse, error)
 }
 
 type msgClient struct {
@@ -900,11 +1140,21 @@ func (c *msgClient) DeactivateDIDDocument(ctx context.Context, in *MsgDeactivate
 	return out, nil
 }
 
+func (c *msgClient) CreateResource(ctx context.Context, in *MsgCreateResource, opts ...grpc.CallOption) (*MsgCreateResourceResponse, error) {
+	out := new(MsgCreateResourceResponse)
+	err := c.cc.Invoke(ctx, "/swisstronik.did.Msg/CreateResource", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MsgServer is the server API for Msg service.
 type MsgServer interface {
 	CreateDIDDocument(context.Context, *MsgCreateDIDDocument) (*MsgCreateDIDDocumentResponse, error)
 	UpdateDIDDocument(context.Context, *MsgUpdateDIDDocument) (*MsgUpdateDIDDocumentResponse, error)
 	DeactivateDIDDocument(context.Context, *MsgDeactivateDIDDocument) (*MsgDeactivateDIDDocumentResponse, error)
+	CreateResource(context.Context, *MsgCreateResource) (*MsgCreateResourceResponse, error)
 }
 
 // UnimplementedMsgServer can be embedded to have forward compatible implementations.
@@ -919,6 +1169,9 @@ func (*UnimplementedMsgServer) UpdateDIDDocument(ctx context.Context, req *MsgUp
 }
 func (*UnimplementedMsgServer) DeactivateDIDDocument(ctx context.Context, req *MsgDeactivateDIDDocument) (*MsgDeactivateDIDDocumentResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeactivateDIDDocument not implemented")
+}
+func (*UnimplementedMsgServer) CreateResource(ctx context.Context, req *MsgCreateResource) (*MsgCreateResourceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateResource not implemented")
 }
 
 func RegisterMsgServer(s grpc1.Server, srv MsgServer) {
@@ -979,6 +1232,24 @@ func _Msg_DeactivateDIDDocument_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Msg_CreateResource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgCreateResource)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).CreateResource(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/swisstronik.did.Msg/CreateResource",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).CreateResource(ctx, req.(*MsgCreateResource))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Msg_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "swisstronik.did.Msg",
 	HandlerType: (*MsgServer)(nil),
@@ -994,6 +1265,10 @@ var _Msg_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeactivateDIDDocument",
 			Handler:    _Msg_DeactivateDIDDocument_Handler,
+		},
+		{
+			MethodName: "CreateResource",
+			Handler:    _Msg_CreateResource_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -1114,6 +1389,55 @@ func (m *MsgDeactivateDIDDocument) MarshalTo(dAtA []byte) (int, error) {
 }
 
 func (m *MsgDeactivateDIDDocument) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Signatures) > 0 {
+		for iNdEx := len(m.Signatures) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Signatures[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTx(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x12
+		}
+	}
+	if m.Payload != nil {
+		{
+			size, err := m.Payload.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTx(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgCreateResource) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgCreateResource) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgCreateResource) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -1600,6 +1924,120 @@ func (m *MsgDeactivateDIDDocumentResponse) MarshalToSizedBuffer(dAtA []byte) (in
 	return len(dAtA) - i, nil
 }
 
+func (m *MsgCreateResourcePayload) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgCreateResourcePayload) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgCreateResourcePayload) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.AlsoKnownAs) > 0 {
+		for iNdEx := len(m.AlsoKnownAs) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.AlsoKnownAs[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTx(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x3a
+		}
+	}
+	if len(m.ResourceType) > 0 {
+		i -= len(m.ResourceType)
+		copy(dAtA[i:], m.ResourceType)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.ResourceType)))
+		i--
+		dAtA[i] = 0x32
+	}
+	if len(m.Version) > 0 {
+		i -= len(m.Version)
+		copy(dAtA[i:], m.Version)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Version)))
+		i--
+		dAtA[i] = 0x2a
+	}
+	if len(m.Name) > 0 {
+		i -= len(m.Name)
+		copy(dAtA[i:], m.Name)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Name)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if len(m.Id) > 0 {
+		i -= len(m.Id)
+		copy(dAtA[i:], m.Id)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Id)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.CollectionId) > 0 {
+		i -= len(m.CollectionId)
+		copy(dAtA[i:], m.CollectionId)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.CollectionId)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Data) > 0 {
+		i -= len(m.Data)
+		copy(dAtA[i:], m.Data)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Data)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgCreateResourceResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgCreateResourceResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgCreateResourceResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Resource != nil {
+		{
+			size, err := m.Resource.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTx(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintTx(dAtA []byte, offset int, v uint64) int {
 	offset -= sovTx(v)
 	base := offset
@@ -1650,6 +2088,25 @@ func (m *MsgUpdateDIDDocument) Size() (n int) {
 }
 
 func (m *MsgDeactivateDIDDocument) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Payload != nil {
+		l = m.Payload.Size()
+		n += 1 + l + sovTx(uint64(l))
+	}
+	if len(m.Signatures) > 0 {
+		for _, e := range m.Signatures {
+			l = e.Size()
+			n += 1 + l + sovTx(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *MsgCreateResource) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1890,6 +2347,58 @@ func (m *MsgDeactivateDIDDocumentResponse) Size() (n int) {
 	_ = l
 	if m.Value != nil {
 		l = m.Value.Size()
+		n += 1 + l + sovTx(uint64(l))
+	}
+	return n
+}
+
+func (m *MsgCreateResourcePayload) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Data)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.CollectionId)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Id)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Name)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Version)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.ResourceType)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	if len(m.AlsoKnownAs) > 0 {
+		for _, e := range m.AlsoKnownAs {
+			l = e.Size()
+			n += 1 + l + sovTx(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *MsgCreateResourceResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Resource != nil {
+		l = m.Resource.Size()
 		n += 1 + l + sovTx(uint64(l))
 	}
 	return n
@@ -2201,6 +2710,126 @@ func (m *MsgDeactivateDIDDocument) Unmarshal(dAtA []byte) error {
 			}
 			if m.Payload == nil {
 				m.Payload = &MsgDeactivateDIDDocumentPayload{}
+			}
+			if err := m.Payload.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Signatures", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Signatures = append(m.Signatures, &SignInfo{})
+			if err := m.Signatures[len(m.Signatures)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgCreateResource) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgCreateResource: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgCreateResource: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Payload", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Payload == nil {
+				m.Payload = &MsgCreateResourcePayload{}
 			}
 			if err := m.Payload.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
@@ -3601,6 +4230,370 @@ func (m *MsgDeactivateDIDDocumentResponse) Unmarshal(dAtA []byte) error {
 				m.Value = &DIDDocumentWithMetadata{}
 			}
 			if err := m.Value.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgCreateResourcePayload) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgCreateResourcePayload: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgCreateResourcePayload: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Data", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Data = append(m.Data[:0], dAtA[iNdEx:postIndex]...)
+			if m.Data == nil {
+				m.Data = []byte{}
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CollectionId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.CollectionId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Id = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Name = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Version", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Version = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ResourceType", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ResourceType = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AlsoKnownAs", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.AlsoKnownAs = append(m.AlsoKnownAs, &AlternativeUri{})
+			if err := m.AlsoKnownAs[len(m.AlsoKnownAs)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgCreateResourceResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgCreateResourceResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgCreateResourceResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Resource", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Resource == nil {
+				m.Resource = &ResourceMetadata{}
+			}
+			if err := m.Resource.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
