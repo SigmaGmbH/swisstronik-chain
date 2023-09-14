@@ -35,7 +35,7 @@ func GetServiceIds(vms []*Service) []string {
 
 func (s Service) Validate(baseDID string, allowedNamespaces []string) error {
 	return validation.ValidateStruct(&s,
-		validation.Field(&s.Id, validation.Required, IsDIDUrl(allowedNamespaces, Empty, Empty, Required), HasPrefix(baseDID)),
+		validation.Field(&s.Id, validation.Required, IsDIDUrl(Empty, Empty, Required), HasPrefix(baseDID)),
 		validation.Field(&s.ServiceType, validation.Required, validation.Length(1, 255)),
 		validation.Field(&s.ServiceEndpoint, validation.Each(validation.Required)),
 	)

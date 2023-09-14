@@ -66,11 +66,9 @@ func FindSignInfoBySigner(infos []*SignInfo, signer string) (info SignInfo, foun
 	return infosBS[0], true
 }
 
-// Validate
-
 func (si SignInfo) Validate(allowedNamespaces []string) error {
 	return validation.ValidateStruct(&si,
-		validation.Field(&si.VerificationMethodId, validation.Required, IsDIDUrl(allowedNamespaces, Empty, Empty, Required)),
+		validation.Field(&si.VerificationMethodId, validation.Required, IsDIDUrl(Empty, Empty, Required)),
 		validation.Field(&si.Signature, validation.Required),
 	)
 }

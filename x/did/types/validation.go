@@ -48,25 +48,25 @@ func IsID() *CustomErrorRule {
 	})
 }
 
-func IsDID(allowedNamespaces []string) *CustomErrorRule {
+func IsDID() *CustomErrorRule {
 	return NewCustomErrorRule(func(value interface{}) error {
 		casted, ok := value.(string)
 		if !ok {
 			panic("IsDID must be only applied on string properties")
 		}
 
-		return ValidateDID(casted, DIDMethod, allowedNamespaces)
+		return ValidateDID(casted, DIDMethod)
 	})
 }
 
-func IsDIDUrl(allowedNamespaces []string, pathRule, queryRule, fragmentRule ValidationType) *CustomErrorRule {
+func IsDIDUrl(pathRule, queryRule, fragmentRule ValidationType) *CustomErrorRule {
 	return NewCustomErrorRule(func(value interface{}) error {
 		casted, ok := value.(string)
 		if !ok {
 			panic("IsDIDUrl must be only applied on string properties")
 		}
 
-		if err := ValidateDIDUrl(casted, DIDMethod, allowedNamespaces); err != nil {
+		if err := ValidateDIDUrl(casted, DIDMethod); err != nil {
 			return err
 		}
 

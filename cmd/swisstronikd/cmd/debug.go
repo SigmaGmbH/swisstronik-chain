@@ -9,15 +9,18 @@ import (
 	"strings"
 
 	"encoding/hex"
+	didutil "swisstronik/testutil/did"
+	"swisstronik/x/did/types"
+	didtypes "swisstronik/x/did/types"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/version"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 	"github.com/tendermint/tendermint/libs/bytes"
-	didutil "swisstronik/testutil/did"
-	didtypes "swisstronik/x/did/types"
 )
 
 type DIDDocument struct {
@@ -64,7 +67,6 @@ func DebugCmd() *cobra.Command {
 	cmd.AddCommand(SampleDIDDocument())
 	cmd.AddCommand(ExtractPubkeyCmd())
 	cmd.AddCommand(ConvertAddressCmd())
-
 
 	return cmd
 }
@@ -179,19 +181,19 @@ func SampleDIDDocument() *cobra.Command {
 
 func SampleDIDResource() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "sample-did-resource [base64-encoded-ed25519-private-key]",
+		Use:   "sample-did-resource [existing-did] [base64-encoded-ed25519-private-key]",
 		Short: "Generates sample DID resource ready to be stored in DID resource registry",
 		Long: `Generates sample DID resource, which is ready to be stored in DID resource registry. 
 		If private key was not provided, this command will generate random ed25519 keypair`,
+		Args: cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var (
 				privateKey ed25519.PrivateKey
-				publicKey  ed25519.PublicKey
 				err        error
 			)
 			// Check if private key was provided.
 			if len(args) != 1 {
-				publicKey, privateKey, err = ed25519.GenerateKey(rand.Reader)
+				_, privateKey, err = ed25519.GenerateKey(rand.Reader)
 				if err != nil {
 					return err
 				}
@@ -201,41 +203,40 @@ func SampleDIDResource() *cobra.Command {
 					return err
 				}
 				privateKey = ed25519.PrivateKey(privateKeyBytes)
-				publicKey = privateKey.Public().(ed25519.PublicKey)
 			}
 
-			// Generate random DID and key id
-			did := didutil.GenerateDID(didutil.Base58_16bytes)
-			keyId := did + "#key1"
-
-			// Construct verification method
-			verificationMethod := make(map[string]any)
-			verificationMethod["id"] = keyId
-			verificationMethod["type"] = didtypes.Ed25519VerificationKey2020Type
-			verificationMethod["controller"] = did
-			verificationMethod["publicKeyMultibase"] = didutil.GenerateEd25519VerificationKey2020VerificationMaterial(publicKey)
-
-			// Construct DID document
-			document := DIDDocument{
-				Context:            []string{"https://www.w3.org/ns/did/v1"},
-				ID:                 did,
-				Authentication:     []string{keyId},
-				VerificationMethod: []VerificationMethod{verificationMethod},
+			did := args[0]
+			if !didtypes.IsValidDID(did, didtypes.DIDMethod) {
+				return fmt.Errorf("provided DID is invalid")
 			}
 
-			encodedDocument, err := json.Marshal(document)
+			resource := didtypes.MsgCreateResourcePayload{
+				CollectionId: did,
+				Id:           uuid.NewString(),
+				Name: "sample-resource",
+				Version: "sample-version",
+				AlsoKnownAs: []*types.AlternativeUri{
+					{
+						Uri: "http://example.com/example-did",
+						Description: "http-uri",
+					},
+				},
+			}
+
+			encodedResource, err := json.Marshal(resource)
 			if err != nil {
 				return err
 			}
 
 			// Construct sign inputs
+			keyId := did + "#key1"
 			signInputs := SignInput{
 				VerificationMethodID: keyId,
 				PrivKey:              privateKey,
 			}
 
 			result := PayloadWithSignInputs{
-				Payload:    encodedDocument,
+				Payload:    encodedResource,
 				SignInputs: []SignInput{signInputs},
 			}
 

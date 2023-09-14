@@ -170,25 +170,6 @@ var _ = DescribeTable("DIDDoc Validation tests", func(testCase DIDDocTestCase) {
 			errorMsg: "controller: (1: unable to split did into method, namespace and id.).",
 		}),
 	Entry(
-		"Namespace in controller is not in list of allowed",
-		DIDDocTestCase{
-			didDoc: &DIDDocument{
-				Id:         ValidTestDID,
-				Controller: []string{ValidTestDID},
-				VerificationMethod: []*VerificationMethod{
-					{
-						Id:                     fmt.Sprintf("%s#fragment", ValidTestDID),
-						VerificationMethodType: "Ed25519VerificationKey2020",
-						Controller:             ValidTestDID,
-						VerificationMaterial:   ValidEd25519VerificationKey2020VerificationMaterial,
-					},
-				},
-			},
-			allowedNamespaces: []string{"mainnet"},
-			isValid:           false,
-			errorMsg:          "controller: (0: did namespace must be one of: mainnet.); id: did namespace must be one of: mainnet; verification_method: (0: (controller: did namespace must be one of: mainnet; id: did namespace must be one of: mainnet.).).",
-		}),
-	Entry(
 		"Controller is duplicated",
 		DIDDocTestCase{
 			didDoc: &DIDDocument{

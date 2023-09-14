@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
-	"strings"
 )
 
 var (
@@ -62,8 +61,8 @@ func ReplaceDIDInDIDURLList(didURLList []string, oldDid string, newDid string) [
 }
 
 // ValidateDID checks method and allowed namespaces only when the corresponding parameters are specified.
-func ValidateDID(did string, method string, allowedNamespaces []string) error {
-	sMethod, sNamespace, sUniqueID, err := TrySplitDID(did)
+func ValidateDID(did string, method string) error {
+	sMethod, _, sUniqueID, err := TrySplitDID(did)
 	if err != nil {
 		return err
 	}
@@ -71,15 +70,6 @@ func ValidateDID(did string, method string, allowedNamespaces []string) error {
 	// check method
 	if method != "" && method != sMethod {
 		return fmt.Errorf("did method must be: %s", method)
-	}
-
-	// check namespaces
-	if !DidNamespaceRegexp.MatchString(sNamespace) {
-		return errors.New("invalid did namespace")
-	}
-
-	if len(allowedNamespaces) > 0 && !Contains(allowedNamespaces, sNamespace) {
-		return fmt.Errorf("did namespace must be one of: %s", strings.Join(allowedNamespaces, ", "))
 	}
 
 	// check unique-id
@@ -91,8 +81,8 @@ func ValidateDID(did string, method string, allowedNamespaces []string) error {
 	return err
 }
 
-func IsValidDID(did string, method string, allowedNamespaces []string) bool {
-	err := ValidateDID(did, method, allowedNamespaces)
+func IsValidDID(did string, method string) bool {
+	err := ValidateDID(did, method)
 	return err == nil
 }
 
