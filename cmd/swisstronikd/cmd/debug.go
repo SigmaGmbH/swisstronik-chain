@@ -67,6 +67,7 @@ func DebugCmd() *cobra.Command {
 	cmd.AddCommand(SampleDIDDocument())
 	cmd.AddCommand(ExtractPubkeyCmd())
 	cmd.AddCommand(ConvertAddressCmd())
+	cmd.AddCommand(SampleDIDResource())
 
 	return cmd
 }
