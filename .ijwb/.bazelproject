@@ -1,0 +1,15 @@
+directories:
+  .
+
+derive_targets_from_directories: true
+
+additional_languages:
+  # Uncomment any additional languages you want supported
+  # android
+  # dart
+  go
+  # javascript
+  # kotlin
+  python
+  # scala
+  # typescript

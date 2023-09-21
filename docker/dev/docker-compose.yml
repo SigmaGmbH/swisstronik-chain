@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  dev:
+    container_name: swisstronil_dev
+    build:
+      dockerfile: docker/dev/dev.Dockerfile
+      target: dev
+      context: ../..
+    ports:
+      - "2022:22"
+    volumes:
+      - ../..:/home/dev/src
+    command: /usr/sbin/sshd -D
