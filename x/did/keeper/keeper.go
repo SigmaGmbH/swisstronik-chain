@@ -309,7 +309,7 @@ func (k Keeper) GetAllDIDDocuments(ctx *sdk.Context) ([]*types.DIDDocumentVersio
 	return didDocs, nil
 }
 
-func FindDIDDocument(k *Keeper, ctx *sdk.Context, inMemoryDIDs map[string]types.DIDDocumentWithMetadata, did string) (res types.DIDDocumentWithMetadata, found bool, err error) {
+func (k *Keeper) FindDIDDocument(ctx *sdk.Context, inMemoryDIDs map[string]types.DIDDocumentWithMetadata, did string) (res types.DIDDocumentWithMetadata, found bool, err error) {
 	// Look in inMemory dict
 	value, found := inMemoryDIDs[did]
 	if found {
@@ -329,8 +329,8 @@ func FindDIDDocument(k *Keeper, ctx *sdk.Context, inMemoryDIDs map[string]types.
 	return types.DIDDocumentWithMetadata{}, false, nil
 }
 
-func MustFindDIDDocument(k *Keeper, ctx *sdk.Context, inMemoryDIDDocs map[string]types.DIDDocumentWithMetadata, did string) (res types.DIDDocumentWithMetadata, err error) {
-	res, found, err := FindDIDDocument(k, ctx, inMemoryDIDDocs, did)
+func (k *Keeper) MustFindDIDDocument(ctx *sdk.Context, inMemoryDIDDocs map[string]types.DIDDocumentWithMetadata, did string) (res types.DIDDocumentWithMetadata, err error) {
+	res, found, err := k.FindDIDDocument(ctx, inMemoryDIDDocs, did)
 	if err != nil {
 		return types.DIDDocumentWithMetadata{}, err
 	}
@@ -342,10 +342,10 @@ func MustFindDIDDocument(k *Keeper, ctx *sdk.Context, inMemoryDIDDocs map[string
 	return res, nil
 }
 
-func FindVerificationMethod(k *Keeper, ctx *sdk.Context, inMemoryDIDs map[string]types.DIDDocumentWithMetadata, didURL string) (res types.VerificationMethod, found bool, err error) {
+func (k *Keeper) FindVerificationMethod(ctx *sdk.Context, inMemoryDIDs map[string]types.DIDDocumentWithMetadata, didURL string) (res types.VerificationMethod, found bool, err error) {
 	did, _, _, _ := types.MustSplitDIDUrl(didURL)
 
-	didDoc, found, err := FindDIDDocument(k, ctx, inMemoryDIDs, did)
+	didDoc, found, err := k.FindDIDDocument(ctx, inMemoryDIDs, did)
 	if err != nil || !found {
 		return types.VerificationMethod{}, found, err
 	}
@@ -359,8 +359,8 @@ func FindVerificationMethod(k *Keeper, ctx *sdk.Context, inMemoryDIDs map[string
 	return types.VerificationMethod{}, false, nil
 }
 
-func MustFindVerificationMethod(k *Keeper, ctx *sdk.Context, inMemoryDIDs map[string]types.DIDDocumentWithMetadata, didURL string) (res types.VerificationMethod, err error) {
-	res, found, err := FindVerificationMethod(k, ctx, inMemoryDIDs, didURL)
+func (k *Keeper) MustFindVerificationMethod(ctx *sdk.Context, inMemoryDIDs map[string]types.DIDDocumentWithMetadata, didURL string) (res types.VerificationMethod, err error) {
+	res, found, err := k.FindVerificationMethod(ctx, inMemoryDIDs, didURL)
 	if err != nil {
 		return types.VerificationMethod{}, err
 	}
@@ -372,8 +372,8 @@ func MustFindVerificationMethod(k *Keeper, ctx *sdk.Context, inMemoryDIDs map[st
 	return res, nil
 }
 
-func VerifySignature(k *Keeper, ctx *sdk.Context, inMemoryDIDs map[string]types.DIDDocumentWithMetadata, message []byte, signature types.SignInfo) error {
-	verificationMethod, err := MustFindVerificationMethod(k, ctx, inMemoryDIDs, signature.VerificationMethodId)
+func (k *Keeper) VerifySignature(ctx *sdk.Context, inMemoryDIDs map[string]types.DIDDocumentWithMetadata, message []byte, signature types.SignInfo) error {
+	verificationMethod, err := k.MustFindVerificationMethod(ctx, inMemoryDIDs, signature.VerificationMethodId)
 	if err != nil {
 		return err
 	}
@@ -386,7 +386,7 @@ func VerifySignature(k *Keeper, ctx *sdk.Context, inMemoryDIDs map[string]types.
 	return nil
 }
 
-func VerifyAllSignersHaveAllValidSignatures(k *Keeper, ctx *sdk.Context, inMemoryDIDs map[string]types.DIDDocumentWithMetadata, message []byte, signers []string, signatures []*types.SignInfo) error {
+func (k *Keeper) VerifyAllSignersHaveAllValidSignatures(ctx *sdk.Context, inMemoryDIDs map[string]types.DIDDocumentWithMetadata, message []byte, signers []string, signatures []*types.SignInfo) error {
 	for _, signer := range signers {
 		signatures := types.FindSignInfosBySigner(signatures, signer)
 
@@ -395,7 +395,7 @@ func VerifyAllSignersHaveAllValidSignatures(k *Keeper, ctx *sdk.Context, inMemor
 		}
 
 		for _, signature := range signatures {
-			err := VerifySignature(k, ctx, inMemoryDIDs, message, signature)
+			err := k.VerifySignature(ctx, inMemoryDIDs, message, signature)
 			if err != nil {
 				return err
 			}
@@ -407,7 +407,7 @@ func VerifyAllSignersHaveAllValidSignatures(k *Keeper, ctx *sdk.Context, inMemor
 
 // VerifyAllSignersHaveAtLeastOneValidSignature verifies that all signers have at least one valid signature.
 // Omit didToBeUpdated and updatedDID if not updating a DID. Otherwise those values will be used to better format error messages.
-func VerifyAllSignersHaveAtLeastOneValidSignature(k *Keeper, ctx *sdk.Context, inMemoryDIDs map[string]types.DIDDocumentWithMetadata,
+func (k *Keeper) VerifyAllSignersHaveAtLeastOneValidSignature(ctx *sdk.Context, inMemoryDIDs map[string]types.DIDDocumentWithMetadata,
 	message []byte, signers []string, signatures []*types.SignInfo, didToBeUpdated string, updatedDID string,
 ) error {
 	for _, signer := range signers {
@@ -420,7 +420,7 @@ func VerifyAllSignersHaveAtLeastOneValidSignature(k *Keeper, ctx *sdk.Context, i
 
 		found := false
 		for _, signature := range signaturesBySigner {
-			err := VerifySignature(k, ctx, inMemoryDIDs, message, signature)
+			err := k.VerifySignature(ctx, inMemoryDIDs, message, signature)
 			if err == nil {
 				found = true
 				break

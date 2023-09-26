@@ -50,7 +50,7 @@ func (k Keeper) CreateDIDDocument(goCtx context.Context, msg *types.MsgCreateDID
 	// Check controllers' existence
 	controllers := didDoc.AllControllerDIDs()
 	for _, controller := range controllers {
-		_, err := MustFindDIDDocument(&k, &ctx, inMemoryDids, controller)
+		_, err := k.MustFindDIDDocument(&ctx, inMemoryDids, controller)
 		if err != nil {
 			return nil, err
 		}
@@ -58,7 +58,7 @@ func (k Keeper) CreateDIDDocument(goCtx context.Context, msg *types.MsgCreateDID
 
 	// Verify signatures
 	signers := GetSignerDIDsForDIDCreation(didDoc)
-	err := VerifyAllSignersHaveAllValidSignatures(&k, &ctx, inMemoryDids, signBytes, signers, msg.Signatures)
+	err := k.VerifyAllSignersHaveAllValidSignatures(&ctx, inMemoryDids, signBytes, signers, msg.Signatures)
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +112,7 @@ func (k Keeper) DeactivateDIDDocument(goCtx context.Context, msg *types.MsgDeact
 
 	// Verify signatures
 	signers := GetSignerDIDsForDIDCreation(*didDoc.DidDoc)
-	err = VerifyAllSignersHaveAllValidSignatures(&k, &ctx, inMemoryDids, signBytes, signers, msg.Signatures)
+	err = k.VerifyAllSignersHaveAllValidSignatures(&ctx, inMemoryDids, signBytes, signers, msg.Signatures)
 	if err != nil {
 		return nil, err
 	}
@@ -189,7 +189,7 @@ func (k Keeper) UpdateDIDDocument(goCtx context.Context, msg *types.MsgUpdateDID
 	// Check controllers existence
 	controllers := updatedDidDoc.AllControllerDIDs()
 	for _, controller := range controllers {
-		_, err := MustFindDIDDocument(&k, &ctx, inMemoryDids, controller)
+		_, err := k.MustFindDIDDocument(&ctx, inMemoryDids, controller)
 		if err != nil {
 			return nil, err
 		}
@@ -202,7 +202,7 @@ func (k Keeper) UpdateDIDDocument(goCtx context.Context, msg *types.MsgUpdateDID
 	// To eliminate this problem we have to add pubkey to the signInfo in future.
 	signers := GetSignerDIDsForDIDUpdate(*existingDidDoc, updatedDidDoc)
 	extendedSignatures := DuplicateSignatures(msg.Signatures, existingDidDocWithMetadata.DidDoc.Id, updatedDidDoc.Id)
-	err = VerifyAllSignersHaveAtLeastOneValidSignature(&k, &ctx, inMemoryDids, signBytes, signers, extendedSignatures, existingDidDoc.Id, updatedDidDoc.Id)
+	err = k.VerifyAllSignersHaveAtLeastOneValidSignature(&ctx, inMemoryDids, signBytes, signers, extendedSignatures, existingDidDoc.Id, updatedDidDoc.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -249,8 +249,7 @@ func (k Keeper) CreateResource(goCtx context.Context, msg *types.MsgCreateResour
 
 	// We can use the same signers as for DID creation because didDoc stays the same
 	signers := GetSignerDIDsForDIDCreation(*didDoc.DidDoc)
-	err = VerifyAllSignersHaveAllValidSignatures(&k, &ctx, map[string]types.DIDDocumentWithMetadata{},
-		signBytes, signers, msg.Signatures)
+	err = k.VerifyAllSignersHaveAllValidSignatures(&ctx, map[string]types.DIDDocumentWithMetadata{}, signBytes, signers, msg.Signatures)
 	if err != nil {
 		return nil, err
 	}
