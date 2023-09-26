@@ -27,6 +27,7 @@ import (
 	feemarkettypes "swisstronik/x/feemarket/types"
 	"github.com/ethereum/go-ethereum/core"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	didtypes "swisstronik/x/did/types"
 )
 
 // AccountKeeper defines the expected account keeper interface
@@ -62,6 +63,11 @@ type FeeMarketKeeper interface {
 	GetBaseFee(ctx sdk.Context) *big.Int
 	GetParams(ctx sdk.Context) feemarkettypes.Params
 	AddTransientGasWanted(ctx sdk.Context, gasWanted uint64) (uint64, error)
+}
+
+// DIDKeeper
+type DIDKeeper interface {
+	GetLatestDIDDocument(ctx *sdk.Context, did string) (didtypes.DIDDocumentWithMetadata, error)
 }
 
 // Event Hooks
