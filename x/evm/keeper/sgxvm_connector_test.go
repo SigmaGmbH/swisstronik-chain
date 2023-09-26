@@ -52,6 +52,7 @@ func (suite *KeeperTestSuite) TestSGXVMConnector() {
 	connector = evmkeeper.Connector{
 		Context:   suite.ctx,
 		EVMKeeper: suite.app.EvmKeeper,
+		DIDKeeper: suite.app.DIDKeeper,
 	}
 
 	testCases := []struct {

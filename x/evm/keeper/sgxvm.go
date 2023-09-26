@@ -280,6 +280,7 @@ func (k *Keeper) ApplyMessageWithConfig(
 	connector := Connector{
 		Context:   ctx,
 		EVMKeeper: k,
+		DIDKeeper: k.didKeeper,
 	}
 
 	var res *librustgo.HandleTransactionResponse

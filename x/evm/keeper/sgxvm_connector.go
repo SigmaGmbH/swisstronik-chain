@@ -2,12 +2,14 @@ package keeper
 
 import (
 	"errors"
+	"math/big"
+	"swisstronik/x/evm/types"
+
 	"github.com/SigmaGmbH/librustgo"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/golang/protobuf/proto"
-	"math/big"
 )
 
 // Connector allows our VM interact with existing Cosmos application.
@@ -17,6 +19,8 @@ type Connector struct {
 	GetHashFn vm.GetHashFunc
 	// Keeper used to store and obtain state
 	EVMKeeper *Keeper
+	// Keeper used to obtain state of DID registry
+	DIDKeeper types.DIDKeeper
 	// Context used to make Keeper calls available
 	Context sdk.Context
 }
