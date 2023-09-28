@@ -3,8 +3,9 @@ use core::marker::PhantomData;
 use evm_precompile_blake2f::Blake2F;
 use evm_precompile_bn128::{Bn128Add, Bn128Mul, Bn128Pairing};
 use evm_precompile_modexp::Modexp;
+use evm_precompile_identity::Identity;
 // use evm_precompile_curve25519::{Curve25519Add, Curve25519ScalarMul};
-use evm_precompile_simple::{ECRecover, Identity, Ripemd160, Sha256};
+use evm_precompile_simple::{ECRecover, Ripemd160, Sha256};
 use precompile_std::{Precompile, PrecompileHandle, PrecompileResult, PrecompileSet, IsPrecompileResult};
 use primitive_types::H160;
 
@@ -19,7 +20,7 @@ impl<R> EVMPrecompiles<R>
     pub fn new() -> Self {
         Self(Default::default())
     }
-    pub fn used_addresses() -> [H160; 9] {
+    pub fn used_addresses() -> [H160; 10] {
         [
             hash(1),
             hash(2),
@@ -32,6 +33,7 @@ impl<R> EVMPrecompiles<R>
             hash(9),
             // hash(1024),
             // hash(1025),
+            hash(1027),
         ]
     }
 }
@@ -55,6 +57,8 @@ impl<R> PrecompileSet for EVMPrecompiles<R>
             // a if a == hash(1024) => Some(Sha3FIPS256::execute(handle)),
             // a if a == hash(1025) => Some(Sha3FIPS512::execute(handle)),
             // a if a == hash(1026) => Some(ECRecoverPublicKey::execute(handle)),
+            // Identity precompile
+            a if a == hash(1027) => Some(Identity::execute(handle)),
             _ => None,
         }
     }
