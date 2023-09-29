@@ -323,7 +323,7 @@ dependencies = [
  "parity-scale-codec",
  "rlp",
  "scale-info",
- "serde 1.0.156",
+ "serde 1.0.164",
  "sha3",
  "triehash",
 ]
@@ -395,6 +395,15 @@ dependencies = [
  "precompile-std",
  "primitive-types",
  "substrate-bn",
+]
+
+[[package]]
+name = "evm-precompile-identity"
+version = "1.0.0-dev"
+dependencies = [
+ "precompile-std",
+ "rlp",
+ "sgx_tstd",
 ]
 
 [[package]]
@@ -558,7 +567,7 @@ version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ebc88fc67028ae3db0c853baa36269d398d5f45b6982f95549ff5def78c935cd"
 dependencies = [
- "serde 1.0.156",
+ "serde 1.0.164",
 ]
 
 [[package]]
@@ -1066,11 +1075,11 @@ dependencies = [
 
 [[package]]
 name = "serde"
-version = "1.0.156"
+version = "1.0.164"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "314b5b092c0ade17c00142951e50ced110ec27cea304b1037c6969246c2469a4"
+checksum = "9e8c8cf938e98f769bc164923b06dce91cea1751522f46f8466461af04c9027d"
 dependencies = [
- "serde_derive 1.0.156",
+ "serde_derive 1.0.164",
 ]
 
 [[package]]
@@ -1085,13 +1094,13 @@ dependencies = [
 
 [[package]]
 name = "serde_derive"
-version = "1.0.156"
+version = "1.0.164"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d7e29c4601e36bcec74a223228dce795f4cd3616341a4af93520ca1a837c087d"
+checksum = "d9735b638ccc51c28bf6914d90a2e9725b377144fc612c49a611fddd1b631d68"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 1.0.109",
+ "syn 2.0.11",
 ]
 
 [[package]]
@@ -1115,6 +1124,14 @@ dependencies = [
  "deoxysii",
  "derive_more",
  "errno",
+ "ethereum",
+ "evm",
+ "evm-precompile-blake2f",
+ "evm-precompile-bn128",
+ "evm-precompile-identity",
+ "evm-precompile-modexp",
+ "evm-precompile-sha3fips",
+ "evm-precompile-simple",
  "hex",
  "hmac 0.11.0",
  "httparse",
@@ -1122,6 +1139,8 @@ dependencies = [
  "itertools",
  "lazy_static",
  "num-bigint 0.2.5",
+ "precompile-std",
+ "primitive-types",
  "protobuf",
  "rustls",
  "serde 1.0.118",
@@ -1132,7 +1151,6 @@ dependencies = [
  "sgx_tse",
  "sgx_tstd",
  "sgx_types",
- "sgxvm",
  "sha2 0.9.9",
  "thiserror-no-std",
  "uuid",
@@ -1246,28 +1264,6 @@ version = "1.1.5"
 source = "git+https://github.com/haerdib/incubator-teaclave-sgx-sdk?branch=master#605c8ea7a05d9d1a2536be66c09d3b5a06f348b0"
 dependencies = [
  "sgx_build_helper",
-]
-
-[[package]]
-name = "sgxvm"
-version = "0.1.0"
-dependencies = [
- "ethereum",
- "evm",
- "evm-precompile-blake2f",
- "evm-precompile-bn128",
- "evm-precompile-modexp",
- "evm-precompile-sha3fips",
- "evm-precompile-simple",
- "hex",
- "internal_types",
- "k256",
- "precompile-std",
- "primitive-types",
- "rlp",
- "rlp-derive",
- "sgx_tstd",
- "sha3",
 ]
 
 [[package]]

@@ -1,17 +1,21 @@
+use protobuf::Message;
+use primitive_types::{H160, H256, U256};
+use std::{vec::Vec, string::String};
+use evm::ExitReason;
+use internal_types::ExecutionResult;
+use protobuf::RepeatedField;
+use evm::executor::stack::{MemoryStackState, StackExecutor, StackSubstateMetadata};
+use evm::backend::Backend;
+
 use crate::AllocationWithResult;
 use crate::encryption::{decrypt_transaction_data, extract_public_key_and_data, ENCRYPTED_DATA_LEN, encrypt_transaction_data};
 use crate::protobuf_generated::ffi::{
     AccessListItem, HandleTransactionResponse, Log,
     SGXVMCallRequest, SGXVMCreateRequest, Topic, TransactionContext as ProtoTransactionContext,
 };
-use protobuf::Message;
-use sgxvm::primitive_types::{H160, H256, U256};
-use std::vec::Vec;
-use sgxvm::{self, Vicinity};
-use internal_types::ExecutionResult;
 use crate::backend;
 use crate::GoQuerier;
-use protobuf::RepeatedField;
+use crate::types::{Vicinity, GASOMETER_CONFIG};
 
 /// Handles incoming request for calling contract or transferring value
 pub fn handle_call_request(querier: *mut GoQuerier, data: SGXVMCallRequest) -> AllocationWithResult {
@@ -81,7 +85,7 @@ fn handle_call_request_inner(querier: *mut GoQuerier, data: SGXVMCallRequest) ->
     // to extract user public key and encrypted data
     match params.data.len() {
         0 => {
-            sgxvm::handle_sgxvm_call(
+            sgxvm_call(
                 &mut backend,
                 params.gasLimit,
                 H160::from_slice(&params.from),
@@ -119,7 +123,7 @@ fn handle_call_request_inner(querier: *mut GoQuerier, data: SGXVMCallRequest) ->
                 }
             } else { Vec::default() };
 
-            let mut exec_result = sgxvm::handle_sgxvm_call(
+            let mut exec_result = sgxvm_call(
                 &mut backend,
                 params.gasLimit,
                 H160::from_slice(&params.from),
@@ -164,7 +168,7 @@ fn handle_create_request_inner(querier: *mut GoQuerier, data: SGXVMCreateRequest
         build_transaction_context(context),
     );
 
-    sgxvm::handle_sgxvm_create(
+    sgxvm_create(
         &mut backend,
         params.gasLimit,
         H160::from_slice(&params.from),
@@ -209,4 +213,91 @@ fn convert_topic_to_proto(topic: H256) -> Topic {
     protobuf_topic.set_inner(topic.as_fixed_bytes().to_vec());
 
     protobuf_topic
+}
+
+/// Handles incoming request for calling some contract / funds transfer
+fn sgxvm_call(
+    backend: &mut impl ExtendedBackend,
+    gas_limit: u64,
+    from: H160,
+    to: H160,
+    value: U256,
+    data: Vec<u8>,
+    access_list: Vec<(H160, Vec<H256>)>,
+    commit: bool,
+) -> ExecutionResult {
+    let metadata = StackSubstateMetadata::new(gas_limit, &GASOMETER_CONFIG);
+    let state = MemoryStackState::new(metadata, backend);
+    let precompiles = EVMPrecompiles::<Backend>::new();
+
+    let mut executor = StackExecutor::new_with_precompiles(state, &GASOMETER_CONFIG, &precompiles);
+    let (exit_reason, ret) = executor.transact_call(from, to, value, data, gas_limit, access_list);
+
+    let gas_used = executor.used_gas();
+    let exit_value = match handle_evm_result(exit_reason, ret) {
+        Ok(data) => data,
+        Err((err, data)) => {
+            return ExecutionResult::from_error(err, data, Some(gas_used))
+        }
+    };
+
+    if commit {
+        let (vals, logs) = executor.into_state().deconstruct();
+        backend.apply(vals, logs, false);
+    }
+
+    ExecutionResult {
+        logs: backend.get_logs(),
+        data: exit_value,
+        gas_used,
+        vm_error: "".to_string(),
+    }
+}
+
+/// Handles incoming request for creation of a new contract
+fn sgxvm_create(
+    backend: &mut impl ExtendedBackend,
+    gas_limit: u64,
+    from: H160,
+    value: U256,
+    data: Vec<u8>,
+    access_list: Vec<(H160, Vec<H256>)>,
+    commit: bool,
+) -> ExecutionResult {
+    let metadata = StackSubstateMetadata::new(gas_limit, &GASOMETER_CONFIG);
+    let state = MemoryStackState::new(metadata, backend);
+    let precompiles = EVMPrecompiles::<Backend>::new();
+
+    let mut executor = StackExecutor::new_with_precompiles(state, &GASOMETER_CONFIG, &precompiles);
+    let (exit_reason, ret) = executor.transact_create(from, value, data, gas_limit, access_list);
+
+    let gas_used = executor.used_gas();
+    let exit_value = match handle_evm_result(exit_reason, ret) {
+        Ok(data) => data,
+        Err((err, data)) => {
+            return ExecutionResult::from_error(err, data, Some(gas_used))
+        }
+    };
+
+    if commit {
+        let (vals, logs) = executor.into_state().deconstruct();
+        backend.apply(vals, logs, false);
+    }
+
+    ExecutionResult {
+        logs: backend.get_logs(),
+        data: exit_value,
+        gas_used,
+        vm_error: "".to_string(),
+    }
+}
+
+/// Handles an EVM result to return either a successful result or a (readable) error reason.
+fn handle_evm_result(exit_reason: ExitReason, data: Vec<u8>) -> Result<Vec<u8>, (String, Vec<u8>)> {
+    match exit_reason {
+        ExitReason::Succeed(_) => Ok(data),
+        ExitReason::Revert(err) => Err((format!("execution reverted: {:?}", err), data)),
+        ExitReason::Error(err) => Err((format!("evm error: {:?}", err), data)),
+        ExitReason::Fatal(err) => Err((format!("fatal evm error: {:?}", err), data)),
+    }
 }

@@ -25,6 +25,7 @@ mod encryption;
 mod attestation;
 mod key_manager;
 mod handlers;
+mod types;
 
 pub const MAX_RESULT_LEN: usize = 4096;
 

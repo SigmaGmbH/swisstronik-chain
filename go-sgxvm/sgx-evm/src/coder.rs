@@ -1,5 +1,5 @@
-use sgxvm::evm::backend::Basic;
-use sgxvm::primitive_types::{H160, U256, H256};
+use evm::backend::Basic;
+use primitive_types::{H160, U256, H256};
 use protobuf::Message;
 use crate::protobuf_generated::ffi;
 use std::vec::Vec;

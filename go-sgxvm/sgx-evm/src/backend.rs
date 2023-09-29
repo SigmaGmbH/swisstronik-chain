@@ -1,15 +1,14 @@
-use sgxvm::ethereum::Log;
+use ethereum::Log;
 use sgxvm::backend::ExtendedBackend;
-use sgxvm::evm::backend::{Backend as EvmBackend, ApplyBackend as EvmApplyBackend, Basic, Apply};
+use evm::backend::{Backend as EvmBackend, ApplyBackend as EvmApplyBackend, Basic, Apply};
 
-use sgxvm::primitive_types::{H160, H256, U256};
-use sgxvm::storage::Storage;
-use sgxvm::Vicinity;
+use primitive_types::{H160, H256, U256};
 use std::vec::Vec;
 
 use crate::{coder, GoQuerier};
 use crate::ocall;
 use crate::protobuf_generated::ffi;
+use crate::types::{Vicinity, Storage};
 
 /// Contains context of the transaction such as gas price, block hash, block timestamp, etc.
 pub struct TxContext {

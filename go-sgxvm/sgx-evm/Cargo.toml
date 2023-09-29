@@ -20,7 +20,7 @@ errno = { version = "0.2.8", default-features=false }
 thiserror-no-std = "2.0.2"
 hex = { version = "0.4.3", default-features=false }
 protobuf = { git = "https://github.com/mesalock-linux/rust-protobuf-sgx", branch = "v2.8" }
-sgxvm = { path = "./evm/sgxvm" }
+# sgxvm = { path = "./evm/sgxvm" }
 internal_types = { path = "./evm/internal_types" }
 chrono = { git = "https://github.com/mesalock-linux/chrono-sgx" }
 webpki = { git = "https://github.com/mesalock-linux/webpki", branch = "mesalock_sgx" }
@@ -38,13 +38,26 @@ x25519-dalek = { version = "2.0.0-pre.1", default-features=false, features=[ "u6
 hmac = { version = "0.11.0", default-features=false }
 sha2 = { version = "0.9.5", default-features=false }
 deoxysii = { version = "0.2.4", path="../deoxysii-rust" }
+primitive-types = { version = "^0.12", default-features = false, features = ["rlp"] }
+evm = { version = "0.39.0", default-features = false }
+ethereum = { version = "0.14", default-features = false, features = ["with-codec", "with-serde"] }
 
+# Sgx crates
 sgx_types = { version = "1.1.5", git = "https://github.com/apache/teaclave-sgx-sdk.git", tag="v1.1.5" }
 sgx_tstd = { version = "1.1.5", git = "https://github.com/apache/teaclave-sgx-sdk.git", tag="v1.1.5", features = ["net", "backtrace"]  }
 sgx_trts = { version = "1.1.5", git = "https://github.com/apache/teaclave-sgx-sdk.git", tag="v1.1.5" }
 sgx_tcrypto = { version = "1.1.5", git = "https://github.com/apache/teaclave-sgx-sdk.git", tag="v1.1.5" }
 sgx_tse = { version = "1.1.5", git = "https://github.com/apache/teaclave-sgx-sdk.git", tag="v1.1.5" }
 sgx_rand = { version = "1.1.5", git = "https://github.com/apache/teaclave-sgx-sdk.git", tag="v1.1.5" }
+
+# Precompiles
+precompile-std = { path = "./evm/precompiles/precompile-std" }
+evm-precompile-simple = { path = "./evm/precompiles/simple" }
+evm-precompile-sha3fips = { path = "./evm/precompiles/sha3fips" }
+evm-precompile-modexp = { path = "./evm/precompiles/modexp" }
+evm-precompile-bn128 = { path = "./evm/precompiles/bn128" }
+evm-precompile-blake2f = { path = "./evm/precompiles/blake2f" }
+evm-precompile-identity = { path = "./evm/precompiles/identity" }
 
 [patch."https://github.com/apache/teaclave-sgx-sdk.git"]
 sgx_tstd = { version = "1.1.5", git = "https://github.com/haerdib/incubator-teaclave-sgx-sdk", branch = "master"}
