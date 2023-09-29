@@ -1,5 +1,6 @@
 use std::vec::Vec;
 use sgx_types::sgx_status_t;
+use protobuf::Message;
 
 use crate::{AllocationWithResult, Allocation};
 use crate::ocall;
@@ -61,5 +62,5 @@ pub fn handle_public_key_request() -> AllocationWithResult {
         }
     };
     
-    super::allocate_inner(encoded_response)
+    allocate_inner(encoded_response)
 }

@@ -106,7 +106,7 @@ pub extern "C" fn handle_request(
                     handlers::tx::handle_create_request(querier, data)
                 },
                 FFIRequest_oneof_req::publicKeyRequest(_) => {
-                    handlers::node::handle_public_key_request()
+                    handlers::handle_public_key_request()
                 }
             }
         }
