@@ -20,9 +20,9 @@ impl LinearCostPrecompile for Identity {
         // Expects to receive RLP-encoded Verifiable Credential with JWT proof
         // should contain [issuer_id, credential_subject_id, credential_subject_address, proof]
         let rlp_raw = Rlp::new(input);
-        let decoded_values: Vec<std::string::String> = match rlp_raw.as_list() {
+        let _decoded_values: Vec<std::string::String> = match rlp_raw.as_list() {
             Ok(res) => res,
-            Err(err) => {
+            Err(_) => {
                 return Err(PrecompileFailure::Error {
                     exit_status: ExitError::Other("cannot decode provided RLP bytes".into()),
                 })

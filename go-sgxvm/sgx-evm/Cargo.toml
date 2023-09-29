@@ -18,9 +18,8 @@ uuid = { version = "0.8.1", default-features=false }
 serde = { git = "https://github.com/mesalock-linux/serde-sgx", features = ["derive"] }
 errno = { version = "0.2.8", default-features=false }
 thiserror-no-std = "2.0.2"
-hex = { version = "0.4.3", default-features=false }
+hex = { version = "0.4.3", default-features=false, features = ["alloc"] }
 protobuf = { git = "https://github.com/mesalock-linux/rust-protobuf-sgx", branch = "v2.8" }
-# sgxvm = { path = "./evm/sgxvm" }
 internal_types = { path = "./evm/internal_types" }
 chrono = { git = "https://github.com/mesalock-linux/chrono-sgx" }
 webpki = { git = "https://github.com/mesalock-linux/webpki", branch = "mesalock_sgx" }

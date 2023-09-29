@@ -27,7 +27,7 @@ pub struct FFIBackend<'state> {
     // Contains gas price and original sender
     pub vicinity: Vicinity,
     // Accounts state
-    pub state: &'state FFIStorage,
+    pub state: &'state mut FFIStorage,
     // Emitted events
     pub logs: Vec<Log>,
     // Transaction context
@@ -216,7 +216,7 @@ impl<'state> EvmApplyBackend for FFIBackend<'state> {
 impl<'state> FFIBackend<'state> {
     pub fn new(
         querier: *mut GoQuerier,
-        storage: &'state FFIStorage,
+        storage: &'state mut FFIStorage,
         vicinity: Vicinity,
         tx_context: TxContext,
     ) -> Self {
