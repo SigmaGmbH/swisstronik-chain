@@ -100,10 +100,10 @@ pub extern "C" fn handle_request(
         Some(req) => {
             match req {
                 FFIRequest_oneof_req::callRequest(data) => {
-                    handlers::tx::handle_call_request(querier, data)
+                    handlers::handle_evm_call_request(querier, data)
                 },
                 FFIRequest_oneof_req::createRequest(data) => {
-                    handlers::tx::handle_create_request(querier, data)
+                    handlers::handle_evm_create_request(querier, data)
                 },
                 FFIRequest_oneof_req::publicKeyRequest(_) => {
                     handlers::handle_public_key_request()

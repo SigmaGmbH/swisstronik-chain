@@ -18,19 +18,8 @@ use crate::precompiles::EVMPrecompiles;
 use crate::types::{Vicinity, GASOMETER_CONFIG, ExtendedBackend};
 use crate::std::string::ToString;
 
-/// Handles incoming request for calling contract or transferring value
-pub fn handle_call_request(querier: *mut GoQuerier, data: SGXVMCallRequest) -> AllocationWithResult {
-    let res = handle_call_request_inner(querier, data);
-    post_transaction_handling(res)
-}
-
-/// Handles incoming request for creation of a new contract
-pub fn handle_create_request(querier: *mut GoQuerier, data: SGXVMCreateRequest) -> AllocationWithResult {
-    let res = handle_create_request_inner(querier, data);
-    post_transaction_handling(res)
-}
-
-fn post_transaction_handling(execution_result: ExecutionResult) -> AllocationWithResult {
+/// Converts raw execution result into protobuf and returns it outside of enclave
+pub fn convert_and_allocate_transaction_result(execution_result: ExecutionResult) -> AllocationWithResult {
     let mut response = HandleTransactionResponse::new();
     response.set_gas_used(execution_result.gas_used);
     response.set_vm_error(execution_result.vm_error);
@@ -66,7 +55,8 @@ fn post_transaction_handling(execution_result: ExecutionResult) -> AllocationWit
     super::allocate_inner(encoded_response)
 }
 
-fn handle_call_request_inner(querier: *mut GoQuerier, data: SGXVMCallRequest) -> ExecutionResult {
+/// Inner handler for EVM call request
+pub fn handle_call_request_inner(querier: *mut GoQuerier, data: SGXVMCallRequest) -> ExecutionResult {
     let params = data.params.unwrap();
     let context = data.context.unwrap();
 
@@ -79,14 +69,14 @@ fn handle_call_request_inner(querier: *mut GoQuerier, data: SGXVMCallRequest) ->
         querier,
         &mut storage,
         vicinity,
-        build_transaction_context(context),
+        tx_context_to_backend_context(context),
     );
 
     // If data is empty, there should be no encryption of result. Otherwise we should try
     // to extract user public key and encrypted data
     match params.data.len() {
         0 => {
-            sgxvm_call(
+            execute_call(
                 &mut backend,
                 params.gasLimit,
                 H160::from_slice(&params.from),
@@ -124,7 +114,7 @@ fn handle_call_request_inner(querier: *mut GoQuerier, data: SGXVMCallRequest) ->
                 }
             } else { Vec::default() };
 
-            let mut exec_result = sgxvm_call(
+            let mut exec_result = execute_call(
                 &mut backend,
                 params.gasLimit,
                 H160::from_slice(&params.from),
@@ -153,7 +143,8 @@ fn handle_call_request_inner(querier: *mut GoQuerier, data: SGXVMCallRequest) ->
     }
 }
 
-fn handle_create_request_inner(querier: *mut GoQuerier, data: SGXVMCreateRequest) -> ExecutionResult {
+/// Inner handler for EVM create request
+pub fn handle_create_request_inner(querier: *mut GoQuerier, data: SGXVMCreateRequest) -> ExecutionResult {
     let params = data.params.unwrap();
     let context = data.context.unwrap();
 
@@ -166,10 +157,10 @@ fn handle_create_request_inner(querier: *mut GoQuerier, data: SGXVMCreateRequest
         querier,
         &mut storage,
         vicinity,
-        build_transaction_context(context),
+        tx_context_to_backend_context(context),
     );
 
-    sgxvm_create(
+    execute_create(
         &mut backend,
         params.gasLimit,
         H160::from_slice(&params.from),
@@ -180,6 +171,7 @@ fn handle_create_request_inner(querier: *mut GoQuerier, data: SGXVMCreateRequest
     )
 }
 
+/// Converts access list from RepeatedField to Vec
 fn parse_access_list(data: RepeatedField<AccessListItem>) -> Vec<(H160, Vec<H256>)> {
     let mut access_list = Vec::default();
     for access_list_item in data.to_vec() {
@@ -197,7 +189,8 @@ fn parse_access_list(data: RepeatedField<AccessListItem>) -> Vec<(H160, Vec<H256
     access_list
 }
 
-fn build_transaction_context(context: ProtoTransactionContext) -> backend::TxContext {
+/// Creates backend context from provided Transaction Context
+fn tx_context_to_backend_context(context: ProtoTransactionContext) -> backend::TxContext {
     backend::TxContext {
         chain_id: U256::from(context.chain_id),
         gas_price: U256::from_big_endian(&context.gas_price),
@@ -209,6 +202,7 @@ fn build_transaction_context(context: ProtoTransactionContext) -> backend::TxCon
     }
 }
 
+/// Converts EVM topic into protobuf-generated `Topic
 fn convert_topic_to_proto(topic: H256) -> Topic {
     let mut protobuf_topic = Topic::new();
     protobuf_topic.set_inner(topic.as_fixed_bytes().to_vec());
@@ -216,8 +210,17 @@ fn convert_topic_to_proto(topic: H256) -> Topic {
     protobuf_topic
 }
 
-/// Handles incoming request for calling some contract / funds transfer
-fn sgxvm_call(
+/// Executes call to smart contract or transferring value
+/// * backend – EVM backend for reading and writting state 
+/// * gas_limit – gas limit for transaction
+/// * from – transaction origin address
+/// * to – destination address
+/// * data – encoded params for smart contract call or arbitrary data
+/// * access_list – EIP-2930 access list
+/// * commit – should apply changes. Provide `false` if you want to simulate transaction, without state changes
+/// 
+/// Returns EVM execution result  
+fn execute_call(
     backend: &mut impl ExtendedBackend,
     gas_limit: u64,
     from: H160,
@@ -255,8 +258,16 @@ fn sgxvm_call(
     }
 }
 
-/// Handles incoming request for creation of a new contract
-fn sgxvm_create(
+/// Creates new smart contract
+/// * backend – EVM backend for reading and writting state 
+/// * gas_limit – gas limit for contract creation
+/// * from – creator address of smart contract
+/// * data – encoded bytecode and creation params
+/// * access_list – EIP-2930 access list
+/// * commit – should apply changes. Provide `false` if you want to simulate contract creation, without state changes
+/// 
+/// Returns EVM execution result  
+fn execute_create(
     backend: &mut impl ExtendedBackend,
     gas_limit: u64,
     from: H160,

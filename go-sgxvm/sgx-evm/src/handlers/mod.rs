@@ -5,7 +5,12 @@ use protobuf::Message;
 use crate::{AllocationWithResult, Allocation};
 use crate::ocall;
 use crate::key_manager::KeyManager;
-use crate::protobuf_generated::ffi::NodePublicKeyResponse;
+use crate::protobuf_generated::ffi::{
+    NodePublicKeyResponse,
+    SGXVMCallRequest, 
+    SGXVMCreateRequest,
+};
+use crate::GoQuerier;
 
 pub mod tx;
 
@@ -63,4 +68,20 @@ pub fn handle_public_key_request() -> AllocationWithResult {
     };
     
     allocate_inner(encoded_response)
+}
+
+/// Handles incoming request for calling contract or transferring value
+/// * querier – GoQuerier which is used to interact with Go (Cosmos) from SGX Enclave
+/// * data – EVM call data (destination, value, etc.)
+pub fn handle_evm_call_request(querier: *mut GoQuerier, data: SGXVMCallRequest) -> AllocationWithResult {
+    let res = tx::handle_call_request_inner(querier, data);
+    tx::convert_and_allocate_transaction_result(res)
+}
+
+/// Handles incoming request for creation of a new contract
+/// * querier – GoQuerier which is used to interact with Go (Cosmos) from SGX Enclave
+/// * data – EVM call data (value, tx.data, etc.)
+pub fn handle_evm_create_request(querier: *mut GoQuerier, data: SGXVMCreateRequest) -> AllocationWithResult {
+    let res = tx::handle_create_request_inner(querier, data);
+    tx::convert_and_allocate_transaction_result(res)
 }
