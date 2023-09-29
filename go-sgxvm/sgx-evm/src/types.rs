@@ -1,4 +1,10 @@
-use evm::{Config, backend::Basic};
+use evm::Config;
+use evm::backend::{
+    ApplyBackend as EvmApplyBackend,
+    Backend as EvmBackend,
+    Basic,
+    Log
+};
 use primitive_types::{H160, H256, U256};
 use std::vec::Vec;
 
@@ -9,6 +15,11 @@ pub static GASOMETER_CONFIG: Config = Config::london();
 pub struct Vicinity {
     pub origin: H160,
     pub nonce: U256,
+}
+
+/// Supertrait for our version of EVM Backend
+pub trait ExtendedBackend: EvmBackend + EvmApplyBackend {
+    fn get_logs(&self) -> Vec<Log>;
 }
 
 /// A key-value storage trait

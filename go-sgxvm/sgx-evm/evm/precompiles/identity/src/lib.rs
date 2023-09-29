@@ -4,10 +4,8 @@ extern crate alloc;
 extern crate sgx_tstd as std;
 
 use alloc::vec::Vec;
-use core::{cmp::max, ops::BitAnd};
 use precompile_std::{
-    ExitError, ExitSucceed, LinearCostPrecompile, Precompile, PrecompileFailure, PrecompileHandle,
-    PrecompileOutput, PrecompileResult,
+    ExitError, ExitSucceed, LinearCostPrecompile, PrecompileFailure,
 };
 use rlp::Rlp;
 

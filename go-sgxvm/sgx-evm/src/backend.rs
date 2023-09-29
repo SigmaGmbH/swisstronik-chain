@@ -1,5 +1,4 @@
 use ethereum::Log;
-use sgxvm::backend::ExtendedBackend;
 use evm::backend::{Backend as EvmBackend, ApplyBackend as EvmApplyBackend, Basic, Apply};
 
 use primitive_types::{H160, H256, U256};
@@ -8,7 +7,8 @@ use std::vec::Vec;
 use crate::{coder, GoQuerier};
 use crate::ocall;
 use crate::protobuf_generated::ffi;
-use crate::types::{Vicinity, Storage};
+use crate::types::{Vicinity, Storage, ExtendedBackend};
+use crate::storage::FFIStorage;
 
 /// Contains context of the transaction such as gas price, block hash, block timestamp, etc.
 pub struct TxContext {
@@ -27,7 +27,7 @@ pub struct FFIBackend<'state> {
     // Contains gas price and original sender
     pub vicinity: Vicinity,
     // Accounts state
-    pub state: &'state mut dyn Storage,
+    pub state: &'state FFIStorage,
     // Emitted events
     pub logs: Vec<Log>,
     // Transaction context
@@ -216,7 +216,7 @@ impl<'state> EvmApplyBackend for FFIBackend<'state> {
 impl<'state> FFIBackend<'state> {
     pub fn new(
         querier: *mut GoQuerier,
-        storage: &'state mut dyn Storage,
+        storage: &'state FFIStorage,
         vicinity: Vicinity,
         tx_context: TxContext,
     ) -> Self {

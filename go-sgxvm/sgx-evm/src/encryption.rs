@@ -1,4 +1,4 @@
-use crate::{error::Error, key_manager::{PUBLIC_KEY_SIZE, self}};
+use crate::{error::Error, key_manager::PUBLIC_KEY_SIZE};
 use std::vec::Vec;
 
 use crate::key_manager::UNSEALED_KEY_MANAGER;

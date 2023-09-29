@@ -5,17 +5,18 @@ use evm::ExitReason;
 use internal_types::ExecutionResult;
 use protobuf::RepeatedField;
 use evm::executor::stack::{MemoryStackState, StackExecutor, StackSubstateMetadata};
-use evm::backend::Backend;
 
 use crate::AllocationWithResult;
-use crate::encryption::{decrypt_transaction_data, extract_public_key_and_data, ENCRYPTED_DATA_LEN, encrypt_transaction_data};
+use crate::encryption::{decrypt_transaction_data, extract_public_key_and_data, encrypt_transaction_data};
 use crate::protobuf_generated::ffi::{
     AccessListItem, HandleTransactionResponse, Log,
     SGXVMCallRequest, SGXVMCreateRequest, Topic, TransactionContext as ProtoTransactionContext,
 };
 use crate::backend;
 use crate::GoQuerier;
-use crate::types::{Vicinity, GASOMETER_CONFIG};
+use crate::precompiles::EVMPrecompiles;
+use crate::types::{Vicinity, GASOMETER_CONFIG, ExtendedBackend};
+use crate::std::string::ToString;
 
 /// Handles incoming request for calling contract or transferring value
 pub fn handle_call_request(querier: *mut GoQuerier, data: SGXVMCallRequest) -> AllocationWithResult {
@@ -228,7 +229,7 @@ fn sgxvm_call(
 ) -> ExecutionResult {
     let metadata = StackSubstateMetadata::new(gas_limit, &GASOMETER_CONFIG);
     let state = MemoryStackState::new(metadata, backend);
-    let precompiles = EVMPrecompiles::<Backend>::new();
+    let precompiles = EVMPrecompiles::<backend::FFIBackend>::new();
 
     let mut executor = StackExecutor::new_with_precompiles(state, &GASOMETER_CONFIG, &precompiles);
     let (exit_reason, ret) = executor.transact_call(from, to, value, data, gas_limit, access_list);
@@ -266,7 +267,7 @@ fn sgxvm_create(
 ) -> ExecutionResult {
     let metadata = StackSubstateMetadata::new(gas_limit, &GASOMETER_CONFIG);
     let state = MemoryStackState::new(metadata, backend);
-    let precompiles = EVMPrecompiles::<Backend>::new();
+    let precompiles = EVMPrecompiles::<backend::FFIBackend>::new();
 
     let mut executor = StackExecutor::new_with_precompiles(state, &GASOMETER_CONFIG, &precompiles);
     let (exit_reason, ret) = executor.transact_create(from, value, data, gas_limit, access_list);
