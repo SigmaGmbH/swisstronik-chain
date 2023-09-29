@@ -23,7 +23,7 @@ pub struct TxContext {
 
 pub struct FFIBackend<'state> {
     // We keep GoQuerier to make it accessible for `OCALL` handlers
-    querier: *mut GoQuerier,
+    pub querier: *mut GoQuerier,
     // Contains gas price and original sender
     pub vicinity: Vicinity,
     // Accounts state

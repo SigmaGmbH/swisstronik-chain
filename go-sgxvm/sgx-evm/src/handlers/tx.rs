@@ -77,6 +77,7 @@ pub fn handle_call_request_inner(querier: *mut GoQuerier, data: SGXVMCallRequest
     match params.data.len() {
         0 => {
             execute_call(
+                querier,
                 &mut backend,
                 params.gasLimit,
                 H160::from_slice(&params.from),
@@ -115,6 +116,7 @@ pub fn handle_call_request_inner(querier: *mut GoQuerier, data: SGXVMCallRequest
             } else { Vec::default() };
 
             let mut exec_result = execute_call(
+                querier,
                 &mut backend,
                 params.gasLimit,
                 H160::from_slice(&params.from),
@@ -161,6 +163,7 @@ pub fn handle_create_request_inner(querier: *mut GoQuerier, data: SGXVMCreateReq
     );
 
     execute_create(
+        querier,
         &mut backend,
         params.gasLimit,
         H160::from_slice(&params.from),
@@ -211,6 +214,7 @@ fn convert_topic_to_proto(topic: H256) -> Topic {
 }
 
 /// Executes call to smart contract or transferring value
+/// * querier – GoQuerier which is used to interact with Go (Cosmos) from SGX Enclave
 /// * backend – EVM backend for reading and writting state 
 /// * gas_limit – gas limit for transaction
 /// * from – transaction origin address
@@ -221,6 +225,7 @@ fn convert_topic_to_proto(topic: H256) -> Topic {
 /// 
 /// Returns EVM execution result  
 fn execute_call(
+    querier: *mut GoQuerier,
     backend: &mut impl ExtendedBackend,
     gas_limit: u64,
     from: H160,
@@ -232,7 +237,7 @@ fn execute_call(
 ) -> ExecutionResult {
     let metadata = StackSubstateMetadata::new(gas_limit, &GASOMETER_CONFIG);
     let state = MemoryStackState::new(metadata, backend);
-    let precompiles = EVMPrecompiles::<backend::FFIBackend>::new();
+    let precompiles = EVMPrecompiles::new(querier);
 
     let mut executor = StackExecutor::new_with_precompiles(state, &GASOMETER_CONFIG, &precompiles);
     let (exit_reason, ret) = executor.transact_call(from, to, value, data, gas_limit, access_list);
@@ -259,6 +264,7 @@ fn execute_call(
 }
 
 /// Creates new smart contract
+/// * querier – GoQuerier which is used to interact with Go (Cosmos) from SGX Enclave
 /// * backend – EVM backend for reading and writting state 
 /// * gas_limit – gas limit for contract creation
 /// * from – creator address of smart contract
@@ -268,6 +274,7 @@ fn execute_call(
 /// 
 /// Returns EVM execution result  
 fn execute_create(
+    querier: *mut GoQuerier,
     backend: &mut impl ExtendedBackend,
     gas_limit: u64,
     from: H160,
@@ -278,7 +285,7 @@ fn execute_create(
 ) -> ExecutionResult {
     let metadata = StackSubstateMetadata::new(gas_limit, &GASOMETER_CONFIG);
     let state = MemoryStackState::new(metadata, backend);
-    let precompiles = EVMPrecompiles::<backend::FFIBackend>::new();
+    let precompiles = EVMPrecompiles::new(querier);
 
     let mut executor = StackExecutor::new_with_precompiles(state, &GASOMETER_CONFIG, &precompiles);
     let (exit_reason, ret) = executor.transact_create(from, value, data, gas_limit, access_list);

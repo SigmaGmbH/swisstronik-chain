@@ -1,5 +1,3 @@
-use core::marker::PhantomData;
-
 use evm_precompile_blake2f::Blake2F;
 use evm_precompile_bn128::{Bn128Add, Bn128Mul, Bn128Pairing};
 use evm_precompile_modexp::Modexp;
@@ -8,14 +6,15 @@ use evm_precompile_simple::{ECRecover, Ripemd160, Sha256};
 use precompile_std::{Precompile, PrecompileHandle, PrecompileResult, PrecompileSet, IsPrecompileResult};
 use primitive_types::H160;
 
-pub struct EVMPrecompiles<R>(PhantomData<R>);
+use crate::GoQuerier;
 
-impl<R> EVMPrecompiles<R>
-    where
-        R: evm::backend::Backend,
-{
-    pub fn new() -> Self {
-        Self(Default::default())
+pub struct EVMPrecompiles {
+    querier: *mut GoQuerier,
+}
+
+impl EVMPrecompiles {
+    pub fn new(querier: *mut GoQuerier) -> Self {
+        Self{ querier }
     }
     pub fn used_addresses() -> [H160; 10] {
         [
@@ -34,10 +33,7 @@ impl<R> EVMPrecompiles<R>
         ]
     }
 }
-impl<R> PrecompileSet for EVMPrecompiles<R>
-    where
-        R: evm::backend::Backend,
-{
+impl PrecompileSet for EVMPrecompiles {
     fn execute(&self, handle: &mut impl PrecompileHandle) -> Option<PrecompileResult> {
         match handle.code_address() {
             // Ethereum precompiles:
