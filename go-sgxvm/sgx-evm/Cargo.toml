@@ -40,6 +40,9 @@ deoxysii = { version = "0.2.4", path="../deoxysii-rust" }
 primitive-types = { version = "^0.12", default-features = false, features = ["rlp"] }
 evm = { version = "0.39.0", default-features = false }
 ethereum = { version = "0.14", default-features = false, features = ["with-codec", "with-serde"] }
+curve25519-dalek = { version = "4.0.0-pre.2", default-features = false, features = ["alloc", "u64_backend"] }
+substrate-bn = { version = "0.6.0", default-featuresc = false }
+tiny-keccak = { version = "2.0.2", features = ["fips202"] }
 
 # Sgx crates
 sgx_types = { version = "1.1.5", git = "https://github.com/apache/teaclave-sgx-sdk.git", tag="v1.1.5" }
@@ -50,13 +53,13 @@ sgx_tse = { version = "1.1.5", git = "https://github.com/apache/teaclave-sgx-sdk
 sgx_rand = { version = "1.1.5", git = "https://github.com/apache/teaclave-sgx-sdk.git", tag="v1.1.5" }
 
 # Precompiles
-precompile-std = { path = "./evm/precompiles/precompile-std" }
-evm-precompile-simple = { path = "./evm/precompiles/simple" }
-evm-precompile-sha3fips = { path = "./evm/precompiles/sha3fips" }
-evm-precompile-modexp = { path = "./evm/precompiles/modexp" }
-evm-precompile-bn128 = { path = "./evm/precompiles/bn128" }
-evm-precompile-blake2f = { path = "./evm/precompiles/blake2f" }
-evm-precompile-identity = { path = "./evm/precompiles/identity" }
+# precompile-std = { path = "./evm/precompiles/precompile-std" }
+# evm-precompile-simple = { path = "./evm/precompiles/simple" }
+# evm-precompile-sha3fips = { path = "./evm/precompiles/sha3fips" }
+# evm-precompile-modexp = { path = "./evm/precompiles/modexp" }
+# evm-precompile-bn128 = { path = "./evm/precompiles/bn128" }
+# evm-precompile-blake2f = { path = "./evm/precompiles/blake2f" }
+# evm-precompile-identity = { path = "./evm/precompiles/identity" }
 
 [patch."https://github.com/apache/teaclave-sgx-sdk.git"]
 sgx_tstd = { version = "1.1.5", git = "https://github.com/haerdib/incubator-teaclave-sgx-sdk", branch = "master"}
