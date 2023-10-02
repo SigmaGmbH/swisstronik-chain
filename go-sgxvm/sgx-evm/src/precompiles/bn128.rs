@@ -36,7 +36,7 @@ impl LinearCostPrecompile for Bn128Add {
 	const BASE: u64 = 15;
 	const WORD: u64 = 3;
 
-	fn execute(
+	fn raw_execute(
 		input: &[u8],
 		_: u64,
 	) -> Result<(ExitSucceed, Vec<u8>), PrecompileFailure> {
@@ -63,7 +63,7 @@ impl LinearCostPrecompile for Bn128Mul {
 	const BASE: u64 = 15;
 	const WORD: u64 = 3;
 
-	fn execute(
+	fn raw_execute(
 		input: &[u8],
 		_: u64,
 	) -> Result<(ExitSucceed, Vec<u8>), PrecompileFailure> {
@@ -90,7 +90,7 @@ impl LinearCostPrecompile for Bn128Pairing {
 	const BASE: u64 = 15;
 	const WORD: u64 = 3;
 
-	fn execute(
+	fn raw_execute(
 		input: &[u8],
 		_: u64,
 	) -> Result<(ExitSucceed, Vec<u8>), PrecompileFailure> {

@@ -14,6 +14,9 @@ mod curve25519;
 mod identity;
 mod modexp;
 mod sha3fips;
+mod ec_recover;
+mod sha256;
+mod ripemd160;
 
 pub type PrecompileResult = Result<PrecompileOutput, PrecompileFailure>;
 
@@ -28,7 +31,7 @@ pub trait LinearCostPrecompile {
     const BASE: u64;
     const WORD: u64;
 
-    fn execute(
+    fn raw_execute(
         input: &[u8],
         cost: u64,
     ) -> core::result::Result<(ExitSucceed, Vec<u8>), PrecompileFailure>;
@@ -40,7 +43,7 @@ impl<T: LinearCostPrecompile> Precompile for T {
         let cost = ensure_linear_cost(target_gas, handle.input().len() as u64, T::BASE, T::WORD)?;
 
         handle.record_cost(cost)?;
-        let (exit_status, output) = T::execute(handle.input(), cost)?;
+        let (exit_status, output) = T::raw_execute(handle.input(), cost)?;
         Ok(PrecompileOutput {
             exit_status,
             output,
@@ -105,10 +108,10 @@ impl PrecompileSet for EVMPrecompiles {
     fn execute(&self, handle: &mut impl PrecompileHandle) -> Option<PrecompileResult> {
         match handle.code_address() {
             // Ethereum precompiles:
-            a if a == hash(1) => Some(ECRecover::execute(handle)),
-            a if a == hash(2) => Some(Sha256::execute(handle)),
-            a if a == hash(3) => Some(Ripemd160::execute(handle)),
-            a if a == hash(4) => Some(identity::Identity::execute(handle)),
+            a if a == hash(1) => Some(ec_recover::ECRecover::execute(handle)),
+            a if a == hash(2) => Some(sha256::Sha256::execute(handle)),
+            a if a == hash(3) => Some(ripemd160::Ripemd160::execute(handle)),
+            a if a == hash(4) => Some(identity::Identity::execute(handle)), // TODO: Replace with `datacopy` precompile
             a if a == hash(5) => Some(modexp::Modexp::execute(handle)),
             a if a == hash(6) => Some(bn128::Bn128Add::execute(handle)),
             a if a == hash(7) => Some(bn128::Bn128Mul::execute(handle)),
@@ -119,7 +122,7 @@ impl PrecompileSet for EVMPrecompiles {
             // a if a == hash(1025) => Some(Sha3FIPS512::execute(handle)),
             // a if a == hash(1026) => Some(ECRecoverPublicKey::execute(handle)),
             // Identity precompile
-            a if a == hash(1027) => Some(Identity::execute(handle)),
+            a if a == hash(1027) => Some(identity::Identity::execute(handle)),
             _ => None,
         }
     }

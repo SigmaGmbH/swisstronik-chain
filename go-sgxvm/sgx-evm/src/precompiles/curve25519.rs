@@ -19,7 +19,7 @@ impl LinearCostPrecompile for Curve25519Add {
     const BASE: u64 = 60;
     const WORD: u64 = 12;
 
-    fn execute(input: &[u8], _: u64) -> Result<(ExitSucceed, Vec<u8>), PrecompileFailure> {
+    fn raw_execute(input: &[u8], _: u64) -> Result<(ExitSucceed, Vec<u8>), PrecompileFailure> {
         if input.len() % 32 != 0 {
             return Err(PrecompileFailure::Error {
                 exit_status: ExitError::Other("input must contain multiple of 32 bytes".into()),
@@ -62,7 +62,7 @@ impl LinearCostPrecompile for Curve25519ScalarMul {
     const BASE: u64 = 60;
     const WORD: u64 = 12;
 
-    fn execute(input: &[u8], _: u64) -> Result<(ExitSucceed, Vec<u8>), PrecompileFailure> {
+    fn raw_execute(input: &[u8], _: u64) -> Result<(ExitSucceed, Vec<u8>), PrecompileFailure> {
         if input.len() != 64 {
             return Err(PrecompileFailure::Error {
                 exit_status: ExitError::Other(
@@ -112,7 +112,7 @@ mod tests {
         let sum: RistrettoPoint = vec.iter().sum();
         let cost: u64 = 1;
 
-        match Curve25519Add::execute(&input, cost) {
+        match Curve25519Add::raw_execute(&input, cost) {
             Ok((_, out)) => {
                 assert_eq!(out, sum.compress().to_bytes());
                 Ok(())
@@ -130,7 +130,7 @@ mod tests {
 
         let cost: u64 = 1;
 
-        match Curve25519Add::execute(&input, cost) {
+        match Curve25519Add::raw_execute(&input, cost) {
             Ok((_, out)) => {
                 assert_eq!(out, RistrettoPoint::identity().compress().to_bytes());
                 Ok(())
@@ -154,7 +154,7 @@ mod tests {
 
         let cost: u64 = 1;
 
-        match Curve25519ScalarMul::execute(&input, cost) {
+        match Curve25519ScalarMul::raw_execute(&input, cost) {
             Ok((_, out)) => {
                 assert_eq!(out, p1.compress().to_bytes());
                 assert_ne!(out, p2.compress().to_bytes());
@@ -172,7 +172,7 @@ mod tests {
 
         let cost: u64 = 1;
 
-        match Curve25519ScalarMul::execute(&input, cost) {
+        match Curve25519ScalarMul::raw_execute(&input, cost) {
             Ok((_, _out)) => {
                 panic!("Test not expected to work");
             }
@@ -197,7 +197,7 @@ mod tests {
 
         let cost: u64 = 1;
 
-        match Curve25519Add::execute(&input, cost) {
+        match Curve25519Add::raw_execute(&input, cost) {
             Ok((_, _out)) => {
                 panic!("Test not expected to work");
             }
@@ -232,7 +232,7 @@ mod tests {
 
         let cost: u64 = 1;
 
-        match Curve25519Add::execute(&input, cost) {
+        match Curve25519Add::raw_execute(&input, cost) {
             Ok((_, _out)) => {
                 panic!("Test not expected to work");
             }

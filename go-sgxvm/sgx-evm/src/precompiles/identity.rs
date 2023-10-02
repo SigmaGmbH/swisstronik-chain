@@ -17,7 +17,7 @@ impl LinearCostPrecompile for Identity {
     const BASE: u64 = 60;
     const WORD: u64 = 150;
 
-    fn execute(input: &[u8], _: u64) -> Result<(ExitSucceed, Vec<u8>), PrecompileFailure> {
+    fn raw_execute(input: &[u8], _: u64) -> Result<(ExitSucceed, Vec<u8>), PrecompileFailure> {
         // Expects to receive RLP-encoded Verifiable Credential with JWT proof
         // should contain [issuer_id, credential_subject_id, credential_subject_address, proof]
         let rlp_raw = Rlp::new(input);

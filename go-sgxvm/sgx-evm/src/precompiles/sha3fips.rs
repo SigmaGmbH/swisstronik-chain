@@ -15,7 +15,7 @@ impl LinearCostPrecompile for Sha3FIPS256 {
     const BASE: u64 = 60;
     const WORD: u64 = 12;
 
-    fn execute(input: &[u8], _: u64) -> Result<(ExitSucceed, Vec<u8>), PrecompileFailure> {
+    fn raw_execute(input: &[u8], _: u64) -> Result<(ExitSucceed, Vec<u8>), PrecompileFailure> {
         use tiny_keccak::Hasher;
         let mut output = [0; 32];
         let mut sha3 = tiny_keccak::Sha3::v256();
@@ -31,7 +31,7 @@ impl LinearCostPrecompile for Sha3FIPS512 {
     const BASE: u64 = 60;
     const WORD: u64 = 12;
 
-    fn execute(input: &[u8], _: u64) -> Result<(ExitSucceed, Vec<u8>), PrecompileFailure> {
+    fn raw_execute(input: &[u8], _: u64) -> Result<(ExitSucceed, Vec<u8>), PrecompileFailure> {
         use tiny_keccak::Hasher;
         let mut output = [0; 64];
         let mut sha3 = tiny_keccak::Sha3::v512();
@@ -55,7 +55,7 @@ mod tests {
 
         let cost: u64 = 1;
 
-        match Sha3FIPS256::execute(&input, cost) {
+        match Sha3FIPS256::raw_execute(&input, cost) {
             Ok((_, out)) => {
                 assert_eq!(out, expected);
                 Ok(())
@@ -76,7 +76,7 @@ mod tests {
 
         let cost: u64 = 1;
 
-        match Sha3FIPS256::execute(input, cost) {
+        match Sha3FIPS256::raw_execute(input, cost) {
             Ok((_, out)) => {
                 assert_eq!(out, expected);
                 Ok(())
@@ -97,7 +97,7 @@ mod tests {
 
         let cost: u64 = 1;
 
-        match Sha3FIPS256::execute(input, cost) {
+        match Sha3FIPS256::raw_execute(input, cost) {
             Ok((_, out)) => {
                 assert_eq!(out, expected);
                 Ok(())
@@ -120,7 +120,7 @@ mod tests {
 
         let cost: u64 = 1;
 
-        match Sha3FIPS512::execute(input, cost) {
+        match Sha3FIPS512::raw_execute(input, cost) {
             Ok((_, out)) => {
                 assert_eq!(out, expected);
                 Ok(())

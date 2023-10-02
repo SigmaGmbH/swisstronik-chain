@@ -40,9 +40,14 @@ deoxysii = { version = "0.2.4", path="../deoxysii-rust" }
 primitive-types = { version = "^0.12", default-features = false, features = ["rlp"] }
 evm = { version = "0.39.0", default-features = false }
 ethereum = { version = "0.14", default-features = false, features = ["with-codec", "with-serde"] }
-curve25519-dalek = { version = "4.0.0-pre.2", default-features = false, features = ["alloc", "u64_backend"] }
+curve25519-dalek = { version = "4.0.0-pre.2", default-features = false, features = ["alloc"] }
 substrate-bn = { version = "0.6.0", default-featuresc = false }
 tiny-keccak = { version = "2.0.2", features = ["fips202"] }
+ripemd = { version = "0.1.3", default-features = false }
+k256 = { version = "0.11.6", default-features = false, features = ["keccak256", "sha2", "ecdsa"] }
+sha3 = { version = "0.10", default-features = false }
+rlp = { version = "0.5.1", default-features = false }
+num = { version = "0.4", default-features = false, features = ["alloc"] }
 
 # Sgx crates
 sgx_types = { version = "1.1.5", git = "https://github.com/apache/teaclave-sgx-sdk.git", tag="v1.1.5" }

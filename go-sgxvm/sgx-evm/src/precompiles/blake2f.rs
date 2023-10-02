@@ -90,7 +90,7 @@ impl LinearCostPrecompile for Blake2F {
 
     /// Format of `input`:
     /// [4 bytes for rounds][64 bytes for h][128 bytes for m][8 bytes for t_0][8 bytes for t_1][1 byte for f]
-    fn execute(input: &[u8], _: u64) -> Result<(ExitSucceed, Vec<u8>), PrecompileFailure> {
+    fn raw_execute(input: &[u8], _: u64) -> Result<(ExitSucceed, Vec<u8>), PrecompileFailure> {
         const BLAKE2_F_ARG_LEN: usize = 213;
 
         if input.len() != BLAKE2_F_ARG_LEN {
@@ -143,7 +143,7 @@ impl LinearCostPrecompile for Blake2F {
             });
         };
 
-        crate::eip152::compress(&mut h, m, [t_0.into(), t_1.into()], f, rounds as usize);
+        compress(&mut h, m, [t_0.into(), t_1.into()], f, rounds as usize);
 
         let mut output_buf = [0u8; 8 * size_of::<u64>()];
         for (i, state_word) in h.iter().enumerate() {
