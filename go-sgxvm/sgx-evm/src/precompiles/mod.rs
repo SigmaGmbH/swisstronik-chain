@@ -2,10 +2,11 @@ extern crate sgx_tstd as std;
 
 use evm::{
     executor::stack::{PrecompileFailure, PrecompileHandle, PrecompileOutput, PrecompileSet, IsPrecompileResult},
-    Context, ExitError, ExitRevert, ExitSucceed, Transfer,
+    ExitError, 
+    ExitSucceed,
 };
-use std::{vec::Vec};
-use primitive_types::{H160};
+use std::vec::Vec;
+use primitive_types::H160 ;
 use crate::GoQuerier;
 
 mod blake2f;

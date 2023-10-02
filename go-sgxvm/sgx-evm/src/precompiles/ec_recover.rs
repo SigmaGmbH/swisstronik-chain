@@ -3,13 +3,17 @@ extern crate alloc;
 use alloc::vec::Vec;
 use core::cmp::min;
 
-use k256::sha2::{Sha256 as kSha256, Digest};
+use k256::sha2::Digest;
 use sha3::{Keccak256};
 use k256::{
     ecdsa::recoverable,
     elliptic_curve::{sec1::ToEncodedPoint, IsHigh},
 };
-use crate::precompiles::{ExitSucceed, LinearCostPrecompile, PrecompileFailure};
+use crate::precompiles::{
+    ExitSucceed, 
+    LinearCostPrecompile, 
+    PrecompileFailure
+};
 
 // The ecrecover precompile.
 pub struct ECRecover;
