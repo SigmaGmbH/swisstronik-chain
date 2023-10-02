@@ -39,6 +39,20 @@ pub trait LinearCostPrecompile {
     ) -> core::result::Result<(ExitSucceed, Vec<u8>), PrecompileFailure>;
 }
 
+/// Precompile with possibility to interact with Cosmos side using GoQuerier
+pub trait LinearCostPrecompileWithQuerier {
+    const BASE: u64;
+    const WORD: u64;
+
+    fn execute(querier: *mut GoQuerier, handle: &mut impl PrecompileHandle) -> PrecompileResult;
+
+    fn raw_execute(
+        querier: *mut GoQuerier,
+        input: &[u8],
+        cost: u64,
+    ) -> core::result::Result<(ExitSucceed, Vec<u8>), PrecompileFailure>;
+}
+
 impl<T: LinearCostPrecompile> Precompile for T {
     fn execute(handle: &mut impl PrecompileHandle) -> PrecompileResult {
         let target_gas = handle.gas_limit();
@@ -54,7 +68,7 @@ impl<T: LinearCostPrecompile> Precompile for T {
 }
 
 /// Linear gas cost
-fn ensure_linear_cost(
+pub fn ensure_linear_cost(
     target_gas: Option<u64>,
     len: u64,
     base: u64,
@@ -106,6 +120,7 @@ impl EVMPrecompiles {
         ]
     }
 }
+
 impl PrecompileSet for EVMPrecompiles {
     fn execute(&self, handle: &mut impl PrecompileHandle) -> Option<PrecompileResult> {
         match handle.code_address() {
@@ -124,7 +139,7 @@ impl PrecompileSet for EVMPrecompiles {
             // a if a == hash(1025) => Some(Sha3FIPS512::execute(handle)),
             // a if a == hash(1026) => Some(ECRecoverPublicKey::execute(handle)),
             // Identity precompile
-            a if a == hash(1027) => Some(identity::Identity::execute(handle)),
+            a if a == hash(1027) => Some(identity::Identity::execute(self.querier, handle)),
             _ => None,
         }
     }
