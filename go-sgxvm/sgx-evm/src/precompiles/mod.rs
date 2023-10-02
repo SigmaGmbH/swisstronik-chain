@@ -18,6 +18,7 @@ mod sha3fips;
 mod ec_recover;
 mod sha256;
 mod ripemd160;
+mod datacopy;
 
 pub type PrecompileResult = Result<PrecompileOutput, PrecompileFailure>;
 
@@ -112,7 +113,7 @@ impl PrecompileSet for EVMPrecompiles {
             a if a == hash(1) => Some(ec_recover::ECRecover::execute(handle)),
             a if a == hash(2) => Some(sha256::Sha256::execute(handle)),
             a if a == hash(3) => Some(ripemd160::Ripemd160::execute(handle)),
-            a if a == hash(4) => Some(identity::Identity::execute(handle)), // TODO: Replace with `datacopy` precompile
+            a if a == hash(4) => Some(datacopy::DataCopy::execute(handle)),
             a if a == hash(5) => Some(modexp::Modexp::execute(handle)),
             a if a == hash(6) => Some(bn128::Bn128Add::execute(handle)),
             a if a == hash(7) => Some(bn128::Bn128Mul::execute(handle)),
