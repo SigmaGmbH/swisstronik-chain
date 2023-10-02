@@ -1,9 +1,10 @@
-extern crate alloc;
-
-use alloc::vec::Vec;
-
+use std::vec::Vec;
 use k256::sha2::Digest;
-use crate::precompiles::{ExitSucceed, LinearCostPrecompile, PrecompileFailure};
+use crate::precompiles::{
+    ExitSucceed, 
+    LinearCostPrecompile, 
+    PrecompileFailure
+};
 
 /// The ripemd precompile.
 pub struct Ripemd160;

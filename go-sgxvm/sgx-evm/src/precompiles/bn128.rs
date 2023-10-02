@@ -1,9 +1,6 @@
-extern crate alloc;
-
-use alloc::vec::Vec;
+use std::vec::Vec;
 use primitive_types::U256;
 use substrate_bn as bn;
-
 use crate::precompiles::{
     ExitSucceed, 
     ExitError, 

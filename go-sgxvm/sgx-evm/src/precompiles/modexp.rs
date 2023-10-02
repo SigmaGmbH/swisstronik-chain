@@ -1,6 +1,4 @@
-extern crate alloc;
-
-use alloc::vec::Vec;
+use std::vec::Vec;
 use core::{cmp::max, ops::BitAnd};
 use num::{BigUint, FromPrimitive, One, ToPrimitive, Zero};
 use crate::precompiles::{

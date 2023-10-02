@@ -1,7 +1,4 @@
-extern crate alloc;
-
-use alloc::vec::Vec;
-
+use std::vec::Vec;
 use k256::sha2::{
     Sha256 as kSha256, 
     Digest

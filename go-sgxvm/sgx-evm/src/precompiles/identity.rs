@@ -1,7 +1,6 @@
-extern crate alloc;
 extern crate sgx_tstd as std;
 
-use alloc::vec::Vec;
+use std::vec::Vec;
 use crate::precompiles::{
     ExitError, 
     ExitSucceed, 

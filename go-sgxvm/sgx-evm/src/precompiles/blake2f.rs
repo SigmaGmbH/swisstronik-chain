@@ -1,6 +1,4 @@
-extern crate alloc;
-
-use alloc::vec::Vec;
+use std::vec::Vec;
 use core::mem::size_of;
 use crate::precompiles::{
     ExitSucceed, 

@@ -1,8 +1,5 @@
-extern crate alloc;
-
-use alloc::vec::Vec;
+use std::vec::Vec;
 use core::cmp::min;
-
 use k256::sha2::Digest;
 use sha3::{Keccak256};
 use k256::{

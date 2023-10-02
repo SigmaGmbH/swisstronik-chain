@@ -1,13 +1,9 @@
-extern crate alloc;
-
-use alloc::vec::Vec;
-
+use std::vec::Vec;
 use crate::precompiles::{ 
     ExitSucceed, 
     LinearCostPrecompile, 
     PrecompileFailure
 };
-
 
 pub struct Sha3FIPS256;
 
