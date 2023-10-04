@@ -2,7 +2,10 @@ use evm::backend::Basic;
 use primitive_types::{H160, U256, H256};
 use protobuf::Message;
 use crate::protobuf_generated::ffi;
-use std::vec::Vec;
+use std::{
+    vec::Vec,
+    string::String,
+};
 
 fn u256_to_vec(value: U256) -> Vec<u8> {
     let mut buffer = [0u8; 32];
@@ -94,6 +97,14 @@ pub fn encode_remove_storage_cell(account_address: &H160, index: &H256) -> Vec<u
     request.set_address(account_address.as_bytes().to_vec());
     request.set_index(index.as_bytes().to_vec());
     cosmos_request.set_removeStorageCell(request);
+    cosmos_request.write_to_bytes().unwrap()
+}
+
+pub fn encode_verification_methods_request(did_url: String) -> Vec<u8> {
+    let mut cosmos_request = ffi::CosmosRequest::new();
+    let mut request = ffi::QueryVerificationMethods::new();
+    request.set_did(did_url);
+    cosmos_request.set_verificationMethods(request);
     cosmos_request.write_to_bytes().unwrap()
 }
 

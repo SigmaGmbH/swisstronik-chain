@@ -136,13 +136,18 @@ message QueryRemoveStorageResponse {}
 message QueryBlockHash { bytes number = 1; }
 message QueryBlockHashResponse { bytes hash = 1; }
 
+// Messages for interaction with x/did module
 message QueryVerificationMethods {
   string did = 1;
 }
 
-message QueryVerificationMethodsResponse {
+message VerificationMethod {
   bytes verificationMaterial = 1;
   string verificationMethodType = 2;
+}
+
+message QueryVerificationMethodsResponse {
+  repeated VerificationMethod vm = 1;
 }
 
 message CosmosRequest {
