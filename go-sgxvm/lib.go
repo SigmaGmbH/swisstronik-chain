@@ -40,6 +40,9 @@ type QueryRemoveStorageCell = ffi.QueryRemoveStorageCell
 type QueryRemoveStorageCellResponse = ffi.QueryRemoveStorageCellResponse
 type QueryBlockHash = ffi.QueryBlockHash
 type QueryBlockHashResponse = ffi.QueryBlockHashResponse
+type VerificationMethod = ffi.VerificationMethod
+type QueryVerificationMethods = ffi.QueryVerificationMethods
+type QueryVerificationMethodsResponse = ffi.QueryVerificationMethodsResponse
 
 // Storage requests
 type CosmosRequest_GetAccount = ffi.CosmosRequest_GetAccount
@@ -51,6 +54,7 @@ type CosmosRequest_InsertAccountCode = ffi.CosmosRequest_InsertAccountCode
 type CosmosRequest_InsertStorageCell = ffi.CosmosRequest_InsertStorageCell
 type CosmosRequest_Remove = ffi.CosmosRequest_Remove
 type CosmosRequest_RemoveStorageCell = ffi.CosmosRequest_RemoveStorageCell
+type CosmosRequest_VerificationMethods = ffi.CosmosRequest_VerificationMethods
 
 // Backend requests
 type CosmosRequest_BlockHash = ffi.CosmosRequest_BlockHash

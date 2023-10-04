@@ -63,6 +63,9 @@ func (q Connector) Query(req []byte) ([]byte, error) {
 	// Returns block hash
 	case *librustgo.CosmosRequest_BlockHash:
 		return q.BlockHash(request)
+	// Returns verification methods for DID Document
+	case *librustgo.CosmosRequest_VerificationMethods:
+		return q.GetVerificationMethods(request)	
 	}
 
 	return nil, errors.New("wrong query received")
@@ -203,4 +206,10 @@ func (q Connector) InsertAccount(req *librustgo.CosmosRequest_InsertAccount) ([]
 	}
 
 	return proto.Marshal(&librustgo.QueryInsertAccountResponse{})
+}
+
+// GetVerificationMethods handles incoming protobuf-encoded request for obtaining verification methods
+// for provided DID URL
+func (q Connector) GetVerificationMethods(req *librustgo.CosmosRequest_VerificationMethods) ([]byte, error) {
+	return nil, nil
 }
