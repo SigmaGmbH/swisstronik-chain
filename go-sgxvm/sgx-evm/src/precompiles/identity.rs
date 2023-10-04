@@ -20,10 +20,9 @@ use bech32::FromBase32;
 use thiserror_no_std::Error;
 
 #[derive(Debug, Deserialize)]
-/// JWT header
 struct Header {
-    alg: String,
-    typ: String,
+    pub alg: String,
+    pub typ: String,
 }
 
 impl Header {
@@ -153,9 +152,20 @@ impl LinearCostPrecompileWithQuerier for Identity {
         
         // Extract issuer from payload and obtain verification material
         let issuer = parsed_payload.iss;
-        let verification_material = get_verification_material(querier, issuer)?;
+        let verification_materials = get_verification_material(querier, issuer)?;
+
+        // Find appropriate verification material
+        let vm = verification_materials.iter().find(|verification_method| verification_method.verificationMethodType == header.alg);
+        let vm = match vm {
+            Some(method) => method.verificationMaterial.clone(),
+            None => {
+                return Err(PrecompileFailure::Error {
+                    exit_status: ExitError::Other("Cannot find appropriate verification method".into()),
+                })
+            }
+        };
         
-        match verify_signature(data, signature, verification_material) {
+        match verify_signature(data, signature, vm) {
             Err(_) => {
                 return Err(PrecompileFailure::Error {
                     exit_status: ExitError::Other("Cannot verify signature".into()),
@@ -298,6 +308,4 @@ fn get_verification_material(connector: *mut GoQuerier, did_url: String) -> Resu
             })
         }
     }
-
-    // Ok(String::from("3f981ba050356043172157033b0b2d3737972ec6962450d036596abdc97073d0"))
 }
