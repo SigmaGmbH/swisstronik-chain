@@ -142,7 +142,7 @@ message QueryVerificationMethods {
 }
 
 message VerificationMethod {
-  bytes verificationMaterial = 1;
+  string verificationMaterial = 1;
   string verificationMethodType = 2;
 }
 

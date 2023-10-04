@@ -3,7 +3,12 @@ extern crate sgx_tstd as std;
 use crate::precompiles::{
     ExitError, ExitSucceed, LinearCostPrecompileWithQuerier, PrecompileFailure, PrecompileResult,
 };
-use crate::querier::GoQuerier;
+use crate::{
+    GoQuerier,
+    coder,
+    ocall,
+    protobuf_generated::ffi,
+};
 use ed25519_dalek::{Signature, Verifier, VerifyingKey};
 use evm::executor::stack::{PrecompileHandle, PrecompileOutput};
 use serde::Deserialize;
@@ -15,9 +20,28 @@ use bech32::FromBase32;
 use thiserror_no_std::Error;
 
 #[derive(Debug, Deserialize)]
+/// JWT header
 struct Header {
     alg: String,
     typ: String,
+}
+
+impl Header {
+    fn validate(&self) -> Result<(), PrecompileFailure> {
+        if self.typ != "JWT" {
+            return Err(PrecompileFailure::Error {
+                exit_status: ExitError::Other("Wrong header type. Expected JWT".into()),
+            })
+        }
+    
+        if self.alg != "EdDSA" {
+            return Err(PrecompileFailure::Error {
+                exit_status: ExitError::Other("Wrong algorithm. Expected EdDSA".into()),
+            })
+        }
+    
+        Ok(())
+    } 
 }
 
 #[derive(Debug, Deserialize)]
@@ -41,6 +65,11 @@ struct VC {
 #[derive(Debug, Deserialize)]
 struct CredentialSubject {
     address: String,
+}
+
+struct VerificationMethod {
+    vm: String,
+    vm_type: String,
 }
 
 #[derive(Error, Debug)]
@@ -97,23 +126,20 @@ impl LinearCostPrecompileWithQuerier for Identity {
         };
 
         // Split JWT into parts
-        let (header, payload, signature, data) = match split_jwt(jwt.as_str()) {
-            Ok((header, payload, signature, data)) => (header, payload, signature, data),
+        let (header, payload, signature, data) = split_jwt(jwt.as_str())?;
+
+        // Parse header
+        let header: Header = match serde_json::from_str(header.as_str()) {
+            Ok(header) => header,
             Err(err) => {
                 return Err(PrecompileFailure::Error {
-                    exit_status: ExitError::Other("Cannot split JWT header".into()),
+                    exit_status: ExitError::Other("Cannot parse JWT header".into()),
                 })
             }
         };
-        // Validate JWT header
-        match validate_header(header) {
-            Err(err) => {
-                return Err(PrecompileFailure::Error {
-                    exit_status: ExitError::Other("Wrong JWT header".into()),
-                })
-            },
-            _ => (),
-        };
+
+        // Validate header
+        header.validate()?;
         
         // Parse payload
         let parsed_payload: VerifiableCredential = match serde_json::from_str(payload.as_str()) {
@@ -127,14 +153,7 @@ impl LinearCostPrecompileWithQuerier for Identity {
         
         // Extract issuer from payload and obtain verification material
         let issuer = parsed_payload.iss;
-        let verification_material = match get_verification_material(querier, issuer) {
-            Ok(vm) => vm,
-            Err(_) => {
-                return Err(PrecompileFailure::Error {
-                    exit_status: ExitError::Other("Cannot get verification material".into()),
-                })
-            }
-        };
+        let verification_material = get_verification_material(querier, issuer)?;
         
         match verify_signature(data, signature, verification_material) {
             Err(_) => {
@@ -159,7 +178,7 @@ impl LinearCostPrecompileWithQuerier for Identity {
 
 /// Splits provided JWT into header, payload, signature and data.
 /// Data field contains concatenated header and payload and can be used for signature verification
-fn split_jwt(jwt: &str) -> Result<(String, String, String, String), VerificationError> {
+fn split_jwt(jwt: &str) -> Result<(String, String, String, String), PrecompileFailure> {
     let parts: Vec<&str> = jwt.split('.').collect();
 
     if parts.len() == 3 {
@@ -171,8 +190,8 @@ fn split_jwt(jwt: &str) -> Result<(String, String, String, String), Verification
         return Ok((header, payload, signature, data));
     }
 
-    Err(VerificationError::CannotSplitJWT {
-        msg: format!("Wrong amount of parts in JWT"),
+    return Err(PrecompileFailure::Error {
+        exit_status: ExitError::Other("Wrong amount of parts in JWT".into()),
     })
 }
 
@@ -258,7 +277,27 @@ fn base64_decode(input: &str) -> Vec<u8> {
     base64::decode_config(&input, base64::URL_SAFE).unwrap_or_default()
 }
 
-fn get_verification_material(connector: *mut GoQuerier, did_url: String) -> Result<String, VerificationError> {
-    
-    Ok(String::from("3f981ba050356043172157033b0b2d3737972ec6962450d036596abdc97073d0"))
+fn get_verification_material(connector: *mut GoQuerier, did_url: String) -> Result<Vec<ffi::VerificationMethod>, PrecompileFailure> {
+    let encoded_request = coder::encode_verification_methods_request(did_url);
+    match ocall::make_request(connector, encoded_request) {
+        Some(result) => {
+            // Decode protobuf
+            let decoded_result = match protobuf::parse_from_bytes::<ffi::QueryVerificationMethodsResponse>(result.as_slice()) {
+                Ok(res) => res,
+                Err(err) => {
+                    return Err(PrecompileFailure::Error {
+                        exit_status: ExitError::Other("Cannot decode protobuf response".into()),
+                    })
+                }
+            };
+            Ok(decoded_result.vm.to_vec())
+        },
+        None => {
+            return Err(PrecompileFailure::Error {
+                exit_status: ExitError::Other("Cannot obtain verification material".into()),
+            })
+        }
+    }
+
+    // Ok(String::from("3f981ba050356043172157033b0b2d3737972ec6962450d036596abdc97073d0"))
 }
