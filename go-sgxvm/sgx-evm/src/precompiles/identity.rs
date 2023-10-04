@@ -127,7 +127,7 @@ impl LinearCostPrecompileWithQuerier for Identity {
         
         // Extract issuer from payload and obtain verification material
         let issuer = parsed_payload.iss;
-        let verification_material = match get_verification_material(issuer) {
+        let verification_material = match get_verification_material(querier, issuer) {
             Ok(vm) => vm,
             Err(_) => {
                 return Err(PrecompileFailure::Error {
@@ -258,6 +258,7 @@ fn base64_decode(input: &str) -> Vec<u8> {
     base64::decode_config(&input, base64::URL_SAFE).unwrap_or_default()
 }
 
-fn get_verification_material(_did_url: String) -> Result<String, VerificationError> {
+fn get_verification_material(connector: *mut GoQuerier, did_url: String) -> Result<String, VerificationError> {
+    
     Ok(String::from("3f981ba050356043172157033b0b2d3737972ec6962450d036596abdc97073d0"))
 }
