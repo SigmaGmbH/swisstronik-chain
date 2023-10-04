@@ -48,6 +48,8 @@ k256 = { version = "0.11.6", default-features = false, features = ["keccak256", 
 sha3 = { version = "0.10", default-features = false }
 rlp = { version = "0.5.1", default-features = false }
 num = { version = "0.4", default-features = false, features = ["alloc"] }
+bech32 = { version = "0.9.1", default-features = false }
+ed25519-dalek = { version = "2.0.0", default-features=false }
 
 # Sgx crates
 sgx_types = { version = "1.1.5", git = "https://github.com/apache/teaclave-sgx-sdk.git", tag="v1.1.5" }

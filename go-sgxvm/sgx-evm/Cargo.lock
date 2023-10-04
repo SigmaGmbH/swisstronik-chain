@@ -50,6 +50,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "bech32"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d86b93f97252c47b41663388e6d155714a9d0c398b99f1005cbc5f978b29f445"
+
+[[package]]
 name = "bit-vec"
 version = "0.6.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -194,6 +200,7 @@ dependencies = [
  "cfg-if",
  "cpufeatures",
  "curve25519-dalek-derive",
+ "digest 0.10.6",
  "fiat-crypto",
  "platforms",
  "rustc_version",
@@ -273,7 +280,27 @@ dependencies = [
  "der",
  "elliptic-curve",
  "rfc6979",
- "signature",
+ "signature 1.6.4",
+]
+
+[[package]]
+name = "ed25519"
+version = "2.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "60f6d271ca33075c88028be6f04d502853d63a5ece419d269c15315d4fc1cf1d"
+dependencies = [
+ "signature 2.1.0",
+]
+
+[[package]]
+name = "ed25519-dalek"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7277392b266383ef8396db7fdeb1e77b6c52fed775f5df15bb24f35b72156980"
+dependencies = [
+ "curve25519-dalek 4.1.1",
+ "ed25519",
+ "sha2 0.10.6",
 ]
 
 [[package]]
@@ -657,9 +684,9 @@ dependencies = [
 
 [[package]]
 name = "memchr"
-version = "2.5.0"
+version = "2.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2dffe52ecf27772e601905b7522cb4ef790d2cc203488bbd0e2fe85fcb74566d"
+checksum = "f665ee40bc4a3c5590afb1e9677db74a508659dfd71e126420da8274909a0167"
 
 [[package]]
 name = "num"
@@ -1099,11 +1126,13 @@ name = "sgx-evm"
 version = "0.1.0"
 dependencies = [
  "base64",
+ "bech32",
  "bit-vec",
  "chrono",
  "curve25519-dalek 4.1.1",
  "deoxysii",
  "derive_more",
+ "ed25519-dalek",
  "errno",
  "ethereum",
  "evm",
@@ -1290,6 +1319,12 @@ dependencies = [
  "digest 0.10.6",
  "rand_core 0.6.4",
 ]
+
+[[package]]
+name = "signature"
+version = "2.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5e1788eed21689f9cf370582dfc467ef36ed9c707f073528ddafa8d83e3b8500"
 
 [[package]]
 name = "spin"

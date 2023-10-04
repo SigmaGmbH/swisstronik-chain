@@ -136,15 +136,13 @@ message QueryRemoveStorageResponse {}
 message QueryBlockHash { bytes number = 1; }
 message QueryBlockHashResponse { bytes hash = 1; }
 
-message QueryVerifyCredential {
-  bytes issuer = 1;
-  bytes credentialId = 3;
-  bytes credentialAddress = 2;
-  bytes proof = 4;
+message QueryVerificationMethods {
+  string did = 1;
 }
 
-message QueryVerifyCredentialResponse {
-  bytes credentialAddress = 1;
+message QueryVerificationMethodsResponse {
+  bytes verificationMaterial = 1;
+  string verificationMethodType = 2;
 }
 
 message CosmosRequest {
@@ -160,7 +158,7 @@ message CosmosRequest {
     QueryRemoveStorageCell removeStorageCell = 9;
     QueryRemoveStorage removeStorage = 10;
     QueryBlockHash blockHash = 11;
-    QueryVerifyCredential verifyCredential = 12;
+    QueryVerificationMethods verificationMethods = 12;
   }
 }
 

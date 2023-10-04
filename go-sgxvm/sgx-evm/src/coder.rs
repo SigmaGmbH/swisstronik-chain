@@ -97,14 +97,3 @@ pub fn encode_remove_storage_cell(account_address: &H160, index: &H256) -> Vec<u
     cosmos_request.write_to_bytes().unwrap()
 }
 
-pub fn encode_verify_credential_request(issuer: Vec<u8>, credentialId: Vec<u8>, credentialAddress: Vec<u8>, proof: Vec<u8>) -> Vec<u8> {
-    let mut cosmos_request = ffi::CosmosRequest::new();
-    let mut request = ffi::QueryVerifyCredential::new();
-    request.set_issuer(issuer);
-    request.set_credentialId(credentialId);
-    request.set_credentialAddress(credentialAddress);
-    request.set_proof(proof);
-    cosmos_request.set_verifyCredential(request);
-    cosmos_request.write_to_bytes().unwrap()
-}
-
