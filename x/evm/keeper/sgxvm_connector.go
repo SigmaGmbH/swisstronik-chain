@@ -211,5 +211,22 @@ func (q Connector) InsertAccount(req *librustgo.CosmosRequest_InsertAccount) ([]
 // GetVerificationMethods handles incoming protobuf-encoded request for obtaining verification methods
 // for provided DID URL
 func (q Connector) GetVerificationMethods(req *librustgo.CosmosRequest_VerificationMethods) ([]byte, error) {
-	return nil, nil
+	didDocument, err := q.DIDKeeper.GetLatestDIDDocument(&q.Context, req.VerificationMethods.Did)
+	if err != nil {
+		return nil, err
+	}
+
+	// Extract verification methods
+	result := []*librustgo.VerificationMethod{}
+	for _, method := range didDocument.DidDoc.VerificationMethod {
+		vm := librustgo.VerificationMethod{
+			VerificationMethodType: method.VerificationMethodType,
+			VerificationMaterial:   method.VerificationMaterial,
+		}
+		result = append(result, &vm)
+	}
+
+	return proto.Marshal(&librustgo.QueryVerificationMethodsResponse{
+		Vm: result,
+	})
 }
