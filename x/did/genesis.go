@@ -15,13 +15,13 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState *types.GenesisState)
 	// Set DID documents
 	for _, versionSet := range genState.VersionSets {
 		for _, didDoc := range versionSet.DidDocs {
-			err := k.SetDIDDocumentVersion(&ctx, didDoc, false)
+			err := k.SetDIDDocumentVersion(ctx, didDoc, false)
 			if err != nil {
 				panic(err)
 			}
 		}
 
-		err := k.SetLatestDIDDocumentVersion(&ctx, versionSet.DidDocs[0].DidDoc.Id, versionSet.LatestVersion)
+		err := k.SetLatestDIDDocumentVersion(ctx, versionSet.DidDocs[0].DidDoc.Id, versionSet.LatestVersion)
 		if err != nil {
 			panic(err)
 		}
@@ -29,7 +29,7 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState *types.GenesisState)
 
 	// Set DID resources
 	for _, resource := range genState.Resources {
-		if err := k.SetResource(&ctx, resource); err != nil {
+		if err := k.SetResource(ctx, resource); err != nil {
 			panic(err)
 		}
 	}
@@ -37,12 +37,12 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState *types.GenesisState)
 
 // ExportGenesis returns module's exported genesis.
 func ExportGenesis(ctx sdk.Context, k keeper.Keeper) *types.GenesisState {
-	docs, err := k.GetAllDIDDocuments(&ctx)
+	docs, err := k.GetAllDIDDocuments(ctx)
 	if err != nil {
 		panic(err)
 	}
 
-	resourceList, err := k.GetAllResources(&ctx)
+	resourceList, err := k.GetAllResources(ctx)
 	if err != nil {
 		panic(err.Error())
 	}

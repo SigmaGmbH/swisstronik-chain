@@ -156,6 +156,7 @@ impl LinearCostPrecompileWithQuerier for Identity {
 
         // Find appropriate verification material
         let vm = verification_materials.iter().find(|verification_method| verification_method.verificationMethodType == header.alg);
+        println!("DEBUG: found vms: {:?}", vm); // TODO: Remove debug log
         let vm = match vm {
             Some(method) => method.verificationMaterial.clone(),
             None => {
@@ -233,7 +234,7 @@ fn validate_header(header_json: String) -> Result<(), VerificationError> {
 }
 
 /// Verifies provided ed25519 signature
-fn verify_signature(data: String, signature: String, vm: String) -> Result<(), VerificationError> {
+fn verify_signature(data: String, signature: String, vm: String) -> Result<(), VerificationError> { // TODO: Replace with PrecompileFailure
     // Construct signature
     let signature = base64_decode(signature.as_str());
     let signature = Signature::from_slice(&signature).map_err(|err| {

@@ -67,7 +67,8 @@ type FeeMarketKeeper interface {
 
 // DIDKeeper
 type DIDKeeper interface {
-	GetLatestDIDDocument(ctx *sdk.Context, did string) (didtypes.DIDDocumentWithMetadata, error)
+	GetLatestDIDDocument(ctx sdk.Context, did string) (didtypes.DIDDocumentWithMetadata, error)
+	AddNewDIDDocumentVersion(ctx sdk.Context, didDoc *didtypes.DIDDocumentWithMetadata) error
 }
 
 // Event Hooks

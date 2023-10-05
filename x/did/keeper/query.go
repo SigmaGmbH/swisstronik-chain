@@ -23,7 +23,7 @@ func (k Keeper) DIDDocument(
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	didDoc, err := k.GetLatestDIDDocument(&ctx, req.Id)
+	didDoc, err := k.GetLatestDIDDocument(ctx, req.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func (k Keeper) AllDIDDocumentVersionsMetadata(
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	versions, err := k.GetAllDIDDocumentVersions(&ctx, req.Id)
+	versions, err := k.GetAllDIDDocumentVersions(ctx, req.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +63,7 @@ func (k Keeper) DIDDocumentVersion(
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	didDoc, err := k.GetDIDDocumentVersion(&ctx, req.Id, req.Version)
+	didDoc, err := k.GetDIDDocumentVersion(ctx, req.Id, req.Version)
 	if err != nil {
 		return nil, err
 	}
@@ -85,11 +85,11 @@ func (k Keeper) Resource(
 
 	// Validate corresponding DID Document exists
 	did := types.JoinDID(types.DIDMethod, req.CollectionId)
-	if !k.HasDIDDocument(&ctx, did) {
+	if !k.HasDIDDocument(ctx, did) {
 		return nil, types.ErrDIDDocumentNotFound.Wrap(did)
 	}
 
-	resource, err := k.GetResource(&ctx, req.CollectionId, req.Id)
+	resource, err := k.GetResource(ctx, req.CollectionId, req.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -113,11 +113,11 @@ func (k Keeper)	ResourceMetadata(
 
 	// Validate corresponding DID Document exists
 	did := types.JoinDID(types.DIDMethod, req.CollectionId)
-	if !k.HasDIDDocument(&ctx, did) {
+	if !k.HasDIDDocument(ctx, did) {
 		return nil, types.ErrDIDDocumentNotFound.Wrap(did)
 	}
 
-	metadata, err := k.GetResourceMetadata(&ctx, req.CollectionId, req.Id)
+	metadata, err := k.GetResourceMetadata(ctx, req.CollectionId, req.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -141,12 +141,12 @@ func (k Keeper) CollectionResources(
 
 	// Validate corresponding DID Document exists
 	did := types.JoinDID(types.DIDMethod, req.CollectionId)
-	if !k.HasDIDDocument(&ctx, did) {
+	if !k.HasDIDDocument(ctx, did) {
 		return nil, types.ErrDIDDocumentNotFound.Wrap(did)
 	}
 
 	// Get all resources
-	resources := k.GetResourceCollection(&ctx, req.CollectionId)
+	resources := k.GetResourceCollection(ctx, req.CollectionId)
 
 	return &types.QueryCollectionResourcesResponse{
 		Resources: resources,

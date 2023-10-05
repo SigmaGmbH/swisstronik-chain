@@ -1,13 +1,17 @@
 package keeper_test
 
 import (
+	"math/big"
+	"math/rand"
 	evmkeeper "swisstronik/x/evm/keeper"
+	"time"
+
 	"github.com/SigmaGmbH/librustgo"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/golang/protobuf/proto"
-	"math/big"
-	"math/rand"
+
+	didtypes "swisstronik/x/did/types"
 )
 
 func insertAccount(
@@ -231,6 +235,38 @@ func (suite *KeeperTestSuite) TestSGXVMConnector() {
 				accCodeDecodingErr := proto.Unmarshal(responseAccountCodeBytes, accountCodeResponse)
 				suite.Require().NoError(accCodeDecodingErr)
 				suite.Require().Equal(bytecode, accountCodeResponse.Code)
+			},
+		},
+		{
+			"Should be able to verify JWT VC",
+			func() {
+				var err error
+
+				//
+				// Create DID Document for issuer
+				//
+				metadata := didtypes.Metadata {
+					Created: time.Now(),
+					VersionId: "123e4567-e89b-12d3-a456-426655440000",
+				}
+				vm := didtypes.VerificationMethod {
+					Id: "'did:swtr:2MGhkRKWKi7ztnBFa8DpQ3#6c1527f2f57601ea2f481a0ab1e605d196f3d952689299491638925cd6f26a7e-1'",
+					VerificationMethodType: "Ed25519VerificationKey2020",
+					Controller: "did:swtr:2MGhkRKWKi7ztnBFa8DpQ3",
+					VerificationMaterial: "z6MkmjAncvMFDiqyquFLt2G3CGYaqLfDjqKuzJnmUX3y68JZ",
+				}
+				document := didtypes.DIDDocument {
+					Id: "did:swtr:2MGhkRKWKi7ztnBFa8DpQ3",
+					Controller: []string{"did:swtr:2MGhkRKWKi7ztnBFa8DpQ3"},
+					VerificationMethod: []*didtypes.VerificationMethod{&vm},
+					Authentication: []string{"did:swtr:2MGhkRKWKi7ztnBFa8DpQ3#6c1527f2f57601ea2f481a0ab1e605d196f3d952689299491638925cd6f26a7e-1"},
+				}
+				didDocument := didtypes.DIDDocumentWithMetadata {
+					Metadata: &metadata,
+					DidDoc: &document,
+				}
+				err = connector.DIDKeeper.AddNewDIDDocumentVersion(suite.ctx, &didDocument)
+				suite.Require().NoError(err)
 			},
 		},
 	}
