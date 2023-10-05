@@ -2,14 +2,12 @@ package keeper
 
 import (
 	"errors"
-	"math/big"
-	"swisstronik/x/evm/types"
-
 	"github.com/SigmaGmbH/librustgo"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/golang/protobuf/proto"
+	"math/big"
 )
 
 // Connector allows our VM interact with existing Cosmos application.
@@ -19,8 +17,6 @@ type Connector struct {
 	GetHashFn vm.GetHashFunc
 	// Keeper used to store and obtain state
 	EVMKeeper *Keeper
-	// Keeper used to obtain state of DID registry
-	DIDKeeper types.DIDKeeper
 	// Context used to make Keeper calls available
 	Context sdk.Context
 }
@@ -65,7 +61,7 @@ func (q Connector) Query(req []byte) ([]byte, error) {
 		return q.BlockHash(request)
 	// Returns verification methods for DID Document
 	case *librustgo.CosmosRequest_VerificationMethods:
-		return q.GetVerificationMethods(request)	
+		return q.GetVerificationMethods(request)
 	}
 
 	return nil, errors.New("wrong query received")
@@ -101,7 +97,6 @@ func (q Connector) InsertAccountCode(req *librustgo.CosmosRequest_InsertAccountC
 		return nil, err
 	}
 
-	// TODO: For some reason, if we broadcast transaction using JSON-RPC it doesn't store account code
 	updAcc := q.EVMKeeper.GetAccountOrEmpty(q.Context, ethAddress)
 	if !updAcc.IsContract() {
 		return nil, errors.New("contract was not deployed")
@@ -211,7 +206,7 @@ func (q Connector) InsertAccount(req *librustgo.CosmosRequest_InsertAccount) ([]
 // GetVerificationMethods handles incoming protobuf-encoded request for obtaining verification methods
 // for provided DID URL
 func (q Connector) GetVerificationMethods(req *librustgo.CosmosRequest_VerificationMethods) ([]byte, error) {
-	didDocument, err := q.DIDKeeper.GetLatestDIDDocument(q.Context, req.VerificationMethods.Did)
+	didDocument, err := q.EVMKeeper.DIDKeeper.GetLatestDIDDocument(q.Context, req.VerificationMethods.Did)
 	if err != nil {
 		return nil, err
 	}
@@ -219,11 +214,11 @@ func (q Connector) GetVerificationMethods(req *librustgo.CosmosRequest_Verificat
 	// Extract verification methods
 	result := []*librustgo.VerificationMethod{}
 	for _, method := range didDocument.DidDoc.VerificationMethod {
-		vm := librustgo.VerificationMethod{
+		ffiMethod := librustgo.VerificationMethod{
 			VerificationMethodType: method.VerificationMethodType,
 			VerificationMaterial:   method.VerificationMaterial,
 		}
-		result = append(result, &vm)
+		result = append(result, &ffiMethod)
 	}
 
 	return proto.Marshal(&librustgo.QueryVerificationMethodsResponse{

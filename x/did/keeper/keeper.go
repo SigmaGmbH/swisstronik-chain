@@ -83,8 +83,8 @@ func (k Keeper) AddNewDIDDocumentVersion(ctx sdk.Context, didDoc *types.DIDDocum
 	// Check if the diddoc version already exists
 	if k.HasDIDDocumentVersion(ctx, didDoc.DidDoc.Id, didDoc.Metadata.VersionId) {
 		return types.ErrDIDDocumentExists.Wrapf(
-			"diddoc version already exists for did %s, version %s", 
-			didDoc.DidDoc.Id, 
+			"diddoc version already exists for did %s, version %s",
+			didDoc.DidDoc.Id,
 			didDoc.Metadata.VersionId,
 		)
 	}

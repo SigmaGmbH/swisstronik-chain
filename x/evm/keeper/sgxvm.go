@@ -5,8 +5,6 @@ import (
 	errorsmod "cosmossdk.io/errors"
 	"encoding/json"
 	"fmt"
-	evmcommontypes "swisstronik/types"
-	"swisstronik/x/evm/types"
 	"github.com/SigmaGmbH/librustgo"
 	"github.com/armon/go-metrics"
 	"github.com/cosmos/cosmos-sdk/telemetry"
@@ -20,6 +18,8 @@ import (
 	tmtypes "github.com/tendermint/tendermint/types"
 	"math/big"
 	"strconv"
+	evmcommontypes "swisstronik/types"
+	"swisstronik/x/evm/types"
 )
 
 // HandleTx receives a transaction which is then
@@ -280,7 +280,6 @@ func (k *Keeper) ApplyMessageWithConfig(
 	connector := Connector{
 		Context:   ctx,
 		EVMKeeper: k,
-		DIDKeeper: k.didKeeper,
 	}
 
 	var res *librustgo.HandleTransactionResponse

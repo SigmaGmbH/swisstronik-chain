@@ -62,7 +62,7 @@ type Keeper struct {
 	// fetch EIP1559 base fee and parameters
 	feeMarketKeeper types.FeeMarketKeeper
 	// access to DID registry
-	didKeeper types.DIDKeeper
+	DIDKeeper types.DIDKeeper
 
 	// chain ID number obtained from the context's chain id
 	eip155ChainID *big.Int
@@ -104,7 +104,7 @@ func NewKeeper(
 		bankKeeper:      bankKeeper,
 		stakingKeeper:   sk,
 		feeMarketKeeper: fmk,
-		didKeeper: 		 dk,
+		DIDKeeper:       dk,
 		storeKey:        storeKey,
 		transientKey:    transientKey,
 		ss:              ss,

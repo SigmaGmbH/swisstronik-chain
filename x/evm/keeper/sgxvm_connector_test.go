@@ -56,7 +56,6 @@ func (suite *KeeperTestSuite) TestSGXVMConnector() {
 	connector = evmkeeper.Connector{
 		Context:   suite.ctx,
 		EVMKeeper: suite.app.EvmKeeper,
-		DIDKeeper: suite.app.DIDKeeper,
 	}
 
 	testCases := []struct {
@@ -217,7 +216,7 @@ func (suite *KeeperTestSuite) TestSGXVMConnector() {
 				suite.Require().NoError(err)
 
 				//
-				// Request inserted account code
+				// Request inserted account codesu
 				//
 				getRequest, err := proto.Marshal(&librustgo.CosmosRequest{
 					Req: &librustgo.CosmosRequest_AccountCode{
@@ -242,31 +241,59 @@ func (suite *KeeperTestSuite) TestSGXVMConnector() {
 			func() {
 				var err error
 
-				//
 				// Create DID Document for issuer
-				//
-				metadata := didtypes.Metadata {
-					Created: time.Now(),
+				metadata := didtypes.Metadata{
+					Created:   time.Now(),
 					VersionId: "123e4567-e89b-12d3-a456-426655440000",
 				}
-				vm := didtypes.VerificationMethod {
-					Id: "'did:swtr:2MGhkRKWKi7ztnBFa8DpQ3#6c1527f2f57601ea2f481a0ab1e605d196f3d952689299491638925cd6f26a7e-1'",
+				didUrl := "did:swtr:2MGhkRKWKi7ztnBFa8DpQ3"
+				verificationMethods := []*didtypes.VerificationMethod{{
+					Id:                     "did:swtr:2MGhkRKWKi7ztnBFa8DpQ3#6c1527f2f57601ea2f481a0ab1e605d196f3d952689299491638925cd6f26a7e-1",
 					VerificationMethodType: "Ed25519VerificationKey2020",
-					Controller: "did:swtr:2MGhkRKWKi7ztnBFa8DpQ3",
-					VerificationMaterial: "z6MkmjAncvMFDiqyquFLt2G3CGYaqLfDjqKuzJnmUX3y68JZ",
+					Controller:             didUrl,
+					VerificationMaterial:   "z6MkmjAncvMFDiqyquFLt2G3CGYaqLfDjqKuzJnmUX3y68JZ",
+				}}
+				document := didtypes.DIDDocument{
+					Id:                 didUrl,
+					Controller:         []string{didUrl},
+					VerificationMethod: verificationMethods,
+					Authentication:     []string{"did:swtr:2MGhkRKWKi7ztnBFa8DpQ3#6c1527f2f57601ea2f481a0ab1e605d196f3d952689299491638925cd6f26a7e-1"},
 				}
-				document := didtypes.DIDDocument {
-					Id: "did:swtr:2MGhkRKWKi7ztnBFa8DpQ3",
-					Controller: []string{"did:swtr:2MGhkRKWKi7ztnBFa8DpQ3"},
-					VerificationMethod: []*didtypes.VerificationMethod{&vm},
-					Authentication: []string{"did:swtr:2MGhkRKWKi7ztnBFa8DpQ3#6c1527f2f57601ea2f481a0ab1e605d196f3d952689299491638925cd6f26a7e-1"},
-				}
-				didDocument := didtypes.DIDDocumentWithMetadata {
+				didDocument := didtypes.DIDDocumentWithMetadata{
 					Metadata: &metadata,
-					DidDoc: &document,
+					DidDoc:   &document,
 				}
-				err = connector.DIDKeeper.AddNewDIDDocumentVersion(suite.ctx, &didDocument)
+				err = connector.EVMKeeper.DIDKeeper.AddNewDIDDocumentVersion(connector.Context, &didDocument)
 				suite.Require().NoError(err)
+
+				// Encode request for DID
+				request, err := proto.Marshal(&librustgo.CosmosRequest{
+					Req: &librustgo.CosmosRequest_VerificationMethods{
+						VerificationMethods: &librustgo.QueryVerificationMethods{
+							Did: didUrl,
+						},
+					},
+				})
+				suite.Require().NoError(err)
+
+				response, err := connector.Query(request)
+				suite.Require().NoError(err)
+
+				vmResponse := &librustgo.QueryVerificationMethodsResponse{}
+				err = proto.Unmarshal(response, vmResponse)
+				suite.Require().NoError(err)
+
+				// Extract verification methods
+				expected := []*librustgo.VerificationMethod{}
+				for _, method := range verificationMethods {
+					ffiMethod := librustgo.VerificationMethod{
+						VerificationMethodType: method.VerificationMethodType,
+						VerificationMaterial:   method.VerificationMaterial,
+					}
+					expected = append(expected, &ffiMethod)
+				}
+
+				suite.Require().Equal(expected, vmResponse.Vm)
 			},
 		},
 	}
