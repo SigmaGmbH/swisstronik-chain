@@ -7,17 +7,21 @@ import (
 	"path/filepath"
 	"strings"
 
-	"swisstronik/encoding"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/config"
+	"swisstronik/encoding"
 
+	tmcfg "github.com/cometbft/cometbft/config"
+	tmcli "github.com/cometbft/cometbft/libs/cli"
+	"github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/rpc"
 	"github.com/cosmos/cosmos-sdk/server"
 	serverconfig "github.com/cosmos/cosmos-sdk/server/config"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 	"github.com/cosmos/cosmos-sdk/simapp/params"
+	simappparams "github.com/cosmos/cosmos-sdk/simapp/params"
 	"github.com/cosmos/cosmos-sdk/snapshots"
 	snapshottypes "github.com/cosmos/cosmos-sdk/snapshots/types"
 	"github.com/cosmos/cosmos-sdk/store"
@@ -30,11 +34,7 @@ import (
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-	tmcfg "github.com/tendermint/tendermint/config"
-	tmcli "github.com/tendermint/tendermint/libs/cli"
-	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
-	simappparams "github.com/cosmos/cosmos-sdk/simapp/params"
 
 	// this line is used by starport scaffolding # root/moduleImport
 
@@ -362,7 +362,7 @@ func initAppConfig() (string, interface{}) {
 func convertEncodingConfig(config params.EncodingConfig) simappparams.EncodingConfig {
 	return simappparams.EncodingConfig{
 		InterfaceRegistry: config.InterfaceRegistry,
-		Codec:         config.Codec,
+		Codec:             config.Codec,
 		TxConfig:          config.TxConfig,
 		Amino:             config.Amino,
 	}

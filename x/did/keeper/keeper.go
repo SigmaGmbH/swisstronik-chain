@@ -5,12 +5,12 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
-	"github.com/tendermint/tendermint/libs/log"
 
 	"swisstronik/x/did/types"
 )
@@ -83,8 +83,8 @@ func (k Keeper) AddNewDIDDocumentVersion(ctx *sdk.Context, didDoc *types.DIDDocu
 	// Check if the diddoc version already exists
 	if k.HasDIDDocumentVersion(ctx, didDoc.DidDoc.Id, didDoc.Metadata.VersionId) {
 		return types.ErrDIDDocumentExists.Wrapf(
-			"diddoc version already exists for did %s, version %s", 
-			didDoc.DidDoc.Id, 
+			"diddoc version already exists for did %s, version %s",
+			didDoc.DidDoc.Id,
 			didDoc.Metadata.VersionId,
 		)
 	}

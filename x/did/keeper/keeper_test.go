@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"testing"
 
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/google/uuid"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
 	"swisstronik/simapp"
 	didutil "swisstronik/testutil/did"
@@ -1110,5 +1110,5 @@ func (suite *KeeperTestSuite) TestCannotUpdateDeactivatedDID() {
 	// Update deactivated DID
 	signatures = []didutil.SignInput{subject.SignInput}
 	_, err = didutil.UpdateDIDDocument(suite.ctx, suite.keeper, updatePayload, signatures)
-	suite.Require().ErrorContains(err, subject.DIDDocumentInfo.Did + ": DID Document already deactivated")
+	suite.Require().ErrorContains(err, subject.DIDDocumentInfo.Did+": DID Document already deactivated")
 }

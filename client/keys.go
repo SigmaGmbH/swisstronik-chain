@@ -18,15 +18,15 @@ package client
 import (
 	"bufio"
 
+	"github.com/cometbft/cometbft/libs/cli"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/keys"
 	"github.com/spf13/cobra"
-	"github.com/tendermint/tendermint/libs/cli"
 
+	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	clientkeys "swisstronik/client/keys"
 	"swisstronik/crypto/hd"
-	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 )
 
 // KeyCommands registers a sub-tree of commands to interact with

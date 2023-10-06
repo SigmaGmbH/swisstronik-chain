@@ -8,12 +8,12 @@ import (
 	"os"
 	"path/filepath"
 
+	abci "github.com/cometbft/cometbft/abci/types"
+	"github.com/cometbft/cometbft/libs/log"
+	tmos "github.com/cometbft/cometbft/libs/os"
 	"github.com/gorilla/mux"
 	"github.com/rakyll/statik/fs"
 	"github.com/spf13/cast"
-	abci "github.com/tendermint/tendermint/abci/types"
-	"github.com/tendermint/tendermint/libs/log"
-	tmos "github.com/tendermint/tendermint/libs/os"
 	dbm "github.com/tendermint/tm-db"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
@@ -206,10 +206,10 @@ type SimApp struct {
 	FeeGrantKeeper   feegrantkeeper.Keeper
 	GroupKeeper      groupkeeper.Keeper
 	NFTKeeper        nftkeeper.Keeper
-	EVMKeeper		 *evmkeeper.Keeper
+	EVMKeeper        *evmkeeper.Keeper
 	FeeMarketKeeper  feemarketkeeper.Keeper
 	VestingKeeper    vestingmodulekeeper.Keeper
-	DIDKeeper		 didmodulekeeper.Keeper
+	DIDKeeper        didmodulekeeper.Keeper
 
 	// the module manager
 	mm *module.Manager
@@ -250,7 +250,7 @@ func NewSimApp(
 		minttypes.StoreKey, distrtypes.StoreKey, slashingtypes.StoreKey,
 		govtypes.StoreKey, paramstypes.StoreKey, upgradetypes.StoreKey, feegrant.StoreKey,
 		evidencetypes.StoreKey, capabilitytypes.StoreKey,
-		authzkeeper.StoreKey, nftkeeper.StoreKey, group.StoreKey, 
+		authzkeeper.StoreKey, nftkeeper.StoreKey, group.StoreKey,
 		vestingmoduletypes.StoreKey, evmmoduletypes.StoreKey, feemarkettypes.StoreKey,
 		didmoduletypes.StoreKey,
 	)

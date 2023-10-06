@@ -22,11 +22,7 @@ import (
 
 	errorsmod "cosmossdk.io/errors"
 	sdkmath "cosmossdk.io/math"
-	"swisstronik/crypto/ethsecp256k1"
-	rpctypes "swisstronik/rpc/types"
-	"swisstronik/server/config"
-	ethermint "swisstronik/types"
-	evmtypes "swisstronik/x/evm/types"
+	tmtypes "github.com/cometbft/cometbft/types"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	sdkcrypto "github.com/cosmos/cosmos-sdk/crypto"
@@ -38,7 +34,11 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
-	tmtypes "github.com/tendermint/tendermint/types"
+	"swisstronik/crypto/ethsecp256k1"
+	rpctypes "swisstronik/rpc/types"
+	"swisstronik/server/config"
+	ethermint "swisstronik/types"
+	evmtypes "swisstronik/x/evm/types"
 )
 
 // Accounts returns the list of accounts available to this node.

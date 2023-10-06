@@ -8,18 +8,18 @@ import (
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	errortypes "github.com/cosmos/cosmos-sdk/types/errors"
 
-	"swisstronik/rpc/backend/mocks"
-	rpc "swisstronik/rpc/types"
-	evmtypes "swisstronik/x/evm/types"
+	abci "github.com/cometbft/cometbft/abci/types"
+	"github.com/cometbft/cometbft/libs/bytes"
+	tmrpcclient "github.com/cometbft/cometbft/rpc/client"
+	tmrpctypes "github.com/cometbft/cometbft/rpc/core/types"
+	"github.com/cometbft/cometbft/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/ethereum/go-ethereum/common"
 	mock "github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	abci "github.com/tendermint/tendermint/abci/types"
-	"github.com/tendermint/tendermint/libs/bytes"
-	tmrpcclient "github.com/tendermint/tendermint/rpc/client"
-	tmrpctypes "github.com/tendermint/tendermint/rpc/core/types"
-	"github.com/tendermint/tendermint/types"
+	"swisstronik/rpc/backend/mocks"
+	rpc "swisstronik/rpc/types"
+	evmtypes "swisstronik/x/evm/types"
 )
 
 // Client defines a mocked object that implements the Tendermint JSON-RPC Client

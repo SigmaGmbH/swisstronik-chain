@@ -35,13 +35,13 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/server"
 
-	"swisstronik/rpc/backend"
-	rpctypes "swisstronik/rpc/types"
+	"github.com/cometbft/cometbft/libs/log"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/consensus/ethash"
 	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/tendermint/tendermint/libs/log"
+	"swisstronik/rpc/backend"
+	rpctypes "swisstronik/rpc/types"
 )
 
 // HandlerT keeps track of the cpu profiler and trace execution

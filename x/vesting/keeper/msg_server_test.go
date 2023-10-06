@@ -10,9 +10,9 @@ import (
 
 	"swisstronik/simapp"
 
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 	"swisstronik/testutil"
 )
 
@@ -31,7 +31,7 @@ func TestCreatingMonthlyVestingAccount(t *testing.T) {
 
 	// setup the app
 	app, genAcc := simapp.Setup(t, false)
-	
+
 	ctx := app.BaseApp.NewContext(false, tmproto.Header{ChainID: "swisstronik_1291-1"})
 	msgServer := keeper.NewMsgServerImpl(app.VestingKeeper)
 

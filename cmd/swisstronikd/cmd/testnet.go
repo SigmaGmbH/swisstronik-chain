@@ -10,10 +10,10 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 
+	tmconfig "github.com/cometbft/cometbft/config"
+	tmrand "github.com/cometbft/cometbft/libs/rand"
+	tmtime "github.com/cometbft/cometbft/types/time"
 	"github.com/spf13/cobra"
-	tmconfig "github.com/tendermint/tendermint/config"
-	tmrand "github.com/tendermint/tendermint/libs/rand"
-	tmtime "github.com/tendermint/tendermint/types/time"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -40,9 +40,9 @@ import (
 	evmmoduletypes "swisstronik/types"
 	evmtypes "swisstronik/x/evm/types"
 
+	cmtproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	tmtypes "github.com/cometbft/cometbft/types"
 	"swisstronik/testutil/network"
-	cmtproto "github.com/tendermint/tendermint/proto/tendermint/types"
-	tmtypes "github.com/tendermint/tendermint/types"
 	"time"
 )
 
@@ -471,25 +471,25 @@ func ExportGenesisFileWithTime(
 ) error {
 	consensusParams := &cmtproto.ConsensusParams{
 		Block: cmtproto.BlockParams{
-			MaxBytes: 22020096,
-			MaxGas: 20000000,
+			MaxBytes:   22020096,
+			MaxGas:     20000000,
 			TimeIotaMs: 1000,
 		},
 		Evidence: cmtproto.EvidenceParams{
 			MaxAgeNumBlocks: 100000,
-			MaxAgeDuration: 172800000000000,
-			MaxBytes: 1048576,
+			MaxAgeDuration:  172800000000000,
+			MaxBytes:        1048576,
 		},
 		Validator: cmtproto.ValidatorParams{
 			PubKeyTypes: []string{"ed25519"},
 		},
-	} 
+	}
 
 	genDoc := tmtypes.GenesisDoc{
-		GenesisTime: genTime,
-		ChainID:     chainID,
-		Validators:  validators,
-		AppState:    appState,
+		GenesisTime:     genTime,
+		ChainID:         chainID,
+		Validators:      validators,
+		AppState:        appState,
 		ConsensusParams: consensusParams,
 	}
 

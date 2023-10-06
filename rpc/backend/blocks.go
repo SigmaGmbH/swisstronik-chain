@@ -22,8 +22,7 @@ import (
 	"math/big"
 	"strconv"
 
-	rpctypes "swisstronik/rpc/types"
-	evmtypes "swisstronik/x/evm/types"
+	tmrpctypes "github.com/cometbft/cometbft/rpc/core/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	grpctypes "github.com/cosmos/cosmos-sdk/types/grpc"
 	"github.com/ethereum/go-ethereum/common"
@@ -31,9 +30,10 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/trie"
 	"github.com/pkg/errors"
-	tmrpctypes "github.com/tendermint/tendermint/rpc/core/types"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
+	rpctypes "swisstronik/rpc/types"
+	evmtypes "swisstronik/x/evm/types"
 )
 
 // BlockNumber returns the current block number in abci app state. Because abci

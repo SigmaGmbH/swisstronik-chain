@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"math/big"
 
-	rpc "swisstronik/rpc/types"
-	"swisstronik/tests"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
 	"google.golang.org/grpc/metadata"
+	rpc "swisstronik/rpc/types"
+	"swisstronik/tests"
 
+	"github.com/cometbft/cometbft/abci/types"
+	tmrpctypes "github.com/cometbft/cometbft/rpc/core/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/tendermint/tendermint/abci/types"
-	tmrpctypes "github.com/tendermint/tendermint/rpc/core/types"
 
 	"swisstronik/rpc/backend/mocks"
 	evmtypes "swisstronik/x/evm/types"
