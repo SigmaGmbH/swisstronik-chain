@@ -114,76 +114,77 @@ impl LinearCostPrecompileWithQuerier for Identity {
         input: &[u8],
         _: u64,
     ) -> Result<(ExitSucceed, Vec<u8>), PrecompileFailure> {
-        // Expects to receive RLP-encoded JWT proof for Verifiable Credential
-        let jwt: String = match rlp::decode(input) {
-            Ok(res) => res,
-            Err(_) => {
-                return Err(PrecompileFailure::Error {
-                    exit_status: ExitError::Other("cannot decode provided JWT proof".into()),
-                })
-            }
-        };
+        // // Expects to receive RLP-encoded JWT proof for Verifiable Credential
+        // let jwt: String = match rlp::decode(input) {
+        //     Ok(res) => res,
+        //     Err(_) => {
+        //         return Err(PrecompileFailure::Error {
+        //             exit_status: ExitError::Other("cannot decode provided JWT proof".into()),
+        //         })
+        //     }
+        // };
 
-        // Split JWT into parts
-        let (header, payload, signature, data) = split_jwt(jwt.as_str())?;
+        // // Split JWT into parts
+        // let (header, payload, signature, data) = split_jwt(jwt.as_str())?;
 
-        // Parse header
-        let header: Header = match serde_json::from_str(header.as_str()) {
-            Ok(header) => header,
-            Err(err) => {
-                return Err(PrecompileFailure::Error {
-                    exit_status: ExitError::Other("Cannot parse JWT header".into()),
-                })
-            }
-        };
+        // // Parse header
+        // let header: Header = match serde_json::from_str(header.as_str()) {
+        //     Ok(header) => header,
+        //     Err(err) => {
+        //         return Err(PrecompileFailure::Error {
+        //             exit_status: ExitError::Other("Cannot parse JWT header".into()),
+        //         })
+        //     }
+        // };
 
-        // Validate header
-        header.validate()?;
+        // // Validate header
+        // header.validate()?;
         
-        // Parse payload
-        let parsed_payload: VerifiableCredential = match serde_json::from_str(payload.as_str()) {
-            Ok(res) => res,
-            Err(e) => {
-                return Err(PrecompileFailure::Error {
-                    exit_status: ExitError::Other("Cannot parse JWT payload".into()),
-                })
-            }
-        };
+        // // Parse payload
+        // let parsed_payload: VerifiableCredential = match serde_json::from_str(payload.as_str()) {
+        //     Ok(res) => res,
+        //     Err(e) => {
+        //         return Err(PrecompileFailure::Error {
+        //             exit_status: ExitError::Other("Cannot parse JWT payload".into()),
+        //         })
+        //     }
+        // };
         
-        // Extract issuer from payload and obtain verification material
-        let issuer = parsed_payload.iss;
-        let verification_materials = get_verification_material(querier, issuer)?;
+        // // Extract issuer from payload and obtain verification material
+        // let issuer = parsed_payload.iss;
+        // let verification_materials = get_verification_material(querier, issuer)?;
 
-        // Find appropriate verification material
-        let vm = verification_materials.iter().find(|verification_method| verification_method.verificationMethodType == header.alg);
-        println!("DEBUG: found vms: {:?}", vm); // TODO: Remove debug log
-        let vm = match vm {
-            Some(method) => method.verificationMaterial.clone(),
-            None => {
-                return Err(PrecompileFailure::Error {
-                    exit_status: ExitError::Other("Cannot find appropriate verification method".into()),
-                })
-            }
-        };
+        // // Find appropriate verification material
+        // let vm = verification_materials.iter().find(|verification_method| verification_method.verificationMethodType == header.alg);
+        // println!("DEBUG: found vms: {:?}", vm); // TODO: Remove debug log
+        // let vm = match vm {
+        //     Some(method) => method.verificationMaterial.clone(),
+        //     None => {
+        //         return Err(PrecompileFailure::Error {
+        //             exit_status: ExitError::Other("Cannot find appropriate verification method".into()),
+        //         })
+        //     }
+        // };
         
-        match verify_signature(data, signature, vm) {
-            Err(_) => {
-                return Err(PrecompileFailure::Error {
-                    exit_status: ExitError::Other("Cannot verify signature".into()),
-                })
-            },
-            _ => (),
-        };
+        // match verify_signature(data, signature, vm) {
+        //     Err(_) => {
+        //         return Err(PrecompileFailure::Error {
+        //             exit_status: ExitError::Other("Cannot verify signature".into()),
+        //         })
+        //     },
+        //     _ => (),
+        // };
 
-        let credential_subject = match convert_bech32_address(parsed_payload.vc.credential_subject.address) {
-            Ok(addr) => addr,
-            Err(_) => {
-                return Err(PrecompileFailure::Error {
-                    exit_status: ExitError::Other("Cannot convert bech32 address into ethereum".into()),
-                })
-            }
-        };
-        Ok((ExitSucceed::Returned, credential_subject))
+        // let credential_subject = match convert_bech32_address(parsed_payload.vc.credential_subject.address) {
+        //     Ok(addr) => addr,
+        //     Err(_) => {
+        //         return Err(PrecompileFailure::Error {
+        //             exit_status: ExitError::Other("Cannot convert bech32 address into ethereum".into()),
+        //         })
+        //     }
+        // };
+        // Ok((ExitSucceed::Returned, credential_subject))
+        Ok((ExitSucceed::Returned, input.to_vec()))
     }
 }
 
