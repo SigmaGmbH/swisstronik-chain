@@ -59,15 +59,6 @@ sgx_tcrypto = { version = "1.1.5", git = "https://github.com/apache/teaclave-sgx
 sgx_tse = { version = "1.1.5", git = "https://github.com/apache/teaclave-sgx-sdk.git", tag="v1.1.5" }
 sgx_rand = { version = "1.1.5", git = "https://github.com/apache/teaclave-sgx-sdk.git", tag="v1.1.5" }
 
-# Precompiles
-# precompile-std = { path = "./evm/precompiles/precompile-std" }
-# evm-precompile-simple = { path = "./evm/precompiles/simple" }
-# evm-precompile-sha3fips = { path = "./evm/precompiles/sha3fips" }
-# evm-precompile-modexp = { path = "./evm/precompiles/modexp" }
-# evm-precompile-bn128 = { path = "./evm/precompiles/bn128" }
-# evm-precompile-blake2f = { path = "./evm/precompiles/blake2f" }
-# evm-precompile-identity = { path = "./evm/precompiles/identity" }
-
 [patch."https://github.com/apache/teaclave-sgx-sdk.git"]
 sgx_tstd = { version = "1.1.5", git = "https://github.com/haerdib/incubator-teaclave-sgx-sdk", branch = "master"}
 sgx_trts = { version = "1.1.5", git = "https://github.com/haerdib/incubator-teaclave-sgx-sdk", branch = "master"}
