@@ -24,9 +24,10 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/keys"
 	"github.com/spf13/cobra"
 
-	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	clientkeys "swisstronik/client/keys"
 	"swisstronik/crypto/hd"
+
+	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 )
 
 // KeyCommands registers a sub-tree of commands to interact with
@@ -63,7 +64,7 @@ The pass backend requires GnuPG: https://gnupg.org/
 	addCmd := keys.AddKeyCommand()
 
 	// update the default signing algorithm value to "eth_secp256k1"
-	algoFlag := addCmd.Flag(flags.FlagKeyAlgorithm)
+	algoFlag := addCmd.Flag(flags.FlagKeyType)
 	algoFlag.DefValue = string(hd.EthSecp256k1Type)
 	err := algoFlag.Value.Set(string(hd.EthSecp256k1Type))
 	if err != nil {
