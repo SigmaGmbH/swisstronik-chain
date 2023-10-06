@@ -3,15 +3,16 @@ package vesting
 import (
 	"math/rand"
 
+	"swisstronik/testutil/sample"
+	vestingsimulation "swisstronik/x/vesting/simulation"
+	"swisstronik/x/vesting/types"
+
+	simappparams "cosmossdk.io/simapp/params"
 	"github.com/cosmos/cosmos-sdk/baseapp"
-	simappparams "github.com/cosmos/cosmos-sdk/simapp/params"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
-	"swisstronik/testutil/sample"
-	vestingsimulation "swisstronik/x/vesting/simulation"
-	"swisstronik/x/vesting/types"
 )
 
 // avoid unused import issue

@@ -3,22 +3,24 @@ package keeper_test
 import (
 	_ "embed"
 	"encoding/json"
-	"github.com/SigmaGmbH/librustgo"
 	"math"
 	"math/big"
 	"time"
 
+	"github.com/SigmaGmbH/librustgo"
+
+	feemarkettypes "swisstronik/x/feemarket/types"
+
 	sdkmath "cosmossdk.io/math"
+	"cosmossdk.io/simapp"
 	tmjson "github.com/cometbft/cometbft/libs/json"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/simapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/stretchr/testify/require"
-	feemarkettypes "swisstronik/x/feemarket/types"
 
 	"swisstronik/app"
 	"swisstronik/crypto/ethsecp256k1"

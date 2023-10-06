@@ -9,6 +9,13 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	"swisstronik/app"
+	"swisstronik/crypto/ethsecp256k1"
+	"swisstronik/encoding"
+	"swisstronik/tests"
+	"swisstronik/testutil"
+	"swisstronik/x/feemarket/types"
+
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
@@ -18,19 +25,14 @@ import (
 	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	"github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"swisstronik/app"
-	"swisstronik/crypto/ethsecp256k1"
-	"swisstronik/encoding"
-	"swisstronik/tests"
-	"swisstronik/testutil"
-	"swisstronik/x/feemarket/types"
 
+	evmtypes "swisstronik/x/evm/types"
+
+	"cosmossdk.io/simapp"
 	abci "github.com/cometbft/cometbft/abci/types"
 	"github.com/cometbft/cometbft/libs/log"
-	"github.com/cosmos/cosmos-sdk/simapp"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	dbm "github.com/tendermint/tm-db"
-	evmtypes "swisstronik/x/evm/types"
 )
 
 var _ = Describe("Feemarket", func() {

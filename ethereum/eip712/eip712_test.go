@@ -6,16 +6,19 @@ import (
 	"cosmossdk.io/math"
 
 	"swisstronik/ethereum/eip712"
+
+	"cosmossdk.io/simapp/params"
 	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/simapp/params"
 	"github.com/ethereum/go-ethereum/crypto"
 
 	"swisstronik/crypto/ethsecp256k1"
+
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"swisstronik/app"
 	"swisstronik/encoding"
+
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 
 	txtypes "github.com/cosmos/cosmos-sdk/types/tx"
