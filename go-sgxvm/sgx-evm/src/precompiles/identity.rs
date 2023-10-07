@@ -18,6 +18,7 @@ use std::{
 };
 use bech32::FromBase32;
 use thiserror_no_std::Error;
+use multibase::{Base, decode};
 
 #[derive(Debug, Deserialize)]
 struct Header {
@@ -139,7 +140,7 @@ impl LinearCostPrecompileWithQuerier for Identity {
 
         // Validate header
         header.validate()?;
-        
+
         // Parse payload
         let parsed_payload: VerifiableCredential = match serde_json::from_str(payload.as_str()) {
             Ok(res) => res,
@@ -153,9 +154,10 @@ impl LinearCostPrecompileWithQuerier for Identity {
         // Extract issuer from payload and obtain verification material
         let issuer = parsed_payload.iss;
         let verification_materials = get_verification_material(querier, issuer)?;
+        println!("DEBUG: received VMs: {:?}", verification_materials);
 
         // Find appropriate verification material
-        let vm = verification_materials.iter().find(|verification_method| verification_method.verificationMethodType == header.alg);
+        let vm = verification_materials.iter().find(|verification_method| verification_method.verificationMethodType == "Ed25519VerificationKey2020" || verification_method.verificationMethodType == "Ed25519VerificationKey2018");
         println!("DEBUG: found vms: {:?}", vm); // TODO: Remove debug log
         let vm = match vm {
             Some(method) => method.verificationMaterial.clone(),
@@ -243,10 +245,13 @@ fn verify_signature(data: String, signature: String, vm: String) -> Result<(), V
         }
     })?;
 
-    let public_key =
-        hex::decode(vm).map_err(|err| VerificationError::SignatureVerificationError {
-            msg: format!("Cannot decode public key. Reason: {}", err),
-        })?;
+    println!("DEBUG: signature extracted");
+    let public_key = multibase_to_hex(vm);
+    println!("DEBUG: multibase public key decoded");
+    // let public_key =
+    //     multibase_to_hex(vm).map_err(|err| VerificationError::SignatureVerificationError {
+    //         msg: format!("Cannot decode public key. Reason: {}", err),
+    //     })?;
 
     let public_key: &[u8; 32] = public_key.as_slice().try_into().map_err(|err| {
         VerificationError::SignatureVerificationError {
@@ -256,12 +261,15 @@ fn verify_signature(data: String, signature: String, vm: String) -> Result<(), V
             ),
         }
     })?;
+    println!("DEBUG: pk extracted");
 
     let verification_key = VerifyingKey::from_bytes(public_key).map_err(|err| {
         VerificationError::SignatureVerificationError {
             msg: format!("Cannot construct verification key. Reason: {}", err),
         }
     })?;
+    println!("DEBUG: verification key constructed");
+
 
     // Verify signature
     let data = data.as_bytes();
@@ -309,4 +317,10 @@ fn get_verification_material(connector: *mut GoQuerier, did_url: String) -> Resu
             })
         }
     }
+}
+
+fn multibase_to_hex(value: String) -> Vec<u8> {
+    let (base, data) = multibase::decode(value).expect("Cannot decode multibase");
+    println!("DEBUG: decoded multibase. Result len: {:?}", data.len());
+    data[2..].to_vec()
 }
