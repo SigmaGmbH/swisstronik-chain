@@ -20,12 +20,13 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"swisstronik/indexer"
+
 	tmnode "github.com/cometbft/cometbft/node"
 	sm "github.com/cometbft/cometbft/state"
 	tmstore "github.com/cometbft/cometbft/store"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/server"
-	"swisstronik/indexer"
 )
 
 func NewIndexTxCmd() *cobra.Command {
