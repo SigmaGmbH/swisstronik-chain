@@ -18,7 +18,7 @@ use std::{
 };
 use bech32::FromBase32;
 
-#[derive(Debug, Deserialize)]
+#[derive(Deserialize)]
 struct Header {
     pub alg: String,
     pub typ: String,
@@ -35,7 +35,7 @@ impl Header {
     } 
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Deserialize)]
 struct VerifiableCredential {
     vc: VC,
     sub: String,
@@ -43,7 +43,7 @@ struct VerifiableCredential {
     iss: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Deserialize)]
 struct VC {
     #[serde(rename = "@context")]
     context: Vec<String>,
@@ -53,14 +53,9 @@ struct VC {
     credential_subject: CredentialSubject,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Deserialize)]
 struct CredentialSubject {
     address: String,
-}
-
-struct VerificationMethod {
-    vm: String,
-    vm_type: String,
 }
 
 /// The identity precompile.
