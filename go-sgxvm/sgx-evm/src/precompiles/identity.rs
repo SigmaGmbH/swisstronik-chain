@@ -17,7 +17,6 @@ use std::{
     vec::Vec,
 };
 use bech32::FromBase32;
-use thiserror_no_std::Error;
 use multibase::{Base, decode};
 
 #[derive(Debug, Deserialize)]
@@ -70,20 +69,6 @@ struct CredentialSubject {
 struct VerificationMethod {
     vm: String,
     vm_type: String,
-}
-
-#[derive(Error, Debug)]
-pub enum VerificationError {
-    #[error("Cannot split JWT: {}", msg)]
-    CannotSplitJWT { msg: String },
-    #[error("Header verification failed: {}", msg)]
-    HeaderVerificationError { msg: String },
-    #[error("Cannot parse JSON: {}", msg)]
-    JSONParseError { msg: String },
-    #[error("Signature verification failed: {}", msg)]
-    SignatureVerificationError { msg: String },
-    #[error("Cannot convert address: {}", msg)]
-    ConvertAddressError { msg: String },
 }
 
 /// The identity precompile.
@@ -154,11 +139,9 @@ impl LinearCostPrecompileWithQuerier for Identity {
         // Extract issuer from payload and obtain verification material
         let issuer = parsed_payload.iss;
         let verification_materials = get_verification_material(querier, issuer)?;
-        println!("DEBUG: received VMs: {:?}", verification_materials);
 
         // Find appropriate verification material
         let vm = verification_materials.iter().find(|verification_method| verification_method.verificationMethodType == "Ed25519VerificationKey2020" || verification_method.verificationMethodType == "Ed25519VerificationKey2018");
-        println!("DEBUG: found vms: {:?}", vm); // TODO: Remove debug log
         let vm = match vm {
             Some(method) => method.verificationMaterial.clone(),
             None => {
@@ -194,41 +177,57 @@ impl LinearCostPrecompileWithQuerier for Identity {
 fn split_jwt(jwt: &str) -> Result<(String, String, String, String), PrecompileFailure> {
     let parts: Vec<&str> = jwt.split('.').collect();
 
-    if parts.len() == 3 {
-        let header = String::from_utf8(base64_decode(parts[0])).unwrap(); // TODO: Remove unwrap
-        let payload = String::from_utf8(base64_decode(parts[1])).unwrap(); // TODO: Remove unwrap
-        let signature = parts[2].to_string();
-        let data = format!("{}.{}", parts[0], parts[1]);
-
-        return Ok((header, payload, signature, data));
+    if parts.len() != 3 {
+        return Err(PrecompileFailure::Error {
+            exit_status: ExitError::Other("Wrong amount of parts in JWT".into()),
+        });
     }
 
-    return Err(PrecompileFailure::Error {
-        exit_status: ExitError::Other("Wrong amount of parts in JWT".into()),
-    })
+    let header = match String::from_utf8(base64_decode(parts[0])) {
+        Ok(decoded_header) => decoded_header,
+        Err(_) => {
+            return Err(PrecompileFailure::Error {
+                exit_status: ExitError::Other("Cannot decode JWT header to utf-8".into()),
+            });
+        }
+    };
+
+    let payload = match String::from_utf8(base64_decode(parts[1])) {
+        Ok(decoded_payload) => decoded_payload,
+        Err(_) => {
+            return Err(PrecompileFailure::Error {
+                exit_status: ExitError::Other("Cannot decode JWT payload to utf-8".into()),
+            });
+        }
+    };
+
+    let signature = parts[2].to_string();
+    let data = format!("{}.{}", parts[0], parts[1]);
+
+    Ok((header, payload, signature, data))
 }
 
+
 /// Validates JSON-encoded JWT header
-fn validate_header(header_json: String) -> Result<(), VerificationError> {
-    // Parse and validate header
+fn validate_header(header_json: String) -> Result<(), PrecompileFailure> {
     let header: Header = match serde_json::from_str(header_json.as_str()) {
         Ok(header) => header,
         Err(err) => {
-            return Err(VerificationError::HeaderVerificationError {
-                msg: format!("Cannot parse JSON header. Reason: {:?}", err),
+            return Err(PrecompileFailure::Error {
+                exit_status: ExitError::Other("Cannot parse JSON header".into()),
             })
         }
     };
 
     if header.typ != "JWT" {
-        return Err(VerificationError::HeaderVerificationError {
-            msg: format!("Wrong header type. Expected JWT, Got: {:?}", header.typ),
+        return Err(PrecompileFailure::Error {
+            exit_status: ExitError::Other("Wrong header type".into()),
         });
     }
 
     if header.alg != "EdDSA" {
-        return Err(VerificationError::HeaderVerificationError {
-            msg: format!("Wrong alg. Expected EdDSA, Got: {:?}", header.alg),
+        return Err(PrecompileFailure::Error {
+            exit_status: ExitError::Other("Wrong algorithm in JWT header".into()),
         });
     }
 
@@ -236,58 +235,45 @@ fn validate_header(header_json: String) -> Result<(), VerificationError> {
 }
 
 /// Verifies provided ed25519 signature
-fn verify_signature(data: String, signature: String, vm: String) -> Result<(), VerificationError> { // TODO: Replace with PrecompileFailure
+fn verify_signature(data: String, signature: String, vm: String) -> Result<(), PrecompileFailure> {
     // Construct signature
     let signature = base64_decode(signature.as_str());
     let signature = Signature::from_slice(&signature).map_err(|err| {
-        VerificationError::SignatureVerificationError {
-            msg: format!("Cannot construct signature. Reason: {}", err),
+        PrecompileFailure::Error {
+            exit_status: ExitError::Other("Cannot construct signature".into()),
         }
     })?;
 
-    println!("DEBUG: signature extracted");
-    let public_key = multibase_to_hex(vm);
-    println!("DEBUG: multibase public key decoded");
-    // let public_key =
-    //     multibase_to_hex(vm).map_err(|err| VerificationError::SignatureVerificationError {
-    //         msg: format!("Cannot decode public key. Reason: {}", err),
-    //     })?;
+    let public_key = multibase_to_bytes(vm)?;
 
     let public_key: &[u8; 32] = public_key.as_slice().try_into().map_err(|err| {
-        VerificationError::SignatureVerificationError {
-            msg: format!(
-                "Cannot convert public key to fixed byte array. Reason: {}",
-                err
-            ),
+        PrecompileFailure::Error {
+            exit_status: ExitError::Other("Cannot convert public key to fixed bytes array".into()),
         }
     })?;
-    println!("DEBUG: pk extracted");
 
     let verification_key = VerifyingKey::from_bytes(public_key).map_err(|err| {
-        VerificationError::SignatureVerificationError {
-            msg: format!("Cannot construct verification key. Reason: {}", err),
+        PrecompileFailure::Error {
+            exit_status: ExitError::Other("Cannot construct verification key".into()),
         }
     })?;
-    println!("DEBUG: verification key constructed");
-
 
     // Verify signature
-    let data = data.as_bytes();
-    verification_key.verify(data, &signature).map_err(|err| {
-        VerificationError::SignatureVerificationError {
-            msg: format!("Cannot verify signature. Reason: {}", err),
+    verification_key.verify(data.as_bytes(), &signature).map_err(|err| {
+        PrecompileFailure::Error {
+            exit_status: ExitError::Other("Signature verification failed".into()),
         }
     })
 }
 
-fn convert_bech32_address(address: String) -> Result<Vec<u8>, VerificationError> {
+fn convert_bech32_address(address: String) -> Result<Vec<u8>, PrecompileFailure> {
     let (_, data, _) =
-        bech32::decode(address.as_str()).map_err(|err| VerificationError::ConvertAddressError {
-            msg: format!("Cannot decode bech32 address: {}", err),
+        bech32::decode(address.as_str()).map_err(|_| PrecompileFailure::Error {
+            exit_status: ExitError::Other("Cannot decode bech32 address".into()),
         })?;
     let data =
-        Vec::<u8>::from_base32(&data).map_err(|err| VerificationError::ConvertAddressError {
-            msg: format!("Cannot convert base32 to bytes"),
+        Vec::<u8>::from_base32(&data).map_err(|_| PrecompileFailure::Error {
+            exit_status: ExitError::Other("Cannot convert base32 to bytes".into()),
         })?;
     Ok(data)
 }
@@ -319,8 +305,14 @@ fn get_verification_material(connector: *mut GoQuerier, did_url: String) -> Resu
     }
 }
 
-fn multibase_to_hex(value: String) -> Vec<u8> {
-    let (base, data) = multibase::decode(value).expect("Cannot decode multibase");
-    println!("DEBUG: decoded multibase. Result len: {:?}", data.len());
-    data[2..].to_vec()
+/// Decodes multibase encoded verification material to bytes
+fn multibase_to_bytes(value: String) -> Result<Vec<u8>, PrecompileFailure> {
+    match multibase::decode(value) {
+        Ok((_, data)) => Ok(data[2..].to_vec()),
+        Err(_) => {
+            return Err(PrecompileFailure::Error {
+                exit_status: ExitError::Other("Cannot decode multibase".into()),
+            })
+        }
+    }
 }
