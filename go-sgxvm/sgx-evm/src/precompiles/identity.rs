@@ -17,7 +17,6 @@ use std::{
     vec::Vec,
 };
 use bech32::FromBase32;
-use multibase::{Base, decode};
 
 #[derive(Debug, Deserialize)]
 struct Header {
@@ -27,19 +26,12 @@ struct Header {
 
 impl Header {
     fn validate(&self) -> Result<(), PrecompileFailure> {
-        if self.typ != "JWT" {
-            return Err(PrecompileFailure::Error {
-                exit_status: ExitError::Other("Wrong header type. Expected JWT".into()),
-            })
+        match (self.typ.as_str(), self.alg.as_str()) {
+            ("JWT", "EdDSA") => Ok(()),
+            _ => Err(PrecompileFailure::Error {
+                exit_status: ExitError::Other("Invalid JWT header".into()),
+            }),
         }
-    
-        if self.alg != "EdDSA" {
-            return Err(PrecompileFailure::Error {
-                exit_status: ExitError::Other("Wrong algorithm. Expected EdDSA".into()),
-            })
-        }
-    
-        Ok(())
     } 
 }
 
@@ -101,73 +93,41 @@ impl LinearCostPrecompileWithQuerier for Identity {
         _: u64,
     ) -> Result<(ExitSucceed, Vec<u8>), PrecompileFailure> {
         // Expects to receive RLP-encoded JWT proof for Verifiable Credential
-        let jwt: String = match rlp::decode(input) {
-            Ok(res) => res,
-            Err(_) => {
-                return Err(PrecompileFailure::Error {
-                    exit_status: ExitError::Other("cannot decode provided JWT proof".into()),
-                })
-            }
-        };
+        let jwt: String = rlp::decode(input).map_err(|_| PrecompileFailure::Error {
+            exit_status: ExitError::Other("cannot decode provided JWT proof".into()),
+        })?;
 
         // Split JWT into parts
         let (header, payload, signature, data) = split_jwt(jwt.as_str())?;
 
-        // Parse header
-        let header: Header = match serde_json::from_str(header.as_str()) {
-            Ok(header) => header,
-            Err(err) => {
-                return Err(PrecompileFailure::Error {
-                    exit_status: ExitError::Other("Cannot parse JWT header".into()),
-                })
-            }
-        };
+        // Parse and validate header
+        let header: Header = serde_json::from_str(header.as_str()).map_err(|_| PrecompileFailure::Error {
+            exit_status: ExitError::Other("Cannot parse JWT header".into()),
+        })?;
 
         // Validate header
         header.validate()?;
 
         // Parse payload
-        let parsed_payload: VerifiableCredential = match serde_json::from_str(payload.as_str()) {
-            Ok(res) => res,
-            Err(e) => {
-                return Err(PrecompileFailure::Error {
-                    exit_status: ExitError::Other("Cannot parse JWT payload".into()),
-                })
-            }
-        };
+        let parsed_payload: VerifiableCredential = serde_json::from_str(payload.as_str()).map_err(|_| PrecompileFailure::Error {
+            exit_status: ExitError::Other("Cannot parse JWT payload".into()),
+        })?;
         
         // Extract issuer from payload and obtain verification material
-        let issuer = parsed_payload.iss;
-        let verification_materials = get_verification_material(querier, issuer)?;
+        let verification_materials = get_verification_material(querier, parsed_payload.iss)?;
 
         // Find appropriate verification material
-        let vm = verification_materials.iter().find(|verification_method| verification_method.verificationMethodType == "Ed25519VerificationKey2020" || verification_method.verificationMethodType == "Ed25519VerificationKey2018");
-        let vm = match vm {
-            Some(method) => method.verificationMaterial.clone(),
-            None => {
-                return Err(PrecompileFailure::Error {
-                    exit_status: ExitError::Other("Cannot find appropriate verification method".into()),
-                })
-            }
-        };
+        let vm = verification_materials
+            .iter()
+            .find(|verification_method| verification_method.verificationMethodType == "Ed25519VerificationKey2020" || verification_method.verificationMethodType == "Ed25519VerificationKey2018")
+            .and_then(|method| Some(method.verificationMaterial.clone()))
+            .ok_or(PrecompileFailure::Error {
+                exit_status: ExitError::Other("Cannot find appropriate verification method".into()),
+            })?;
         
-        match verify_signature(data, signature, vm) {
-            Err(_) => {
-                return Err(PrecompileFailure::Error {
-                    exit_status: ExitError::Other("Cannot verify signature".into()),
-                })
-            },
-            _ => (),
-        };
+        verify_signature(&data, &signature, &vm)?;
 
-        let credential_subject = match convert_bech32_address(parsed_payload.vc.credential_subject.address) {
-            Ok(addr) => addr,
-            Err(_) => {
-                return Err(PrecompileFailure::Error {
-                    exit_status: ExitError::Other("Cannot convert bech32 address into ethereum".into()),
-                })
-            }
-        };
+        let credential_subject = convert_bech32_address(parsed_payload.vc.credential_subject.address)?;
         Ok((ExitSucceed::Returned, credential_subject))
     }
 }
@@ -183,23 +143,13 @@ fn split_jwt(jwt: &str) -> Result<(String, String, String, String), PrecompileFa
         });
     }
 
-    let header = match String::from_utf8(base64_decode(parts[0])) {
-        Ok(decoded_header) => decoded_header,
-        Err(_) => {
-            return Err(PrecompileFailure::Error {
-                exit_status: ExitError::Other("Cannot decode JWT header to utf-8".into()),
-            });
-        }
-    };
+    let header = String::from_utf8(base64_decode(parts[0])).map_err(|_| PrecompileFailure::Error {
+        exit_status: ExitError::Other("Cannot decode JWT header to utf-8".into()),
+    })?;
 
-    let payload = match String::from_utf8(base64_decode(parts[1])) {
-        Ok(decoded_payload) => decoded_payload,
-        Err(_) => {
-            return Err(PrecompileFailure::Error {
-                exit_status: ExitError::Other("Cannot decode JWT payload to utf-8".into()),
-            });
-        }
-    };
+    let payload = String::from_utf8(base64_decode(parts[1])).map_err(|_| PrecompileFailure::Error {
+        exit_status: ExitError::Other("Cannot decode JWT payload to utf-8".into()),
+    })?;
 
     let signature = parts[2].to_string();
     let data = format!("{}.{}", parts[0], parts[1]);
@@ -207,44 +157,17 @@ fn split_jwt(jwt: &str) -> Result<(String, String, String, String), PrecompileFa
     Ok((header, payload, signature, data))
 }
 
-
-/// Validates JSON-encoded JWT header
-fn validate_header(header_json: String) -> Result<(), PrecompileFailure> {
-    let header: Header = match serde_json::from_str(header_json.as_str()) {
-        Ok(header) => header,
-        Err(err) => {
-            return Err(PrecompileFailure::Error {
-                exit_status: ExitError::Other("Cannot parse JSON header".into()),
-            })
-        }
-    };
-
-    if header.typ != "JWT" {
-        return Err(PrecompileFailure::Error {
-            exit_status: ExitError::Other("Wrong header type".into()),
-        });
-    }
-
-    if header.alg != "EdDSA" {
-        return Err(PrecompileFailure::Error {
-            exit_status: ExitError::Other("Wrong algorithm in JWT header".into()),
-        });
-    }
-
-    Ok(())
-}
-
 /// Verifies provided ed25519 signature
-fn verify_signature(data: String, signature: String, vm: String) -> Result<(), PrecompileFailure> {
+fn verify_signature(data: &str, signature: &str, vm: &str) -> Result<(), PrecompileFailure> {
     // Construct signature
-    let signature = base64_decode(signature.as_str());
+    let signature = base64_decode(signature);
     let signature = Signature::from_slice(&signature).map_err(|err| {
         PrecompileFailure::Error {
             exit_status: ExitError::Other("Cannot construct signature".into()),
         }
     })?;
 
-    let public_key = multibase_to_bytes(vm)?;
+    let public_key = multibase_to_vec(vm)?;
 
     let public_key: &[u8; 32] = public_key.as_slice().try_into().map_err(|err| {
         PrecompileFailure::Error {
@@ -259,11 +182,13 @@ fn verify_signature(data: String, signature: String, vm: String) -> Result<(), P
     })?;
 
     // Verify signature
-    verification_key.verify(data.as_bytes(), &signature).map_err(|err| {
-        PrecompileFailure::Error {
+    verification_key
+        .verify(data.as_bytes(), &signature)
+        .map_err(|_| PrecompileFailure::Error {
             exit_status: ExitError::Other("Signature verification failed".into()),
-        }
-    })
+        })?;
+
+    Ok(())    
 }
 
 fn convert_bech32_address(address: String) -> Result<Vec<u8>, PrecompileFailure> {
@@ -282,20 +207,17 @@ fn base64_decode(input: &str) -> Vec<u8> {
     base64::decode_config(&input, base64::URL_SAFE).unwrap_or_default()
 }
 
+/// Makes `OCALL` to obtain verification methods from DID registry
+/// * connector – pointer to GoQuerier, which will be used to make queries to `x/did` module
+/// * did_url – url to DID document
 fn get_verification_material(connector: *mut GoQuerier, did_url: String) -> Result<Vec<ffi::VerificationMethod>, PrecompileFailure> {
     let encoded_request = coder::encode_verification_methods_request(did_url);
     match ocall::make_request(connector, encoded_request) {
         Some(result) => {
-            // Decode protobuf
-            let decoded_result = match protobuf::parse_from_bytes::<ffi::QueryVerificationMethodsResponse>(result.as_slice()) {
-                Ok(res) => res,
-                Err(err) => {
-                    return Err(PrecompileFailure::Error {
-                        exit_status: ExitError::Other("Cannot decode protobuf response".into()),
-                    })
-                }
-            };
-            Ok(decoded_result.vm.to_vec())
+            // Decode protobuf and extract verification methods
+            protobuf::parse_from_bytes::<ffi::QueryVerificationMethodsResponse>(result.as_slice())
+                .map_err(|_| PrecompileFailure::Error { exit_status: ExitError::Other("Cannot decode protobuf response".into()) })
+                .and_then(|decoded_result| Ok(decoded_result.vm.to_vec()))
         },
         None => {
             return Err(PrecompileFailure::Error {
@@ -306,13 +228,11 @@ fn get_verification_material(connector: *mut GoQuerier, did_url: String) -> Resu
 }
 
 /// Decodes multibase encoded verification material to bytes
-fn multibase_to_bytes(value: String) -> Result<Vec<u8>, PrecompileFailure> {
-    match multibase::decode(value) {
-        Ok((_, data)) => Ok(data[2..].to_vec()),
-        Err(_) => {
-            return Err(PrecompileFailure::Error {
-                exit_status: ExitError::Other("Cannot decode multibase".into()),
-            })
-        }
-    }
+fn multibase_to_vec(value: &str) -> Result<Vec<u8>, PrecompileFailure> {
+    let (_, decoded_data) = multibase::decode(value)
+        .map_err(|_| PrecompileFailure::Error { 
+            exit_status: ExitError::Other("Cannot decode multibase".into()) 
+    })?;
+
+    Ok(decoded_data[2..].to_vec())
 }
