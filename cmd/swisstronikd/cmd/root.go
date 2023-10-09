@@ -337,7 +337,7 @@ func (a appCreator) appExport(
 
 	}
 
-	return swissApp.ExportAppStateAndValidators(forZeroHeight, jailAllowedAddrs)
+	return swissApp.ExportAppStateAndValidators(forZeroHeight, jailAllowedAddrs, modulesToExport)
 }
 
 // initAppConfig helps to override default appConfig template and configs.
