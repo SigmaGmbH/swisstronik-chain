@@ -12,8 +12,9 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
 
-	"swisstronik/simapp"
+	"swisstronik/app"
 	didutil "swisstronik/testutil/did"
+	"swisstronik/utils"
 	"swisstronik/x/did/keeper"
 	"swisstronik/x/did/types"
 )
@@ -26,6 +27,7 @@ type KeeperTestSuite struct {
 	ctx    sdk.Context
 	goCtx  context.Context
 	keeper keeper.Keeper
+	app    *app.App
 }
 
 func TestKeeperTestSuite(t *testing.T) {
@@ -39,7 +41,10 @@ func TestKeeperTestSuite(t *testing.T) {
 }
 
 func (suite *KeeperTestSuite) Setup(t *testing.T) {
-	app, _ := simapp.Setup(t, false)
+	checkTx := false
+	chainID := utils.TestnetChainID + "-1"
+
+	app, _ := app.SetupSwissApp(checkTx, nil, chainID)
 	s.ctx = app.BaseApp.NewContext(false, tmproto.Header{ChainID: "swisstronik_1291-1"})
 	s.goCtx = sdk.WrapSDKContext(s.ctx)
 	s.keeper = app.DIDKeeper

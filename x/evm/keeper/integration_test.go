@@ -12,6 +12,7 @@ import (
 	"swisstronik/encoding"
 	"swisstronik/tests"
 	"swisstronik/testutil"
+	"swisstronik/utils"
 	"swisstronik/x/feemarket/types"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
@@ -23,10 +24,10 @@ import (
 
 	evmtypes "swisstronik/x/evm/types"
 
-	"cosmossdk.io/simapp"
 	dbm "github.com/cometbft/cometbft-db"
 	abci "github.com/cometbft/cometbft/abci/types"
 	"github.com/cometbft/cometbft/libs/log"
+	simutils "github.com/cosmos/cosmos-sdk/testutil/sims"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 )
 
@@ -170,6 +171,7 @@ func setupChain(localMinGasPricesStr string) {
 	// Initialize the app, so we can use SetMinGasPrices to set the
 	// validator-specific min-gas-prices setting
 	db := dbm.NewMemDB()
+	chainID := utils.TestnetChainID + "-1"
 	newapp := app.New(
 		log.NewNopLogger(),
 		db,
@@ -179,7 +181,8 @@ func setupChain(localMinGasPricesStr string) {
 		app.DefaultNodeHome,
 		5,
 		encoding.MakeConfig(app.ModuleBasics),
-		simapp.EmptyAppOptions{},
+		simutils.NewAppOptionsWithFlagHome(app.DefaultNodeHome),
+		baseapp.SetChainID(chainID),
 		baseapp.SetMinGasPrices(localMinGasPricesStr),
 	)
 

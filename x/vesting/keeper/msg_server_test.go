@@ -8,12 +8,13 @@ import (
 	"swisstronik/x/vesting/keeper"
 	"swisstronik/x/vesting/types"
 
-	"swisstronik/simapp"
+	"swisstronik/app"
+	"swisstronik/testutil"
+	"swisstronik/utils"
 
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
-	"swisstronik/testutil"
 )
 
 var (
@@ -29,8 +30,11 @@ var (
 func TestCreatingMonthlyVestingAccount(t *testing.T) {
 	cmd.InitSDKConfig()
 
+	checkTx := false
+	chainID := utils.TestnetChainID + "-1"
+
 	// setup the app
-	app, genAcc := simapp.Setup(t, false)
+	app, genAcc := app.SetupSwissApp(checkTx, nil, chainID)
 
 	ctx := app.BaseApp.NewContext(false, tmproto.Header{ChainID: "swisstronik_1291-1"})
 	msgServer := keeper.NewMsgServerImpl(app.VestingKeeper)
