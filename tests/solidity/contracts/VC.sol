@@ -4,14 +4,18 @@ contract VC {
     mapping (address => bool) private _isAuthorized;
 
     function authorize(bytes calldata credential) public {
-        // For now, we ignore response from precompiled contract. 0x42 is address of precompiled contract for verification of credential
-        // and it can be changed in future releases
-        (bool passed, _) = address(1027).staticcall(credential);
+        (bool passed, bytes memory data) = address(1027).staticcall(credential);
         require(passed, "Cannot verify credential");
-        _isAuthorized[msg.sender] = true;
+
+        address credentialSubject = bytesToAddress(data);
+        _isAuthorized[credentialSubject] = true;
     }
 
     function isAuthorized(address user) public view returns (bool) {
         return _isAuthorized[user];
     }
+
+    function bytesToAddress(bytes memory b) private pure returns (address) {
+        return address(uint160(bytes20(b)));
+    }  
 }
