@@ -7,7 +7,8 @@ import (
 // DefaultGenesis returns the default genesis state
 func DefaultGenesis() *GenesisState {
 	return &GenesisState{
-		VersionSets:  []*DIDDocumentVersionSet{},
+		VersionSets: []*DIDDocumentVersionSet{},
+		Resources: []*ResourceWithMetadata{},
 	}
 }
 
@@ -38,6 +39,27 @@ func (gs GenesisState) ValidateNoDuplicates() error {
 		// Check that latest version is present
 		if _, ok := versionCache[versionSet.LatestVersion]; !ok {
 			return fmt.Errorf("latest version not found in DID document with id %s", did)
+		}
+	}
+
+	// Group resources by collection
+	resourcesByCollection := make(map[string][]*ResourceWithMetadata)
+
+	for _, resource := range gs.Resources {
+		existing := resourcesByCollection[resource.Metadata.CollectionId]
+		resourcesByCollection[resource.Metadata.CollectionId] = append(existing, resource)
+	}
+
+	// Check that there are no collisions within each collection
+	for _, resources := range resourcesByCollection {
+		resourceIDMap := make(map[string]bool)
+
+		for _, resource := range resources {
+			if _, ok := resourceIDMap[resource.Metadata.Id]; ok {
+				return fmt.Errorf("duplicated id for resource within the same collection. collection: %s, id: %s", resource.Metadata.CollectionId, resource.Metadata.Id)
+			}
+
+			resourceIDMap[resource.Metadata.Id] = true
 		}
 	}
 

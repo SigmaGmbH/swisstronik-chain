@@ -3,22 +3,22 @@ package keeper_test
 import (
 	"encoding/json"
 	"fmt"
-	"swisstronik/crypto/deoxys"
 	"math/big"
 
 	sdkmath "cosmossdk.io/math"
 
-	"swisstronik/tests"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	ethparams "github.com/ethereum/go-ethereum/params"
+	"swisstronik/tests"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"swisstronik/server/config"
 	evmcommontypes "swisstronik/types"
 	"swisstronik/x/evm/types"
+	"swisstronik/crypto/deoxys"
 )
 
 // Not valid Ethereum address
@@ -520,6 +520,7 @@ func (suite *KeeperTestSuite) TestEstimateGas() {
 			false,
 		},
 		// estimate gas of an erc20 transfer, the exact gas number is checked with geth
+		// For some reason rust/evm returns different gas estimation. Geth: 51880, SputnikVM: 49080
 		{
 			"erc20 transfer",
 			func() {
@@ -597,6 +598,7 @@ func (suite *KeeperTestSuite) TestEstimateGas() {
 			1186778,
 			true,
 		},
+		// For some reason rust/evm returns different gas estimation. Geth: 51880, SputnikVM: 49080
 		{
 			"erc20 transfer w/ enableFeemarket",
 			func() {
@@ -935,19 +937,6 @@ func (suite *KeeperTestSuite) TestEmptyRequest() {
 				return k.EstimateGas(suite.ctx, nil)
 			},
 		},
-		// TODO: Uncomment when tracing will be enabled
-		//{
-		//	"TraceTx method",
-		//	func() (interface{}, error) {
-		//		return k.TraceTx(suite.ctx, nil)
-		//	},
-		//},
-		//{
-		//	"TraceBlock method",
-		//	func() (interface{}, error) {
-		//		return k.TraceBlock(suite.ctx, nil)
-		//	},
-		//},
 	}
 
 	for _, tc := range testCases {

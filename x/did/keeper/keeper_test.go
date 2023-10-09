@@ -16,6 +16,8 @@ import (
 	didutil "swisstronik/testutil/did"
 	"swisstronik/x/did/keeper"
 	"swisstronik/x/did/types"
+	"crypto/sha256"
+	"encoding/hex"
 )
 
 var s *KeeperTestSuite
@@ -1111,4 +1113,61 @@ func (suite *KeeperTestSuite) TestCannotUpdateDeactivatedDID() {
 	signatures = []didutil.SignInput{subject.SignInput}
 	_, err = didutil.UpdateDIDDocument(suite.ctx, suite.keeper, updatePayload, signatures)
 	suite.Require().ErrorContains(err, subject.DIDDocumentInfo.Did + ": DID Document already deactivated")
+}
+
+func (suite *KeeperTestSuite) ExpectPayloadToMatchResource(payload *types.MsgCreateResourcePayload, resource *types.ResourceWithMetadata) {
+	// Provided header
+	suite.Require().Equal(resource.Metadata.Id, payload.Id)
+	suite.Require().Equal(resource.Metadata.CollectionId, payload.CollectionId)
+	suite.Require().Equal(resource.Metadata.Name, payload.Name)
+	suite.Require().Equal(resource.Metadata.ResourceType, payload.ResourceType)
+
+	defaultAlternativeURL := types.AlternativeUri{
+		Uri:         "did:swtr:" + payload.CollectionId + "/resources/" + payload.Id,
+		Description: "did-url",
+	}
+
+	suite.Require().Equal(resource.Metadata.AlsoKnownAs, append(payload.AlsoKnownAs, &defaultAlternativeURL))
+
+	// Generated header
+	hash := sha256.Sum256(payload.Data)
+	hex := hex.EncodeToString(hash[:])
+	suite.Require().Equal(hex, resource.Metadata.Checksum)
+
+	// Provided data
+	suite.Require().Equal(resource.Resource.Data, payload.Data)
+}
+
+func (suite *KeeperTestSuite) TestCreateWithControllerSignature() {
+	did, err := didutil.CreateDefaultDID(suite.ctx, suite.keeper)
+	suite.Require().NoError(err)
+
+	payload := &types.MsgCreateResourcePayload{
+		CollectionId: did.CollectionID,
+		Id:           uuid.NewString(),
+		Name:         "Test Resource Name",
+		ResourceType: didutil.CLSchemaType,
+		Data:         []byte(didutil.SchemaData),
+		AlsoKnownAs: []*types.AlternativeUri{
+			{
+				Uri: "https://example.com/alternative-uri",
+			},
+			{
+				Uri:         "https://example.com/alternative-uri",
+				Description: "Alternative URI description",
+			},
+		},
+	}
+
+	_, err = didutil.CreateResource(suite.ctx, suite.keeper, payload, []didutil.SignInput{did.SignInput})
+	suite.Require().NoError(err)
+
+	// check
+	created, err := suite.keeper.Resource(sdk.WrapSDKContext(suite.ctx), &types.QueryResourceRequest{
+		CollectionId: did.CollectionID,
+		Id: payload.Id,
+	})
+	suite.Require().NoError(err)
+
+	suite.ExpectPayloadToMatchResource(payload, created.Resource)
 }

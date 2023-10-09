@@ -23,6 +23,14 @@ const (
 	UUID            
 )
 
+const (
+	CLSchemaType     = "CL-Schema"
+	SchemaData       = "{\"attr\":[\"name\",\"age\"]}"
+	TestResourceName = "Test Resource Name"
+	JSONResourceType = "application/json"
+	UUIDString       = "A86F9CAE-0902-4a7c-a144-96b60ced2FC9"
+)
+
 var letters = []rune("123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz")
 
 type IDType int
@@ -264,4 +272,45 @@ func GetDIDDocumentVersion(ctx sdk.Context, keeper keeper.Keeper, did string, ve
 
 func GetAllDIDVersionsMetadata(ctx sdk.Context, keeper keeper.Keeper, did string) (*types.QueryAllDIDDocumentVersionsMetadataResponse, error) {
 	return keeper.AllDIDDocumentVersionsMetadata(sdk.WrapSDKContext(ctx), &types.QueryAllDIDDocumentVersionsMetadataRequest{Id: did})
+}
+
+func CreateResource(ctx sdk.Context, keeper keeper.Keeper, payload *types.MsgCreateResourcePayload, signInputs []SignInput) (*types.MsgCreateResourceResponse, error) {
+	signBytes := payload.GetSignBytes()
+	signatures := make([]*types.SignInfo, 0, len(signInputs))
+
+	for _, input := range signInputs {
+		signature := ed25519.Sign(input.Key, signBytes)
+
+		signatures = append(signatures, &types.SignInfo{
+			VerificationMethodId: input.VerificationMethodID,
+			Signature:            signature,
+		})
+	}
+
+	msg := &types.MsgCreateResource{
+		Payload:    payload,
+		Signatures: signatures,
+	}
+
+	return keeper.CreateResource(sdk.WrapSDKContext(ctx), msg)
+}
+
+func BuildSimpleResource(collectionID, data, name, _type string) types.MsgCreateResourcePayload {
+	return types.MsgCreateResourcePayload{
+		Id:           uuid.NewString(),
+		CollectionId: collectionID,
+		Data:         []byte(data),
+		Name:         name,
+		ResourceType: _type,
+	}
+}
+
+func CreateSimpleResource(ctx sdk.Context, keeper keeper.Keeper, collectionID, data, name, _type string, signInputs []SignInput) *types.MsgCreateResourceResponse {
+	resource := BuildSimpleResource(collectionID, data, name, _type)
+	res, err := CreateResource(ctx, keeper, &resource, signInputs)
+	if err != nil {
+		panic(err)
+	}
+
+	return res
 }

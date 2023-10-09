@@ -130,8 +130,8 @@ func (vm *VerificationMethod) ReplaceDIDs(old, new string) {
 // Validation
 func (vm VerificationMethod) Validate(baseDID string, allowedNamespaces []string) error {
 	return validation.ValidateStruct(&vm,
-		validation.Field(&vm.Id, validation.Required, IsDIDUrl(allowedNamespaces, Empty, Empty, Required), HasPrefix(baseDID)),
-		validation.Field(&vm.Controller, validation.Required, IsDID(allowedNamespaces)),
+		validation.Field(&vm.Id, validation.Required, IsDIDUrl(Empty, Empty, Required), HasPrefix(baseDID)),
+		validation.Field(&vm.Controller, validation.Required, IsDID()),
 		validation.Field(&vm.VerificationMethodType, validation.Required, validation.In(ToInterfaces(SupportedMethodTypes)...)),
 		validation.Field(&vm.VerificationMaterial,
 			validation.When(vm.VerificationMethodType == Ed25519VerificationKey2020Type, validation.Required, IsMultibaseEd25519VerificationKey2020()),

@@ -1,6 +1,5 @@
-use sgxvm::evm::backend::Basic;
-use sgxvm::primitive_types::{H160, H256, U256};
-use sgxvm::storage::Storage;
+use evm::backend::Basic;
+use primitive_types::{H160, H256, U256};
 use std::vec::Vec;
 
 use crate::protobuf_generated::ffi;
@@ -8,6 +7,7 @@ use crate::querier::GoQuerier;
 use crate::ocall;
 use crate::coder;
 use crate::encryption;
+use crate::types::Storage;
 
 /// This struct allows us to obtain state from keeper
 /// that is located outside of Rust code

@@ -149,9 +149,5 @@ Example payload file:
 	// add custom / override flags
 	cmd.Flags().String(FlagVersionID, "", "Version ID of the DID Document")
 
-	_ = cmd.MarkFlagRequired(flags.FlagFees)
-	_ = cmd.MarkFlagRequired(flags.FlagGas)
-	_ = cmd.MarkFlagRequired(flags.FlagGasAdjustment)
-
 	return cmd
 }

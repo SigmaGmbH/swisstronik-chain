@@ -19,6 +19,7 @@ const (
 	codeErrDIDDocDeactivated
 	codeErrUnpackStateValue
 	codeErrInternal
+	codeErrResourceExists
 )
 
 var (
@@ -34,4 +35,5 @@ var (
 	ErrDIDDocumentDeactivated     = sdkerrors.Register(ModuleName, codeErrDIDDocDeactivated, "DID Document already deactivated")
 	ErrUnpackStateValue           = sdkerrors.Register(ModuleName, codeErrUnpackStateValue, "invalid did state value")
 	ErrInternal                   = sdkerrors.Register(ModuleName, codeErrInternal, "internal error")
+	ErrResourceExists             = sdkerrors.Register(ModuleName, codeErrResourceExists, "resource exists")
 )

@@ -315,7 +315,7 @@ func New(
 		// this line is used by starport scaffolding # stargate/app/storeKey
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey, evmtypes.TransientKey, feemarkettypes.TransientKey)
-	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
+	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey, didmoduletypes.MemStoreKey)
 
 	app := &App{
 		BaseApp:           bApp,
@@ -453,11 +453,19 @@ func New(
 		keys[feemarkettypes.StoreKey], tkeys[feemarkettypes.TransientKey], feeMarketSs,
 	)
 
+	app.DIDKeeper = *didmodulekeeper.NewKeeper(
+		appCodec,
+		keys[didmoduletypes.StoreKey],
+		keys[didmoduletypes.MemStoreKey],
+		app.GetSubspace(didmoduletypes.ModuleName),
+	)
+	didModule := didmodule.NewAppModule(appCodec, app.DIDKeeper)
+
 	// Set authority to x/gov module account to only expect the module account to update params
 	evmSs := app.GetSubspace(evmtypes.ModuleName)
 	app.EvmKeeper = evmkeeper.NewKeeper(
 		appCodec, keys[evmtypes.StoreKey], tkeys[evmtypes.TransientKey], authtypes.NewModuleAddress(govtypes.ModuleName),
-		app.AccountKeeper, app.BankKeeper, app.StakingKeeper, app.FeeMarketKeeper, evmSs,
+		app.AccountKeeper, app.BankKeeper, app.StakingKeeper, app.FeeMarketKeeper, app.DIDKeeper, evmSs,
 	)
 
 	// ... other modules keepers
@@ -545,14 +553,6 @@ func New(
 		app.BankKeeper,
 	)
 	vestingModule := vestingmodule.NewAppModule(appCodec, app.VestingKeeper, app.AccountKeeper, app.BankKeeper)
-
-	app.DIDKeeper = *didmodulekeeper.NewKeeper(
-		appCodec,
-		keys[didmoduletypes.StoreKey],
-		keys[didmoduletypes.MemStoreKey],
-		app.GetSubspace(didmoduletypes.ModuleName),
-	)
-	didModule := didmodule.NewAppModule(appCodec, app.DIDKeeper)
 
 	// this line is used by starport scaffolding # stargate/app/keeperDefinition
 

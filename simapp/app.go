@@ -257,7 +257,7 @@ func NewSimApp(
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	// NOTE: The testingkey is just mounted for testing purposes. Actual applications should
 	// not include this key.
-	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey, "testingkey")
+	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey, "testingkey", didmoduletypes.MemStoreKey)
 
 	// load state streaming if enabled
 	if _, _, err := streaming.LoadStreamingServices(bApp, appOpts, appCodec, keys); err != nil {
@@ -337,11 +337,19 @@ func NewSimApp(
 		keys[feemarkettypes.StoreKey], tkeys[feemarkettypes.TransientKey], feeMarketSs,
 	)
 
+	app.DIDKeeper = *didmodulekeeper.NewKeeper(
+		appCodec,
+		keys[didmoduletypes.StoreKey],
+		keys[didmoduletypes.MemStoreKey],
+		app.GetSubspace(didmoduletypes.ModuleName),
+	)
+	didModule := didmodule.NewAppModule(appCodec, app.DIDKeeper)
+
 	// Set authority to x/gov module account to only expect the module account to update params
 	evmSs := app.GetSubspace(evmmoduletypes.ModuleName)
 	app.EVMKeeper = evmkeeper.NewKeeper(
 		appCodec, keys[evmmoduletypes.StoreKey], tkeys[evmmoduletypes.TransientKey], authtypes.NewModuleAddress(govtypes.ModuleName),
-		app.AccountKeeper, app.BankKeeper, app.StakingKeeper, app.FeeMarketKeeper, evmSs,
+		app.AccountKeeper, app.BankKeeper, app.StakingKeeper, app.FeeMarketKeeper, app.DIDKeeper, evmSs,
 	)
 
 	// Register the proposal types
@@ -387,14 +395,6 @@ func NewSimApp(
 		app.BankKeeper,
 	)
 	vestingModule := vestingmodule.NewAppModule(appCodec, app.VestingKeeper, app.AccountKeeper, app.BankKeeper)
-
-	app.DIDKeeper = *didmodulekeeper.NewKeeper(
-		appCodec,
-		keys[didmoduletypes.StoreKey],
-		keys[didmoduletypes.MemStoreKey],
-		app.GetSubspace(didmoduletypes.ModuleName),
-	)
-	didModule := didmodule.NewAppModule(appCodec, app.DIDKeeper)
 
 	/****  Module Options ****/
 
