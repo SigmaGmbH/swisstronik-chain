@@ -29,10 +29,10 @@ import (
 	evmtypes "swisstronik/x/evm/types"
 
 	"cosmossdk.io/simapp"
+	dbm "github.com/cometbft/cometbft-db"
 	abci "github.com/cometbft/cometbft/abci/types"
 	"github.com/cometbft/cometbft/libs/log"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	dbm "github.com/tendermint/tm-db"
 )
 
 var _ = Describe("Feemarket", func() {

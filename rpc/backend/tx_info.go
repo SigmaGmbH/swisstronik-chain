@@ -20,7 +20,12 @@ import (
 	"math"
 	"math/big"
 
+	rpctypes "swisstronik/rpc/types"
+	ethermint "swisstronik/types"
+	evmtypes "swisstronik/x/evm/types"
+
 	errorsmod "cosmossdk.io/errors"
+	tmrpcclient "github.com/cometbft/cometbft/rpc/client"
 	tmrpctypes "github.com/cometbft/cometbft/rpc/core/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
@@ -28,9 +33,6 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/pkg/errors"
-	rpctypes "swisstronik/rpc/types"
-	ethermint "swisstronik/types"
-	evmtypes "swisstronik/x/evm/types"
 )
 
 // GetTransactionByHash returns the Ethereum format transaction identified by Ethereum transaction hash
@@ -273,8 +275,12 @@ func (b *Backend) GetTransactionReceipt(hash common.Hash) (map[string]interface{
 // GetTransactionByBlockHashAndIndex returns the transaction identified by hash and index.
 func (b *Backend) GetTransactionByBlockHashAndIndex(hash common.Hash, idx hexutil.Uint) (*rpctypes.RPCTransaction, error) {
 	b.logger.Debug("eth_getTransactionByBlockHashAndIndex", "hash", hash.Hex(), "index", idx)
+	sc, ok := b.clientCtx.Client.(tmrpcclient.SignClient)
+	if !ok {
+		return nil, errors.New("invalid rpc client")
+	}
 
-	block, err := b.clientCtx.Client.BlockByHash(b.ctx, hash.Bytes())
+	block, err := sc.BlockByHash(b.ctx, hash.Bytes())
 	if err != nil {
 		b.logger.Debug("block not found", "hash", hash.Hex(), "error", err.Error())
 		return nil, nil

@@ -31,6 +31,7 @@ import (
 	"time"
 
 	sdkmath "cosmossdk.io/math"
+	dbm "github.com/cometbft/cometbft-db"
 	tmcfg "github.com/cometbft/cometbft/config"
 	tmflags "github.com/cometbft/cometbft/libs/cli/flags"
 	"github.com/cometbft/cometbft/libs/log"
@@ -40,7 +41,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/spf13/cobra"
-	dbm "github.com/tendermint/tm-db"
 	"google.golang.org/grpc"
 
 	"cosmossdk.io/simapp"
@@ -71,6 +71,8 @@ import (
 	evmtypes "swisstronik/x/evm/types"
 
 	"swisstronik/app"
+
+	simutils "github.com/cosmos/cosmos-sdk/testutil/sims"
 )
 
 // network lock to only allow one test network at a time
@@ -81,14 +83,16 @@ var lock = new(sync.Mutex)
 type AppConstructor = func(val Validator) servertypes.Application
 
 // NewAppConstructor returns a new simapp AppConstructor
-func NewAppConstructor(encodingCfg params.EncodingConfig) AppConstructor {
+func NewAppConstructor(encodingCfg params.EncodingConfig, chainID string) AppConstructor {
 	return func(val Validator) servertypes.Application {
 		return app.New(
 			val.Ctx.Logger, dbm.NewMemDB(), nil, true, make(map[int64]bool), val.Ctx.Config.RootDir, 0,
 			encodingCfg,
-			simapp.EmptyAppOptions{},
+			simutils.NewAppOptionsWithFlagHome(val.Ctx.Config.RootDir),
 			baseapp.SetPruning(pruningtypes.NewPruningOptionsFromString(val.AppConfig.Pruning)),
 			baseapp.SetMinGasPrices(val.AppConfig.MinGasPrices),
+			baseapp.SetChainID(chainID),
+
 		)
 	}
 }
@@ -127,6 +131,7 @@ type Config struct {
 // testing requirements.
 func DefaultConfig() Config {
 	encCfg := encoding.MakeConfig(app.ModuleBasics)
+	chainID := fmt.Sprintf("swisstronik_%d-1", tmrand.Int63n(9999999999999)+1)
 
 	return Config{
 		Codec:             encCfg.Codec,
@@ -134,16 +139,16 @@ func DefaultConfig() Config {
 		LegacyAmino:       encCfg.Amino,
 		InterfaceRegistry: encCfg.InterfaceRegistry,
 		AccountRetriever:  authtypes.AccountRetriever{},
-		AppConstructor:    NewAppConstructor(encCfg),
+		AppConstructor:    NewAppConstructor(encCfg, chainID),
 		GenesisState:      app.ModuleBasics.DefaultGenesis(encCfg.Codec),
 		TimeoutCommit:     2 * time.Second,
 		ChainID:           fmt.Sprintf("swisstronik_%d-1", tmrand.Int63n(9999999999999)+1),
 		NumValidators:     4,
 		BondDenom:         evmmoduletypes.SwtrDenom,
 		MinGasPrices:      fmt.Sprintf("0.000006%s", evmmoduletypes.SwtrDenom),
-		AccountTokens:     sdk.TokensFromConsensusPower(1000, evmmoduletypes.PowerReduction),
-		StakingTokens:     sdk.TokensFromConsensusPower(500, evmmoduletypes.PowerReduction),
-		BondedTokens:      sdk.TokensFromConsensusPower(100, evmmoduletypes.PowerReduction),
+		AccountTokens:     sdk.TokensFromConsensusPower(1000000000000000000, evmmoduletypes.PowerReduction),
+		StakingTokens:     sdk.TokensFromConsensusPower(500000000000000000, evmmoduletypes.PowerReduction),
+		BondedTokens:      sdk.TokensFromConsensusPower(100000000000000000, evmmoduletypes.PowerReduction),
 		PruningStrategy:   pruningtypes.PruningOptionNothing,
 		CleanupDir:        true,
 		SigningAlgo:       string(hd.EthSecp256k1Type),
