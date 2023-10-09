@@ -18,6 +18,7 @@ import (
 	"swisstronik/server/config"
 	evmcommontypes "swisstronik/types"
 	"swisstronik/x/evm/types"
+	"swisstronik/crypto/deoxys"
 )
 
 // Not valid Ethereum address
@@ -520,21 +521,21 @@ func (suite *KeeperTestSuite) TestEstimateGas() {
 		},
 		// estimate gas of an erc20 transfer, the exact gas number is checked with geth
 		// For some reason rust/evm returns different gas estimation. Geth: 51880, SputnikVM: 49080
-		// {
-		// 	"erc20 transfer",
-		// 	func() {
-		// 		contractAddr := suite.DeployTestContract(suite.T(), suite.address, sdkmath.NewIntWithDecimal(1000, 18).BigInt())
-		// 		suite.Commit()
-		// 		transferData, err := types.ERC20Contract.ABI.Pack("transfer", common.HexToAddress("0x378c50D9264C63F3F92B806d4ee56E9D86FfB3Ec"), big.NewInt(1000))
-		// 		suite.Require().NoError(err)
-		// 		encryptedTransferData, err := deoxys.EncryptECDH(suite.privateKey, suite.nodePublicKey, transferData)
-		// 		suite.Require().NoError(err)
-		// 		args = types.TransactionArgs{To: &contractAddr, From: &suite.address, Data: (*hexutil.Bytes)(&encryptedTransferData)}
-		// 	},
-		// 	true,
-		// 	51880,
-		// 	false,
-		// },
+		{
+			"erc20 transfer",
+			func() {
+				contractAddr := suite.DeployTestContract(suite.T(), suite.address, sdkmath.NewIntWithDecimal(1000, 18).BigInt())
+				suite.Commit()
+				transferData, err := types.ERC20Contract.ABI.Pack("transfer", common.HexToAddress("0x378c50D9264C63F3F92B806d4ee56E9D86FfB3Ec"), big.NewInt(1000))
+				suite.Require().NoError(err)
+				encryptedTransferData, err := deoxys.EncryptECDH(suite.privateKey, suite.nodePublicKey, transferData)
+				suite.Require().NoError(err)
+				args = types.TransactionArgs{To: &contractAddr, From: &suite.address, Data: (*hexutil.Bytes)(&encryptedTransferData)}
+			},
+			true,
+			51880,
+			false,
+		},
 		// repeated tests with enableFeemarket
 		{
 			"default args w/ enableFeemarket",
@@ -598,21 +599,21 @@ func (suite *KeeperTestSuite) TestEstimateGas() {
 			true,
 		},
 		// For some reason rust/evm returns different gas estimation. Geth: 51880, SputnikVM: 49080
-		// {
-		// 	"erc20 transfer w/ enableFeemarket",
-		// 	func() {
-		// 		contractAddr := suite.DeployTestContract(suite.T(), suite.address, sdkmath.NewIntWithDecimal(1000, 18).BigInt())
-		// 		suite.Commit()
-		// 		transferData, err := types.ERC20Contract.ABI.Pack("transfer", common.HexToAddress("0x378c50D9264C63F3F92B806d4ee56E9D86FfB3Ec"), big.NewInt(1000))
-		// 		suite.Require().NoError(err)
-		// 		encryptedTransferData, err := deoxys.EncryptECDH(suite.privateKey, suite.nodePublicKey, transferData)
-		// 		suite.Require().NoError(err)
-		// 		args = types.TransactionArgs{To: &contractAddr, From: &suite.address, Data: (*hexutil.Bytes)(&encryptedTransferData)}
-		// 	},
-		// 	true,
-		// 	51880,
-		// 	true,
-		// },
+		{
+			"erc20 transfer w/ enableFeemarket",
+			func() {
+				contractAddr := suite.DeployTestContract(suite.T(), suite.address, sdkmath.NewIntWithDecimal(1000, 18).BigInt())
+				suite.Commit()
+				transferData, err := types.ERC20Contract.ABI.Pack("transfer", common.HexToAddress("0x378c50D9264C63F3F92B806d4ee56E9D86FfB3Ec"), big.NewInt(1000))
+				suite.Require().NoError(err)
+				encryptedTransferData, err := deoxys.EncryptECDH(suite.privateKey, suite.nodePublicKey, transferData)
+				suite.Require().NoError(err)
+				args = types.TransactionArgs{To: &contractAddr, From: &suite.address, Data: (*hexutil.Bytes)(&encryptedTransferData)}
+			},
+			true,
+			51880,
+			true,
+		},
 		{
 			"contract creation but 'create' param disabled",
 			func() {
