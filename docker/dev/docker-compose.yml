@@ -11,4 +11,7 @@ services:
       - "2022:22"
     volumes:
       - ../..:/home/dev/src
+      - dev-cache:/home/dev/.cache
     command: /usr/sbin/sshd -D
+volumes:
+  dev-cache:

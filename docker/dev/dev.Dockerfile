@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install \
     apt-utils \
     build-essential \
     openssh-server \
+    openjdk-11-jdk \
     -y
 
 RUN mkdir /var/run/sshd
@@ -27,16 +28,17 @@ RUN echo 'dev ALL=(ALL:ALL) ALL' >> /etc/sudoers
 # COPY ~/.ssh/id_rsa.pub /home/dev/.ssh/authorized_keys
 # RUN chmod 600 /home/dev/.ssh/authorized_keys
 
-# RUN chown -R dev:dev /home/dev/*
-# RUN chown -R dev:dev /home/dev/.[^.]*
-
 RUN sudo -u dev bash -c "curl https://sh.rustup.rs -sSf | bash -s -- -y"
 RUN bash -c "NONINTERACTIVE=1 $(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 RUN bash -c "(echo; echo 'eval \"$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)\"') >> /root/.profile"
 RUN sudo -u dev bash -c "(echo; echo 'eval \"$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)\"') >> /home/dev/.profile"
-RUN brew install bazelisk go
-RUN apt-get install \
-    openjdk-11-jdk
+RUN /home/linuxbrew/.linuxbrew/bin/brew install bazelisk go
+
+# RUN chown -R dev:dev /home/dev/*
+# RUN chown -R dev:dev /home/dev/.[^.]*
+
+COPY /docker/dev/deventrypoint.sh /deventrypoint.sh
+ENTRYPOINT ["/bin/sh", "/deventrypoint.sh"]
 
 # Upon start, run ssh daemon
 CMD ["/usr/sbin/sshd", "-D"]
