@@ -51,7 +51,6 @@ func NewAnteHandler(options HandlerOptions) (sdk.AnteHandler, error) {
 		var anteHandler sdk.AnteHandler
 
 		defer Recover(ctx.Logger(), &err)
-
 		txWithExtensions, ok := tx.(authante.HasExtensionOptionsTx)
 		if ok {
 			opts := txWithExtensions.GetExtensionOptions()
