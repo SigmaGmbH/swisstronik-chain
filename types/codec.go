@@ -16,8 +16,6 @@
 package types
 
 import (
-	fmt "fmt"
-
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/types/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -26,7 +24,6 @@ import (
 // RegisterInterfaces registers the tendermint concrete client-related
 // implementations and interfaces.
 func RegisterInterfaces(registry codectypes.InterfaceRegistry) {
-	fmt.Println("!!!!!!!!!!!")
 	registry.RegisterImplementations(
 		(*authtypes.AccountI)(nil),
 		&EthAccount{},

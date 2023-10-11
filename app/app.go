@@ -572,7 +572,9 @@ func New(
 	govKeeper.SetLegacyRouter(govRouter)
 
 	app.GovKeeper = *govKeeper.SetHooks(
-		govtypes.NewMultiGovHooks(),
+		govtypes.NewMultiGovHooks(
+		// insert governance hooks receivers here
+		),
 	)
 
 	app.VestingKeeper = *vestingmodulekeeper.NewKeeper(
@@ -613,12 +615,6 @@ func New(
 			// insert staking hooks receivers here
 			app.DistrKeeper.Hooks(),
 			app.SlashingKeeper.Hooks(),
-		),
-	)
-
-	app.GovKeeper.SetHooks(
-		govtypes.NewMultiGovHooks(
-		// insert governance hooks receivers here
 		),
 	)
 
