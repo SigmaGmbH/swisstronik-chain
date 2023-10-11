@@ -20,9 +20,9 @@ PROJECT_NAME = $(shell git remote get-url origin | xargs basename -s .git)
 # NOTE: Link to the tendermintdev/sdk-proto-gen docker images: 
 #       https://hub.docker.com/r/tendermintdev/sdk-proto-gen/tags
 #
-protoVer=v0.7
-protoImageName=tendermintdev/sdk-proto-gen:$(protoVer)
-protoImage=$(DOCKER) run --network host --rm -v $(CURDIR):/workspace --workdir /workspace $(protoImageName)
+protoVer=0.11.6
+protoImageName=ghcr.io/cosmos/proto-builder:$(protoVer)
+protoImage=$(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace --user 0 $(protoImageName)
 # ------
 # NOTE: cosmos/proto-builder image is needed because clang-format is not installed
 #       on the tendermintdev/sdk-proto-gen docker image.
