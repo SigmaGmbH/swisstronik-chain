@@ -15,7 +15,7 @@ use lazy_static::lazy_static;
 use parking_lot::{Condvar, Mutex};
 
 static ENCLAVE_FILE: &'static str = "enclave.signed.so";
-static ENCLAVE_HOME: &'static str = env!("ENCLAVE_HOME", "please specify CHAIN_HOME env variable");
+static ENCLAVE_HOME: &'static str = env!("ENCLAVE_HOME", "please specify ENCLAVE_HOME env variable");
 const ENCLAVE_LOCK_TIMEOUT: u64 = 6*5;
 
 lazy_static! {

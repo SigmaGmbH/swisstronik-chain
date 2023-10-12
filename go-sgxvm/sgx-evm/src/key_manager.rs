@@ -19,7 +19,7 @@ pub const PRIVATE_KEY_SIZE: usize = 32;
 
 lazy_static! {
     pub static ref UNSEALED_KEY_MANAGER: Option<KeyManager> = KeyManager::unseal().ok();
-    pub static ref CHAIN_HOME: OsString = env::var_os("CHAIN_HOME").unwrap_or_else(|| OsString::from(format!("{}/.swisstronik-enclave", env::home_dir().unwrap().to_str().unwrap())));
+    pub static ref ENCLAVE_HOME: OsString = env::var_os("ENCLAVE_HOME").unwrap_or_else(|| OsString::from(format!("{}/.swisstronik-enclave", env::home_dir().unwrap().to_str().unwrap())));
 }
 
 #[no_mangle]
@@ -72,7 +72,7 @@ pub struct KeyManager {
 impl KeyManager {
     /// Checks if file with sealed master key exists
     pub fn exists() -> SgxResult<bool> {
-        match SgxFile::open(format!("{}/{}", CHAIN_HOME.to_str().unwrap(), SEED_FILENAME)) {
+        match SgxFile::open(format!("{}/{}", ENCLAVE_HOME.to_str().unwrap(), SEED_FILENAME)) {
             Ok(_) => Ok(true),
             Err(ref err) if err.kind() == std::io::ErrorKind::NotFound => Ok(false),
             Err(err) => {
@@ -87,7 +87,7 @@ impl KeyManager {
     /// we'll use MRENCLAVE since Upgradeability Protocol will be implemented
     pub fn seal(&self) -> SgxResult<()> {
         // Prepare file to write master key
-        let mut master_key_file = match SgxFile::create(format!("{}/{}", CHAIN_HOME.to_str().unwrap(), SEED_FILENAME)) {
+        let mut master_key_file = match SgxFile::create(format!("{}/{}", ENCLAVE_HOME.to_str().unwrap(), SEED_FILENAME)) {
             Ok(master_key_file) => master_key_file,
             Err(err) => {
                 println!(
@@ -111,7 +111,7 @@ impl KeyManager {
     /// will return SGX_ERROR_UNEXPECTED
     pub fn unseal() -> SgxResult<Self> {
         // Open file with master key
-        let mut master_key_file = match SgxFile::open(format!("{}/{}", CHAIN_HOME.to_str().unwrap(), SEED_FILENAME)) {
+        let mut master_key_file = match SgxFile::open(format!("{}/{}", ENCLAVE_HOME.to_str().unwrap(), SEED_FILENAME)) {
             Ok(file) => file,
             Err(err) => {
                 println!(
