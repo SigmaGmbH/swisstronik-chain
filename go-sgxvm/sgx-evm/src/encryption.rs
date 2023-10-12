@@ -9,19 +9,20 @@ pub const PUBLIC_KEY_ONLY_DATA_LEN: usize = 36;
 pub const ENCRYPTED_DATA_LEN: usize = 79;
 pub const DEFAULT_STORAGE_VALUE: [u8; 32] = [0u8; 32];
 
-/// Encrypts given storage cell value using sealed master key
+/// Encrypts given storage cell value using specific storage key for provided contract address
+/// * contract_address – Address of the contract. Used to derive unique storage encryption key for state of this smart contract
+/// * value – Raw storage value to encrypt
 pub fn encrypt_storage_cell(contract_address: Vec<u8>, value: Vec<u8>) -> Result<Vec<u8>, Error> {
-    let key_manager = match &*UNSEALED_KEY_MANAGER {
-        Some(key_manager) => key_manager,
-        None => {
-            return Err(Error::encryption_err(format!("Cannot unseal master key")));
-        }
+    if let Some(km) = &*UNSEALED_KEY_MANAGER {
+        return km.encrypt_state(contract_address, value)
     };
 
-    key_manager.encrypt_state(contract_address, value)
+    return Err(Error::encryption_err(format!("Cannot unseal master key")));
 }
 
-/// Decrypts given storage cell value using sealed master key
+/// Decrypts given storage cell value using specific storage key for provided contract address
+/// * contract_address – Address of the contract. Used to derive unique storage encryption key for state of this smart contract
+/// * value – Encrypted storage value
 pub fn decrypt_storage_cell(contract_address: Vec<u8>, encrypted_value: Vec<u8>) -> Result<Vec<u8>, Error> {
     // It there is 32-byte zeroed vector, it means that storage slot was not initialized
     // In this case we return default value
@@ -29,14 +30,11 @@ pub fn decrypt_storage_cell(contract_address: Vec<u8>, encrypted_value: Vec<u8>)
         return Ok(encrypted_value)
     }
 
-    let key_manager = match &*UNSEALED_KEY_MANAGER {
-        Some(key_manager) => key_manager,
-        None => {
-            return Err(Error::encryption_err(format!("Cannot unseal master key")));
-        }
-    };
+    if let Some(km) = &*UNSEALED_KEY_MANAGER {
+        return km.decrypt_state(contract_address, encrypted_value);
+    }
 
-    key_manager.decrypt_state(contract_address, encrypted_value)
+    return Err(Error::encryption_err(format!("Cannot unseal master key")));
 }
 
 /// Extracts user public and encrypted data from provided tx `data` field.
@@ -67,28 +65,27 @@ pub fn extract_public_key_and_data(tx_data: Vec<u8>) -> Result<(Vec<u8>, Vec<u8>
 }
 
 /// Decrypts transaction data using derived shared secret
+/// * encrypted_data – Encrypted data 
+/// * public_key – Public key provided by user
 pub fn decrypt_transaction_data(encrypted_data: Vec<u8>, public_key: Vec<u8>) -> Result<Vec<u8>, Error> {
-    let key_manager = match &*UNSEALED_KEY_MANAGER {
-        Some(key_manager) => key_manager,
-        None => {
-            return Err(Error::encryption_err(format!("Cannot unseal master key")));
-        }
-    };
+    if let Some(km) = &*UNSEALED_KEY_MANAGER {
+        return km.decrypt_ecdh(public_key.to_vec(), encrypted_data);
+    }
 
-    key_manager.decrypt_ecdh(public_key.to_vec(), encrypted_data)
+    return Err(Error::encryption_err(format!("Cannot unseal master key")));
 }
 
+/// Encrypts transaction data or response
+/// * data – Raw data
+/// * public_key - Public key provided by user
 pub fn encrypt_transaction_data(data: Vec<u8>, user_public_key: Vec<u8>) -> Result<Vec<u8>, Error> {
     if user_public_key.len() < PUBLIC_KEY_SIZE {
         return Err(Error::ecdh_err("Wrong public key size"));
     }
 
-    let key_manager = match &*UNSEALED_KEY_MANAGER {
-        Some(key_manager) => key_manager,
-        None => {
-            return Err(Error::encryption_err(format!("Cannot unseal master key")));
-        }
-    };
+    if let Some(km) = &*UNSEALED_KEY_MANAGER {
+        return km.encrypt_ecdh(data, user_public_key);
+    }
 
-    key_manager.encrypt_ecdh(data, user_public_key)
+    return Err(Error::encryption_err(format!("Cannot unseal master key")));
 }
