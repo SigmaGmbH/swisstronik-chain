@@ -334,17 +334,11 @@ mod tests {
 
         let mut handle = MockHandle::new(input, Some(cost), context);
 
-        match Modexp::execute(&mut handle) {
-            Ok(precompile_result) => {
-                assert_eq!(precompile_result.output.len(), 1); // should be same length as mod
-                let result = BigUint::from_bytes_be(&precompile_result.output[..]);
-                let expected = BigUint::parse_bytes(b"5", 10).unwrap();
-                assert_eq!(result, expected);
-            }
-            Err(_) => {
-                panic!("Modexp::execute() returned error"); // TODO: how to pass error on?
-            }
-        }
+        let precompile_result = Modexp::execute(&mut handle).unwrap();
+        assert_eq!(precompile_result.output.len(), 1); // should be same length as mod
+        let result = BigUint::from_bytes_be(&precompile_result.output[..]);
+        let expected = BigUint::parse_bytes(b"5", 10).unwrap();
+        assert_eq!(result, expected);
     }
 
     #[test]
@@ -371,17 +365,11 @@ mod tests {
 
         let mut handle = MockHandle::new(input, Some(cost), context);
 
-        match Modexp::execute(&mut handle) {
-            Ok(precompile_result) => {
-                assert_eq!(precompile_result.output.len(), 32); // should be same length as mod
-                let result = BigUint::from_bytes_be(&precompile_result.output[..]);
-                let expected = BigUint::parse_bytes(b"10055", 10).unwrap();
-                assert_eq!(result, expected);
-            }
-            Err(_) => {
-                panic!("Modexp::execute() returned error"); // TODO: how to pass error on?
-            }
-        }
+        let precompile_result = Modexp::execute(&mut handle).unwrap();
+        assert_eq!(precompile_result.output.len(), 32); // should be same length as mod
+        let result = BigUint::from_bytes_be(&precompile_result.output[..]);
+        let expected = BigUint::parse_bytes(b"10055", 10).unwrap();
+        assert_eq!(result, expected);
     }
 
     #[test]
@@ -406,17 +394,11 @@ mod tests {
 
         let mut handle = MockHandle::new(input, Some(cost), context);
 
-        match Modexp::execute(&mut handle) {
-            Ok(precompile_result) => {
-                assert_eq!(precompile_result.output.len(), 32); // should be same length as mod
-                let result = BigUint::from_bytes_be(&precompile_result.output[..]);
-                let expected = BigUint::parse_bytes(b"1", 10).unwrap();
-                assert_eq!(result, expected);
-            }
-            Err(_) => {
-                panic!("Modexp::execute() returned error"); // TODO: how to pass error on?
-            }
-        }
+        let precompile_result = Modexp::execute(&mut handle).unwrap();
+        assert_eq!(precompile_result.output.len(), 32); // should be same length as mod
+        let result = BigUint::from_bytes_be(&precompile_result.output[..]);
+        let expected = BigUint::parse_bytes(b"1", 10).unwrap();
+        assert_eq!(result, expected);
     }
 
     #[test]
@@ -427,7 +409,7 @@ mod tests {
         // In debug mode, this underflow could cause a panic. Otherwise, it causes N**0 to
         // be calculated at more-than-normal expense.
         //
-        // TODO: cite security advisory
+
 
         let input = vec![
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -448,7 +430,7 @@ mod tests {
         let mut handle = MockHandle::new(input, Some(cost), context);
 
         let precompile_result =
-            Modexp::execute(&mut handle).expect("Modexp::execute() returned error");
+            Modexp::execute(&mut handle).unwrap();
 
         assert_eq!(precompile_result.output.len(), 1); // should be same length as mod
         let result = BigUint::from_bytes_be(&precompile_result.output[..]);
