@@ -1,69 +1,72 @@
 package types_test
 
 import (
+	"testing"
+
 	"github.com/google/uuid"
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 
 	. "swisstronik/x/did/types"
 )
 
-var _ = Describe("Message for DID updating", func() {
+type MsgDeactivateDIDSuite struct {
+	suite.Suite
+}
+
+func (suite *MsgDeactivateDIDSuite) TestMessageForDIDDeactivating() {
 	type TestCaseMsgDeactivateDID struct {
 		msg      *MsgDeactivateDIDDocument
 		isValid  bool
 		errorMsg string
 	}
 
-	DescribeTable("Tests for message for DID deactivating", func(testCase TestCaseMsgDeactivateDID) {
+	testCases := []TestCaseMsgDeactivateDID{
+		{
+			msg: &MsgDeactivateDIDDocument{
+				Payload: &MsgDeactivateDIDDocumentPayload{
+					Id:        "did:swtr:zABCDEFG123456789abcd",
+					VersionId: uuid.NewString(),
+				},
+				Signatures: nil,
+			},
+			isValid: true,
+		},
+		{
+			msg: &MsgDeactivateDIDDocument{
+				Payload: &MsgDeactivateDIDDocumentPayload{
+					Id:        "did:swtrttt:testnet:zABCDEFG123456789abcd",
+					VersionId: uuid.NewString(),
+				},
+				Signatures: nil,
+			},
+			isValid:  false,
+			errorMsg: "payload: (id: did method must be: swtr.).: basic validation failed",
+		},
+		{
+			msg: &MsgDeactivateDIDDocument{
+				Payload: &MsgDeactivateDIDDocumentPayload{
+					VersionId: uuid.NewString(),
+				},
+				Signatures: nil,
+			},
+			isValid:  false,
+			errorMsg: "payload: (id: cannot be blank.).: basic validation failed",
+		},
+	}
+
+	for _, testCase := range testCases {
 		err := testCase.msg.ValidateBasic()
 
 		if testCase.isValid {
-			Expect(err).To(BeNil())
+			assert.Nil(suite.T(), err)
 		} else {
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring(testCase.errorMsg))
+			assert.Error(suite.T(), err)
+			assert.Contains(suite.T(), err.Error(), testCase.errorMsg)
 		}
-	},
+	}
+}
 
-		Entry(
-			"All fields are set properly",
-			TestCaseMsgDeactivateDID{
-				msg: &MsgDeactivateDIDDocument{
-					Payload: &MsgDeactivateDIDDocumentPayload{
-						Id:        "did:swtr:zABCDEFG123456789abcd",
-						VersionId: uuid.NewString(),
-					},
-					Signatures: nil,
-				},
-				isValid: true,
-			}),
-
-		Entry(
-			"Negative: Invalid DID Method",
-			TestCaseMsgDeactivateDID{
-				msg: &MsgDeactivateDIDDocument{
-					Payload: &MsgDeactivateDIDDocumentPayload{
-						Id:        "did:swtrttt:testnet:zABCDEFG123456789abcd",
-						VersionId: uuid.NewString(),
-					},
-					Signatures: nil,
-				},
-				isValid:  false,
-				errorMsg: "payload: (id: did method must be: swtr.).: basic validation failed",
-			}),
-
-		Entry(
-			"Negative: Id is required",
-			TestCaseMsgDeactivateDID{
-				msg: &MsgDeactivateDIDDocument{
-					Payload: &MsgDeactivateDIDDocumentPayload{
-						VersionId: uuid.NewString(),
-					},
-					Signatures: nil,
-				},
-				isValid:  false,
-				errorMsg: "payload: (id: cannot be blank.).: basic validation failed",
-			}),
-	)
-})
+func TestMsgDeactivateDIDSuite(t *testing.T) {
+	suite.Run(t, new(MsgDeactivateDIDSuite))
+}
