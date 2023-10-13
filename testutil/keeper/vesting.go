@@ -38,7 +38,6 @@ func VestingKeeper(t testing.TB) (*keeper.Keeper, sdk.Context) {
 		"VestingParams",
 	)
 	k := keeper.NewKeeper(
-		cdc,
 		storeKey,
 		memStoreKey,
 		paramsSubspace,

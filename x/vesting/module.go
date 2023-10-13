@@ -36,11 +36,6 @@ var (
 
 // AppModuleBasic implements the AppModuleBasic interface that defines the independent methods a Cosmos SDK module needs to implement.
 type AppModuleBasic struct {
-	cdc codec.BinaryCodec
-}
-
-func NewAppModuleBasic(cdc codec.BinaryCodec) AppModuleBasic {
-	return AppModuleBasic{cdc: cdc}
 }
 
 // Name returns the name of the module as a string
@@ -107,7 +102,7 @@ func NewAppModule(
 	bankKeeper types.BankKeeper,
 ) AppModule {
 	return AppModule{
-		AppModuleBasic: NewAppModuleBasic(cdc),
+		AppModuleBasic: AppModuleBasic{},
 		keeper:         keeper,
 		accountKeeper:  accountKeeper,
 		bankKeeper:     bankKeeper,

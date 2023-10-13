@@ -578,7 +578,6 @@ func New(
 	)
 
 	app.VestingKeeper = *vestingmodulekeeper.NewKeeper(
-		appCodec,
 		keys[vestingmoduletypes.StoreKey],
 		keys[vestingmoduletypes.MemStoreKey],
 		app.GetSubspace(vestingmoduletypes.ModuleName),
