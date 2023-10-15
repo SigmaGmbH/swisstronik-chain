@@ -3,7 +3,7 @@ package keeper_test
 import (
 	_ "embed"
 	"encoding/json"
-	"github.com/SigmaGmbH/librustgo"
+	"swisstronik/go-sgxvm"
 	"math"
 	"math/big"
 	"time"

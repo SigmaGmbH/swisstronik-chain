@@ -43,7 +43,7 @@ import (
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 	tmversion "github.com/tendermint/tendermint/proto/tendermint/version"
 
-	"github.com/SigmaGmbH/librustgo"
+	"swisstronik/go-sgxvm"
 	"github.com/tendermint/tendermint/version"
 )
 

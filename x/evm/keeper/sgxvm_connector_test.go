@@ -6,7 +6,7 @@ import (
 	evmkeeper "swisstronik/x/evm/keeper"
 	"time"
 
-	"github.com/SigmaGmbH/librustgo"
+	"swisstronik/go-sgxvm"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/golang/protobuf/proto"

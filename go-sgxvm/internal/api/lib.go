@@ -13,8 +13,8 @@ import (
 	"net"
 	"runtime"
 
-	ffi "github.com/SigmaGmbH/librustgo/go_protobuf_gen"
-	"github.com/SigmaGmbH/librustgo/types"
+	ffi "swisstronik/go-sgxvm/go_protobuf_gen"
+	"swisstronik/go-sgxvm/types"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 )
 

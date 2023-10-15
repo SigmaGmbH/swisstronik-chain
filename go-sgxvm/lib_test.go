@@ -5,8 +5,8 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/SigmaGmbH/librustgo/internal/api"
-	"github.com/SigmaGmbH/librustgo/types"
+	"swisstronik/go-sgxvm/internal/api"
+	"swisstronik/go-sgxvm/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 )

@@ -2,8 +2,8 @@ package handlers
 
 import "C"
 import (
-	ffi "github.com/SigmaGmbH/librustgo/go_protobuf_gen"
-	"github.com/SigmaGmbH/librustgo/internal/api"
+	ffi "swisstronik/go-sgxvm/go_protobuf_gen"
+	"swisstronik/go-sgxvm/internal/api"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"google.golang.org/protobuf/proto"

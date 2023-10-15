@@ -19,7 +19,7 @@ import (
 	"reflect"
 	"runtime/debug"
 
-	types "github.com/SigmaGmbH/librustgo/types"
+	types "swisstronik/go-sgxvm/types"
 
 	// "github.com/holiman/uint256"
 	"unsafe"

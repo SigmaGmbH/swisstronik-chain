@@ -5,7 +5,7 @@ import (
 	errorsmod "cosmossdk.io/errors"
 	"encoding/json"
 	"fmt"
-	"github.com/SigmaGmbH/librustgo"
+	"swisstronik/go-sgxvm"
 	"github.com/armon/go-metrics"
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"

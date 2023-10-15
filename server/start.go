@@ -67,7 +67,7 @@ import (
 	"swisstronik/server/config"
 	srvflags "swisstronik/server/flags"
 	evmcommontypes "swisstronik/types"
-	"github.com/SigmaGmbH/librustgo"
+	"swisstronik/go-sgxvm"
 )
 
 // DBOpener is a function to open `application.db`, potentially with customized options.

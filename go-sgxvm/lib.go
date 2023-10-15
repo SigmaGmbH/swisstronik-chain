@@ -1,10 +1,10 @@
 package librustgo
 
 import (
-	"github.com/SigmaGmbH/librustgo/internal/api"
-	"github.com/SigmaGmbH/librustgo/types"
+	"swisstronik/go-sgxvm/internal/api"
+	"swisstronik/go-sgxvm/types"
 
-	ffi "github.com/SigmaGmbH/librustgo/go_protobuf_gen"
+	ffi "swisstronik/go-sgxvm/go_protobuf_gen"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 )
 

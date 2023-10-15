@@ -2,7 +2,7 @@ package types
 
 import (
 	"errors"
-	ffi "github.com/SigmaGmbH/librustgo/go_protobuf_gen"
+	ffi "swisstronik/go-sgxvm/go_protobuf_gen"
 	"github.com/ethereum/go-ethereum/common"
 	"google.golang.org/protobuf/proto"
 )
