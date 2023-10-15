@@ -1,0 +1,44 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "keeper",
+    srcs = [
+        "keeper.go",
+        "msg_server.go",
+        "params.go",
+        "query.go",
+    ],
+    importpath = "swisstronik/x/did/keeper",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_cosmos_cosmos_sdk//codec",
+        "@com_github_cosmos_cosmos_sdk//store/types",
+        "@com_github_cosmos_cosmos_sdk//types",
+        "@com_github_cosmos_cosmos_sdk//types/errors",
+        "@com_github_cosmos_cosmos_sdk//x/params/types",
+        "@com_github_tendermint_tendermint//libs/log",
+        "@org_golang_google_grpc//codes",
+        "@org_golang_google_grpc//status",
+    ],
+)
+
+go_test(
+    name = "keeper_test",
+    srcs = [
+        "keeper_test.go",
+        "params_test.go",
+    ],
+    deps = [
+        ":keeper",
+        "//simapp",
+        "//testutil/did",
+        "//testutil/keeper",
+        "@com_github_cosmos_cosmos_sdk//types",
+        "@com_github_google_uuid//:uuid",
+        "@com_github_onsi_ginkgo_v2//:ginkgo",
+        "@com_github_onsi_gomega//:gomega",
+        "@com_github_stretchr_testify//require",
+        "@com_github_stretchr_testify//suite",
+        "@com_github_tendermint_tendermint//proto/tendermint/types",
+    ],
+)

@@ -1,0 +1,36 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "cli",
+    srcs = [
+        "query.go",
+        "tx.go",
+        "utils.go",
+    ],
+    importpath = "swisstronik/x/evm/client/cli",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//rpc/types",
+        "//x/evm/types",
+        "@com_github_cosmos_cosmos_sdk//client",
+        "@com_github_cosmos_cosmos_sdk//client/flags",
+        "@com_github_cosmos_cosmos_sdk//client/input",
+        "@com_github_cosmos_cosmos_sdk//types",
+        "@com_github_ethereum_go_ethereum//common",
+        "@com_github_ethereum_go_ethereum//common/hexutil",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_spf13_cobra//:cobra",
+    ],
+)
+
+go_test(
+    name = "cli_test",
+    srcs = ["utils_test.go"],
+    embed = [":cli"],
+    deps = [
+        "@com_github_cosmos_cosmos_sdk//types",
+        "@com_github_ethereum_go_ethereum//common",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_stretchr_testify//require",
+    ],
+)

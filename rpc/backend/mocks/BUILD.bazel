@@ -1,0 +1,23 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "mocks",
+    srcs = [
+        "client.go",
+        "evm_query_client.go",
+        "feemarket_query_client.go",
+    ],
+    importpath = "swisstronik/rpc/backend/mocks",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//x/evm/types",
+        "//x/feemarket/types",
+        "@com_github_stretchr_testify//mock",
+        "@com_github_tendermint_tendermint//libs/bytes",
+        "@com_github_tendermint_tendermint//libs/log",
+        "@com_github_tendermint_tendermint//rpc/client",
+        "@com_github_tendermint_tendermint//rpc/core/types",
+        "@com_github_tendermint_tendermint//types",
+        "@org_golang_google_grpc//:go_default_library",
+    ],
+)

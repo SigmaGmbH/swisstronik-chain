@@ -1,0 +1,20 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "demo_lib",
+    srcs = ["main.go"],
+    importpath = "swisstronik/go-sgxvm/cmd/demo",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//go-sgxvm/internal/api",
+        "//go-sgxvm/types",
+        "@com_github_ethereum_go_ethereum//common",
+        "@com_github_ethereum_go_ethereum//crypto",
+    ],
+)
+
+go_binary(
+    name = "demo",
+    embed = [":demo_lib"],
+    visibility = ["//visibility:public"],
+)

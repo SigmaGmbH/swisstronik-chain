@@ -1,0 +1,52 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "types",
+    srcs = [
+        "addrlock.go",
+        "block.go",
+        "events.go",
+        "query_client.go",
+        "types.go",
+        "utils.go",
+    ],
+    importpath = "swisstronik/rpc/types",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//types",
+        "//x/evm/types",
+        "//x/feemarket/types",
+        "@com_github_cosmos_cosmos_sdk//client",
+        "@com_github_cosmos_cosmos_sdk//types",
+        "@com_github_cosmos_cosmos_sdk//types/errors",
+        "@com_github_cosmos_cosmos_sdk//types/grpc",
+        "@com_github_cosmos_cosmos_sdk//types/tx",
+        "@com_github_ethereum_go_ethereum//common",
+        "@com_github_ethereum_go_ethereum//common/hexutil",
+        "@com_github_ethereum_go_ethereum//common/math",
+        "@com_github_ethereum_go_ethereum//core/types",
+        "@com_github_ethereum_go_ethereum//params",
+        "@com_github_spf13_cast//:cast",
+        "@com_github_tendermint_tendermint//abci/types",
+        "@com_github_tendermint_tendermint//proto/tendermint/crypto",
+        "@com_github_tendermint_tendermint//rpc/core/types",
+        "@com_github_tendermint_tendermint//types",
+        "@io_cosmossdk_errors//:errors",
+        "@org_golang_google_grpc//metadata",
+    ],
+)
+
+go_test(
+    name = "types_test",
+    srcs = [
+        "block_test.go",
+        "events_test.go",
+    ],
+    embed = [":types"],
+    deps = [
+        "//x/evm/types",
+        "@com_github_ethereum_go_ethereum//common",
+        "@com_github_stretchr_testify//require",
+        "@com_github_tendermint_tendermint//abci/types",
+    ],
+)

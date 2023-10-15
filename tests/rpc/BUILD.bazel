@@ -1,0 +1,37 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "rpc",
+    srcs = ["utils.go"],
+    importpath = "swisstronik/tests/rpc",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_ethereum_go_ethereum//common",
+        "@com_github_ethereum_go_ethereum//common/hexutil",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_stretchr_testify//require",
+    ],
+)
+
+go_test(
+    name = "rpc_test",
+    srcs = [
+        "net_test.go",
+        "personal_test.go",
+        "rpc_pending_test.go",
+        "rpc_test.go",
+        "ws_test.go",
+    ],
+    embed = [":rpc"],
+    deps = [
+        "//rpc/types",
+        "//types",
+        "//x/evm/types",
+        "@com_github_ethereum_go_ethereum//common",
+        "@com_github_ethereum_go_ethereum//common/hexutil",
+        "@com_github_ethereum_go_ethereum//core/types",
+        "@com_github_ethereum_go_ethereum//crypto",
+        "@com_github_gorilla_websocket//:websocket",
+        "@com_github_stretchr_testify//require",
+    ],
+)

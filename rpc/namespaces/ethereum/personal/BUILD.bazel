@@ -1,0 +1,21 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "personal",
+    srcs = ["api.go"],
+    importpath = "swisstronik/rpc/namespaces/ethereum/personal",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//crypto/hd",
+        "//rpc/backend",
+        "//types",
+        "//x/evm/types",
+        "@com_github_cosmos_cosmos_sdk//crypto/keyring",
+        "@com_github_cosmos_cosmos_sdk//types",
+        "@com_github_ethereum_go_ethereum//accounts",
+        "@com_github_ethereum_go_ethereum//common",
+        "@com_github_ethereum_go_ethereum//common/hexutil",
+        "@com_github_ethereum_go_ethereum//crypto",
+        "@com_github_tendermint_tendermint//libs/log",
+    ],
+)

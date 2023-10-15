@@ -1,0 +1,44 @@
+load("@rules_proto//proto:defs.bzl", "proto_library")
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
+
+proto_library(
+    name = "types_proto",
+    srcs = [
+        "events.proto",
+        "feemarket.proto",
+        "genesis.proto",
+        "query.proto",
+        "tx.proto",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//cosmos/msg/v1:v1_proto",
+        "//cosmos_proto:cosmos_proto_proto",
+        "//ethermint/feemarket/v1:v1_proto",
+        "//gogoproto:gogoproto_proto",
+        "//google/api:api_proto",
+    ],
+)
+
+go_proto_library(
+    name = "types_go_proto",
+    compilers = ["@io_bazel_rules_go//proto:go_grpc"],
+    importpath = "github.com/evmos/ethermint/x/feemarket/types",
+    proto = ":types_proto",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//cosmos/msg/v1:msg_proto",
+        "//cosmos_proto",
+        "//ethermint/feemarket/v1:feemarket_proto",
+        "//gogoproto:gogo_proto",
+        "//google/api:annotations_proto",
+    ],
+)
+
+go_library(
+    name = "types",
+    embed = [":types_go_proto"],
+    importpath = "github.com/evmos/ethermint/x/feemarket/types",
+    visibility = ["//visibility:public"],
+)

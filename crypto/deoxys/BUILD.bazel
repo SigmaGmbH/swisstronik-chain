@@ -1,0 +1,18 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "deoxys",
+    srcs = ["encryption.go"],
+    importpath = "swisstronik/crypto/deoxys",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_oasisprotocol_deoxysii//:deoxysii",
+        "@org_golang_x_crypto//curve25519",
+    ],
+)
+
+go_test(
+    name = "deoxys_test",
+    srcs = ["encryption_test.go"],
+    embed = [":deoxys"],
+)

@@ -1,0 +1,38 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "ethsecp256k1",
+    srcs = [
+        "ethsecp256k1.go",
+        "keys.pb.go",
+    ],
+    importpath = "swisstronik/crypto/ethsecp256k1",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//ethereum/eip712",
+        "@com_github_cosmos_cosmos_sdk//codec",
+        "@com_github_cosmos_cosmos_sdk//crypto/types",
+        "@com_github_cosmos_cosmos_sdk//types/errors",
+        "@com_github_cosmos_gogoproto//gogoproto",
+        "@com_github_ethereum_go_ethereum//crypto",
+        "@com_github_gogo_protobuf//proto",
+        "@com_github_tendermint_tendermint//crypto",
+        "@io_cosmossdk_errors//:errors",
+    ],
+)
+
+go_test(
+    name = "ethsecp256k1_test",
+    srcs = [
+        "benchmark_test.go",
+        "ethsecp256k1_test.go",
+    ],
+    embed = [":ethsecp256k1"],
+    deps = [
+        "@com_github_cosmos_cosmos_sdk//codec",
+        "@com_github_cosmos_cosmos_sdk//crypto/types",
+        "@com_github_ethereum_go_ethereum//crypto",
+        "@com_github_ethereum_go_ethereum//crypto/secp256k1",
+        "@com_github_stretchr_testify//require",
+    ],
+)

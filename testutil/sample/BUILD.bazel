@@ -1,0 +1,12 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "sample",
+    srcs = ["sample.go"],
+    importpath = "swisstronik/testutil/sample",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_cosmos_cosmos_sdk//crypto/keys/ed25519",
+        "@com_github_cosmos_cosmos_sdk//types",
+    ],
+)

@@ -1,0 +1,14 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "did",
+    srcs = ["api.go"],
+    importpath = "swisstronik/rpc/namespaces/ethereum/did",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//rpc/backend",
+        "//rpc/types",
+        "@com_github_cosmos_cosmos_sdk//server",
+        "@com_github_tendermint_tendermint//libs/log",
+    ],
+)

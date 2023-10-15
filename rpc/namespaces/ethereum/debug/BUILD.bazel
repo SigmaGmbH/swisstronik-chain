@@ -1,0 +1,26 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "debug",
+    srcs = [
+        "api.go",
+        "trace.go",
+        "trace_fallback.go",
+        "utils.go",
+    ],
+    importpath = "swisstronik/rpc/namespaces/ethereum/debug",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//rpc/backend",
+        "//rpc/types",
+        "//x/evm/types",
+        "@com_github_cosmos_cosmos_sdk//server",
+        "@com_github_davecgh_go_spew//spew",
+        "@com_github_ethereum_go_ethereum//common",
+        "@com_github_ethereum_go_ethereum//common/hexutil",
+        "@com_github_ethereum_go_ethereum//consensus/ethash",
+        "@com_github_ethereum_go_ethereum//rlp",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_tendermint_tendermint//libs/log",
+    ],
+)

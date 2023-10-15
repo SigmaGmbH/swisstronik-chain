@@ -1,0 +1,16 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "handlers",
+    srcs = ["evm.go"],
+    cgo = True,
+    importpath = "swisstronik/go-sgxvm/internal/api/handlers",
+    visibility = ["//go-sgxvm:__subpackages__"],
+    deps = [
+        "//go-sgxvm/go_protobuf_gen",
+        "//go-sgxvm/internal/api",
+        "@com_github_ethereum_go_ethereum//common",
+        "@com_github_ethereum_go_ethereum//core/types",
+        "@org_golang_google_protobuf//proto",
+    ],
+)

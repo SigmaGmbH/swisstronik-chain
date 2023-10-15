@@ -1,0 +1,26 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "go-sgxvm",
+    srcs = ["lib.go"],
+    importpath = "swisstronik/go-sgxvm",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//go-sgxvm/go_protobuf_gen",
+        "//go-sgxvm/internal/api",
+        "//go-sgxvm/types",
+        "@com_github_ethereum_go_ethereum//core/types",
+    ],
+)
+
+go_test(
+    name = "go-sgxvm_test",
+    srcs = ["lib_test.go"],
+    embed = [":go-sgxvm"],
+    deps = [
+        "//go-sgxvm/internal/api",
+        "//go-sgxvm/types",
+        "@com_github_ethereum_go_ethereum//common",
+        "@com_github_ethereum_go_ethereum//crypto",
+    ],
+)

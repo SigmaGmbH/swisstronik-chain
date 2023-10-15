@@ -1,0 +1,19 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "types",
+    srcs = [
+        "mocked_connector.go",
+        "mocked_db.go",
+        "queries.go",
+        "utils.go",
+    ],
+    importpath = "swisstronik/go-sgxvm/types",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//go-sgxvm/go_protobuf_gen",
+        "@com_github_ethereum_go_ethereum//common",
+        "@com_github_hashicorp_go_memdb//:go-memdb",
+        "@org_golang_google_protobuf//proto",
+    ],
+)

@@ -1,0 +1,29 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "encoding",
+    srcs = ["config.go"],
+    importpath = "swisstronik/encoding",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//encoding/codec",
+        "@com_github_cosmos_cosmos_sdk//codec",
+        "@com_github_cosmos_cosmos_sdk//codec/types",
+        "@com_github_cosmos_cosmos_sdk//simapp/params",
+        "@com_github_cosmos_cosmos_sdk//types/module",
+        "@com_github_cosmos_cosmos_sdk//x/auth/tx",
+    ],
+)
+
+go_test(
+    name = "encoding_test",
+    srcs = ["config_test.go"],
+    deps = [
+        ":encoding",
+        "//app",
+        "//tests",
+        "//x/evm/types",
+        "@com_github_ethereum_go_ethereum//core/types",
+        "@com_github_stretchr_testify//require",
+    ],
+)

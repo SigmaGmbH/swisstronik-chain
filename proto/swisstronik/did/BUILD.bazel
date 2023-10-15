@@ -1,0 +1,46 @@
+load("@rules_proto//proto:defs.bzl", "proto_library")
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
+
+proto_library(
+    name = "types_proto",
+    srcs = [
+        "document.proto",
+        "genesis.proto",
+        "params.proto",
+        "query.proto",
+        "resource.proto",
+        "tx.proto",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//cosmos/base/query/v1beta1:v1beta1_proto",
+        "//gogoproto:gogoproto_proto",
+        "//google/api:api_proto",
+        "//swisstronik/did:did_proto",
+        "@com_google_protobuf//:timestamp_proto",
+    ],
+)
+
+go_proto_library(
+    name = "types_go_proto",
+    compilers = ["@io_bazel_rules_go//proto:go_grpc"],
+    importpath = "swisstronik/x/did/types",
+    proto = ":types_proto",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//cosmos/base/query/v1beta1:pagination_proto",
+        "//gogoproto:gogo_proto",
+        "//google/api:annotations_proto",
+        "//swisstronik/did:document_proto",
+        "//swisstronik/did:params_proto",
+        "//swisstronik/did:resource_proto",
+    ],
+)
+
+go_library(
+    name = "types",
+    embed = [":types_go_proto"],
+    importpath = "swisstronik/x/did/types",
+    visibility = ["//visibility:public"],
+)

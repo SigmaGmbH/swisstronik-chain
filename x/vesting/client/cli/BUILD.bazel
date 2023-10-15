@@ -1,0 +1,19 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "cli",
+    srcs = [
+        "query.go",
+        "query_params.go",
+        "tx.go",
+    ],
+    importpath = "swisstronik/x/vesting/client/cli",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_cosmos_cosmos_sdk//client",
+        "@com_github_cosmos_cosmos_sdk//client/flags",
+        "@com_github_cosmos_cosmos_sdk//client/tx",
+        "@com_github_cosmos_cosmos_sdk//types",
+        "@com_github_spf13_cobra//:cobra",
+    ],
+)

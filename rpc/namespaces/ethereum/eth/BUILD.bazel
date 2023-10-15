@@ -1,0 +1,20 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "eth",
+    srcs = ["api.go"],
+    importpath = "swisstronik/rpc/namespaces/ethereum/eth",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//rpc/backend",
+        "//rpc/types",
+        "//types",
+        "//x/evm/types",
+        "@com_github_ethereum_go_ethereum//common",
+        "@com_github_ethereum_go_ethereum//common/hexutil",
+        "@com_github_ethereum_go_ethereum//core/types",
+        "@com_github_ethereum_go_ethereum//rpc",
+        "@com_github_ethereum_go_ethereum//signer/core/apitypes",
+        "@com_github_tendermint_tendermint//libs/log",
+    ],
+)

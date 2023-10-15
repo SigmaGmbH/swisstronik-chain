@@ -1,0 +1,25 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "config",
+    srcs = [
+        "config.go",
+        "toml.go",
+    ],
+    importpath = "swisstronik/server/config",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_cosmos_cosmos_sdk//server/config",
+        "@com_github_cosmos_cosmos_sdk//types/errors",
+        "@com_github_spf13_viper//:viper",
+        "@com_github_tendermint_tendermint//libs/strings",
+        "@io_cosmossdk_errors//:errors",
+    ],
+)
+
+go_test(
+    name = "config_test",
+    srcs = ["config_test.go"],
+    embed = [":config"],
+    deps = ["@com_github_stretchr_testify//require"],
+)

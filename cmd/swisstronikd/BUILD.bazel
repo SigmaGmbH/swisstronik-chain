@@ -1,0 +1,21 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "swisstronikd_lib",
+    srcs = ["main.go"],
+    importpath = "swisstronik/cmd/swisstronikd",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//app",
+        "//cmd/swisstronikd/cmd",
+        "@com_github_cosmos_cosmos_sdk//server",
+        "@com_github_cosmos_cosmos_sdk//server/cmd",
+        "@com_github_getsentry_sentry_go//:sentry-go",
+    ],
+)
+
+go_binary(
+    name = "swisstronikd",
+    embed = [":swisstronikd_lib"],
+    visibility = ["//visibility:public"],
+)

@@ -1,0 +1,13 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "testutil",
+    srcs = ["fund.go"],
+    importpath = "swisstronik/testutil",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//x/evm/types",
+        "@com_github_cosmos_cosmos_sdk//types",
+        "@com_github_cosmos_cosmos_sdk//x/bank/keeper",
+    ],
+)

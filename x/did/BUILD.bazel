@@ -1,0 +1,24 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "did",
+    srcs = [
+        "genesis.go",
+        "module.go",
+    ],
+    importpath = "swisstronik/x/did",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//x/did/client/cli",
+        "//x/did/keeper",
+        "@com_github_cosmos_cosmos_sdk//client",
+        "@com_github_cosmos_cosmos_sdk//codec",
+        "@com_github_cosmos_cosmos_sdk//codec/types",
+        "@com_github_cosmos_cosmos_sdk//types",
+        "@com_github_cosmos_cosmos_sdk//types/module",
+        "@com_github_cosmos_cosmos_sdk//types/simulation",
+        "@com_github_grpc_ecosystem_grpc_gateway//runtime",
+        "@com_github_spf13_cobra//:cobra",
+        "@com_github_tendermint_tendermint//abci/types",
+    ],
+)

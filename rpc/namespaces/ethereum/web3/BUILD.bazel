@@ -1,0 +1,13 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "web3",
+    srcs = ["api.go"],
+    importpath = "swisstronik/rpc/namespaces/ethereum/web3",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//version",
+        "@com_github_ethereum_go_ethereum//common/hexutil",
+        "@com_github_ethereum_go_ethereum//crypto",
+    ],
+)

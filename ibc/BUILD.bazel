@@ -1,0 +1,43 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "ibc",
+    srcs = [
+        "module.go",
+        "utils.go",
+    ],
+    importpath = "swisstronik/ibc",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//utils",
+        "@com_github_cosmos_cosmos_sdk//types",
+        "@com_github_cosmos_cosmos_sdk//types/errors",
+        "@com_github_cosmos_cosmos_sdk//x/capability/types",
+        "@com_github_cosmos_ibc_go_v6//modules/apps/transfer/types",
+        "@com_github_cosmos_ibc_go_v6//modules/core/04-channel/types",
+        "@com_github_cosmos_ibc_go_v6//modules/core/05-port/types",
+        "@com_github_cosmos_ibc_go_v6//modules/core/exported",
+        "@io_cosmossdk_errors//:errors",
+    ],
+)
+
+go_test(
+    name = "ibc_test",
+    srcs = [
+        "module_test.go",
+        "utils_test.go",
+    ],
+    embed = [":ibc"],
+    deps = [
+        "//types/tests",
+        "@com_github_cosmos_cosmos_sdk//types",
+        "@com_github_cosmos_cosmos_sdk//x/capability/types",
+        "@com_github_cosmos_ibc_go_v6//modules/apps/transfer/types",
+        "@com_github_cosmos_ibc_go_v6//modules/core/04-channel/types",
+        "@com_github_cosmos_ibc_go_v6//modules/core/05-port/types",
+        "@com_github_cosmos_ibc_go_v6//modules/core/exported",
+        "@com_github_cosmos_ibc_go_v6//testing",
+        "@com_github_stretchr_testify//mock",
+        "@com_github_stretchr_testify//require",
+    ],
+)

@@ -1,0 +1,21 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "codec",
+    srcs = [
+        "amino.go",
+        "codec.go",
+    ],
+    importpath = "swisstronik/crypto/codec",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//crypto/ethsecp256k1",
+        "@com_github_cosmos_cosmos_sdk//client/keys",
+        "@com_github_cosmos_cosmos_sdk//codec",
+        "@com_github_cosmos_cosmos_sdk//codec/legacy",
+        "@com_github_cosmos_cosmos_sdk//codec/types",
+        "@com_github_cosmos_cosmos_sdk//crypto/codec",
+        "@com_github_cosmos_cosmos_sdk//crypto/keyring",
+        "@com_github_cosmos_cosmos_sdk//crypto/types",
+    ],
+)

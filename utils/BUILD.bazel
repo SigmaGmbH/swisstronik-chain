@@ -1,0 +1,32 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "utils",
+    srcs = ["utils.go"],
+    importpath = "swisstronik/utils",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//crypto/ethsecp256k1",
+        "@com_github_cosmos_cosmos_sdk//crypto/keys/ed25519",
+        "@com_github_cosmos_cosmos_sdk//crypto/types",
+        "@com_github_cosmos_cosmos_sdk//crypto/types/multisig",
+        "@com_github_cosmos_cosmos_sdk//types",
+        "@com_github_cosmos_cosmos_sdk//types/errors",
+        "@io_cosmossdk_errors//:errors",
+    ],
+)
+
+go_test(
+    name = "utils_test",
+    srcs = ["utils_test.go"],
+    embed = [":utils"],
+    deps = [
+        "//crypto/ethsecp256k1",
+        "@com_github_cosmos_cosmos_sdk//crypto/keys/ed25519",
+        "@com_github_cosmos_cosmos_sdk//crypto/keys/multisig",
+        "@com_github_cosmos_cosmos_sdk//crypto/keys/secp256k1",
+        "@com_github_cosmos_cosmos_sdk//crypto/types",
+        "@com_github_cosmos_cosmos_sdk//types",
+        "@com_github_stretchr_testify//require",
+    ],
+)

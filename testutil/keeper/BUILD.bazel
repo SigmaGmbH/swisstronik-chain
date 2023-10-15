@@ -1,0 +1,25 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "keeper",
+    srcs = [
+        "did.go",
+        "vesting.go",
+    ],
+    importpath = "swisstronik/testutil/keeper",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//x/did/keeper",
+        "//x/vesting/keeper",
+        "@com_github_cosmos_cosmos_sdk//codec",
+        "@com_github_cosmos_cosmos_sdk//codec/types",
+        "@com_github_cosmos_cosmos_sdk//store",
+        "@com_github_cosmos_cosmos_sdk//store/types",
+        "@com_github_cosmos_cosmos_sdk//types",
+        "@com_github_cosmos_cosmos_sdk//x/params/types",
+        "@com_github_stretchr_testify//require",
+        "@com_github_tendermint_tendermint//libs/log",
+        "@com_github_tendermint_tendermint//proto/tendermint/types",
+        "@com_github_tendermint_tm_db//:tm-db",
+    ],
+)

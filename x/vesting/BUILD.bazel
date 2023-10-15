@@ -1,0 +1,41 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "vesting",
+    srcs = [
+        "genesis.go",
+        "module.go",
+        "module_simulation.go",
+    ],
+    importpath = "swisstronik/x/vesting",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//testutil/sample",
+        "//x/vesting/client/cli",
+        "//x/vesting/keeper",
+        "//x/vesting/simulation",
+        "@com_github_cosmos_cosmos_sdk//baseapp",
+        "@com_github_cosmos_cosmos_sdk//client",
+        "@com_github_cosmos_cosmos_sdk//codec",
+        "@com_github_cosmos_cosmos_sdk//codec/types",
+        "@com_github_cosmos_cosmos_sdk//simapp/params",
+        "@com_github_cosmos_cosmos_sdk//types",
+        "@com_github_cosmos_cosmos_sdk//types/module",
+        "@com_github_cosmos_cosmos_sdk//types/simulation",
+        "@com_github_cosmos_cosmos_sdk//x/simulation",
+        "@com_github_grpc_ecosystem_grpc_gateway//runtime",
+        "@com_github_spf13_cobra//:cobra",
+        "@com_github_tendermint_tendermint//abci/types",
+    ],
+)
+
+go_test(
+    name = "vesting_test",
+    srcs = ["genesis_test.go"],
+    deps = [
+        ":vesting",
+        "//testutil/keeper",
+        "//testutil/nullify",
+        "@com_github_stretchr_testify//require",
+    ],
+)

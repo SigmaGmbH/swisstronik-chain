@@ -1,0 +1,39 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "hd",
+    srcs = ["algorithm.go"],
+    importpath = "swisstronik/crypto/hd",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//crypto/ethsecp256k1",
+        "@com_github_btcsuite_btcd//chaincfg",
+        "@com_github_btcsuite_btcutil//hdkeychain",
+        "@com_github_cosmos_cosmos_sdk//crypto/hd",
+        "@com_github_cosmos_cosmos_sdk//crypto/keyring",
+        "@com_github_cosmos_cosmos_sdk//crypto/types",
+        "@com_github_ethereum_go_ethereum//accounts",
+        "@com_github_ethereum_go_ethereum//crypto",
+        "@com_github_tyler_smith_go_bip39//:go-bip39",
+    ],
+)
+
+go_test(
+    name = "hd_test",
+    srcs = [
+        "algorithm_test.go",
+        "benchmark_test.go",
+    ],
+    embed = [":hd"],
+    deps = [
+        "//crypto/codec",
+        "//encoding/codec",
+        "//types",
+        "@com_github_cosmos_cosmos_sdk//codec",
+        "@com_github_cosmos_cosmos_sdk//codec/types",
+        "@com_github_cosmos_cosmos_sdk//crypto/keyring",
+        "@com_github_ethereum_go_ethereum//common",
+        "@com_github_miguelmota_go_ethereum_hdwallet//:go-ethereum-hdwallet",
+        "@com_github_stretchr_testify//require",
+    ],
+)

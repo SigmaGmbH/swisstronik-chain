@@ -1,0 +1,60 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "types",
+    srcs = [
+        "codec.go",
+        "errors.go",
+        "expected_keepers.go",
+        "genesis.go",
+        "genesis.pb.go",
+        "keys.go",
+        "msg.go",
+        "params.go",
+        "params.pb.go",
+        "query.pb.go",
+        "query.pb.gw.go",
+        "tx.pb.go",
+        "types.go",
+    ],
+    importpath = "swisstronik/x/vesting/types",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_cosmos_cosmos_sdk//codec",
+        "@com_github_cosmos_cosmos_sdk//codec/types",
+        "@com_github_cosmos_cosmos_sdk//types",
+        "@com_github_cosmos_cosmos_sdk//types/errors",
+        "@com_github_cosmos_cosmos_sdk//types/msgservice",
+        "@com_github_cosmos_cosmos_sdk//types/query",
+        "@com_github_cosmos_cosmos_sdk//x/auth/types",
+        "@com_github_cosmos_cosmos_sdk//x/params/types",
+        "@com_github_cosmos_gogoproto//gogoproto",
+        "@com_github_gogo_protobuf//grpc",
+        "@com_github_gogo_protobuf//proto",
+        "@com_github_golang_protobuf//descriptor:go_default_library_gen",
+        "@com_github_golang_protobuf//proto:go_default_library",
+        "@com_github_grpc_ecosystem_grpc_gateway//runtime",
+        "@com_github_grpc_ecosystem_grpc_gateway//utilities",
+        "@in_gopkg_yaml_v2//:yaml_v2",
+        "@org_golang_google_genproto_googleapis_api//annotations",
+        "@org_golang_google_grpc//:go_default_library",
+        "@org_golang_google_grpc//codes",
+        "@org_golang_google_grpc//grpclog",
+        "@org_golang_google_grpc//metadata",
+        "@org_golang_google_grpc//status",
+    ],
+)
+
+go_test(
+    name = "types_test",
+    srcs = [
+        "genesis_test.go",
+        "msg_test.go",
+    ],
+    embed = [":types"],
+    deps = [
+        "//testutil/sample",
+        "@com_github_cosmos_cosmos_sdk//types/errors",
+        "@com_github_stretchr_testify//require",
+    ],
+)

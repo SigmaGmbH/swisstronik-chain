@@ -1,0 +1,16 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "did",
+    srcs = ["did.go"],
+    importpath = "swisstronik/testutil/did",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//x/did/keeper",
+        "@com_github_cosmos_cosmos_sdk//types",
+        "@com_github_google_uuid//:uuid",
+        "@com_github_lestrrat_go_jwx//jwk",
+        "@com_github_mr_tron_base58//:base58",
+        "@com_github_multiformats_go_multibase//:go-multibase",
+    ],
+)

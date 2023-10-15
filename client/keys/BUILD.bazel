@@ -1,0 +1,26 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "keys",
+    srcs = [
+        "add.go",
+        "utils.go",
+    ],
+    importpath = "swisstronik/client/keys",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//crypto/hd",
+        "@com_github_cosmos_cosmos_sdk//client",
+        "@com_github_cosmos_cosmos_sdk//client/flags",
+        "@com_github_cosmos_cosmos_sdk//client/input",
+        "@com_github_cosmos_cosmos_sdk//client/keys",
+        "@com_github_cosmos_cosmos_sdk//crypto/hd",
+        "@com_github_cosmos_cosmos_sdk//crypto/keyring",
+        "@com_github_cosmos_cosmos_sdk//crypto/keys/multisig",
+        "@com_github_cosmos_cosmos_sdk//crypto/types",
+        "@com_github_cosmos_cosmos_sdk//types",
+        "@com_github_cosmos_go_bip39//:go-bip39",
+        "@com_github_spf13_cobra//:cobra",
+        "@io_k8s_sigs_yaml//:yaml",
+    ],
+)

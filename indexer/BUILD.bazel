@@ -1,0 +1,45 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "indexer",
+    srcs = ["kv_indexer.go"],
+    importpath = "swisstronik/indexer",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//rpc/types",
+        "//types",
+        "//x/evm/types",
+        "@com_github_cosmos_cosmos_sdk//client",
+        "@com_github_cosmos_cosmos_sdk//codec",
+        "@com_github_cosmos_cosmos_sdk//types",
+        "@com_github_cosmos_cosmos_sdk//x/auth/ante",
+        "@com_github_ethereum_go_ethereum//common",
+        "@com_github_tendermint_tendermint//abci/types",
+        "@com_github_tendermint_tendermint//libs/log",
+        "@com_github_tendermint_tendermint//types",
+        "@com_github_tendermint_tm_db//:tm-db",
+        "@io_cosmossdk_errors//:errors",
+    ],
+)
+
+go_test(
+    name = "indexer_test",
+    srcs = ["kv_indexer_test.go"],
+    deps = [
+        ":indexer",
+        "//app",
+        "//crypto/ethsecp256k1",
+        "//encoding",
+        "//tests",
+        "//x/evm/types",
+        "@com_github_cosmos_cosmos_sdk//client",
+        "@com_github_cosmos_cosmos_sdk//simapp/params",
+        "@com_github_ethereum_go_ethereum//common",
+        "@com_github_ethereum_go_ethereum//core/types",
+        "@com_github_stretchr_testify//require",
+        "@com_github_tendermint_tendermint//abci/types",
+        "@com_github_tendermint_tendermint//libs/log",
+        "@com_github_tendermint_tendermint//types",
+        "@com_github_tendermint_tm_db//:tm-db",
+    ],
+)
