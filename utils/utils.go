@@ -31,9 +31,9 @@ import (
 
 const (
 	// MainnetChainID defines the Evmos EIP155 chain ID for mainnet
-	MainnetChainID = "swisstronik_1291"
+	MainnetChainID = "swisstronik_1290"
 	// TestnetChainID defines the Evmos EIP155 chain ID for testnet
-	TestnetChainID = "swisstronik_1290"
+	TestnetChainID = "swisstronik_1291"
 	// BaseDenom defines the Evmos mainnet denomination
 	BaseDenom = "uswtr"
 )
