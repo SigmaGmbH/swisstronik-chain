@@ -1,0 +1,15 @@
+load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
+
+copy_file(
+    name = "gogo_proto_src",
+    src = "@com_github_gogo_protobuf//gogoproto:go_default_library_protos",
+    out = "gogo.proto",
+)
+
+proto_library(
+    name = "gogo_proto",
+    deps = ["@com_google_protobuf//:descriptor_proto"],
+    srcs = [":gogo_proto_src"],
+    strip_import_prefix = "/proto",
+    visibility = ["//visibility:public"],
+)

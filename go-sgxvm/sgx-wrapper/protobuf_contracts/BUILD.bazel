@@ -5,6 +5,7 @@ load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
 proto_library(
     name = "protobuf_contracts_proto",
     srcs = ["node.proto"],
+    strip_import_prefix = "/proto",
     visibility = ["//visibility:public"],
 )
 

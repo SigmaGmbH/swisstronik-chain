@@ -10,11 +10,12 @@ proto_library(
         "indexer.proto",
         "web3.proto",
     ],
+    strip_import_prefix = "/proto",
     visibility = ["//visibility:public"],
     deps = [
-        "//cosmos/auth/v1beta1:v1beta1_proto",
-        "//cosmos_proto:cosmos_proto_proto",
-        "//gogoproto:gogoproto_proto",
+        "@com_github_cosmos_cosmos_proto//proto/cosmos_proto:cosmos_proto_proto",
+        "@com_github_cosmos_cosmos_sdk//proto/cosmos/auth/v1beta1:types_proto",
+        "@com_github_regen_network_protobuf//gogoproto:gogoproto_proto",
     ],
 )
 
@@ -24,9 +25,9 @@ go_proto_library(
     proto = ":types_proto",
     visibility = ["//visibility:public"],
     deps = [
-        "//cosmos/auth/v1beta1:auth_proto",
-        "//cosmos_proto",
-        "//gogoproto:gogo_proto",
+        "@com_github_cosmos_cosmos_proto//proto/cosmos_proto:go_default_library",
+        "@com_github_cosmos_cosmos_sdk//proto/cosmos/auth/v1beta1:go_default_library",
+        "@com_github_regen_network_protobuf//gogoproto:go_default_library",
     ],
 )
 

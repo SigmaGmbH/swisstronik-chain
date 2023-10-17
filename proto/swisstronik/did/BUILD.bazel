@@ -12,12 +12,12 @@ proto_library(
         "resource.proto",
         "tx.proto",
     ],
+    strip_import_prefix = "/proto",
     visibility = ["//visibility:public"],
     deps = [
-        "//cosmos/base/query/v1beta1:v1beta1_proto",
-        "//gogoproto:gogoproto_proto",
-        "//google/api:api_proto",
-        "//swisstronik/did:did_proto",
+        "@com_github_cosmos_cosmos_sdk//proto/cosmos/base/query/v1beta1:query_proto",
+        "@com_github_gogo_googleapis//google/api:api_proto",
+        "@com_github_regen_network_protobuf//gogoproto:gogoproto_proto",
         "@com_google_protobuf//:timestamp_proto",
     ],
 )
@@ -29,12 +29,9 @@ go_proto_library(
     proto = ":types_proto",
     visibility = ["//visibility:public"],
     deps = [
-        "//cosmos/base/query/v1beta1:pagination_proto",
-        "//gogoproto:gogo_proto",
-        "//google/api:annotations_proto",
-        "//swisstronik/did:document_proto",
-        "//swisstronik/did:params_proto",
-        "//swisstronik/did:resource_proto",
+        "@com_github_cosmos_cosmos_sdk//proto/cosmos/base/query/v1beta1:go_default_library",
+        "@com_github_gogo_googleapis//google/api:go_default_library",
+        "@com_github_regen_network_protobuf//gogoproto:go_default_library",
     ],
 )
 

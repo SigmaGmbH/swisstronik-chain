@@ -11,13 +11,13 @@ proto_library(
         "query.proto",
         "tx.proto",
     ],
+    strip_import_prefix = "/proto",
     visibility = ["//visibility:public"],
     deps = [
-        "//cosmos/msg/v1:v1_proto",
-        "//cosmos_proto:cosmos_proto_proto",
-        "//ethermint/feemarket/v1:v1_proto",
-        "//gogoproto:gogoproto_proto",
-        "//google/api:api_proto",
+        "@com_github_cosmos_cosmos_proto//proto/cosmos_proto:cosmos_proto_proto",
+        "@com_github_cosmos_cosmos_sdk//proto/cosmos/msg/v1:msgservice_proto",
+        "@com_github_gogo_googleapis//google/api:api_proto",
+        "@com_github_regen_network_protobuf//gogoproto:gogoproto_proto",
     ],
 )
 
@@ -28,11 +28,10 @@ go_proto_library(
     proto = ":types_proto",
     visibility = ["//visibility:public"],
     deps = [
-        "//cosmos/msg/v1:msg_proto",
-        "//cosmos_proto",
-        "//ethermint/feemarket/v1:feemarket_proto",
-        "//gogoproto:gogo_proto",
-        "//google/api:annotations_proto",
+        "@com_github_cosmos_cosmos_proto//proto/cosmos_proto:go_default_library",
+        "@com_github_cosmos_cosmos_sdk//proto/cosmos/msg/v1:go_default_library",
+        "@com_github_gogo_googleapis//google/api:go_default_library",
+        "@com_github_regen_network_protobuf//gogoproto:go_default_library",
     ],
 )
 

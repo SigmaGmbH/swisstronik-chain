@@ -1,6 +1,31 @@
 load("@bazel_gazelle//:def.bzl", "gazelle")
 
 # gazelle:prefix swisstronik
+# gazelle:exclude proto/gogoproto
+
+# gazelle:proto_strip_import_prefix /proto
+
+# gazelle:resolve proto gogoproto/gogo.proto @com_github_regen_network_protobuf//gogoproto:gogoproto_proto
+# gazelle:resolve proto go gogoproto/gogo.proto @com_github_regen_network_protobuf//gogoproto:go_default_library
+
+# gazelle:resolve_regexp proto google/api/.*\.proto @com_github_gogo_googleapis//google/api:api_proto
+# gazelle:resolve_regexp proto go google/api/.*\.proto @com_github_gogo_googleapis//google/api:go_default_library
+
+# gazelle:resolve proto cosmos_proto/cosmos.proto @com_github_cosmos_cosmos_proto//proto/cosmos_proto:cosmos_proto_proto
+# gazelle:resolve proto go cosmos_proto/cosmos.proto @com_github_cosmos_cosmos_proto//proto/cosmos_proto:go_default_library
+
+# gazelle:resolve_regexp proto cosmos/auth/v1beta1/.*\.proto @com_github_cosmos_cosmos_sdk//proto/cosmos/auth/v1beta1:types_proto
+# gazelle:resolve_regexp proto go cosmos/auth/v1beta1/.*\.proto @com_github_cosmos_cosmos_sdk//proto/cosmos/auth/v1beta1:go_default_library
+
+# gazelle:resolve_regexp proto cosmos/base/v1beta1/.*\.proto @com_github_cosmos_cosmos_sdk//proto/cosmos/base/v1beta1:types_proto
+# gazelle:resolve_regexp proto go cosmos/base/v1beta1/.*\.proto @com_github_cosmos_cosmos_sdk//proto/cosmos/base/v1beta1:go_default_library
+
+# gazelle:resolve_regexp proto cosmos/base/query/v1beta1/.*\.proto @com_github_cosmos_cosmos_sdk//proto/cosmos/base/query/v1beta1:query_proto
+# gazelle:resolve_regexp proto go cosmos/base/query/v1beta1/.*\.proto @com_github_cosmos_cosmos_sdk//proto/cosmos/base/query/v1beta1:go_default_library
+
+# gazelle:resolve_regexp proto cosmos/msg/v1/.*\.proto @com_github_cosmos_cosmos_sdk//proto/cosmos/msg/v1:msgservice_proto
+# gazelle:resolve_regexp proto go cosmos/msg/v1/.*\.proto @com_github_cosmos_cosmos_sdk//proto/cosmos/msg/v1:go_default_library
+
 gazelle(name = "gazelle")
 
 gazelle(
