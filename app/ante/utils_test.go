@@ -527,78 +527,6 @@ func (suite *AnteTestSuite) CreateTestEIP712CosmosTxBuilder(
 	)
 }
 
-// func (suite *AnteTestSuite) CreateTestEIP712CosmosTxBuilder(
-// 	from sdk.AccAddress, priv cryptotypes.PrivKey, chainId string, gas uint64, gasAmount sdk.Coins, msgs []sdk.Msg,
-// ) client.TxBuilder {
-// 	var err error
-
-// 	nonce, err := suite.app.AccountKeeper.GetSequence(suite.ctx, from)
-// 	suite.Require().NoError(err)
-
-// 	pc, err := types.ParseChainID(chainId)
-// 	suite.Require().NoError(err)
-// 	ethChainId := pc.Uint64()
-
-// 	// GenerateTypedData TypedData
-// 	var ethermintCodec codec.ProtoCodecMarshaler
-// 	registry := codectypes.NewInterfaceRegistry()
-// 	types.RegisterInterfaces(registry)
-// 	ethermintCodec = codec.NewProtoCodec(registry)
-// 	cryptocodec.RegisterInterfaces(registry)
-
-// 	fee := legacytx.NewStdFee(gas, gasAmount)
-// 	accNumber := suite.app.AccountKeeper.GetAccount(suite.ctx, from).GetAccountNumber()
-
-// 	data := legacytx.StdSignBytes(chainId, accNumber, nonce, 0, fee, msgs, "", nil)
-// 	typedData, err := eip712.LegacyWrapTxToTypedData(ethermintCodec, ethChainId, msgs[0], data, &eip712.FeeDelegationOptions{
-// 		FeePayer: from,
-// 	})
-// 	suite.Require().NoError(err)
-
-// 	sigHash, _, err := apitypes.TypedDataAndHash(typedData)
-// 	suite.Require().NoError(err)
-
-// 	// Sign typedData
-// 	keyringSigner := tests.NewSigner(priv)
-// 	signature, pubKey, err := keyringSigner.SignByAddress(from, sigHash)
-// 	suite.Require().NoError(err)
-// 	signature[crypto.RecoveryIDOffset] += 27 // Transform V from 0/1 to 27/28 according to the yellow paper
-
-// 	// Add ExtensionOptionsWeb3Tx extension
-// 	var option *codectypes.Any
-// 	option, err = codectypes.NewAnyWithValue(&types.ExtensionOptionsWeb3Tx{
-// 		FeePayer:         from.String(),
-// 		TypedDataChainID: ethChainId,
-// 		FeePayerSig:      signature,
-// 	})
-// 	suite.Require().NoError(err)
-
-// 	suite.clientCtx.TxConfig.SignModeHandler()
-// 	txBuilder := suite.clientCtx.TxConfig.NewTxBuilder()
-// 	builder, ok := txBuilder.(authtx.ExtensionOptionsTxBuilder)
-// 	suite.Require().True(ok)
-
-// 	builder.SetExtensionOptions(option)
-// 	builder.SetFeeAmount(gasAmount)
-// 	builder.SetGasLimit(gas)
-
-// 	sigsV2 := signing.SignatureV2{
-// 		PubKey: pubKey,
-// 		Data: &signing.SingleSignatureData{
-// 			SignMode: signing.SignMode_SIGN_MODE_LEGACY_AMINO_JSON,
-// 		},
-// 		Sequence: nonce,
-// 	}
-
-// 	err = builder.SetSignatures(sigsV2)
-// 	suite.Require().NoError(err)
-
-// 	err = builder.SetMsgs(msgs...)
-// 	suite.Require().NoError(err)
-
-// 	return builder
-// }
-
 // Generate a set of pub/priv keys to be used in creating multi-keys
 func (suite *AnteTestSuite) GenerateMultipleKeys(n int) ([]cryptotypes.PrivKey, []cryptotypes.PubKey) {
 	privKeys := make([]cryptotypes.PrivKey, n)
@@ -703,7 +631,7 @@ func (suite *AnteTestSuite) createBaseTxBuilder(msg sdk.Msg, gas uint64) client.
 
 	txBuilder.SetGasLimit(gas)
 	txBuilder.SetFeeAmount(sdk.NewCoins(
-		sdk.NewCoin("uswtr", sdk.NewInt(10000)),
+		sdk.NewCoin(evmtypes.DefaultEVMDenom, sdk.NewInt(10000)),
 	))
 
 	err := txBuilder.SetMsgs(msg)
@@ -763,15 +691,17 @@ func (suite *AnteTestSuite) CreateTestSingleSignedTx(privKey cryptotypes.PrivKey
 
 	// Prepare signature field
 	sig := signing.SingleSignatureData{}
-	txBuilder.SetSignatures(signing.SignatureV2{
+	err := txBuilder.SetSignatures(signing.SignatureV2{
 		PubKey: pubKey,
 		Data:   &sig,
 	})
+	suite.Require().NoError(err)
 
 	signerBytes := suite.createSignerBytes(chainId, signMode, pubKey, txBuilder)
 
 	sigData := suite.generateSingleSignature(signMode, privKey, signerBytes, signType)
-	txBuilder.SetSignatures(sigData)
+	err = txBuilder.SetSignatures(sigData)
+	suite.Require().NoError(err)
 
 	return txBuilder
 }

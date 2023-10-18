@@ -356,9 +356,8 @@ func (suite AnteTestSuite) TestAnteHandler() {
 			"success- DeliverTx EIP712 create validator",
 			func() sdk.Tx {
 				from := acc.GetAddress()
-				coinAmount := sdk.NewCoin(evmtypes.DefaultEVMDenom, sdk.NewInt(20))
-				amount := sdk.NewCoins(coinAmount)
 				gas := uint64(200000)
+				amount := sdk.NewCoins(sdk.NewCoin(evmtypes.DefaultEVMDenom, sdkmath.NewInt(100*int64(gas))))
 				txBuilder, err := suite.CreateTestEIP712MsgCreateValidator(from, privKey, suite.ctx.ChainID(), gas, amount)
 				suite.Require().NoError(err)
 
@@ -369,9 +368,8 @@ func (suite AnteTestSuite) TestAnteHandler() {
 			"success- DeliverTx EIP712 create validator (with blank fields)",
 			func() sdk.Tx {
 				from := acc.GetAddress()
-				coinAmount := sdk.NewCoin(evmtypes.DefaultEVMDenom, sdk.NewInt(20))
-				amount := sdk.NewCoins(coinAmount)
 				gas := uint64(200000)
+				amount := sdk.NewCoins(sdk.NewCoin(evmtypes.DefaultEVMDenom, sdkmath.NewInt(100*int64(gas))))
 				txBuilder, err := suite.CreateTestEIP712MsgCreateValidator2(from, privKey, suite.ctx.ChainID(), gas, amount)
 				suite.Require().NoError(err)
 				return txBuilder.GetTx()
@@ -382,8 +380,8 @@ func (suite AnteTestSuite) TestAnteHandler() {
 			func() sdk.Tx {
 				from := acc.GetAddress()
 				coinAmount := sdk.NewCoin(evmtypes.DefaultEVMDenom, sdk.NewInt(20))
-				gasAmount := sdk.NewCoins(coinAmount)
 				gas := uint64(200000)
+				gasAmount := sdk.NewCoins(sdk.NewCoin(evmtypes.DefaultEVMDenom, sdkmath.NewInt(100*int64(gas))))
 				// reusing the gasAmount for deposit
 				deposit := sdk.NewCoins(coinAmount)
 				txBuilder, err := suite.CreateTestEIP712SubmitProposal(from, privKey, suite.ctx.ChainID(), gas, gasAmount, deposit)
@@ -397,9 +395,8 @@ func (suite AnteTestSuite) TestAnteHandler() {
 			func() sdk.Tx {
 				from := acc.GetAddress()
 				grantee := sdk.AccAddress("_______grantee______")
-				coinAmount := sdk.NewCoin(evmtypes.DefaultEVMDenom, sdk.NewInt(20))
-				gasAmount := sdk.NewCoins(coinAmount)
 				gas := uint64(200000)
+				gasAmount := sdk.NewCoins(sdk.NewCoin(evmtypes.DefaultEVMDenom, sdkmath.NewInt(100*int64(gas))))
 				blockTime := time.Date(1, 1, 1, 1, 1, 1, 1, time.UTC)
 				expiresAt := blockTime.Add(time.Hour)
 				msg, err := authz.NewMsgGrant(
@@ -417,9 +414,8 @@ func (suite AnteTestSuite) TestAnteHandler() {
 			"success- DeliverTx EIP712 MsgGrantAllowance",
 			func() sdk.Tx {
 				from := acc.GetAddress()
-				coinAmount := sdk.NewCoin(evmtypes.DefaultEVMDenom, sdk.NewInt(20))
-				gasAmount := sdk.NewCoins(coinAmount)
 				gas := uint64(200000)
+				gasAmount := sdk.NewCoins(sdk.NewCoin(evmtypes.DefaultEVMDenom, sdkmath.NewInt(100*int64(gas))))
 				txBuilder, err := suite.CreateTestEIP712GrantAllowance(from, privKey, suite.ctx.ChainID(), gas, gasAmount)
 				suite.Require().NoError(err)
 
@@ -430,12 +426,11 @@ func (suite AnteTestSuite) TestAnteHandler() {
 			"success- DeliverTx EIP712 edit validator",
 			func() sdk.Tx {
 				from := acc.GetAddress()
-				coinAmount := sdk.NewCoin(evmtypes.DefaultEVMDenom, sdk.NewInt(20))
-				amount := sdk.NewCoins(coinAmount)
 				gas := uint64(200000)
+				amount := sdk.NewCoins(sdk.NewCoin(evmtypes.DefaultEVMDenom, sdkmath.NewInt(100*int64(gas))))
 				txBuilder, err := suite.CreateTestEIP712MsgEditValidator(from, privKey, suite.ctx.ChainID(), gas, amount)
 				suite.Require().NoError(err)
-				
+
 				return txBuilder.GetTx()
 			}, false, false, true,
 		},
@@ -443,12 +438,11 @@ func (suite AnteTestSuite) TestAnteHandler() {
 			"success- DeliverTx EIP712 submit evidence",
 			func() sdk.Tx {
 				from := acc.GetAddress()
-				coinAmount := sdk.NewCoin(evmtypes.DefaultEVMDenom, sdk.NewInt(20))
-				amount := sdk.NewCoins(coinAmount)
 				gas := uint64(200000)
+				amount := sdk.NewCoins(sdk.NewCoin(evmtypes.DefaultEVMDenom, sdkmath.NewInt(100*int64(gas))))
 				txBuilder, err := suite.CreateTestEIP712MsgSubmitEvidence(from, privKey, suite.ctx.ChainID(), gas, amount)
 				suite.Require().NoError(err)
-				
+
 				return txBuilder.GetTx()
 			}, false, false, true,
 		},
@@ -456,12 +450,11 @@ func (suite AnteTestSuite) TestAnteHandler() {
 			"success- DeliverTx EIP712 submit proposal v1",
 			func() sdk.Tx {
 				from := acc.GetAddress()
-				coinAmount := sdk.NewCoin(evmtypes.DefaultEVMDenom, sdk.NewInt(20))
-				amount := sdk.NewCoins(coinAmount)
 				gas := uint64(200000)
+				amount := sdk.NewCoins(sdk.NewCoin(evmtypes.DefaultEVMDenom, sdkmath.NewInt(100*int64(gas))))
 				txBuilder, err := suite.CreateTestEIP712SubmitProposalV1(from, privKey, suite.ctx.ChainID(), gas, amount)
 				suite.Require().NoError(err)
-				
+
 				return txBuilder.GetTx()
 			}, false, false, true,
 		},
@@ -469,12 +462,11 @@ func (suite AnteTestSuite) TestAnteHandler() {
 			"success- DeliverTx EIP712 MsgExec",
 			func() sdk.Tx {
 				from := acc.GetAddress()
-				coinAmount := sdk.NewCoin(evmtypes.DefaultEVMDenom, sdk.NewInt(20))
-				amount := sdk.NewCoins(coinAmount)
 				gas := uint64(200000)
+				amount := sdk.NewCoins(sdk.NewCoin(evmtypes.DefaultEVMDenom, sdkmath.NewInt(100*int64(gas))))
 				txBuilder, err := suite.CreateTestEIP712MsgExec(from, privKey, suite.ctx.ChainID(), gas, amount)
 				suite.Require().NoError(err)
-				
+
 				return txBuilder.GetTx()
 			}, false, false, true,
 		},
@@ -482,12 +474,11 @@ func (suite AnteTestSuite) TestAnteHandler() {
 			"success- DeliverTx EIP712 MsgVoteV1",
 			func() sdk.Tx {
 				from := acc.GetAddress()
-				coinAmount := sdk.NewCoin(evmtypes.DefaultEVMDenom, sdk.NewInt(20))
-				amount := sdk.NewCoins(coinAmount)
 				gas := uint64(200000)
+				amount := sdk.NewCoins(sdk.NewCoin(evmtypes.DefaultEVMDenom, sdkmath.NewInt(100*int64(gas))))
 				txBuilder, err := suite.CreateTestEIP712MsgVoteV1(from, privKey, suite.ctx.ChainID(), gas, amount)
 				suite.Require().NoError(err)
-				
+
 				return txBuilder.GetTx()
 			}, false, false, true,
 		},
@@ -495,12 +486,11 @@ func (suite AnteTestSuite) TestAnteHandler() {
 			"success- DeliverTx EIP712 Multiple MsgSend",
 			func() sdk.Tx {
 				from := acc.GetAddress()
-				coinAmount := sdk.NewCoin(evmtypes.DefaultEVMDenom, sdk.NewInt(20))
-				amount := sdk.NewCoins(coinAmount)
 				gas := uint64(200000)
+				amount := sdk.NewCoins(sdk.NewCoin(evmtypes.DefaultEVMDenom, sdkmath.NewInt(100*int64(gas))))
 				txBuilder, err := suite.CreateTestEIP712MultipleMsgSend(from, privKey, suite.ctx.ChainID(), gas, amount)
 				suite.Require().NoError(err)
-				
+
 				return txBuilder.GetTx()
 			}, false, false, true,
 		},
@@ -508,12 +498,11 @@ func (suite AnteTestSuite) TestAnteHandler() {
 			"fails - DeliverTx EIP712 Multiple Signers",
 			func() sdk.Tx {
 				from := acc.GetAddress()
-				coinAmount := sdk.NewCoin(evmtypes.DefaultEVMDenom, sdk.NewInt(20))
-				amount := sdk.NewCoins(coinAmount)
 				gas := uint64(200000)
+				amount := sdk.NewCoins(sdk.NewCoin(evmtypes.DefaultEVMDenom, sdkmath.NewInt(100*int64(gas))))
 				txBuilder, err := suite.CreateTestEIP712MultipleSignerMsgs(from, privKey, suite.ctx.ChainID(), gas, amount)
 				suite.Require().NoError(err)
-				
+
 				return txBuilder.GetTx()
 			}, false, false, false,
 		},
@@ -525,7 +514,7 @@ func (suite AnteTestSuite) TestAnteHandler() {
 				amount := sdk.NewCoins(sdk.NewCoin(evmtypes.DefaultEVMDenom, sdkmath.NewInt(100*int64(gas))))
 				txBuilder, err := suite.CreateTestEIP712TxBuilderMsgSend(from, privKey, "ethermint_9002-1", gas, amount)
 				suite.Require().NoError(err)
-				
+
 				return txBuilder.GetTx()
 			}, false, false, false,
 		},
@@ -537,7 +526,7 @@ func (suite AnteTestSuite) TestAnteHandler() {
 				amount := sdk.NewCoins(sdk.NewCoin(evmtypes.DefaultEVMDenom, sdkmath.NewInt(100*int64(gas))))
 				txBuilder, err := suite.CreateTestEIP712TxBuilderMsgSend(from, privKey, suite.ctx.ChainID(), gas, amount)
 				suite.Require().NoError(err)
-				
+
 				txBuilder.SetGasLimit(uint64(300000))
 				txBuilder.SetFeeAmount(sdk.NewCoins(sdk.NewCoin(evmtypes.DefaultEVMDenom, sdkmath.NewInt(30))))
 				return txBuilder.GetTx()
@@ -551,7 +540,7 @@ func (suite AnteTestSuite) TestAnteHandler() {
 				amount := sdk.NewCoins(sdk.NewCoin(evmtypes.DefaultEVMDenom, sdkmath.NewInt(100*int64(gas))))
 				txBuilder, err := suite.CreateTestEIP712TxBuilderMsgSend(from, privKey, suite.ctx.ChainID(), gas, amount)
 				suite.Require().NoError(err)
-				
+
 				sigsV2 := signing.SignatureV2{}
 				txBuilder.SetSignatures(sigsV2)
 				return txBuilder.GetTx()
@@ -565,7 +554,7 @@ func (suite AnteTestSuite) TestAnteHandler() {
 				amount := sdk.NewCoins(sdk.NewCoin(evmtypes.DefaultEVMDenom, sdkmath.NewInt(100*int64(gas))))
 				txBuilder, err := suite.CreateTestEIP712TxBuilderMsgSend(from, privKey, suite.ctx.ChainID(), gas, amount)
 				suite.Require().NoError(err)
-				
+
 				nonce, err := suite.app.AccountKeeper.GetSequence(suite.ctx, acc.GetAddress())
 				suite.Require().NoError(err)
 				sigsV2 := signing.SignatureV2{
@@ -629,7 +618,7 @@ func (suite AnteTestSuite) TestAnteHandler() {
 					addr[:],
 					sdk.NewCoins(
 						sdk.NewCoin(
-							"photon",
+							"uswtr",
 							sdk.NewInt(1),
 						),
 					),
@@ -659,7 +648,7 @@ func (suite AnteTestSuite) TestAnteHandler() {
 					addr[:],
 					sdk.NewCoins(
 						sdk.NewCoin(
-							"photon",
+							"uswtr",
 							sdk.NewInt(1),
 						),
 					),
@@ -689,7 +678,7 @@ func (suite AnteTestSuite) TestAnteHandler() {
 					addr[:],
 					sdk.NewCoins(
 						sdk.NewCoin(
-							"photon",
+							"uswtr",
 							sdk.NewInt(1),
 						),
 					),
@@ -744,7 +733,7 @@ func (suite AnteTestSuite) TestAnteHandler() {
 					addr[:],
 					sdk.NewCoins(
 						sdk.NewCoin(
-							"photon",
+							"uswtr",
 							sdk.NewInt(1),
 						),
 					),
@@ -774,7 +763,7 @@ func (suite AnteTestSuite) TestAnteHandler() {
 					addr[:],
 					sdk.NewCoins(
 						sdk.NewCoin(
-							"photon",
+							"uswtr",
 							sdk.NewInt(1),
 						),
 					),
@@ -804,7 +793,7 @@ func (suite AnteTestSuite) TestAnteHandler() {
 					addr[:],
 					sdk.NewCoins(
 						sdk.NewCoin(
-							"photon",
+							"uswtr",
 							sdk.NewInt(1),
 						),
 					),
@@ -834,7 +823,7 @@ func (suite AnteTestSuite) TestAnteHandler() {
 					addr[:],
 					sdk.NewCoins(
 						sdk.NewCoin(
-							"photon",
+							"uswtr",
 							sdk.NewInt(1),
 						),
 					),
@@ -867,7 +856,7 @@ func (suite AnteTestSuite) TestAnteHandler() {
 					addr[:],
 					sdk.NewCoins(
 						sdk.NewCoin(
-							"photon",
+							"uswtr",
 							sdk.NewInt(1),
 						),
 					),
@@ -896,7 +885,7 @@ func (suite AnteTestSuite) TestAnteHandler() {
 					addr[:],
 					sdk.NewCoins(
 						sdk.NewCoin(
-							"photon",
+							"uswtr",
 							sdk.NewInt(1),
 						),
 					),
@@ -929,6 +918,10 @@ func (suite AnteTestSuite) TestAnteHandler() {
 
 			// suite.Require().Equal(consumed, ctx.GasMeter().GasConsumed())
 
+			// if tc.name == "success- DeliverTx EIP712 MsgGrant" {
+			// 	feeTx, _ := tc.txFn().(sdk.FeeTx)
+			// 	panic(feeTx.GetGas())
+			// }
 			if tc.expPass {
 				suite.Require().NoError(err)
 				// suite.Require().Equal(int(expConsumed), int(suite.ctx.GasMeter().GasConsumed()))
