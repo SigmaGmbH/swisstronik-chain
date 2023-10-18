@@ -26,6 +26,7 @@ import (
 	"swisstronik/encoding"
 	"swisstronik/tests"
 	ethermint "swisstronik/types"
+	"swisstronik/utils"
 	evmtypes "swisstronik/x/evm/types"
 	"swisstronik/x/feemarket/types"
 
@@ -77,6 +78,7 @@ func (suite *KeeperTestSuite) SetupTest() {
 }
 
 func (suite *KeeperTestSuite) SetupApp(checkTx bool) {
+	chainID := utils.TestnetChainID + "-1"
 	t := suite.T()
 	// account key
 	priv, err := ethsecp256k1.GenerateKey()
@@ -91,7 +93,7 @@ func (suite *KeeperTestSuite) SetupApp(checkTx bool) {
 
 	suite.ctx = suite.app.BaseApp.NewContext(checkTx, tmproto.Header{
 		Height:          1,
-		ChainID:         "ethermint_9000-1",
+		ChainID:         chainID,
 		Time:            time.Now().UTC(),
 		ProposerAddress: suite.consAddress.Bytes(),
 		Version: tmversion.Consensus{

@@ -30,6 +30,8 @@ import (
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	"swisstronik/crypto/ethsecp256k1"
+
+	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
 )
 
 const (
@@ -120,7 +122,10 @@ func DefaultSigVerificationGasConsumer(
 	case *ethsecp256k1.PubKey:
 		meter.ConsumeGas(secp256k1VerifyCost, "ante verify: eth_secp256k1")
 		return nil
-
+	case *ed25519.PubKey:
+		// Validator keys
+		meter.ConsumeGas(params.SigVerifyCostED25519, "ante verify: ed25519")
+		return errorsmod.Wrap(errortypes.ErrInvalidPubKey, "ED25519 public keys are unsupported")
 	case multisig.PubKey:
 		// Multisig keys
 		multisignature, ok := sig.Data.(*signing.MultiSignatureData)
@@ -130,7 +135,7 @@ func DefaultSigVerificationGasConsumer(
 		return ConsumeMultisignatureVerificationGas(meter, multisignature, pubkey, params, sig.Sequence)
 
 	default:
-		return authante.DefaultSigVerificationGasConsumer(meter, sig, params)
+		return errorsmod.Wrapf(errortypes.ErrInvalidPubKey, "unrecognized/unsupported public key type: %T", pubkey)
 	}
 }
 

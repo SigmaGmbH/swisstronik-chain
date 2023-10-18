@@ -3,12 +3,13 @@ package keeper_test
 import (
 	"encoding/json"
 	"fmt"
-	"swisstronik/crypto/deoxys"
 	"math/big"
+	"swisstronik/crypto/deoxys"
 
 	sdkmath "cosmossdk.io/math"
 
 	"swisstronik/tests"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -532,7 +533,7 @@ func (suite *KeeperTestSuite) TestEstimateGas() {
 				args = types.TransactionArgs{To: &contractAddr, From: &suite.address, Data: (*hexutil.Bytes)(&encryptedTransferData)}
 			},
 			true,
-			51880,
+			49080,
 			false,
 		},
 		// repeated tests with enableFeemarket
@@ -609,7 +610,7 @@ func (suite *KeeperTestSuite) TestEstimateGas() {
 				args = types.TransactionArgs{To: &contractAddr, From: &suite.address, Data: (*hexutil.Bytes)(&encryptedTransferData)}
 			},
 			true,
-			51880,
+			49080,
 			true,
 		},
 		{

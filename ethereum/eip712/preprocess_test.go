@@ -6,12 +6,6 @@ import (
 	"testing"
 
 	"cosmossdk.io/math"
-	"swisstronik/app"
-	"swisstronik/encoding"
-	"swisstronik/ethereum/eip712"
-	"swisstronik/tests"
-	"swisstronik/types"
-	evmtypes "swisstronik/x/evm/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
@@ -19,17 +13,25 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	"github.com/cosmos/cosmos-sdk/x/auth/ante"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+
+	"swisstronik/app"
+	"swisstronik/encoding"
+	"swisstronik/ethereum/eip712"
+	utiltx "swisstronik/testutil/tx"
+	"swisstronik/types"
+	"swisstronik/utils"
+
 	"github.com/stretchr/testify/require"
 )
 
 // Testing Constants
 var (
-	chainId = "ethermint_9000-1"
+	chainID = utils.TestnetChainID + "-1"
 	ctx     = client.Context{}.WithTxConfig(
 		encoding.MakeConfig(app.ModuleBasics).TxConfig,
 	)
 )
-var feePayerAddress = "ethm17xpfvakm2amg962yls6f84z3kell8c5lthdzgl"
+var feePayerAddress = "evmos17xpfvakm2amg962yls6f84z3kell8c5ljcjw34"
 
 type TestCaseStruct struct {
 	txBuilder              client.TxBuilder
@@ -43,7 +45,7 @@ type TestCaseStruct struct {
 
 func TestLedgerPreprocessing(t *testing.T) {
 	// Update bech32 prefix
-	sdk.GetConfig().SetBech32PrefixForAccount("ethm", "")
+	sdk.GetConfig().SetBech32PrefixForAccount(app.AccountAddressPrefix, "")
 
 	testCases := []TestCaseStruct{
 		createBasicTestCase(t),
@@ -53,7 +55,7 @@ func TestLedgerPreprocessing(t *testing.T) {
 	for _, tc := range testCases {
 		// Run pre-processing
 		err := eip712.PreprocessLedgerTx(
-			chainId,
+			chainID,
 			keyring.TypeLedger,
 			tc.txBuilder,
 		)
@@ -93,7 +95,7 @@ func TestLedgerPreprocessing(t *testing.T) {
 
 		require.Equal(t, tx.FeePayer().String(), tc.expectedFeePayer)
 		require.Equal(t, tx.GetGas(), tc.expectedGas)
-		require.Equal(t, tx.GetFee().AmountOf(evmtypes.DefaultParams().EvmDenom), tc.expectedFee)
+		require.Equal(t, tx.GetFee().AmountOf(utils.BaseDenom), tc.expectedFee)
 		require.Equal(t, tx.GetMemo(), tc.expectedMemo)
 
 		// Verify message is unchanged
@@ -110,7 +112,7 @@ func TestBlankTxBuilder(t *testing.T) {
 	txBuilder := ctx.TxConfig.NewTxBuilder()
 
 	err := eip712.PreprocessLedgerTx(
-		chainId,
+		chainID,
 		keyring.TypeLedger,
 		txBuilder,
 	)
@@ -122,7 +124,7 @@ func TestNonLedgerTxBuilder(t *testing.T) {
 	txBuilder := ctx.TxConfig.NewTxBuilder()
 
 	err := eip712.PreprocessLedgerTx(
-		chainId,
+		chainID,
 		keyring.TypeLocal,
 		txBuilder,
 	)
@@ -156,7 +158,7 @@ func createBasicTestCase(t *testing.T) TestCaseStruct {
 	signatureBytes, err := hex.DecodeString(signatureHex)
 	require.NoError(t, err)
 
-	_, privKey := tests.NewAddrKey()
+	_, privKey := utiltx.NewAddrKey()
 	sigsV2 := signing.SignatureV2{
 		PubKey: privKey.PubKey(), // Use unrelated public key for testing
 		Data: &signing.SingleSignatureData{
@@ -166,7 +168,9 @@ func createBasicTestCase(t *testing.T) TestCaseStruct {
 		Sequence: 0,
 	}
 
-	txBuilder.SetSignatures(sigsV2)
+	err = txBuilder.SetSignatures(sigsV2)
+	require.NoError(t, err)
+
 	return TestCaseStruct{
 		txBuilder:              txBuilder,
 		expectedFeePayer:       feePayer.String(),
@@ -185,7 +189,7 @@ func createPopulatedTestCase(t *testing.T) TestCaseStruct {
 
 	gasLimit := uint64(200000)
 	memo := ""
-	denom := evmtypes.DefaultParams().EvmDenom
+	denom := utils.BaseDenom
 	feeAmount := math.NewInt(2000)
 
 	txBuilder.SetFeeAmount(sdk.NewCoins(
@@ -199,16 +203,17 @@ func createPopulatedTestCase(t *testing.T) TestCaseStruct {
 
 	msgSend := banktypes.MsgSend{
 		FromAddress: feePayerAddress,
-		ToAddress:   "ethm12luku6uxehhak02py4rcz65zu0swh7wjun6msa",
+		ToAddress:   "evmos12luku6uxehhak02py4rcz65zu0swh7wjun6msa",
 		Amount: sdk.NewCoins(
 			sdk.NewCoin(
-				evmtypes.DefaultParams().EvmDenom,
+				utils.BaseDenom,
 				math.NewInt(10000000),
 			),
 		),
 	}
 
-	txBuilder.SetMsgs(&msgSend)
+	err := txBuilder.SetMsgs(&msgSend)
+	require.NoError(t, err)
 
 	return TestCaseStruct{
 		txBuilder:              txBuilder,

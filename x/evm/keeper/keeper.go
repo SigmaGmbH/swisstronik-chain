@@ -16,10 +16,11 @@
 package keeper
 
 import (
-	sdkmath "cosmossdk.io/math"
 	"fmt"
-	"github.com/ethereum/go-ethereum/crypto"
 	"math/big"
+
+	sdkmath "cosmossdk.io/math"
+	"github.com/ethereum/go-ethereum/crypto"
 
 	errorsmod "cosmossdk.io/errors"
 	"github.com/cometbft/cometbft/libs/log"
