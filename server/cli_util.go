@@ -1,5 +1,5 @@
-//go:build !nosgx
-// +build !nosgx
+//go:build nosgx
+// +build nosgx
 
 // Copyright 2021 Evmos Foundation
 // This file is part of Evmos' Ethermint library.
@@ -16,6 +16,7 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with the Ethermint library. If not, see https://github.com/evmos/ethermint/blob/main/LICENSE
+
 package server
 
 import (
@@ -29,11 +30,11 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/net/netutil"
 
-	sdkserver "github.com/cosmos/cosmos-sdk/server"
+	// sdkserver "github.com/cosmos/cosmos-sdk/server"
 	"github.com/cosmos/cosmos-sdk/server/types"
-	"github.com/cosmos/cosmos-sdk/version"
+	// "github.com/cosmos/cosmos-sdk/version"
 
-	tmcmd "github.com/cometbft/cometbft/cmd/cometbft/commands"
+	// tmcmd "github.com/cometbft/cometbft/cmd/cometbft/commands"
 	tmlog "github.com/tendermint/tendermint/libs/log"
 	rpcclient "github.com/tendermint/tendermint/rpc/jsonrpc/client"
 )
@@ -45,33 +46,33 @@ func AddCommands(
 	appExport types.AppExporter,
 	addStartFlags types.ModuleInitFlags,
 ) {
-	tendermintCmd := &cobra.Command{
-		Use:   "tendermint",
-		Short: "Tendermint subcommands",
-	}
+	// tendermintCmd := &cobra.Command{
+	// 	Use:   "tendermint",
+	// 	Short: "Tendermint subcommands",
+	// }
 
-	tendermintCmd.AddCommand(
-		sdkserver.ShowNodeIDCmd(),
-		sdkserver.ShowValidatorCmd(),
-		sdkserver.ShowAddressCmd(),
-		sdkserver.VersionCmd(),
-		tmcmd.ResetAllCmd,
-		tmcmd.ResetStateCmd,
-	)
+	// tendermintCmd.AddCommand(
+	// 	sdkserver.ShowNodeIDCmd(),
+	// 	sdkserver.ShowValidatorCmd(),
+	// 	sdkserver.ShowAddressCmd(),
+	// 	sdkserver.VersionCmd(),
+	// 	tmcmd.ResetAllCmd,
+	// 	tmcmd.ResetStateCmd,
+	// )
 
-	startCmd := StartCmd(opts)
-	addStartFlags(startCmd)
+	// startCmd := StartCmd(opts)
+	// addStartFlags(startCmd)
 
-	rootCmd.AddCommand(
-		startCmd,
-		tendermintCmd,
-		sdkserver.ExportCmd(appExport, opts.DefaultNodeHome),
-		version.NewVersionCommand(),
-		sdkserver.NewRollbackCmd(opts.AppCreator, opts.DefaultNodeHome),
+	// rootCmd.AddCommand(
+	// 	startCmd,
+	// 	tendermintCmd,
+	// 	sdkserver.ExportCmd(appExport, opts.DefaultNodeHome),
+	// 	version.NewVersionCommand(),
+	// 	sdkserver.NewRollbackCmd(opts.AppCreator, opts.DefaultNodeHome),
 
-		// custom tx indexer command
-		NewIndexTxCmd(),
-	)
+	// 	// custom tx indexer command
+	// 	NewIndexTxCmd(),
+	// )
 }
 
 func ConnectTmWS(tmRPCAddr, tmEndpoint string, logger tmlog.Logger) *rpcclient.WSClient {

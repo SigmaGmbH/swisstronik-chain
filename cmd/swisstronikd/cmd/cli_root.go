@@ -1,5 +1,5 @@
-//go:build !nosgx
-// +build !nosgx
+//go:build nosgx
+// +build nosgx
 
 package cmd
 
@@ -27,14 +27,14 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
-	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	// banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
-	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
+	// genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	tmcfg "github.com/tendermint/tendermint/config"
-	tmcli "github.com/tendermint/tendermint/libs/cli"
+	// tmcli "github.com/tendermint/tendermint/libs/cli"
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
 	simappparams "github.com/cosmos/cosmos-sdk/simapp/params"
@@ -63,8 +63,10 @@ func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
 		WithViper("")
 
 	rootCmd := &cobra.Command{
-		Use:   app.Name + "d",
-		Short: "Swisstronik Daemon",
+		Use:   app.Name + "cli",
+		Short: "Swisstronik CLI",
+		Long: `Command Line Interface for Swisstronik. 
+			   NOTE: This CLI does not support SGX, if you want to setup your node, use swisstronikd instead`,
 		PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
 			// set the default command outputs
 			cmd.SetOut(cmd.OutOrStdout())
@@ -114,36 +116,36 @@ func initRootCmd(
 	InitSDKConfig()
 
 	rootCmd.AddCommand(
-		evmmoduleclient.ValidateChainID(
-			genutilcli.InitCmd(app.ModuleBasics, app.DefaultNodeHome),
-		),
-		genutilcli.CollectGenTxsCmd(banktypes.GenesisBalancesIterator{}, app.DefaultNodeHome),
-		genutilcli.MigrateGenesisCmd(),
-		genutilcli.GenTxCmd(
-			app.ModuleBasics,
-			encodingConfig.TxConfig,
-			banktypes.GenesisBalancesIterator{},
-			app.DefaultNodeHome,
-		),
-		genutilcli.ValidateGenesisCmd(app.ModuleBasics),
-		AddGenesisAccountCmd(app.DefaultNodeHome),
-		tmcli.NewCompletionCmd(rootCmd, true),
-		NewTestnetCmd(app.ModuleBasics, banktypes.GenesisBalancesIterator{}),
+		// evmmoduleclient.ValidateChainID(
+		// 	genutilcli.InitCmd(app.ModuleBasics, app.DefaultNodeHome),
+		// ),
+		// genutilcli.CollectGenTxsCmd(banktypes.GenesisBalancesIterator{}, app.DefaultNodeHome),
+		// genutilcli.MigrateGenesisCmd(),
+		// genutilcli.GenTxCmd(
+		// 	app.ModuleBasics,
+		// 	encodingConfig.TxConfig,
+		// 	banktypes.GenesisBalancesIterator{},
+		// 	app.DefaultNodeHome,
+		// ),
+		// genutilcli.ValidateGenesisCmd(app.ModuleBasics),
+		// AddGenesisAccountCmd(app.DefaultNodeHome),
+		// tmcli.NewCompletionCmd(rootCmd, true),
+		// NewTestnetCmd(app.ModuleBasics, banktypes.GenesisBalancesIterator{}),
 		config.Cmd(),
-		EnclaveCmd(),
+		// EnclaveCmd(),
 		DebugCmd(),
 		// this line is used by starport scaffolding # root/commands
 	)
 
 	a := appCreator{encodingConfig}
 
-	// add server commands
-	evmmoduleserver.AddCommands(
-		rootCmd,
-		evmmoduleserver.NewDefaultStartOptions(a.newApp, app.DefaultNodeHome),
-		a.appExport,
-		addModuleInitFlags,
-	)
+	// // add server commands
+	// evmmoduleserver.AddCommands(
+	// 	rootCmd,
+	// 	evmmoduleserver.NewDefaultStartOptions(a.newApp, app.DefaultNodeHome),
+	// 	a.appExport,
+	// 	addModuleInitFlags,
+	// )
 
 	// add keybase, auxiliary RPC, query, and tx child commands
 	rootCmd.AddCommand(
@@ -159,7 +161,7 @@ func initRootCmd(
 	}
 
 	// add rosetta
-	rootCmd.AddCommand(server.RosettaCommand(encodingConfig.InterfaceRegistry, encodingConfig.Codec))
+	// rootCmd.AddCommand(server.RosettaCommand(encodingConfig.InterfaceRegistry, encodingConfig.Codec))
 }
 
 // queryCommand returns the sub-command to send queries to the app

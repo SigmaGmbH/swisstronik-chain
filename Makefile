@@ -78,6 +78,9 @@ install: go.sum
 build: go.sum
 	go build -mod=mod $(BUILD_FLAGS)  -tags osusergo,netgo -o build/swisstronikd ./cmd/swisstronikd
 
+build-cli: go.sum
+	go build -mod=mod $(BUILD_FLAGS) -tags osusergo,netgo,nosgx -o build/swisstronikcli ./cmd/swisstronikd
+
 build-linux:
 	GOOS=linux GOARCH=$(if $(findstring aarch64,$(shell uname -m)) || $(findstring arm64,$(shell uname -m)),arm64,amd64) $(MAKE) build
 
