@@ -1,6 +1,3 @@
-//go:build !nosgx
-// +build !nosgx
-
 // Copyright 2021 Evmos Foundation
 // This file is part of Evmos' Ethermint library.
 //

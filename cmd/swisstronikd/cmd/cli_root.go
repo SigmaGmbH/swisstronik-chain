@@ -4,14 +4,10 @@
 package cmd
 
 import (
-	"errors"
-	"io"
 	"os"
-	"path/filepath"
 	"strings"
 
 	"swisstronik/encoding"
-	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/config"
 
@@ -19,32 +15,18 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/rpc"
 	"github.com/cosmos/cosmos-sdk/server"
 	serverconfig "github.com/cosmos/cosmos-sdk/server/config"
-	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 	"github.com/cosmos/cosmos-sdk/simapp/params"
-	"github.com/cosmos/cosmos-sdk/snapshots"
-	snapshottypes "github.com/cosmos/cosmos-sdk/snapshots/types"
-	"github.com/cosmos/cosmos-sdk/store"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
-	// banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
-	// genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
-	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	tmcfg "github.com/tendermint/tendermint/config"
-	// tmcli "github.com/tendermint/tendermint/libs/cli"
-	"github.com/tendermint/tendermint/libs/log"
-	dbm "github.com/tendermint/tm-db"
 	simappparams "github.com/cosmos/cosmos-sdk/simapp/params"
-
-	// this line is used by starport scaffolding # root/moduleImport
 
 	"swisstronik/app"
 
 	evmmoduleclient "swisstronik/client"
-	evmmoduleserver "swisstronik/server"
 	evmserverconfig "swisstronik/server/config"
 	srvflags "swisstronik/server/flags"
 )
@@ -65,8 +47,9 @@ func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
 	rootCmd := &cobra.Command{
 		Use:   app.Name + "cli",
 		Short: "Swisstronik CLI",
-		Long: `Command Line Interface for Swisstronik. 
-			   NOTE: This CLI does not support SGX, if you want to setup your node, use swisstronikd instead`,
+		Long: `
+			Command Line Interface for Swisstronik. 
+			NOTE: This CLI does not support SGX, if you want to setup your node, use swisstronikd instead`,
 		PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
 			// set the default command outputs
 			cmd.SetOut(cmd.OutOrStdout())
@@ -116,36 +99,9 @@ func initRootCmd(
 	InitSDKConfig()
 
 	rootCmd.AddCommand(
-		// evmmoduleclient.ValidateChainID(
-		// 	genutilcli.InitCmd(app.ModuleBasics, app.DefaultNodeHome),
-		// ),
-		// genutilcli.CollectGenTxsCmd(banktypes.GenesisBalancesIterator{}, app.DefaultNodeHome),
-		// genutilcli.MigrateGenesisCmd(),
-		// genutilcli.GenTxCmd(
-		// 	app.ModuleBasics,
-		// 	encodingConfig.TxConfig,
-		// 	banktypes.GenesisBalancesIterator{},
-		// 	app.DefaultNodeHome,
-		// ),
-		// genutilcli.ValidateGenesisCmd(app.ModuleBasics),
-		// AddGenesisAccountCmd(app.DefaultNodeHome),
-		// tmcli.NewCompletionCmd(rootCmd, true),
-		// NewTestnetCmd(app.ModuleBasics, banktypes.GenesisBalancesIterator{}),
 		config.Cmd(),
-		// EnclaveCmd(),
 		DebugCmd(),
-		// this line is used by starport scaffolding # root/commands
 	)
-
-	a := appCreator{encodingConfig}
-
-	// // add server commands
-	// evmmoduleserver.AddCommands(
-	// 	rootCmd,
-	// 	evmmoduleserver.NewDefaultStartOptions(a.newApp, app.DefaultNodeHome),
-	// 	a.appExport,
-	// 	addModuleInitFlags,
-	// )
 
 	// add keybase, auxiliary RPC, query, and tx child commands
 	rootCmd.AddCommand(
@@ -159,9 +115,6 @@ func initRootCmd(
 	if err != nil {
 		panic(err)
 	}
-
-	// add rosetta
-	// rootCmd.AddCommand(server.RosettaCommand(encodingConfig.InterfaceRegistry, encodingConfig.Codec))
 }
 
 // queryCommand returns the sub-command to send queries to the app
@@ -235,108 +188,6 @@ func overwriteFlagDefaults(c *cobra.Command, defaults map[string]string) {
 	for _, c := range c.Commands() {
 		overwriteFlagDefaults(c, defaults)
 	}
-}
-
-type appCreator struct {
-	encodingConfig params.EncodingConfig
-}
-
-// newApp creates a new Cosmos SDK app
-func (a appCreator) newApp(
-	logger log.Logger,
-	db dbm.DB,
-	traceStore io.Writer,
-	appOpts servertypes.AppOptions,
-) servertypes.Application {
-	var cache sdk.MultiStorePersistentCache
-
-	if cast.ToBool(appOpts.Get(server.FlagInterBlockCache)) {
-		cache = store.NewCommitKVStoreCacheManager()
-	}
-
-	skipUpgradeHeights := make(map[int64]bool)
-	for _, h := range cast.ToIntSlice(appOpts.Get(server.FlagUnsafeSkipUpgrades)) {
-		skipUpgradeHeights[int64(h)] = true
-	}
-
-	pruningOpts, err := server.GetPruningOptionsFromFlags(appOpts)
-	if err != nil {
-		panic(err)
-	}
-
-	snapshotDir := filepath.Join(cast.ToString(appOpts.Get(flags.FlagHome)), "data", "snapshots")
-	snapshotDB, err := dbm.NewDB("metadata", dbm.GoLevelDBBackend, snapshotDir)
-	if err != nil {
-		panic(err)
-	}
-	snapshotStore, err := snapshots.NewStore(snapshotDB, snapshotDir)
-	if err != nil {
-		panic(err)
-	}
-
-	snapshotOptions := snapshottypes.NewSnapshotOptions(
-		cast.ToUint64(appOpts.Get(server.FlagStateSyncSnapshotInterval)),
-		cast.ToUint32(appOpts.Get(server.FlagStateSyncSnapshotKeepRecent)),
-	)
-
-	return app.New(
-		logger,
-		db,
-		traceStore,
-		true,
-		skipUpgradeHeights,
-		cast.ToString(appOpts.Get(flags.FlagHome)),
-		cast.ToUint(appOpts.Get(server.FlagInvCheckPeriod)),
-		a.encodingConfig,
-		appOpts,
-		baseapp.SetPruning(pruningOpts),
-		baseapp.SetMinGasPrices(cast.ToString(appOpts.Get(server.FlagMinGasPrices))),
-		baseapp.SetMinRetainBlocks(cast.ToUint64(appOpts.Get(server.FlagMinRetainBlocks))),
-		baseapp.SetHaltHeight(cast.ToUint64(appOpts.Get(server.FlagHaltHeight))),
-		baseapp.SetHaltTime(cast.ToUint64(appOpts.Get(server.FlagHaltTime))),
-		baseapp.SetInterBlockCache(cache),
-		baseapp.SetTrace(cast.ToBool(appOpts.Get(server.FlagTrace))),
-		baseapp.SetIndexEvents(cast.ToStringSlice(appOpts.Get(server.FlagIndexEvents))),
-		baseapp.SetSnapshot(snapshotStore, snapshotOptions),
-		baseapp.SetIAVLCacheSize(cast.ToInt(appOpts.Get(server.FlagIAVLCacheSize))),
-		baseapp.SetIAVLDisableFastNode(cast.ToBool(appOpts.Get(server.FlagDisableIAVLFastNode))),
-	)
-}
-
-// appExport creates a new simapp (optionally at a given height)
-func (a appCreator) appExport(
-	logger log.Logger,
-	db dbm.DB,
-	traceStore io.Writer,
-	height int64,
-	forZeroHeight bool,
-	jailAllowedAddrs []string,
-	appOpts servertypes.AppOptions,
-) (servertypes.ExportedApp, error) {
-	homePath, ok := appOpts.Get(flags.FlagHome).(string)
-	if !ok || homePath == "" {
-		return servertypes.ExportedApp{}, errors.New("application home not set")
-	}
-
-	app := app.New(
-		logger,
-		db,
-		traceStore,
-		height == -1, // -1: no height provided
-		map[int64]bool{},
-		homePath,
-		uint(1),
-		a.encodingConfig,
-		appOpts,
-	)
-
-	if height != -1 {
-		if err := app.LoadHeight(height); err != nil {
-			return servertypes.ExportedApp{}, err
-		}
-	}
-
-	return app.ExportAppStateAndValidators(forZeroHeight, jailAllowedAddrs)
 }
 
 // initAppConfig helps to override default appConfig template and configs.
