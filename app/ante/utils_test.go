@@ -631,7 +631,7 @@ func (suite *AnteTestSuite) createBaseTxBuilder(msg sdk.Msg, gas uint64) client.
 
 	txBuilder.SetGasLimit(gas)
 	txBuilder.SetFeeAmount(sdk.NewCoins(
-		sdk.NewCoin(evmtypes.DefaultEVMDenom, sdk.NewInt(10000)),
+		sdk.NewCoin(evmtypes.DefaultEVMDenom, sdk.NewInt(int64(gas)*int64(100))),
 	))
 
 	err := txBuilder.SetMsgs(msg)

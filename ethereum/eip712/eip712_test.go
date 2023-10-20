@@ -75,7 +75,7 @@ func (suite *EIP712TestSuite) SetupTest() {
 	suite.clientCtx = client.Context{}.WithTxConfig(suite.config.TxConfig)
 	suite.denom = utils.BaseDenom
 
-	sdk.GetConfig().SetBech32PrefixForAccount(app.AccountAddressPrefix, "")
+	sdk.GetConfig().SetBech32PrefixForAccount("ethm", "")
 	eip712.SetEncodingConfig(suite.config)
 }
 
@@ -123,7 +123,7 @@ func (suite *EIP712TestSuite) TestEIP712() {
 
 	params := EIP712TestParams{
 		fee: txtypes.Fee{
-			Amount:   suite.makeCoins(suite.denom, math.NewInt(2000)),
+			Amount:   suite.makeCoins("uswtr", math.NewInt(2000)),
 			GasLimit: 20000,
 		},
 		address:       suite.createTestAddress(),
@@ -348,7 +348,7 @@ func (suite *EIP712TestSuite) TestEIP712() {
 				err = txBuilder.SetSignatures([]signing.SignatureV2{txSig}...)
 				suite.Require().NoError(err)
 
-				chainID := utils.TestnetChainID + "-1"
+				chainID := "ethermint_9000-1"
 				if tc.chainID != "" {
 					chainID = tc.chainID
 				}
@@ -362,7 +362,7 @@ func (suite *EIP712TestSuite) TestEIP712() {
 					AccountNumber: params.accountNumber,
 					Sequence:      params.sequence,
 					PubKey:        pubKey,
-					Address:       sdk.MustBech32ifyAddressBytes(app.AccountAddressPrefix, pubKey.Bytes()),
+					Address:       sdk.MustBech32ifyAddressBytes("ethm", pubKey.Bytes()),
 				}
 
 				bz, err := suite.clientCtx.TxConfig.SignModeHandler().GetSignBytes(

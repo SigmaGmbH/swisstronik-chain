@@ -538,11 +538,8 @@ func (suite AnteTestSuite) TestAnteHandler() {
 				from := acc.GetAddress()
 				gas := uint64(200000)
 				amount := sdk.NewCoins(sdk.NewCoin(evmtypes.DefaultEVMDenom, sdkmath.NewInt(100*int64(gas))))
-				txBuilder, err := suite.CreateTestEIP712TxBuilderMsgSend(from, privKey, suite.ctx.ChainID(), gas, amount)
+				txBuilder, err := suite.CreateTestEIP712TxBuilderMsgSend(from, privKey, "swisstronik_9001-1", gas, amount)
 				suite.Require().NoError(err)
-
-				sigsV2 := signing.SignatureV2{}
-				txBuilder.SetSignatures(sigsV2)
 				return txBuilder.GetTx()
 			}, false, false, false,
 		},
@@ -1373,7 +1370,7 @@ func (suite *AnteTestSuite) TestConsumeSignatureVerificationGas() {
 	}{
 		{"PubKeyEd25519", args{sdk.NewInfiniteGasMeter(), nil, ed25519.GenPrivKey().PubKey(), params}, p.SigVerifyCostED25519, true},
 		{"PubKeyEthSecp256k1", args{sdk.NewInfiniteGasMeter(), nil, pkSet1[0], params}, 21_000, false},
-		{"PubKeySecp256r1", args{sdk.NewInfiniteGasMeter(), nil, skR1.PubKey(), params}, p.SigVerifyCostSecp256r1(), false},
+		{"PubKeySecp256r1", args{sdk.NewInfiniteGasMeter(), nil, skR1.PubKey(), params}, p.SigVerifyCostSecp256r1(), true},
 		{"Multisig", args{sdk.NewInfiniteGasMeter(), multisignature1, multisigKey1, params}, expectedCost1, false},
 		{"unknown key", args{sdk.NewInfiniteGasMeter(), nil, nil, params}, 0, true},
 	}
