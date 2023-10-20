@@ -16,6 +16,7 @@
 package eip712
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -25,12 +26,17 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	txTypes "github.com/cosmos/cosmos-sdk/types/tx"
 
-	evmostypes "swisstronik/types"
+	ethermint "swisstronik/types"
 
 	apitypes "github.com/ethereum/go-ethereum/signer/core/apitypes"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 )
+
+type aminoMessage struct {
+	Type  string      `json:"type"`
+	Value interface{} `json:"value"`
+}
 
 var (
 	protoCodec codec.ProtoCodecMarshaler
@@ -46,8 +52,9 @@ func SetEncodingConfig(cfg params.EncodingConfig) {
 	protoCodec = codec.NewProtoCodec(cfg.InterfaceRegistry)
 }
 
-// GetEIP712BytesForMsg returns the EIP-712 object bytes for the given SignDoc bytes by decoding the bytes into
-// an EIP-712 object, then converting via WrapTxToTypedData. See https://eips.ethereum.org/EIPS/eip-712 for more.
+// Get the EIP-712 object bytes for the given SignDoc bytes by first decoding the bytes into
+// an EIP-712 object, then hashing the EIP-712 object to create the bytes to be signed.
+// See https://eips.ethereum.org/EIPS/eip-712 for more.
 func GetEIP712BytesForMsg(signDocBytes []byte) ([]byte, error) {
 	typedData, err := GetEIP712TypedDataForMsg(signDocBytes)
 	if err != nil {
@@ -117,14 +124,26 @@ func decodeAminoSignDoc(signDocBytes []byte) (apitypes.TypedData, error) {
 		return apitypes.TypedData{}, err
 	}
 
-	chainID, err := evmostypes.ParseChainID(aminoDoc.ChainID)
+	// Use first message for fee payer and type inference
+	msg := msgs[0]
+
+	// By convention, the fee payer is the first address in the list of signers.
+	feePayer := msg.GetSigners()[0]
+	feeDelegation := &FeeDelegationOptions{
+		FeePayer: feePayer,
+	}
+
+	chainID, err := ethermint.ParseChainID(aminoDoc.ChainID)
 	if err != nil {
 		return apitypes.TypedData{}, errors.New("invalid chain ID passed as argument")
 	}
 
 	typedData, err := WrapTxToTypedData(
+		protoCodec,
 		chainID.Uint64(),
+		msg,
 		signDocBytes,
+		feeDelegation,
 	)
 	if err != nil {
 		return apitypes.TypedData{}, fmt.Errorf("could not convert to EIP712 representation: %w", err)
@@ -179,9 +198,12 @@ func decodeProtobufSignDoc(signDocBytes []byte) (apitypes.TypedData, error) {
 		return apitypes.TypedData{}, err
 	}
 
+	// Use first message for fee payer and type inference
+	msg := msgs[0]
+
 	signerInfo := authInfo.SignerInfos[0]
 
-	chainID, err := evmostypes.ParseChainID(signDoc.ChainId)
+	chainID, err := ethermint.ParseChainID(signDoc.ChainId)
 	if err != nil {
 		return apitypes.TypedData{}, fmt.Errorf("invalid chain ID passed as argument: %w", err)
 	}
@@ -189,6 +211,11 @@ func decodeProtobufSignDoc(signDocBytes []byte) (apitypes.TypedData, error) {
 	stdFee := &legacytx.StdFee{
 		Amount: authInfo.Fee.Amount,
 		Gas:    authInfo.Fee.GasLimit,
+	}
+
+	feePayer := msg.GetSigners()[0]
+	feeDelegation := &FeeDelegationOptions{
+		FeePayer: feePayer,
 	}
 
 	tip := authInfo.Tip
@@ -206,8 +233,11 @@ func decodeProtobufSignDoc(signDocBytes []byte) (apitypes.TypedData, error) {
 	)
 
 	typedData, err := WrapTxToTypedData(
+		protoCodec,
 		chainID.Uint64(),
+		msg,
 		signBytes,
+		feeDelegation,
 	)
 	if err != nil {
 		return apitypes.TypedData{}, err
@@ -227,22 +257,33 @@ func validateCodecInit() error {
 }
 
 // validatePayloadMessages ensures that the transaction messages can be represented in an EIP-712
-// encoding by checking that messages exist and share a single signer.
+// encoding by checking that messages exist, are of the same type, and share a single signer.
 func validatePayloadMessages(msgs []sdk.Msg) error {
 	if len(msgs) == 0 {
 		return errors.New("unable to build EIP-712 payload: transaction does contain any messages")
 	}
 
+	var msgType string
 	var msgSigner sdk.AccAddress
 
 	for i, m := range msgs {
+		t, err := getMsgType(m)
+		if err != nil {
+			return err
+		}
+
 		if len(m.GetSigners()) != 1 {
 			return errors.New("unable to build EIP-712 payload: expect exactly 1 signer")
 		}
 
 		if i == 0 {
+			msgType = t
 			msgSigner = m.GetSigners()[0]
 			continue
+		}
+
+		if t != msgType {
+			return errors.New("unable to build EIP-712 payload: different types of messages detected")
 		}
 
 		if !msgSigner.Equals(m.GetSigners()[0]) {
@@ -251,4 +292,24 @@ func validatePayloadMessages(msgs []sdk.Msg) error {
 	}
 
 	return nil
+}
+
+// getMsgType returns the message type prefix for the given Cosmos SDK Msg
+func getMsgType(msg sdk.Msg) (string, error) {
+	jsonBytes, err := aminoCodec.MarshalJSON(msg)
+	if err != nil {
+		return "", err
+	}
+
+	var jsonMsg aminoMessage
+	if err := json.Unmarshal(jsonBytes, &jsonMsg); err != nil {
+		return "", err
+	}
+
+	// Verify Type was successfully filled in
+	if jsonMsg.Type == "" {
+		return "", errors.New("could not decode message: type is missing")
+	}
+
+	return jsonMsg.Type, nil
 }

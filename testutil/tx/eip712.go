@@ -190,26 +190,22 @@ func signCosmosEIP712Tx(
 // createTypedData creates the TypedData object corresponding to
 // the arguments, using the legacy implementation as specified.
 func createTypedData(args typedDataArgs, useLegacy bool) (apitypes.TypedData, error) {
-	if useLegacy {
-		registry := codectypes.NewInterfaceRegistry()
-		types.RegisterInterfaces(registry)
-		cryptocodec.RegisterInterfaces(registry)
-		evmosCodec := codec.NewProtoCodec(registry)
+	registry := codectypes.NewInterfaceRegistry()
+	types.RegisterInterfaces(registry)
+	cryptocodec.RegisterInterfaces(registry)
+	evmosCodec := codec.NewProtoCodec(registry)
 
-		feeDelegation := &eip712.FeeDelegationOptions{
-			FeePayer: args.legacyFeePayer,
-		}
-
-		return eip712.LegacyWrapTxToTypedData(
-			evmosCodec,
-			args.chainID,
-			args.legacyMsg,
-			args.data,
-			feeDelegation,
-		)
+	feeDelegation := &eip712.FeeDelegationOptions{
+		FeePayer: args.legacyFeePayer,
 	}
 
-	return eip712.WrapTxToTypedData(args.chainID, args.data)
+	return eip712.WrapTxToTypedData(
+		evmosCodec,
+		args.chainID,
+		args.legacyMsg,
+		args.data,
+		feeDelegation,
+	)
 }
 
 // setBuilderLegacyWeb3Extension creates a legacy ExtensionOptionsWeb3Tx and

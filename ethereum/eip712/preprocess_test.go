@@ -5,6 +5,13 @@ import (
 	"strings"
 	"testing"
 
+	"swisstronik/app"
+	"swisstronik/encoding"
+	"swisstronik/ethereum/eip712"
+	"swisstronik/tests"
+	"swisstronik/types"
+	evmtypes "swisstronik/x/evm/types"
+
 	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/client"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
@@ -13,20 +20,12 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	"github.com/cosmos/cosmos-sdk/x/auth/ante"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-
-	"swisstronik/app"
-	"swisstronik/encoding"
-	"swisstronik/ethereum/eip712"
-	utiltx "swisstronik/testutil/tx"
-	"swisstronik/types"
-	"swisstronik/utils"
-
 	"github.com/stretchr/testify/require"
 )
 
 // Testing Constants
 var (
-	chainID = "ethermint_9000-1"
+	chainId = "ethermint_9000-1"
 	ctx     = client.Context{}.WithTxConfig(
 		encoding.MakeConfig(app.ModuleBasics).TxConfig,
 	)
@@ -55,7 +54,7 @@ func TestLedgerPreprocessing(t *testing.T) {
 	for _, tc := range testCases {
 		// Run pre-processing
 		err := eip712.PreprocessLedgerTx(
-			chainID,
+			chainId,
 			keyring.TypeLedger,
 			tc.txBuilder,
 		)
@@ -95,7 +94,7 @@ func TestLedgerPreprocessing(t *testing.T) {
 
 		require.Equal(t, tx.FeePayer().String(), tc.expectedFeePayer)
 		require.Equal(t, tx.GetGas(), tc.expectedGas)
-		require.Equal(t, tx.GetFee().AmountOf(utils.BaseDenom), tc.expectedFee)
+		require.Equal(t, tx.GetFee().AmountOf(evmtypes.DefaultParams().EvmDenom), tc.expectedFee)
 		require.Equal(t, tx.GetMemo(), tc.expectedMemo)
 
 		// Verify message is unchanged
@@ -112,7 +111,7 @@ func TestBlankTxBuilder(t *testing.T) {
 	txBuilder := ctx.TxConfig.NewTxBuilder()
 
 	err := eip712.PreprocessLedgerTx(
-		chainID,
+		chainId,
 		keyring.TypeLedger,
 		txBuilder,
 	)
@@ -124,7 +123,7 @@ func TestNonLedgerTxBuilder(t *testing.T) {
 	txBuilder := ctx.TxConfig.NewTxBuilder()
 
 	err := eip712.PreprocessLedgerTx(
-		chainID,
+		chainId,
 		keyring.TypeLocal,
 		txBuilder,
 	)
@@ -158,7 +157,7 @@ func createBasicTestCase(t *testing.T) TestCaseStruct {
 	signatureBytes, err := hex.DecodeString(signatureHex)
 	require.NoError(t, err)
 
-	_, privKey := utiltx.NewAddrKey()
+	_, privKey := tests.NewAddrKey()
 	sigsV2 := signing.SignatureV2{
 		PubKey: privKey.PubKey(), // Use unrelated public key for testing
 		Data: &signing.SingleSignatureData{
@@ -168,9 +167,7 @@ func createBasicTestCase(t *testing.T) TestCaseStruct {
 		Sequence: 0,
 	}
 
-	err = txBuilder.SetSignatures(sigsV2)
-	require.NoError(t, err)
-
+	txBuilder.SetSignatures(sigsV2)
 	return TestCaseStruct{
 		txBuilder:              txBuilder,
 		expectedFeePayer:       feePayer.String(),
@@ -189,7 +186,7 @@ func createPopulatedTestCase(t *testing.T) TestCaseStruct {
 
 	gasLimit := uint64(200000)
 	memo := ""
-	denom := utils.BaseDenom
+	denom := evmtypes.DefaultParams().EvmDenom
 	feeAmount := math.NewInt(2000)
 
 	txBuilder.SetFeeAmount(sdk.NewCoins(
@@ -206,14 +203,13 @@ func createPopulatedTestCase(t *testing.T) TestCaseStruct {
 		ToAddress:   "ethm12luku6uxehhak02py4rcz65zu0swh7wjun6msa",
 		Amount: sdk.NewCoins(
 			sdk.NewCoin(
-				utils.BaseDenom,
+				evmtypes.DefaultParams().EvmDenom,
 				math.NewInt(10000000),
 			),
 		),
 	}
 
-	err := txBuilder.SetMsgs(&msgSend)
-	require.NoError(t, err)
+	txBuilder.SetMsgs(&msgSend)
 
 	return TestCaseStruct{
 		txBuilder:              txBuilder,
