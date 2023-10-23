@@ -4,6 +4,7 @@ Swisstronik is an identity-based hybrid layer-1 blockchain ecosystem.
 It lets Web 3.0 and traditional companies build KYC, AML and DPR compliant applications with enhanced data privacy
 
 [![Build local node docker image](https://github.com/SigmaGmbH/swisstronik-chain/actions/workflows/docker-local.yml/badge.svg)](https://github.com/SigmaGmbH/swisstronik-chain/actions/workflows/docker-local.yml)
+[![Build CLI multiplatform](https://github.com/SigmaGmbH/swisstronik-chain/actions/workflows/build-ci-multiplatform.yml/badge.svg)](https://github.com/SigmaGmbH/swisstronik-chain/actions/workflows/build-ci-multiplatform.yml)
 
 ## Build
 
