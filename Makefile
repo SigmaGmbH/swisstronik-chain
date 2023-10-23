@@ -87,7 +87,7 @@ build-linux:
 build-macos-cli:
 	BINARY_NAME=swisstronikcli-macos-arm64 GOOS=darwin GOARCH=arm64 $(MAKE) build-cli
 
-build-linux-amd64-cli:
+build-linux-cli:
 	BINARY_NAME=swisstronikcli-linux-amd64 GOOS=linux GOARCH=amd64 $(MAKE) build-cli
 
 build-enclave:

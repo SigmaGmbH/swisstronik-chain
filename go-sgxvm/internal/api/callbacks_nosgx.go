@@ -97,25 +97,5 @@ func buildEmptyConnector() C.GoQuerier {
 
 //export cQueryExternal
 func cQueryExternal(ptr *C.querier_t, request C.U8SliceView, result *C.UnmanagedVector, errOut *C.UnmanagedVector) (ret C.GoError) {
-	defer recoverPanic(&ret)
-
-	if result == nil || errOut == nil {
-		// we received an invalid pointer
-		return C.GoError_BadArgument
-	}
-	if !(*result).is_none || !(*errOut).is_none {
-		panic("Got a non-none UnmanagedVector we're about to override. This is a bug because someone has to drop the old one.")
-	}
-
-	req := CopyU8Slice(request)
-	querier := *(*types.Connector)(unsafe.Pointer(ptr))
-	response, err := querier.Query(req)
-
-	if err != nil {
-		*errOut = NewUnmanagedVector([]byte(err.Error()))
-		return C.GoError_QuerierError
-	}
-	*result = NewUnmanagedVector(response)
-
 	return C.GoError_None
 }
