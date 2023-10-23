@@ -94,7 +94,7 @@ build-linux-cli-amd:
 	BINARY_NAME=swisstronikcli-linux-amd64 GOOS=linux GOARCH=amd64 $(MAKE) build-cli
 
 build-linux-cli-arm:
-	BINARY_NAME=swisstronikcli-linux-arm64 GOOS=linux GOARCH=amd64 $(MAKE) build-cli
+	BINARY_NAME=swisstronikcli-linux-arm64 GOOS=linux GOARCH=arm64 $(MAKE) build-cli
 
 build-windows-cli:
 	BINARY_NAME=swisstronikcli-windows GOOS=windows GOARCH=amd64 $(MAKE) build-cli
