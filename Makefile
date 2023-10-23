@@ -84,11 +84,17 @@ build-cli: go.sum
 build-linux:
 	GOOS=linux GOARCH=$(if $(findstring aarch64,$(shell uname -m)) || $(findstring arm64,$(shell uname -m)),arm64,amd64) $(MAKE) build
 
-build-macos-cli:
+build-macos-cli-amd: 
+	BINARY_NAME=swisstronikcli-macos-amd64 GOOS=darwin GOARCH=amd64 $(MAKE) build-cli
+
+build-macos-cli-arm:
 	BINARY_NAME=swisstronikcli-macos-arm64 GOOS=darwin GOARCH=arm64 $(MAKE) build-cli
 
-build-linux-cli:
+build-linux-cli-amd:
 	BINARY_NAME=swisstronikcli-linux-amd64 GOOS=linux GOARCH=amd64 $(MAKE) build-cli
+
+build-linux-cli-arm:
+	BINARY_NAME=swisstronikcli-linux-arm64 GOOS=linux GOARCH=amd64 $(MAKE) build-cli
 
 build-windows-cli:
 	BINARY_NAME=swisstronikcli-windows GOOS=windows GOARCH=amd64 $(MAKE) build-cli
