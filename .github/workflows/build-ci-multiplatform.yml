@@ -15,6 +15,11 @@ jobs:
           go-version: 'stable'
       - name: "Build linux-amd64"
         run: make build-linux-cli-amd
+      - name: "Upload file"
+        uses: actions/upload-artifact@v2
+        with:
+          name: swisstronikcli-linux-amd64
+          path: swisstronikcli-linux-amd64
 
   macos-amd64:
     runs-on: macos-latest
@@ -25,6 +30,28 @@ jobs:
           go-version: 'stable'
       - name: "Build macos-amd64"
         run: make build-macos-cli-amd
+      - name: "Upload file"
+        uses: actions/upload-artifact@v2
+        with:
+          name: swisstronikcli-macos-amd64
+          path: swisstronikcli-macos-amd64
+
+  macos-arm64:
+    runs-on:  macos-latest-xlarge
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v4
+        with:
+          go-version: 'stable'
+      - name: "Build macos-arm64"
+        run: make build-macos-cli-amd
+      - name: "Upload file"
+        uses: actions/upload-artifact@v2
+        with:
+          name: swisstronikcli-macos-arm64
+          path: swisstronikcli-macos-arm64
+
+
 
   windows-amd64:
     runs-on: windows-latest
@@ -35,3 +62,8 @@ jobs:
           go-version: 'stable'
       - name: "Build windows-amd64"
         run: make build-windows-cli
+      - name: "Upload file"
+        uses: actions/upload-artifact@v2
+        with:
+          name: swisstronikcli-windows
+          path: swisstronikcli-windows
