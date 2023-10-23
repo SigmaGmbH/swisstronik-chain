@@ -90,6 +90,9 @@ build-macos-cli:
 build-linux-cli:
 	BINARY_NAME=swisstronikcli-linux-amd64 GOOS=linux GOARCH=amd64 $(MAKE) build-cli
 
+build-windows-cli:
+	BINARY_NAME=swisstronikcli-windows GOOS=windows GOARCH=amd64 $(MAKE) build-cli
+
 build-enclave:
 	$(MAKE) -C go-sgxvm build_go
 
