@@ -1,4 +1,4 @@
-//go:build darwin && !sys_sgx_wrapper
+//go:build darwin && !sys_sgx_wrapper && !nosgx
 
 package api
 
