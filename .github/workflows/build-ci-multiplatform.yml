@@ -1,0 +1,34 @@
+name: Build CI multiplatform
+
+on:
+  push:
+    branches: [ feat/no-sgx-cli ]
+
+
+jobs:
+  linux-amd64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v4
+        with:
+          go-version: 'stable'
+      - name: "Build linux-amd64"
+        run: make build-linux-cli-amd
+
+  macos-amd64:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/setup-go@v4
+        with:
+          go-version: 'stable'
+      - name: "Build macos-amd64"
+        run: make build-macos-cli-amd
+
+  windows-amd64:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/setup-go@v4
+        with:
+          go-version: 'stable'
+      - name: "Build windows-amd64"
+        run: make build-windows-cli
