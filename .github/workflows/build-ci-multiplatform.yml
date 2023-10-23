@@ -19,7 +19,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: swisstronikcli-linux-amd64
-          path: swisstronikcli-linux-amd64
+          path: build/swisstronikcli-linux-amd64
 
   macos-amd64:
     runs-on: macos-latest
@@ -34,7 +34,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: swisstronikcli-macos-amd64
-          path: swisstronikcli-macos-amd64
+          path: build/swisstronikcli-macos-amd64
 
   macos-arm64:
     runs-on:  macos-latest-xlarge
@@ -49,7 +49,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: swisstronikcli-macos-arm64
-          path: swisstronikcli-macos-arm64
+          path: build/swisstronikcli-macos-arm64
 
 
 
@@ -66,4 +66,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: swisstronikcli-windows
-          path: swisstronikcli-windows
+          path: build/swisstronikcli-windows
