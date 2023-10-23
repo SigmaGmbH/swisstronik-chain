@@ -7,6 +7,7 @@ import (
 	"swisstronik/rpc/backend/mocks"
 	"swisstronik/tests"
 	evmtypes "swisstronik/x/evm/types"
+
 	"github.com/cosmos/cosmos-sdk/crypto"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
@@ -77,6 +78,7 @@ func (suite *BackendTestSuite) TestSendTransaction() {
 				RegisterBlock(client, 1, nil)
 				RegisterBlockResults(client, 1)
 				RegisterBaseFee(queryClient, baseFee)
+				RegisterParamsWithoutHeader(queryClient, 1)
 			},
 			evmtypes.TransactionArgs{
 				From:     &from,
@@ -132,6 +134,7 @@ func (suite *BackendTestSuite) TestSendTransaction() {
 				tx, _ := msg.BuildTx(suite.backend.clientCtx.TxConfig.NewTxBuilder(), "uswtr")
 				txEncoder := suite.backend.clientCtx.TxConfig.TxEncoder()
 				txBytes, _ := txEncoder(tx)
+
 				RegisterBroadcastTx(client, txBytes)
 			},
 			callArgsDefault,

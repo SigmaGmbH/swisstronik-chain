@@ -152,8 +152,6 @@ type DIDBackend interface {
 
 var _ BackendI = (*Backend)(nil)
 
-var bAttributeKeyEthereumBloom = []byte(evmtypes.AttributeKeyEthereumBloom)
-
 // Backend implements the BackendI interface
 type Backend struct {
 	ctx                 context.Context
