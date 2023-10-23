@@ -16,7 +16,7 @@ jobs:
       - name: "Build linux-amd64"
         run: make build-linux-cli-amd
       - name: "Upload file"
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: swisstronikcli-linux-amd64
           path: build/swisstronikcli-linux-amd64
@@ -31,7 +31,7 @@ jobs:
       - name: "Build macos-amd64"
         run: make build-macos-cli-amd
       - name: "Upload file"
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: swisstronikcli-macos-amd64
           path: build/swisstronikcli-macos-amd64
@@ -46,7 +46,7 @@ jobs:
       - name: "Build macos-arm64"
         run: make build-macos-cli-arm
       - name: "Upload file"
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: swisstronikcli-macos-arm64
           path: build/swisstronikcli-macos-arm64
@@ -63,7 +63,7 @@ jobs:
       - name: "Build windows-amd64"
         run: make build-windows-cli
       - name: "Upload file"
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: swisstronikcli-windows
           path: build/swisstronikcli-windows
