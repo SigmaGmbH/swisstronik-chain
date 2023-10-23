@@ -44,7 +44,7 @@ jobs:
         with:
           go-version: 'stable'
       - name: "Build macos-arm64"
-        run: make build-macos-cli-amd
+        run: make build-macos-cli-arm
       - name: "Upload file"
         uses: actions/upload-artifact@v2
         with:
