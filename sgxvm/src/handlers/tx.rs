@@ -2,7 +2,6 @@ use protobuf::Message;
 use primitive_types::{H160, H256, U256};
 use std::{vec::Vec, string::String};
 use evm::ExitReason;
-use internal_types::ExecutionResult;
 use protobuf::RepeatedField;
 use evm::executor::stack::{MemoryStackState, StackExecutor, StackSubstateMetadata};
 
@@ -15,7 +14,7 @@ use crate::protobuf_generated::ffi::{
 use crate::backend;
 use crate::GoQuerier;
 use crate::precompiles::EVMPrecompiles;
-use crate::types::{Vicinity, GASOMETER_CONFIG, ExtendedBackend};
+use crate::types::{Vicinity, GASOMETER_CONFIG, ExtendedBackend, ExecutionResult};
 use crate::std::string::ToString;
 
 /// Converts raw execution result into protobuf and returns it outside of enclave

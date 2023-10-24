@@ -1,5 +1,6 @@
 [package]
-name = "sgx-evm"
+name = "sgxvm"
+description = "EVM adapted for execution inside SGX enclave"
 version = "0.1.0"
 edition = "2021"
 
@@ -35,7 +36,7 @@ rustls = { git = "https://github.com/mesalock-linux/rustls", branch = "mesalock_
 x25519-dalek = { version = "2.0.0-pre.1", default-features=false, features=[ "u64_backend" ] }
 hmac = { version = "0.11.0", default-features=false }
 sha2 = { version = "0.9.5", default-features=false }
-deoxysii = { version = "0.2.4", path="../deoxysii-rust" }
+deoxysii = { version = "0.2.4", path="./deoxysii-rust" }
 primitive-types = { version = "^0.12", default-features = false, features = ["rlp"] }
 evm = { version = "0.39.0", default-features = false }
 ethereum = { version = "0.14", default-features = false, features = ["with-codec", "with-serde"] }
@@ -60,9 +61,9 @@ sgx_tse = { version = "1.1.5", git = "https://github.com/apache/teaclave-sgx-sdk
 sgx_rand = { version = "1.1.5", git = "https://github.com/apache/teaclave-sgx-sdk.git", tag="v1.1.5" }
 
 [patch."https://github.com/apache/teaclave-sgx-sdk.git"]
-sgx_tstd = { version = "1.1.5", git = "https://github.com/haerdib/incubator-teaclave-sgx-sdk", branch = "master"}
-sgx_trts = { version = "1.1.5", git = "https://github.com/haerdib/incubator-teaclave-sgx-sdk", branch = "master"}
-sgx_types = { version = "1.1.5", git = "https://github.com/haerdib/incubator-teaclave-sgx-sdk", branch = "master"}
-sgx_tcrypto = { version = "1.1.5", git = "https://github.com/haerdib/incubator-teaclave-sgx-sdk", branch = "master"}
-sgx_tse = { version = "1.1.5", git = "https://github.com/haerdib/incubator-teaclave-sgx-sdk", branch = "master"}
-sgx_rand = { version = "1.1.5", git = "https://github.com/haerdib/incubator-teaclave-sgx-sdk", branch = "master"}
+sgx_tstd = { path = "./sgx-sdk/sgx_tstd" }
+sgx_trts = { path = "./sgx-sdk/sgx_trts" }
+sgx_types = { path = "./sgx-sdk/sgx_types" }
+sgx_tcrypto = { path = "./sgx-sdk/sgx_tcrypto" }
+sgx_tse = { path = "./sgx-sdk/sgx_tse" }
+sgx_rand = { path = "./sgx-sdk/sgx_rand" }

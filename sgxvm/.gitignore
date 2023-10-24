@@ -1,6 +1,6 @@
 # Build results
 target/
-artifacts/
+sgx-artifacts/
 
 # Other
 Enclave_t*

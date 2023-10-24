@@ -551,7 +551,6 @@ checksum = "8a9ee70c43aaf417c914396645a0fa852624801b24ebb7ae78fe8272889ac888"
 [[package]]
 name = "hashbrown_tstd"
 version = "0.12.0"
-source = "git+https://github.com/haerdib/incubator-teaclave-sgx-sdk?branch=master#605c8ea7a05d9d1a2536be66c09d3b5a06f348b0"
 
 [[package]]
 name = "hex"
@@ -630,16 +629,6 @@ checksum = "1885e79c1fc4b10f0e172c475f458b7f7b93061064d98c3293e98c5ba0c8b399"
 dependencies = [
  "autocfg 1.1.0",
  "hashbrown",
-]
-
-[[package]]
-name = "internal_types"
-version = "0.1.0"
-dependencies = [
- "ethereum",
- "rlp",
- "rlp-derive",
- "sgx_tstd",
 ]
 
 [[package]]
@@ -1165,7 +1154,100 @@ dependencies = [
 ]
 
 [[package]]
-name = "sgx-evm"
+name = "sgx_alloc"
+version = "1.1.5"
+
+[[package]]
+name = "sgx_backtrace_sys"
+version = "1.1.5"
+dependencies = [
+ "cc",
+ "sgx_build_helper",
+ "sgx_libc",
+]
+
+[[package]]
+name = "sgx_build_helper"
+version = "1.1.5"
+
+[[package]]
+name = "sgx_demangle"
+version = "1.1.5"
+
+[[package]]
+name = "sgx_libc"
+version = "1.1.5"
+dependencies = [
+ "sgx_types",
+]
+
+[[package]]
+name = "sgx_rand"
+version = "1.1.5"
+dependencies = [
+ "sgx_trts",
+ "sgx_tstd",
+ "sgx_types",
+]
+
+[[package]]
+name = "sgx_tcrypto"
+version = "1.1.5"
+dependencies = [
+ "sgx_types",
+]
+
+[[package]]
+name = "sgx_tprotected_fs"
+version = "1.1.5"
+dependencies = [
+ "sgx_trts",
+ "sgx_types",
+]
+
+[[package]]
+name = "sgx_trts"
+version = "1.1.5"
+dependencies = [
+ "sgx_libc",
+ "sgx_types",
+]
+
+[[package]]
+name = "sgx_tse"
+version = "1.1.5"
+dependencies = [
+ "sgx_types",
+]
+
+[[package]]
+name = "sgx_tstd"
+version = "1.1.5"
+dependencies = [
+ "hashbrown_tstd",
+ "sgx_alloc",
+ "sgx_backtrace_sys",
+ "sgx_demangle",
+ "sgx_libc",
+ "sgx_tprotected_fs",
+ "sgx_trts",
+ "sgx_types",
+ "sgx_unwind",
+]
+
+[[package]]
+name = "sgx_types"
+version = "1.1.5"
+
+[[package]]
+name = "sgx_unwind"
+version = "1.1.5"
+dependencies = [
+ "sgx_build_helper",
+]
+
+[[package]]
+name = "sgxvm"
 version = "0.1.0"
 dependencies = [
  "base64",
@@ -1182,7 +1264,6 @@ dependencies = [
  "hex",
  "hmac 0.11.0",
  "httparse",
- "internal_types",
  "itertools",
  "k256",
  "lazy_static",
@@ -1212,112 +1293,6 @@ dependencies = [
  "webpki-roots",
  "x25519-dalek",
  "yasna",
-]
-
-[[package]]
-name = "sgx_alloc"
-version = "1.1.5"
-source = "git+https://github.com/haerdib/incubator-teaclave-sgx-sdk?branch=master#605c8ea7a05d9d1a2536be66c09d3b5a06f348b0"
-
-[[package]]
-name = "sgx_backtrace_sys"
-version = "1.1.5"
-source = "git+https://github.com/haerdib/incubator-teaclave-sgx-sdk?branch=master#605c8ea7a05d9d1a2536be66c09d3b5a06f348b0"
-dependencies = [
- "cc",
- "sgx_build_helper",
- "sgx_libc",
-]
-
-[[package]]
-name = "sgx_build_helper"
-version = "1.1.5"
-source = "git+https://github.com/haerdib/incubator-teaclave-sgx-sdk?branch=master#605c8ea7a05d9d1a2536be66c09d3b5a06f348b0"
-
-[[package]]
-name = "sgx_demangle"
-version = "1.1.5"
-source = "git+https://github.com/haerdib/incubator-teaclave-sgx-sdk?branch=master#605c8ea7a05d9d1a2536be66c09d3b5a06f348b0"
-
-[[package]]
-name = "sgx_libc"
-version = "1.1.5"
-source = "git+https://github.com/haerdib/incubator-teaclave-sgx-sdk?branch=master#605c8ea7a05d9d1a2536be66c09d3b5a06f348b0"
-dependencies = [
- "sgx_types",
-]
-
-[[package]]
-name = "sgx_rand"
-version = "1.1.5"
-source = "git+https://github.com/haerdib/incubator-teaclave-sgx-sdk?branch=master#605c8ea7a05d9d1a2536be66c09d3b5a06f348b0"
-dependencies = [
- "sgx_trts",
- "sgx_tstd",
- "sgx_types",
-]
-
-[[package]]
-name = "sgx_tcrypto"
-version = "1.1.5"
-source = "git+https://github.com/haerdib/incubator-teaclave-sgx-sdk?branch=master#605c8ea7a05d9d1a2536be66c09d3b5a06f348b0"
-dependencies = [
- "sgx_types",
-]
-
-[[package]]
-name = "sgx_tprotected_fs"
-version = "1.1.5"
-source = "git+https://github.com/haerdib/incubator-teaclave-sgx-sdk?branch=master#605c8ea7a05d9d1a2536be66c09d3b5a06f348b0"
-dependencies = [
- "sgx_trts",
- "sgx_types",
-]
-
-[[package]]
-name = "sgx_trts"
-version = "1.1.5"
-source = "git+https://github.com/haerdib/incubator-teaclave-sgx-sdk?branch=master#605c8ea7a05d9d1a2536be66c09d3b5a06f348b0"
-dependencies = [
- "sgx_libc",
- "sgx_types",
-]
-
-[[package]]
-name = "sgx_tse"
-version = "1.1.5"
-source = "git+https://github.com/haerdib/incubator-teaclave-sgx-sdk?branch=master#605c8ea7a05d9d1a2536be66c09d3b5a06f348b0"
-dependencies = [
- "sgx_types",
-]
-
-[[package]]
-name = "sgx_tstd"
-version = "1.1.5"
-source = "git+https://github.com/haerdib/incubator-teaclave-sgx-sdk?branch=master#605c8ea7a05d9d1a2536be66c09d3b5a06f348b0"
-dependencies = [
- "hashbrown_tstd",
- "sgx_alloc",
- "sgx_backtrace_sys",
- "sgx_demangle",
- "sgx_libc",
- "sgx_tprotected_fs",
- "sgx_trts",
- "sgx_types",
- "sgx_unwind",
-]
-
-[[package]]
-name = "sgx_types"
-version = "1.1.5"
-source = "git+https://github.com/haerdib/incubator-teaclave-sgx-sdk?branch=master#605c8ea7a05d9d1a2536be66c09d3b5a06f348b0"
-
-[[package]]
-name = "sgx_unwind"
-version = "1.1.5"
-source = "git+https://github.com/haerdib/incubator-teaclave-sgx-sdk?branch=master#605c8ea7a05d9d1a2536be66c09d3b5a06f348b0"
-dependencies = [
- "sgx_build_helper",
 ]
 
 [[package]]
