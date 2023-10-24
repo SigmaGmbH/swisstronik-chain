@@ -1,5 +1,6 @@
 [package]
-name = "sgx_wrapper"
+name = "sgxvm_wrapper"
+description = "Wrapper around EVM inside SGX Enclave"
 version = "1.0.0"
 build = "build.rs"
 
