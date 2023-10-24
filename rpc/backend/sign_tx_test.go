@@ -3,10 +3,6 @@ package backend
 import (
 	"fmt"
 
-	"swisstronik/crypto/ethsecp256k1"
-	"swisstronik/rpc/backend/mocks"
-	"swisstronik/tests"
-	evmtypes "swisstronik/x/evm/types"
 	"github.com/cosmos/cosmos-sdk/crypto"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
@@ -15,6 +11,10 @@ import (
 	goethcrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/signer/core/apitypes"
 	"google.golang.org/grpc/metadata"
+	"swisstronik/crypto/ethsecp256k1"
+	"swisstronik/rpc/backend/mocks"
+	"swisstronik/tests"
+	evmtypes "swisstronik/x/evm/types"
 )
 
 func (suite *BackendTestSuite) TestSendTransaction() {
@@ -57,7 +57,8 @@ func (suite *BackendTestSuite) TestSendTransaction() {
 				queryClient := suite.backend.queryClient.QueryClient.(*mocks.EVMQueryClient)
 				client := suite.backend.clientCtx.Client.(*mocks.Client)
 				armor := crypto.EncryptArmorPrivKey(priv, "", "eth_secp256k1")
-				suite.backend.clientCtx.Keyring.ImportPrivKey("test_key", armor, "")
+				err := suite.backend.clientCtx.Keyring.ImportPrivKey("test_key", armor, "")
+				suite.Require().NoError(err)
 				RegisterParams(queryClient, &header, 1)
 				RegisterBlockError(client, 1)
 			},
@@ -72,10 +73,13 @@ func (suite *BackendTestSuite) TestSendTransaction() {
 				queryClient := suite.backend.queryClient.QueryClient.(*mocks.EVMQueryClient)
 				client := suite.backend.clientCtx.Client.(*mocks.Client)
 				armor := crypto.EncryptArmorPrivKey(priv, "", "eth_secp256k1")
-				suite.backend.clientCtx.Keyring.ImportPrivKey("test_key", armor, "")
+				err := suite.backend.clientCtx.Keyring.ImportPrivKey("test_key", armor, "")
+				suite.Require().NoError(err)
 				RegisterParams(queryClient, &header, 1)
-				RegisterBlock(client, 1, nil)
-				RegisterBlockResults(client, 1)
+				_, err = RegisterBlock(client, 1, nil)
+				suite.Require().NoError(err)
+				_, err = RegisterBlockResults(client, 1)
+				suite.Require().NoError(err)
 				RegisterBaseFee(queryClient, baseFee)
 			},
 			evmtypes.TransactionArgs{
@@ -95,15 +99,19 @@ func (suite *BackendTestSuite) TestSendTransaction() {
 				queryClient := suite.backend.queryClient.QueryClient.(*mocks.EVMQueryClient)
 				client := suite.backend.clientCtx.Client.(*mocks.Client)
 				armor := crypto.EncryptArmorPrivKey(priv, "", "eth_secp256k1")
-				suite.backend.clientCtx.Keyring.ImportPrivKey("test_key", armor, "")
+				err := suite.backend.clientCtx.Keyring.ImportPrivKey("test_key", armor, "")
+				suite.Require().NoError(err)
 				RegisterParams(queryClient, &header, 1)
-				RegisterBlock(client, 1, nil)
-				RegisterBlockResults(client, 1)
+				_, err = RegisterBlock(client, 1, nil)
+				suite.Require().NoError(err)
+				_, err = RegisterBlockResults(client, 1)
+				suite.Require().NoError(err)
 				RegisterBaseFee(queryClient, baseFee)
 				RegisterParamsWithoutHeader(queryClient, 1)
 				ethSigner := ethtypes.LatestSigner(suite.backend.ChainConfig())
 				msg := callArgsDefault.ToTransaction()
-				msg.Sign(ethSigner, suite.backend.clientCtx.Keyring)
+				err = msg.Sign(ethSigner, suite.backend.clientCtx.Keyring)
+				suite.Require().NoError(err)
 				tx, _ := msg.BuildTx(suite.backend.clientCtx.TxConfig.NewTxBuilder(), "uswtr")
 				txEncoder := suite.backend.clientCtx.TxConfig.TxEncoder()
 				txBytes, _ := txEncoder(tx)
@@ -120,15 +128,19 @@ func (suite *BackendTestSuite) TestSendTransaction() {
 				queryClient := suite.backend.queryClient.QueryClient.(*mocks.EVMQueryClient)
 				client := suite.backend.clientCtx.Client.(*mocks.Client)
 				armor := crypto.EncryptArmorPrivKey(priv, "", "eth_secp256k1")
-				suite.backend.clientCtx.Keyring.ImportPrivKey("test_key", armor, "")
+				err := suite.backend.clientCtx.Keyring.ImportPrivKey("test_key", armor, "")
+				suite.Require().NoError(err)
 				RegisterParams(queryClient, &header, 1)
-				RegisterBlock(client, 1, nil)
-				RegisterBlockResults(client, 1)
+				_, err = RegisterBlock(client, 1, nil)
+				suite.Require().NoError(err)
+				_, err = RegisterBlockResults(client, 1)
+				suite.Require().NoError(err)
 				RegisterBaseFee(queryClient, baseFee)
 				RegisterParamsWithoutHeader(queryClient, 1)
 				ethSigner := ethtypes.LatestSigner(suite.backend.ChainConfig())
 				msg := callArgsDefault.ToTransaction()
-				msg.Sign(ethSigner, suite.backend.clientCtx.Keyring)
+				err = msg.Sign(ethSigner, suite.backend.clientCtx.Keyring)
+				suite.Require().NoError(err)
 				tx, _ := msg.BuildTx(suite.backend.clientCtx.TxConfig.NewTxBuilder(), "uswtr")
 				txEncoder := suite.backend.clientCtx.TxConfig.TxEncoder()
 				txBytes, _ := txEncoder(tx)
@@ -151,7 +163,8 @@ func (suite *BackendTestSuite) TestSendTransaction() {
 				RegisterParamsWithoutHeader(queryClient, 1)
 				ethSigner := ethtypes.LatestSigner(suite.backend.ChainConfig())
 				msg := callArgsDefault.ToTransaction()
-				msg.Sign(ethSigner, suite.backend.clientCtx.Keyring)
+				err := msg.Sign(ethSigner, suite.backend.clientCtx.Keyring)
+				suite.Require().NoError(err)
 				tc.expHash = msg.AsTransaction().Hash()
 			}
 			responseHash, err := suite.backend.SendTransaction(tc.args)
@@ -185,7 +198,8 @@ func (suite *BackendTestSuite) TestSign() {
 			"pass - sign nil data",
 			func() {
 				armor := crypto.EncryptArmorPrivKey(priv, "", "eth_secp256k1")
-				suite.backend.clientCtx.Keyring.ImportPrivKey("test_key", armor, "")
+				err := suite.backend.clientCtx.Keyring.ImportPrivKey("test_key", armor, "")
+				suite.Require().NoError(err)
 			},
 			from,
 			nil,
@@ -231,13 +245,13 @@ func (suite *BackendTestSuite) TestSignTypedData() {
 			"fail - empty TypeData",
 			func() {
 				armor := crypto.EncryptArmorPrivKey(priv, "", "eth_secp256k1")
-				suite.backend.clientCtx.Keyring.ImportPrivKey("test_key", armor, "")
+				err := suite.backend.clientCtx.Keyring.ImportPrivKey("test_key", armor, "")
+				suite.Require().NoError(err)
 			},
 			from,
 			apitypes.TypedData{},
 			false,
 		},
-		// TODO: Generate a TypedData msg
 	}
 
 	for _, tc := range testCases {
