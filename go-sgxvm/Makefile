@@ -16,3 +16,4 @@ build:
 	@cp $(CURDIR)/target/release/libsgxvm_wrapper.so $(CURDIR)/internal/api/libsgx_wrapper.x86_64.so
 	@protoc --go_out=types --proto_path=../sgxvm/proto/ ../sgxvm/proto/ffi.proto
 	@protoc --go_out=types --proto_path=proto/ proto/node.proto
+	@cp types/github.com/SigmaGmbH/librustgo/types/* types/ && rm -rf types/github.com

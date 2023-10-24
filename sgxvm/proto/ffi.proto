@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package ffi.ffi;
 
-option go_package = "./";
+option go_package = "github.com/SigmaGmbH/librustgo/types";
 
 // General request
 

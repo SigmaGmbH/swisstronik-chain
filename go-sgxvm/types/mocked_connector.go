@@ -2,7 +2,7 @@ package types
 
 import (
 	"errors"
-	ffi "github.com/SigmaGmbH/librustgo/go_protobuf_gen"
+	"github.com/SigmaGmbH/librustgo/types"
 	"github.com/ethereum/go-ethereum/common"
 	"google.golang.org/protobuf/proto"
 )
@@ -15,17 +15,17 @@ var _ Connector = MockedConnector{}
 
 func (c MockedConnector) Query(request []byte) ([]byte, error) {
 	// Decode protobuf
-	decodedRequest := &ffi.CosmosRequest{}
+	decodedRequest := &types.CosmosRequest{}
 	if err := proto.Unmarshal(request, decodedRequest); err != nil {
 		return nil, err
 	}
 
 	switch request := decodedRequest.Req.(type) {
-	case *ffi.CosmosRequest_BlockHash:
+	case *types.CosmosRequest_BlockHash:
 		println("[Go:Query] Block hash")
 		blockHash := make([]byte, 32)
-		return proto.Marshal(&ffi.QueryBlockHashResponse{Hash: blockHash})
-	case *ffi.CosmosRequest_GetAccount:
+		return proto.Marshal(&types.QueryBlockHashResponse{Hash: blockHash})
+	case *types.CosmosRequest_GetAccount:
 		ethAddress := common.BytesToAddress(request.GetAccount.Address)
 		println("[Go:Query] get account data for address: ", ethAddress.String())
 		acct, err := c.DB.GetAccountOrEmpty(ethAddress)
@@ -33,78 +33,78 @@ func (c MockedConnector) Query(request []byte) ([]byte, error) {
 			return nil, err
 		}
 
-		return proto.Marshal(&ffi.QueryGetAccountResponse{
+		return proto.Marshal(&types.QueryGetAccountResponse{
 			Balance: acct.Balance,
 			Nonce:   acct.Nonce,
 		})
-	case *ffi.CosmosRequest_InsertAccount:
+	case *types.CosmosRequest_InsertAccount:
 		data := request.InsertAccount
 		ethAddress := common.BytesToAddress(request.InsertAccount.Address)
 		println("[Go:Query] Insert/Update account: ", ethAddress.String())
 		if err := c.DB.InsertAccount(ethAddress, data.Balance, data.Nonce); err != nil {
 			return nil, err
 		}
-		return proto.Marshal(&ffi.QueryInsertAccountResponse{})
-	case *ffi.CosmosRequest_ContainsKey:
+		return proto.Marshal(&types.QueryInsertAccountResponse{})
+	case *types.CosmosRequest_ContainsKey:
 		ethAddress := common.BytesToAddress(request.ContainsKey.Key)
 		println("[Go:Query] Contains key for: ", ethAddress.String())
 		contains, err := c.DB.Contains(ethAddress)
 		if err != nil {
 			return nil, err
 		}
-		return proto.Marshal(&ffi.QueryContainsKeyResponse{Contains: contains})
-	case *ffi.CosmosRequest_AccountCode:
+		return proto.Marshal(&types.QueryContainsKeyResponse{Contains: contains})
+	case *types.CosmosRequest_AccountCode:
 		ethAddress := common.BytesToAddress(request.AccountCode.Address)
 		acct, err := c.DB.GetAccountOrEmpty(ethAddress)
 		if err != nil {
 			return nil, err
 		}
 		println("[Go:Query] Account code: ", ethAddress.String(), "code len: ", len(acct.Code))
-		return proto.Marshal(&ffi.QueryGetAccountCodeResponse{Code: acct.Code})
-	case *ffi.CosmosRequest_StorageCell:
+		return proto.Marshal(&types.QueryGetAccountCodeResponse{Code: acct.Code})
+	case *types.CosmosRequest_StorageCell:
 		ethAddress := common.BytesToAddress(request.StorageCell.Address)
 		println("[Go:Query] Get storage cell: ", ethAddress.String())
 		value, err := c.DB.GetStorageCell(ethAddress, request.StorageCell.Index)
 		if err != nil {
 			return nil, err
 		}
-		return proto.Marshal(&ffi.QueryGetAccountStorageCellResponse{Value: value})
-	case *ffi.CosmosRequest_InsertAccountCode:
+		return proto.Marshal(&types.QueryGetAccountStorageCellResponse{Value: value})
+	case *types.CosmosRequest_InsertAccountCode:
 		ethAddress := common.BytesToAddress(request.InsertAccountCode.Address)
 		println("[Go:Query] Insert account code: ", ethAddress.String(), "len: ", len(request.InsertAccountCode.Code))
 		if err := c.DB.InsertContractCode(ethAddress, request.InsertAccountCode.Code); err != nil {
 			return nil, err
 		}
-		return proto.Marshal(&ffi.QueryInsertAccountCodeResponse{})
-	case *ffi.CosmosRequest_InsertStorageCell:
+		return proto.Marshal(&types.QueryInsertAccountCodeResponse{})
+	case *types.CosmosRequest_InsertStorageCell:
 		data := request.InsertStorageCell
 		ethAddress := common.BytesToAddress(request.InsertStorageCell.Address)
 		println("[Go:Query] Insert storage cell: ", ethAddress.String())
 		if err := c.DB.InsertStorageCell(ethAddress, data.Index, data.Value); err != nil {
 			return nil, err
 		}
-		return proto.Marshal(&ffi.QueryInsertStorageCellResponse{})
-	case *ffi.CosmosRequest_Remove:
+		return proto.Marshal(&types.QueryInsertStorageCellResponse{})
+	case *types.CosmosRequest_Remove:
 		ethAddress := common.BytesToAddress(request.Remove.Address)
 		println("[Go:Query] Remove account: ", ethAddress.String())
 		if err := c.DB.Delete(ethAddress); err != nil {
 			return nil, err
 		}
-		return proto.Marshal(&ffi.QueryRemoveResponse{})
-	case *ffi.CosmosRequest_RemoveStorageCell:
+		return proto.Marshal(&types.QueryRemoveResponse{})
+	case *types.CosmosRequest_RemoveStorageCell:
 		ethAddress := common.BytesToAddress(request.RemoveStorageCell.Address)
 		println("[Go:Query] Remove storage cell: ", ethAddress.String())
 		if err := c.DB.RemoveStorageCell(ethAddress, request.RemoveStorageCell.Index); err != nil {
 			return nil, err
 		}
-		return proto.Marshal(&ffi.QueryRemoveStorageCellResponse{})
+		return proto.Marshal(&types.QueryRemoveStorageCellResponse{})
 	}
 
 	return nil, errors.New("wrong query")
 }
 
-func GetDefaultTxContext() *ffi.TransactionContext {
-	return &ffi.TransactionContext{
+func GetDefaultTxContext() *types.TransactionContext {
+	return &types.TransactionContext{
 		BlockCoinbase:      common.Address{}.Bytes(),
 		BlockNumber:        0,
 		BlockBaseFeePerGas: make([]byte, 32),

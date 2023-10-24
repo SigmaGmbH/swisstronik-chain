@@ -9,7 +9,6 @@ import "C"
 
 import (
 	"net"
-	ffi "github.com/SigmaGmbH/librustgo/go_protobuf_gen"
 	"github.com/SigmaGmbH/librustgo/types"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 )
@@ -58,7 +57,7 @@ func RequestSeed(hostname string, port int) error {
 }
 
 // GetNodePublicKey handles request for node public key
-func GetNodePublicKey() (*ffi.NodePublicKeyResponse, error) {
+func GetNodePublicKey() (*types.NodePublicKeyResponse, error) {
 	return nil, nil
 }
 
@@ -68,9 +67,9 @@ func Call(
 	from, to, data, value []byte,
 	accessList ethtypes.AccessList,
 	gasLimit, nonce uint64,
-	txContext *ffi.TransactionContext,
+	txContext *types.TransactionContext,
 	commit bool,
-) (*ffi.HandleTransactionResponse, error) {
+) (*types.HandleTransactionResponse, error) {
 	return nil, nil
 }
 
@@ -80,8 +79,8 @@ func Create(
 	from, data, value []byte,
 	accessList ethtypes.AccessList,
 	gasLimit, nonce uint64,
-	txContext *ffi.TransactionContext,
+	txContext *types.TransactionContext,
 	commit bool,
-) (*ffi.HandleTransactionResponse, error) {
+) (*types.HandleTransactionResponse, error) {
 	return nil, nil
 }
