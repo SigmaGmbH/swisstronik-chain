@@ -5,12 +5,12 @@ fn main () {
     let crate_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
 
     let generated = cbindgen::generate(crate_dir).expect("Unable to generate bindings");
-    generated.write_to_file("../internal/api/bindings.h");
+    generated.write_to_file("./internal/api/bindings.h");
 
     let is_sim = env::var("SGX_MODE").unwrap_or_else(|_| "HW".to_string());
 
     // Link enclave and libraries
-    println!("cargo:rustc-link-search=native=../sgx-artifacts/lib");
+    println!("cargo:rustc-link-search=native=../sgxvm/sgx-artifacts/lib");
     println!("cargo:rustc-link-lib=static=Enclave_u");
 
     println!("cargo:rustc-link-search=native=/opt/intel/sgxsdk/lib64");

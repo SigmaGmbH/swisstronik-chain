@@ -100,6 +100,9 @@ define sgx_build
 	$(call sign_enclave)
 endef
 
-sgx:
+build:
 	$(call sgx_build)
 	@echo "Intel SGX enclave built and signed"
+
+clean:
+	$(call sgx_clean)

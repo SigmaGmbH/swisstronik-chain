@@ -372,7 +372,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "sgx_wrapper"
+name = "sgxvm_wrapper"
 version = "1.0.0"
 dependencies = [
  "cbindgen",
