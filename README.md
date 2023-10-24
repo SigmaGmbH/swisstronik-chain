@@ -8,20 +8,50 @@ It lets Web 3.0 and traditional companies build KYC, AML and DPR compliant appli
 
 ## Build
 
+### Prerequisites
+
 Install submodules by running
 ```sh 
 make init 
 ```
 
-Build an enclave. For testing purposes you can build enclave in simulation mode by adding `SGX_MODE=SW`. To specify path for output with compiled enclave you can use `ENCLAVE_HOME` env arg.
-```sh
-make build-enclave
-```
+### Build `swisstronikd` to run the node
 
-Build a chain
+To build `swisstronikd` binary, which can be used to run node and interact with SGX-dependent functionality, use the following command:
 ```sh
 make build
 ```
+
+This command will build binary with SGX in hardware mode (your hardware should support SGX to run binary in this mode) and will put enclave file (`enclave.signed.so`) to `$HOME/.swisstronik-enclave` directory. 
+
+If you want to setup local node for testing purposes without possibility to connect to Swisstronik testnet as full node, you can build `swisstronikd` in simulation mode using the following command:
+```sh
+SGX_MODE=SW make build
+```
+
+Also, if you want to put enclave file (`enclave.signed.so`) to other directory, you can specify `ENCLAVE_HOME` env variable. For example:
+```sh
+ENCLAVE_HOME=/tmp/enclave-directory make build
+```
+
+### Build `swisstronikdcli`
+
+If your OS / hardware doesn't support SGX even in simulation mode, you can build CLI which will allow you:
+- sending queries
+- transactions
+- manage your keys 
+- debug commands, such as address conversion 
+
+Below you can see table with build commands for each OS / CPU
+
+| OS / arch             | command                     |
+|-----------------------|-----------------------------|
+| linux amd64           | `make build-linux-cli-amd`  |
+| linux arm64           | `make build-macos-cli-arm`  |
+| macos with M1 chip    | `make build-macos-cli-arm`  |
+| macos with Intel chip | `make build-macos-cli-amd`  |
+| windows               | `make build-windows-cli`    |
+
 
 ## Docker
 
