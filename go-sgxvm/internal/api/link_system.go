@@ -1,4 +1,4 @@
-//go:build sys_sgx_wrapper
+//go:build sys_sgx_wrapper && !nosgx
 
 package api
 

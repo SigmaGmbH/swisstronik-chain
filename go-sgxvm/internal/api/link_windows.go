@@ -1,4 +1,4 @@
-//go:build windows && !sys_sgx_wrapper
+//go:build windows && !sys_sgx_wrapper && !nosgx
 
 package api
 

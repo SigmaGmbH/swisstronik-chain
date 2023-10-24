@@ -1,6 +1,5 @@
-//go:build !nosgx
-// +build !nosgx
-
+//go:build nosgx
+// +build nosgx
 
 package api
 
