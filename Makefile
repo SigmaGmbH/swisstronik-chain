@@ -78,8 +78,26 @@ install: go.sum
 build: go.sum
 	go build -mod=mod $(BUILD_FLAGS)  -tags osusergo,netgo -o build/swisstronikd ./cmd/swisstronikd
 
+build-cli: go.sum
+	go build -mod=mod $(BUILD_FLAGS) -tags osusergo,netgo,nosgx -o build/$(BINARY_NAME) ./cmd/swisstronikd
+
 build-linux:
 	GOOS=linux GOARCH=$(if $(findstring aarch64,$(shell uname -m)) || $(findstring arm64,$(shell uname -m)),arm64,amd64) $(MAKE) build
+
+build-macos-cli-amd: 
+	BINARY_NAME=swisstronikcli-macos-amd64 GOOS=darwin GOARCH=amd64 $(MAKE) build-cli
+
+build-macos-cli-arm:
+	BINARY_NAME=swisstronikcli-macos-arm64 GOOS=darwin GOARCH=arm64 $(MAKE) build-cli
+
+build-linux-cli-amd:
+	BINARY_NAME=swisstronikcli-linux-amd64 GOOS=linux GOARCH=amd64 $(MAKE) build-cli
+
+build-linux-cli-arm:
+	BINARY_NAME=swisstronikcli-linux-arm64 GOOS=linux GOARCH=arm64 $(MAKE) build-cli
+
+build-windows-cli:
+	BINARY_NAME=swisstronikcli-windows GOOS=windows GOARCH=amd64 $(MAKE) build-cli
 
 build-enclave:
 	$(MAKE) -C go-sgxvm build_go

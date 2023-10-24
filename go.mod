@@ -24,6 +24,7 @@ require (
 	github.com/ethereum-optimism/go-ethereum-hdwallet v0.1.3
 	github.com/ethereum/go-ethereum v1.11.5
 	github.com/getsentry/sentry-go v0.23.0
+	github.com/gabriel-vasile/mimetype v1.4.2
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
 	github.com/gogo/protobuf v1.3.3
 	github.com/golang/protobuf v1.5.3

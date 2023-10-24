@@ -25,6 +25,8 @@ mod encryption;
 mod attestation;
 mod key_manager;
 mod handlers;
+mod types;
+mod precompiles;
 
 pub const MAX_RESULT_LEN: usize = 4096;
 
@@ -98,13 +100,13 @@ pub extern "C" fn handle_request(
         Some(req) => {
             match req {
                 FFIRequest_oneof_req::callRequest(data) => {
-                    handlers::tx::handle_call_request(querier, data)
+                    handlers::handle_evm_call_request(querier, data)
                 },
                 FFIRequest_oneof_req::createRequest(data) => {
-                    handlers::tx::handle_create_request(querier, data)
+                    handlers::handle_evm_create_request(querier, data)
                 },
                 FFIRequest_oneof_req::publicKeyRequest(_) => {
-                    handlers::node::handle_public_key_request()
+                    handlers::handle_public_key_request()
                 }
             }
         }

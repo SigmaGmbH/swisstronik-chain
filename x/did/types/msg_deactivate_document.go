@@ -62,7 +62,7 @@ func (msg *MsgDeactivateDIDDocumentPayload) GetSignBytes() []byte {
 
 func (msg MsgDeactivateDIDDocumentPayload) Validate(allowedNamespaces []string) error {
 	return validation.ValidateStruct(&msg,
-		validation.Field(&msg.Id, validation.Required, IsDID(allowedNamespaces)),
+		validation.Field(&msg.Id, validation.Required, IsDID()),
 		validation.Field(&msg.VersionId, validation.Required, IsUUID()),
 	)
 }

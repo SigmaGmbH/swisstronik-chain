@@ -36,18 +36,6 @@ var _ = Describe("SignInfo tests", func() {
 				isValid:  true,
 				errorMsg: "",
 			}),
-
-		Entry(
-			"Namespace is not allowed",
-			TestCaseSignInfoStruct{
-				si: SignInfo{
-					VerificationMethodId: "did:swtr:zABCDEFG123456789abcd#service1",
-					Signature:            []byte("DIDCommMessaging"),
-				},
-				allowedNamespaces: []string{"mainnet"},
-				isValid:           false,
-				errorMsg:          "verification_method_id: did namespace must be one of: mainnet.",
-			}),
 	)
 })
 

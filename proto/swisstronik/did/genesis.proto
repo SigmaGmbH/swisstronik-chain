@@ -4,6 +4,7 @@ package swisstronik.did;
 
 import "swisstronik/did/document.proto";
 import "swisstronik/did/params.proto";
+import "swisstronik/did/resource.proto";
 
 import "gogoproto/gogo.proto";
 
@@ -25,5 +26,8 @@ message GenesisState {
   // All DID Document version sets (contains all versions of all DID Documents)
   repeated DIDDocumentVersionSet version_sets = 1;
 
-  Params params = 2 [ (gogoproto.nullable) = false ];
+  // All Resources with metadata
+  repeated ResourceWithMetadata resources = 2;
+
+  Params params = 3 [ (gogoproto.nullable) = false ];
 }

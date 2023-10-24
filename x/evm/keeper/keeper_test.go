@@ -7,6 +7,7 @@ import (
 	"math"
 	"math/big"
 	"os"
+	didtypes "swisstronik/x/did/types"
 	"testing"
 	"time"
 
@@ -35,6 +36,7 @@ import (
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	tmjson "github.com/tendermint/tendermint/libs/json"
 
 	"swisstronik/app"
 	"swisstronik/crypto/ethsecp256k1"
@@ -285,8 +287,8 @@ func (suite *KeeperTestSuite) Commit() {
 	suite.queryClient = evmtypes.NewQueryClient(queryHelper)
 }
 
-// DeployTestContract deploy a test erc20 contract and returns the contract address
-func (suite *KeeperTestSuite) DeployTestContract(t require.TestingT, owner common.Address, supply *big.Int) common.Address {
+// DeployVCContract deploy a test contract for verifying credentials and returns the contract address
+func (suite *KeeperTestSuite) DeployVCContract(t require.TestingT) common.Address {
 	ctx := sdk.WrapSDKContext(suite.ctx)
 	chainID := suite.app.EvmKeeper.ChainID()
 
@@ -313,6 +315,134 @@ func (suite *KeeperTestSuite) DeployTestContract(t require.TestingT, owner commo
 		erc20DeployTx = evmtypes.NewTxContract(
 			chainID,
 			nonce,
+			nil,       // amount
+			1_000_000, // gasLimit
+			nil,       // gasPrice
+			suite.app.FeeMarketKeeper.GetBaseFee(suite.ctx),
+			big.NewInt(1),
+			data,                   // input
+			&ethtypes.AccessList{}, // accesses
+		)
+	} else {
+		erc20DeployTx = evmtypes.NewTxContract(
+			chainID,
+			nonce,
+			nil,       // amount
+			1_000_000, // gasLimit
+			nil,       // gasPrice
+			nil, nil,
+			data, // input
+			nil,  // accesses
+		)
+	}
+
+	deployTx.From = suite.address.Hex()
+	err = deployTx.Sign(ethtypes.LatestSignerForChainID(chainID), suite.signer)
+	require.NoError(t, err)
+
+	ethTx := &types.MsgHandleTx{
+		Data: erc20DeployTx.Data,
+		Hash: erc20DeployTx.Hash,
+		From: erc20DeployTx.From,
+	}
+	rsp, err := suite.app.EvmKeeper.HandleTx(ctx, ethTx)
+	require.NoError(t, err)
+	require.Empty(t, rsp.VmError)
+	return crypto.CreateAddress(suite.address, nonce)
+}
+
+func (suite *KeeperTestSuite) TransferERC20Token(t require.TestingT, contractAddr, from, to common.Address, amount *big.Int) *types.MsgHandleTx {
+	ctx := sdk.WrapSDKContext(suite.ctx)
+	chainID := suite.app.EvmKeeper.ChainID()
+
+	transferData, err := types.ERC20Contract.ABI.Pack("transfer", to, amount)
+	require.NoError(t, err)
+	args, err := json.Marshal(&types.TransactionArgs{To: &contractAddr, From: &from, Data: (*hexutil.Bytes)(&transferData)})
+	require.NoError(t, err)
+	res, err := suite.queryClient.EstimateGas(ctx, &types.EthCallRequest{
+		Args:            args,
+		GasCap:          25_000_000,
+		ProposerAddress: suite.ctx.BlockHeader().ProposerAddress,
+	})
+	require.NoError(t, err)
+
+	nonce := suite.app.EvmKeeper.GetNonce(suite.ctx, suite.address)
+
+	var ercTransferTx *types.MsgHandleTx
+	if suite.enableFeemarket {
+		ercTransferTx = types.NewTx(
+			chainID,
+			nonce,
+			&contractAddr,
+			nil,
+			500_000,
+			nil,
+			suite.app.FeeMarketKeeper.GetBaseFee(suite.ctx),
+			big.NewInt(1),
+			txData,
+			&ethtypes.AccessList{},
+			suite.privateKey,
+			suite.nodePublicKey,
+		)
+	} else {
+		ercTransferTx = types.NewTx(
+			chainID,
+			nonce,
+			&contractAddr,
+			nil,
+			500_000,
+			nil,
+			nil,
+			nil,
+			txData,
+			nil,
+			suite.privateKey,
+			suite.nodePublicKey,
+		)
+	}
+
+	tx.From = suite.address.Hex()
+	err = tx.Sign(ethtypes.LatestSignerForChainID(chainID), suite.signer)
+	require.NoError(t, err)
+
+	ethTx := &types.MsgHandleTx{
+		Data: ercTransferTx.Data,
+		Hash: ercTransferTx.Hash,
+		From: ercTransferTx.From,
+	}
+	rsp, err := suite.app.EvmKeeper.HandleTx(ctx, ethTx)
+	require.NoError(t, err)
+	require.Empty(t, rsp.VmError)
+}
+
+// DeployTestContract deploy a test erc20 contract and returns the contract address
+func (suite *KeeperTestSuite) DeployTestContract(t require.TestingT, owner common.Address, supply *big.Int) common.Address {
+	ctx := sdk.WrapSDKContext(suite.ctx)
+	chainID := suite.app.EvmKeeper.ChainID()
+
+	ctorArgs, err := types.ERC20Contract.ABI.Pack("", owner, supply)
+	require.NoError(t, err)
+
+	nonce := suite.app.EvmKeeper.GetNonce(suite.ctx, suite.address)
+
+	data := append(types.ERC20Contract.Bin, ctorArgs...)
+	args, err := json.Marshal(&types.TransactionArgs{
+		From: &suite.address,
+		Data: (*hexutil.Bytes)(&data),
+	})
+	require.NoError(t, err)
+	res, err := suite.queryClient.EstimateGas(ctx, &types.EthCallRequest{
+		Args:            args,
+		GasCap:          uint64(config.DefaultGasCap),
+		ProposerAddress: suite.ctx.BlockHeader().ProposerAddress,
+	})
+	require.NoError(t, err)
+
+	var erc20DeployTx *types.MsgHandleTx
+	if suite.enableFeemarket {
+		erc20DeployTx = types.NewTxContract(
+			chainID,
+			nonce,
 			nil,     // amount
 			res.Gas, // gasLimit
 			nil,     // gasPrice
@@ -322,7 +452,7 @@ func (suite *KeeperTestSuite) DeployTestContract(t require.TestingT, owner commo
 			&ethtypes.AccessList{}, // accesses
 		)
 	} else {
-		erc20DeployTx = evmtypes.NewTxContract(
+		erc20DeployTx = types.NewTxContract(
 			chainID,
 			nonce,
 			nil,     // amount
@@ -338,7 +468,7 @@ func (suite *KeeperTestSuite) DeployTestContract(t require.TestingT, owner commo
 	err = erc20DeployTx.Sign(ethtypes.LatestSignerForChainID(chainID), suite.signer)
 	require.NoError(t, err)
 
-	ethTx := &evmtypes.MsgHandleTx{
+	ethTx := &types.MsgHandleTx{
 		Data: erc20DeployTx.Data,
 		Hash: erc20DeployTx.Hash,
 		From: erc20DeployTx.From,
@@ -347,70 +477,6 @@ func (suite *KeeperTestSuite) DeployTestContract(t require.TestingT, owner commo
 	require.NoError(t, err)
 	require.Empty(t, rsp.VmError)
 	return crypto.CreateAddress(suite.address, nonce)
-}
-
-func (suite *KeeperTestSuite) TransferERC20Token(t require.TestingT, contractAddr, from, to common.Address, amount *big.Int) *evmtypes.MsgHandleTx {
-	ctx := sdk.WrapSDKContext(suite.ctx)
-	chainID := suite.app.EvmKeeper.ChainID()
-
-	transferData, err := evmtypes.ERC20Contract.ABI.Pack("transfer", to, amount)
-	require.NoError(t, err)
-	args, err := json.Marshal(&evmtypes.TransactionArgs{To: &contractAddr, From: &from, Data: (*hexutil.Bytes)(&transferData)})
-	require.NoError(t, err)
-	res, err := suite.queryClient.EstimateGas(ctx, &evmtypes.EthCallRequest{
-		Args:            args,
-		GasCap:          25_000_000,
-		ProposerAddress: suite.ctx.BlockHeader().ProposerAddress,
-	})
-	require.NoError(t, err)
-
-	nonce := suite.app.EvmKeeper.GetNonce(suite.ctx, suite.address)
-
-	var ercTransferTx *evmtypes.MsgHandleTx
-	if suite.enableFeemarket {
-		ercTransferTx = evmtypes.NewTx(
-			chainID,
-			nonce,
-			&contractAddr,
-			nil,
-			res.Gas,
-			nil,
-			suite.app.FeeMarketKeeper.GetBaseFee(suite.ctx),
-			big.NewInt(1),
-			transferData,
-			&ethtypes.AccessList{}, // accesses
-			suite.privateKey,
-			suite.nodePublicKey,
-		)
-	} else {
-		ercTransferTx = evmtypes.NewTx(
-			chainID,
-			nonce,
-			&contractAddr,
-			nil,
-			res.Gas,
-			nil,
-			nil, nil,
-			transferData,
-			nil,
-			suite.privateKey,
-			suite.nodePublicKey,
-		)
-	}
-
-	ercTransferTx.From = suite.address.Hex()
-	err = ercTransferTx.Sign(ethtypes.LatestSignerForChainID(chainID), suite.signer)
-	require.NoError(t, err)
-
-	ethTx := &evmtypes.MsgHandleTx{
-		Data: ercTransferTx.Data,
-		Hash: ercTransferTx.Hash,
-		From: ercTransferTx.From,
-	}
-	rsp, err := suite.app.EvmKeeper.HandleTx(ctx, ethTx)
-	require.NoError(t, err)
-	require.Empty(t, rsp.VmError)
-	return ercTransferTx
 }
 
 // DeployTestMessageCall deploy a test erc20 contract and returns the contract address
@@ -1143,4 +1209,40 @@ func (suite *KeeperTestSuite) TestDeleteAccount() {
 			}
 		})
 	}
+}
+
+func (suite *KeeperTestSuite) TestVerifyCredential() {
+	// Add verifiable credential
+	var err error
+
+	// Create DID Document for issuer
+	metadata := didtypes.Metadata{
+		Created:   time.Now(),
+		VersionId: "123e4567-e89b-12d3-a456-426655440000",
+	}
+	didUrl := "did:swtr:79UeaXUMYuhso8tKfmx9Lj"
+	verificationMethods := []*didtypes.VerificationMethod{{
+		Id:                     "did:swtr:79UeaXUMYuhso8tKfmx9Lj#7fe2db8637700730ce468995ee89cd986d9d2e3d07266171abdaf6d11a9c7732-1",
+		VerificationMethodType: "Ed25519VerificationKey2020",
+		Controller:             didUrl,
+		VerificationMaterial:   "z6Mko4UTTiH1d8ZcThnBxokPaVggEQ9QkuJuEWgBTwwJAYcq",
+	}}
+	document := didtypes.DIDDocument{
+		Id:                 didUrl,
+		Controller:         []string{didUrl},
+		VerificationMethod: verificationMethods,
+		Authentication:     []string{"did:swtr:79UeaXUMYuhso8tKfmx9Lj#7fe2db8637700730ce468995ee89cd986d9d2e3d07266171abdaf6d11a9c7732-1"},
+	}
+	didDocument := didtypes.DIDDocumentWithMetadata{
+		Metadata: &metadata,
+		DidDoc:   &document,
+	}
+	err = suite.app.EvmKeeper.DIDKeeper.AddNewDIDDocumentVersion(suite.ctx, &didDocument)
+	suite.Require().NoError(err)
+
+	// Deploy contract VC.sol
+	vcContract := suite.DeployVCContract(suite.T())
+
+	// Send transaction to verify credentials
+	suite.SendVerifiableCredentialTx(suite.T(), vcContract)
 }

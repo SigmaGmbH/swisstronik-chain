@@ -61,14 +61,14 @@ func JoinDIDUrl(did string, path string, query string, fragment string) string {
 }
 
 // ValidateDIDUrl checks method and allowed namespaces only when the corresponding parameters are specified.
-func ValidateDIDUrl(didURL string, method string, allowedNamespaces []string) error {
+func ValidateDIDUrl(didURL string, method string) error {
 	did, path, query, fragment, err := TrySplitDIDUrl(didURL)
 	if err != nil {
 		return err
 	}
 
 	// Validate DID
-	err = ValidateDID(did, method, allowedNamespaces)
+	err = ValidateDID(did, method)
 	if err != nil {
 		return err
 	}
@@ -112,8 +112,8 @@ func ValidatePath(path string) error {
 	return nil
 }
 
-func IsValidDIDUrl(didURL string, method string, allowedNamespaces []string) bool {
-	err := ValidateDIDUrl(didURL, method, allowedNamespaces)
+func IsValidDIDUrl(didURL string, method string) bool {
+	err := ValidateDIDUrl(didURL, method)
 
 	return nil == err
 }

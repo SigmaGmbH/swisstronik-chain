@@ -5,16 +5,16 @@ accounts:
 - name: alice
   mnemonic: "entry garbage bike poem grunt negative easily annual miss happy license blur false fringe program picture inner tape dismiss eagle include quality drill master"
   coins:
-  - 200000000000000000000uswtr
+  - 200000000000000000000000000uswtr
   cointype: 60
 - name: bob
   mnemonic: "license hint pulse quiz child night blood reveal scrap cloth winter manual often access duck humble oblige wool pyramid gate pretty rib toss unhappy"
   coins:
-  - 200000000000000000000uswtr
+  - 200000000000000000000000000uswtr
   cointype: 60
 - name: jane
   coins:
-    - 200000000000000000000uswtr
+    - 200000000000000000000000000uswtr
   mnemonic: "cargo ramp supreme review change various throw air figure humble soft steel slam pole betray inhale already dentist enough away office apple sample glue"
   cointype: 60  
 client:

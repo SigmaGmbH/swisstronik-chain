@@ -2,6 +2,9 @@ package keeper
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"fmt"
 	"reflect"
 	"swisstronik/x/did/types"
 
@@ -9,6 +12,11 @@ import (
 )
 
 var _ types.MsgServer = &Keeper{}
+
+const (
+	DefaultAlternativeURITemplate    = "did:swtr:%s/resources/%s"
+	DefaultAlternaticeURIDescription = "did-url"
+)
 
 // NewMsgServer returns an implementation of the MsgServer interface for the provided Keeper.
 func NewMsgServer(keeper Keeper) types.MsgServer {
@@ -25,7 +33,7 @@ func (k Keeper) CreateDIDDocument(goCtx context.Context, msg *types.MsgCreateDID
 	msg.Normalize()
 
 	// Validate DID doesn't exist
-	if k.HasDIDDocument(&ctx, msg.Payload.Id) {
+	if k.HasDIDDocument(ctx, msg.Payload.Id) {
 		return nil, types.ErrDIDDocumentExists.Wrap(msg.Payload.Id)
 	}
 
@@ -42,7 +50,7 @@ func (k Keeper) CreateDIDDocument(goCtx context.Context, msg *types.MsgCreateDID
 	// Check controllers' existence
 	controllers := didDoc.AllControllerDIDs()
 	for _, controller := range controllers {
-		_, err := MustFindDIDDocument(&k, &ctx, inMemoryDids, controller)
+		_, err := k.MustFindDIDDocument(ctx, inMemoryDids, controller)
 		if err != nil {
 			return nil, err
 		}
@@ -50,13 +58,13 @@ func (k Keeper) CreateDIDDocument(goCtx context.Context, msg *types.MsgCreateDID
 
 	// Verify signatures
 	signers := GetSignerDIDsForDIDCreation(didDoc)
-	err := VerifyAllSignersHaveAllValidSignatures(&k, &ctx, inMemoryDids, signBytes, signers, msg.Signatures)
+	err := k.VerifyAllSignersHaveAllValidSignatures(ctx, inMemoryDids, signBytes, signers, msg.Signatures)
 	if err != nil {
 		return nil, err
 	}
 
 	// Save first DID Document version
-	err = k.AddNewDIDDocumentVersion(&ctx, &didDocWithMetadata)
+	err = k.AddNewDIDDocumentVersion(ctx, &didDocWithMetadata)
 	if err != nil {
 		return nil, types.ErrInternal.Wrapf(err.Error())
 	}
@@ -84,12 +92,12 @@ func (k Keeper) DeactivateDIDDocument(goCtx context.Context, msg *types.MsgDeact
 	msg.Normalize()
 
 	// Validate DID does exist
-	if !k.HasDIDDocument(&ctx, msg.Payload.Id) {
+	if !k.HasDIDDocument(ctx, msg.Payload.Id) {
 		return nil, types.ErrDIDDocumentNotFound.Wrap(msg.Payload.Id)
 	}
 
 	// Retrieve DID Document state value and did
-	didDoc, err := k.GetLatestDIDDocument(&ctx, msg.Payload.Id)
+	didDoc, err := k.GetLatestDIDDocument(ctx, msg.Payload.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +112,7 @@ func (k Keeper) DeactivateDIDDocument(goCtx context.Context, msg *types.MsgDeact
 
 	// Verify signatures
 	signers := GetSignerDIDsForDIDCreation(*didDoc.DidDoc)
-	err = VerifyAllSignersHaveAllValidSignatures(&k, &ctx, inMemoryDids, signBytes, signers, msg.Signatures)
+	err = k.VerifyAllSignersHaveAllValidSignatures(ctx, inMemoryDids, signBytes, signers, msg.Signatures)
 	if err != nil {
 		return nil, err
 	}
@@ -114,17 +122,17 @@ func (k Keeper) DeactivateDIDDocument(goCtx context.Context, msg *types.MsgDeact
 	didDoc.Metadata.Update(ctx, msg.Payload.VersionId)
 
 	// Apply changes. We create a new version on deactivation to track deactivation time
-	err = k.AddNewDIDDocumentVersion(&ctx, &didDoc)
+	err = k.AddNewDIDDocumentVersion(ctx, &didDoc)
 	if err != nil {
 		return nil, types.ErrInternal.Wrapf(err.Error())
 	}
 
 	// Deactivate all previous versions
 	var iterationErr error
-	k.IterateDIDDocumentVersions(&ctx, msg.Payload.Id, func(didDocWithMetadata types.DIDDocumentWithMetadata) bool {
+	k.IterateDIDDocumentVersions(ctx, msg.Payload.Id, func(didDocWithMetadata types.DIDDocumentWithMetadata) bool {
 		didDocWithMetadata.Metadata.Deactivated = true
 
-		err := k.SetDIDDocumentVersion(&ctx, &didDocWithMetadata, true)
+		err := k.SetDIDDocumentVersion(ctx, &didDocWithMetadata, true)
 		if err != nil {
 			iterationErr = err
 			return false
@@ -153,7 +161,7 @@ func (k Keeper) UpdateDIDDocument(goCtx context.Context, msg *types.MsgUpdateDID
 	msg.Normalize()
 
 	// Check if DID exists and get latest version
-	existingDidDocWithMetadata, err := k.GetLatestDIDDocument(&ctx, msg.Payload.Id)
+	existingDidDocWithMetadata, err := k.GetLatestDIDDocument(ctx, msg.Payload.Id)
 	if err != nil {
 		return nil, types.ErrDIDDocumentNotFound.Wrap(err.Error())
 	}
@@ -181,7 +189,7 @@ func (k Keeper) UpdateDIDDocument(goCtx context.Context, msg *types.MsgUpdateDID
 	// Check controllers existence
 	controllers := updatedDidDoc.AllControllerDIDs()
 	for _, controller := range controllers {
-		_, err := MustFindDIDDocument(&k, &ctx, inMemoryDids, controller)
+		_, err := k.MustFindDIDDocument(ctx, inMemoryDids, controller)
 		if err != nil {
 			return nil, err
 		}
@@ -194,7 +202,7 @@ func (k Keeper) UpdateDIDDocument(goCtx context.Context, msg *types.MsgUpdateDID
 	// To eliminate this problem we have to add pubkey to the signInfo in future.
 	signers := GetSignerDIDsForDIDUpdate(*existingDidDoc, updatedDidDoc)
 	extendedSignatures := DuplicateSignatures(msg.Signatures, existingDidDocWithMetadata.DidDoc.Id, updatedDidDoc.Id)
-	err = VerifyAllSignersHaveAtLeastOneValidSignature(&k, &ctx, inMemoryDids, signBytes, signers, extendedSignatures, existingDidDoc.Id, updatedDidDoc.Id)
+	err = k.VerifyAllSignersHaveAtLeastOneValidSignature(ctx, inMemoryDids, signBytes, signers, extendedSignatures, existingDidDoc.Id, updatedDidDoc.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -203,7 +211,7 @@ func (k Keeper) UpdateDIDDocument(goCtx context.Context, msg *types.MsgUpdateDID
 	updatedDidDoc.ReplaceDIDs(updatedDidDoc.Id, existingDidDoc.Id)
 
 	// Update state
-	err = k.AddNewDIDDocumentVersion(&ctx, &updatedDidDocWithMetadata)
+	err = k.AddNewDIDDocumentVersion(ctx, &updatedDidDocWithMetadata)
 	if err != nil {
 		return nil, types.ErrInternal.Wrapf(err.Error())
 	}
@@ -211,6 +219,64 @@ func (k Keeper) UpdateDIDDocument(goCtx context.Context, msg *types.MsgUpdateDID
 	// Build and return response
 	return &types.MsgUpdateDIDDocumentResponse{
 		Value: &updatedDidDocWithMetadata,
+	}, nil
+}
+
+func (k Keeper) CreateResource(goCtx context.Context, msg *types.MsgCreateResource) (*types.MsgCreateResourceResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// Remember bytes before modifying payload
+	signBytes := msg.Payload.GetSignBytes()
+
+	msg.Normalize()
+
+	// Validate corresponding DIDDoc exists
+	did := types.JoinDID(types.DIDMethod, msg.Payload.CollectionId)
+	didDoc, err := k.GetLatestDIDDocument(ctx, did)
+	if err != nil {
+		return nil, err
+	}
+
+	// Validate DID is not deactivated
+	if didDoc.Metadata.Deactivated {
+		return nil, types.ErrDIDDocumentDeactivated.Wrap(did)
+	}
+
+	// Validate Resource doesn't exist
+	if k.HasResource(ctx, msg.Payload.CollectionId, msg.Payload.Id) {
+		return nil, types.ErrResourceExists.Wrap(msg.Payload.Id)
+	}
+
+	// We can use the same signers as for DID creation because didDoc stays the same
+	signers := GetSignerDIDsForDIDCreation(*didDoc.DidDoc)
+	err = k.VerifyAllSignersHaveAllValidSignatures(ctx, map[string]types.DIDDocumentWithMetadata{}, signBytes, signers, msg.Signatures)
+	if err != nil {
+		return nil, err
+	}
+
+	// Build Resource
+	resource := msg.Payload.ToResource()
+	checksum := sha256.Sum256(resource.Resource.Data)
+	resource.Metadata.Checksum = hex.EncodeToString(checksum[:])
+	resource.Metadata.Created = ctx.BlockTime()
+	resource.Metadata.MediaType = types.DetectMediaType(resource.Resource.Data)
+
+	// Add default resource alternative url
+	defaultAlternativeURL := types.AlternativeUri{
+		Uri:         fmt.Sprintf(DefaultAlternativeURITemplate, msg.Payload.CollectionId, msg.Payload.Id),
+		Description: DefaultAlternaticeURIDescription,
+	}
+	resource.Metadata.AlsoKnownAs = append(resource.Metadata.AlsoKnownAs, &defaultAlternativeURL)
+
+	// Persist resource
+	err = k.AddNewResourceVersion(ctx, &resource)
+	if err != nil {
+		return nil, types.ErrInternal.Wrapf(err.Error())
+	}
+
+	// Build and return response
+	return &types.MsgCreateResourceResponse{
+		Resource: resource.Metadata,
 	}, nil
 }
 
@@ -279,4 +345,3 @@ func GetSignerDIDsForDIDUpdate(existingDidDoc types.DIDDocument, updatedDidDoc t
 
 	return types.UniqueSorted(signers)
 }
-

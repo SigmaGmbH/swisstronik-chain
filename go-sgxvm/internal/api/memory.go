@@ -1,3 +1,6 @@
+//go:build !nosgx
+// +build !nosgx
+
 package api
 
 /*

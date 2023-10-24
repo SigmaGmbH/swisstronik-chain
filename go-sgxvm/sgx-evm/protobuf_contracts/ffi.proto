@@ -136,6 +136,20 @@ message QueryRemoveStorageResponse {}
 message QueryBlockHash { bytes number = 1; }
 message QueryBlockHashResponse { bytes hash = 1; }
 
+// Messages for interaction with x/did module
+message QueryVerificationMethods {
+  string did = 1;
+}
+
+message VerificationMethod {
+  string verificationMaterial = 1;
+  string verificationMethodType = 2;
+}
+
+message QueryVerificationMethodsResponse {
+  repeated VerificationMethod vm = 1;
+}
+
 message CosmosRequest {
   oneof req {
     QueryGetAccount getAccount = 1;
@@ -149,6 +163,7 @@ message CosmosRequest {
     QueryRemoveStorageCell removeStorageCell = 9;
     QueryRemoveStorage removeStorage = 10;
     QueryBlockHash blockHash = 11;
+    QueryVerificationMethods verificationMethods = 12;
   }
 }
 
