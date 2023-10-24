@@ -55,7 +55,8 @@ struct VC {
 
 #[derive(Deserialize)]
 struct CredentialSubject {
-    address: String,
+    #[serde(alias = "address")]
+    user_address: String,
 }
 
 /// The identity precompile.
@@ -103,10 +104,12 @@ impl LinearCostPrecompileWithQuerier for Identity {
         // Validate header
         header.validate()?;
 
+        println!("ENCLAVE DEBUG: PARSE VC");
         // Parse payload
         let parsed_payload: VerifiableCredential = serde_json::from_str(payload.as_str()).map_err(|_| PrecompileFailure::Error {
             exit_status: ExitError::Other("Cannot parse JWT payload".into()),
         })?;
+        println!("ENCLAVE DEBUG: VC PARSED");
         
         // Extract issuer from payload and obtain verification material
         let verification_materials = get_verification_material(querier, parsed_payload.iss)?;
@@ -120,9 +123,12 @@ impl LinearCostPrecompileWithQuerier for Identity {
                 exit_status: ExitError::Other("Cannot find appropriate verification method".into()),
             })?;
         
+        println!("Verify issuer signature");
         verify_signature(&data, &signature, &vm)?;
+        println!("Issuer signature is correct");
 
-        let credential_subject = convert_bech32_address(parsed_payload.vc.credential_subject.address)?;
+        // TODO: user address can be 0xethereumaddress or bech32swisstronikaddress
+        let credential_subject = convert_bech32_address(parsed_payload.vc.credential_subject.user_address)?;
         Ok((ExitSucceed::Returned, credential_subject))
     }
 }
@@ -187,6 +193,13 @@ fn verify_signature(data: &str, signature: &str, vm: &str) -> Result<(), Precomp
 }
 
 fn convert_bech32_address(address: String) -> Result<Vec<u8>, PrecompileFailure> {
+    // If address is 0x-prefixed we treat it as ethereum-like address
+    if address.starts_with("0x") {
+        return hex::decode(&address[2..]).map_err(|_| PrecompileFailure::Error {
+            exit_status: ExitError::Other("Cannot decode address".into()),
+        });
+    }
+
     let (_, data, _) =
         bech32::decode(address.as_str()).map_err(|_| PrecompileFailure::Error {
             exit_status: ExitError::Other("Cannot decode bech32 address".into()),
