@@ -76,7 +76,12 @@ install: go.sum
 	go install -mod=readonly $(BUILD_FLAGS) ./cmd/swisstronikd
 
 build: go.sum
+	$(MAKE) -C go-sgxvm build
 	go build -mod=mod $(BUILD_FLAGS)  -tags osusergo,netgo -o build/swisstronikd ./cmd/swisstronikd
+
+###############################################################################
+### 		          Build commands for CLI (without SGX support) 			###
+###############################################################################
 
 build-cli: go.sum
 	go build -mod=mod $(BUILD_FLAGS) -tags osusergo,netgo,nosgx -o build/$(BINARY_NAME) ./cmd/swisstronikd
@@ -98,9 +103,6 @@ build-linux-cli-arm:
 
 build-windows-cli:
 	BINARY_NAME=swisstronikcli-windows GOOS=windows GOARCH=amd64 $(MAKE) build-cli
-
-build-enclave:
-	$(MAKE) -C go-sgxvm build_go
 
 go.sum: go.mod
 	@echo "--> Ensure dependencies have not been modified"
