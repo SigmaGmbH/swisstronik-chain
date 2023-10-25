@@ -18,6 +18,12 @@ use std::{
 };
 use bech32::FromBase32;
 
+use std::prelude::v1::*;
+use std::time::*;
+use std::untrusted::time::SystemTimeEx;
+use chrono::TimeZone;
+use chrono::Utc as TzUtc;
+
 #[derive(Deserialize)]
 struct Header {
     pub alg: String,
@@ -108,7 +114,10 @@ impl LinearCostPrecompileWithQuerier for Identity {
         let parsed_payload: VerifiableCredential = serde_json::from_str(payload.as_str()).map_err(|_| PrecompileFailure::Error {
             exit_status: ExitError::Other("Cannot parse JWT payload".into()),
         })?;
-        
+
+        // Since we issue VC without expiration date, verify nbf (not valid before) field of JWT, it should be less than current timestamp 
+        validate_nbf(parsed_payload.nbf)?;
+
         // Extract issuer from payload and obtain verification material
         let verification_materials = get_verification_material(querier, parsed_payload.iss)?;
 
@@ -157,7 +166,7 @@ fn split_jwt(jwt: &str) -> Result<(String, String, String, String), PrecompileFa
 fn verify_signature(data: &str, signature: &str, vm: &str) -> Result<(), PrecompileFailure> {
     // Construct signature
     let signature = base64_decode(signature);
-    let signature = Signature::from_slice(&signature).map_err(|err| {
+    let signature = Signature::from_slice(&signature).map_err(|_err| {
         PrecompileFailure::Error {
             exit_status: ExitError::Other("Cannot construct signature".into()),
         }
@@ -165,13 +174,13 @@ fn verify_signature(data: &str, signature: &str, vm: &str) -> Result<(), Precomp
 
     let public_key = multibase_to_vec(vm)?;
 
-    let public_key: &[u8; 32] = public_key.as_slice().try_into().map_err(|err| {
+    let public_key: &[u8; 32] = public_key.as_slice().try_into().map_err(|_err| {
         PrecompileFailure::Error {
             exit_status: ExitError::Other("Cannot convert public key to fixed bytes array".into()),
         }
     })?;
 
-    let verification_key = VerifyingKey::from_bytes(public_key).map_err(|err| {
+    let verification_key = VerifyingKey::from_bytes(public_key).map_err(|_err| {
         PrecompileFailure::Error {
             exit_status: ExitError::Other("Cannot construct verification key".into()),
         }
@@ -238,4 +247,18 @@ fn multibase_to_vec(value: &str) -> Result<Vec<u8>, PrecompileFailure> {
     })?;
 
     Ok(decoded_data[2..].to_vec())
+}
+
+fn validate_nbf(nbf: i64) -> Result<bool, PrecompileFailure> {
+    let utc_duration = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+    let utc_now = TzUtc.timestamp(utc_duration.as_secs() as i64, 0);
+    let nbf_date = TzUtc.timestamp(nbf, 0);
+    
+    if utc_now > nbf_date {
+        return Err(PrecompileFailure::Error {
+            exit_status: ExitError::Other("Exceed the expiration date".into()),
+        })
+    }
+
+    Ok(true)
 }
