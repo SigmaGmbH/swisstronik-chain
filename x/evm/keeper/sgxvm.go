@@ -334,12 +334,7 @@ func (k *Keeper) ApplyMessageWithConfig(
 }
 
 func (k *Keeper) GetNodePublicKey() (common.Hash, error) {
-	response, err := librustgo.GetNodePublicKey()
-	if err != nil {
-		return common.Hash{}, err
-	}
-	publicKey := common.BytesToHash(response.PublicKey)
-	return publicKey, nil
+	return k.nodePublicKey, nil
 }
 
 func CreateSGXVMContext(ctx sdk.Context, k *Keeper, tx *ethtypes.Transaction) (*librustgo.TransactionContext, error) {
