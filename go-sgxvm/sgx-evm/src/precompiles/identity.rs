@@ -254,9 +254,9 @@ fn validate_nbf(nbf: i64) -> Result<bool, PrecompileFailure> {
     let utc_now = TzUtc.timestamp(utc_duration.as_secs() as i64, 0);
     let nbf_date = TzUtc.timestamp(nbf, 0);
     
-    if utc_now > nbf_date {
+    if utc_now < nbf_date {
         return Err(PrecompileFailure::Error {
-            exit_status: ExitError::Other("Exceed the expiration date".into()),
+            exit_status: ExitError::Other("Wrong issue date".into()),
         })
     }
 
