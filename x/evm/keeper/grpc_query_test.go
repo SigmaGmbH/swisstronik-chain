@@ -14,14 +14,12 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	ethparams "github.com/ethereum/go-ethereum/params"
-	"swisstronik/tests"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"swisstronik/server/config"
 	evmcommontypes "swisstronik/types"
 	"swisstronik/x/evm/types"
-	"swisstronik/crypto/deoxys"
 )
 
 // Not valid Ethereum address

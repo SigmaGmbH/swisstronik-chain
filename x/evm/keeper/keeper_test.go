@@ -36,7 +36,6 @@ import (
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	tmjson "github.com/tendermint/tendermint/libs/json"
 
 	"swisstronik/app"
 	"swisstronik/crypto/ethsecp256k1"
