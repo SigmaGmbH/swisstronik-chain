@@ -110,7 +110,7 @@ impl LinearCostPrecompileWithQuerier for Identity {
         })?;
         
         // Extract issuer from payload and obtain verification material
-        let verification_materials = get_verification_material(querier, parsed_payload.iss)?;
+        let verification_materials = get_verification_material(querier, parsed_payload.iss.clone())?;
 
         // Find appropriate verification material
         let vm = verification_materials
@@ -124,7 +124,9 @@ impl LinearCostPrecompileWithQuerier for Identity {
         verify_signature(&data, &signature, &vm)?;
 
         let credential_subject = convert_bech32_address(parsed_payload.vc.credential_subject.user_address)?;
-        Ok((ExitSucceed::Returned, credential_subject))
+        let output = rlp_encode(credential_subject, parsed_payload.iss);
+
+        Ok((ExitSucceed::Returned, output))
     }
 }
 
@@ -238,4 +240,17 @@ fn multibase_to_vec(value: &str) -> Result<Vec<u8>, PrecompileFailure> {
     })?;
 
     Ok(decoded_data[2..].to_vec())
+}
+
+fn rlp_encode(credential_subject: Vec<u8>, issuer: String) -> Vec<u8> {
+    // Create an RlpStream
+    let mut rlp_stream = rlp::RlpStream::new();
+
+    // Serialize the struct into the RlpStream
+    rlp_stream.begin_list(2);  // Number of elements in the struct
+    rlp_stream.append(&credential_subject);
+    rlp_stream.append(&issuer);
+
+    // Return the serialized RLP data as a Vec<u8>
+    rlp_stream.out().to_vec()
 }
