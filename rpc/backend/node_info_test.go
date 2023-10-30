@@ -6,15 +6,15 @@ import (
 
 	"google.golang.org/grpc/metadata"
 
-	"swisstronik/crypto/ethsecp256k1"
-	"swisstronik/rpc/backend/mocks"
-	ethermint "swisstronik/types"
+	tmrpcclient "github.com/cometbft/cometbft/rpc/client"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/spf13/viper"
-	tmrpcclient "github.com/tendermint/tendermint/rpc/client"
+	"swisstronik/crypto/ethsecp256k1"
+	"swisstronik/rpc/backend/mocks"
+	ethermint "swisstronik/types"
 )
 
 func (suite *BackendTestSuite) TestRPCMinGasPrice() {

@@ -81,6 +81,7 @@ func (suite *BackendTestSuite) TestSendTransaction() {
 				_, err = RegisterBlockResults(client, 1)
 				suite.Require().NoError(err)
 				RegisterBaseFee(queryClient, baseFee)
+				RegisterParamsWithoutHeader(queryClient, 1)
 			},
 			evmtypes.TransactionArgs{
 				From:     &from,
@@ -144,6 +145,7 @@ func (suite *BackendTestSuite) TestSendTransaction() {
 				tx, _ := msg.BuildTx(suite.backend.clientCtx.TxConfig.NewTxBuilder(), "uswtr")
 				txEncoder := suite.backend.clientCtx.TxConfig.TxEncoder()
 				txBytes, _ := txEncoder(tx)
+
 				RegisterBroadcastTx(client, txBytes)
 			},
 			callArgsDefault,

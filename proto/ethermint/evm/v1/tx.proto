@@ -166,7 +166,7 @@ message MsgEthereumTxResponse {
 
   // hash of the ethereum transaction in hex format. This hash differs from the
   // Tendermint sha256 hash of the transaction bytes. See
-  // https://github.com/tendermint/tendermint/issues/6539 for reference
+  // https://github.com/cometbft/cometbft/issues/6539 for reference
   string hash = 1;
   // logs contains the transaction hash and the proto-compatible ethereum
   // logs.

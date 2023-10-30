@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
+	abci "github.com/cometbft/cometbft/abci/types"
 	"github.com/stretchr/testify/require"
-	abci "github.com/tendermint/tendermint/abci/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -320,7 +320,7 @@ func (suite *AnteTestSuite) TestRejectMsgsInAuthz() {
 					},
 				),
 			},
-			expectedCode: sdkerrors.ErrUnauthorized.ABCICode(),
+			expectedCode: sdkerrors.ErrUnpackAny.ABCICode(),
 		},
 		{
 			name: "a MsgExec with nested MsgExec messages that has invalid messages is blocked",
@@ -333,7 +333,7 @@ func (suite *AnteTestSuite) TestRejectMsgsInAuthz() {
 					},
 				),
 			},
-			expectedCode: sdkerrors.ErrUnauthorized.ABCICode(),
+			expectedCode: sdkerrors.ErrUnpackAny.ABCICode(),
 		},
 		{
 			name: "a MsgExec with more nested MsgExec messages than allowed and with valid messages is blocked",

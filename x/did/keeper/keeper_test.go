@@ -5,15 +5,16 @@ import (
 	"fmt"
 	"testing"
 
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/google/uuid"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
-	"swisstronik/simapp"
+	"swisstronik/app"
 	didutil "swisstronik/testutil/did"
+	"swisstronik/utils"
 	"swisstronik/x/did/keeper"
 	"swisstronik/x/did/types"
 	"crypto/sha256"
@@ -28,6 +29,7 @@ type KeeperTestSuite struct {
 	ctx    sdk.Context
 	goCtx  context.Context
 	keeper keeper.Keeper
+	app    *app.App
 }
 
 func TestKeeperTestSuite(t *testing.T) {
@@ -41,7 +43,10 @@ func TestKeeperTestSuite(t *testing.T) {
 }
 
 func (suite *KeeperTestSuite) Setup(t *testing.T) {
-	app, _ := simapp.Setup(t, false)
+	checkTx := false
+	chainID := utils.TestnetChainID + "-1"
+
+	app, _ := app.SetupSwissApp(checkTx, nil, chainID)
 	s.ctx = app.BaseApp.NewContext(false, tmproto.Header{ChainID: "swisstronik_1291-1"})
 	s.goCtx = sdk.WrapSDKContext(s.ctx)
 	s.keeper = app.DIDKeeper
@@ -1112,7 +1117,7 @@ func (suite *KeeperTestSuite) TestCannotUpdateDeactivatedDID() {
 	// Update deactivated DID
 	signatures = []didutil.SignInput{subject.SignInput}
 	_, err = didutil.UpdateDIDDocument(suite.ctx, suite.keeper, updatePayload, signatures)
-	suite.Require().ErrorContains(err, subject.DIDDocumentInfo.Did + ": DID Document already deactivated")
+	suite.Require().ErrorContains(err, subject.DIDDocumentInfo.Did+": DID Document already deactivated")
 }
 
 func (suite *KeeperTestSuite) ExpectPayloadToMatchResource(payload *types.MsgCreateResourcePayload, resource *types.ResourceWithMetadata) {

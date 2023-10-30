@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"github.com/SigmaGmbH/librustgo"
 	"github.com/armon/go-metrics"
+	tmbytes "github.com/cometbft/cometbft/libs/bytes"
+	tmtypes "github.com/cometbft/cometbft/types"
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
@@ -14,8 +16,6 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/params"
-	tmbytes "github.com/tendermint/tendermint/libs/bytes"
-	tmtypes "github.com/tendermint/tendermint/types"
 	"math/big"
 	"strconv"
 	evmcommontypes "swisstronik/types"
@@ -334,12 +334,7 @@ func (k *Keeper) ApplyMessageWithConfig(
 }
 
 func (k *Keeper) GetNodePublicKey() (common.Hash, error) {
-	response, err := librustgo.GetNodePublicKey()
-	if err != nil {
-		return common.Hash{}, err
-	}
-	publicKey := common.BytesToHash(response.PublicKey)
-	return publicKey, nil
+	return k.nodePublicKey, nil
 }
 
 func CreateSGXVMContext(ctx sdk.Context, k *Keeper, tx *ethtypes.Transaction) (*librustgo.TransactionContext, error) {

@@ -16,13 +16,13 @@
 package keeper
 
 import (
-	tmtypes "github.com/tendermint/tendermint/types"
+	tmtypes "github.com/cometbft/cometbft/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	evmcommontypes "swisstronik/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/vm"
+	evmcommontypes "swisstronik/types"
 )
 
 // GetHashFn implements vm.GetHashFunc for Ethermint. It handles 3 cases:
