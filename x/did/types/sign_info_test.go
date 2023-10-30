@@ -1,13 +1,19 @@
 package types_test
 
 import (
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 
 	. "swisstronik/x/did/types"
 )
 
-var _ = Describe("SignInfo tests", func() {
+type SignInfoSuite struct {
+	suite.Suite
+}
+
+func (suite *SignInfoSuite) TestSignInfoValidation() {
 	type TestCaseSignInfoStruct struct {
 		si                SignInfo
 		allowedNamespaces []string
@@ -15,107 +21,100 @@ var _ = Describe("SignInfo tests", func() {
 		errorMsg          string
 	}
 
-	DescribeTable("SignInfo validation tests", func(testCase TestCaseSignInfoStruct) {
+	testCases := []TestCaseSignInfoStruct{
+		{
+			si: SignInfo{
+				VerificationMethodId: "did:swtr:zABCDEFG123456789abcd#method1",
+				Signature:            []byte("aaa="),
+			},
+			isValid:  true,
+			errorMsg: "",
+		},
+	}
+
+	for _, testCase := range testCases {
 		err := testCase.si.Validate(testCase.allowedNamespaces)
 
 		if testCase.isValid {
-			Expect(err).To(BeNil())
+			assert.Nil(suite.T(), err)
 		} else {
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring(testCase.errorMsg))
+			assert.Error(suite.T(), err)
+			assert.Contains(suite.T(), err.Error(), testCase.errorMsg)
 		}
-	},
+	}
+}
 
-		Entry(
-			"Positive case",
-			TestCaseSignInfoStruct{
-				si: SignInfo{
-					VerificationMethodId: "did:swtr:zABCDEFG123456789abcd#method1",
-					Signature:            []byte("aaa="),
-				},
-				isValid:  true,
-				errorMsg: "",
-			}),
-	)
-})
-
-var _ = Describe("Full SignInfo duplicates tests", func() {
+func (suite *SignInfoSuite) TestSignInfoDuplicates() {
 	type TestCaseSignInfosStruct struct {
 		signInfos []*SignInfo
 		isValid   bool
 	}
 
-	DescribeTable("SignInfo duplicates tests", func(testCase TestCaseSignInfosStruct) {
+	testCases := []TestCaseSignInfosStruct{
+		{
+			signInfos: []*SignInfo{
+				{
+					VerificationMethodId: "did:swtr:zABCDEFG123456789abcd#method1",
+					Signature:            []byte("aaa="),
+				},
+				{
+					VerificationMethodId: "did:swtr:zABCDEFG123456789abcd#method1",
+					Signature:            []byte("bbb="),
+				},
+			},
+			isValid: true,
+		},
+		{
+			signInfos: []*SignInfo{
+				{
+					VerificationMethodId: "did:swtr:zABCDEFG123456789abcd#method1",
+					Signature:            []byte("aaa="),
+				},
+				{
+					VerificationMethodId: "did:swtr:zABCDEFG123456789abcd#method1",
+					Signature:            []byte("bbb="),
+				},
+			},
+			isValid: true,
+		},
+		{
+			signInfos: []*SignInfo{
+				{
+					VerificationMethodId: "did:swtr:zABCDEFG123456789abcd#method1",
+					Signature:            []byte("aaa="),
+				},
+				{
+					VerificationMethodId: "did:swtr:zABCDEFG123456789abcd#method1",
+					Signature:            []byte("aaa="),
+				},
+			},
+			isValid: false,
+		},
+		{
+			signInfos: []*SignInfo{
+				{
+					VerificationMethodId: "did:swtr:zABCDEFG123456789abcd#method1",
+					Signature:            []byte("aaa="),
+				},
+				{
+					VerificationMethodId: "did:swtr:zABCDEFG123456789abcd#method1",
+					Signature:            []byte("aaa="),
+				},
+				{
+					VerificationMethodId: "did:swtr:zABCDEFG123456789abcd#method1",
+					Signature:            []byte("aaa="),
+				},
+			},
+			isValid: false,
+		},
+	}
+
+	for _, testCase := range testCases {
 		res := IsUniqueSignInfoList(testCase.signInfos)
-		Expect(res).To(Equal(testCase.isValid))
-	},
+		assert.Equal(suite.T(), testCase.isValid, res)
+	}
+}
 
-		Entry(
-			"Signatures are different",
-			TestCaseSignInfosStruct{
-				signInfos: []*SignInfo{
-					{
-						VerificationMethodId: "did:swtr:zABCDEFG123456789abcd#method1",
-						Signature:            []byte("aaa="),
-					},
-					{
-						VerificationMethodId: "did:swtr:zABCDEFG123456789abcd#method1",
-						Signature:            []byte("bbb="),
-					},
-				},
-				isValid: true,
-			}),
-
-		Entry(
-			"All fields are different",
-			TestCaseSignInfosStruct{
-				signInfos: []*SignInfo{
-					{
-						VerificationMethodId: "did:swtr:zABCDEFG123456789abcd#method1",
-						Signature:            []byte("aaa="),
-					},
-					{
-						VerificationMethodId: "did:swtr:zABCDEFG123456789abcd#method1",
-						Signature:            []byte("bbb="),
-					},
-				},
-				isValid: true,
-			}),
-
-		Entry(
-			"All fields are the same",
-			TestCaseSignInfosStruct{
-				signInfos: []*SignInfo{
-					{
-						VerificationMethodId: "did:swtr:zABCDEFG123456789abcd#method1",
-						Signature:            []byte("aaa="),
-					},
-					{
-						VerificationMethodId: "did:swtr:zABCDEFG123456789abcd#method1",
-						Signature:            []byte("aaa="),
-					},
-				},
-				isValid: false,
-			}),
-
-		Entry(
-			"All fields are the same and more elments",
-			TestCaseSignInfosStruct{
-				signInfos: []*SignInfo{
-					{
-						VerificationMethodId: "did:swtr:zABCDEFG123456789abcd#method1",
-						Signature:            []byte("aaa="),
-					},
-					{
-						VerificationMethodId: "did:swtr:zABCDEFG123456789abcd#method1",
-						Signature:            []byte("aaa="),
-					},
-					{
-						VerificationMethodId: "did:swtr:zABCDEFG123456789abcd#method1",
-						Signature:            []byte("aaa="),
-					},
-				},
-				isValid: false,
-			}),
-	)
-})
+func TestSignInfoSuite(t *testing.T) {
+	suite.Run(t, new(SignInfoSuite))
+}

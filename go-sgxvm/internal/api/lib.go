@@ -16,7 +16,6 @@ import (
 	"net"
 	"runtime"
 
-	ffi "github.com/SigmaGmbH/librustgo/go_protobuf_gen"
 	"github.com/SigmaGmbH/librustgo/types"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 )
@@ -43,8 +42,8 @@ type Connector = types.Connector
 // IsNodeInitialized checks if node was initialized and master key was sealed
 func IsNodeInitialized() (bool, error) {
 	// Create protobuf encoded request
-	req := ffi.SetupRequest{Req: &ffi.SetupRequest_IsInitialized{
-		IsInitialized: &ffi.IsInitializedRequest{},
+	req := types.SetupRequest{Req: &types.SetupRequest_IsInitialized{
+		IsInitialized: &types.IsInitializedRequest{},
 	}}
 
 	reqBytes, err := proto.Marshal(&req)
@@ -66,7 +65,7 @@ func IsNodeInitialized() (bool, error) {
 
 	// Recover returned value
 	executionResult := CopyAndDestroyUnmanagedVector(ptr)
-	response := ffi.IsInitializedResponse{}
+	response := types.IsInitializedResponse{}
 	if err := proto.Unmarshal(executionResult, &response); err != nil {
 		log.Fatalln("Failed to decode execution result:", err)
 		return false, err
@@ -78,8 +77,8 @@ func IsNodeInitialized() (bool, error) {
 // SetupSeedNode handles initialization of seed node which will share seed with other nodes
 func InitializeMasterKey(shouldReset bool) error {
 	// Create protobuf encoded request
-	req := ffi.SetupRequest{Req: &ffi.SetupRequest_InitializeMasterKey{
-		InitializeMasterKey: &ffi.InitializeMasterKeyRequest{ ShouldReset: shouldReset },
+	req := types.SetupRequest{Req: &types.SetupRequest_InitializeMasterKey{
+		InitializeMasterKey: &types.InitializeMasterKeyRequest{ ShouldReset: shouldReset },
 	}}
 	reqBytes, err := proto.Marshal(&req)
 	if err != nil {
@@ -143,8 +142,8 @@ func attestPeer(connection net.Conn) error {
 	}
 
 	// Create protobuf encoded request
-	req := ffi.SetupRequest{Req: &ffi.SetupRequest_StartSeedServer{
-		StartSeedServer: &ffi.StartSeedServerRequest{
+	req := types.SetupRequest{Req: &types.SetupRequest_StartSeedServer{
+		StartSeedServer: &types.StartSeedServerRequest{
 			Fd: int32(file.Fd()),
 		},
 	}}
@@ -200,8 +199,8 @@ func RequestSeed(hostname string, port int) error {
 	}
 
 	// Create protobuf encoded request
-	req := ffi.SetupRequest{Req: &ffi.SetupRequest_NodeSeed{
-		NodeSeed: &ffi.NodeSeedRequest{
+	req := types.SetupRequest{Req: &types.SetupRequest_NodeSeed{
+		NodeSeed: &types.NodeSeedRequest{
 			Fd: int32(file.Fd()),
 			Hostname: hostname,
 		},
@@ -228,12 +227,12 @@ func RequestSeed(hostname string, port int) error {
 }
 
 // GetNodePublicKey handles request for node public key
-func GetNodePublicKey() (*ffi.NodePublicKeyResponse, error) {
+func GetNodePublicKey() (*types.NodePublicKeyResponse, error) {
 	// Construct mocked querier
 	c := buildEmptyConnector()
 
 	// Create protobuf-encoded request
-	req := &ffi.FFIRequest{ Req: &ffi.FFIRequest_PublicKeyRequest {} }
+	req := &types.FFIRequest{ Req: &types.FFIRequest_PublicKeyRequest {} }
 	reqBytes, err := proto.Marshal(req)
 	if err != nil {
 		log.Fatalln("Failed to encode req:", err)
@@ -247,12 +246,12 @@ func GetNodePublicKey() (*ffi.NodePublicKeyResponse, error) {
 	errmsg := NewUnmanagedVector(nil)
 	ptr, err := C.make_pb_request(c, d, &errmsg)
 	if err != nil {
-		return &ffi.NodePublicKeyResponse{}, ErrorWithMessage(err, errmsg)
+		return &types.NodePublicKeyResponse{}, ErrorWithMessage(err, errmsg)
 	}
 
 	// Recover returned value
 	executionResult := CopyAndDestroyUnmanagedVector(ptr)
-	response := ffi.NodePublicKeyResponse{}
+	response := types.NodePublicKeyResponse{}
 	if err := proto.Unmarshal(executionResult, &response); err != nil {
 		log.Fatalln("Failed to decode node public key result:", err)
 		return nil, err
@@ -267,14 +266,14 @@ func Call(
 	from, to, data, value []byte,
 	accessList ethtypes.AccessList,
 	gasLimit, nonce uint64,
-	txContext *ffi.TransactionContext,
+	txContext *types.TransactionContext,
 	commit bool,
-) (*ffi.HandleTransactionResponse, error) {
+) (*types.HandleTransactionResponse, error) {
 	// Construct mocked querier
 	c := BuildConnector(connector)
 
 	// Create protobuf-encoded transaction data
-	params := &ffi.SGXVMCallParams{
+	params := &types.SGXVMCallParams{
 		From:       from,
 		To:         to,
 		Data:       data,
@@ -286,8 +285,8 @@ func Call(
 	}
 
 	// Create protobuf encoded request
-	req := ffi.FFIRequest{Req: &ffi.FFIRequest_CallRequest{
-		CallRequest: &ffi.SGXVMCallRequest{
+	req := types.FFIRequest{Req: &types.FFIRequest_CallRequest{
+		CallRequest: &types.SGXVMCallRequest{
 			Params:  params,
 			Context: txContext,
 		},
@@ -305,12 +304,12 @@ func Call(
 	errmsg := NewUnmanagedVector(nil)
 	ptr, err := C.make_pb_request(c, d, &errmsg)
 	if err != nil {
-		return &ffi.HandleTransactionResponse{}, ErrorWithMessage(err, errmsg)
+		return &types.HandleTransactionResponse{}, ErrorWithMessage(err, errmsg)
 	}
 
 	// Recover returned value
 	executionResult := CopyAndDestroyUnmanagedVector(ptr)
-	response := ffi.HandleTransactionResponse{}
+	response := types.HandleTransactionResponse{}
 	if err := proto.Unmarshal(executionResult, &response); err != nil {
 		log.Fatalln("Failed to decode execution result:", err)
 		return nil, err
@@ -325,14 +324,14 @@ func Create(
 	from, data, value []byte,
 	accessList ethtypes.AccessList,
 	gasLimit, nonce uint64,
-	txContext *ffi.TransactionContext,
+	txContext *types.TransactionContext,
 	commit bool,
-) (*ffi.HandleTransactionResponse, error) {
+) (*types.HandleTransactionResponse, error) {
 	// Construct mocked querier
 	c := BuildConnector(connector)
 
 	// Create protobuf-encoded transaction data
-	params := &ffi.SGXVMCreateParams{
+	params := &types.SGXVMCreateParams{
 		From:       from,
 		Data:       data,
 		GasLimit:   gasLimit,
@@ -343,8 +342,8 @@ func Create(
 	}
 
 	// Create protobuf encoded request
-	req := ffi.FFIRequest{Req: &ffi.FFIRequest_CreateRequest{
-		CreateRequest: &ffi.SGXVMCreateRequest{
+	req := types.FFIRequest{Req: &types.FFIRequest_CreateRequest{
+		CreateRequest: &types.SGXVMCreateRequest{
 			Params:  params,
 			Context: txContext,
 		},
@@ -362,12 +361,12 @@ func Create(
 	errmsg := NewUnmanagedVector(nil)
 	ptr, err := C.make_pb_request(c, d, &errmsg)
 	if err != nil {
-		return &ffi.HandleTransactionResponse{}, ErrorWithMessage(err, errmsg)
+		return &types.HandleTransactionResponse{}, ErrorWithMessage(err, errmsg)
 	}
 
 	// Recover returned value
 	executionResult := CopyAndDestroyUnmanagedVector(ptr)
-	response := ffi.HandleTransactionResponse{}
+	response := types.HandleTransactionResponse{}
 	if err := proto.Unmarshal(executionResult, &response); err != nil {
 		log.Fatalln("Failed to decode execution result:", err)
 		return nil, err
@@ -377,10 +376,10 @@ func Create(
 }
 
 // Converts AccessList type from ethtypes to protobuf-compatible type
-func convertAccessList(accessList ethtypes.AccessList) []*ffi.AccessListItem {
-	var converted []*ffi.AccessListItem
+func convertAccessList(accessList ethtypes.AccessList) []*types.AccessListItem {
+	var converted []*types.AccessListItem
 	for _, item := range accessList {
-		accessListItem := &ffi.AccessListItem{
+		accessListItem := &types.AccessListItem{
 			StorageSlot: convertAccessListStorageSlots(item.StorageKeys),
 			Address:     item.Address.Bytes(),
 		}

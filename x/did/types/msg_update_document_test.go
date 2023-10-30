@@ -1,94 +1,96 @@
 package types_test
 
 import (
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 
 	. "swisstronik/x/did/types"
 )
 
-var _ = Describe("Message for DID updating", func() {
+type MsgUpdateDIDSuite struct {
+	suite.Suite
+}
+
+func (suite *MsgUpdateDIDSuite) TestMessageForDIDUpdating() {
 	type TestCaseMsgUpdateDID struct {
 		msg      *MsgUpdateDIDDocument
 		isValid  bool
 		errorMsg string
 	}
 
-	DescribeTable("Tests for message for DID updating", func(testCase TestCaseMsgUpdateDID) {
+	testCases := []TestCaseMsgUpdateDID{
+		{
+			msg: &MsgUpdateDIDDocument{
+				Payload: &MsgUpdateDIDDocumentPayload{
+					Id: "did:swtr:zABCDEFG123456789abcd",
+					VerificationMethod: []*VerificationMethod{
+						{
+							Id:                     "did:swtr:zABCDEFG123456789abcd#key1",
+							VerificationMethodType: "Ed25519VerificationKey2020",
+							Controller:             "did:swtr:zABCDEFG123456789abcd",
+							VerificationMaterial:   ValidEd25519VerificationKey2020VerificationMaterial,
+						},
+					},
+					Authentication: []string{"did:swtr:zABCDEFG123456789abcd#key1", "did:swtr:zABCDEFG123456789abcd#aaa"},
+					VersionId:      "version1",
+				},
+				Signatures: nil,
+			},
+			isValid: true,
+		},
+		{
+			msg: &MsgUpdateDIDDocument{
+				Payload: &MsgUpdateDIDDocumentPayload{
+					Id: "did:swtr:zABCDEFG123456789abcd",
+					VerificationMethod: []*VerificationMethod{
+						{
+							Id:                     "did:swtr:zABCDEFG123456789abcd#key1",
+							VerificationMethodType: "Ed25519VerificationKey2020",
+							Controller:             "did:swtr:zABCDEFG123456789abcd",
+							VerificationMaterial:   ValidEd25519VerificationKey2020VerificationMaterial,
+						},
+					},
+					Authentication: []string{"did:swtr:zABCDEFG123456789abcd#key1", "did:swtr:zABCDEFG123456789abcd#key1"},
+					VersionId:      "version1",
+				},
+			},
+			isValid:  false,
+			errorMsg: "payload: (authentication: there should be no duplicates.).: basic validation failed",
+		},
+		{
+			msg: &MsgUpdateDIDDocument{
+				Payload: &MsgUpdateDIDDocumentPayload{
+					Id: "did:swtr:zABCDEFG123456789abcd",
+					VerificationMethod: []*VerificationMethod{
+						{
+							Id:                     "did:swtr:zABCDEFG123456789abcd#key1",
+							VerificationMethodType: "Ed25519VerificationKey2020",
+							Controller:             "did:swtr:zABCDEFG123456789abcd",
+							VerificationMaterial:   ValidEd25519VerificationKey2020VerificationMaterial,
+						},
+					},
+					Authentication: []string{"did:swtr:zABCDEFG123456789abcd#key1", "did:swtr:zABCDEFG123456789abcd#aaa"},
+				},
+			},
+			isValid:  false,
+			errorMsg: "payload: (version_id: cannot be blank.).: basic validation failed",
+		},
+	}
+
+	for _, testCase := range testCases {
 		err := testCase.msg.ValidateBasic()
 
 		if testCase.isValid {
-			Expect(err).To(BeNil())
+			assert.Nil(suite.T(), err)
 		} else {
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring(testCase.errorMsg))
+			assert.Error(suite.T(), err)
+			assert.Contains(suite.T(), err.Error(), testCase.errorMsg)
 		}
-	},
+	}
+}
 
-		Entry(
-			"All fields are set properly",
-			TestCaseMsgUpdateDID{
-				msg: &MsgUpdateDIDDocument{
-					Payload: &MsgUpdateDIDDocumentPayload{
-						Id: "did:swtr:zABCDEFG123456789abcd",
-						VerificationMethod: []*VerificationMethod{
-							{
-								Id:                     "did:swtr:zABCDEFG123456789abcd#key1",
-								VerificationMethodType: "Ed25519VerificationKey2020",
-								Controller:             "did:swtr:zABCDEFG123456789abcd",
-								VerificationMaterial:   ValidEd25519VerificationKey2020VerificationMaterial,
-							},
-						},
-						Authentication: []string{"did:swtr:zABCDEFG123456789abcd#key1", "did:swtr:zABCDEFG123456789abcd#aaa"},
-						VersionId:      "version1",
-					},
-					Signatures: nil,
-				},
-				isValid: true,
-			}),
-
-		Entry(
-			"IDs are duplicated",
-			TestCaseMsgUpdateDID{
-				msg: &MsgUpdateDIDDocument{
-					Payload: &MsgUpdateDIDDocumentPayload{
-						Id: "did:swtr:zABCDEFG123456789abcd",
-						VerificationMethod: []*VerificationMethod{
-							{
-								Id:                     "did:swtr:zABCDEFG123456789abcd#key1",
-								VerificationMethodType: "Ed25519VerificationKey2020",
-								Controller:             "did:swtr:zABCDEFG123456789abcd",
-								VerificationMaterial:   ValidEd25519VerificationKey2020VerificationMaterial,
-							},
-						},
-						Authentication: []string{"did:swtr:zABCDEFG123456789abcd#key1", "did:swtr:zABCDEFG123456789abcd#key1"},
-						VersionId:      "version1",
-					},
-					Signatures: nil,
-				},
-				isValid:  false,
-				errorMsg: "payload: (authentication: there should be no duplicates.).: basic validation failed",
-			}),
-		Entry(
-			"VersionId is empty",
-			TestCaseMsgUpdateDID{
-				msg: &MsgUpdateDIDDocument{
-					Payload: &MsgUpdateDIDDocumentPayload{
-						Id: "did:swtr:zABCDEFG123456789abcd",
-						VerificationMethod: []*VerificationMethod{
-							{
-								Id:                     "did:swtr:zABCDEFG123456789abcd#key1",
-								VerificationMethodType: "Ed25519VerificationKey2020",
-								Controller:             "did:swtr:zABCDEFG123456789abcd",
-								VerificationMaterial:   ValidEd25519VerificationKey2020VerificationMaterial,
-							},
-						},
-						Authentication: []string{"did:swtr:zABCDEFG123456789abcd#key1", "did:swtr:zABCDEFG123456789abcd#aaa"},
-					},
-					Signatures: nil,
-				},
-				isValid:  false,
-				errorMsg: "payload: (version_id: cannot be blank.).: basic validation failed",
-			}),
-	)
-})
+func TestMsgUpdateDIDSuite(t *testing.T) {
+	suite.Run(t, new(MsgUpdateDIDSuite))
+}
