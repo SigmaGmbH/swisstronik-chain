@@ -20,7 +20,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/crisis"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-	tmcfg "github.com/tendermint/tendermint/config"
+	tmcfg "github.com/cometbft/cometbft/config"
 	simappparams "cosmossdk.io/simapp/params"
 
 	"swisstronik/app"
