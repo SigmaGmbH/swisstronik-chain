@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"math/big"
 
+	"github.com/cometbft/cometbft/abci/types"
+	tmrpctypes "github.com/cometbft/cometbft/rpc/core/types"
+	tmtypes "github.com/cometbft/cometbft/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/trie"
-	"github.com/tendermint/tendermint/abci/types"
-	tmrpctypes "github.com/tendermint/tendermint/rpc/core/types"
-	tmtypes "github.com/tendermint/tendermint/types"
 	"google.golang.org/grpc/metadata"
 
 	"swisstronik/rpc/backend/mocks"
@@ -846,7 +846,7 @@ func (suite *BackendTestSuite) TestBlockBloom() {
 					{
 						Type: evmtypes.EventTypeBlockBloom,
 						Attributes: []types.EventAttribute{
-							{Key: []byte(evmtypes.AttributeKeyEthereumTxHash)},
+							{Key: evmtypes.AttributeKeyEthereumTxHash},
 						},
 					},
 				},
@@ -861,7 +861,7 @@ func (suite *BackendTestSuite) TestBlockBloom() {
 					{
 						Type: evmtypes.EventTypeBlockBloom,
 						Attributes: []types.EventAttribute{
-							{Key: []byte(bAttributeKeyEthereumBloom)},
+							{Key: evmtypes.AttributeKeyEthereumBloom},
 						},
 					},
 				},
@@ -1582,7 +1582,7 @@ func (suite *BackendTestSuite) TestEthBlockFromTendermintBlock() {
 					{
 						Type: evmtypes.EventTypeBlockBloom,
 						Attributes: []types.EventAttribute{
-							{Key: []byte(bAttributeKeyEthereumBloom)},
+							{Key: evmtypes.AttributeKeyEthereumBloom},
 						},
 					},
 				},

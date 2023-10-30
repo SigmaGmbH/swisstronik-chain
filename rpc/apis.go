@@ -36,7 +36,7 @@ import (
 	"swisstronik/rpc/namespaces/utils"
 	ethermint "swisstronik/types"
 
-	rpcclient "github.com/tendermint/tendermint/rpc/jsonrpc/client"
+	rpcclient "github.com/cometbft/cometbft/rpc/jsonrpc/client"
 )
 
 // RPC namespaces and API version

@@ -21,10 +21,11 @@ import (
 
 	ethermint "swisstronik/types"
 	evmtypes "swisstronik/x/evm/types"
+
+	abci "github.com/cometbft/cometbft/abci/types"
+	tmrpctypes "github.com/cometbft/cometbft/rpc/core/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
-	abci "github.com/tendermint/tendermint/abci/types"
-	tmrpctypes "github.com/tendermint/tendermint/rpc/core/types"
 )
 
 // EventFormat is the format version of the events.
@@ -242,7 +243,7 @@ func (p *ParsedTxs) AccumulativeGasUsed(msgIndex int) (result uint64) {
 
 // fillTxAttribute parse attributes by name, less efficient than hardcode the index, but more stable against event
 // format changes.
-func fillTxAttribute(tx *ParsedTx, key []byte, value []byte) error {
+func fillTxAttribute(tx *ParsedTx, key string, value string) error {
 	switch string(key) {
 	case evmtypes.AttributeKeyEthereumTxHash:
 		tx.Hash = common.HexToHash(string(value))

@@ -14,7 +14,9 @@ import (
 	"swisstronik/encoding"
 	"swisstronik/tests"
 	"swisstronik/testutil"
+	"swisstronik/utils"
 	"swisstronik/x/feemarket/types"
+
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
@@ -26,11 +28,12 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 
 	evmtypes "swisstronik/x/evm/types"
-	"github.com/cosmos/cosmos-sdk/simapp"
+
+	dbm "github.com/cometbft/cometbft-db"
+	abci "github.com/cometbft/cometbft/abci/types"
+	"github.com/cometbft/cometbft/libs/log"
+	simutils "github.com/cosmos/cosmos-sdk/testutil/sims"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	abci "github.com/tendermint/tendermint/abci/types"
-	"github.com/tendermint/tendermint/libs/log"
-	dbm "github.com/tendermint/tm-db"
 )
 
 var _ = Describe("Feemarket", func() {
@@ -445,7 +448,7 @@ var _ = Describe("Feemarket", func() {
 // setupTestWithContext sets up a test chain with an example Cosmos send msg,
 // given a local (validator config) and a gloabl (feemarket param) minGasPrice
 func setupTestWithContext(valMinGasPrice string, minGasPrice sdk.Dec, baseFee sdkmath.Int) (*ethsecp256k1.PrivKey, banktypes.MsgSend) {
-	privKey, msg := setupTest(valMinGasPrice + s.denom)
+	privKey, msg := setupTest(valMinGasPrice + utils.BaseDenom)
 	params := types.DefaultParams()
 	params.MinGasPrice = minGasPrice
 	s.app.FeeMarketKeeper.SetParams(s.ctx, params)
@@ -483,6 +486,8 @@ func setupChain(localMinGasPricesStr string) {
 	// Initialize the app, so we can use SetMinGasPrices to set the
 	// validator-specific min-gas-prices setting
 	db := dbm.NewMemDB()
+	chainID := utils.TestnetChainID + "-1"
+
 	newapp := app.New(
 		log.NewNopLogger(),
 		db,
@@ -492,7 +497,8 @@ func setupChain(localMinGasPricesStr string) {
 		app.DefaultNodeHome,
 		5,
 		encoding.MakeConfig(app.ModuleBasics),
-		simapp.EmptyAppOptions{},
+		simutils.NewAppOptionsWithFlagHome(app.DefaultNodeHome),
+		baseapp.SetChainID(chainID),
 		baseapp.SetMinGasPrices(localMinGasPricesStr),
 	)
 
@@ -505,7 +511,7 @@ func setupChain(localMinGasPricesStr string) {
 	// Initialize the chain
 	newapp.InitChain(
 		abci.RequestInitChain{
-			ChainId:         "ethermint_9000-1",
+			ChainId:         chainID,
 			Validators:      []abci.ValidatorUpdate{},
 			AppStateBytes:   stateBytes,
 			ConsensusParams: app.DefaultConsensusParams,

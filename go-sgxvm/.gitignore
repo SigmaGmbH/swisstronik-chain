@@ -1,5 +1,3 @@
-# Please also see sgx_wrapper/.gitignore for the Rust-specific ignored files.
-
 **/*.rs.bk
 *.iml
 .idea
@@ -13,9 +11,8 @@ lib*.a
 tmp
 a.out
 
-# sgx artifacts
-sgx-artifacts/
-Enclave_u*
+# build artifacts
+target/
 
 # other stuff
 .DS_Store

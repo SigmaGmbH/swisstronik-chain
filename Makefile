@@ -20,9 +20,9 @@ PROJECT_NAME = $(shell git remote get-url origin | xargs basename -s .git)
 # NOTE: Link to the tendermintdev/sdk-proto-gen docker images: 
 #       https://hub.docker.com/r/tendermintdev/sdk-proto-gen/tags
 #
-protoVer=v0.7
-protoImageName=tendermintdev/sdk-proto-gen:$(protoVer)
-protoImage=$(DOCKER) run --network host --rm -v $(CURDIR):/workspace --workdir /workspace $(protoImageName)
+protoVer=0.11.6
+protoImageName=ghcr.io/cosmos/proto-builder:$(protoVer)
+protoImage=$(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace --user 0 $(protoImageName)
 # ------
 # NOTE: cosmos/proto-builder image is needed because clang-format is not installed
 #       on the tendermintdev/sdk-proto-gen docker image.
@@ -76,7 +76,12 @@ install: go.sum
 	go install -mod=readonly $(BUILD_FLAGS) ./cmd/swisstronikd
 
 build: go.sum
+	$(MAKE) -C go-sgxvm build
 	go build -mod=mod $(BUILD_FLAGS)  -tags osusergo,netgo -o build/swisstronikd ./cmd/swisstronikd
+
+###############################################################################
+### 		          Build commands for CLI (without SGX support) 			###
+###############################################################################
 
 build-cli: go.sum
 	go build -mod=mod $(BUILD_FLAGS) -tags osusergo,netgo,nosgx -o build/$(BINARY_NAME) ./cmd/swisstronikd
@@ -98,9 +103,6 @@ build-linux-cli-arm:
 
 build-windows-cli:
 	BINARY_NAME=swisstronikcli-windows GOOS=windows GOARCH=amd64 $(MAKE) build-cli
-
-build-enclave:
-	$(MAKE) -C go-sgxvm build_go
 
 go.sum: go.mod
 	@echo "--> Ensure dependencies have not been modified"

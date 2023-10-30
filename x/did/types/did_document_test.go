@@ -2,34 +2,28 @@ package types_test
 
 import (
 	"fmt"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 
 	. "swisstronik/x/did/types"
-
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
 )
 
-type DIDDocTestCase struct {
-	didDoc            *DIDDocument
-	allowedNamespaces []string
-	isValid           bool
-	errorMsg          string
+type DIDDocValidationSuite struct {
+	suite.Suite
 }
 
-var _ = DescribeTable("DIDDoc Validation tests", func(testCase DIDDocTestCase) {
-	err := testCase.didDoc.Validate(testCase.allowedNamespaces)
-
-	if testCase.isValid {
-		Expect(err).To(BeNil())
-	} else {
-		Expect(err).To(HaveOccurred())
-		Expect(err.Error()).To(ContainSubstring(testCase.errorMsg))
+func (suite *DIDDocValidationSuite) TestDIDDocValidation() {
+	type DIDDocTestCase struct {
+		didDoc            *DIDDocument
+		allowedNamespaces []string
+		isValid           bool
+		errorMsg          string
 	}
-},
 
-	Entry(
-		"DIDDoc is valid",
-		DIDDocTestCase{
+	testCases := []DIDDocTestCase{
+		{
 			didDoc: &DIDDocument{
 				Id: ValidTestDID,
 				VerificationMethod: []*VerificationMethod{
@@ -43,11 +37,8 @@ var _ = DescribeTable("DIDDoc Validation tests", func(testCase DIDDocTestCase) {
 			},
 			isValid:  true,
 			errorMsg: "",
-		}),
-
-	Entry(
-		"DIDDoc is invalid",
-		DIDDocTestCase{
+		},
+		{
 			didDoc: &DIDDocument{
 				Id: InvalidTestDID,
 				VerificationMethod: []*VerificationMethod{
@@ -61,11 +52,8 @@ var _ = DescribeTable("DIDDoc Validation tests", func(testCase DIDDocTestCase) {
 			},
 			isValid:  false,
 			errorMsg: "id: unable to split did into method, namespace and id; verification_method: (0: (id: must have prefix: badDid.).).",
-		}),
-
-	Entry(
-		"Verification method is Ed25519VerificationKey2020",
-		DIDDocTestCase{
+		},
+		{
 			didDoc: &DIDDocument{
 				Id: ValidTestDID,
 				VerificationMethod: []*VerificationMethod{
@@ -79,11 +67,8 @@ var _ = DescribeTable("DIDDoc Validation tests", func(testCase DIDDocTestCase) {
 			},
 			isValid:  true,
 			errorMsg: "",
-		}),
-
-	Entry(
-		"Verification method is JWK",
-		DIDDocTestCase{
+		},
+		{
 			didDoc: &DIDDocument{
 				Id: ValidTestDID,
 				VerificationMethod: []*VerificationMethod{
@@ -97,10 +82,8 @@ var _ = DescribeTable("DIDDoc Validation tests", func(testCase DIDDocTestCase) {
 			},
 			isValid:  true,
 			errorMsg: "",
-		}),
-
-	Entry("Verification method has wrong ID",
-		DIDDocTestCase{
+		},
+		{
 			didDoc: &DIDDocument{
 				Id: ValidTestDID,
 				VerificationMethod: []*VerificationMethod{
@@ -114,10 +97,8 @@ var _ = DescribeTable("DIDDoc Validation tests", func(testCase DIDDocTestCase) {
 			},
 			isValid:  false,
 			errorMsg: "verification_method: (0: (id: unable to split did into method, namespace and id.).).",
-		}),
-	Entry(
-		"Verification method has wrong controller",
-		DIDDocTestCase{
+		},
+		{
 			didDoc: &DIDDocument{
 				Id: ValidTestDID,
 				VerificationMethod: []*VerificationMethod{
@@ -131,10 +112,8 @@ var _ = DescribeTable("DIDDoc Validation tests", func(testCase DIDDocTestCase) {
 			},
 			isValid:  false,
 			errorMsg: "verification_method: (0: (controller: unable to split did into method, namespace and id.).).",
-		}),
-	Entry(
-		"List of DIDs in controller is allowed",
-		DIDDocTestCase{
+		},
+		{
 			didDoc: &DIDDocument{
 				Id:         ValidTestDID,
 				Controller: []string{ValidTestDID, ValidTestDID2},
@@ -149,10 +128,8 @@ var _ = DescribeTable("DIDDoc Validation tests", func(testCase DIDDocTestCase) {
 			},
 			isValid:  true,
 			errorMsg: "",
-		}),
-	Entry(
-		"List of DIDs in controller is not allowed",
-		DIDDocTestCase{
+		},
+		{
 			didDoc: &DIDDocument{
 				Context:    nil,
 				Id:         ValidTestDID,
@@ -168,10 +145,8 @@ var _ = DescribeTable("DIDDoc Validation tests", func(testCase DIDDocTestCase) {
 			},
 			isValid:  false,
 			errorMsg: "controller: (1: unable to split did into method, namespace and id.).",
-		}),
-	Entry(
-		"Controller is duplicated",
-		DIDDocTestCase{
+		},
+		{
 			didDoc: &DIDDocument{
 				Id:         ValidTestDID,
 				Controller: []string{ValidTestDID, ValidTestDID},
@@ -186,10 +161,8 @@ var _ = DescribeTable("DIDDoc Validation tests", func(testCase DIDDocTestCase) {
 			},
 			isValid:  false,
 			errorMsg: "controller: there should be no duplicates.",
-		}),
-	Entry(
-		"Verification method is duplicated",
-		DIDDocTestCase{
+		},
+		{
 			didDoc: &DIDDocument{
 				Id: ValidTestDID,
 				VerificationMethod: []*VerificationMethod{
@@ -209,5 +182,21 @@ var _ = DescribeTable("DIDDoc Validation tests", func(testCase DIDDocTestCase) {
 			},
 			isValid:  false,
 			errorMsg: "verification_method: there are verification method duplicates.",
-		}),
-)
+		},
+	}
+
+	for _, testCase := range testCases {
+		err := testCase.didDoc.Validate(testCase.allowedNamespaces)
+
+		if testCase.isValid {
+			assert.Nil(suite.T(), err)
+		} else {
+			assert.Error(suite.T(), err)
+			assert.Contains(suite.T(), err.Error(), testCase.errorMsg)
+		}
+	}
+}
+
+func TestDIDDocValidationSuite(t *testing.T) {
+	suite.Run(t, new(DIDDocValidationSuite))
+}
