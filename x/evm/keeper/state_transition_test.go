@@ -9,16 +9,16 @@ import (
 	"swisstronik/tests"
 	"swisstronik/x/evm/keeper"
 	"swisstronik/x/evm/types"
+
+	"github.com/cometbft/cometbft/crypto/tmhash"
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	tmtypes "github.com/cometbft/cometbft/types"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/params"
-	"github.com/tendermint/tendermint/crypto/tmhash"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
-	tmtypes "github.com/tendermint/tendermint/types"
 )
 
 func (suite *KeeperTestSuite) TestGetHashFn() {
@@ -364,16 +364,6 @@ func (suite *KeeperTestSuite) TestContractDeployment() {
 	contractAccount := suite.app.EvmKeeper.GetAccountOrEmpty(suite.ctx, contractAddress)
 	code := suite.app.EvmKeeper.GetCode(suite.ctx, common.BytesToHash(contractAccount.CodeHash))
 	suite.Require().Greater(len(code), 0)
-}
-
-func (suite *KeeperTestSuite) createContractGethMsg(nonce uint64, signer ethtypes.Signer, cfg *params.ChainConfig, gasPrice *big.Int) (core.Message, error) {
-	ethMsg, err := suite.createContractMsgTx(nonce, signer, cfg, gasPrice)
-	if err != nil {
-		return nil, err
-	}
-
-	msgSigner := ethtypes.MakeSigner(cfg, big.NewInt(suite.ctx.BlockHeight()))
-	return ethMsg.AsMessage(msgSigner, nil)
 }
 
 func getERC20Bytecode() []byte {

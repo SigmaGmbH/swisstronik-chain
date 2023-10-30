@@ -13,24 +13,22 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with the Ethermint library. If not, see https://github.com/evmos/ethermint/blob/main/LICENSE
-package codec
+package eip712
 
 import (
-	"github.com/cosmos/cosmos-sdk/codec"
-	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
-	"github.com/cosmos/cosmos-sdk/crypto/keyring"
-
-	"swisstronik/crypto/ethsecp256k1"
+	"github.com/ethereum/go-ethereum/common/math"
+	"github.com/ethereum/go-ethereum/signer/core/apitypes"
 )
 
-// RegisterCrypto registers all crypto dependency types with the provided Amino
-// codec.
-func RegisterCrypto(cdc *codec.LegacyAmino) {
-	cdc.RegisterConcrete(&ethsecp256k1.PubKey{},
-		ethsecp256k1.PubKeyName, nil)
-	cdc.RegisterConcrete(&ethsecp256k1.PrivKey{},
-		ethsecp256k1.PrivKeyName, nil)
+// createEIP712Domain creates the typed data domain for the given chainID.
+func createEIP712Domain(chainID uint64) apitypes.TypedDataDomain {
+	domain := apitypes.TypedDataDomain{
+		Name:              "Cosmos Web3",
+		Version:           "1.0.0",
+		ChainId:           math.NewHexOrDecimal256(int64(chainID)), // #nosec G701
+		VerifyingContract: "cosmos",
+		Salt:              "0",
+	}
 
-	keyring.RegisterLegacyAminoCodec(cdc)
-	cryptocodec.RegisterCrypto(cdc)
+	return domain
 }

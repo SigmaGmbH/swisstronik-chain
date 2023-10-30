@@ -27,11 +27,11 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 
+	tmconfig "github.com/cometbft/cometbft/config"
+	tmrand "github.com/cometbft/cometbft/libs/rand"
+	"github.com/cometbft/cometbft/types"
+	tmtime "github.com/cometbft/cometbft/types/time"
 	"github.com/spf13/cobra"
-	tmconfig "github.com/tendermint/tendermint/config"
-	tmrand "github.com/tendermint/tendermint/libs/rand"
-	"github.com/tendermint/tendermint/types"
-	tmtime "github.com/tendermint/tendermint/types/time"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -60,9 +60,6 @@ import (
 	evmtypes "swisstronik/x/evm/types"
 
 	"swisstronik/testutil/network"
-	cmtproto "github.com/tendermint/tendermint/proto/tendermint/types"
-	tmtypes "github.com/tendermint/tendermint/types"
-	"time"
 )
 
 var (
@@ -111,7 +108,7 @@ func addTestnetFlagsToCmd(cmd *cobra.Command) {
 		fmt.Sprintf("0.000006%s",
 			evmmoduletypes.SwtrDenom),
 		"Minimum gas prices to accept for transactions; All fees in a tx must meet this minimum (e.g. 0.01photino,0.001stake)")
-	cmd.Flags().String(flags.FlagKeyAlgorithm, string(hd.EthSecp256k1Type), "Key signing algorithm to generate keys for")
+	cmd.Flags().String(flags.FlagKeyType, string(hd.EthSecp256k1Type), "Key signing algorithm to generate keys for")
 }
 
 // NewTestnetCmd creates a root testnet command with subcommands to run an in-process testnet or initialize
@@ -164,7 +161,7 @@ Example:
 			args.nodeDaemonHome, _ = cmd.Flags().GetString(flagNodeDaemonHome)
 			args.startingIPAddress, _ = cmd.Flags().GetString(flagStartingIPAddress)
 			args.numValidators, _ = cmd.Flags().GetInt(flagNumValidators)
-			args.algo, _ = cmd.Flags().GetString(flags.FlagKeyAlgorithm)
+			args.algo, _ = cmd.Flags().GetString(flags.FlagKeyType)
 
 			return initTestnetFiles(clientCtx, cmd, serverCtx.Config, mbm, genBalIterator, args)
 		},
@@ -199,7 +196,7 @@ Example:
 			args.chainID, _ = cmd.Flags().GetString(flags.FlagChainID)
 			args.minGasPrices, _ = cmd.Flags().GetString(sdkserver.FlagMinGasPrices)
 			args.numValidators, _ = cmd.Flags().GetInt(flagNumValidators)
-			args.algo, _ = cmd.Flags().GetString(flags.FlagKeyAlgorithm)
+			args.algo, _ = cmd.Flags().GetString(flags.FlagKeyType)
 			args.enableLogging, _ = cmd.Flags().GetBool(flagEnableLogging)
 			args.rpcAddress, _ = cmd.Flags().GetString(flagRPCAddress)
 			args.apiAddress, _ = cmd.Flags().GetString(flagAPIAddress)
@@ -496,7 +493,7 @@ func collectGenFiles(
 			return err
 		}
 
-		nodeAppState, err := genutil.GenAppStateFromConfig(clientCtx.Codec, clientCtx.TxConfig, nodeConfig, initCfg, *genDoc, genBalIterator)
+		nodeAppState, err := genutil.GenAppStateFromConfig(clientCtx.Codec, clientCtx.TxConfig, nodeConfig, initCfg, *genDoc, genBalIterator, genutiltypes.DefaultMessageValidator)
 		if err != nil {
 			return err
 		}
@@ -509,7 +506,7 @@ func collectGenFiles(
 		genFile := nodeConfig.GenesisFile()
 
 		// overwrite each validator's genesis file to have a canonical genesis time
-		if err := ExportGenesisFileWithTime(genFile, chainID, nil, appState, genTime); err != nil {
+		if err := genutil.ExportGenesisFileWithTime(genFile, chainID, nil, appState, genTime); err != nil {
 			return err
 		}
 	}
@@ -586,41 +583,4 @@ func startTestnet(cmd *cobra.Command, args startArgs) error {
 	testnet.Cleanup()
 
 	return nil
-}
-
-// ExportGenesisFileWithTime creates and writes the genesis configuration to disk.
-// An error is returned if building or writing the configuration to file fails.
-func ExportGenesisFileWithTime(
-	genFile, chainID string, validators []tmtypes.GenesisValidator,
-	appState json.RawMessage, genTime time.Time,
-) error {
-	consensusParams := &cmtproto.ConsensusParams{
-		Block: cmtproto.BlockParams{
-			MaxBytes: 22020096,
-			MaxGas: 20000000,
-			TimeIotaMs: 1000,
-		},
-		Evidence: cmtproto.EvidenceParams{
-			MaxAgeNumBlocks: 100000,
-			MaxAgeDuration: 172800000000000,
-			MaxBytes: 1048576,
-		},
-		Validator: cmtproto.ValidatorParams{
-			PubKeyTypes: []string{"ed25519"},
-		},
-	} 
-
-	genDoc := tmtypes.GenesisDoc{
-		GenesisTime: genTime,
-		ChainID:     chainID,
-		Validators:  validators,
-		AppState:    appState,
-		ConsensusParams: consensusParams,
-	}
-
-	if err := genDoc.ValidateAndComplete(); err != nil {
-		return err
-	}
-
-	return genDoc.SaveAs(genFile)
 }

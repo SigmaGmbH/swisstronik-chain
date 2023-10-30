@@ -11,6 +11,7 @@ import (
 	rpc "swisstronik/rpc/types"
 	"swisstronik/tests"
 	evmtypes "swisstronik/x/evm/types"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	errortypes "github.com/cosmos/cosmos-sdk/types/errors"
 	grpctypes "github.com/cosmos/cosmos-sdk/types/grpc"
@@ -138,13 +139,13 @@ func TestRegisterParamsError(t *testing.T) {
 
 // ETH Call
 func RegisterEthCall(queryClient *mocks.EVMQueryClient, request *evmtypes.EthCallRequest) {
-	ctx, _ := context.WithCancel(rpc.ContextWithHeight(1))
+	ctx, _ := context.WithCancel(rpc.ContextWithHeight(1)) //nolint
 	queryClient.On("EthCall", ctx, request).
 		Return(&evmtypes.MsgEthereumTxResponse{}, nil)
 }
 
 func RegisterEthCallError(queryClient *mocks.EVMQueryClient, request *evmtypes.EthCallRequest) {
-	ctx, _ := context.WithCancel(rpc.ContextWithHeight(1))
+	ctx, _ := context.WithCancel(rpc.ContextWithHeight(1)) //nolint
 	queryClient.On("EthCall", ctx, request).
 		Return(nil, errortypes.ErrInvalidRequest)
 }

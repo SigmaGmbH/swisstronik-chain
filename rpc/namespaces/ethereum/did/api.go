@@ -20,7 +20,7 @@ import (
 
 	rpctypes "swisstronik/rpc/types"
 
-	"github.com/tendermint/tendermint/libs/log"
+	"github.com/cometbft/cometbft/libs/log"
 
 	"swisstronik/rpc/backend"
 	didtypes "swisstronik/x/did/types"

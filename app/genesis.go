@@ -2,8 +2,9 @@ package app
 
 import (
 	"encoding/json"
-	"github.com/cosmos/cosmos-sdk/simapp"
 	"swisstronik/encoding"
+
+	"cosmossdk.io/simapp"
 )
 
 // The genesis state of the blockchain is represented here as a map of raw json
