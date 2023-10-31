@@ -15,14 +15,13 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/rpc"
 	"github.com/cosmos/cosmos-sdk/server"
 	serverconfig "github.com/cosmos/cosmos-sdk/server/config"
-	"github.com/cosmos/cosmos-sdk/simapp/params"
 	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-	tmcfg "github.com/tendermint/tendermint/config"
-	simappparams "github.com/cosmos/cosmos-sdk/simapp/params"
+	tmcfg "github.com/cometbft/cometbft/config"
+	simappparams "cosmossdk.io/simapp/params"
 
 	"swisstronik/app"
 
@@ -32,7 +31,7 @@ import (
 )
 
 // NewRootCmd creates a new root command for a Cosmos SDK application
-func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
+func NewRootCmd() (*cobra.Command, simappparams.EncodingConfig) {
 	encodingConfig := encoding.MakeConfig(app.ModuleBasics)
 	initClientCtx := client.Context{}.
 		WithCodec(encodingConfig.Codec).
@@ -93,7 +92,7 @@ func initTendermintConfig() *tmcfg.Config {
 
 func initRootCmd(
 	rootCmd *cobra.Command,
-	encodingConfig params.EncodingConfig,
+	encodingConfig simappparams.EncodingConfig,
 ) {
 	// Set config
 	InitSDKConfig()
@@ -215,7 +214,7 @@ func initAppConfig() (string, interface{}) {
 }
 
 // convertEncodingConfig converts default cosmos encoding config to ignite format
-func convertEncodingConfig(config params.EncodingConfig) simappparams.EncodingConfig {
+func convertEncodingConfig(config simappparams.EncodingConfig) simappparams.EncodingConfig {
 	return simappparams.EncodingConfig{
 		InterfaceRegistry: config.InterfaceRegistry,
 		Codec:         config.Codec,

@@ -5,13 +5,14 @@ import (
 	"strings"
 	"testing"
 
-	"cosmossdk.io/math"
 	"swisstronik/app"
 	"swisstronik/encoding"
 	"swisstronik/ethereum/eip712"
 	"swisstronik/tests"
 	"swisstronik/types"
 	evmtypes "swisstronik/x/evm/types"
+
+	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/client"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"

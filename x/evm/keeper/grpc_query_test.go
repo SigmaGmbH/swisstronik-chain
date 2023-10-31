@@ -4,21 +4,22 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/big"
+	"swisstronik/crypto/deoxys"
 
 	sdkmath "cosmossdk.io/math"
+
+	"swisstronik/tests"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	ethparams "github.com/ethereum/go-ethereum/params"
-	"swisstronik/tests"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"swisstronik/server/config"
 	evmcommontypes "swisstronik/types"
 	"swisstronik/x/evm/types"
-	"swisstronik/crypto/deoxys"
 )
 
 // Not valid Ethereum address
@@ -533,7 +534,7 @@ func (suite *KeeperTestSuite) TestEstimateGas() {
 				args = types.TransactionArgs{To: &contractAddr, From: &suite.address, Data: (*hexutil.Bytes)(&encryptedTransferData)}
 			},
 			true,
-			51880,
+			49080,
 			false,
 		},
 		// repeated tests with enableFeemarket
@@ -611,7 +612,7 @@ func (suite *KeeperTestSuite) TestEstimateGas() {
 				args = types.TransactionArgs{To: &contractAddr, From: &suite.address, Data: (*hexutil.Bytes)(&encryptedTransferData)}
 			},
 			true,
-			51880,
+			49080,
 			true,
 		},
 		{

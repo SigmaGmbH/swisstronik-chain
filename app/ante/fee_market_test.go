@@ -1,13 +1,14 @@
 package ante_test
 
 import (
-	"swisstronik/types"
 	"math/big"
+	"swisstronik/types"
 
-	sdkmath "cosmossdk.io/math"
 	"swisstronik/app/ante"
 	"swisstronik/tests"
 	evmtypes "swisstronik/x/evm/types"
+
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
@@ -79,8 +80,10 @@ func (suite *AnteTestSuite) TestGasWantedDecorator() {
 				acc := suite.app.AccountKeeper.NewAccountWithAddress(suite.ctx, from.Bytes())
 				suite.Require().NoError(acc.SetSequence(1))
 				suite.app.AccountKeeper.SetAccount(suite.ctx, acc)
-				tx := suite.CreateTestEIP712TxBuilderMsgSend(acc.GetAddress(), fromPrivKey, suite.ctx.ChainID(), gas, amount)
-				return tx.GetTx()
+				builder, err := suite.CreateTestEIP712TxBuilderMsgSend(acc.GetAddress(), fromPrivKey, suite.ctx.ChainID(), gas, amount)
+				suite.Require().NoError(err)
+
+				return builder.GetTx()
 			},
 			true,
 		},

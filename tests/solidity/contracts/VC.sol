@@ -1,44 +1,26 @@
-// SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8;
 
-import "solidity-rlp/contracts/RLPReader.sol";
-
+/**
+ Sample contract to test if precompile for verifiable credentials
+*/
 contract VC {
-    using RLPReader for RLPReader.RLPItem;
-    using RLPReader for RLPReader.Iterator;
-    using RLPReader for bytes;
-    
-    struct IssuerAuthorized {
-        string  issuer;
-        bool    isAuthorized;
+    /**
+        Verifies provided JWT Proof for Verifiable Credential.
+        Returns `address` of credential subject and string with DID URL of issuer
+     */
+    function verifyJWT(bytes calldata credential) public view returns (address, string memory) {
+        (bool success, bytes memory data) = address(1027).staticcall(credential);
+        require(success, "Cannot verify credential");
+
+        (address subject, string memory issuer) = decodeResult(data);
+        return (subject, issuer);
     }
 
-    mapping (address => IssuerAuthorized) private _isAuthorized;
-
-    function authorize(bytes calldata credential) public {
-        (bool passed, bytes memory rlpBytes) = address(1027).staticcall(credential);
-        require(passed, "Cannot verify credential");
-        RLPReader.RLPItem[] memory ls = rlpBytes.toRlpItem().toList();
-        require(ls.length == 2, "Invalid credential");
-
-        RLPReader.RLPItem memory credentialSubjectItem = ls[0];
-        address credentialSubject = bytesToAddress(credentialSubjectItem.toBytes());
-        RLPReader.RLPItem memory issuerItem = ls[1];
-        string memory issuer = string(issuerItem.toBytes());
-
-        IssuerAuthorized memory authorized = IssuerAuthorized(issuer, true);
-        _isAuthorized[credentialSubject] = authorized;
+    /**
+        Decodes precompile result. Precompile returns credential subject address and DID URL of issuer
+     */
+    function decodeResult(bytes memory output) public pure returns (address, string memory) {
+        (address subject, string memory issuer) = abi.decode(output, (address, string));
+        return (subject, issuer);
     }
-
-    function isAuthorized(address user) public view returns (bool) {
-        return _isAuthorized[user].isAuthorized;
-    }
-
-    function getIssuer(address user) public view returns (string memory) {
-        return _isAuthorized[user].issuer;
-    }
-
-    function bytesToAddress(bytes memory b) private pure returns (address) {
-        return address(uint160(bytes20(b)));
-    }  
 }

@@ -4,12 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"math/rand"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/cobra"
 
-	abci "github.com/tendermint/tendermint/abci/types"
+	abci "github.com/cometbft/cometbft/abci/types"
+
+	"swisstronik/x/did/client/cli"
+	"swisstronik/x/did/keeper"
+	"swisstronik/x/did/types"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -17,14 +20,13 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
-	"swisstronik/x/did/client/cli"
-	"swisstronik/x/did/keeper"
-	"swisstronik/x/did/types"
 )
 
 var (
-	_ module.AppModule      = AppModule{}
-	_ module.AppModuleBasic = AppModuleBasic{}
+	_ module.AppModule           = AppModule{}
+	_ module.AppModuleBasic      = AppModuleBasic{}
+	_ module.EndBlockAppModule   = AppModule{}
+	_ module.BeginBlockAppModule = AppModule{}
 )
 
 // ----------------------------------------------------------------------------
@@ -92,7 +94,7 @@ func (AppModuleBasic) GetQueryCmd() *cobra.Command {
 type AppModule struct {
 	AppModuleBasic
 
-	keeper        keeper.Keeper
+	keeper keeper.Keeper
 }
 
 func NewAppModule(
@@ -103,17 +105,6 @@ func NewAppModule(
 		AppModuleBasic: NewAppModuleBasic(cdc),
 		keeper:         keeper,
 	}
-}
-
-// Deprecated: use RegisterServices
-func (am AppModule) Route() sdk.Route { return sdk.Route{} }
-
-// Deprecated: use RegisterServices
-func (AppModule) QuerierRoute() string { return types.RouterKey }
-
-// Deprecated: use RegisterServices
-func (am AppModule) LegacyQuerierHandler(_ *codec.LegacyAmino) sdk.Querier {
-	return nil
 }
 
 // RegisterServices registers a gRPC query service to respond to the module-specific gRPC queries
@@ -151,11 +142,6 @@ func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
 // EndBlock contains the logic that is automatically triggered at the end of each block
 func (am AppModule) EndBlock(_ sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
 	return []abci.ValidatorUpdate{}
-}
-
-// RandomizedParams creates randomized evm param changes for the simulator.
-func (AppModule) RandomizedParams(_ *rand.Rand) []simtypes.ParamChange {
-	return nil
 }
 
 // RegisterStoreDecoder registers a decoder for evm module's types

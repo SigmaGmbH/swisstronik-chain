@@ -2,8 +2,8 @@ package handlers
 
 import "C"
 import (
-	ffi "github.com/SigmaGmbH/librustgo/go_protobuf_gen"
 	"github.com/SigmaGmbH/librustgo/internal/api"
+	"github.com/SigmaGmbH/librustgo/types"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"google.golang.org/protobuf/proto"
@@ -17,14 +17,14 @@ func Call(
 	from, to, data, value []byte,
 	accessList ethtypes.AccessList,
 	gasLimit uint64,
-	txContext *ffi.TransactionContext,
+	txContext *types.TransactionContext,
 	commit bool,
-) (*ffi.HandleTransactionResponse, error) {
+) (*types.HandleTransactionResponse, error) {
 	// Construct connector to rust code
 	c := api.BuildConnector(connector)
 
 	// Create protobuf-encoded transaction data
-	params := &ffi.SGXVMCallParams{
+	params := &types.SGXVMCallParams{
 		From:       from,
 		To:         to,
 		Data:       data,
@@ -35,8 +35,8 @@ func Call(
 	}
 
 	// Create protobuf encoded request
-	req := ffi.FFIRequest{Req: &ffi.FFIRequest_CallRequest{
-		CallRequest: &ffi.SGXVMCallRequest{
+	req := types.FFIRequest{Req: &types.FFIRequest_CallRequest{
+		CallRequest: &types.SGXVMCallRequest{
 			Params:  params,
 			Context: txContext,
 		},
@@ -53,12 +53,12 @@ func Call(
 	errmsg := api.NewUnmanagedVector(nil)
 	ptr, err := C.make_pb_request(c, d, &errmsg)
 	if err != nil {
-		return &ffi.HandleTransactionResponse{}, api.ErrorWithMessage(err, errmsg)
+		return &types.HandleTransactionResponse{}, api.ErrorWithMessage(err, errmsg)
 	}
 
 	// Recover returned value
 	executionResult := api.CopyAndDestroyUnmanagedVector(ptr)
-	response := ffi.HandleTransactionResponse{}
+	response := types.HandleTransactionResponse{}
 	if err := proto.Unmarshal(executionResult, &response); err != nil {
 		log.Fatalln("Failed to decode execution result:", err)
 	}
@@ -72,14 +72,14 @@ func Create(
 	from, data, value []byte,
 	accessList ethtypes.AccessList,
 	gasLimit uint64,
-	txContext *ffi.TransactionContext,
+	txContext *types.TransactionContext,
 	commit bool,
-) (*ffi.HandleTransactionResponse, error) {
+) (*types.HandleTransactionResponse, error) {
 	// Construct connector to rust code
 	c := api.BuildConnector(connector)
 
 	// Create protobuf-encoded transaction data
-	params := &ffi.SGXVMCreateParams{
+	params := &types.SGXVMCreateParams{
 		From:       from,
 		Data:       data,
 		GasLimit:   gasLimit,
@@ -89,8 +89,8 @@ func Create(
 	}
 
 	// Create protobuf encoded request
-	req := ffi.FFIRequest{Req: &ffi.FFIRequest_CreateRequest{
-		CreateRequest: &ffi.SGXVMCreateRequest{
+	req := types.FFIRequest{Req: &types.FFIRequest_CreateRequest{
+		CreateRequest: &types.SGXVMCreateRequest{
 			Params:  params,
 			Context: txContext,
 		},
@@ -107,12 +107,12 @@ func Create(
 	errmsg := api.NewUnmanagedVector(nil)
 	ptr, err := C.make_pb_request(c, d, &errmsg)
 	if err != nil {
-		return &ffi.HandleTransactionResponse{}, api.ErrorWithMessage(err, errmsg)
+		return &types.HandleTransactionResponse{}, api.ErrorWithMessage(err, errmsg)
 	}
 
 	// Recover returned value
 	executionResult := api.CopyAndDestroyUnmanagedVector(ptr)
-	response := ffi.HandleTransactionResponse{}
+	response := types.HandleTransactionResponse{}
 	if err := proto.Unmarshal(executionResult, &response); err != nil {
 		log.Fatalln("Failed to decode execution result:", err)
 	}
@@ -121,10 +121,10 @@ func Create(
 }
 
 // Converts AccessList type from ethtypes to protobuf-compatible type
-func convertAccessList(accessList ethtypes.AccessList) []*ffi.AccessListItem {
-	var converted []*ffi.AccessListItem
+func convertAccessList(accessList ethtypes.AccessList) []*types.AccessListItem {
+	var converted []*types.AccessListItem
 	for _, item := range accessList {
-		accessListItem := &ffi.AccessListItem{
+		accessListItem := &types.AccessListItem{
 			StorageSlot: convertAccessListStorageSlots(item.StorageKeys),
 			Address:     item.Address.Bytes(),
 		}

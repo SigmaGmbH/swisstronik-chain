@@ -26,6 +26,7 @@ import (
 	"swisstronik/encoding"
 	"swisstronik/tests"
 	ethermint "swisstronik/types"
+	"swisstronik/utils"
 	evmtypes "swisstronik/x/evm/types"
 	"swisstronik/x/feemarket/types"
 
@@ -33,11 +34,11 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 
-	abci "github.com/tendermint/tendermint/abci/types"
-	"github.com/tendermint/tendermint/crypto/tmhash"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
-	tmversion "github.com/tendermint/tendermint/proto/tendermint/version"
-	"github.com/tendermint/tendermint/version"
+	abci "github.com/cometbft/cometbft/abci/types"
+	"github.com/cometbft/cometbft/crypto/tmhash"
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	tmversion "github.com/cometbft/cometbft/proto/tendermint/version"
+	"github.com/cometbft/cometbft/version"
 )
 
 type KeeperTestSuite struct {
@@ -77,6 +78,7 @@ func (suite *KeeperTestSuite) SetupTest() {
 }
 
 func (suite *KeeperTestSuite) SetupApp(checkTx bool) {
+	chainID := utils.TestnetChainID + "-1"
 	t := suite.T()
 	// account key
 	priv, err := ethsecp256k1.GenerateKey()
@@ -91,7 +93,7 @@ func (suite *KeeperTestSuite) SetupApp(checkTx bool) {
 
 	suite.ctx = suite.app.BaseApp.NewContext(checkTx, tmproto.Header{
 		Height:          1,
-		ChainID:         "ethermint_9000-1",
+		ChainID:         chainID,
 		Time:            time.Now().UTC(),
 		ProposerAddress: suite.consAddress.Bytes(),
 		Version: tmversion.Consensus{
@@ -127,8 +129,8 @@ func (suite *KeeperTestSuite) SetupApp(checkTx bool) {
 	valAddr := sdk.ValAddress(suite.address.Bytes())
 	validator, err := stakingtypes.NewValidator(valAddr, priv.PubKey(), stakingtypes.Description{})
 	require.NoError(t, err)
-	validator = stakingkeeper.TestingUpdateValidator(suite.app.StakingKeeper, suite.ctx, validator, true)
-	err = suite.app.StakingKeeper.AfterValidatorCreated(suite.ctx, validator.GetOperator())
+	validator = stakingkeeper.TestingUpdateValidator(&suite.app.StakingKeeper, suite.ctx, validator, true)
+	err = suite.app.StakingKeeper.Hooks().AfterValidatorCreated(suite.ctx, validator.GetOperator())
 	require.NoError(t, err)
 
 	err = suite.app.StakingKeeper.SetValidatorByConsAddr(suite.ctx, validator)

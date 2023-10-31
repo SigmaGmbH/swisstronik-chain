@@ -1,24 +1,26 @@
 package evm_test
 
 import (
-	"swisstronik/x/evm/keeper"
 	"math/big"
+	"swisstronik/utils"
+	"swisstronik/x/evm/keeper"
 	"testing"
 	"time"
 
 	sdkmath "cosmossdk.io/math"
 	"github.com/gogo/protobuf/proto"
 
-	abci "github.com/tendermint/tendermint/abci/types"
-	tmjson "github.com/tendermint/tendermint/libs/json"
+	abci "github.com/cometbft/cometbft/abci/types"
+	tmjson "github.com/cometbft/cometbft/libs/json"
 
-	"github.com/cosmos/cosmos-sdk/simapp"
+	"cosmossdk.io/simapp"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 
 	feemarkettypes "swisstronik/x/feemarket/types"
 
 	"errors"
+
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core"
@@ -39,12 +41,12 @@ import (
 	"swisstronik/x/evm"
 	"swisstronik/x/evm/types"
 
-	"github.com/tendermint/tendermint/crypto/tmhash"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
-	tmversion "github.com/tendermint/tendermint/proto/tendermint/version"
+	"github.com/cometbft/cometbft/crypto/tmhash"
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	tmversion "github.com/cometbft/cometbft/proto/tendermint/version"
 
 	"github.com/SigmaGmbH/librustgo"
-	"github.com/tendermint/tendermint/version"
+	"github.com/cometbft/cometbft/version"
 )
 
 type EvmTestSuite struct {
@@ -68,6 +70,7 @@ type EvmTestSuite struct {
 
 // DoSetupTest setup test environment, it uses`require.TestingT` to support both `testing.T` and `testing.B`.
 func (suite *EvmTestSuite) DoSetupTest(t require.TestingT) {
+	chainID := utils.TestnetChainID + "-1"
 	checkTx := false
 
 	// account key
@@ -118,7 +121,7 @@ func (suite *EvmTestSuite) DoSetupTest(t require.TestingT) {
 	// Initialize the chain
 	suite.app.InitChain(
 		abci.RequestInitChain{
-			ChainId:         "ethermint_9000-1",
+			ChainId:         chainID,
 			Validators:      []abci.ValidatorUpdate{},
 			ConsensusParams: app.DefaultConsensusParams,
 			AppStateBytes:   stateBytes,
@@ -127,7 +130,7 @@ func (suite *EvmTestSuite) DoSetupTest(t require.TestingT) {
 
 	suite.ctx = suite.app.BaseApp.NewContext(checkTx, tmproto.Header{
 		Height:          1,
-		ChainID:         "ethermint_9000-1",
+		ChainID:         chainID,
 		Time:            time.Now().UTC(),
 		ProposerAddress: consAddress.Bytes(),
 		Version: tmversion.Consensus{
