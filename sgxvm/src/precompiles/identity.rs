@@ -11,6 +11,8 @@ use crate::{
 };
 use ed25519_dalek::{Signature, Verifier, VerifyingKey};
 use evm::executor::stack::{PrecompileHandle, PrecompileOutput};
+use ethabi::{Token as AbiToken, encode as encodeAbi};
+use primitive_types::H160;
 use serde::Deserialize;
 use std::{
     string::{String, ToString},
@@ -133,7 +135,7 @@ impl LinearCostPrecompileWithQuerier for Identity {
         verify_signature(&data, &signature, &vm)?;
 
         let credential_subject = convert_bech32_address(parsed_payload.vc.credential_subject.user_address)?;
-        let output = rlp_encode(credential_subject, parsed_payload.iss);
+        let output = encode_output(credential_subject, parsed_payload.iss);
 
         Ok((ExitSucceed::Returned, output))
     }
@@ -222,8 +224,8 @@ fn base64_decode(input: &str) -> Vec<u8> {
 }
 
 /// Makes `OCALL` to obtain verification methods from DID registry
-/// * connector – pointer to GoQuerier, which will be used to make queries to `x/did` module
-/// * did_url – url to DID document
+/// * connector Pointer to GoQuerier, which will be used to make queries to `x/did` module
+/// * did_url URL of DID document
 fn get_verification_material(connector: *mut GoQuerier, did_url: String) -> Result<Vec<ffi::VerificationMethod>, PrecompileFailure> {
     let encoded_request = coder::encode_verification_methods_request(did_url);
     match ocall::make_request(connector, encoded_request) {
@@ -251,19 +253,21 @@ fn multibase_to_vec(value: &str) -> Result<Vec<u8>, PrecompileFailure> {
     Ok(decoded_data[2..].to_vec())
 }
 
-fn rlp_encode(credential_subject: Vec<u8>, issuer: String) -> Vec<u8> {
-    // Create an RlpStream
-    let mut rlp_stream = rlp::RlpStream::new();
+/// Used to encode address of credential subject and issuer DID URL to 
+/// a format, which can be easily decoded in Solidity smart contract
+/// * credential_subject Address of credential subject in bytes format
+/// * issuer DID URL of issuer of provided credential
+fn encode_output(credential_subject: Vec<u8>, issuer: String) -> Vec<u8> {
+    let tokens = vec![
+        AbiToken::Address(H160::from_slice(&credential_subject)),
+        AbiToken::String(issuer),
+    ];
 
-    // Serialize the struct into the RlpStream
-    rlp_stream.begin_list(2);  // Number of elements in the struct
-    rlp_stream.append(&credential_subject);
-    rlp_stream.append(&issuer);
-
-    // Return the serialized RLP data as a Vec<u8>
-    rlp_stream.out().to_vec()
+    encodeAbi(&tokens)
 }
 
+/// Checks if provided `nbf` (not valid before) field has a correct timestamp
+/// * nbf `nbf` field from provided JWT proof
 fn validate_nbf(nbf: i64) -> Result<bool, PrecompileFailure> {
     let utc_duration = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
     let utc_now = TzUtc.timestamp(utc_duration.as_secs() as i64, 0);
