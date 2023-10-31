@@ -10,7 +10,6 @@ use std::panic::catch_unwind;
 use std::env;
 use std::ops::Deref;
 use std::time::Duration;
-use std::path::Path;
 use lazy_static::lazy_static;
 use parking_lot::{Condvar, Mutex};
 
