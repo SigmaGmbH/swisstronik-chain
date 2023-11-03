@@ -21,6 +21,7 @@ const (
 	ResourceMetadataKey      = "resource-metadata:"
 	ResourceDataKey          = "resource-data:"
 	ResourceCountKey         = "resource-count:"
+	VMToDIDsKey              = "vm-to-did:"
 )
 
 func KeyPrefix(p string) []byte {
@@ -53,4 +54,8 @@ func GetResourceDataKey(collectionID string, id string) []byte {
 
 func GetResourceMetadataCollectionPrefix(collectionID string) []byte {
 	return []byte(ResourceMetadataKey + collectionID + ":")
+}
+
+func GetVMToDIDsPrefix(verificationMaterial string) []byte {
+	return []byte(VMToDIDsKey + verificationMaterial)
 }

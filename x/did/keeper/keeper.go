@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+	"github.com/cosmos/gogoproto/proto"
 	"strconv"
 	"strings"
 
@@ -67,6 +68,25 @@ func (k Keeper) GetDIDDocumentCount(ctx sdk.Context) uint64 {
 	}
 
 	return count
+}
+
+// GetDIDURLsControlledBy returns list of DID URLs controlled by provided verification material
+func (k Keeper) GetDIDURLsControlledBy(ctx sdk.Context, verificationMaterial string) ([]string, error) {
+	store := ctx.KVStore(k.storeKey)
+	key := types.GetVMToDIDsPrefix(verificationMaterial)
+
+	didBytes := store.Get(key)
+	if didBytes == nil {
+		return []string{}, nil
+	}
+
+	controlledDIDs := types.ControlledDIDs{}
+	err := proto.Unmarshal(didBytes, &controlledDIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	return controlledDIDs.ControlledDids, nil
 }
 
 // SetDIDDocumentCount set the total number of did
