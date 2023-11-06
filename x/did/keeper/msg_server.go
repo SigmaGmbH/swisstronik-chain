@@ -69,6 +69,13 @@ func (k Keeper) CreateDIDDocument(goCtx context.Context, msg *types.MsgCreateDID
 		return nil, types.ErrInternal.Wrapf(err.Error())
 	}
 
+	for _, vm := range didDoc.VerificationMethod {
+		err = k.AddDIDControlledBy(ctx, vm.VerificationMaterial, didDoc.Id)
+		if err != nil {
+			return nil, types.ErrInternal.Wrapf(err.Error())
+		}
+	}
+
 	// Build and return response
 	return &types.MsgCreateDIDDocumentResponse{
 		Value: &didDocWithMetadata,
@@ -145,6 +152,13 @@ func (k Keeper) DeactivateDIDDocument(goCtx context.Context, msg *types.MsgDeact
 		return nil, types.ErrInternal.Wrapf(iterationErr.Error())
 	}
 
+	for _, vm := range didDoc.DidDoc.VerificationMethod {
+		err = k.RemoveControlledDID(ctx, vm.VerificationMaterial, didDoc.DidDoc.Id)
+		if err != nil {
+			return nil, types.ErrInternal.Wrapf(err.Error())
+		}
+	}
+
 	// Build and return response
 	return &types.MsgDeactivateDIDDocumentResponse{
 		Value: &didDoc,
@@ -171,6 +185,14 @@ func (k Keeper) UpdateDIDDocument(goCtx context.Context, msg *types.MsgUpdateDID
 	// Validate DID is not deactivated
 	if existingDidDocWithMetadata.Metadata.Deactivated {
 		return nil, types.ErrDIDDocumentDeactivated.Wrap(msg.Payload.Id)
+	}
+
+	// Remove existing DID doc from associated DIDs with verification material
+	for _, vm := range existingDidDoc.VerificationMethod {
+		err = k.RemoveControlledDID(ctx, vm.VerificationMaterial, existingDidDoc.Id)
+		if err != nil {
+			return nil, types.ErrInternal.Wrapf(err.Error())
+		}
 	}
 
 	// Construct the new version of the DID and temporary rename it and its self references
@@ -214,6 +236,13 @@ func (k Keeper) UpdateDIDDocument(goCtx context.Context, msg *types.MsgUpdateDID
 	err = k.AddNewDIDDocumentVersion(ctx, &updatedDidDocWithMetadata)
 	if err != nil {
 		return nil, types.ErrInternal.Wrapf(err.Error())
+	}
+
+	for _, newVm := range updatedDidDoc.VerificationMethod {
+		err = k.AddDIDControlledBy(ctx, newVm.VerificationMaterial, updatedDidDoc.Id)
+		if err != nil {
+			return nil, types.ErrInternal.Wrapf(err.Error())
+		}
 	}
 
 	// Build and return response
