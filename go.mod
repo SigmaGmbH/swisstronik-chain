@@ -23,10 +23,10 @@ require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/ethereum-optimism/go-ethereum-hdwallet v0.1.3
 	github.com/ethereum/go-ethereum v1.11.5
-	github.com/getsentry/sentry-go v0.23.0
 	github.com/gabriel-vasile/mimetype v1.4.2
+	github.com/getsentry/sentry-go v0.23.0
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
-	github.com/gogo/protobuf v1.3.3
+	github.com/gogo/protobuf v1.3.2
 	github.com/golang/protobuf v1.5.3
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/mux v1.8.0
@@ -50,8 +50,6 @@ require (
 	github.com/spf13/viper v1.16.0
 	github.com/status-im/keycard-go v0.2.0
 	github.com/stretchr/testify v1.8.4
-	github.com/tidwall/gjson v1.14.0
-	github.com/tidwall/sjson v1.2.4
 	github.com/tyler-smith/go-bip39 v1.1.0
 	golang.org/x/crypto v0.13.0
 	golang.org/x/net v0.15.0
@@ -197,8 +195,6 @@ require (
 	github.com/syndtr/goleveldb v1.0.1-0.20220721030215-126854af5e6d // indirect
 	github.com/tendermint/go-amino v0.16.0 // indirect
 	github.com/tidwall/btree v1.7.0 // indirect
-	github.com/tidwall/match v1.1.1 // indirect
-	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/tklauser/go-sysconf v0.3.10 // indirect
 	github.com/tklauser/numcpus v0.4.0 // indirect
 	github.com/ulikunitz/xz v0.5.11 // indirect
@@ -230,8 +226,6 @@ replace (
 	github.com/SigmaGmbH/librustgo v0.0.2-0.20230725120829-f1a254f14ac6 => ./go-sgxvm
 	github.com/cosmos/cosmos-sdk => github.com/cosmos/cosmos-sdk v0.47.4
 	github.com/ethereum/go-ethereum => github.com/evmos/go-ethereum v1.10.26-evmos-rc2
-	// use Cosmos-SDK fork to enable Ledger functionality
-	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
 	// replace broken goleveldb
 	github.com/syndtr/goleveldb => github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
 )
