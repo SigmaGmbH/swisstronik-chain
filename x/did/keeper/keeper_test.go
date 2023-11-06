@@ -271,6 +271,14 @@ func (suite *KeeperTestSuite) TestCreateDIDWithAllProperties() {
 	created, err := suite.keeper.DIDDocument(suite.goCtx, &types.QueryDIDDocumentRequest{Id: did})
 	suite.Require().NoError(err)
 	suite.Require().Equal(payload.ToDidDoc(), *created.Value.DidDoc)
+
+	// Check if verification methods were indexed
+	for _, vm := range payload.VerificationMethod {
+		controlledDocuments, err := suite.keeper.GetDIDsControlledBy(suite.ctx, vm.VerificationMaterial)
+		suite.Require().NoError(err)
+		suite.Require().Contains(controlledDocuments, payload.Id)
+		suite.Require().Equal(1, len(controlledDocuments))
+	}
 }
 
 func (suite *KeeperTestSuite) TestShouldFailWithoutSignatureOfSecondController() {
