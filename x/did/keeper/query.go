@@ -152,3 +152,23 @@ func (k Keeper) CollectionResources(
 		Resources: resources,
 	}, nil
 }
+
+func (k Keeper) AllControlledDIDDocuments(
+	goCtx context.Context,
+	req *types.QueryAllControlledDIDDocumentsRequest,
+) (*types.QueryAllControlledDIDDocumentsResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	documents, err := k.GetDIDsControlledBy(ctx, req.VerificationMaterial)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.QueryAllControlledDIDDocumentsResponse {
+		ControlledDocuments: documents,
+	}, nil
+}
