@@ -12,13 +12,13 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
 
+	"crypto/sha256"
+	"encoding/hex"
 	"swisstronik/app"
 	didutil "swisstronik/testutil/did"
 	"swisstronik/utils"
 	"swisstronik/x/did/keeper"
 	"swisstronik/x/did/types"
-	"crypto/sha256"
-	"encoding/hex"
 )
 
 var s *KeeperTestSuite
@@ -566,6 +566,16 @@ func (suite *KeeperTestSuite) TestShouldDeactivateDID() {
 	did, err := didutil.CreateDefaultDID(suite.ctx, suite.keeper)
 	suite.Require().NoError(err)
 
+	// Check if verification methods were indexed
+	existingDID, err := suite.keeper.GetLatestDIDDocument(suite.ctx, did.Did)
+	suite.Require().NoError(err)
+	for _, vm := range existingDID.DidDoc.VerificationMethod {
+		controlledDocuments, err := suite.keeper.GetDIDsControlledBy(suite.ctx, vm.VerificationMaterial)
+		suite.Require().NoError(err)
+		suite.Require().Contains(controlledDocuments, did.Did)
+		suite.Require().Equal(1, len(controlledDocuments))
+	}
+
 	payload := &types.MsgDeactivateDIDDocumentPayload{
 		Id:        did.Did,
 		VersionId: uuid.NewString(),
@@ -583,6 +593,14 @@ func (suite *KeeperTestSuite) TestShouldDeactivateDID() {
 
 	for _, version := range versions.Versions {
 		suite.Require().True(version.Deactivated)
+	}
+
+	// Check that deactivated document was removed from controlled list
+	for _, vm := range existingDID.DidDoc.VerificationMethod {
+		controlledDocuments, err := suite.keeper.GetDIDsControlledBy(suite.ctx, vm.VerificationMaterial)
+		suite.Require().NoError(err)
+		suite.Require().NotContains(controlledDocuments, did.Did)
+		suite.Require().Equal(0, len(controlledDocuments))
 	}
 }
 
@@ -824,6 +842,16 @@ func (suite *KeeperTestSuite) TestUpdateWithSameVerificationMethod() {
 	subject, err := didutil.CreateDIDDocumentWithExternalControllers(suite.ctx, suite.keeper, []string{controller.Did}, []didutil.SignInput{controller.SignInput})
 	suite.Require().NoError(err)
 
+	// Check if verification methods were indexed
+	subjectDocument, err := suite.keeper.GetLatestDIDDocument(suite.ctx, subject.Did)
+	suite.Require().NoError(err)
+	for _, vm := range subjectDocument.DidDoc.VerificationMethod {
+		controlledDocuments, err := suite.keeper.GetDIDsControlledBy(suite.ctx, vm.VerificationMaterial)
+		suite.Require().NoError(err)
+		suite.Require().Contains(controlledDocuments, subject.Did)
+		suite.Require().Equal(1, len(controlledDocuments))
+	}
+
 	payload := &types.MsgUpdateDIDDocumentPayload{
 		Id:         subject.Did,
 		Controller: []string{controller.Did},
@@ -846,6 +874,15 @@ func (suite *KeeperTestSuite) TestUpdateWithSameVerificationMethod() {
 
 	_, err = didutil.UpdateDIDDocument(suite.ctx, suite.keeper, payload, signatures)
 	suite.Require().NoError(err)
+
+	// Check if verification methods still the same
+	suite.Require().NoError(err)
+	for _, vm := range subjectDocument.DidDoc.VerificationMethod {
+		controlledDocuments, err := suite.keeper.GetDIDsControlledBy(suite.ctx, vm.VerificationMaterial)
+		suite.Require().NoError(err)
+		suite.Require().Contains(controlledDocuments, subject.Did)
+		suite.Require().Equal(1, len(controlledDocuments))
+	}
 
 	created, err := didutil.GetDIDDocument(suite.ctx, suite.keeper, subject.Did)
 	suite.Require().NoError(err)
@@ -1178,7 +1215,7 @@ func (suite *KeeperTestSuite) TestCreateWithControllerSignature() {
 	// check
 	created, err := suite.keeper.Resource(sdk.WrapSDKContext(suite.ctx), &types.QueryResourceRequest{
 		CollectionId: did.CollectionID,
-		Id: payload.Id,
+		Id:           payload.Id,
 	})
 	suite.Require().NoError(err)
 
