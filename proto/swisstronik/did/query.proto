@@ -35,6 +35,11 @@ service Query {
     };
   }
 
+  // Fetch list of all DIDs controlled by given verification material
+  rpc AllControlledDIDDocuments(QueryAllControlledDIDDocumentsRequest) returns (QueryAllControlledDIDDocumentsResponse) {
+    option (google.api.http).get = "/str/did/controlled_by/{verification_material}";
+  }
+
   // Fetch data/payload for a specific resource (without metadata)
   rpc Resource(QueryResourceRequest) returns (QueryResourceResponse) {
     option (google.api.http).get = "/swtr/resource/{collection_id}/resources/{id}";
@@ -198,4 +203,14 @@ message QueryCollectionResourcesResponse {
 
   // pagination defines the pagination in the response.
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryDIDDocumentsControlledByVerificationMaterial is the request type for the QueryAllControlledDIDDocuments RPC method
+message QueryAllControlledDIDDocumentsRequest {
+  string verification_material = 1;
+}
+
+// QueryAllControlledDIDDocumentsResponse is the response type for the QueryAllControlledDIDDocuments RPC method
+message QueryAllControlledDIDDocumentsResponse {
+  repeated string controlled_documents = 1;
 }

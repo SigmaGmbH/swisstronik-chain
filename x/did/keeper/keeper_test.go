@@ -12,13 +12,13 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
 
+	"crypto/sha256"
+	"encoding/hex"
 	"swisstronik/app"
 	didutil "swisstronik/testutil/did"
 	"swisstronik/utils"
 	"swisstronik/x/did/keeper"
 	"swisstronik/x/did/types"
-	"crypto/sha256"
-	"encoding/hex"
 )
 
 var s *KeeperTestSuite
@@ -271,6 +271,14 @@ func (suite *KeeperTestSuite) TestCreateDIDWithAllProperties() {
 	created, err := suite.keeper.DIDDocument(suite.goCtx, &types.QueryDIDDocumentRequest{Id: did})
 	suite.Require().NoError(err)
 	suite.Require().Equal(payload.ToDidDoc(), *created.Value.DidDoc)
+
+	// Check if verification methods were indexed
+	for _, vm := range payload.VerificationMethod {
+		controlledDocuments, err := suite.keeper.GetDIDsControlledBy(suite.ctx, vm.VerificationMaterial)
+		suite.Require().NoError(err)
+		suite.Require().Contains(controlledDocuments, payload.Id)
+		suite.Require().Equal(1, len(controlledDocuments))
+	}
 }
 
 func (suite *KeeperTestSuite) TestShouldFailWithoutSignatureOfSecondController() {
@@ -558,6 +566,16 @@ func (suite *KeeperTestSuite) TestShouldDeactivateDID() {
 	did, err := didutil.CreateDefaultDID(suite.ctx, suite.keeper)
 	suite.Require().NoError(err)
 
+	// Check if verification methods were indexed
+	existingDID, err := suite.keeper.GetLatestDIDDocument(suite.ctx, did.Did)
+	suite.Require().NoError(err)
+	for _, vm := range existingDID.DidDoc.VerificationMethod {
+		controlledDocuments, err := suite.keeper.GetDIDsControlledBy(suite.ctx, vm.VerificationMaterial)
+		suite.Require().NoError(err)
+		suite.Require().Contains(controlledDocuments, did.Did)
+		suite.Require().Equal(1, len(controlledDocuments))
+	}
+
 	payload := &types.MsgDeactivateDIDDocumentPayload{
 		Id:        did.Did,
 		VersionId: uuid.NewString(),
@@ -575,6 +593,14 @@ func (suite *KeeperTestSuite) TestShouldDeactivateDID() {
 
 	for _, version := range versions.Versions {
 		suite.Require().True(version.Deactivated)
+	}
+
+	// Check that deactivated document was removed from controlled list
+	for _, vm := range existingDID.DidDoc.VerificationMethod {
+		controlledDocuments, err := suite.keeper.GetDIDsControlledBy(suite.ctx, vm.VerificationMaterial)
+		suite.Require().NoError(err)
+		suite.Require().NotContains(controlledDocuments, did.Did)
+		suite.Require().Equal(0, len(controlledDocuments))
 	}
 }
 
@@ -816,6 +842,16 @@ func (suite *KeeperTestSuite) TestUpdateWithSameVerificationMethod() {
 	subject, err := didutil.CreateDIDDocumentWithExternalControllers(suite.ctx, suite.keeper, []string{controller.Did}, []didutil.SignInput{controller.SignInput})
 	suite.Require().NoError(err)
 
+	// Check if verification methods were indexed
+	subjectDocument, err := suite.keeper.GetLatestDIDDocument(suite.ctx, subject.Did)
+	suite.Require().NoError(err)
+	for _, vm := range subjectDocument.DidDoc.VerificationMethod {
+		controlledDocuments, err := suite.keeper.GetDIDsControlledBy(suite.ctx, vm.VerificationMaterial)
+		suite.Require().NoError(err)
+		suite.Require().Contains(controlledDocuments, subject.Did)
+		suite.Require().Equal(1, len(controlledDocuments))
+	}
+
 	payload := &types.MsgUpdateDIDDocumentPayload{
 		Id:         subject.Did,
 		Controller: []string{controller.Did},
@@ -838,6 +874,15 @@ func (suite *KeeperTestSuite) TestUpdateWithSameVerificationMethod() {
 
 	_, err = didutil.UpdateDIDDocument(suite.ctx, suite.keeper, payload, signatures)
 	suite.Require().NoError(err)
+
+	// Check if verification methods still the same
+	suite.Require().NoError(err)
+	for _, vm := range subjectDocument.DidDoc.VerificationMethod {
+		controlledDocuments, err := suite.keeper.GetDIDsControlledBy(suite.ctx, vm.VerificationMaterial)
+		suite.Require().NoError(err)
+		suite.Require().Contains(controlledDocuments, subject.Did)
+		suite.Require().Equal(1, len(controlledDocuments))
+	}
 
 	created, err := didutil.GetDIDDocument(suite.ctx, suite.keeper, subject.Did)
 	suite.Require().NoError(err)
@@ -1170,9 +1215,247 @@ func (suite *KeeperTestSuite) TestCreateWithControllerSignature() {
 	// check
 	created, err := suite.keeper.Resource(sdk.WrapSDKContext(suite.ctx), &types.QueryResourceRequest{
 		CollectionId: did.CollectionID,
-		Id: payload.Id,
+		Id:           payload.Id,
 	})
 	suite.Require().NoError(err)
 
 	suite.ExpectPayloadToMatchResource(payload, created.Resource)
+}
+
+func (suite *KeeperTestSuite) TestIndexVerificationMethodAfterAddingDocument() {
+	did, err := didutil.CreateDefaultDID(suite.ctx, suite.keeper)
+	suite.Require().NoError(err)
+
+	createdDocument, err := suite.keeper.GetLatestDIDDocument(suite.ctx, did.Did)
+	suite.Require().NoError(err)
+
+	// Check if verification method was indexed correctly
+	for _, vm := range createdDocument.DidDoc.VerificationMethod {
+		controlledDocuments, err := suite.keeper.GetDIDsControlledBy(suite.ctx, vm.VerificationMaterial)
+		suite.Require().NoError(err)
+		// There should be only one associated document
+		suite.Require().Equal(1, len(controlledDocuments))
+		// Should contain DID URL of created document
+		suite.Require().Contains(controlledDocuments, did.Did)
+	}
+}
+
+func (suite *KeeperTestSuite) TestIndexMultipleDocuments() {
+	documentsAmount := 3
+	keypair := didutil.GenerateKeyPair()
+
+	// Generate 3 did documents with same verification method
+	var createdDocuments []*types.DIDDocument
+	for i:=0; i<documentsAmount; i++ {
+		did := didutil.GenerateDID(didutil.Base58_16bytes)
+		keyID := did + "#key-1"
+
+		payload := &types.MsgCreateDIDDocumentPayload{
+			Id:             did,
+			Authentication: []string{keyID},
+			VerificationMethod: []*types.VerificationMethod{
+				{
+					Id:                     keyID,
+					VerificationMethodType: types.Ed25519VerificationKey2020Type,
+					Controller:             did,
+					VerificationMaterial:   didutil.GenerateEd25519VerificationKey2020VerificationMaterial(keypair.Public),
+				},
+			},
+			VersionId: uuid.NewString(),
+		}
+	
+		signatures := []didutil.SignInput{
+			{
+				VerificationMethodID: keyID,
+				Key:                  keypair.Private,
+			},
+		}
+	
+		// create DID document
+		createdDoc, err := didutil.CreateDID(suite.ctx, suite.keeper, payload, signatures)
+		suite.Require().NoError(err)
+
+		createdDocuments = append(createdDocuments, createdDoc.Value.DidDoc)
+	} 
+
+	// Get verification method and obtain DID URLs
+	verificationMaterial := createdDocuments[0].VerificationMethod[0].VerificationMaterial
+	controlledDocuments, err := suite.keeper.GetDIDsControlledBy(suite.ctx, verificationMaterial)
+	suite.Require().NoError(err)
+
+	suite.Require().Equal(documentsAmount, len(controlledDocuments))
+	for _, doc := range createdDocuments {
+		suite.Require().Contains(controlledDocuments, doc.Id)
+	}
+}
+
+func (suite *KeeperTestSuite) TestDeactivateOneDocument() {
+	documentsAmount := 2
+	keypair := didutil.GenerateKeyPair()
+
+	// Generate 2 did documents with same verification method
+	var createdDocuments []*types.DIDDocument
+	for i:=0; i<documentsAmount; i++ {
+		did := didutil.GenerateDID(didutil.Base58_16bytes)
+		keyID := did + "#key-1"
+
+		payload := &types.MsgCreateDIDDocumentPayload{
+			Id:             did,
+			Authentication: []string{keyID},
+			VerificationMethod: []*types.VerificationMethod{
+				{
+					Id:                     keyID,
+					VerificationMethodType: types.Ed25519VerificationKey2020Type,
+					Controller:             did,
+					VerificationMaterial:   didutil.GenerateEd25519VerificationKey2020VerificationMaterial(keypair.Public),
+				},
+			},
+			VersionId: uuid.NewString(),
+		}
+	
+		signatures := []didutil.SignInput{
+			{
+				VerificationMethodID: keyID,
+				Key:                  keypair.Private,
+			},
+		}
+	
+		// create DID document
+		createdDoc, err := didutil.CreateDID(suite.ctx, suite.keeper, payload, signatures)
+		suite.Require().NoError(err)
+
+		createdDocuments = append(createdDocuments, createdDoc.Value.DidDoc)
+	} 
+
+	// Get verification method and obtain DID URLs
+	verificationMaterial := createdDocuments[0].VerificationMethod[0].VerificationMaterial
+	controlledDocuments, err := suite.keeper.GetDIDsControlledBy(suite.ctx, verificationMaterial)
+	suite.Require().NoError(err)
+
+	suite.Require().Equal(documentsAmount, len(controlledDocuments))
+	for _, doc := range createdDocuments {
+		suite.Require().Contains(controlledDocuments, doc.Id)
+	}
+
+	// Deactivate one of documents
+	documentToDeactivate := createdDocuments[0]
+	remainingDocument := createdDocuments[1]
+	payload := &types.MsgDeactivateDIDDocumentPayload{
+		Id:        documentToDeactivate.Id,
+		VersionId: uuid.NewString(),
+	}
+
+	signatures := []didutil.SignInput{
+		{
+			VerificationMethodID: documentToDeactivate.Id + "#key-1",
+			Key:                  keypair.Private,
+		},
+	}
+
+	_, err = didutil.DeactivateDIDDocument(suite.ctx, suite.keeper, payload, signatures)
+	suite.Require().NoError(err)
+
+	// Check if document was removed from index
+	updatedControlledDocuments, err := suite.keeper.GetDIDsControlledBy(suite.ctx, verificationMaterial)
+	suite.Require().NoError(err)
+	suite.Require().Equal(documentsAmount - 1, len(updatedControlledDocuments))
+	suite.Require().NotContains(updatedControlledDocuments, documentToDeactivate.Id)
+	suite.Require().Contains(updatedControlledDocuments, remainingDocument.Id)
+}
+
+func (suite *KeeperTestSuite) TestShouldUpdateIndexOnDocumentUpdate() {
+	documentsAmount := 2
+	keypair := didutil.GenerateKeyPair()
+
+	// Generate 2 did documents with same verification method
+	var createdDocuments []*types.DIDDocument
+	for i:=0; i<documentsAmount; i++ {
+		did := didutil.GenerateDID(didutil.Base58_16bytes)
+		keyID := did + "#key-1"
+
+		payload := &types.MsgCreateDIDDocumentPayload{
+			Id:             did,
+			Authentication: []string{keyID},
+			VerificationMethod: []*types.VerificationMethod{
+				{
+					Id:                     keyID,
+					VerificationMethodType: types.Ed25519VerificationKey2020Type,
+					Controller:             did,
+					VerificationMaterial:   didutil.GenerateEd25519VerificationKey2020VerificationMaterial(keypair.Public),
+				},
+			},
+			VersionId: uuid.NewString(),
+		}
+	
+		signatures := []didutil.SignInput{
+			{
+				VerificationMethodID: keyID,
+				Key:                  keypair.Private,
+			},
+		}
+	
+		// create DID document
+		createdDoc, err := didutil.CreateDID(suite.ctx, suite.keeper, payload, signatures)
+		suite.Require().NoError(err)
+
+		createdDocuments = append(createdDocuments, createdDoc.Value.DidDoc)
+	} 
+
+	// Get verification method and obtain DID URLs
+	verificationMaterial := createdDocuments[0].VerificationMethod[0].VerificationMaterial
+	controlledDocuments, err := suite.keeper.GetDIDsControlledBy(suite.ctx, verificationMaterial)
+	suite.Require().NoError(err)
+
+	suite.Require().Equal(documentsAmount, len(controlledDocuments))
+	for _, doc := range createdDocuments {
+		suite.Require().Contains(controlledDocuments, doc.Id)
+	}
+
+	// Update verification method in one document
+	documentToUpdate := createdDocuments[0]
+	newKeypair := didutil.GenerateKeyPair()
+	payload := &types.MsgUpdateDIDDocumentPayload{
+		Id:         documentToUpdate.Id,
+		VerificationMethod: []*types.VerificationMethod{
+			{
+				Id:                     documentToUpdate.Id + "#key-2",
+				VerificationMethodType: types.Ed25519VerificationKey2020Type,
+				Controller:             documentToUpdate.Id,
+				VerificationMaterial:   didutil.GenerateEd25519VerificationKey2020VerificationMaterial(newKeypair.Public),
+			},
+			{
+				Id:                     documentToUpdate.Id + "#key-1",
+				VerificationMethodType: types.Ed25519VerificationKey2020Type,
+				Controller:             documentToUpdate.Id,
+				VerificationMaterial:   didutil.GenerateEd25519VerificationKey2020VerificationMaterial(keypair.Public),
+			},
+		},
+		Authentication:  []string{documentToUpdate.Id + "#key-2", documentToUpdate.Id + "#key-1"},
+		AssertionMethod: []string{documentToUpdate.Id + "#key-2", documentToUpdate.Id + "#key-1"},
+		VersionId:       uuid.NewString(),
+	}
+
+	signatures := []didutil.SignInput{
+		{
+			VerificationMethodID: documentToUpdate.Id + "#key-1",
+			Key:                  keypair.Private,
+		},
+	}
+	_, err = didutil.UpdateDIDDocument(suite.ctx, suite.keeper, payload, signatures)
+	suite.Require().NoError(err)
+
+	// Check if document was indexed correctly (index still have previous verification material + new verification material)
+	updatedDocuments, err := suite.keeper.GetDIDsControlledBy(suite.ctx, verificationMaterial)
+	suite.Require().NoError(err)
+	
+	suite.Require().Equal(documentsAmount, len(updatedDocuments))
+	for _, doc := range createdDocuments {
+		suite.Require().Contains(updatedDocuments, doc.Id)
+	}
+
+	// Check if new verification method was indexed
+	docsControlledByNewKey, err := suite.keeper.GetDIDsControlledBy(suite.ctx, payload.VerificationMethod[0].VerificationMaterial)
+	suite.Require().NoError(err)
+	suite.Require().Equal(1, len(docsControlledByNewKey))
+	suite.Require().Contains(docsControlledByNewKey, documentToUpdate.Id)
 }

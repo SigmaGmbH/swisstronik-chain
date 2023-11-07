@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+	"github.com/cosmos/gogoproto/proto"
 	"strconv"
 	"strings"
 
@@ -13,6 +14,10 @@ import (
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 
 	"swisstronik/x/did/types"
+)
+
+const (
+	MaxAmountOfControlledDIDs = 500
 )
 
 type (
@@ -67,6 +72,84 @@ func (k Keeper) GetDIDDocumentCount(ctx sdk.Context) uint64 {
 	}
 
 	return count
+}
+
+// GetDIDsControlledBy returns list of DID URLs controlled by provided verification material
+func (k Keeper) GetDIDsControlledBy(ctx sdk.Context, verificationMaterial string) ([]string, error) {
+	store := ctx.KVStore(k.storeKey)
+	key := types.GetVMToDIDsPrefix(verificationMaterial)
+
+	didBytes := store.Get(key)
+	if didBytes == nil {
+		return []string{}, nil
+	}
+
+	controlledDIDs := types.ControlledDIDs{}
+	err := proto.Unmarshal(didBytes, &controlledDIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	return controlledDIDs.ControlledDids, nil
+}
+
+func (k Keeper) AddDIDControlledBy(ctx sdk.Context, verificationMaterial, didURL string) error {
+	controlledDIDs, err := k.GetDIDsControlledBy(ctx, verificationMaterial)
+	if err != nil {
+		return err
+	}
+
+	// Check if there is space for another DID URL.
+	// This limit was made to protect network from heavy requests.
+	// If there will be need in more than 500 DIDs, controlled by the same
+	// verification material, we will develop an indexer service for that
+	if len(controlledDIDs)-1 == MaxAmountOfControlledDIDs {
+		return fmt.Errorf("reached max amount of DIDs, controlled by the same verification material")
+	}
+
+	// Check if DID URL is unique for provided verification material
+	for _, did := range controlledDIDs {
+		if did == didURL {
+			return nil // DID already in list
+		}
+	}
+	updatedControlledDIDsList := append(controlledDIDs, didURL)
+	return k.setControlledDIDs(ctx, verificationMaterial, updatedControlledDIDsList)
+}
+
+func (k Keeper) RemoveControlledDID(ctx sdk.Context, verificationMaterial, didURL string) error {
+	controlledDIDs, err := k.GetDIDsControlledBy(ctx, verificationMaterial)
+	if err != nil {
+		return err
+	}
+
+	// Remove provided didURL
+	for i, did := range controlledDIDs {
+		if did == didURL {
+			controlledDIDs[i] = controlledDIDs[len(controlledDIDs)-1]
+			controlledDIDs = controlledDIDs[:len(controlledDIDs)-1]
+			break
+		}
+	}
+
+	return k.setControlledDIDs(ctx, verificationMaterial, controlledDIDs)
+}
+
+func (k Keeper) setControlledDIDs(ctx sdk.Context, verificationMaterial string, didURLs []string) error {
+	controlledDIDs := types.ControlledDIDs{
+		ControlledDids: didURLs,
+	}
+
+	didsBytes, err := proto.Marshal(&controlledDIDs)
+	if err != nil {
+		return err
+	}
+
+	store := ctx.KVStore(k.storeKey)
+	key := types.GetVMToDIDsPrefix(verificationMaterial)
+	store.Set(key, didsBytes)
+
+	return nil
 }
 
 // SetDIDDocumentCount set the total number of did

@@ -138,3 +138,10 @@ message Metadata {
   // 123e4567-e89b-12d3-a456-426655440000
   string previous_version_id = 6 [ (gogoproto.nullable) = true ];
 }
+
+// ControlledDIDs defines a message for encoding and decoding
+// DID URLs associated with specific verification material
+message ControlledDIDs {
+  // List of DID URLs controlled by specific Verification Material
+  repeated string controlled_dids = 1;
+}

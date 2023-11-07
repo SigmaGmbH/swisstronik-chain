@@ -27,6 +27,7 @@ func GetQueryCmd() *cobra.Command {
 		CmdGetCollectionResources(),
 		CmdGetResource(),
 		CmdGetResourceMetadata(),
+		CmdGetControlledDocuments(),
 	)
 
 	return cmd
@@ -94,7 +95,7 @@ func CmdGetDIDDocumentVersion() *cobra.Command {
 
 func CmdGetAllDidDocVersionsMetadata() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "metadata [id]",
+		Use:   "document-metadata [id]",
 		Short: "Query all versions metadata for a DID",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -196,7 +197,7 @@ func CmdGetResource() *cobra.Command {
 
 func CmdGetResourceMetadata() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "metadata [collection-id] [resource-id]",
+		Use:   "resource-metadata [collection-id] [resource-id]",
 		Short: "Query metadata for a specific resource",
 		Long: `Query metadata for a specific resource by Collection ID and Resource ID.
 		
@@ -220,6 +221,36 @@ func CmdGetResourceMetadata() *cobra.Command {
 			}
 
 			resp, err := queryClient.ResourceMetadata(context.Background(), params)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(resp)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+func CmdGetControlledDocuments() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "controlled-documents [verification-material]",
+		Short: "Query all DID Documents controlled by given verification material",
+		Args: cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx := client.GetClientContextFromCmd(cmd)
+
+			queryClient := types.NewQueryClient(clientCtx)
+
+			verificationMaterial := args[0]
+
+			params := &types.QueryAllControlledDIDDocumentsRequest{
+				VerificationMaterial: verificationMaterial,
+			}
+
+			resp, err := queryClient.AllControlledDIDDocuments(context.Background(), params)
 			if err != nil {
 				return err
 			}
