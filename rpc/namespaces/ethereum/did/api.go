@@ -50,3 +50,9 @@ func (api *API) Resolve(blockNrOrHash rpctypes.BlockNumberOrHash, Id string) (*d
 	api.logger.Debug("did_resolve", "block number or hash", blockNrOrHash, "DID Id", Id)
 	return api.backend.DIDResolve(blockNrOrHash, Id)
 }
+
+// Resolve function returns list of DID Documents controlled by provided verification method
+func (api *API) DocumentsControlledBy(blockNrOrHash rpctypes.BlockNumberOrHash, VerificationMethod string) ([]string, error) {
+	api.logger.Debug("did_documentsControlledBy", "block number or hash", blockNrOrHash, "Verification method", VerificationMethod)
+	return api.backend.DocumentsControlledBy(blockNrOrHash, VerificationMethod)
+}

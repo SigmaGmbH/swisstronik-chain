@@ -148,6 +148,7 @@ type EVMBackend interface {
 // DIDBackend implements the functionality shared within did namespaces
 type DIDBackend interface {
 	DIDResolve(blockNrOrHash rpctypes.BlockNumberOrHash, Id string) (*didtypes.DIDDocumentWithMetadata, error)
+	DocumentsControlledBy(blockNrOrHash rpctypes.BlockNumberOrHash, VerificationMethod string) ([]string, error)
 }
 
 var _ BackendI = (*Backend)(nil)
