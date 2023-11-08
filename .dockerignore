@@ -1,2 +1,6 @@
 ./docker/
 ./.git/
+./build
+./vscode
+./idea
+./github
