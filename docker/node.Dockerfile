@@ -39,7 +39,6 @@ ENV LD_LIBRARY_PATH="/opt/intel/sgxsdk/sdk_libs:${LD_LIBRARY_PATH}"
 
 COPY . /root/chain
 WORKDIR /root/chain
-RUN	make build-enclave
 RUN make build
 
 
