@@ -13,7 +13,7 @@ import (
 
 func CmdCreateResource() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "create [payload-file] [resource-data-file]",
+		Use:   "create-resource [payload-file] [resource-data-file]",
 		Short: "Create a new Resource.",
 		Long: `Create a new Resource within a DID Resource Collection. 
 [payload-file] is JSON encoded MsgCreateResourcePayload alongside with sign inputs. 

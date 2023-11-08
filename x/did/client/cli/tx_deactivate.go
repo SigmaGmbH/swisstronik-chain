@@ -11,7 +11,7 @@ import (
 
 func CmdDeactivateDIDDocument() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "deactivate [payload-file] --version-id [version-id]",
+		Use:   "deactivate-document [payload-file] --version-id [version-id]",
 		Short: "Deactivate a DID.",
 		Long: `Deactivates a DID and its associated DID Document. 
 [payload-file] is JSON encoded MsgDeactivateDidDocPayload alongside with sign inputs. 

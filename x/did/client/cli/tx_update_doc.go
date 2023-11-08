@@ -13,7 +13,7 @@ import (
 
 func CmdUpdateDIDDocument() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "update [payload-file] --version-id [version-id]",
+		Use:   "update-document [payload-file] --version-id [version-id]",
 		Short: "Updates a DID and its associated DID Document.",
 		Long: `Update DID Document associated with a given DID. 
 [payload-file] is JSON encoded DID Document alongside with sign inputs. 
