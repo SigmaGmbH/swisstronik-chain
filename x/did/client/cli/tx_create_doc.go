@@ -13,7 +13,7 @@ import (
 
 func CmdCreateDIDDocument() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "create [payload-file] --version-id [version-id]",
+		Use:   "create-document [payload-file] --version-id [version-id]",
 		Short: "Create a new DID and associated DID Document.",
 		Long: `Creates a new DID and associated DID Document. 
 [payload-file] is JSON encoded DID Document alongside with sign inputs.
