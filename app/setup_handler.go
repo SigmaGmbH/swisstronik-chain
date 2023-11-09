@@ -29,7 +29,7 @@ import (
 )
 
 func SetupHandlers(
-	app *App, 
+	app *App,
 	ek *evmkeeper.Keeper,
 	clientKeeper ibctmmigrations.ClientKeeper,
 	pk paramskeeper.Keeper,
@@ -101,9 +101,28 @@ func setUpgradeHandler(
 			}
 			// !! ATTENTION !!
 
+			// Add EIP contained in Shanghai hard fork to the extra EIPs
+			// in the EVM parameters. This enables using the PUSH0 opcode and
+			// thus supports Solidity v0.8.20.
+			//
+			app.Logger().Info("adding EIP 3855 to EVM parameters")
+			err := EnableEIPs(ctx, ek, 3855)
+			if err != nil {
+				app.Logger().Error("error while enabling EIPs", "error", err)
+			}
+
+			app.Logger().Debug("running module migrations ...")
 			return app.mm.RunMigrations(ctx, app.configurator, vm)
 		},
 	)
+}
+
+// EnableEIPs enables the given EIPs in the EVM parameters.
+func EnableEIPs(ctx sdk.Context, ek *evmkeeper.Keeper, eips ...int64) error {
+	evmParams := ek.GetParams(ctx)
+	evmParams.ExtraEIPs = append(evmParams.ExtraEIPs, eips...)
+
+	return ek.SetParams(ctx, evmParams)
 }
 
 func loadUpgradeStore(app *App) {
