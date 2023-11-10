@@ -57,7 +57,7 @@ WORKDIR /root
 # Copy over binaries from the build-env
 COPY --from=compile-chain /root/chain/build/swisstronikd swisstronikd
 COPY --from=compile-chain /root/.swisstronik-enclave /usr/lib/.swisstronik-enclave
-COPY --from=compile-chain /root/chain/external/evm-module/librustgo/internal/api/libsgx_wrapper.x86_64.so /usr/lib/.swisstronik-enclave/libsgx_wrapper.x86_64.so
+COPY --from=compile-chain /root/chain/go-sgxvm/internal/api/libsgx_wrapper.x86_64.so /usr/lib/.swisstronik-enclave/libsgx_wrapper.x86_64.so
 
 COPY ./deb ./deb
 COPY ./scripts/build_deb.sh .
