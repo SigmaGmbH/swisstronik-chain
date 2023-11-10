@@ -44,9 +44,9 @@ jobs:
           target: build-deb
       - name: Run .deb Package Image
         run: |
-          docker run -e VERSION=${{ VERSION }} -v $GITHUB_WORKSPACE/build:/build deb_build
-          cp build/swisstronik_${{ VERSION }}_amd64.deb swisstronik_${{VERSION}}_amd64.deb
+          docker run -e VERSION=${{ env.VERSION }} -v $GITHUB_WORKSPACE/build:/build deb_build
+          cp build/swisstronik_${{ env.VERSION }}_amd64.deb swisstronik_${{ env.VERSION }}_amd64.deb
       - uses: actions/upload-artifact@v3
         with:
-          name: swisstronik_${{ VERSION }}_amd64.deb
-          path: swisstronik_${{ VERSION }}_amd64.deb
+          name: swisstronik_${{ env.VERSION }}_amd64.deb
+          path: swisstronik_${{ env.VERSION }}_amd64.deb
