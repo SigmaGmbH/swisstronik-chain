@@ -38,6 +38,7 @@ RestrictRealtime = true
 RestrictSUIDSGID = true
 RemoveIPC = true
 PrivateMounts = true
+Environment="ENCLAVE_HOME=/usr/lib"
 
 [Install]
 WantedBy=multi-user.target
