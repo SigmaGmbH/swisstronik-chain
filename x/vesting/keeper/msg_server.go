@@ -73,10 +73,10 @@ func (k msgServer) CreateMonthlyVestingAccount(goCtx context.Context, msg *types
 	}
 
 	baseAccount := authtypes.NewBaseAccountWithAddress(to)
-	baseAccount = k.Keeper.accountKeeper.NewAccount(ctx, baseAccount).(*authtypes.BaseAccount)
+	baseAccount = k.accountKeeper.NewAccount(ctx, baseAccount).(*authtypes.BaseAccount)
 	vestingAccount := atypes.NewPeriodicVestingAccount(baseAccount, totalCoins.Sort(), msg.StartTime, periods)
 
-	k.Keeper.accountKeeper.SetAccount(ctx, vestingAccount)
+	k.accountKeeper.SetAccount(ctx, vestingAccount)
 
 	defer func() {
 		telemetry.IncrCounter(1, "new", "account")

@@ -1,0 +1,282 @@
+syntax = "proto3";
+
+package swisstronik.did;
+
+import "swisstronik/did/document.proto";
+import "swisstronik/did/resource.proto";
+
+import "gogoproto/gogo.proto";
+
+option go_package = "swisstronik/x/did/types";
+
+// Msg defines the Msg service.
+service Msg {
+  rpc CreateDIDDocument(MsgCreateDIDDocument) returns (MsgCreateDIDDocumentResponse);
+
+  rpc UpdateDIDDocument(MsgUpdateDIDDocument) returns (MsgUpdateDIDDocumentResponse);
+
+  rpc DeactivateDIDDocument(MsgDeactivateDIDDocument) returns (MsgDeactivateDIDDocumentResponse);
+  
+  rpc CreateResource(MsgCreateResource) returns (MsgCreateResourceResponse);
+}
+
+message MsgCreateDIDDocument {
+  // Payload containing the DID Document to be created
+  MsgCreateDIDDocumentPayload payload = 1;
+
+  // Signatures of the DID Document's controller(s)
+  repeated SignInfo signatures = 2;
+}
+
+message MsgUpdateDIDDocument {
+  // Payload containing the DID Document to be updated. This should be updated
+  // the DID Document.
+  MsgUpdateDIDDocumentPayload payload = 1;
+
+  // Signatures of the DID Document's controller(s)
+  repeated SignInfo signatures = 2;
+}
+
+message MsgDeactivateDIDDocument {
+  // Payload containing the DID Document to be deactivated
+  MsgDeactivateDIDDocumentPayload payload = 1;
+
+  // Signatures of the DID Document's controller(s)
+  repeated SignInfo signatures = 2;
+}
+
+// MsgCreateResource defines the MsgCreateResource request type.
+// It describes the parameters of a request for creating a resource.
+message MsgCreateResource {
+  // Payload containing the resource to be created.
+  MsgCreateResourcePayload payload = 1;
+
+  // Signatures of the corresponding DID Document's controller(s).
+  repeated SignInfo signatures = 2;
+}
+
+// SignInfo defines the structure of a DID Document controller's signature
+message SignInfo {
+  // Verification method ID of the DID Controller
+  string verification_method_id = 1;
+
+  // Signature of the DID Document controller
+  bytes signature = 2;
+}
+
+// MsgCreateDIDDocumentPayload defines the structure of the payload for creating
+// a new DID document
+message MsgCreateDIDDocumentPayload {
+  // context is a list of URIs used to identify the context of the DID document.
+  // Default: https://www.w3.org/ns/did/v1
+  repeated string context = 1;
+
+  // id is the DID of the DID document.
+  // Format: did:swtr:<unique-identifier>
+  string id = 2;
+
+  // controller is a list of DIDs that are allowed to control the DID document.
+  repeated string controller = 3;
+
+  // verificationMethod is a list of verification methods that can be used to
+  // verify a digital signature or cryptographic proof.
+  // Documentation: https://www.w3.org/TR/did-core/#verification-methods
+  //
+  // Required fields:
+  // - id: A unique identifier for the verification method
+  // - type: A supported verification method type (supported:
+  // Ed25519VerificationKey2018, Ed25519VerificationKey2020, JsonWebKey2020)
+  // - controller: DID of the controller of the verification method
+  // - verification_material: Public key of the verification method (supported:
+  // publicJwk, publicKeyBase58, publicKeyMultibase)
+  repeated VerificationMethod verification_method = 4;
+
+  // authentication is a list of verification methods that can be used to
+  // authenticate as the DID subject.
+  repeated string authentication = 5;
+
+  // assertionMethod is a list of verification methods that can be used to
+  // assert statements as the DID subject.
+  repeated string assertion_method = 6;
+
+  // capabilityInvocation is a list of verification methods that can be used to
+  // invoke capabilities as the DID subject.
+  repeated string capability_invocation = 7;
+
+  // capabilityDelegation is a list of verification methods that can be used to
+  // delegate capabilities as the DID subject.
+  repeated string capability_delegation = 8;
+
+  // keyAgreement is a list of verification methods that can be used to perform
+  // key agreement as the DID subject.
+  repeated string key_agreement = 9;
+
+  // service is a list of services that can be used to interact with the DID
+  // subject. Documentation: https://www.w3.org/TR/did-core/#services
+  //
+  // Required fields:
+  // - id: A unique identifier for the service
+  // - type: A service type defined in DID Specification Registries
+  // - service_endpoint: Service endpoint(s), provided as a URI or set of URIs
+  repeated Service service = 10;
+
+  // alsoKnownAs is a list of DIDs that are known to refer to the same DID
+  // subject.
+  repeated string also_known_as = 11;
+
+  // Version ID of the DID Document to be created
+  //
+  // Format: <uuid>
+  string version_id = 12;
+}
+
+// MsgCreateDIDDocumentResponse defines response type for Msg/CreateDIDDocument.
+message MsgCreateDIDDocumentResponse {
+  // Return the created DID Document with metadata
+  DIDDocumentWithMetadata value = 1;
+}
+
+// MsgUpdateDIDDocumentPayload defines the structure of the payload for updating
+// an existing DID document
+message MsgUpdateDIDDocumentPayload {
+  // context is a list of URIs used to identify the context of the DID document.
+  // Default: https://www.w3.org/ns/did/v1
+  repeated string context = 1;
+
+  // id is the DID of the DID document.
+  // Format: did:swtr:<unique-identifier>
+  string id = 2;
+
+  // controller is a list of DIDs that are allowed to control the DID document.
+  repeated string controller = 3;
+
+  // verificationMethod is a list of verification methods that can be used to
+  // verify a digital signature or cryptographic proof.
+  // Documentation: https://www.w3.org/TR/did-core/#verification-methods
+  //
+  // Required fields:
+  // - id: A unique identifier for the verification method
+  // - type: A supported verification method type (supported:
+  // Ed25519VerificationKey2018, Ed25519VerificationKey2020, JsonWebKey2020)
+  // - controller: DID of the controller of the verification method
+  // - verification_material: Public key of the verification method (supported:
+  // publicJwk, publicKeyBase58, publicKeyMultibase)
+  repeated VerificationMethod verification_method = 4;
+
+  // authentication is a list of verification methods that can be used to
+  // authenticate as the DID subject.
+  repeated string authentication = 5;
+
+  // assertionMethod is a list of verification methods that can be used to
+  // assert statements as the DID subject.
+  repeated string assertion_method = 6;
+
+  // capabilityInvocation is a list of verification methods that can be used to
+  // invoke capabilities as the DID subject.
+  repeated string capability_invocation = 7;
+
+  // capabilityDelegation is a list of verification methods that can be used to
+  // delegate capabilities as the DID subject.
+  repeated string capability_delegation = 8;
+
+  // keyAgreement is a list of verification methods that can be used to perform
+  // key agreement as the DID subject.
+  repeated string key_agreement = 9;
+
+  // service is a list of services that can be used to interact with the DID
+  // subject. Documentation: https://www.w3.org/TR/did-core/#services
+  //
+  // Required fields:
+  // - id: A unique identifier for the service
+  // - type: A service type defined in DID Specification Registries
+  // - service_endpoint: Service endpoint(s), provided as a URI or set of URIs
+  repeated Service service = 10;
+
+  // alsoKnownAs is a list of DIDs that are known to refer to the same DID
+  // subject.
+  repeated string also_known_as = 11;
+
+  // Updated version ID of the DID Document.
+  // Links to next/previous versions of the DID Document will be automatically
+  // updated.
+  //
+  // Format: <uuid>
+  string version_id = 12;
+}
+
+message MsgUpdateDIDDocumentResponse {
+  // Return the updated DID Document with metadata
+  DIDDocumentWithMetadata value = 1;
+}
+
+// MsgDeactivateDIDDocumentPayload defines the structure of the payload for
+// deactivating an existing DID document
+message MsgDeactivateDIDDocumentPayload {
+  // Unique identifier of the DID Document to be deactivated
+  string id = 1;
+
+  // Version ID of the DID Document to be deactivated
+  // This is primarily used as a sanity check to ensure that the correct DID
+  // Document is being deactivated.
+  string version_id = 2;
+}
+
+// MsgDeactivateDIDDocumentResponse defines response type for
+// MsgDeactivateDIDDocument.
+message MsgDeactivateDIDDocumentResponse {
+  // Return the deactivated DID Document with metadata
+  DIDDocumentWithMetadata value = 1;
+}
+
+// MsgCreateResourcePayload defines the structure of the payload for creating a resource.
+message MsgCreateResourcePayload {
+  // data is a byte-representation of the actual Data the user wants to store.
+  bytes data = 1;
+
+  // collection_id is an identifier of the DidDocument the resource belongs to.
+  // Format: <unique-identifier>
+  //
+  // Examples:
+  // - c82f2b02-bdab-4dd7-b833-3e143745d612
+  // - wGHEXrZvJxR8vw5P3UWH1j
+  string collection_id = 2 [(gogoproto.jsontag) = "resourceCollectionId"];
+
+  // id is a unique id of the resource.
+  // Format: <uuid>
+  string id = 3 [(gogoproto.jsontag) = "resourceId"];
+
+  // name is a human-readable name of the resource.
+  // Format: <string>
+  //
+  // Does not change between different versions.
+  // Example: PassportSchema, EducationTrustRegistry
+  string name = 4 [(gogoproto.jsontag) = "resourceName"];
+
+  // version is a version of the resource.
+  // Format: <string>
+  // Stored as a string. OPTIONAL.
+  //
+  // Example: 1.0.0, v2.1.0
+  string version = 5 [
+    (gogoproto.jsontag) = "resourceVersion",
+    (gogoproto.nullable) = true
+  ];
+
+  // resource_type is a type of the resource.
+  // Format: <string>
+  //
+  // This is NOT the same as the resource's media type.
+  // Example: AnonCredsSchema, StatusList2021
+  string resource_type = 6 [(gogoproto.jsontag) = "resourceType"];
+
+  // also_known_as is a list of URIs that can be used to get the resource.
+  repeated AlternativeUri also_known_as = 7 [
+    (gogoproto.jsontag) = "resourceAlternativeUri",
+    (gogoproto.nullable) = true
+  ];
+}
+
+message MsgCreateResourceResponse {
+  // Return the created resource metadata.
+  ResourceMetadata resource = 1 [(gogoproto.jsontag) = "linkedResourceMetadata"];
+}

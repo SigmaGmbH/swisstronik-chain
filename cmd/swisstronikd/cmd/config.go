@@ -5,7 +5,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"swisstronik/app"
-	evmtypes "github.com/SigmaGmbH/evm-module/types"
+	evmtypes "swisstronik/types"
 	"github.com/spf13/cobra"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 )

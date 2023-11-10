@@ -39,7 +39,6 @@ ENV LD_LIBRARY_PATH="/opt/intel/sgxsdk/sdk_libs:${LD_LIBRARY_PATH}"
 
 COPY . /root/chain
 WORKDIR /root/chain
-RUN	make build-enclave
 RUN make build
 
 
@@ -73,7 +72,7 @@ FROM base as hw-node
 
 COPY --from=compile-chain /root/chain/build/swisstronikd /usr/local/bin/swisstronikd
 COPY --from=compile-chain /root/.swisstronik-enclave /root/.swisstronik-enclave
-COPY --from=compile-chain /root/chain/external/evm-module/librustgo/internal/api/libsgx_wrapper.x86_64.so /lib/x86_64-linux-gnu/libsgx_wrapper.x86_64.so
+COPY --from=compile-chain /root/chain/go-sgxvm/internal/api/libsgx_wrapper.x86_64.so /lib/x86_64-linux-gnu/libsgx_wrapper.x86_64.so
 COPY --from=compile-chain /opt/intel /opt/intel
 
 EXPOSE 26656 26657 1317 9090 8545 8546 8999
@@ -90,7 +89,7 @@ RUN rm -rf /var/lib/apt/lists/*
 
 COPY --from=compile-chain /root/chain/build/swisstronikd /usr/bin/swisstronikd
 COPY --from=compile-chain /root/.swisstronik-enclave /root/.swisstronik-enclave
-COPY --from=compile-chain /root/chain/external/evm-module/librustgo/internal/api/libsgx_wrapper.x86_64.so /lib/x86_64-linux-gnu/libsgx_wrapper.x86_64.so
+COPY --from=compile-chain /root/chain/go-sgxvm/internal/api/libsgx_wrapper.x86_64.so /lib/x86_64-linux-gnu/libsgx_wrapper.x86_64.so
 COPY --from=compile-chain /opt/intel/sgxsdk/sdk_libs/* /lib/x86_64-linux-gnu/
 COPY --from=compile-chain /root/chain/scripts/local-node.sh /root/local-node.sh
 
