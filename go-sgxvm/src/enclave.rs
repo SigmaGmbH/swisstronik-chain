@@ -14,7 +14,6 @@ use lazy_static::lazy_static;
 use parking_lot::{Condvar, Mutex};
 
 static ENCLAVE_FILE: &'static str = "enclave.signed.so";
-static ENCLAVE_HOME: &'static str = env!("ENCLAVE_HOME", "please specify ENCLAVE_HOME env variable");
 const ENCLAVE_LOCK_TIMEOUT: u64 = 6*5;
 
 lazy_static! {
@@ -68,10 +67,16 @@ pub fn init_enclave() -> SgxResult<SgxEnclave> {
         misc_select: 0,
     };
 
-    println!("[DEBUG] Initialize enclave");
+    let enclave_home = match env::var("ENCLAVE_HOME") {
+        Ok(home) => home,
+        Err(e) => String::from(std::env::home_dir().expect("Please specify ENCLAVE_HOME env variable explicitly").to_str().unwrap())
+    };
+    let enclave_path = format!("{}/{}", enclave_home, ENCLAVE_FILE);
+
+    println!("[DEBUG] Initialize enclave. Enclave location: {:?}", enclave_path);
 
     SgxEnclave::create(
-        format!("{}/{}", ENCLAVE_HOME, ENCLAVE_FILE),
+        enclave_path,
         debug,
         &mut launch_token,
         &mut launch_token_updated,
