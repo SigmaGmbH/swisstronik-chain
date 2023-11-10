@@ -37,6 +37,7 @@ RestrictSUIDSGID = true
 RemoveIPC = true
 PrivateMounts = true
 Environment="ENCLAVE_HOME=/usr/lib"
+Environment="SEED_HOME=/opt/swisstronik/.swisstronik"
 
 [Install]
 WantedBy=multi-user.target
