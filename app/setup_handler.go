@@ -78,6 +78,8 @@ func setUpgradeHandler(
 			keyTable = vestmoduletypes.ParamKeyTable()
 		case distrtypes.ModuleName:
 			keyTable = distrtypes.ParamKeyTable()
+		default:
+			continue
 		}
 
 		if !subspace.HasKeyTable() {
