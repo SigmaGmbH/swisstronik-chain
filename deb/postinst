@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# This `DEBIAN/postinst` script is run post-installation
+
+set -e
+
+if [[ -z "$SUDO_USER" ]]
+then
+    export SUDO_USER=root
+fi
+
+cat <<EOF > /etc/systemd/system/swisstronik-node.service
+[Unit]
+Description=Swisstronik node service
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=$(eval echo ~"$SUDO_USER")
+ExecStart=/usr/local/bin/swisstronikd start --rpc.laddr "tcp://0.0.0.0:26657"  --json-rpc.address 0.0.0.0:8545 --json-rpc.ws-address 0.0.0.0:8546 --home /opt/swisstronik/.swisstronik
+User=$SUDO_USER
+Restart=on-failure
+StartLimitInterval=0
+RestartSec=3
+LimitNOFILE=65535
+LimitMEMLOCK=209715200
+ProtectHome = true
+ProtectSystem = "strict"
+PrivateTmp = true
+ProtectHostname = true
+ProtectKernelTunables = true
+ProtectKernelModules = true
+ProtectKernelLogs = true
+ProtectControlGroups = true
+NoNewPrivileges = true
+RestrictRealtime = true
+RestrictSUIDSGID = true
+RemoveIPC = true
+PrivateMounts = true
+Environment="ENCLAVE_HOME=/usr/lib"
+Environment="SEED_HOME=/opt/swisstronik/.swisstronik"
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+
+mkdir -p "/opt/swisstronik/"
+chown -R "$SUDO_USER":"$SUDO_USER" "/opt/swisstronik/"

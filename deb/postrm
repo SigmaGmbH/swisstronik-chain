@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# This `DEBIAN/postrm` script is run post-uninstallation
+
+set -e
+
+systemctl stop swisstronik-node                    || true
+systemctl disable swisstronik-node                 || true
+rm -f /etc/systemd/system/swisstronik-node.service || true
+rm -r /opt/swisstronik/                            || true
+systemctl daemon-reload                            || true

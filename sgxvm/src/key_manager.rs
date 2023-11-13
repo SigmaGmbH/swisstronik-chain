@@ -1,6 +1,6 @@
 use deoxysii::*;
 use sgx_tstd::sgxfs::SgxFile;
-use sgx_tstd::env;
+use sgx_tstd::{env, string::String};
 use sgx_tstd::ffi::OsString;
 use sgx_types::{sgx_read_rand, sgx_status_t, SgxResult};
 use std::io::{Read, Write};
@@ -19,12 +19,12 @@ pub const PRIVATE_KEY_SIZE: usize = 32;
 
 lazy_static! {
     pub static ref UNSEALED_KEY_MANAGER: Option<KeyManager> = KeyManager::unseal().ok();
-    pub static ref ENCLAVE_HOME: OsString = env::var_os("ENCLAVE_HOME").unwrap_or_else(|| OsString::from(format!("{}/.swisstronik-enclave", env::home_dir().unwrap().to_str().unwrap())));
+    pub static ref SEED_HOME: OsString = env::var_os("SEED_HOME").unwrap_or_else(|| get_default_seed_home());
 }
 
 #[no_mangle]
-/// Handles initialization of a new seed node.
-/// If seed is already sealed, it will reset it
+/// Handles initialization of a new seed node by creating and sealing master key to seed file
+/// If `reset_flag` was set to `true`, it will rewrite existing seed file
 pub unsafe extern "C" fn ecall_init_master_key(reset_flag: i32) -> sgx_status_t {
     // Check if master key exists
     let master_key_exists = match KeyManager::exists() {
@@ -72,7 +72,7 @@ pub struct KeyManager {
 impl KeyManager {
     /// Checks if file with sealed master key exists
     pub fn exists() -> SgxResult<bool> {
-        match SgxFile::open(format!("{}/{}", ENCLAVE_HOME.to_str().unwrap(), SEED_FILENAME)) {
+        match SgxFile::open(format!("{}/{}", SEED_HOME.to_str().unwrap(), SEED_FILENAME)) {
             Ok(_) => Ok(true),
             Err(ref err) if err.kind() == std::io::ErrorKind::NotFound => Ok(false),
             Err(err) => {
@@ -86,8 +86,10 @@ impl KeyManager {
     /// For now, enclaves with same MRSIGNER will be able to recover that file, but
     /// we'll use MRENCLAVE since Upgradeability Protocol will be implemented
     pub fn seal(&self) -> SgxResult<()> {
+        println!("[KeyManager] Seed location: {}/{}", SEED_HOME.to_str().unwrap(), SEED_FILENAME);
+
         // Prepare file to write master key
-        let mut master_key_file = match SgxFile::create(format!("{}/{}", ENCLAVE_HOME.to_str().unwrap(), SEED_FILENAME)) {
+        let mut master_key_file = match SgxFile::create(format!("{}/{}", SEED_HOME.to_str().unwrap(), SEED_FILENAME)) {
             Ok(master_key_file) => master_key_file,
             Err(err) => {
                 println!(
@@ -110,8 +112,10 @@ impl KeyManager {
     /// Unseals master key from protected file. If file was not found or unaccessible,
     /// will return SGX_ERROR_UNEXPECTED
     pub fn unseal() -> SgxResult<Self> {
+        println!("[KeyManager] Seed location: {}/{}", SEED_HOME.to_str().unwrap(), SEED_FILENAME);
+
         // Open file with master key
-        let mut master_key_file = match SgxFile::open(format!("{}/{}", ENCLAVE_HOME.to_str().unwrap(), SEED_FILENAME)) {
+        let mut master_key_file = match SgxFile::open(format!("{}/{}", SEED_HOME.to_str().unwrap(), SEED_FILENAME)) {
             Ok(file) => file,
             Err(err) => {
                 println!(
@@ -369,29 +373,6 @@ impl KeyManager {
         public_key.as_bytes().to_vec()
     }
 
-    /// Performes Diffie-Hellman derivation of encryption key for transaction encryption
-    /// * public_key – User public key
-    fn diffie_hellman(
-        &self,
-        public_key: Vec<u8>,
-    ) -> Result<x25519_dalek::SharedSecret, Error> {
-        let secret = x25519_dalek::StaticSecret::from(self.master_key);
-
-        if public_key.len() != PUBLIC_KEY_SIZE {
-            return Err(Error::ecdh_err("Wrong public key size"));
-        }
-
-        let public_key: [u8; 32] = match public_key.try_into() {
-            Ok(pk) => pk,
-            Err(err) => {
-                return Err(Error::ecdh_err("Cannot convert public key to proper size"));
-            }
-        };
-
-        let public_key = x25519_dalek::PublicKey::from(public_key);
-        Ok(secret.diffie_hellman(&public_key))
-    }
-
     fn derive_key(master_key: &[u8; PRIVATE_KEY_SIZE], info: &[u8]) -> [u8; PRIVATE_KEY_SIZE] {
         let mut kdf = Hmac::<sha2::Sha256>::new_from_slice(info).expect("Unable to create KDF");
         kdf.update(master_key);
@@ -443,5 +424,13 @@ impl RegistrationKey {
         let secret = x25519_dalek::StaticSecret::from(self.inner);
         secret.diffie_hellman(&public_key)
     }
+}
+
+/// Tries to return path to $HOME/.swisstronik-enclave directory.
+/// If it cannot find home directory, panics with error
+fn get_default_seed_home() -> OsString {
+    let home_dir = env::home_dir().expect("[Enclave] Cannot find home directory");
+    let default_seed_home = home_dir.to_str().expect("[Enclave] Cannot decode home directory path");
+    OsString::from(format!("{}/.swisstronik-enclave", default_seed_home))
 }
 
