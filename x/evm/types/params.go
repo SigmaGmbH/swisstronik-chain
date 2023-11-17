@@ -27,7 +27,7 @@ import (
 )
 
 var (
-	// DefaultEVMDenom defines the default EVM denomination on Ethermint
+	// DefaultEVMDenom defines the default EVM denomination
 	DefaultEVMDenom = types.SwtrDenom
 	// DefaultAllowUnprotectedTxs rejects all unprotected txs (i.e false)
 	DefaultAllowUnprotectedTxs = false
