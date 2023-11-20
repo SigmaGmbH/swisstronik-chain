@@ -32,11 +32,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const DefaultFeeAmt = int64(150_000_000_000_000_000) // 0.15 EVMOS
+const DefaultFeeAmt = int64(150_000_000_000_000_000) // 0.15 SWTR
 
 var globalStartTime = time.Date(2020, 1, 2, 0, 0, 0, 0, time.UTC)
 
-// NewCoordinator initializes Coordinator with N EVM TestChain's (Evmos apps) and M Cosmos chains (Simulation Apps)
+// NewCoordinator initializes Coordinator with N EVM TestChain's and M Cosmos chains (Simulation Apps)
 func NewCoordinator(t *testing.T, nEVMChains, mCosmosChains int) *ibctesting.Coordinator {
 	chains := make(map[string]*ibctesting.TestChain)
 	coord := &ibctesting.Coordinator{
@@ -142,8 +142,8 @@ func SendMsgs(chain *ibctesting.TestChain, feeAmt int64, msgs ...sdk.Msg) (*sdk.
 	// ensure the chain has the latest time
 	chain.Coordinator.UpdateTimeForChain(chain)
 
-	if evmosChain, ok := chain.App.(*app.App); ok {
-		bondDenom = evmosChain.StakingKeeper.BondDenom(chain.GetContext())
+	if evmChain, ok := chain.App.(*app.App); ok {
+		bondDenom = evmChain.StakingKeeper.BondDenom(chain.GetContext())
 	} else {
 		bondDenom = chain.GetSimApp().StakingKeeper.BondDenom(chain.GetContext())
 	}
