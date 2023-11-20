@@ -9,6 +9,7 @@ import (
 	rpctypes "swisstronik/rpc/types"
 	"swisstronik/tests"
 	evmtypes "swisstronik/x/evm/types"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -20,7 +21,7 @@ func (suite *BackendTestSuite) TestResend() {
 	txNonce := (hexutil.Uint64)(1)
 	baseFee := sdk.NewInt(1)
 	gasPrice := new(hexutil.Big)
-	toAddr := tests.GenerateAddress()
+	toAddr := tests.RandomEthAddress()
 	chainID := (*hexutil.Big)(suite.backend.chainID)
 	callArgs := evmtypes.TransactionArgs{
 		From:                 nil,
@@ -377,7 +378,7 @@ func (suite *BackendTestSuite) TestSendRawTransaction() {
 func (suite *BackendTestSuite) TestDoCall() {
 	_, bz := suite.buildEthereumTx()
 	gasPrice := (*hexutil.Big)(big.NewInt(1))
-	toAddr := tests.GenerateAddress()
+	toAddr := tests.RandomEthAddress()
 	chainID := (*hexutil.Big)(suite.backend.chainID)
 	callArgs := evmtypes.CallArgs{
 		From:                 nil,

@@ -26,7 +26,7 @@ func TestKVIndexer(t *testing.T) {
 	priv, err := ethsecp256k1.GenerateKey()
 	require.NoError(t, err)
 	from := common.BytesToAddress(priv.PubKey().Address().Bytes())
-	signer := tests.NewSigner(priv)
+	signer := tests.NewTestSigner(priv)
 	ethSigner := ethtypes.LatestSignerForChainID(nil)
 
 	to := common.BigToAddress(big.NewInt(1))

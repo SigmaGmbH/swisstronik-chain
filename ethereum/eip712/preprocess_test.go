@@ -157,7 +157,7 @@ func createBasicTestCase(t *testing.T) TestCaseStruct {
 	signatureBytes, err := hex.DecodeString(signatureHex)
 	require.NoError(t, err)
 
-	_, privKey := tests.NewAddrKey()
+	_, privKey := tests.RandomEthAddressWithPrivateKey()
 	sigsV2 := signing.SignatureV2{
 		PubKey: privKey.PubKey(), // Use unrelated public key for testing
 		Data: &signing.SingleSignatureData{

@@ -8,6 +8,7 @@ import (
 	"swisstronik/app"
 	"swisstronik/encoding"
 	evmtypes "swisstronik/x/evm/types"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -88,7 +89,7 @@ func TestBinSearch(t *testing.T) {
 }
 
 func TestTransactionLogsEncodeDecode(t *testing.T) {
-	addr := tests.GenerateAddress().String()
+	addr := tests.RandomEthAddress().String()
 
 	txLogs := evmtypes.TransactionLogs{
 		Hash: common.BytesToHash([]byte("tx_hash")).String(),

@@ -56,7 +56,7 @@ func (suite *BackendTestSuite) SetupTest() {
 	}
 
 	// Create Account with set sequence
-	suite.acc = sdk.AccAddress(tests.GenerateAddress().Bytes())
+	suite.acc = sdk.AccAddress(tests.RandomEthAddress().Bytes())
 	accounts := map[string]client.TestAccount{}
 	accounts[suite.acc.String()] = client.TestAccount{
 		Address: suite.acc,
@@ -65,7 +65,7 @@ func (suite *BackendTestSuite) SetupTest() {
 	}
 
 	priv, err := ethsecp256k1.GenerateKey()
-	suite.signer = tests.NewSigner(priv)
+	suite.signer = tests.NewTestSigner(priv)
 	suite.Require().NoError(err)
 
 	encodingConfig := encoding.MakeConfig(app.ModuleBasics)
@@ -173,8 +173,8 @@ func (suite *BackendTestSuite) generateTestKeyring(clientDir string) (keyring.Ke
 }
 
 func (suite *BackendTestSuite) signAndEncodeEthTx(msgHandleTx *evmtypes.MsgHandleTx) []byte {
-	from, priv := tests.NewAddrKey()
-	signer := tests.NewSigner(priv)
+	from, priv := tests.RandomEthAddressWithPrivateKey()
+	signer := tests.NewTestSigner(priv)
 
 	queryClient := suite.backend.queryClient.QueryClient.(*mocks.EVMQueryClient)
 	RegisterParamsWithoutHeader(queryClient, 1)

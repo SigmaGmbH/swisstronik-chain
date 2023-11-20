@@ -151,7 +151,7 @@ func signCosmosEIP712Tx(
 		return nil, err
 	}
 
-	keyringSigner := NewSigner(priv)
+	keyringSigner := NewTestSigner(priv)
 	signature, pubKey, err := keyringSigner.SignByAddress(from, sigHash)
 	if err != nil {
 		return nil, err

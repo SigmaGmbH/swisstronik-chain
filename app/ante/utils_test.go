@@ -227,7 +227,7 @@ func (suite *AnteTestSuite) CreateTestTxBuilder(
 		builder.SetExtensionOptions(option)
 	}
 
-	err = msg.Sign(suite.ethSigner, tests.NewSigner(priv))
+	err = msg.Sign(suite.ethSigner, tests.NewTestSigner(priv))
 	suite.Require().NoError(err)
 
 	msg.From = ""
@@ -300,7 +300,7 @@ func (suite *AnteTestSuite) CreateTestEIP712TxBuilderMsgSend(from sdk.AccAddress
 
 func (suite *AnteTestSuite) CreateTestEIP712TxBuilderMsgDelegate(from sdk.AccAddress, priv cryptotypes.PrivKey, chainId string, gas uint64, gasAmount sdk.Coins) (client.TxBuilder, error) {
 	// Build MsgSend
-	valEthAddr := tests.GenerateAddress()
+	valEthAddr := tests.RandomEthAddress()
 	valAddr := sdk.ValAddress(valEthAddr.Bytes())
 	msgSend := stakingtypes.NewMsgDelegate(from, valAddr, sdk.NewCoin(evmtypes.DefaultEVMDenom, sdkmath.NewInt(20)))
 	return suite.CreateTestEIP712SingleMessageTxBuilder(priv, chainId, gas, gasAmount, msgSend)
@@ -354,7 +354,7 @@ func (suite *AnteTestSuite) CreateTestEIP712GrantAllowance(from sdk.AccAddress, 
 		SpendLimit: spendLimit,
 		Expiration: &threeHours,
 	}
-	granted := tests.GenerateAddress()
+	granted := tests.RandomEthAddress()
 	grantedAddr := suite.app.AccountKeeper.NewAccountWithAddress(suite.ctx, granted.Bytes())
 	msgGrant, err := feegrant.NewMsgGrantAllowance(basic, from, grantedAddr.GetAddress())
 	suite.Require().NoError(err)

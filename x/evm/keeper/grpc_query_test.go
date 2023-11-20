@@ -702,7 +702,7 @@ func (suite *KeeperTestSuite) TestEstimateGas() {
 }
 
 func (suite *KeeperTestSuite) TestNonceInQuery() {
-	address := tests.GenerateAddress()
+	address := tests.RandomEthAddress()
 	suite.Require().Equal(uint64(0), suite.app.EvmKeeper.GetNonce(suite.ctx, address))
 	supply := sdkmath.NewIntWithDecimal(1000, 18).BigInt()
 
@@ -811,7 +811,7 @@ func (suite *KeeperTestSuite) TestQueryBaseFee() {
 func (suite *KeeperTestSuite) TestEthCall() {
 	var req *types.EthCallRequest
 
-	address := tests.GenerateAddress()
+	address := tests.RandomEthAddress()
 	suite.Require().Equal(uint64(0), suite.app.EvmKeeper.GetNonce(suite.ctx, address))
 	supply := sdkmath.NewIntWithDecimal(1000, 18).BigInt()
 

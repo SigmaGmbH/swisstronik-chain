@@ -18,8 +18,8 @@ func (suite *AnteTestSuite) TestGasWantedDecorator() {
 	suite.enableFeemarket = true
 	suite.SetupTest()
 	dec := ante.NewGasWantedDecorator(suite.app.EvmKeeper, suite.app.FeeMarketKeeper)
-	from, fromPrivKey := tests.NewAddrKey()
-	to := tests.GenerateAddress()
+	from, fromPrivKey := tests.RandomEthAddressWithPrivateKey()
+	to := tests.RandomEthAddress()
 
 	testCases := []struct {
 		name              string

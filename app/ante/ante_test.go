@@ -38,8 +38,8 @@ import (
 
 func (suite AnteTestSuite) TestAnteHandler() {
 	var acc authtypes.AccountI
-	addr, privKey := tests.NewAddrKey()
-	to := tests.GenerateAddress()
+	addr, privKey := tests.RandomEthAddressWithPrivateKey()
+	to := tests.RandomEthAddress()
 
 	setup := func() {
 		suite.enableFeemarket = false
@@ -930,8 +930,8 @@ func (suite AnteTestSuite) TestAnteHandler() {
 }
 
 func (suite AnteTestSuite) TestAnteHandlerWithDynamicTxFee() {
-	addr, privKey := tests.NewAddrKey()
-	to := tests.GenerateAddress()
+	addr, privKey := tests.RandomEthAddressWithPrivateKey()
+	to := tests.RandomEthAddress()
 
 	testCases := []struct {
 		name           string
@@ -1203,8 +1203,8 @@ func (suite AnteTestSuite) TestAnteHandlerWithDynamicTxFee() {
 }
 
 func (suite AnteTestSuite) TestAnteHandlerWithParams() {
-	addr, privKey := tests.NewAddrKey()
-	to := tests.GenerateAddress()
+	addr, privKey := tests.RandomEthAddressWithPrivateKey()
+	to := tests.RandomEthAddress()
 
 	testCases := []struct {
 		name         string

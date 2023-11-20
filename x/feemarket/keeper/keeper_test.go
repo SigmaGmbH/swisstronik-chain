@@ -84,7 +84,7 @@ func (suite *KeeperTestSuite) SetupApp(checkTx bool) {
 	priv, err := ethsecp256k1.GenerateKey()
 	require.NoError(t, err)
 	suite.address = common.BytesToAddress(priv.PubKey().Address().Bytes())
-	suite.signer = tests.NewSigner(priv)
+	suite.signer = tests.NewTestSigner(priv)
 
 	// consensus key
 	priv, err = ethsecp256k1.GenerateKey()

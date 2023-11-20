@@ -12,6 +12,7 @@ import (
 
 	"swisstronik/crypto/ethsecp256k1"
 	"swisstronik/tests"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -47,14 +48,14 @@ func TestMsgsTestSuite(t *testing.T) {
 }
 
 func (suite *MsgsTestSuite) SetupTest() {
-	from, privFrom := tests.NewAddrKey()
+	from, privFrom := tests.RandomEthAddressWithPrivateKey()
 
 	suite.privateKey = privFrom.Bytes()
 	suite.nodePublicKey = privFrom.Bytes()
 
-	suite.signer = tests.NewSigner(privFrom)
+	suite.signer = tests.NewTestSigner(privFrom)
 	suite.from = from
-	suite.to = tests.GenerateAddress()
+	suite.to = tests.RandomEthAddress()
 	suite.chainID = big.NewInt(1)
 	suite.hundredBigInt = big.NewInt(100)
 

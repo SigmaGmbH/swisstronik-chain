@@ -139,8 +139,8 @@ func (s AnteTestSuite) TestMinGasPriceDecorator() {
 
 func (s AnteTestSuite) TestEthMinGasPriceDecorator() {
 	denom := evmtypes.DefaultEVMDenom
-	from, privKey := tests.NewAddrKey()
-	to := tests.GenerateAddress()
+	from, privKey := tests.RandomEthAddressWithPrivateKey()
+	to := tests.RandomEthAddress()
 	emptyAccessList := ethtypes.AccessList{}
 
 	testCases := []struct {

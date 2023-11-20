@@ -15,8 +15,8 @@ import (
 )
 
 func TestTxEncoding(t *testing.T) {
-	addr, key := tests.NewAddrKey()
-	signer := tests.NewSigner(key)
+	addr, key := tests.RandomEthAddressWithPrivateKey()
+	signer := tests.NewTestSigner(key)
 
 	msg := evmtypes.NewTxContract(big.NewInt(1), 1, big.NewInt(10), 100000, nil, big.NewInt(1), big.NewInt(1), []byte{}, nil)
 	msg.From = addr.Hex()

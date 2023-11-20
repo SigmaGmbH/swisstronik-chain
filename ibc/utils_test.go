@@ -80,7 +80,7 @@ func TestGetTransferSenderRecipient(t *testing.T) {
 			true,
 		},
 		{
-			"valid - cosmos sender, evmos recipient",
+			"valid - cosmos sender, swtr recipient",
 			channeltypes.Packet{
 				Data: transfertypes.ModuleCdc.MustMarshalJSON(
 					&transfertypes.FungibleTokenPacketData{
@@ -95,7 +95,7 @@ func TestGetTransferSenderRecipient(t *testing.T) {
 			false,
 		},
 		{
-			"valid - evmos sender, cosmos recipient",
+			"valid - swtr sender, cosmos recipient",
 			channeltypes.Packet{
 				Data: transfertypes.ModuleCdc.MustMarshalJSON(
 					&transfertypes.FungibleTokenPacketData{
@@ -110,7 +110,7 @@ func TestGetTransferSenderRecipient(t *testing.T) {
 			false,
 		},
 		{
-			"valid - osmosis sender, evmos recipient",
+			"valid - osmosis sender, swtr recipient",
 			channeltypes.Packet{
 				Data: transfertypes.ModuleCdc.MustMarshalJSON(
 					&transfertypes.FungibleTokenPacketData{
@@ -255,9 +255,9 @@ func TestGetReceivedCoin(t *testing.T) {
 			"channel-0",
 			"transfer",
 			"channel-0",
-			"transfer/channel-0/aevmos",
+			"transfer/channel-0/uswtr",
 			"10",
-			sdk.Coin{Denom: "aevmos", Amount: sdk.NewInt(10)},
+			sdk.Coin{Denom: "uswtr", Amount: sdk.NewInt(10)},
 		},
 		{
 			"transfer 2x ibc wrapped coin to destination which is its source",
@@ -295,16 +295,10 @@ func TestGetSentCoin(t *testing.T) {
 		expCoin   sdk.Coin
 	}{
 		{
-			"get unwrapped aevmos coin",
-			"aevmos",
+			"get unwrapped uswtr coin",
+			"uswtr",
 			"10",
-			sdk.Coin{Denom: "aevmos", Amount: sdk.NewInt(10)},
-		},
-		{
-			"get ibc wrapped aevmos coin",
-			"transfer/channel-0/aevmos",
-			"10",
-			sdk.Coin{Denom: teststypes.AevmosIbcdenom, Amount: sdk.NewInt(10)},
+			sdk.Coin{Denom: "uswtr", Amount: sdk.NewInt(10)},
 		},
 		{
 			"get ibc wrapped uosmo coin",

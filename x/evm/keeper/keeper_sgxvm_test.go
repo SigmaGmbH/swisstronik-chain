@@ -75,7 +75,7 @@ func (suite *KeeperTestSuite) SetupSGXVMAppWithT(checkTx bool, t require.Testing
 	}
 	suite.privateKey = priv.Bytes()
 	suite.address = common.BytesToAddress(priv.PubKey().Address().Bytes())
-	suite.signer = tests.NewSigner(priv)
+	suite.signer = tests.NewTestSigner(priv)
 
 	// consensus key
 	priv, err = ethsecp256k1.GenerateKey()
