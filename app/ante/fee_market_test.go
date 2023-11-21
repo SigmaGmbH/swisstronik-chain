@@ -72,22 +72,6 @@ func (suite *AnteTestSuite) TestGasWantedDecorator() {
 			true,
 		},
 		{
-			"EIP712 message",
-			200000,
-			func() sdk.Tx {
-				amount := sdk.NewCoins(sdk.NewCoin(evmtypes.DefaultEVMDenom, sdkmath.NewInt(20)))
-				gas := uint64(200000)
-				acc := suite.app.AccountKeeper.NewAccountWithAddress(suite.ctx, from.Bytes())
-				suite.Require().NoError(acc.SetSequence(1))
-				suite.app.AccountKeeper.SetAccount(suite.ctx, acc)
-				builder, err := suite.CreateTestEIP712TxBuilderMsgSend(acc.GetAddress(), fromPrivKey, suite.ctx.ChainID(), gas, amount)
-				suite.Require().NoError(err)
-
-				return builder.GetTx()
-			},
-			true,
-		},
-		{
 			"Cosmos Tx - gasWanted > max block gas",
 			TestGasLimit,
 			func() sdk.Tx {

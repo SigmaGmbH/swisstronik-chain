@@ -12,7 +12,7 @@ type TestSigner struct {
 	address 	sdk.Address
 }
 
-func (ts TestSigner) NewTestSigner(privateKey cryptotypes.PrivKey) keyring.Signer {
+func NewTestSigner(privateKey cryptotypes.PrivKey) keyring.Signer {
 	return TestSigner{
 		privateKey: privateKey,
 		address: sdk.AccAddress(privateKey.PubKey().Address()),
