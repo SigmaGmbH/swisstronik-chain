@@ -28,8 +28,8 @@ import (
 	"swisstronik/crypto/ethsecp256k1"
 )
 
-// NewAddrKey generates an Ethereum address and its corresponding private key.
-func NewAddrKey() (common.Address, cryptotypes.PrivKey) {
+// RandomEthAddressWithPrivateKey generates an Ethereum address and its corresponding private key.
+func RandomEthAddressWithPrivateKey() (common.Address, cryptotypes.PrivKey) {
 	privkey, _ := ethsecp256k1.GenerateKey()
 	key, err := privkey.ToECDSA()
 	if err != nil {
@@ -41,9 +41,9 @@ func NewAddrKey() (common.Address, cryptotypes.PrivKey) {
 	return addr, privkey
 }
 
-// GenerateAddress generates an Ethereum address.
-func GenerateAddress() common.Address {
-	addr, _ := NewAddrKey()
+// RandomEthAddress generates an Ethereum address.
+func RandomEthAddress() common.Address {
+	addr, _ := RandomEthAddressWithPrivateKey()
 	return addr
 }
 
@@ -54,7 +54,7 @@ type Signer struct {
 	privKey cryptotypes.PrivKey
 }
 
-func NewSigner(sk cryptotypes.PrivKey) keyring.Signer {
+func NewTestSigner(sk cryptotypes.PrivKey) keyring.Signer {
 	return &Signer{
 		privKey: sk,
 	}

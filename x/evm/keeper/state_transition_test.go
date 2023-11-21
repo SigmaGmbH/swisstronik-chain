@@ -108,7 +108,7 @@ func (suite *KeeperTestSuite) TestGetHashFn() {
 }
 
 func (suite *KeeperTestSuite) TestGetCoinbaseAddress() {
-	valOpAddr := tests.GenerateAddress()
+	valOpAddr := tests.RandomEthAddress()
 
 	testCases := []struct {
 		msg      string
@@ -127,7 +127,7 @@ func (suite *KeeperTestSuite) TestGetCoinbaseAddress() {
 		{
 			"success",
 			func() {
-				valConsAddr, privkey := tests.NewAddrKey()
+				valConsAddr, privkey := tests.RandomEthAddressWithPrivateKey()
 
 				pkAny, err := codectypes.NewAnyWithValue(privkey.PubKey())
 				suite.Require().NoError(err)

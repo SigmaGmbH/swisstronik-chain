@@ -214,7 +214,7 @@ func RegisterValidatorAccountError(queryClient *mocks.EVMQueryClient) {
 func TestRegisterValidatorAccount(t *testing.T) {
 	queryClient := mocks.NewEVMQueryClient(t)
 
-	validator := sdk.AccAddress(tests.GenerateAddress().Bytes())
+	validator := sdk.AccAddress(tests.RandomEthAddress().Bytes())
 	RegisterValidatorAccount(queryClient, validator)
 	res, err := queryClient.ValidatorAccount(rpc.ContextWithHeight(1), &evmtypes.QueryValidatorAccountRequest{})
 	require.Equal(t, &evmtypes.QueryValidatorAccountResponse{AccountAddress: validator.String()}, res)

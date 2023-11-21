@@ -5,6 +5,7 @@ import (
 
 	"swisstronik/tests"
 	"swisstronik/types"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/require"
 )
@@ -71,7 +72,7 @@ func TestValidateAddress(t *testing.T) {
 			"zero address", common.Address{}.String(), false,
 		},
 		{
-			"valid address", tests.GenerateAddress().Hex(), false,
+			"valid address", tests.RandomEthAddress().Hex(), false,
 		},
 	}
 
@@ -102,7 +103,7 @@ func TestValidateNonZeroAddress(t *testing.T) {
 			"zero address", common.Address{}.String(), true,
 		},
 		{
-			"valid address", tests.GenerateAddress().Hex(), false,
+			"valid address", tests.RandomEthAddress().Hex(), false,
 		},
 	}
 

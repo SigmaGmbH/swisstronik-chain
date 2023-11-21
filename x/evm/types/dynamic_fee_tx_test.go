@@ -7,6 +7,7 @@ import (
 	sdkmath "cosmossdk.io/math"
 
 	"swisstronik/tests"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -42,7 +43,7 @@ func (suite *TxDataTestSuite) SetupTest() {
 	suite.sdkZeroInt = sdk.ZeroInt()
 	suite.sdkMinusOneInt = sdkmath.NewInt(-1)
 	suite.invalidAddr = "123456"
-	suite.addr = tests.GenerateAddress()
+	suite.addr = tests.RandomEthAddress()
 	suite.hexAddr = suite.addr.Hex()
 	suite.hexDataBytes = hexutil.Bytes([]byte("data"))
 	suite.hexInputBytes = hexutil.Bytes([]byte("input"))

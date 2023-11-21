@@ -35,13 +35,13 @@ import (
 	"github.com/cosmos/ibc-go/v7/testing/mock"
 
 	"swisstronik/crypto/ethsecp256k1"
-	evmostypes "swisstronik/types"
+	"swisstronik/types"
 	"swisstronik/utils"
 	evmtypes "swisstronik/x/evm/types"
 )
 
-// ChainIDPrefix defines the default chain ID prefix for Evmos test chains
-var ChainIDPrefix = "evmos_9000-"
+// ChainIDPrefix defines the default chain ID prefix for test chains
+var ChainIDPrefix = "swisstronik_9000-"
 
 func init() {
 	ibcgotesting.ChainIDPrefix = ChainIDPrefix
@@ -75,12 +75,12 @@ func NewTestChain(t *testing.T, coord *ibcgotesting.Coordinator, chainID string)
 
 	baseAcc := authtypes.NewBaseAccount(senderPrivKey.PubKey().Address().Bytes(), senderPrivKey.PubKey(), 0, 0)
 
-	acc := &evmostypes.EthAccount{
+	acc := &types.EthAccount{
 		BaseAccount: baseAcc,
 		CodeHash:    common.BytesToHash(evmtypes.EmptyCodeHash).Hex(),
 	}
 
-	amount := sdk.TokensFromConsensusPower(1, evmostypes.PowerReduction)
+	amount := sdk.TokensFromConsensusPower(1, types.PowerReduction)
 
 	balance := banktypes.Balance{
 		Address: acc.GetAddress().String(),

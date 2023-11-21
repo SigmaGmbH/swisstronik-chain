@@ -2,8 +2,8 @@ package keeper_test
 
 import (
 	_ "embed"
-	"encoding/json"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"math"
 	"math/big"
@@ -144,7 +144,7 @@ func (suite *KeeperTestSuite) SetupAppWithT(checkTx bool, t require.TestingT, ch
 
 	suite.privateKey = priv.Bytes()
 	suite.address = common.BytesToAddress(priv.PubKey().Address().Bytes())
-	suite.signer = tests.NewSigner(priv)
+	suite.signer = tests.NewTestSigner(priv)
 
 	// consensus key
 	priv, err = ethsecp256k1.GenerateKey()
@@ -587,7 +587,7 @@ func (suite *KeeperTestSuite) TestGetNonce() {
 	}{
 		{
 			"account not found",
-			tests.GenerateAddress(),
+			tests.RandomEthAddress(),
 			0,
 			func() {},
 		},
@@ -622,7 +622,7 @@ func (suite *KeeperTestSuite) TestSetNonce() {
 	}{
 		{
 			"new account",
-			tests.GenerateAddress(),
+			tests.RandomEthAddress(),
 			10,
 			func() {},
 		},
@@ -646,7 +646,7 @@ func (suite *KeeperTestSuite) TestSetNonce() {
 }
 
 func (suite *KeeperTestSuite) TestGetCodeHash() {
-	addr := tests.GenerateAddress()
+	addr := tests.RandomEthAddress()
 	baseAcc := &authtypes.BaseAccount{Address: sdk.AccAddress(addr.Bytes()).String()}
 	suite.app.AccountKeeper.SetAccount(suite.ctx, baseAcc)
 
@@ -658,7 +658,7 @@ func (suite *KeeperTestSuite) TestGetCodeHash() {
 	}{
 		{
 			"account not found",
-			tests.GenerateAddress(),
+			tests.RandomEthAddress(),
 			common.BytesToHash(evmtypes.EmptyCodeHash),
 			func() {},
 		},
@@ -690,7 +690,7 @@ func (suite *KeeperTestSuite) TestGetCodeHash() {
 }
 
 func (suite *KeeperTestSuite) TestSetCode() {
-	addr := tests.GenerateAddress()
+	addr := tests.RandomEthAddress()
 	baseAcc := &authtypes.BaseAccount{Address: sdk.AccAddress(addr.Bytes()).String()}
 	suite.app.AccountKeeper.SetAccount(suite.ctx, baseAcc)
 
@@ -702,7 +702,7 @@ func (suite *KeeperTestSuite) TestSetCode() {
 	}{
 		{
 			"account not found",
-			tests.GenerateAddress(),
+			tests.RandomEthAddress(),
 			[]byte("code"),
 			false,
 		},
@@ -747,7 +747,7 @@ func (suite *KeeperTestSuite) TestSetCode() {
 }
 
 func (suite *KeeperTestSuite) TestKeeperSetAccountCode() {
-	addr := tests.GenerateAddress()
+	addr := tests.RandomEthAddress()
 	baseAcc := &authtypes.BaseAccount{Address: sdk.AccAddress(addr.Bytes()).String()}
 	suite.app.AccountKeeper.SetAccount(suite.ctx, baseAcc)
 
@@ -789,7 +789,7 @@ func (suite *KeeperTestSuite) TestKeeperSetAccountCode() {
 }
 
 func (suite *KeeperTestSuite) TestKeeperSetCode() {
-	addr := tests.GenerateAddress()
+	addr := tests.RandomEthAddress()
 	baseAcc := &authtypes.BaseAccount{Address: sdk.AccAddress(addr.Bytes()).String()}
 	suite.app.AccountKeeper.SetAccount(suite.ctx, baseAcc)
 
@@ -913,7 +913,7 @@ func (suite *KeeperTestSuite) TestExist() {
 		exists   bool
 	}{
 		{"success, account exists", suite.address, func() {}, true},
-		{"success, account doesn't exist", tests.GenerateAddress(), func() {}, false},
+		{"success, account doesn't exist", tests.RandomEthAddress(), func() {}, false},
 	}
 
 	for _, tc := range testCases {
@@ -941,7 +941,7 @@ func (suite *KeeperTestSuite) TestEmpty() {
 			},
 			false,
 		},
-		{"empty, account doesn't exist", tests.GenerateAddress(), func() {}, true},
+		{"empty, account doesn't exist", tests.RandomEthAddress(), func() {}, true},
 	}
 
 	for _, tc := range testCases {
@@ -964,7 +964,7 @@ func (suite *KeeperTestSuite) CreateTestTx(msg *evmtypes.MsgHandleTx, priv crypt
 
 	builder.SetExtensionOptions(option)
 
-	err = msg.Sign(suite.ethSigner, tests.NewSigner(priv))
+	err = msg.Sign(suite.ethSigner, tests.NewTestSigner(priv))
 	suite.Require().NoError(err)
 
 	err = txBuilder.SetMsgs(msg)
@@ -1174,7 +1174,7 @@ func (suite *KeeperTestSuite) TestVerifyCredential() {
 	res, err := suite.SendVerifiableCredentialTx(suite.T(), vcContract, correctTxDataHex)
 	suite.Require().NoError(err)
 	suite.Require().Empty(res.VmError)
-	
+
 	// Decrypt result
 	decrypedRes, err := deoxys.DecryptECDH(suite.privateKey, suite.nodePublicKey, res.Ret)
 	suite.Require().NoError(err)

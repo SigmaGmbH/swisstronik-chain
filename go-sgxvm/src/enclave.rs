@@ -69,7 +69,10 @@ pub fn init_enclave() -> SgxResult<SgxEnclave> {
 
     let enclave_home = match env::var("ENCLAVE_HOME") {
         Ok(home) => home,
-        Err(e) => String::from(std::env::home_dir().expect("Please specify ENCLAVE_HOME env variable explicitly").to_str().unwrap())
+        Err(_) => {
+            let dir_path = String::from(std::env::home_dir().expect("Please specify ENCLAVE_HOME env variable explicitly").to_str().unwrap());
+            format!("{}/.swisstronik-enclave", dir_path)
+        }
     };
     let enclave_path = format!("{}/{}", enclave_home, ENCLAVE_FILE);
 

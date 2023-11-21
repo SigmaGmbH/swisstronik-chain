@@ -102,7 +102,7 @@ func (suite *BackendTestSuite) TestGetBlockByNumber() {
 			ethrpc.BlockNumber(1),
 			true,
 			sdk.NewInt(1).BigInt(),
-			sdk.AccAddress(tests.GenerateAddress().Bytes()),
+			sdk.AccAddress(tests.RandomEthAddress().Bytes()),
 			nil,
 			nil,
 			func(blockNum ethrpc.BlockNumber, _ sdk.Int, _ sdk.AccAddress, _ []byte) {
@@ -118,7 +118,7 @@ func (suite *BackendTestSuite) TestGetBlockByNumber() {
 			ethrpc.BlockNumber(1),
 			true,
 			sdk.NewInt(1).BigInt(),
-			sdk.AccAddress(tests.GenerateAddress().Bytes()),
+			sdk.AccAddress(tests.RandomEthAddress().Bytes()),
 			nil,
 			nil,
 			func(blockNum ethrpc.BlockNumber, baseFee sdk.Int, validator sdk.AccAddress, txBz []byte) {
@@ -134,7 +134,7 @@ func (suite *BackendTestSuite) TestGetBlockByNumber() {
 			ethrpc.BlockNumber(1),
 			true,
 			sdk.NewInt(1).BigInt(),
-			sdk.AccAddress(tests.GenerateAddress().Bytes()),
+			sdk.AccAddress(tests.RandomEthAddress().Bytes()),
 			nil,
 			nil,
 			func(blockNum ethrpc.BlockNumber, baseFee sdk.Int, validator sdk.AccAddress, txBz []byte) {
@@ -151,7 +151,7 @@ func (suite *BackendTestSuite) TestGetBlockByNumber() {
 			ethrpc.BlockNumber(1),
 			true,
 			sdk.NewInt(1).BigInt(),
-			sdk.AccAddress(tests.GenerateAddress().Bytes()),
+			sdk.AccAddress(tests.RandomEthAddress().Bytes()),
 			nil,
 			nil,
 			func(blockNum ethrpc.BlockNumber, baseFee sdk.Int, validator sdk.AccAddress, txBz []byte) {
@@ -173,7 +173,7 @@ func (suite *BackendTestSuite) TestGetBlockByNumber() {
 			ethrpc.BlockNumber(1),
 			true,
 			sdk.NewInt(1).BigInt(),
-			sdk.AccAddress(tests.GenerateAddress().Bytes()),
+			sdk.AccAddress(tests.RandomEthAddress().Bytes()),
 			msgHandleTx,
 			bz,
 			func(blockNum ethrpc.BlockNumber, baseFee sdk.Int, validator sdk.AccAddress, txBz []byte) {
@@ -247,7 +247,7 @@ func (suite *BackendTestSuite) TestGetBlockByHash() {
 			common.BytesToHash(block.Hash()),
 			true,
 			sdk.NewInt(1).BigInt(),
-			sdk.AccAddress(tests.GenerateAddress().Bytes()),
+			sdk.AccAddress(tests.RandomEthAddress().Bytes()),
 			nil,
 			nil,
 			func(hash common.Hash, baseFee sdk.Int, validator sdk.AccAddress, txBz []byte) {
@@ -262,7 +262,7 @@ func (suite *BackendTestSuite) TestGetBlockByHash() {
 			common.BytesToHash(block.Hash()),
 			true,
 			sdk.NewInt(1).BigInt(),
-			sdk.AccAddress(tests.GenerateAddress().Bytes()),
+			sdk.AccAddress(tests.RandomEthAddress().Bytes()),
 			nil,
 			nil,
 			func(hash common.Hash, baseFee sdk.Int, validator sdk.AccAddress, txBz []byte) {
@@ -277,7 +277,7 @@ func (suite *BackendTestSuite) TestGetBlockByHash() {
 			common.BytesToHash(block.Hash()),
 			true,
 			sdk.NewInt(1).BigInt(),
-			sdk.AccAddress(tests.GenerateAddress().Bytes()),
+			sdk.AccAddress(tests.RandomEthAddress().Bytes()),
 			nil,
 			nil,
 			func(hash common.Hash, baseFee sdk.Int, validator sdk.AccAddress, txBz []byte) {
@@ -295,7 +295,7 @@ func (suite *BackendTestSuite) TestGetBlockByHash() {
 			common.BytesToHash(block.Hash()),
 			true,
 			sdk.NewInt(1).BigInt(),
-			sdk.AccAddress(tests.GenerateAddress().Bytes()),
+			sdk.AccAddress(tests.RandomEthAddress().Bytes()),
 			nil,
 			nil,
 			func(hash common.Hash, baseFee sdk.Int, validator sdk.AccAddress, txBz []byte) {
@@ -318,7 +318,7 @@ func (suite *BackendTestSuite) TestGetBlockByHash() {
 			common.BytesToHash(block.Hash()),
 			true,
 			sdk.NewInt(1).BigInt(),
-			sdk.AccAddress(tests.GenerateAddress().Bytes()),
+			sdk.AccAddress(tests.RandomEthAddress().Bytes()),
 			msgHandleTx,
 			bz,
 			func(hash common.Hash, baseFee sdk.Int, validator sdk.AccAddress, txBz []byte) {
@@ -925,7 +925,7 @@ func (suite *BackendTestSuite) TestGetEthBlockFromTendermint() {
 		{
 			"pass - block with tx - with BaseFee error",
 			nil,
-			sdk.AccAddress(tests.GenerateAddress().Bytes()),
+			sdk.AccAddress(tests.RandomEthAddress().Bytes()),
 			int64(1),
 			&tmrpctypes.ResultBlock{
 				Block: tmtypes.MakeBlock(1, []tmtypes.Tx{bz}, nil, nil),
@@ -973,7 +973,7 @@ func (suite *BackendTestSuite) TestGetEthBlockFromTendermint() {
 		{
 			"pass - block with tx - with ConsensusParams error - BlockMaxGas defaults to max uint32",
 			sdk.NewInt(1).BigInt(),
-			sdk.AccAddress(tests.GenerateAddress().Bytes()),
+			sdk.AccAddress(tests.RandomEthAddress().Bytes()),
 			int64(1),
 			&tmrpctypes.ResultBlock{
 				Block: tmtypes.MakeBlock(1, []tmtypes.Tx{bz}, nil, nil),
@@ -997,7 +997,7 @@ func (suite *BackendTestSuite) TestGetEthBlockFromTendermint() {
 		{
 			"pass - block with tx - with ShouldIgnoreGasUsed - empty txs",
 			sdk.NewInt(1).BigInt(),
-			sdk.AccAddress(tests.GenerateAddress().Bytes()),
+			sdk.AccAddress(tests.RandomEthAddress().Bytes()),
 			int64(1),
 			&tmrpctypes.ResultBlock{
 				Block: tmtypes.MakeBlock(1, []tmtypes.Tx{bz}, nil, nil),
@@ -1027,7 +1027,7 @@ func (suite *BackendTestSuite) TestGetEthBlockFromTendermint() {
 		{
 			"pass - block with tx - non fullTx",
 			sdk.NewInt(1).BigInt(),
-			sdk.AccAddress(tests.GenerateAddress().Bytes()),
+			sdk.AccAddress(tests.RandomEthAddress().Bytes()),
 			int64(1),
 			&tmrpctypes.ResultBlock{
 				Block: tmtypes.MakeBlock(1, []tmtypes.Tx{bz}, nil, nil),
@@ -1051,7 +1051,7 @@ func (suite *BackendTestSuite) TestGetEthBlockFromTendermint() {
 		{
 			"pass - block with tx",
 			sdk.NewInt(1).BigInt(),
-			sdk.AccAddress(tests.GenerateAddress().Bytes()),
+			sdk.AccAddress(tests.RandomEthAddress().Bytes()),
 			int64(1),
 			&tmrpctypes.ResultBlock{
 				Block: tmtypes.MakeBlock(1, []tmtypes.Tx{bz}, nil, nil),

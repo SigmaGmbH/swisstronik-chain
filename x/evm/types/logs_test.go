@@ -11,7 +11,7 @@ import (
 )
 
 func TestTransactionLogsValidate(t *testing.T) {
-	addr := tests.GenerateAddress().String()
+	addr := tests.RandomEthAddress().String()
 
 	testCases := []struct {
 		name    string
@@ -95,7 +95,7 @@ func TestTransactionLogsValidate(t *testing.T) {
 }
 
 func TestValidateLog(t *testing.T) {
-	addr := tests.GenerateAddress().String()
+	addr := tests.RandomEthAddress().String()
 
 	testCases := []struct {
 		name    string
@@ -168,7 +168,7 @@ func TestValidateLog(t *testing.T) {
 }
 
 func TestConversionFunctions(t *testing.T) {
-	addr := tests.GenerateAddress().String()
+	addr := tests.RandomEthAddress().String()
 
 	txLogs := TransactionLogs{
 		Hash: common.BytesToHash([]byte("tx_hash")).String(),

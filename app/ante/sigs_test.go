@@ -11,8 +11,8 @@ func (suite AnteTestSuite) TestSignatures() {
 	suite.enableFeemarket = false
 	suite.SetupTest() // reset
 
-	addr, privKey := tests.NewAddrKey()
-	to := tests.GenerateAddress()
+	addr, privKey := tests.RandomEthAddressWithPrivateKey()
+	to := tests.RandomEthAddress()
 
 	acc := evmtypes.NewEmptyAccount()
 	acc.Nonce = 1

@@ -3,6 +3,11 @@ package backend
 import (
 	"fmt"
 
+	"swisstronik/crypto/ethsecp256k1"
+	"swisstronik/rpc/backend/mocks"
+	"swisstronik/tests"
+	evmtypes "swisstronik/x/evm/types"
+
 	"github.com/cosmos/cosmos-sdk/crypto"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
@@ -11,17 +16,13 @@ import (
 	goethcrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/signer/core/apitypes"
 	"google.golang.org/grpc/metadata"
-	"swisstronik/crypto/ethsecp256k1"
-	"swisstronik/rpc/backend/mocks"
-	"swisstronik/tests"
-	evmtypes "swisstronik/x/evm/types"
 )
 
 func (suite *BackendTestSuite) TestSendTransaction() {
 	gasPrice := new(hexutil.Big)
 	gas := hexutil.Uint64(1)
 	zeroGas := hexutil.Uint64(0)
-	toAddr := tests.GenerateAddress()
+	toAddr := tests.RandomEthAddress()
 	priv, _ := ethsecp256k1.GenerateKey()
 	from := common.BytesToAddress(priv.PubKey().Address().Bytes())
 	nonce := hexutil.Uint64(1)
@@ -181,7 +182,7 @@ func (suite *BackendTestSuite) TestSendTransaction() {
 }
 
 func (suite *BackendTestSuite) TestSign() {
-	from, priv := tests.NewAddrKey()
+	from, priv := tests.RandomEthAddressWithPrivateKey()
 	testCases := []struct {
 		name         string
 		registerMock func()
@@ -228,7 +229,7 @@ func (suite *BackendTestSuite) TestSign() {
 }
 
 func (suite *BackendTestSuite) TestSignTypedData() {
-	from, priv := tests.NewAddrKey()
+	from, priv := tests.RandomEthAddressWithPrivateKey()
 	testCases := []struct {
 		name           string
 		registerMock   func()

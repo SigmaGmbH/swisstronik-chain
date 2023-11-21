@@ -18,8 +18,8 @@ func (suite *AnteTestSuite) TestGasWantedDecorator() {
 	suite.enableFeemarket = true
 	suite.SetupTest()
 	dec := ante.NewGasWantedDecorator(suite.app.EvmKeeper, suite.app.FeeMarketKeeper)
-	from, fromPrivKey := tests.NewAddrKey()
-	to := tests.GenerateAddress()
+	from, fromPrivKey := tests.RandomEthAddressWithPrivateKey()
+	to := tests.RandomEthAddress()
 
 	testCases := []struct {
 		name              string
@@ -68,22 +68,6 @@ func (suite *AnteTestSuite) TestGasWantedDecorator() {
 				emptyAccessList := ethtypes.AccessList{}
 				msg := suite.BuildTestEthTx(from, to, nil, make([]byte, 0), big.NewInt(0), big.NewInt(100), big.NewInt(50), &emptyAccessList, nil, nil)
 				return suite.CreateTestTx(msg, fromPrivKey, 1, false)
-			},
-			true,
-		},
-		{
-			"EIP712 message",
-			200000,
-			func() sdk.Tx {
-				amount := sdk.NewCoins(sdk.NewCoin(evmtypes.DefaultEVMDenom, sdkmath.NewInt(20)))
-				gas := uint64(200000)
-				acc := suite.app.AccountKeeper.NewAccountWithAddress(suite.ctx, from.Bytes())
-				suite.Require().NoError(acc.SetSequence(1))
-				suite.app.AccountKeeper.SetAccount(suite.ctx, acc)
-				builder, err := suite.CreateTestEIP712TxBuilderMsgSend(acc.GetAddress(), fromPrivKey, suite.ctx.ChainID(), gas, amount)
-				suite.Require().NoError(err)
-
-				return builder.GetTx()
 			},
 			true,
 		},

@@ -40,7 +40,7 @@ func TestBackendTestSuite(t *testing.T) {
 	suite.Run(t, new(BackendTestSuite))
 }
 
-const ChainID = "ethermint_9000-1"
+const ChainID = "swisstronik_1291-1"
 
 // SetupTest is executed before every BackendTestSuite test
 func (suite *BackendTestSuite) SetupTest() {
@@ -49,14 +49,14 @@ func (suite *BackendTestSuite) SetupTest() {
 
 	baseDir := suite.T().TempDir()
 	nodeDirName := "node"
-	clientDir := filepath.Join(baseDir, nodeDirName, "evmoscli")
+	clientDir := filepath.Join(baseDir, nodeDirName, "swisstronikcli")
 	keyRing, err := suite.generateTestKeyring(clientDir)
 	if err != nil {
 		panic(err)
 	}
 
 	// Create Account with set sequence
-	suite.acc = sdk.AccAddress(tests.GenerateAddress().Bytes())
+	suite.acc = sdk.AccAddress(tests.RandomEthAddress().Bytes())
 	accounts := map[string]client.TestAccount{}
 	accounts[suite.acc.String()] = client.TestAccount{
 		Address: suite.acc,
@@ -65,7 +65,7 @@ func (suite *BackendTestSuite) SetupTest() {
 	}
 
 	priv, err := ethsecp256k1.GenerateKey()
-	suite.signer = tests.NewSigner(priv)
+	suite.signer = tests.NewTestSigner(priv)
 	suite.Require().NoError(err)
 
 	encodingConfig := encoding.MakeConfig(app.ModuleBasics)
@@ -173,8 +173,8 @@ func (suite *BackendTestSuite) generateTestKeyring(clientDir string) (keyring.Ke
 }
 
 func (suite *BackendTestSuite) signAndEncodeEthTx(msgHandleTx *evmtypes.MsgHandleTx) []byte {
-	from, priv := tests.NewAddrKey()
-	signer := tests.NewSigner(priv)
+	from, priv := tests.RandomEthAddressWithPrivateKey()
+	signer := tests.NewTestSigner(priv)
 
 	queryClient := suite.backend.queryClient.QueryClient.(*mocks.EVMQueryClient)
 	RegisterParamsWithoutHeader(queryClient, 1)

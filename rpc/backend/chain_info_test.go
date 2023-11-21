@@ -189,7 +189,7 @@ func (suite *BackendTestSuite) TestChainId() {
 }
 
 func (suite *BackendTestSuite) TestGetCoinbase() {
-	validatorAcc := sdk.AccAddress(tests.GenerateAddress().Bytes())
+	validatorAcc := sdk.AccAddress(tests.RandomEthAddress().Bytes())
 	testCases := []struct {
 		name         string
 		registerMock func()
@@ -400,7 +400,7 @@ func (suite *BackendTestSuite) TestFeeHistory() {
 			1,
 			1,
 			nil,
-			sdk.AccAddress(tests.GenerateAddress().Bytes()),
+			sdk.AccAddress(tests.RandomEthAddress().Bytes()),
 			false,
 		},
 		{
@@ -427,7 +427,7 @@ func (suite *BackendTestSuite) TestFeeHistory() {
 				GasUsedRatio: []float64{0},
 				Reward:       [][]*hexutil.Big{{(*hexutil.Big)(big.NewInt(0)), (*hexutil.Big)(big.NewInt(0)), (*hexutil.Big)(big.NewInt(0)), (*hexutil.Big)(big.NewInt(0))}},
 			},
-			sdk.AccAddress(tests.GenerateAddress().Bytes()),
+			sdk.AccAddress(tests.RandomEthAddress().Bytes()),
 			true,
 		},
 	}

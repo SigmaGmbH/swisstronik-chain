@@ -3,10 +3,11 @@ package ante_test
 import (
 	"math/big"
 
-	sdkmath "cosmossdk.io/math"
 	"swisstronik/app/ante"
 	"swisstronik/tests"
 	evmtypes "swisstronik/x/evm/types"
+
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
@@ -24,8 +25,8 @@ var execTypes = []struct {
 func (s AnteTestSuite) TestMinGasPriceDecorator() {
 	denom := evmtypes.DefaultEVMDenom
 	testMsg := banktypes.MsgSend{
-		FromAddress: "evmos1x8fhpj9nmhqk8z9kpgjt95ck2xwyue0ptzkucp",
-		ToAddress:   "evmos1dx67l23hz9l0k9hcher8xz04uj7wf3yu26l2yn",
+		FromAddress: "swtr13sllcdsqhjektac5r6h50dvjrthm0yt6zw3q4s",
+		ToAddress:   "swtr1734tyvkylw3f7vc9xmwxp6g5n79qvsrvjhsvs4",
 		Amount:      sdk.Coins{sdk.Coin{Amount: sdkmath.NewInt(10), Denom: denom}},
 	}
 
@@ -138,8 +139,8 @@ func (s AnteTestSuite) TestMinGasPriceDecorator() {
 
 func (s AnteTestSuite) TestEthMinGasPriceDecorator() {
 	denom := evmtypes.DefaultEVMDenom
-	from, privKey := tests.NewAddrKey()
-	to := tests.GenerateAddress()
+	from, privKey := tests.RandomEthAddressWithPrivateKey()
+	to := tests.RandomEthAddress()
 	emptyAccessList := ethtypes.AccessList{}
 
 	testCases := []struct {
@@ -166,8 +167,8 @@ func (s AnteTestSuite) TestEthMinGasPriceDecorator() {
 				params.MinGasPrice = sdk.NewDec(10)
 				s.app.FeeMarketKeeper.SetParams(s.ctx, params)
 				testMsg := banktypes.MsgSend{
-					FromAddress: "evmos1x8fhpj9nmhqk8z9kpgjt95ck2xwyue0ptzkucp",
-					ToAddress:   "evmos1dx67l23hz9l0k9hcher8xz04uj7wf3yu26l2yn",
+					FromAddress: "swtr13sllcdsqhjektac5r6h50dvjrthm0yt6zw3q4s",
+					ToAddress:   "swtr1734tyvkylw3f7vc9xmwxp6g5n79qvsrvjhsvs4",
 					Amount:      sdk.Coins{sdk.Coin{Amount: sdkmath.NewInt(10), Denom: denom}},
 				}
 				txBuilder := s.CreateTestCosmosTxBuilder(sdkmath.NewInt(0), denom, &testMsg)
