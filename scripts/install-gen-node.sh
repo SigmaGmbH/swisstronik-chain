@@ -15,7 +15,7 @@ cd $HOME/chain/ && SGX_MODE=SW make build-enclave
 cd $HOME/chain/ && make install
 mkdir -p $HOMEDIR/cosmovisor/genesis/bin && mkdir -p $HOMEDIR/cosmovisor/upgrades
 cp $HOME/go/bin/swisstronikd $HOMEDIR/cosmovisor/genesis/bin
-swisstronikd init validator --chain-id swisstronik_4141-1
+swisstronikd init validator --chain-id swisstronik_1291-1
 echo "pet apart myth reflect stuff force attract taste caught fit exact ice slide sheriff state since unusual gaze practice course mesh magnet ozone purchase" | swisstronikd keys add validator --keyring-backend test --recover
 echo "bottom soccer blue sniff use improve rough use amateur senior transfer quarter" | swisstronikd keys add validator1 --keyring-backend test --recover
 echo "wreck layer draw very fame person frown essence approve lyrics sustain spoon" | swisstronikd keys add validator2 --keyring-backend test --recover
@@ -30,7 +30,7 @@ swisstronikd add-genesis-account $(swisstronikd keys show validator3 -a --keyrin
 swisstronikd add-genesis-account $(swisstronikd keys show validator4 -a --keyring-backend test) 140000000000000000000000uswtr
 swisstronikd add-genesis-account $(swisstronikd keys show test1 -a --keyring-backend test) 10000000000000000000000uswtr
 swisstronikd add-genesis-account $(swisstronikd keys show test2 -a --keyring-backend test) 10000000000000000000000uswtr
-swisstronikd gentx validator 90000000000000000000000uswtr --keyring-backend test --chain-id swisstronik_4141-1
+swisstronikd gentx validator 90000000000000000000000uswtr --keyring-backend test --chain-id swisstronik_1291-1
 swisstronikd collect-gentxs
 sed -i 's/stake/uswtr/g' "$GENESIS"
 sed -i 's/pruning = "default"/pruning = "custom"/g' "$CONFIG"

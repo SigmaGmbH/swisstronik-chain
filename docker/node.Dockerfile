@@ -39,9 +39,34 @@ ENV LD_LIBRARY_PATH="/opt/intel/sgxsdk/sdk_libs:${LD_LIBRARY_PATH}"
 
 COPY . /root/chain
 WORKDIR /root/chain
-RUN	make build-enclave
 RUN make build
 
+
+############ Node binary for deb package
+FROM compile-base as build-deb
+
+ARG BUILD_VERSION="v1.0.1"
+ENV VERSION=${BUILD_VERSION}
+ARG DEB_BIN_DIR=/usr/local/bin
+ENV DEB_BIN_DIR=${DEB_BIN_DIR}
+ARG DEB_LIB_DIR=/usr/lib
+ENV DEB_LIB_DIR=${DEB_LIB_DIR}
+ARG ENCLAVE_HOME=${DEB_LIB_DIR}
+ARG ENCLAVE_HOME=${ENCLAVE_HOME}
+
+WORKDIR /root
+
+# Copy over binaries from the build-env
+COPY --from=compile-chain /root/chain/build/swisstronikd swisstronikd
+COPY --from=compile-chain /root/.swisstronik-enclave /usr/lib/.swisstronik-enclave
+COPY --from=compile-chain /root/chain/go-sgxvm/internal/api/libsgx_wrapper.x86_64.so /usr/lib/.swisstronik-enclave/libsgx_wrapper.x86_64.so
+
+COPY ./deb ./deb
+COPY ./scripts/build_deb.sh .
+
+RUN chmod +x build_deb.sh
+
+CMD ["/bin/bash", "build_deb.sh"]
 
 
 ############ Node binary in Hardware Mode
@@ -49,7 +74,7 @@ FROM base as hw-node
 
 COPY --from=compile-chain /root/chain/build/swisstronikd /usr/local/bin/swisstronikd
 COPY --from=compile-chain /root/.swisstronik-enclave /root/.swisstronik-enclave
-COPY --from=compile-chain /root/chain/external/evm-module/librustgo/internal/api/libsgx_wrapper.x86_64.so /lib/x86_64-linux-gnu/libsgx_wrapper.x86_64.so
+COPY --from=compile-chain /root/chain/go-sgxvm/internal/api/libsgx_wrapper.x86_64.so /lib/x86_64-linux-gnu/libsgx_wrapper.x86_64.so
 COPY --from=compile-chain /opt/intel /opt/intel
 
 EXPOSE 26656 26657 1317 9090 8545 8546 8999
@@ -66,7 +91,7 @@ RUN rm -rf /var/lib/apt/lists/*
 
 COPY --from=compile-chain /root/chain/build/swisstronikd /usr/bin/swisstronikd
 COPY --from=compile-chain /root/.swisstronik-enclave /root/.swisstronik-enclave
-COPY --from=compile-chain /root/chain/external/evm-module/librustgo/internal/api/libsgx_wrapper.x86_64.so /lib/x86_64-linux-gnu/libsgx_wrapper.x86_64.so
+COPY --from=compile-chain /root/chain/go-sgxvm/internal/api/libsgx_wrapper.x86_64.so /lib/x86_64-linux-gnu/libsgx_wrapper.x86_64.so
 COPY --from=compile-chain /opt/intel/sgxsdk/sdk_libs/* /lib/x86_64-linux-gnu/
 COPY --from=compile-chain /root/chain/scripts/local-node.sh /root/local-node.sh
 
