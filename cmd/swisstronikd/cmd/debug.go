@@ -210,12 +210,19 @@ func SampleDIDResource() *cobra.Command {
 			if !didtypes.IsValidDID(did, didtypes.DIDMethod) {
 				return fmt.Errorf("provided DID is invalid")
 			}
+			
+			// Derive collection id from provided DID
+			_, collectionId, err := didtypes.TrySplitDID(did)
+			if err != nil {
+				return err
+			}
 
 			resource := didtypes.MsgCreateResourcePayload{
-				CollectionId: did,
+				CollectionId: collectionId,
 				Id:           uuid.NewString(),
 				Name: "sample-resource",
 				Version: "sample-version",
+				ResourceType: "SampleResourceType",
 				AlsoKnownAs: []*types.AlternativeUri{
 					{
 						Uri: "http://example.com/example-did",

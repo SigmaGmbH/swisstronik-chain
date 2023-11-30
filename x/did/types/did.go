@@ -13,24 +13,22 @@ var (
 
 // TrySplitDID Validates generic format of DID. It doesn't validate method, name and id content.
 // Call ValidateDID for further validation.
-func TrySplitDID(did string) (method string, namespace string, id string, err error) {
+func TrySplitDID(did string) (method string, id string, err error) {
 	// Example: did:swtr:base58str1ng1111
 	// match [0] - the whole string
 	// match [1] - swtr                 - method
-	// match [2] - :testnet
-	// match [3] - testnet              - namespace
 	// match [4] - base58str1ng1111     - id
 	matches := SplitDIDRegexp.FindAllStringSubmatch(did, -1)
 	if len(matches) != 1 {
-		return "", "", "", errors.New("unable to split did into method, namespace and id")
+		return "", "", errors.New("unable to split did into method, namespace and id")
 	}
 
 	match := matches[0]
-	return match[1], match[3], match[4], nil
+	return match[1], match[4], nil
 }
 
 func MustSplitDID(did string) (method string, namespace string, id string) {
-	method, namespace, id, err := TrySplitDID(did)
+	method, id, err := TrySplitDID(did)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -62,7 +60,7 @@ func ReplaceDIDInDIDURLList(didURLList []string, oldDid string, newDid string) [
 
 // ValidateDID checks method and allowed namespaces only when the corresponding parameters are specified.
 func ValidateDID(did string, method string) error {
-	sMethod, _, sUniqueID, err := TrySplitDID(did)
+	sMethod, sUniqueID, err := TrySplitDID(did)
 	if err != nil {
 		return err
 	}
