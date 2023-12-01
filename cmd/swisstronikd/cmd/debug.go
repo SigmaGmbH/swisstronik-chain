@@ -193,13 +193,13 @@ func SampleDIDResource() *cobra.Command {
 				err        error
 			)
 			// Check if private key was provided.
-			if len(args) != 1 {
+			if len(args) == 1 {
 				_, privateKey, err = ed25519.GenerateKey(rand.Reader)
 				if err != nil {
 					return err
 				}
 			} else {
-				privateKeyBytes, err := base64.StdEncoding.DecodeString(args[0])
+				privateKeyBytes, err := base64.StdEncoding.DecodeString(args[1])
 				if err != nil {
 					return err
 				}
