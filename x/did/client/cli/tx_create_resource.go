@@ -2,6 +2,7 @@ package cli
 
 import (
 	"os"
+	"encoding/json"
 
 	"swisstronik/x/did/types"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -70,7 +71,7 @@ Example payload file:
 
 			// Unmarshal payload
 			var payload types.MsgCreateResourcePayload
-			err = clientCtx.Codec.UnmarshalJSON(payloadJSON, &payload)
+			err = json.Unmarshal(payloadJSON, &payload)
 			if err != nil {
 				return err
 			}
