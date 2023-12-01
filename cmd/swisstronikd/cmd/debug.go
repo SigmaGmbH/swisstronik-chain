@@ -193,13 +193,13 @@ func SampleDIDResource() *cobra.Command {
 				err        error
 			)
 			// Check if private key was provided.
-			if len(args) != 1 {
+			if len(args) == 1 {
 				_, privateKey, err = ed25519.GenerateKey(rand.Reader)
 				if err != nil {
 					return err
 				}
 			} else {
-				privateKeyBytes, err := base64.StdEncoding.DecodeString(args[0])
+				privateKeyBytes, err := base64.StdEncoding.DecodeString(args[1])
 				if err != nil {
 					return err
 				}
@@ -210,12 +210,19 @@ func SampleDIDResource() *cobra.Command {
 			if !didtypes.IsValidDID(did, didtypes.DIDMethod) {
 				return fmt.Errorf("provided DID is invalid")
 			}
+			
+			// Derive collection id from provided DID
+			_, collectionId, err := didtypes.TrySplitDID(did)
+			if err != nil {
+				return err
+			}
 
 			resource := didtypes.MsgCreateResourcePayload{
-				CollectionId: did,
+				CollectionId: collectionId,
 				Id:           uuid.NewString(),
 				Name: "sample-resource",
 				Version: "sample-version",
+				ResourceType: "SampleResourceType",
 				AlsoKnownAs: []*types.AlternativeUri{
 					{
 						Uri: "http://example.com/example-did",
