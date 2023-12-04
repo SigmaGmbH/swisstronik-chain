@@ -5,14 +5,17 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"os"
 	"strings"
 
 	"encoding/hex"
 	didutil "swisstronik/testutil/did"
-	"swisstronik/x/did/types"
+	didcli "swisstronik/x/did/client/cli"
 	didtypes "swisstronik/x/did/types"
 
+	"github.com/cometbft/cometbft/libs/bytes"
 	"github.com/cosmos/cosmos-sdk/client"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -20,7 +23,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
-	"github.com/cometbft/cometbft/libs/bytes"
 )
 
 type DIDDocument struct {
@@ -44,6 +46,12 @@ type PayloadWithSignInputs struct {
 	SignInputs []SignInput
 }
 
+type PayloadWithSignInputsAndSignatures struct {
+	Payload    json.RawMessage
+	SignInputs []didcli.SignInput
+	Signatures []*didtypes.SignInfo
+}
+
 type SignInput struct {
 	VerificationMethodID string
 	PrivKey              ed25519.PrivateKey
@@ -53,6 +61,11 @@ type Service struct {
 	ID              string   `json:"id"`
 	Type            string   `json:"type"`
 	ServiceEndpoint []string `json:"serviceEndpoint"`
+}
+
+type KeyPair struct {
+	PrivateKeyBase64 string `json:"private_key_base_64"`
+	PublicKeyBase64  string `json:"public_key_base_64"`
 }
 
 // Cmd creates a CLI main command
@@ -68,6 +81,7 @@ func DebugCmd() *cobra.Command {
 	cmd.AddCommand(ExtractPubkeyCmd())
 	cmd.AddCommand(ConvertAddressCmd())
 	cmd.AddCommand(SampleDIDResource())
+	cmd.AddCommand(SignDIDDocument())
 
 	return cmd
 }
@@ -180,6 +194,136 @@ func SampleDIDDocument() *cobra.Command {
 	return cmd
 }
 
+func ReadKeyPairFromFile(file string) (KeyPair, error) {
+	bytes, err := os.ReadFile(file)
+	if err != nil {
+		return KeyPair{}, err
+	}
+
+	keyPair := KeyPair{}
+	err = json.Unmarshal(bytes, &keyPair)
+	if err != nil {
+		return KeyPair{}, err
+	}
+
+	return keyPair, nil
+}
+
+func SignDIDDocument() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "sign-did-document [did.json] [key.json]",
+		Short: "Generates signed DID document ready to be stored in DID registry",
+		Long:  "Generates signed self-controlled DID document from the payload and key information provided, which is ready to be stored in DID registry.",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			var (
+				privateKey ed25519.PrivateKey
+				publicKey  ed25519.PublicKey
+				err        error
+			)
+
+			if len(args) != 2 {
+				return errors.New("invalid input parameters")
+			}
+
+			// Decode did.json to have payload and signInputs
+			payloadJSON, signInputs, err := didcli.ReadPayloadWithSignInputsFromFile(args[0])
+			if err != nil {
+				return err
+			}
+
+			// Decode key.json to have private and public key pair
+			keyPair, err := ReadKeyPairFromFile(args[1])
+			if err != nil {
+				return err
+			}
+
+			// Decode base64 based private key string to have byte[]
+			privateKeyBytes, err := base64.StdEncoding.DecodeString(keyPair.PrivateKeyBase64)
+			if err != nil {
+				return err
+			}
+
+			// Encode ed25519 based private key
+			privateKey = ed25519.PrivateKey(privateKeyBytes)
+			// Encode ed25519 based public key
+			publicKeyFromFile := privateKey.Public().(ed25519.PublicKey)
+
+			// Unmarshal spec-compliant payload
+			var specPayload didcli.DIDDocument
+			err = json.Unmarshal([]byte(payloadJSON), &specPayload)
+			if err != nil {
+				return err
+			}
+
+			// Check if public key is addressed in verfication method
+			_, ok := specPayload.VerificationMethod[0]["publicKeyMultibase"]
+			if !ok {
+				return errors.New("publicKeyMultibase is not specified")
+			}
+
+			// Get base64 based public key
+			publicKeyMultibase := specPayload.VerificationMethod[0]["publicKeyMultibase"].(string)
+			publicKeyBytes, err := base64.StdEncoding.DecodeString(publicKeyMultibase)
+			if err != nil {
+				return err
+			}
+
+			// Encode ed25519 based public key
+			publicKey = ed25519.PublicKey(publicKeyBytes)
+
+			// Check if the two public keys are being matched
+			if !publicKeyFromFile.Equal(publicKey) {
+				return errors.New("public key doesn't match")
+			}
+
+			// Validate spec-compliant payload & get verification methods
+			verificationMethod, service, err := didcli.GetFromSpecCompliantPayload(specPayload)
+			if err != nil {
+				return err
+			}
+
+			// Construct MsgCreateDIDDocumentPayload
+			payload := didtypes.MsgCreateDIDDocumentPayload{
+				Context:              specPayload.Context,
+				Id:                   specPayload.ID,
+				Controller:           specPayload.Controller,
+				VerificationMethod:   verificationMethod,
+				Authentication:       specPayload.Authentication,
+				AssertionMethod:      specPayload.AssertionMethod,
+				CapabilityInvocation: specPayload.CapabilityInvocation,
+				CapabilityDelegation: specPayload.CapabilityDelegation,
+				KeyAgreement:         specPayload.KeyAgreement,
+				Service:              service,
+				AlsoKnownAs:          specPayload.AlsoKnownAs,
+				VersionId:            specPayload.ID,
+			}
+
+			// Build identity message
+			signBytes := payload.GetSignBytes()
+			identitySignatures := didcli.SignWithSignInputs(signBytes, signInputs)
+
+			// Construct output with signed signature.
+			result := PayloadWithSignInputsAndSignatures{
+				Payload:    payloadJSON,
+				SignInputs: signInputs,
+				Signatures: identitySignatures,
+			}
+
+			// Encode the structured result
+			encodedResult, err := json.Marshal(result)
+			if err != nil {
+				return err
+			}
+
+			// Print output.
+			_, err = fmt.Fprintln(cmd.OutOrStdout(), string(encodedResult))
+			return err
+		},
+	}
+
+	return cmd
+}
+
 func SampleDIDResource() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "sample-did-resource [existing-did] [base64-encoded-ed25519-private-key]",
@@ -210,7 +354,7 @@ func SampleDIDResource() *cobra.Command {
 			if !didtypes.IsValidDID(did, didtypes.DIDMethod) {
 				return fmt.Errorf("provided DID is invalid")
 			}
-			
+
 			// Derive collection id from provided DID
 			_, collectionId, err := didtypes.TrySplitDID(did)
 			if err != nil {
@@ -220,12 +364,12 @@ func SampleDIDResource() *cobra.Command {
 			resource := didtypes.MsgCreateResourcePayload{
 				CollectionId: collectionId,
 				Id:           uuid.NewString(),
-				Name: "sample-resource",
-				Version: "sample-version",
+				Name:         "sample-resource",
+				Version:      "sample-version",
 				ResourceType: "SampleResourceType",
-				AlsoKnownAs: []*types.AlternativeUri{
+				AlsoKnownAs: []*didtypes.AlternativeUri{
 					{
-						Uri: "http://example.com/example-did",
+						Uri:         "http://example.com/example-did",
 						Description: "http-uri",
 					},
 				},
