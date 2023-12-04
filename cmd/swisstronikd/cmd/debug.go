@@ -215,11 +215,7 @@ func SignDIDDocument() *cobra.Command {
 		Short: "Generates signed DID document ready to be stored in DID registry",
 		Long:  "Generates signed self-controlled DID document from the payload and key information provided, which is ready to be stored in DID registry.",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			var (
-				privateKey ed25519.PrivateKey
-				publicKey  ed25519.PublicKey
-				err        error
-			)
+			var err error
 
 			if len(args) != 2 {
 				return errors.New("invalid input parameters")
@@ -232,21 +228,21 @@ func SignDIDDocument() *cobra.Command {
 			}
 
 			// Decode key.json to have private and public key pair
-			keyPair, err := ReadKeyPairFromFile(args[1])
+			keyPairFromFile, err := ReadKeyPairFromFile(args[1])
 			if err != nil {
 				return err
 			}
 
 			// Decode base64 based private key string to have byte[]
-			privateKeyBytes, err := base64.StdEncoding.DecodeString(keyPair.PrivateKeyBase64)
+			privateKeyBytesFromFile, err := base64.StdEncoding.DecodeString(keyPairFromFile.PrivateKeyBase64)
 			if err != nil {
 				return err
 			}
 
 			// Encode ed25519 based private key
-			privateKey = ed25519.PrivateKey(privateKeyBytes)
+			privateKeyFromFile := ed25519.PrivateKey(privateKeyBytesFromFile)
 			// Encode ed25519 based public key
-			publicKeyFromFile := privateKey.Public().(ed25519.PublicKey)
+			publicKeyFromFile := privateKeyFromFile.Public().(ed25519.PublicKey)
 
 			// Unmarshal spec-compliant payload
 			var specPayload didcli.DIDDocument
@@ -269,10 +265,10 @@ func SignDIDDocument() *cobra.Command {
 			}
 
 			// Encode ed25519 based public key
-			publicKey = ed25519.PublicKey(publicKeyBytes)
+			publicKeyFromPayload := ed25519.PublicKey(publicKeyBytes)
 
 			// Check if the two public keys are being matched
-			if !publicKeyFromFile.Equal(publicKey) {
+			if !publicKeyFromFile.Equal(publicKeyFromPayload) {
 				return errors.New("public key doesn't match")
 			}
 
