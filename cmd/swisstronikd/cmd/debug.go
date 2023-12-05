@@ -46,12 +46,6 @@ type PayloadWithSignInputs struct {
 	SignInputs []SignInput
 }
 
-type PayloadWithSignInputsAndSignatures struct {
-	Payload    json.RawMessage
-	SignInputs []didcli.SignInput
-	Signatures []*didtypes.SignInfo
-}
-
 type SignInput struct {
 	VerificationMethodID string
 	PrivKey              ed25519.PrivateKey
@@ -215,16 +209,21 @@ func SignDIDDocument() *cobra.Command {
 		Short: "Generates signed DID document ready to be stored in DID registry",
 		Long:  "Generates signed self-controlled DID document from the payload and key information provided, which is ready to be stored in DID registry.",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			var err error
-
 			if len(args) != 2 {
 				return errors.New("invalid input parameters")
 			}
 
-			// Decode did.json to have payload and signInputs
-			payloadJSON, signInputs, err := didcli.ReadPayloadWithSignInputsFromFile(args[0])
+			signInputs := make([]didcli.SignInput, 0)
+
+			// Decode did.json to have payload
+			payloadJSON, err := didcli.ReadPayloadFromFile(args[0])
 			if err != nil {
-				return err
+				// Decode did.json to have payload & sign inputs
+				payloadJSON, signInputs, err = didcli.ReadPayloadWithSignInputsFromFile(args[0])
+			}
+
+			if err != nil {
+				return errors.New("invalid payload")
 			}
 
 			// Decode key.json to have private and public key pair
@@ -243,6 +242,8 @@ func SignDIDDocument() *cobra.Command {
 			privateKeyFromFile := ed25519.PrivateKey(privateKeyBytesFromFile)
 			// Encode ed25519 based public key
 			publicKeyFromFile := privateKeyFromFile.Public().(ed25519.PublicKey)
+			// Multibase public key
+			multibasePublicKeyFromFile := didutil.GenerateEd25519VerificationKey2020VerificationMaterial(publicKeyFromFile)
 
 			// Unmarshal spec-compliant payload
 			var specPayload didcli.DIDDocument
@@ -251,58 +252,52 @@ func SignDIDDocument() *cobra.Command {
 				return err
 			}
 
-			// Check if public key is addressed in verfication method
-			_, ok := specPayload.VerificationMethod[0]["publicKeyMultibase"]
-			if !ok {
+			if len(specPayload.VerificationMethod) < 1 {
 				return errors.New("publicKeyMultibase is not specified")
 			}
 
-			// Get base64 based public key
-			publicKeyMultibase := specPayload.VerificationMethod[0]["publicKeyMultibase"].(string)
-			publicKeyBytes, err := base64.StdEncoding.DecodeString(publicKeyMultibase)
-			if err != nil {
-				return err
+			validKey := false
+			keyId := ""
+			for _, v := range specPayload.VerificationMethod {
+				// Check if public key is addressed in verfication method
+				_, ok := v["publicKeyMultibase"]
+				if !ok {
+					continue
+				}
+
+				_, ok = v["id"]
+				if !ok {
+					continue
+				}
+
+				// Get multibase public key address
+				publicKeyMultibase := v["publicKeyMultibase"].(string)
+
+				// if there is matching verification method,
+				if publicKeyMultibase == multibasePublicKeyFromFile {
+					keyId = v["id"].(string)
+					validKey = true
+					break
+				}
 			}
 
-			// Encode ed25519 based public key
-			publicKeyFromPayload := ed25519.PublicKey(publicKeyBytes)
-
-			// Check if the two public keys are being matched
-			if !publicKeyFromFile.Equal(publicKeyFromPayload) {
-				return errors.New("public key doesn't match")
+			// if there is no matching verification method
+			if !validKey {
+				return errors.New("invalid key information")
 			}
 
-			// Validate spec-compliant payload & get verification methods
-			verificationMethod, service, err := didcli.GetFromSpecCompliantPayload(specPayload)
-			if err != nil {
-				return err
+			// Construct sign inputs
+			if len(signInputs) < 1 {
+				signInputs = append(signInputs, didcli.SignInput{
+					VerificationMethodID: keyId,
+					PrivKey:              privateKeyFromFile,
+				})
 			}
 
-			// Construct MsgCreateDIDDocumentPayload
-			payload := didtypes.MsgCreateDIDDocumentPayload{
-				Context:              specPayload.Context,
-				Id:                   specPayload.ID,
-				Controller:           specPayload.Controller,
-				VerificationMethod:   verificationMethod,
-				Authentication:       specPayload.Authentication,
-				AssertionMethod:      specPayload.AssertionMethod,
-				CapabilityInvocation: specPayload.CapabilityInvocation,
-				CapabilityDelegation: specPayload.CapabilityDelegation,
-				KeyAgreement:         specPayload.KeyAgreement,
-				Service:              service,
-				AlsoKnownAs:          specPayload.AlsoKnownAs,
-				VersionId:            specPayload.ID,
-			}
-
-			// Build identity message
-			signBytes := payload.GetSignBytes()
-			identitySignatures := didcli.SignWithSignInputs(signBytes, signInputs)
-
-			// Construct output with signed signature.
-			result := PayloadWithSignInputsAndSignatures{
+			// Construct payload with sign inputs
+			result := didcli.PayloadWithSignInputs{
 				Payload:    payloadJSON,
 				SignInputs: signInputs,
-				Signatures: identitySignatures,
 			}
 
 			// Encode the structured result

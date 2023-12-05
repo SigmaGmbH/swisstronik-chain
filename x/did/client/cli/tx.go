@@ -1,17 +1,18 @@
 package cli
 
 import (
-	"fmt"
-	"github.com/spf13/cobra"
-	"github.com/cosmos/cosmos-sdk/client"
 	"crypto/ed25519"
 	"encoding/json"
+	"fmt"
 	"os"
-	
+
+	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/spf13/cobra"
+
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	
+
 	"swisstronik/x/did/types"
 )
 
@@ -59,6 +60,10 @@ type Service struct {
 	ID              string   `json:"id"`
 	Type            string   `json:"type"`
 	ServiceEndpoint []string `json:"serviceEndpoint"`
+}
+
+type Payload struct {
+	Payload json.RawMessage
 }
 
 type PayloadWithSignInputs struct {
@@ -117,6 +122,21 @@ func AccAddrByKeyRef(keyring keyring.Keyring, keyRef string) (sdk.AccAddress, er
 
 	// Fallback: convert keyref to address
 	return sdk.AccAddressFromBech32(keyRef)
+}
+
+func ReadPayloadFromFile(filePath string) (json.RawMessage, error) {
+	bytes, err := os.ReadFile(filePath)
+	if err != nil {
+		return nil, err
+	}
+
+	payload := &Payload{}
+	err = json.Unmarshal(bytes, payload)
+	if err != nil {
+		return nil, err
+	}
+
+	return payload.Payload, nil
 }
 
 func ReadPayloadWithSignInputsFromFile(filePath string) (json.RawMessage, []SignInput, error) {
@@ -202,4 +222,3 @@ func GetFromSpecCompliantPayload(specPayload DIDDocument) ([]*types.Verification
 
 	return verificationMethod, service, nil
 }
-
