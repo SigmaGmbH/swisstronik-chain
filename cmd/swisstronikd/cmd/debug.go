@@ -243,7 +243,7 @@ func SignDIDDocument() *cobra.Command {
 			// Encode ed25519 based public key
 			publicKeyFromFile := privateKeyFromFile.Public().(ed25519.PublicKey)
 			// Multibase public key
-			multibasePublicKeyFromFile := didutil.GenerateEd25519VerificationKey2020VerificationMaterial(publicKeyFromFile)
+			publicKeyMultibaseFromFile := didutil.GenerateEd25519VerificationKey2020VerificationMaterial(publicKeyFromFile)
 
 			// Unmarshal spec-compliant payload
 			var specPayload didcli.DIDDocument
@@ -274,7 +274,7 @@ func SignDIDDocument() *cobra.Command {
 				publicKeyMultibase := v["publicKeyMultibase"].(string)
 
 				// if there is matching verification method,
-				if publicKeyMultibase == multibasePublicKeyFromFile {
+				if publicKeyMultibase == publicKeyMultibaseFromFile {
 					keyId = v["id"].(string)
 					validKey = true
 					break
