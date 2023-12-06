@@ -31,7 +31,7 @@ jobs:
       - name: Build .deb Package Image
         uses: docker/build-push-action@v4
         with:
-          file: ./docker/node.Dockerfile
+          file: ./docker/deb.Dockerfile
           context: .
           load: true
           tags: deb_build
