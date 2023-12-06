@@ -1,5 +1,5 @@
 ############ Install Intel SGX SDK & SGX PSW
-FROM ghcr.io/initc3/linux-sgx:2.19-jammy as base
+FROM ghcr.io/sigmagmbh/sgx:2.19-bionic as base
 RUN wget -qO - https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | apt-key add -
 RUN apt-get update
 
