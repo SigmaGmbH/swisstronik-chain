@@ -5,14 +5,17 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"os"
 	"strings"
 
 	"encoding/hex"
 	didutil "swisstronik/testutil/did"
-	"swisstronik/x/did/types"
+	didcli "swisstronik/x/did/client/cli"
 	didtypes "swisstronik/x/did/types"
 
+	"github.com/cometbft/cometbft/libs/bytes"
 	"github.com/cosmos/cosmos-sdk/client"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -20,7 +23,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
-	"github.com/cometbft/cometbft/libs/bytes"
 )
 
 type DIDDocument struct {
@@ -55,6 +57,11 @@ type Service struct {
 	ServiceEndpoint []string `json:"serviceEndpoint"`
 }
 
+type KeyPair struct {
+	PrivateKeyBase64 string `json:"private_key_base_64"`
+	PublicKeyBase64  string `json:"public_key_base_64"`
+}
+
 // Cmd creates a CLI main command
 func DebugCmd() *cobra.Command {
 	cmd := &cobra.Command{
@@ -68,6 +75,7 @@ func DebugCmd() *cobra.Command {
 	cmd.AddCommand(ExtractPubkeyCmd())
 	cmd.AddCommand(ConvertAddressCmd())
 	cmd.AddCommand(SampleDIDResource())
+	cmd.AddCommand(SignDIDDocument())
 
 	return cmd
 }
@@ -180,6 +188,133 @@ func SampleDIDDocument() *cobra.Command {
 	return cmd
 }
 
+func ReadKeyPairFromFile(file string) (KeyPair, error) {
+	bytes, err := os.ReadFile(file)
+	if err != nil {
+		return KeyPair{}, err
+	}
+
+	keyPair := KeyPair{}
+	err = json.Unmarshal(bytes, &keyPair)
+	if err != nil {
+		return KeyPair{}, err
+	}
+
+	return keyPair, nil
+}
+
+func SignDIDDocument() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "sign-did-document [did.json] [key.json]",
+		Short: "Generates signed DID document ready to be stored in DID registry",
+		Long:  "Generates signed self-controlled DID document from the payload and key information provided, which is ready to be stored in DID registry.",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) != 2 {
+				return errors.New("invalid input parameters")
+			}
+
+			signInputs := make([]didcli.SignInput, 0)
+
+			// Decode did.json to have payload
+			payloadJSON, err := didcli.ReadPayloadFromFile(args[0])
+			if err != nil {
+				// Decode did.json to have payload & sign inputs
+				payloadJSON, signInputs, err = didcli.ReadPayloadWithSignInputsFromFile(args[0])
+			}
+
+			if err != nil {
+				return errors.New("invalid payload")
+			}
+
+			// Decode key.json to have private and public key pair
+			keyPairFromFile, err := ReadKeyPairFromFile(args[1])
+			if err != nil {
+				return err
+			}
+
+			// Decode base64 based private key string to have byte[]
+			privateKeyBytesFromFile, err := base64.StdEncoding.DecodeString(keyPairFromFile.PrivateKeyBase64)
+			if err != nil {
+				return err
+			}
+
+			// Encode ed25519 based private key
+			privateKeyFromFile := ed25519.PrivateKey(privateKeyBytesFromFile)
+			// Encode ed25519 based public key
+			publicKeyFromFile := privateKeyFromFile.Public().(ed25519.PublicKey)
+			// Multibase public key
+			publicKeyMultibaseFromFile := didutil.GenerateEd25519VerificationKey2020VerificationMaterial(publicKeyFromFile)
+
+			// Unmarshal spec-compliant payload
+			var specPayload didcli.DIDDocument
+			err = json.Unmarshal([]byte(payloadJSON), &specPayload)
+			if err != nil {
+				return err
+			}
+
+			if len(specPayload.VerificationMethod) < 1 {
+				return errors.New("publicKeyMultibase is not specified")
+			}
+
+			validKey := false
+			keyId := ""
+			for _, v := range specPayload.VerificationMethod {
+				// Check if public key is addressed in verfication method
+				_, ok := v["publicKeyMultibase"]
+				if !ok {
+					continue
+				}
+
+				_, ok = v["id"]
+				if !ok {
+					continue
+				}
+
+				// Get multibase public key address
+				publicKeyMultibase := v["publicKeyMultibase"].(string)
+
+				// if there is matching verification method,
+				if publicKeyMultibase == publicKeyMultibaseFromFile {
+					keyId = v["id"].(string)
+					validKey = true
+					break
+				}
+			}
+
+			// if there is no matching verification method
+			if !validKey {
+				return errors.New("invalid key information")
+			}
+
+			// Construct sign inputs
+			if len(signInputs) < 1 {
+				signInputs = append(signInputs, didcli.SignInput{
+					VerificationMethodID: keyId,
+					PrivKey:              privateKeyFromFile,
+				})
+			}
+
+			// Construct payload with sign inputs
+			result := didcli.PayloadWithSignInputs{
+				Payload:    payloadJSON,
+				SignInputs: signInputs,
+			}
+
+			// Encode the structured result
+			encodedResult, err := json.Marshal(result)
+			if err != nil {
+				return err
+			}
+
+			// Print output.
+			_, err = fmt.Fprintln(cmd.OutOrStdout(), string(encodedResult))
+			return err
+		},
+	}
+
+	return cmd
+}
+
 func SampleDIDResource() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "sample-did-resource [existing-did] [base64-encoded-ed25519-private-key]",
@@ -220,12 +355,12 @@ func SampleDIDResource() *cobra.Command {
 			resource := didtypes.MsgCreateResourcePayload{
 				CollectionId: collectionId,
 				Id:           uuid.NewString(),
-				Name: "sample-resource",
-				Version: "sample-version",
+				Name:         "sample-resource",
+				Version:      "sample-version",
 				ResourceType: "SampleResourceType",
-				AlsoKnownAs: []*types.AlternativeUri{
+				AlsoKnownAs: []*didtypes.AlternativeUri{
 					{
-						Uri: "http://example.com/example-did",
+						Uri:         "http://example.com/example-did",
 						Description: "http-uri",
 					},
 				},
