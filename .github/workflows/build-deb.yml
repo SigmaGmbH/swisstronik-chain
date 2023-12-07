@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-deb:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     env:
       SGX_MODE: HW
     steps:
@@ -31,7 +31,7 @@ jobs:
       - name: Build .deb Package Image
         uses: docker/build-push-action@v4
         with:
-          file: ./docker/node.Dockerfile
+          file: ./docker/deb.Dockerfile
           context: .
           load: true
           tags: deb_build

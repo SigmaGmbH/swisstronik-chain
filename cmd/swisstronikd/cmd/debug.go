@@ -345,7 +345,7 @@ func SampleDIDResource() *cobra.Command {
 			if !didtypes.IsValidDID(did, didtypes.DIDMethod) {
 				return fmt.Errorf("provided DID is invalid")
 			}
-
+			
 			// Derive collection id from provided DID
 			_, collectionId, err := didtypes.TrySplitDID(did)
 			if err != nil {
