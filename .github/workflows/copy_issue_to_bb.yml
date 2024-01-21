@@ -11,8 +11,8 @@ jobs:
         env:
           MAIN_REPO_TOKEN: ${{ secrets.ISSUES_BB }}
           MAIN_REPO: SigmaGmbH/Bug-Bounty-1.0
+          TITLE: ${{ github.event.issue.title }}
         run: |
-          TITLE="${{ github.event.issue.title }}"
           ORIGIN_REPO_URL="${{ github.event.issue.html_url }}"
 
           # Create the new issue in the "bug_bounty_1.0 repository with the title and the link in the body
