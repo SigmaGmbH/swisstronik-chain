@@ -5,9 +5,10 @@ ENCLAVE_HOME ?= $(HOME)/.swisstronik-enclave
 ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=swisstronik \
 	-X github.com/cosmos/cosmos-sdk/version.ServerName=swisstronikd \
 	-X github.com/cosmos/cosmos-sdk/version.Version=$(VERSION) \
-	-X github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT)
+	-X github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT) \
+	-w -s -linkmode 'external' -extldflags=-static
 
-BUILD_FLAGS := -ldflags '$(ldflags)'
+BUILD_FLAGS := -ldflags "$(ldflags)"
 DOCKER := $(shell which docker)
 DOCKER_BUF := $(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace bufbuild/buf
 PROJECT_NAME = $(shell git remote get-url origin | xargs basename -s .git)	
@@ -84,7 +85,7 @@ build: go.sum
 ###############################################################################
 
 build-cli: go.sum
-	go build -mod=mod $(BUILD_FLAGS) -tags osusergo,netgo,nosgx -o build/$(BINARY_NAME) ./cmd/swisstronikd
+	 CGO_ENABLED=1  go build -mod=mod $(BUILD_FLAGS) -tags osusergo,netgo,nosgx -o build/$(BINARY_NAME) ./cmd/swisstronikd
 
 build-linux:
 	GOOS=linux GOARCH=$(if $(findstring aarch64,$(shell uname -m)) || $(findstring arm64,$(shell uname -m)),arm64,amd64) $(MAKE) build
