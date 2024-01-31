@@ -63,7 +63,7 @@ pub fn handle_call_request_inner(querier: *mut GoQuerier, data: SGXVMCallRequest
         origin: H160::from_slice(&params.from),
         nonce: U256::from(params.nonce),
     };
-    let mut storage = crate::storage::FFIStorage::new(querier);
+    let mut storage = crate::storage::FFIStorage::new(querier, context.timestamp);
     let mut backend = backend::FFIBackend::new(
         querier,
         &mut storage,
@@ -153,7 +153,7 @@ pub fn handle_create_request_inner(querier: *mut GoQuerier, data: SGXVMCreateReq
         origin: H160::from_slice(&params.from),
         nonce: U256::from(params.nonce),
     };
-    let mut storage = crate::storage::FFIStorage::new(querier);
+    let mut storage = crate::storage::FFIStorage::new(querier, context.timestamp);
     let mut backend = backend::FFIBackend::new(
         querier,
         &mut storage,

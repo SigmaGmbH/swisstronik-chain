@@ -10,11 +10,11 @@ pub const ENCRYPTED_DATA_LEN: usize = 79;
 pub const DEFAULT_STORAGE_VALUE: [u8; 32] = [0u8; 32];
 
 /// Encrypts given storage cell value using specific storage key for provided contract address
-/// * contract_address – Address of the contract. Used to derive unique storage encryption key for state of this smart contract
-/// * value – Raw storage value to encrypt
-pub fn encrypt_storage_cell(contract_address: Vec<u8>, value: Vec<u8>) -> Result<Vec<u8>, Error> {
+/// * contract_address - Address of the contract. Used to derive unique storage encryption key for state of this smart contract
+/// * value - Raw storage value to encrypt
+pub fn encrypt_storage_cell(contract_address: Vec<u8>, encryption_salt: [u8; 32], value: Vec<u8>) -> Result<Vec<u8>, Error> {
     if let Some(km) = &*UNSEALED_KEY_MANAGER {
-        return km.encrypt_state(contract_address, value)
+        return km.encrypt_state(contract_address, encryption_salt, value)
     };
 
     return Err(Error::encryption_err(format!("Cannot unseal master key")));
