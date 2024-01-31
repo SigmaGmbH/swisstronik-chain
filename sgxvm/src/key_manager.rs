@@ -1,6 +1,5 @@
 use deoxysii::*;
-use sgx_tstd::sgxfs::SgxFile;
-use sgx_tstd::{env, string::String};
+use sgx_tstd::{env, sgxfs::SgxFile};
 use sgx_tstd::ffi::OsString;
 use sgx_types::{sgx_read_rand, sgx_status_t, SgxResult};
 use std::io::{Read, Write};
@@ -13,7 +12,6 @@ use crate::error::Error;
 pub const REGISTRATION_KEY_SIZE: usize = 32;
 pub const SEED_SIZE: usize = 32;
 pub const SEED_FILENAME: &str = ".swtr_seed";
-pub const NONCE_LEN: usize = 16;
 pub const PUBLIC_KEY_SIZE: usize = 32;
 pub const PRIVATE_KEY_SIZE: usize = 32;
 
@@ -59,7 +57,7 @@ pub unsafe extern "C" fn ecall_init_master_key(reset_flag: i32) -> sgx_status_t 
 }
 
 /// KeyManager handles keys sealing/unsealing and derivation.
-/// * master_key – This key is used to derive keys for transaction and state encryption/decryption
+/// * master_key - This key is used to derive keys for transaction and state encryption/decryption
 pub struct KeyManager {
     // Master key to derive all keys
     master_key: [u8; 32],
@@ -278,7 +276,7 @@ impl KeyManager {
         let nonce = &encrypted_value[..NONCE_SIZE];
         let nonce: [u8; 15] = match nonce.try_into() {
             Ok(nonce) => nonce,
-            Err(err) => { return Err(Error::decryption_err("cannot extract nonce")); }
+            Err(_) => { return Err(Error::decryption_err("cannot extract nonce")); }
         };
 
         // Extract additional data
@@ -304,7 +302,7 @@ impl KeyManager {
         // Convert public key to appropriate format
         let public_key: [u8; 32] = match public_key.try_into() {
             Ok(public_key) => public_key,
-            Err(err) => {
+            Err(_) => {
                 return Err(Error::decryption_err(format!(
                     "Public key has wrong length"
                 )))
@@ -332,7 +330,7 @@ impl KeyManager {
         // Convert public key to appropriate format
         let public_key: [u8; 32] = match public_key.try_into() {
             Ok(public_key) => public_key,
-            Err(err) => {
+            Err(_) => {
                 return Err(Error::encryption_err(format!(
                     "Public key has wrong length"
                 )))
@@ -352,7 +350,7 @@ impl KeyManager {
         // Convert master key to appropriate format
         let master_key: [u8; 32] = match master_key.try_into() {
             Ok(master_key) => master_key,
-            Err(err) => {
+            Err(_) => {
                 return Err(Error::decryption_err(format!(
                     "Master key has wrong length"
                 )))
@@ -416,7 +414,7 @@ impl RegistrationKey {
     }
 
     /// Performes Diffie-Hellman derivation of encryption key for master key encryption
-    /// * public_key – User public key
+    /// * public_key - User public key
     pub fn diffie_hellman(
         &self,
         public_key: x25519_dalek::PublicKey,
