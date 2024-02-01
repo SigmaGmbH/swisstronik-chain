@@ -329,9 +329,6 @@ pub fn verify_quote_status(
     match &report.sgx_quote_status {
         SgxQuoteStatus::OK | 
         SgxQuoteStatus::SwHardeningNeeded | 
-        // For now we allow statuses GroupOutOfDate and ConfigurationAndSwHardeningNeeded. In future releases,
-        // we will increase requirements to hardware and configuration
-        SgxQuoteStatus::GroupOutOfDate |
         SgxQuoteStatus::ConfigurationAndSwHardeningNeeded => {
             check_advisories(&report.sgx_quote_status, advisories)?;
 
