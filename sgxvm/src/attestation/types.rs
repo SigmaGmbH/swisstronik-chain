@@ -25,6 +25,7 @@ pub static SUPPORTED_SIG_ALGS: SignatureAlgorithms = &[
 ];
 
 #[derive(Debug, Display, PartialEq, Eq)]
+#[allow(dead_code)]
 pub enum AuthResult {
     #[display(fmt = "Enclave quote is valid")]
     Success,

@@ -19,7 +19,7 @@ pub const PRIVATE_KEY_SIZE: usize = 32;
 lazy_static! {
     pub static ref UNSEALED_KEY_MANAGER: Option<KeyManager> = KeyManager::unseal().ok();
     pub static ref SEED_HOME: OsString =
-        env::var_os("SEED_HOME").unwrap_or_else(|| get_default_seed_home());
+        env::var_os("SEED_HOME").unwrap_or_else(get_default_seed_home);
 }
 
 #[no_mangle]
@@ -80,7 +80,7 @@ impl KeyManager {
                     "[KeyManager] Cannot check if sealed file exists. Reason: {:?}",
                     err
                 );
-                return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+                Err(sgx_status_t::SGX_ERROR_UNEXPECTED)
             }
         }
     }
@@ -353,9 +353,7 @@ impl KeyManager {
         let public_key: [u8; 32] = match public_key.try_into() {
             Ok(public_key) => public_key,
             Err(_) => {
-                return Err(Error::decryption_err(format!(
-                    "Public key has wrong length"
-                )))
+                return Err(Error::decryption_err("Public key has wrong length"))
             }
         };
         let public_key = x25519_dalek::PublicKey::from(public_key);
@@ -382,9 +380,7 @@ impl KeyManager {
         let public_key: [u8; 32] = match public_key.try_into() {
             Ok(public_key) => public_key,
             Err(_) => {
-                return Err(Error::encryption_err(format!(
-                    "Public key has wrong length"
-                )))
+                return Err(Error::encryption_err("Public key has wrong length"))
             }
         };
         let public_key = x25519_dalek::PublicKey::from(public_key);
@@ -400,9 +396,7 @@ impl KeyManager {
         let master_key: [u8; 32] = match master_key.try_into() {
             Ok(master_key) => master_key,
             Err(_) => {
-                return Err(Error::decryption_err(format!(
-                    "Master key has wrong length"
-                )))
+                return Err(Error::decryption_err("Master key has wrong length"));
             }
         };
 
@@ -455,13 +449,13 @@ impl RegistrationKey {
         let res = unsafe { sgx_read_rand(&mut buffer as *mut u8, REGISTRATION_KEY_SIZE) };
 
         match res {
-            sgx_status_t::SGX_SUCCESS => return Ok(Self { inner: buffer }),
+            sgx_status_t::SGX_SUCCESS => Ok(Self { inner: buffer }),
             _ => {
                 println!(
                     "[KeyManager] Cannot generate random registration key. Reason: {:?}",
                     res.as_str()
                 );
-                return Err(res);
+                Err(res)
             }
         }
     }

@@ -17,12 +17,12 @@ pub fn encrypt_storage_cell(contract_address: Vec<u8>, encryption_salt: [u8; 32]
         return km.encrypt_state(contract_address, encryption_salt, value)
     };
 
-    return Err(Error::encryption_err(format!("Cannot unseal master key")));
+    Err(Error::encryption_err("Cannot unseal master key"))
 }
 
 /// Decrypts given storage cell value using specific storage key for provided contract address
-/// * contract_address – Address of the contract. Used to derive unique storage encryption key for state of this smart contract
-/// * value – Encrypted storage value
+/// * contract_address - Address of the contract. Used to derive unique storage encryption key for state of this smart contract
+/// * value - Encrypted storage value
 pub fn decrypt_storage_cell(contract_address: Vec<u8>, encrypted_value: Vec<u8>) -> Result<Vec<u8>, Error> {
     // It there is 32-byte zeroed vector, it means that storage slot was not initialized
     // In this case we return default value

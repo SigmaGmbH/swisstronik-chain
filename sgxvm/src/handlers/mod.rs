@@ -49,7 +49,7 @@ pub fn allocate_inner(data: Vec<u8>) -> AllocationWithResult {
 pub fn handle_public_key_request() -> AllocationWithResult {
     let key_manager = match KeyManager::unseal() {
         Ok(manager) => manager,
-        Err(err) => {
+        Err(_) => {
             return AllocationWithResult::default()
         }
     };

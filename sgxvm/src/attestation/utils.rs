@@ -441,7 +441,7 @@ pub fn create_attestation_report(
     })
 }
 
-fn load_spid(filename: &str) -> sgx_spid_t {
+fn load_spid(_filename: &str) -> sgx_spid_t {
     let spid = "472D87732579A170FAD0E1457A787131";
     super::hex::decode_spid(spid)
 }
@@ -457,9 +457,7 @@ pub struct ClientAuth {
 
 impl ClientAuth {
     pub fn new(outdated_ok: bool) -> ClientAuth {
-        ClientAuth {
-            outdated_ok: outdated_ok,
-        }
+        ClientAuth { outdated_ok }
     }
 }
 
@@ -480,23 +478,23 @@ impl rustls::ClientCertVerifier for ClientAuth {
         // This call will automatically verify cert is properly signed
         match super::cert::verify_ra_cert(&certs[0].0, None) {
             Ok(_) => {
-                return Ok(rustls::ClientCertVerified::assertion());
+                Ok(rustls::ClientCertVerified::assertion())
             },
             Err(super::types::AuthResult::SwHardeningAndConfigurationNeeded) |
             Err(super::types::AuthResult::GroupOutOfDate) => {
                 if self.outdated_ok {
                     println!("outdated_ok is set, overriding outdated error");
-                    return Ok(rustls::ClientCertVerified::assertion());
+                    Ok(rustls::ClientCertVerified::assertion())
                 } else {
-                    return Err(rustls::TLSError::WebPKIError(
+                    Err(rustls::TLSError::WebPKIError(
                         webpki::Error::ExtensionValueInvalid,
-                    ));
+                    ))
                 }
             }
             Err(_) => {
-                return Err(rustls::TLSError::WebPKIError(
+                Err(rustls::TLSError::WebPKIError(
                     webpki::Error::ExtensionValueInvalid,
-                ));
+                ))
             }
         }
     }
@@ -526,9 +524,7 @@ pub struct ServerAuth {
 
 impl ServerAuth {
     pub fn new(outdated_ok: bool) -> ServerAuth {
-        ServerAuth {
-            outdated_ok: outdated_ok,
-        }
+        ServerAuth { outdated_ok }
     }
 }
 
@@ -544,24 +540,22 @@ impl rustls::ServerCertVerifier for ServerAuth {
         // This call will automatically verify cert is properly signed
         let res = super::cert::verify_ra_cert(&certs[0].0, None);
         match res {
-            Ok(_) => {
-                return Ok(rustls::ServerCertVerified::assertion());
-            }
+            Ok(_) => { Ok(rustls::ServerCertVerified::assertion()) }
             Err(super::types::AuthResult::SwHardeningAndConfigurationNeeded) |
             Err(super::types::AuthResult::GroupOutOfDate) => {
                 if self.outdated_ok {
                     println!("outdated_ok is set, overriding outdated error");
-                    return Ok(rustls::ServerCertVerified::assertion());
+                    Ok(rustls::ServerCertVerified::assertion())
                 } else {
-                    return Err(rustls::TLSError::WebPKIError(
+                    Err(rustls::TLSError::WebPKIError(
                         webpki::Error::ExtensionValueInvalid,
-                    ));
+                    ))
                 }
             }
             Err(_) => {
-                return Err(rustls::TLSError::WebPKIError(
+                Err(rustls::TLSError::WebPKIError(
                     webpki::Error::ExtensionValueInvalid,
-                ));
+                ))
             }
         }
     }
