@@ -10,6 +10,7 @@ crate-type = ["staticlib"]
 
 [features]
 default = ["hardware_mode"]
+mainnet = []
 hardware_mode = []
 simulation_mode = []
 
