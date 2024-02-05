@@ -48,9 +48,7 @@ pub fn self_attest() -> sgx_status_t {
             println!("Cannot parse attestation report. Reason: {:?}", err);
             return sgx_status_t::SGX_ERROR_UNEXPECTED;
         }
-    };
-
-    println!("[Enclave] Attestation Report: {:?}", report);    
+    };    
 
     sgx_status_t::SGX_SUCCESS
 }
