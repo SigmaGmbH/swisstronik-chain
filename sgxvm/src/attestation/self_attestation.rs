@@ -50,6 +50,10 @@ pub fn self_attest() -> sgx_status_t {
         }
     };    
 
+    // TODO: Add report parsing
+
+    println!("Your node is ready to be connected to testnet / mainnet");
+
     sgx_status_t::SGX_SUCCESS
 }
 
