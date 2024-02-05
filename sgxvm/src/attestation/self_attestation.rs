@@ -3,9 +3,9 @@ use sgx_types::*;
 use std::string::String;
 
 use crate::attestation::{
-    consts::QUOTE_SIGNATURE_TYPE,
+    consts::{QUOTE_SIGNATURE_TYPE, MIN_REQUIRED_TCB},
     utils::create_attestation_report,
-    cert::gen_ecc_cert,
+    cert::{gen_ecc_cert, verify_quote_status}
 };
 
 #[cfg(feature = "hardware_mode")]
@@ -33,7 +33,7 @@ pub fn self_attest() -> sgx_status_t {
         }
     };
 
-    let (key_der, cert_der) = match gen_ecc_cert(payload, &prv_k, &pub_k, &ecc_handle)
+    let (_, cert_der) = match gen_ecc_cert(payload, &prv_k, &pub_k, &ecc_handle)
     {
         Ok(result) => result,
         Err(err) => {
@@ -42,6 +42,7 @@ pub fn self_attest() -> sgx_status_t {
         }
     };
 
+    // Parse report
     let report = match AttestationReport::from_cert(&cert_der) {
         Ok(report) => report,
         Err(err) => {
@@ -50,9 +51,17 @@ pub fn self_attest() -> sgx_status_t {
         }
     };    
 
-    // TODO: Add report parsing
+    // Verify tcb
+    if report.tcb < MIN_REQUIRED_TCB {
+        println!("Your TCB is out of date. Required TCB: {:?}, current TCB: {:?}", MIN_REQUIRED_TCB, report.tcb);
+        return sgx_status_t::SGX_SUCCESS;
+    }
 
-    println!("Your node is ready to be connected to testnet / mainnet");
+    // Verify quote
+    match verify_quote_status(&report, &report.advisory_ids) {
+        Ok(_) => println!("Your node is ready to be connected to testnet / mainnet"),
+        Err(err) => println!("Node was not properly configured. Reason: {:?}", err)
+    }
 
     sgx_status_t::SGX_SUCCESS
 }

@@ -429,7 +429,7 @@ impl ClientAuth {
     }
 }
 
-#[cfg(feature = "hardware_mode")]
+#[cfg(all(feature = "hardware_mode", not(feature = "mainnet")))]
 impl rustls::ClientCertVerifier for ClientAuth {
     fn client_auth_root_subjects(
         &self,
@@ -450,6 +450,44 @@ impl rustls::ClientCertVerifier for ClientAuth {
             },
             Err(super::types::AuthResult::SwHardeningAndConfigurationNeeded) |
             Err(super::types::AuthResult::GroupOutOfDate) => {
+                if self.outdated_ok {
+                    println!("outdated_ok is set, overriding outdated error");
+                    Ok(rustls::ClientCertVerified::assertion())
+                } else {
+                    Err(rustls::TLSError::WebPKIError(
+                        webpki::Error::ExtensionValueInvalid,
+                    ))
+                }
+            }
+            Err(_) => {
+                Err(rustls::TLSError::WebPKIError(
+                    webpki::Error::ExtensionValueInvalid,
+                ))
+            }
+        }
+    }
+}
+
+#[cfg(all(feature = "hardware_mode", feature = "mainnet"))]
+impl rustls::ClientCertVerifier for ClientAuth {
+    fn client_auth_root_subjects(
+        &self,
+        _sni: Option<&webpki::DNSName>,
+    ) -> Option<rustls::DistinguishedNames> {
+        Some(rustls::DistinguishedNames::new())
+    }
+
+    fn verify_client_cert(
+        &self,
+        certs: &[rustls::Certificate],
+        _sni: Option<&webpki::DNSName>,
+    ) -> Result<rustls::ClientCertVerified, rustls::TLSError> {
+        // This call will automatically verify cert is properly signed
+        match super::cert::verify_ra_cert(&certs[0].0, None) {
+            Ok(_) => {
+                Ok(rustls::ClientCertVerified::assertion())
+            },
+            Err(super::types::AuthResult::SwHardeningAndConfigurationNeeded) => {
                 if self.outdated_ok {
                     println!("outdated_ok is set, overriding outdated error");
                     Ok(rustls::ClientCertVerified::assertion())
@@ -496,7 +534,39 @@ impl ServerAuth {
     }
 }
 
-#[cfg(feature = "hardware_mode")]
+#[cfg(all(feature = "hardware_mode", feature = "mainnet"))]
+impl rustls::ServerCertVerifier for ServerAuth {
+    fn verify_server_cert(
+        &self,
+        _roots: &rustls::RootCertStore,
+        certs: &[rustls::Certificate],
+        _hostname: webpki::DNSNameRef,
+        _ocsp: &[u8],
+    ) -> Result<rustls::ServerCertVerified, rustls::TLSError> {
+        // This call will automatically verify cert is properly signed
+        let res = super::cert::verify_ra_cert(&certs[0].0, None);
+        match res {
+            Ok(_) => { Ok(rustls::ServerCertVerified::assertion()) }
+            Err(super::types::AuthResult::SwHardeningAndConfigurationNeeded) => {
+                if self.outdated_ok {
+                    println!("outdated_ok is set, overriding outdated error");
+                    Ok(rustls::ServerCertVerified::assertion())
+                } else {
+                    Err(rustls::TLSError::WebPKIError(
+                        webpki::Error::ExtensionValueInvalid,
+                    ))
+                }
+            }
+            Err(_) => {
+                Err(rustls::TLSError::WebPKIError(
+                    webpki::Error::ExtensionValueInvalid,
+                ))
+            }
+        }
+    }
+}
+
+#[cfg(all(feature = "hardware_mode", not(feature = "mainnet")))]
 impl rustls::ServerCertVerifier for ServerAuth {
     fn verify_server_cert(
         &self,
