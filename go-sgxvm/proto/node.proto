@@ -22,11 +22,15 @@ message NodeSeedResponse {}
 message IsInitializedRequest {}
 message IsInitializedResponse { bool isInitialized = 1; }
 
+message NodeStatusRequest {}
+message NodeStatusResponse {}
+
 message SetupRequest {
   oneof req {
     InitializeMasterKeyRequest initializeMasterKey = 1;
     StartSeedServerRequest startSeedServer = 2;
     NodeSeedRequest nodeSeed = 3;
     IsInitializedRequest isInitialized = 4;
+    NodeStatusRequest nodeStatus = 5;
   }
 }

@@ -117,7 +117,7 @@ func Status() *cobra.Command {
 		Short: "Checks status of Intel SGX Enclave",
 		Long:  "Checks if Intel SGX Enclave is accessible and if Intel SGX was properly configured",
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			return nil
+			return librustgo.CheckNodeStatus()
 		},
 	}
 

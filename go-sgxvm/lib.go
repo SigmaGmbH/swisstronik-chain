@@ -62,6 +62,11 @@ type HandleTransactionResponse = types.HandleTransactionResponse
 type NodePublicKeyRequest = types.NodePublicKeyRequest
 type NodePublicKeyResponse = types.NodePublicKeyResponse
 
+// CheckNodeStatus checks if SGX requirements are met
+func CheckNodeStatus() error {
+	return api.CheckNodeStatus()
+}
+
 // IsNodeInitialized checks if node was properly initialized and master key was sealed
 func IsNodeInitialized() (bool, error) {
 	return api.IsNodeInitialized()

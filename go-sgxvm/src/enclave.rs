@@ -54,6 +54,8 @@ extern "C" {
         data_len: usize,
         socket_fd: c_int,
     ) -> sgx_status_t;
+
+    pub fn ecall_status(eid: sgx_enclave_id_t, retval: *mut sgx_status_t) -> sgx_status_t;
 }
 
 pub fn init_enclave() -> SgxResult<SgxEnclave> {
@@ -115,6 +117,34 @@ pub unsafe extern "C" fn handle_initialization_request(
         let result = match request.req {
             Some(req) => {
                 match req {
+                    node::SetupRequest_oneof_req::nodeStatus(_) => {
+                        let mut retval = sgx_status_t::SGX_SUCCESS;
+                        let res = ecall_status(evm_enclave.geteid(), &mut retval);
+
+                        match res {
+                            sgx_status_t::SGX_SUCCESS => {}
+                            _ => {
+                                return Err(Error::enclave_error(res.as_str()));
+                            }
+                        };
+
+                        match retval {
+                            sgx_status_t::SGX_SUCCESS => {}
+                            _ => {
+                                return Err(Error::enclave_error(retval.as_str()));
+                            }
+                        }
+
+                        let response = node::NodeStatusResponse::new();
+                        let response_bytes = match response.write_to_bytes() {
+                            Ok(res) => res,
+                            Err(_) => {
+                                return Err(Error::protobuf_decode("Response encoding failed"));
+                            }
+                        };
+
+                        Ok(response_bytes)
+                    },
                     node::SetupRequest_oneof_req::initializeMasterKey(req) => {
                         let mut retval = sgx_status_t::SGX_SUCCESS;
                         let should_reset = req.shouldReset as i32;

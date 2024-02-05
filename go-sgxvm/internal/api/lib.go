@@ -39,6 +39,35 @@ type cu8_ptr = *C.uint8_t
 // Connector is our custom connector
 type Connector = types.Connector
 
+func CheckNodeStatus() error {
+	req := types.SetupRequest{Req: &types.SetupRequest_NodeStatus{}}
+	reqBytes, err := proto.Marshal(&req)
+	if err != nil {
+		log.Fatalln("Failed to encode req:", err)
+		return err
+	}
+
+	// Pass request to Rust
+	d := MakeView(reqBytes)
+	defer runtime.KeepAlive(reqBytes)
+
+	errmsg := NewUnmanagedVector(nil)
+	ptr, err := C.handle_initialization_request(d, &errmsg)
+	if err != nil {
+		return ErrorWithMessage(err, errmsg)
+	}
+
+	// Recover returned value
+	executionResult := CopyAndDestroyUnmanagedVector(ptr)
+	response := types.IsInitializedResponse{}
+	if err := proto.Unmarshal(executionResult, &response); err != nil {
+		log.Fatalln("Failed to decode execution result:", err)
+		return err
+	}
+
+	return nil
+}
+
 // IsNodeInitialized checks if node was initialized and master key was sealed
 func IsNodeInitialized() (bool, error) {
 	// Create protobuf encoded request
