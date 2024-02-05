@@ -117,92 +117,66 @@ pub unsafe extern "C" fn handle_initialization_request(
         let result = match request.req {
             Some(req) => {
                 match req {
-                    node::SetupRequest_oneof_req::nodeStatus(_) => {
+                    node::SetupRequest_oneof_req::nodeStatus(_req) => {
                         let mut retval = sgx_status_t::SGX_SUCCESS;
                         let res = ecall_status(evm_enclave.geteid(), &mut retval);
 
-                        match res {
-                            sgx_status_t::SGX_SUCCESS => {}
-                            _ => {
-                                return Err(Error::enclave_error(res.as_str()));
-                            }
-                        };
-
-                        match retval {
-                            sgx_status_t::SGX_SUCCESS => {}
-                            _ => {
-                                return Err(Error::enclave_error(retval.as_str()));
+                        match (res, retval) {
+                            (sgx_status_t::SGX_SUCCESS, sgx_status_t::SGX_SUCCESS) => {
+                                let response = node::NodeStatusResponse::new();
+                                let response_bytes: Vec<u8> = response.write_to_bytes()?;
+                                Ok(response_bytes)
+                            },
+                            (_, _) => {
+                                let error_str = if res == sgx_status_t::SGX_SUCCESS {
+                                    res.as_str()
+                                } else {
+                                    retval.as_str()
+                                };
+                                Err(Error::enclave_error(error_str))
                             }
                         }
-
-                        let response = node::NodeStatusResponse::new();
-                        let response_bytes = match response.write_to_bytes() {
-                            Ok(res) => res,
-                            Err(_) => {
-                                return Err(Error::protobuf_decode("Response encoding failed"));
-                            }
-                        };
-
-                        Ok(response_bytes)
                     },
                     node::SetupRequest_oneof_req::initializeMasterKey(req) => {
                         let mut retval = sgx_status_t::SGX_SUCCESS;
                         let should_reset = req.shouldReset as i32;
                         let res = ecall_init_master_key(evm_enclave.geteid(), &mut retval, should_reset);
 
-                        match res {
-                            sgx_status_t::SGX_SUCCESS => {}
-                            _ => {
-                                return Err(Error::enclave_error(res.as_str()));
-                            }
-                        };
-
-                        match retval {
-                            sgx_status_t::SGX_SUCCESS => {}
-                            _ => {
-                                return Err(Error::enclave_error(retval.as_str()));
+                        match (res, retval) {
+                            (sgx_status_t::SGX_SUCCESS, sgx_status_t::SGX_SUCCESS) => {
+                                let response = node::InitializeMasterKeyResponse::new();
+                                let response_bytes = response.write_to_bytes()?;
+                                Ok(response_bytes)
+                            },
+                            (_, _) => {
+                                let error_str = if res == sgx_status_t::SGX_SUCCESS {
+                                    res.as_str()
+                                } else {
+                                    retval.as_str()
+                                };
+                                Err(Error::enclave_error(error_str))
                             }
                         }
-
-                        // Create response, convert it to bytes and return
-                        let response = node::InitializeMasterKeyResponse::new();
-                        let response_bytes = match response.write_to_bytes() {
-                            Ok(res) => res,
-                            Err(_) => {
-                                return Err(Error::protobuf_decode("Response encoding failed"));
-                            }
-                        };
-
-                        Ok(response_bytes)
                     },
                     node::SetupRequest_oneof_req::startSeedServer(req) => {
                         let mut retval = sgx_status_t::SGX_SUCCESS;
                         let res = ecall_share_seed(evm_enclave.geteid(), &mut retval, req.fd);
 
-                        match res {
-                            sgx_status_t::SGX_SUCCESS => {}
-                            _ => {
-                                return Err(Error::enclave_error(res.as_str()));
-                            }
-                        };
-
-                        match retval {
-                            sgx_status_t::SGX_SUCCESS => {}
-                            _ => {
-                                return Err(Error::enclave_error(retval.as_str()));
+                        match (res, retval) {
+                            (sgx_status_t::SGX_SUCCESS, sgx_status_t::SGX_SUCCESS) => {
+                                let response = node::StartSeedServerResponse::new();
+                                let response_bytes = response.write_to_bytes()?;
+                                Ok(response_bytes)
+                            },
+                            (_, _) => {
+                                let error_str = if res == sgx_status_t::SGX_SUCCESS {
+                                    res.as_str()
+                                } else {
+                                    retval.as_str()
+                                };
+                                Err(Error::enclave_error(error_str))
                             }
                         }
-
-                        // Create response, convert it to bytes and return
-                        let response = node::StartSeedServerResponse::new();
-                        let response_bytes = match response.write_to_bytes() {
-                            Ok(res) => res,
-                            Err(_) => {
-                                return Err(Error::protobuf_decode("Response encoding failed"));
-                            }
-                        };
-
-                        Ok(response_bytes)
                     }
                     node::SetupRequest_oneof_req::nodeSeed(req) => {
                         if req.hostname.is_empty() {
@@ -219,46 +193,36 @@ pub unsafe extern "C" fn handle_initialization_request(
                         );
 
                         match (res, retval) {
-                            (sgx_status_t::SGX_SUCCESS, sgx_status_t::SGX_SUCCESS) => {}
+                            (sgx_status_t::SGX_SUCCESS, sgx_status_t::SGX_SUCCESS) => {
+                                let response = node::NodeSeedResponse::new();
+                                let response_bytes = response.write_to_bytes()?;
+                                Ok(response_bytes)
+                            }
                             (_, _) => {
-                                return Err(Error::enclave_error(res.as_str()));
+                                let error_str = if res == sgx_status_t::SGX_SUCCESS {
+                                    res.as_str()
+                                } else {
+                                    retval.as_str()
+                                };
+                                Err(Error::enclave_error(error_str))
                             }
-                        };
-
-                        // Create response, convert it to bytes and return
-                        let response = node::NodeSeedResponse::new();
-                        let response_bytes = match response.write_to_bytes() {
-                            Ok(res) => res,
-                            Err(_) => {
-                                return Err(Error::protobuf_decode("Response encoding failed"));
-                            }
-                        };
-
-                        Ok(response_bytes)
+                        }
                     },
                     node::SetupRequest_oneof_req::isInitialized(_) => {
-                        println!("[SGX_WRAPPER] checking if node is initialized");
                         let mut retval = 0i32;
                         let res = ecall_is_initialized(evm_enclave.geteid(), &mut retval);
 
                         match res {
-                            sgx_status_t::SGX_SUCCESS => {}
+                            sgx_status_t::SGX_SUCCESS => {
+                                let mut response = node::IsInitializedResponse::new();
+                                response.isInitialized = retval != 0;
+                                let response_bytes = response.write_to_bytes()?;
+                                Ok(response_bytes)
+                            },
                             _ => {
-                                return Err(Error::enclave_error(res.as_str()));
+                                Err(Error::enclave_error(res.as_str()))
                             }
-                        };
-
-                        // Create response, convert it to bytes and return
-                        let mut response = node::IsInitializedResponse::new();
-                        response.isInitialized = retval != 0;
-                        let response_bytes = match response.write_to_bytes() {
-                            Ok(res) => res,
-                            Err(_) => {
-                                return Err(Error::protobuf_decode("[SGX_WRAPPER] Response encoding failed"));
-                            }
-                        };
-
-                        Ok(response_bytes)
+                        }
                     }
                 }
             }

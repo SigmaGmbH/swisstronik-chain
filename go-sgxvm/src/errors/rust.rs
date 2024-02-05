@@ -37,6 +37,12 @@ pub enum RustError {
         #[cfg(feature = "backtraces")]
         backtrace: Backtrace,
     },
+    #[error("Error encoding protobuf: {}", msg)]
+    ProtobufEncodeError {
+        msg: String,
+        #[cfg(feature = "backtraces")]
+        backtrace: Backtrace,
+    },
     #[error("Enclave failure: {}", msg)]
     EnclaveError {
         msg: String,
@@ -83,11 +89,18 @@ impl RustError {
         }
     }
 
+    pub fn protobuf_encode<S: ToString>(msg: S) -> Self {
+        RustError::ProtobufEncodeError {
+            msg: msg.to_string(),
+            #[cfg(feature = "backtraces")]
+            backtrace: Backtrace::capture(),
+        }
+    }
+
     pub fn enclave_error<S: ToString>(msg: S) -> Self {
         RustError::EnclaveError { msg: msg.to_string() }
     }
 }
-
 
 impl From<std::str::Utf8Error> for RustError {
     fn from(source: std::str::Utf8Error) -> Self {
@@ -104,6 +117,12 @@ impl From<std::string::FromUtf8Error> for RustError {
 impl From<sgx_types::sgx_status_t> for RustError {
     fn from(source: sgx_types::sgx_status_t) -> Self {
         RustError::enclave_error(source.as_str())
+    }
+}
+
+impl From<protobuf::ProtobufError> for RustError {
+    fn from(source: protobuf::ProtobufError) -> Self {
+        RustError::protobuf_encode(source)
     }
 }
 
