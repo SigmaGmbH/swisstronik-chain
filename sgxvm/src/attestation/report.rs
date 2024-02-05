@@ -199,7 +199,6 @@ impl AttestationReport {
 
         // Verify and extract information from attestation report
         let attn_report: Value = serde_json::from_slice(&report.report)?;
-        println!("attn_report: {}", attn_report);
 
         // Verify API version is supported
         let version = attn_report["version"]
