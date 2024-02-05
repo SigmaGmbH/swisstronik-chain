@@ -11,3 +11,4 @@ pub const PUBLIC_KEY_SIZE: usize = 32;
 pub const ENCRYPTED_KEY_SIZE: usize = 78;
 
 pub const QUOTE_SIGNATURE_TYPE: sgx_quote_sign_type_t = sgx_quote_sign_type_t::SGX_LINKABLE_SIGNATURE; 
+pub const MIN_REQUIRED_TCB: u16 = 13;
