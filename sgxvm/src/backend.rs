@@ -86,6 +86,10 @@ impl<'state> EvmBackend for FFIBackend<'state> {
         U256::zero() // Only applicable for PoW
     }
 
+    fn block_randomness(&self) -> Option<H256> {
+        None
+    }
+
     fn block_gas_limit(&self) -> U256 {
         self.tx_context.block_gas_limit
     }
@@ -137,10 +141,6 @@ impl<'state> EvmBackend for FFIBackend<'state> {
     fn original_storage(&self, _address: H160, _index: H256) -> Option<H256> {
         None
     }
-
-    fn block_randomness(&self) -> Option<H256> {
-        None
-    }
 }
 
 /// Implementation of trait `Apply` provided by evm crate
@@ -165,7 +165,7 @@ impl<'state> EvmApplyBackend for FFIBackend<'state> {
                     ..
                 } => {
                     // Reset storage is ignored since storage cannot be efficiently reset as this
-                    // would require iterating over all of the storage keys
+                    // would require iterating over storage keys
 
                     // Update account balance and nonce
                     let previous_account_data = self.state.get_account(&address);
@@ -193,7 +193,7 @@ impl<'state> EvmApplyBackend for FFIBackend<'state> {
                         }
                     }
                 },
-                // Used by SELFDESTRUCT opcode
+                // Used by `SELFDESTRUCT` opcode
                 Apply::Delete { address } => {
                     self.state.remove(&address);
                 }

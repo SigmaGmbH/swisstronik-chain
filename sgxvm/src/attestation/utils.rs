@@ -3,7 +3,6 @@ use sgx_tcrypto::*;
 use sgx_tse::*;
 use sgx_types::*;
 
-use itertools::Itertools;
 use std::io::{Read, Write};
 use std::net::TcpStream;
 use std::prelude::v1::*;
@@ -162,7 +161,6 @@ pub fn get_sigrl_from_intel(fd: c_int, gid: u32) -> Vec<u8> {
     let _result = tls.write(req.as_bytes());
     let mut plaintext = Vec::new();
 
-
     match tls.read_to_end(&mut plaintext) {
         Ok(_) => (),
         Err(e) => {
@@ -170,7 +168,6 @@ pub fn get_sigrl_from_intel(fd: c_int, gid: u32) -> Vec<u8> {
             panic!("Cannot connect to Intel server");
         }
     }
-    let resp_string = String::from_utf8(plaintext.clone()).unwrap();
     parse_response_sigrl(&plaintext)
 }
 
@@ -198,8 +195,6 @@ pub fn get_report_from_intel(fd: c_int, quote: Vec<u8>) -> SgxResult<(String, Ve
     let mut plaintext = Vec::new();
 
     tls.read_to_end(&mut plaintext).unwrap();
-    let resp_string = String::from_utf8(plaintext.clone()).unwrap();
-
     parse_response_attn_report(&plaintext)
 }
 

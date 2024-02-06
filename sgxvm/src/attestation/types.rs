@@ -1,6 +1,7 @@
 use derive_more::Display;
 
 #[derive(PartialEq, Eq, Debug)]
+#[allow(dead_code)]
 pub enum SigningMethod {
     MRSIGNER,
     MRENCLAVE,
