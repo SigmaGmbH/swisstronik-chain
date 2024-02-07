@@ -57,8 +57,7 @@ CMD ["swisstronikd"]
 ############ Node binary in Software Mode
 FROM ubuntu:22.04 as local-node
 
-RUN apt-get update 
-RUN apt-get install -y jq 
+RUN apt-get update && apt-get install jq -y
 RUN rm -rf /var/lib/apt/lists/* 
 
 COPY --from=compile-chain /root/chain/build/swisstronikd /usr/bin/swisstronikd

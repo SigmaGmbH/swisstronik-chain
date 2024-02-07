@@ -134,7 +134,7 @@ Example:
 	cmd.Flags().String(flagStartingIPAddress,
 		"192.167.10.1",
 		"Starting IP address (192.167.10.1 results in persistent peers list ID0@192.167.10.1:46656, ID1@192.167.10.1:46656, ...)")
-	cmd.Flags().String(flags.FlagKeyringBackend, flags.DefaultKeyringBackend, "Select keyring's backend (os|file|test)")
+	cmd.Flags().String(flags.FlagKeyringBackend, "test", "Select keyring's backend (os|file|test)")
 
 	return cmd
 }
@@ -349,9 +349,6 @@ func initGenFiles(
 	var govGenState govv1.GenesisState
 	clientCtx.Codec.MustUnmarshalJSON(appGenState[govtypes.ModuleName], &govGenState)
 
-	govGenState.DepositParams.MinDeposit[0].Denom = coinDenom
-	appGenState[govtypes.ModuleName] = clientCtx.Codec.MustMarshalJSON(&govGenState)
-
 	var mintGenState mintypes.GenesisState
 	clientCtx.Codec.MustUnmarshalJSON(appGenState[mintypes.ModuleName], &mintGenState)
 
@@ -423,11 +420,17 @@ func collectGenFiles(
 			// set the canonical application state (they should not differ)
 			appState = nodeAppState
 		}
-
+		
 		genFile := nodeConfig.GenesisFile()
 
 		// overwrite each validator's genesis file to have a canonical genesis time
-		if err := genutil.ExportGenesisFileWithTime(genFile, chainID, nil, appState, genTime); err != nil {
+		genDoc.GenesisTime = genTime
+		genDoc.Validators = nil
+		genDoc.AppState = nodeAppState
+		genDoc.ChainID = chainID
+		genDoc.ConsensusParams.Block.MaxGas = 20_000_000
+
+		if err := genutil.ExportGenesisFile(genDoc, genFile); err != nil {
 			return err
 		}
 	}
