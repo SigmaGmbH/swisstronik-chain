@@ -8,6 +8,11 @@ use sgx_types::{sgx_read_rand, sgx_status_t, SgxResult};
 use std::io::{Read, Write};
 use std::vec::Vec;
 
+use k256::sha2::{
+    Sha256 as kSha256, 
+    Digest
+};
+
 use crate::error::Error;
 
 pub const REGISTRATION_KEY_SIZE: usize = 32;
@@ -192,7 +197,7 @@ impl KeyManager {
     /// Encrypts provided value using encryption key, derived from master key and user public key.
     /// To derive shared secret we're using x25519 since its private keys have wider range of acceptable
     /// values than secp256k1, which is used for transaction signing.
-    pub fn encrypt_ecdh(&self, value: Vec<u8>, public_key: Vec<u8>) -> Result<Vec<u8>, Error> {
+    pub fn encrypt_ecdh(&self, value: Vec<u8>, public_key: Vec<u8>, encryption_salt: Vec<u8>) -> Result<Vec<u8>, Error> {
         // Convert public key to appropriate format
         let public_key: [u8; PUBLIC_KEY_SIZE] = match public_key.as_slice().try_into() {
             Ok(public_key) => public_key,
@@ -208,7 +213,7 @@ impl KeyManager {
         // Derive encryption key from shared key
         let encryption_key = KeyManager::derive_key(shared_key.as_bytes(), b"IOEncryptionKeyV1");
         // Encrypt provided value using shared secret
-        KeyManager::encrypt_deoxys(&encryption_key, value, None)
+        KeyManager::encrypt_deoxys(&encryption_key, value, Some(encryption_salt))
     }
 
     /// Decrypts provided encrypted transaction data using encryption key,
@@ -243,7 +248,7 @@ impl KeyManager {
     pub fn encrypt_state(
         &self,
         contract_address: Vec<u8>,
-        encryption_salt: [u8; 32],
+        encryption_salt: Vec<u8>,
         value: Vec<u8>,
     ) -> Result<Vec<u8>, Error> {
         // Derive encryption key for this contract
@@ -271,8 +276,17 @@ impl KeyManager {
     fn encrypt_deoxys(
         encryption_key: &[u8; PRIVATE_KEY_SIZE],
         plaintext: Vec<u8>,
-        encryption_salt: Option<[u8; 32]>,
+        encryption_salt: Option<Vec<u8>>,
     ) -> Result<Vec<u8>, Error> {
+        // Derive encryption salt if provided
+        let encryption_salt = encryption_salt.and_then(|salt| {
+            let mut hasher = kSha256::new();
+            hasher.update(salt);
+            let mut encryption_salt = [0u8; 32];
+            encryption_salt.copy_from_slice(&hasher.finalize());
+            Some(encryption_salt)
+        });
+
         let nonce = match encryption_salt {
             // If salt was not provided, generate random nonce field
             None => {

@@ -88,9 +88,9 @@ pub fn handle_call_request_inner(querier: *mut GoQuerier, data: SGXVMCallRequest
             )
         },
         _ => {
-            // Extract user public key from transaction data
-            let (user_public_key, data) = match extract_public_key_and_data(params.data) {
-                Ok((user_public_key, data)) => (user_public_key, data),
+            // Extract user public key and nonce from transaction data
+            let (user_public_key, data, nonce) = match extract_public_key_and_data(params.data) {
+                Ok((user_public_key, data, nonce)) => (user_public_key, data, nonce),
                 Err(err) => {
                     return ExecutionResult::from_error(
                         format!("{:?}", err),
@@ -127,7 +127,7 @@ pub fn handle_call_request_inner(querier: *mut GoQuerier, data: SGXVMCallRequest
             );
 
             // Encrypt transaction data output
-            let encrypted_data = match encrypt_transaction_data(exec_result.data, user_public_key) {
+            let encrypted_data = match encrypt_transaction_data(exec_result.data, user_public_key, nonce) {
                 Ok(data) => data,
                 Err(err) => {
                     return ExecutionResult::from_error(

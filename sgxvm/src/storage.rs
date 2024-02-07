@@ -1,10 +1,6 @@
 use evm::backend::Basic;
 use primitive_types::{H160, H256, U256};
 use std::vec::Vec;
-use k256::sha2::{
-    Sha256 as kSha256, 
-    Digest
-};
 
 use crate::protobuf_generated::ffi;
 use crate::querier::GoQuerier;
@@ -147,14 +143,12 @@ impl Storage for FFIStorage {
     }
 
     fn insert_storage_cell(&mut self, key: H160, index: H256, value: H256) {
-        // Derive encryption salt   
-        let mut hasher = kSha256::new();
-        hasher.update(self.context_timestamp.to_be_bytes());
-        let mut encryption_salt = [0u8; 32];
-        encryption_salt.copy_from_slice(&hasher.finalize());
-
         // Encrypt value
-        let encrypted_value = match encryption::encrypt_storage_cell(key.as_bytes().to_vec(), encryption_salt, value.as_bytes().to_vec()) {
+        let encrypted_value = match encryption::encrypt_storage_cell(
+            key.as_bytes().to_vec(), 
+            self.context_timestamp.to_be_bytes().to_vec(),
+            value.as_bytes().to_vec()
+        ) {
             Ok(encrypted_value) => encrypted_value,
             Err(err) => {
                 println!("Cannot encrypt value. Reason: {:?}", err);
