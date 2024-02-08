@@ -22,7 +22,6 @@ func EnclaveCmd() *cobra.Command {
 	}
 
 	cmd.AddCommand(RequestMasterKeyCmd())
-	cmd.AddCommand(CreateMasterKey())
 	cmd.AddCommand(StartAttestationServer())
 	cmd.AddCommand(Status())
 
@@ -60,34 +59,6 @@ func RequestMasterKeyCmd() *cobra.Command {
 			return nil
 		},
 	}
-
-	return cmd
-}
-
-// CreateMasterKey returns create-master-key cobra Command.
-func CreateMasterKey() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "create-master-key",
-		Short: "Creates new master key",
-		Long:  "Initializes SGX enclave by creating new master key. Use this function for first validator in network",
-		Args:  cobra.ExactArgs(0),
-		RunE: func(cmd *cobra.Command, _ []string) error {
-			shouldReset, err := cmd.Flags().GetBool(flagShouldReset)
-			if err != nil {
-				return err
-			}
-
-			if err := librustgo.InitializeMasterKey(shouldReset); err != nil {
-				return err
-			}
-
-			fmt.Println("Node is ready for work")
-
-			return nil
-		},
-	}
-
-	cmd.Flags().Bool(flagShouldReset, false, "reset already existing master key. Default: false")
 
 	return cmd
 }

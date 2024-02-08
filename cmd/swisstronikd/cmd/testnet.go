@@ -43,6 +43,7 @@ import (
 	"swisstronik/testutil/network"
 
 	tmtypes "github.com/cometbft/cometbft/types"
+	"github.com/SigmaGmbH/librustgo"
 )
 
 var (
@@ -84,7 +85,10 @@ func NewTestnetCmd(mbm module.BasicManager, genBalIterator banktypes.GenesisBala
 		RunE:                       client.ValidateCmd,
 	}
 
-	testnetCmd.AddCommand(testnetInitConfigCmd(mbm, genBalIterator))
+	testnetCmd.AddCommand(
+		initializeEnclave(),
+		testnetInitConfigCmd(mbm, genBalIterator),
+	)
 
 	return testnetCmd
 }
@@ -135,6 +139,35 @@ Example:
 		"192.167.10.1",
 		"Starting IP address (192.167.10.1 results in persistent peers list ID0@192.167.10.1:46656, ID1@192.167.10.1:46656, ...)")
 	cmd.Flags().String(flags.FlagKeyringBackend, "test", "Select keyring's backend (os|file|test)")
+
+	return cmd
+}
+
+// initializeEnclave initializes SGX enclave for local testnet
+func initializeEnclave() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "init-testnet-enclave",
+		Short: "Initialize SGX Enclave for local testnet",
+		Long:  `Initializes SGX enclave by creating new master key
+		*** WARNING: Do not use this command to setup master key for validator ***`,
+		Args:  cobra.ExactArgs(0),
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			shouldReset, err := cmd.Flags().GetBool(flagShouldReset)
+			if err != nil {
+				return err
+			}
+
+			if err := librustgo.InitializeMasterKey(shouldReset); err != nil {
+				return err
+			}
+
+			fmt.Println("SGX Enclave was initialized")
+
+			return nil
+		},
+	}
+
+	cmd.Flags().Bool(flagShouldReset, false, "reset already existing master key. Default: false")
 
 	return cmd
 }
