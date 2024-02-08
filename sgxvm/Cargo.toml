@@ -58,12 +58,12 @@ ed25519-dalek = { version = "2.0.0", default-features=false }
 rand_chacha = { version = "0.3.1", default-features=false }
 
 # Sgx crates
-sgx_types = { version = "1.1.5", git = "https://github.com/apache/teaclave-sgx-sdk.git", tag="v1.1.5" }
-sgx_tstd = { version = "1.1.5", git = "https://github.com/apache/teaclave-sgx-sdk.git", tag="v1.1.5", features = ["net", "backtrace"]  }
-sgx_trts = { version = "1.1.5", git = "https://github.com/apache/teaclave-sgx-sdk.git", tag="v1.1.5" }
-sgx_tcrypto = { version = "1.1.5", git = "https://github.com/apache/teaclave-sgx-sdk.git", tag="v1.1.5" }
-sgx_tse = { version = "1.1.5", git = "https://github.com/apache/teaclave-sgx-sdk.git", tag="v1.1.5" }
-sgx_rand = { version = "1.1.5", git = "https://github.com/apache/teaclave-sgx-sdk.git", tag="v1.1.5" }
+sgx_types = { version = "1.1.6", git = "https://github.com/apache/teaclave-sgx-sdk.git", tag="v1.1.6" }
+sgx_tstd = { version = "1.1.6", git = "https://github.com/apache/teaclave-sgx-sdk.git", tag="v1.1.6", features = ["net", "backtrace"]  }
+sgx_trts = { version = "1.1.6", git = "https://github.com/apache/teaclave-sgx-sdk.git", tag="v1.1.6" }
+sgx_tcrypto = { version = "1.1.6", git = "https://github.com/apache/teaclave-sgx-sdk.git", tag="v1.1.6" }
+sgx_tse = { version = "1.1.6", git = "https://github.com/apache/teaclave-sgx-sdk.git", tag="v1.1.6" }
+sgx_rand = { version = "1.1.6", git = "https://github.com/apache/teaclave-sgx-sdk.git", tag="v1.1.6" }
 
 [patch."https://github.com/apache/teaclave-sgx-sdk.git"]
 sgx_tstd = { path = "./sgx-sdk/sgx_tstd" }

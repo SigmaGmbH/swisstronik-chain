@@ -15,8 +15,8 @@ parking_lot = { version = "0.11" }
 thiserror = "1.0.37"
 hex = "0.4.3"
 protobuf = "=2.8.1"
-sgx_types = { git = "https://github.com/apache/teaclave-sgx-sdk.git", tag="v1.1.5" }
-sgx_urts = { git = "https://github.com/apache/teaclave-sgx-sdk.git", tag="v1.1.5" }
+sgx_types = { git = "https://github.com/apache/teaclave-sgx-sdk.git", tag="v1.1.6" }
+sgx_urts = { git = "https://github.com/apache/teaclave-sgx-sdk.git", tag="v1.1.6" }
 
 [build-dependencies]
 cbindgen = "0.24.3"
