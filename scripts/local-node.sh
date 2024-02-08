@@ -73,5 +73,5 @@ swisstronikd collect-gentxs --home "$HOMEDIR"
 # Run this to ensure everything worked and that the genesis file is setup correctly
 swisstronikd validate-genesis --home "$HOMEDIR"
 
-# Initialize master key
-swisstronikd enclave create-master-key
+# Initialize master key for local testnet
+swisstronikd testnet init-testnet-enclave
