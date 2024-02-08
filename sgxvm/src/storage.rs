@@ -94,10 +94,7 @@ impl Storage for FFIStorage {
                 Ok(res) => res,
                 Err(err) => {
                     println!("Cannot decode protobuf response: {:?}", err);
-                    return Basic {
-                        balance: U256::default(),
-                        nonce: U256::default(),
-                    };
+                    return Basic::default();
                 }
             };
             
@@ -107,10 +104,7 @@ impl Storage for FFIStorage {
             }
         } else {
             println!("Get account failed. Empty response");
-            Basic {
-                balance: U256::default(),
-                nonce: U256::default(),
-            }
+            Basic::default()
         }
     }
 
