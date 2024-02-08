@@ -13,9 +13,6 @@ thiserror-no-std = "2.0.2"
 zeroize = { version = "1.3", features = ["zeroize_derive"] }
 sgx_tstd = { git = "https://github.com/apache/teaclave-sgx-sdk.git", rev = "3c903bda", features = ["net", "backtrace"]  }
 
-[patch."https://github.com/apache/teaclave-sgx-sdk.git"]
-sgx_tstd = { git = "https://github.com/haerdib/incubator-teaclave-sgx-sdk", rev = "3c903bda"}
-
 [dev-dependencies]
 base64 = "0.13"
 criterion = "0.1.0"
