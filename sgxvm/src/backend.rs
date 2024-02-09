@@ -21,6 +21,20 @@ pub struct TxContext {
     pub block_coinbase: H160
 }
 
+impl From<ffi::TransactionContext> for TxContext {
+    fn from(context: ffi::TransactionContext) -> Self {
+        Self {
+            chain_id: U256::from(context.chain_id),
+            gas_price: U256::from_big_endian(&context.gas_price),
+            block_number: U256::from(context.block_number),
+            timestamp: U256::from(context.timestamp),
+            block_gas_limit: U256::from(context.block_gas_limit),
+            block_base_fee_per_gas: U256::from_big_endian(&context.block_base_fee_per_gas),
+            block_coinbase: H160::from_slice(&context.block_coinbase),
+        }
+    }
+}
+
 pub struct FFIBackend<'state> {
     // We keep GoQuerier to make it accessible for `OCALL` handlers
     pub querier: *mut GoQuerier,
@@ -86,6 +100,10 @@ impl<'state> EvmBackend for FFIBackend<'state> {
         U256::zero() // Only applicable for PoW
     }
 
+    fn block_randomness(&self) -> Option<H256> {
+        None
+    }
+
     fn block_gas_limit(&self) -> U256 {
         self.tx_context.block_gas_limit
     }
@@ -137,10 +155,6 @@ impl<'state> EvmBackend for FFIBackend<'state> {
     fn original_storage(&self, _address: H160, _index: H256) -> Option<H256> {
         None
     }
-
-    fn block_randomness(&self) -> Option<H256> {
-        None
-    }
 }
 
 /// Implementation of trait `Apply` provided by evm crate
@@ -165,7 +179,7 @@ impl<'state> EvmApplyBackend for FFIBackend<'state> {
                     ..
                 } => {
                     // Reset storage is ignored since storage cannot be efficiently reset as this
-                    // would require iterating over all of the storage keys
+                    // would require iterating over storage keys
 
                     // Update account balance and nonce
                     let previous_account_data = self.state.get_account(&address);
@@ -193,7 +207,7 @@ impl<'state> EvmApplyBackend for FFIBackend<'state> {
                         }
                     }
                 },
-                // Used by SELFDESTRUCT opcode
+                // Used by `SELFDESTRUCT` opcode
                 Apply::Delete { address } => {
                     self.state.remove(&address);
                 }

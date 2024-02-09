@@ -68,15 +68,19 @@ pub extern "C" fn ecall_allocate(
     data: *const u8,
     len: usize,
 ) -> Allocation {
-    // TODO: In case of any errors check: https://github.com/scrtlabs/SecretNetwork/blob/8e157399de55c8e9c3f9a05d2d23e259dae24095/cosmwasm/enclaves/shared/contract-engine/src/external/ecalls.rs#L41
     let slice = unsafe { slice::from_raw_parts(data, len) };
     let mut vector_copy = slice.to_vec();
 
     let ptr = vector_copy.as_mut_ptr();
     let size = vector_copy.len();
-    std::mem::forget(vector_copy); // TODO: Need to clean that memory
+    std::mem::forget(vector_copy);
 
     Allocation { result_ptr: ptr, result_size: size }
+}
+
+#[no_mangle]
+pub extern "C" fn ecall_status() -> sgx_status_t {
+    attestation::self_attestation::self_attest()
 }
 
 #[no_mangle]

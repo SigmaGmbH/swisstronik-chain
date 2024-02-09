@@ -3,6 +3,7 @@ use std::string::ToString;
 use thiserror_no_std::Error;
 
 #[derive(Error, Debug)]
+#[allow(dead_code)]
 pub enum RustError {
     #[error("Cannot decode UTF8 bytes into string: {}", msg)]
     InvalidUtf8 { msg: String },

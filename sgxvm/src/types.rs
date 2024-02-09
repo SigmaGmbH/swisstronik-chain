@@ -58,11 +58,13 @@ pub trait Storage {
 
 // Struct for allocated buffer outside of SGX Enclave
 #[repr(C)]
+#[allow(dead_code)]
 pub struct AllocatedBuffer {
     pub ptr: *mut u8,
 }
 
 /// Recovers boxed value from pointer
+#[allow(dead_code)]
 pub unsafe fn recover_buffer(buf: AllocatedBuffer) -> Option<Vec<u8>> {
     if buf.ptr.is_null() {
         return None;
@@ -84,9 +86,9 @@ impl ExecutionResult {
     pub fn from_error(reason: String, data: Vec<u8>, gas_used: Option<u64>) -> Self {
         Self {
             logs: Vec::default(),
-            data: data,
             gas_used: gas_used.unwrap_or(21000), // This is minimum gas fee to apply the transaction
-            vm_error: reason
+            vm_error: reason,
+            data,
         }
     }
 }

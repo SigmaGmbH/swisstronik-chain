@@ -60,6 +60,7 @@ include = [
 exclude = [
     "handle_request",
     "ecall_allocate",
+    "ecall_status",
     "ecall_init_master_key",
     "ecall_share_seed",
     "ecall_request_seed",

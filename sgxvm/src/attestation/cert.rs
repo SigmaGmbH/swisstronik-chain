@@ -322,6 +322,31 @@ fn extract_asn1_value(cert: &[u8], oid: &[u8]) -> Result<Vec<u8>, Error> {
     Ok(payload)
 }
 
+#[cfg(not(feature = "mainnet"))]
+pub fn verify_quote_status(
+    report: &AttestationReport,
+    advisories: &AdvisoryIDs,
+) -> Result<AuthResult, AuthResult> {
+    match &report.sgx_quote_status {
+        SgxQuoteStatus::OK | 
+        SgxQuoteStatus::GroupOutOfDate |
+        SgxQuoteStatus::SwHardeningNeeded | 
+        SgxQuoteStatus::ConfigurationAndSwHardeningNeeded => {
+            check_advisories(&report.sgx_quote_status, advisories)?;
+
+            Ok(AuthResult::Success)
+        }
+        _ => {
+            println!(
+                "Invalid attestation quote status - cannot verify remote node: {:?}",
+                &report.sgx_quote_status
+            );
+            Err(AuthResult::from(&report.sgx_quote_status))
+        }
+    }
+}
+
+#[cfg(feature = "mainnet")]
 pub fn verify_quote_status(
     report: &AttestationReport,
     advisories: &AdvisoryIDs,
@@ -329,9 +354,6 @@ pub fn verify_quote_status(
     match &report.sgx_quote_status {
         SgxQuoteStatus::OK | 
         SgxQuoteStatus::SwHardeningNeeded | 
-        // For now we allow statuses GroupOutOfDate and ConfigurationAndSwHardeningNeeded. In future releases,
-        // we will increase requirements to hardware and configuration
-        SgxQuoteStatus::GroupOutOfDate |
         SgxQuoteStatus::ConfigurationAndSwHardeningNeeded => {
             check_advisories(&report.sgx_quote_status, advisories)?;
 

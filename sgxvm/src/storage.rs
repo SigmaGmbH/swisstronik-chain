@@ -13,6 +13,7 @@ use crate::types::Storage;
 /// that is located outside of Rust code
 pub struct FFIStorage {
     pub querier: *mut GoQuerier,
+    pub context_timestamp: u64,
 }
 
 impl Storage for FFIStorage {
@@ -93,10 +94,7 @@ impl Storage for FFIStorage {
                 Ok(res) => res,
                 Err(err) => {
                     println!("Cannot decode protobuf response: {:?}", err);
-                    return Basic {
-                        balance: U256::default(),
-                        nonce: U256::default(),
-                    };
+                    return Basic::default();
                 }
             };
             
@@ -106,10 +104,7 @@ impl Storage for FFIStorage {
             }
         } else {
             println!("Get account failed. Empty response");
-            Basic {
-                balance: U256::default(),
-                nonce: U256::default(),
-            }
+            Basic::default()
         }
     }
 
@@ -143,7 +138,11 @@ impl Storage for FFIStorage {
 
     fn insert_storage_cell(&mut self, key: H160, index: H256, value: H256) {
         // Encrypt value
-        let encrypted_value = match encryption::encrypt_storage_cell(key.as_bytes().to_vec(), value.as_bytes().to_vec()) {
+        let encrypted_value = match encryption::encrypt_storage_cell(
+            key.as_bytes().to_vec(), 
+            self.context_timestamp.to_be_bytes().to_vec(),
+            value.as_bytes().to_vec()
+        ) {
             Ok(encrypted_value) => encrypted_value,
             Err(err) => {
                 println!("Cannot encrypt value. Reason: {:?}", err);
@@ -194,7 +193,7 @@ impl Storage for FFIStorage {
 }
 
 impl FFIStorage {
-    pub fn new(querier: *mut GoQuerier) -> Self {
-        Self {querier}
+    pub fn new(querier: *mut GoQuerier, context_timestamp: u64) -> Self {
+        Self {querier, context_timestamp}
     }
 }
