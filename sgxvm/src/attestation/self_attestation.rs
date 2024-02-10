@@ -12,9 +12,22 @@ use crate::attestation::{
 pub fn self_attest() -> sgx_status_t {
     use super::report::AttestationReport;
 
+    // Generate Keypair
     let ecc_handle = SgxEccHandle::new();
-    let _result = ecc_handle.open();
-    let (prv_k, pub_k) = ecc_handle.create_key_pair().unwrap();
+    match ecc_handle.open() {
+        Err(err) => {
+            println!("Cannot open SgxEccHandle. Reason: {:?}", err);
+            return sgx_status_t::SGX_ERROR_UNEXPECTED;
+        },
+        _ => {},
+    };
+    let (prv_k, pub_k) = match ecc_handle.create_key_pair() {
+        Ok((prv_k, pub_k)) => (prv_k, pub_k),
+        Err(err) => {
+            println!("Cannot generate ecc keypair. Reason: {:?}", err);
+            return sgx_status_t::SGX_ERROR_UNEXPECTED;
+        }
+    };
 
     let signed_report = match create_attestation_report(&pub_k, QUOTE_SIGNATURE_TYPE)
     {

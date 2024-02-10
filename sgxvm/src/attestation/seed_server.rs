@@ -144,8 +144,18 @@ fn share_seed_inner(socket_fd: c_int) -> sgx_status_t {
 fn get_server_configuration() -> Result<rustls::ServerConfig, String> {
     // Generate Keypair
     let ecc_handle = SgxEccHandle::new();
-    let _result = ecc_handle.open();
-    let (prv_k, pub_k) = ecc_handle.create_key_pair().unwrap();
+    match ecc_handle.open() {
+        Err(err) => {
+            return Err(format!("Cannot open SgxEccHandle. Reason: {:?}", err));
+        },
+        _ => {},
+    };
+    let (prv_k, pub_k) = match ecc_handle.create_key_pair() {
+        Ok((prv_k, pub_k)) => (prv_k, pub_k),
+        Err(err) => {
+            return Err(format!("Cannot generate ecc keypair. Reason: {:?}", err));
+        }
+    };
 
     let signed_report = match create_attestation_report(&pub_k, QUOTE_SIGNATURE_TYPE)
     {
@@ -178,8 +188,10 @@ fn get_server_configuration() -> Result<rustls::ServerConfig, String> {
     certs.push(rustls::Certificate(cert_der));
     let privkey = rustls::PrivateKey(key_der);
 
-    cfg.set_single_cert_with_ocsp_and_sct(certs, privkey, vec![], vec![])
-        .unwrap();
-
-    Ok(cfg)
+    match cfg.set_single_cert_with_ocsp_and_sct(certs, privkey, vec![], vec![]) {
+        Err(err) => {
+            Err(format!("Cannot set cert with ocsp and sct. Reason: {:?}", err))
+        },
+        _ => Ok(cfg)
+    }
 }

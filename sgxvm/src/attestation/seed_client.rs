@@ -218,8 +218,18 @@ fn request_seed_inner(_hostname: String, socket_fd: c_int) -> sgx_status_t {
 fn get_client_configuration() -> Result<rustls::ClientConfig, String> {
     // Generate Keypair
     let ecc_handle = SgxEccHandle::new();
-    ecc_handle.open().unwrap();
-    let (prv_k, pub_k) = ecc_handle.create_key_pair().unwrap();
+    match ecc_handle.open() {
+        Err(err) => {
+            return Err(format!("Cannot open SgxEccHandle. Reason: {:?}", err));
+        },
+        _ => {},
+    };
+    let (prv_k, pub_k) = match ecc_handle.create_key_pair() {
+        Ok((prv_k, pub_k)) => (prv_k, pub_k),
+        Err(err) => {
+            return Err(format!("Cannot generate ecc keypair. Reason: {:?}", err));
+        }
+    };
 
     let signed_report = match create_attestation_report(&pub_k, QUOTE_SIGNATURE_TYPE)
     {
@@ -245,14 +255,24 @@ fn get_client_configuration() -> Result<rustls::ClientConfig, String> {
             return Err(format!("Error in gen_ecc_cert: {:?}", e));
         }
     };
-    ecc_handle.close().unwrap();
+    match ecc_handle.close() {
+        Err(err) => {
+            return Err(format!("Cannot close SgxEccHandle. Reason: {:?}", err));
+        },
+        _ => {},
+    };
 
     let mut cfg = rustls::ClientConfig::new();
     let mut certs = Vec::new();
     certs.push(rustls::Certificate(cert_der));
     let privkey = rustls::PrivateKey(key_der);
 
-    cfg.set_single_client_cert(certs, privkey).unwrap();
+    match cfg.set_single_client_cert(certs, privkey) {
+        Err(err) => {
+            return Err(format!("Cannot set client cert. Reason: {:?}", err));
+        },
+        _ => {},
+    };
     cfg.dangerous()
         .set_certificate_verifier(Arc::new(ServerAuth::new(true)));
     cfg.versions.clear();
