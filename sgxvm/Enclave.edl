@@ -11,6 +11,9 @@ enclave {
     from "sgx_tprotected_fs.edl" import *;
 
     include "sgx_quote.h"
+	include "sgx_report.h"
+	include "sgx_ql_quote.h"
+	include "sgx_qve_header.h"
 
     struct ResultWithAllocation {
         uint8_t* ptr;
@@ -39,7 +42,9 @@ enclave {
         public sgx_status_t ecall_dcap_attestation(
             [in, size=len] const uint8_t* hostname,
             size_t len,
-            int fd
+            int fd,
+            [in] const sgx_target_info_t* qe_target_info,
+			uint32_t quote_size
         );
 
         public ResultWithAllocation handle_request(
@@ -90,5 +95,11 @@ enclave {
 			int32_t enclaveTrusted,
 			[out] sgx_update_info_bit_t * update_info
         );
+
+        sgx_status_t ocall_get_ecdsa_quote(
+			[in] sgx_report_t *p_report,
+			[out, size = quote_size] sgx_quote_t *p_quote, 
+            uint32_t quote_size
+		);
     };
 };

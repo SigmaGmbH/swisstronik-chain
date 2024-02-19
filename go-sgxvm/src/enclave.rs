@@ -1,3 +1,4 @@
+use crate::dcap;
 use crate::errors::{handle_c_error_default, Error};
 use crate::memory::{ByteSliceView, UnmanagedVector};
 use crate::protobuf_generated::node;
@@ -63,6 +64,8 @@ extern "C" {
         hostname: *const u8,
         data_len: usize,
         socket_fd: c_int,
+        qe_target_info: &sgx_target_info_t,
+	    quote_size: u32,
     ) -> sgx_status_t;
 }
 
@@ -217,9 +220,21 @@ pub unsafe extern "C" fn handle_initialization_request(
                         }
                     },
                     node::SetupRequest_oneof_req::dcapAttestationRequest(req) => {
+                        // Validate provided host
                         if req.hostname.is_empty() {
                             return Err(Error::unset_arg("Hostname was not set"));
                         }
+
+                        // Prepare target info for DCAP attestation
+                        let target_info = match crate::dcap::get_target_info() {
+                            Ok(target_info) => target_info,
+                            Err(err) => return Err(Error::enclave_error(err.as_str()))
+                        };
+                        // Prepare quote size for DCAP attestation
+                        let quote_size = match crate::dcap::get_quote_size() {
+                            Ok(quote_size) => quote_size,
+                            Err(err) => return Err(Error::enclave_error(err.as_str()))
+                        };
 
                         let mut retval = sgx_status_t::SGX_SUCCESS;
                         let res = ecall_dcap_attestation(
@@ -227,7 +242,9 @@ pub unsafe extern "C" fn handle_initialization_request(
                             &mut retval,
                             req.hostname.as_ptr() as *const u8,
                             req.hostname.len(),
-                            req.fd
+                            req.fd,
+                            &target_info,
+                            quote_size,
                         );
 
                         match (res, retval) {

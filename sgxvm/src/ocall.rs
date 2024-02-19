@@ -35,6 +35,13 @@ extern "C" {
         maxlen: u32,
         p_quote_len: *mut u32,
     ) -> sgx_status_t;
+
+    pub fn ocall_get_ecdsa_quote(
+		ret_val: *mut sgx_status_t,
+		p_report: *const sgx_report_t,
+		p_quote: *mut u8,
+		quote_size: u32,
+	) -> sgx_status_t;
 }
 
 pub fn make_request(querier: *mut GoQuerier, request: Vec<u8>) -> Option<Vec<u8>> {

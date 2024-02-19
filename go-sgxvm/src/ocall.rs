@@ -10,6 +10,16 @@ use std::os::unix::io::IntoRawFd;
 use std::slice;
 
 #[no_mangle]
+pub extern "C" fn ocall_get_ecdsa_quote(
+    p_report: *const sgx_report_t,
+    p_quote: *mut u8,
+    quote_size: u32,
+) -> sgx_status_t {
+    let report = unsafe { *p_report };
+    sgx_status_t::SGX_SUCCESS
+}
+
+#[no_mangle]
 pub extern "C" fn ocall_get_quote(
     p_sigrl: *const u8,
     sigrl_len: u32,
