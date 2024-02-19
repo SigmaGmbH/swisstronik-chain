@@ -56,6 +56,14 @@ extern "C" {
     ) -> sgx_status_t;
 
     pub fn ecall_status(eid: sgx_enclave_id_t, retval: *mut sgx_status_t) -> sgx_status_t;
+
+    pub fn ecall_dcap_attestation(
+        eid: sgx_enclave_id_t,
+        retval: *mut sgx_status_t,
+        hostname: *const u8,
+        data_len: usize,
+        socket_fd: c_int,
+    ) -> sgx_status_t;
 }
 
 pub fn init_enclave() -> SgxResult<SgxEnclave> {
@@ -158,13 +166,13 @@ pub unsafe extern "C" fn handle_initialization_request(
                             }
                         }
                     },
-                    node::SetupRequest_oneof_req::startSeedServer(req) => {
+                    node::SetupRequest_oneof_req::startBootstrapServer(req) => {
                         let mut retval = sgx_status_t::SGX_SUCCESS;
                         let res = ecall_share_seed(evm_enclave.geteid(), &mut retval, req.fd);
 
                         match (res, retval) {
                             (sgx_status_t::SGX_SUCCESS, sgx_status_t::SGX_SUCCESS) => {
-                                let response = node::StartSeedServerResponse::new();
+                                let response = node::StartBootstrapServerResponse::new();
                                 let response_bytes = response.write_to_bytes()?;
                                 Ok(response_bytes)
                             },
@@ -178,7 +186,7 @@ pub unsafe extern "C" fn handle_initialization_request(
                             }
                         }
                     }
-                    node::SetupRequest_oneof_req::nodeSeed(req) => {
+                    node::SetupRequest_oneof_req::epidAttestationRequest(req) => {
                         if req.hostname.is_empty() {
                             return Err(Error::unset_arg("Hostname was not set"));
                         }
@@ -194,7 +202,37 @@ pub unsafe extern "C" fn handle_initialization_request(
 
                         match (res, retval) {
                             (sgx_status_t::SGX_SUCCESS, sgx_status_t::SGX_SUCCESS) => {
-                                let response = node::NodeSeedResponse::new();
+                                let response = node::EPIDAttestationResponse::new();
+                                let response_bytes = response.write_to_bytes()?;
+                                Ok(response_bytes)
+                            }
+                            (_, _) => {
+                                let error_str = if res == sgx_status_t::SGX_SUCCESS {
+                                    res.as_str()
+                                } else {
+                                    retval.as_str()
+                                };
+                                Err(Error::enclave_error(error_str))
+                            }
+                        }
+                    },
+                    node::SetupRequest_oneof_req::dcapAttestationRequest(req) => {
+                        if req.hostname.is_empty() {
+                            return Err(Error::unset_arg("Hostname was not set"));
+                        }
+
+                        let mut retval = sgx_status_t::SGX_SUCCESS;
+                        let res = ecall_dcap_attestation(
+                            evm_enclave.geteid(),
+                            &mut retval,
+                            req.hostname.as_ptr() as *const u8,
+                            req.hostname.len(),
+                            req.fd
+                        );
+
+                        match (res, retval) {
+                            (sgx_status_t::SGX_SUCCESS, sgx_status_t::SGX_SUCCESS) => {
+                                let response = node::DCAPAttestationResponse::new();
                                 let response_bytes = response.write_to_bytes()?;
                                 Ok(response_bytes)
                             }

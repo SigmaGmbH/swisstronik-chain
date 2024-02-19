@@ -8,16 +8,23 @@ message InitializeMasterKeyRequest { bool shouldReset = 1; }
 
 message InitializeMasterKeyResponse {}
 
-message StartSeedServerRequest { int32 fd = 1; }
+// Bootstrap server messages
+message StartBootstrapServerRequest { int32 fd = 1; }
+message StartBootstrapServerResponse {}
 
-message StartSeedServerResponse {}
-
-message NodeSeedRequest {
+// EPID Remote Attestation messages
+message EPIDAttestationRequest {
   int32 fd = 1;
   string hostname = 2;
 }
+message EPIDAttestationResponse {}
 
-message NodeSeedResponse {}
+// DCAP Remote Attestation messages
+message DCAPAttestationRequest {
+  int32 fd = 1;
+  string hostname = 2;
+}
+message DCAPAttestationResponse {}
 
 message IsInitializedRequest {}
 message IsInitializedResponse { bool isInitialized = 1; }
@@ -28,9 +35,10 @@ message NodeStatusResponse {}
 message SetupRequest {
   oneof req {
     InitializeMasterKeyRequest initializeMasterKey = 1;
-    StartSeedServerRequest startSeedServer = 2;
-    NodeSeedRequest nodeSeed = 3;
-    IsInitializedRequest isInitialized = 4;
-    NodeStatusRequest nodeStatus = 5;
+    StartBootstrapServerRequest startBootstrapServer = 2;
+    EPIDAttestationRequest epidAttestationRequest = 3;
+    DCAPAttestationRequest dcapAttestationRequest = 4;
+    IsInitializedRequest isInitialized = 5;
+    NodeStatusRequest nodeStatus = 6;
   }
 }

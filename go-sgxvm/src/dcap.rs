@@ -43,15 +43,3 @@ impl Attesteer {
         }
     }
 }
-
-pub(crate) unsafe fn try_dcap() -> SgxError {
-    println!("TRYING DCAP 2");
-    let attesteer = Attesteer{};
-
-    let _target_info = attesteer.get_target_info()?;
-    println!("target info generated");
-    let quote_size = attesteer.get_quote_size()?;
-
-    println!("QUOTE SIZE: {:?}", quote_size);
-    Ok(())
-}

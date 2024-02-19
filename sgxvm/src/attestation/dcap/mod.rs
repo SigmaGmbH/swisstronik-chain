@@ -18,8 +18,12 @@ KoZIzj0EAwIDSQAwRgIhAOW/5QkR+S9CiSDcNoowLuPRLsWGf/Yi7GSX94BgwTwg
 AiEA4J0lrHoMs+Xo5o/sX6O9QWxHRAvZUGOdRQ7cvqRXaqI=
 -----END CERTIFICATE-----"#;
 
-pub fn try_ecdsa() -> sgx_status_t {
-    println!("Trying to perform DCAP RA");
-
+#[no_mangle]
+pub unsafe extern "C" fn ecall_dcap_attestation(
+    hostname: *const u8,
+    data_len: usize,
+    socket_fd: c_int,
+) -> sgx_status_t {
+    println!("HELLO FROM ENCLAVE DCAP");
     sgx_status_t::SGX_SUCCESS
 }

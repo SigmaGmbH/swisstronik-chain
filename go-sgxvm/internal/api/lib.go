@@ -171,8 +171,8 @@ func attestPeer(connection net.Conn) error {
 	}
 
 	// Create protobuf encoded request
-	req := types.SetupRequest{Req: &types.SetupRequest_StartSeedServer{
-		StartSeedServer: &types.StartSeedServerRequest{
+	req := types.SetupRequest{Req: &types.SetupRequest_StartBootstrapServer{
+		StartBootstrapServer: &types.StartBootstrapServerRequest{
 			Fd: int32(file.Fd()),
 		},
 	}}
@@ -228,8 +228,8 @@ func RequestMasterKeyEPID(hostname string, port int) error {
 	}
 
 	// Create protobuf encoded request
-	req := types.SetupRequest{Req: &types.SetupRequest_NodeSeed{
-		NodeSeed: &types.NodeSeedRequest{
+	req := types.SetupRequest{Req: &types.SetupRequest_EpidAttestationRequest{
+		EpidAttestationRequest: &types.EPIDAttestationRequest{
 			Fd: int32(file.Fd()),
 			Hostname: hostname,
 		},
@@ -272,8 +272,8 @@ func RequestMasterKeyDCAP(hostname string, port int) error {
 	}
 
 	// Create protobuf encoded request
-	req := types.SetupRequest{Req: &types.SetupRequest_NodeSeed{
-		NodeSeed: &types.NodeSeedRequest{
+	req := types.SetupRequest{Req: &types.SetupRequest_DcapAttestationRequest{
+		DcapAttestationRequest: &types.DCAPAttestationRequest{
 			Fd: int32(file.Fd()),
 			Hostname: hostname,
 		},

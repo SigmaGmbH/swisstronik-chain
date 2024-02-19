@@ -36,6 +36,12 @@ enclave {
             int fd
         );
 
+        public sgx_status_t ecall_dcap_attestation(
+            [in, size=len] const uint8_t* hostname,
+            size_t len,
+            int fd
+        );
+
         public ResultWithAllocation handle_request(
             [user_check] void* querier,
             [in, size=len] const uint8_t* request,

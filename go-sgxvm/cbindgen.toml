@@ -71,6 +71,7 @@ exclude = [
     "ocall_get_ias_socket",
     "ocall_get_update_info",
     "ocall_get_quote",
+    "ecall_dcap_attestation",
 ]
 # prefix = "CAPI_"
 item_types = []

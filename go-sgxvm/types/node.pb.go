@@ -105,7 +105,8 @@ func (*InitializeMasterKeyResponse) Descriptor() ([]byte, []int) {
 	return file_node_proto_rawDescGZIP(), []int{1}
 }
 
-type StartSeedServerRequest struct {
+// Bootstrap server messages
+type StartBootstrapServerRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -113,8 +114,8 @@ type StartSeedServerRequest struct {
 	Fd int32 `protobuf:"varint,1,opt,name=fd,proto3" json:"fd,omitempty"`
 }
 
-func (x *StartSeedServerRequest) Reset() {
-	*x = StartSeedServerRequest{}
+func (x *StartBootstrapServerRequest) Reset() {
+	*x = StartBootstrapServerRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_node_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -122,13 +123,13 @@ func (x *StartSeedServerRequest) Reset() {
 	}
 }
 
-func (x *StartSeedServerRequest) String() string {
+func (x *StartBootstrapServerRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*StartSeedServerRequest) ProtoMessage() {}
+func (*StartBootstrapServerRequest) ProtoMessage() {}
 
-func (x *StartSeedServerRequest) ProtoReflect() protoreflect.Message {
+func (x *StartBootstrapServerRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_node_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -140,26 +141,26 @@ func (x *StartSeedServerRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use StartSeedServerRequest.ProtoReflect.Descriptor instead.
-func (*StartSeedServerRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use StartBootstrapServerRequest.ProtoReflect.Descriptor instead.
+func (*StartBootstrapServerRequest) Descriptor() ([]byte, []int) {
 	return file_node_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *StartSeedServerRequest) GetFd() int32 {
+func (x *StartBootstrapServerRequest) GetFd() int32 {
 	if x != nil {
 		return x.Fd
 	}
 	return 0
 }
 
-type StartSeedServerResponse struct {
+type StartBootstrapServerResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 }
 
-func (x *StartSeedServerResponse) Reset() {
-	*x = StartSeedServerResponse{}
+func (x *StartBootstrapServerResponse) Reset() {
+	*x = StartBootstrapServerResponse{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_node_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -167,13 +168,13 @@ func (x *StartSeedServerResponse) Reset() {
 	}
 }
 
-func (x *StartSeedServerResponse) String() string {
+func (x *StartBootstrapServerResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*StartSeedServerResponse) ProtoMessage() {}
+func (*StartBootstrapServerResponse) ProtoMessage() {}
 
-func (x *StartSeedServerResponse) ProtoReflect() protoreflect.Message {
+func (x *StartBootstrapServerResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_node_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -185,12 +186,13 @@ func (x *StartSeedServerResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use StartSeedServerResponse.ProtoReflect.Descriptor instead.
-func (*StartSeedServerResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use StartBootstrapServerResponse.ProtoReflect.Descriptor instead.
+func (*StartBootstrapServerResponse) Descriptor() ([]byte, []int) {
 	return file_node_proto_rawDescGZIP(), []int{3}
 }
 
-type NodeSeedRequest struct {
+// EPID Remote Attestation messages
+type EPIDAttestationRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -199,8 +201,8 @@ type NodeSeedRequest struct {
 	Hostname string `protobuf:"bytes,2,opt,name=hostname,proto3" json:"hostname,omitempty"`
 }
 
-func (x *NodeSeedRequest) Reset() {
-	*x = NodeSeedRequest{}
+func (x *EPIDAttestationRequest) Reset() {
+	*x = EPIDAttestationRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_node_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -208,13 +210,13 @@ func (x *NodeSeedRequest) Reset() {
 	}
 }
 
-func (x *NodeSeedRequest) String() string {
+func (x *EPIDAttestationRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*NodeSeedRequest) ProtoMessage() {}
+func (*EPIDAttestationRequest) ProtoMessage() {}
 
-func (x *NodeSeedRequest) ProtoReflect() protoreflect.Message {
+func (x *EPIDAttestationRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_node_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -226,33 +228,33 @@ func (x *NodeSeedRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use NodeSeedRequest.ProtoReflect.Descriptor instead.
-func (*NodeSeedRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use EPIDAttestationRequest.ProtoReflect.Descriptor instead.
+func (*EPIDAttestationRequest) Descriptor() ([]byte, []int) {
 	return file_node_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *NodeSeedRequest) GetFd() int32 {
+func (x *EPIDAttestationRequest) GetFd() int32 {
 	if x != nil {
 		return x.Fd
 	}
 	return 0
 }
 
-func (x *NodeSeedRequest) GetHostname() string {
+func (x *EPIDAttestationRequest) GetHostname() string {
 	if x != nil {
 		return x.Hostname
 	}
 	return ""
 }
 
-type NodeSeedResponse struct {
+type EPIDAttestationResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 }
 
-func (x *NodeSeedResponse) Reset() {
-	*x = NodeSeedResponse{}
+func (x *EPIDAttestationResponse) Reset() {
+	*x = EPIDAttestationResponse{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_node_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -260,13 +262,13 @@ func (x *NodeSeedResponse) Reset() {
 	}
 }
 
-func (x *NodeSeedResponse) String() string {
+func (x *EPIDAttestationResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*NodeSeedResponse) ProtoMessage() {}
+func (*EPIDAttestationResponse) ProtoMessage() {}
 
-func (x *NodeSeedResponse) ProtoReflect() protoreflect.Message {
+func (x *EPIDAttestationResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_node_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -278,9 +280,103 @@ func (x *NodeSeedResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use NodeSeedResponse.ProtoReflect.Descriptor instead.
-func (*NodeSeedResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use EPIDAttestationResponse.ProtoReflect.Descriptor instead.
+func (*EPIDAttestationResponse) Descriptor() ([]byte, []int) {
 	return file_node_proto_rawDescGZIP(), []int{5}
+}
+
+// DCAP Remote Attestation messages
+type DCAPAttestationRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Fd       int32  `protobuf:"varint,1,opt,name=fd,proto3" json:"fd,omitempty"`
+	Hostname string `protobuf:"bytes,2,opt,name=hostname,proto3" json:"hostname,omitempty"`
+}
+
+func (x *DCAPAttestationRequest) Reset() {
+	*x = DCAPAttestationRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_node_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *DCAPAttestationRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DCAPAttestationRequest) ProtoMessage() {}
+
+func (x *DCAPAttestationRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_node_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DCAPAttestationRequest.ProtoReflect.Descriptor instead.
+func (*DCAPAttestationRequest) Descriptor() ([]byte, []int) {
+	return file_node_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *DCAPAttestationRequest) GetFd() int32 {
+	if x != nil {
+		return x.Fd
+	}
+	return 0
+}
+
+func (x *DCAPAttestationRequest) GetHostname() string {
+	if x != nil {
+		return x.Hostname
+	}
+	return ""
+}
+
+type DCAPAttestationResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *DCAPAttestationResponse) Reset() {
+	*x = DCAPAttestationResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_node_proto_msgTypes[7]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *DCAPAttestationResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DCAPAttestationResponse) ProtoMessage() {}
+
+func (x *DCAPAttestationResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_node_proto_msgTypes[7]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DCAPAttestationResponse.ProtoReflect.Descriptor instead.
+func (*DCAPAttestationResponse) Descriptor() ([]byte, []int) {
+	return file_node_proto_rawDescGZIP(), []int{7}
 }
 
 type IsInitializedRequest struct {
@@ -292,7 +388,7 @@ type IsInitializedRequest struct {
 func (x *IsInitializedRequest) Reset() {
 	*x = IsInitializedRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_node_proto_msgTypes[6]
+		mi := &file_node_proto_msgTypes[8]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -305,7 +401,7 @@ func (x *IsInitializedRequest) String() string {
 func (*IsInitializedRequest) ProtoMessage() {}
 
 func (x *IsInitializedRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_node_proto_msgTypes[6]
+	mi := &file_node_proto_msgTypes[8]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -318,7 +414,7 @@ func (x *IsInitializedRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IsInitializedRequest.ProtoReflect.Descriptor instead.
 func (*IsInitializedRequest) Descriptor() ([]byte, []int) {
-	return file_node_proto_rawDescGZIP(), []int{6}
+	return file_node_proto_rawDescGZIP(), []int{8}
 }
 
 type IsInitializedResponse struct {
@@ -332,7 +428,7 @@ type IsInitializedResponse struct {
 func (x *IsInitializedResponse) Reset() {
 	*x = IsInitializedResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_node_proto_msgTypes[7]
+		mi := &file_node_proto_msgTypes[9]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -345,7 +441,7 @@ func (x *IsInitializedResponse) String() string {
 func (*IsInitializedResponse) ProtoMessage() {}
 
 func (x *IsInitializedResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_node_proto_msgTypes[7]
+	mi := &file_node_proto_msgTypes[9]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -358,7 +454,7 @@ func (x *IsInitializedResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IsInitializedResponse.ProtoReflect.Descriptor instead.
 func (*IsInitializedResponse) Descriptor() ([]byte, []int) {
-	return file_node_proto_rawDescGZIP(), []int{7}
+	return file_node_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *IsInitializedResponse) GetIsInitialized() bool {
@@ -377,7 +473,7 @@ type NodeStatusRequest struct {
 func (x *NodeStatusRequest) Reset() {
 	*x = NodeStatusRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_node_proto_msgTypes[8]
+		mi := &file_node_proto_msgTypes[10]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -390,7 +486,7 @@ func (x *NodeStatusRequest) String() string {
 func (*NodeStatusRequest) ProtoMessage() {}
 
 func (x *NodeStatusRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_node_proto_msgTypes[8]
+	mi := &file_node_proto_msgTypes[10]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -403,7 +499,7 @@ func (x *NodeStatusRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NodeStatusRequest.ProtoReflect.Descriptor instead.
 func (*NodeStatusRequest) Descriptor() ([]byte, []int) {
-	return file_node_proto_rawDescGZIP(), []int{8}
+	return file_node_proto_rawDescGZIP(), []int{10}
 }
 
 type NodeStatusResponse struct {
@@ -415,7 +511,7 @@ type NodeStatusResponse struct {
 func (x *NodeStatusResponse) Reset() {
 	*x = NodeStatusResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_node_proto_msgTypes[9]
+		mi := &file_node_proto_msgTypes[11]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -428,7 +524,7 @@ func (x *NodeStatusResponse) String() string {
 func (*NodeStatusResponse) ProtoMessage() {}
 
 func (x *NodeStatusResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_node_proto_msgTypes[9]
+	mi := &file_node_proto_msgTypes[11]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -441,7 +537,7 @@ func (x *NodeStatusResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NodeStatusResponse.ProtoReflect.Descriptor instead.
 func (*NodeStatusResponse) Descriptor() ([]byte, []int) {
-	return file_node_proto_rawDescGZIP(), []int{9}
+	return file_node_proto_rawDescGZIP(), []int{11}
 }
 
 type SetupRequest struct {
@@ -452,8 +548,9 @@ type SetupRequest struct {
 	// Types that are assignable to Req:
 	//
 	//	*SetupRequest_InitializeMasterKey
-	//	*SetupRequest_StartSeedServer
-	//	*SetupRequest_NodeSeed
+	//	*SetupRequest_StartBootstrapServer
+	//	*SetupRequest_EpidAttestationRequest
+	//	*SetupRequest_DcapAttestationRequest
 	//	*SetupRequest_IsInitialized
 	//	*SetupRequest_NodeStatus
 	Req isSetupRequest_Req `protobuf_oneof:"req"`
@@ -462,7 +559,7 @@ type SetupRequest struct {
 func (x *SetupRequest) Reset() {
 	*x = SetupRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_node_proto_msgTypes[10]
+		mi := &file_node_proto_msgTypes[12]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -475,7 +572,7 @@ func (x *SetupRequest) String() string {
 func (*SetupRequest) ProtoMessage() {}
 
 func (x *SetupRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_node_proto_msgTypes[10]
+	mi := &file_node_proto_msgTypes[12]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -488,7 +585,7 @@ func (x *SetupRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetupRequest.ProtoReflect.Descriptor instead.
 func (*SetupRequest) Descriptor() ([]byte, []int) {
-	return file_node_proto_rawDescGZIP(), []int{10}
+	return file_node_proto_rawDescGZIP(), []int{12}
 }
 
 func (m *SetupRequest) GetReq() isSetupRequest_Req {
@@ -505,16 +602,23 @@ func (x *SetupRequest) GetInitializeMasterKey() *InitializeMasterKeyRequest {
 	return nil
 }
 
-func (x *SetupRequest) GetStartSeedServer() *StartSeedServerRequest {
-	if x, ok := x.GetReq().(*SetupRequest_StartSeedServer); ok {
-		return x.StartSeedServer
+func (x *SetupRequest) GetStartBootstrapServer() *StartBootstrapServerRequest {
+	if x, ok := x.GetReq().(*SetupRequest_StartBootstrapServer); ok {
+		return x.StartBootstrapServer
 	}
 	return nil
 }
 
-func (x *SetupRequest) GetNodeSeed() *NodeSeedRequest {
-	if x, ok := x.GetReq().(*SetupRequest_NodeSeed); ok {
-		return x.NodeSeed
+func (x *SetupRequest) GetEpidAttestationRequest() *EPIDAttestationRequest {
+	if x, ok := x.GetReq().(*SetupRequest_EpidAttestationRequest); ok {
+		return x.EpidAttestationRequest
+	}
+	return nil
+}
+
+func (x *SetupRequest) GetDcapAttestationRequest() *DCAPAttestationRequest {
+	if x, ok := x.GetReq().(*SetupRequest_DcapAttestationRequest); ok {
+		return x.DcapAttestationRequest
 	}
 	return nil
 }
@@ -541,27 +645,33 @@ type SetupRequest_InitializeMasterKey struct {
 	InitializeMasterKey *InitializeMasterKeyRequest `protobuf:"bytes,1,opt,name=initializeMasterKey,proto3,oneof"`
 }
 
-type SetupRequest_StartSeedServer struct {
-	StartSeedServer *StartSeedServerRequest `protobuf:"bytes,2,opt,name=startSeedServer,proto3,oneof"`
+type SetupRequest_StartBootstrapServer struct {
+	StartBootstrapServer *StartBootstrapServerRequest `protobuf:"bytes,2,opt,name=startBootstrapServer,proto3,oneof"`
 }
 
-type SetupRequest_NodeSeed struct {
-	NodeSeed *NodeSeedRequest `protobuf:"bytes,3,opt,name=nodeSeed,proto3,oneof"`
+type SetupRequest_EpidAttestationRequest struct {
+	EpidAttestationRequest *EPIDAttestationRequest `protobuf:"bytes,3,opt,name=epidAttestationRequest,proto3,oneof"`
+}
+
+type SetupRequest_DcapAttestationRequest struct {
+	DcapAttestationRequest *DCAPAttestationRequest `protobuf:"bytes,4,opt,name=dcapAttestationRequest,proto3,oneof"`
 }
 
 type SetupRequest_IsInitialized struct {
-	IsInitialized *IsInitializedRequest `protobuf:"bytes,4,opt,name=isInitialized,proto3,oneof"`
+	IsInitialized *IsInitializedRequest `protobuf:"bytes,5,opt,name=isInitialized,proto3,oneof"`
 }
 
 type SetupRequest_NodeStatus struct {
-	NodeStatus *NodeStatusRequest `protobuf:"bytes,5,opt,name=nodeStatus,proto3,oneof"`
+	NodeStatus *NodeStatusRequest `protobuf:"bytes,6,opt,name=nodeStatus,proto3,oneof"`
 }
 
 func (*SetupRequest_InitializeMasterKey) isSetupRequest_Req() {}
 
-func (*SetupRequest_StartSeedServer) isSetupRequest_Req() {}
+func (*SetupRequest_StartBootstrapServer) isSetupRequest_Req() {}
 
-func (*SetupRequest_NodeSeed) isSetupRequest_Req() {}
+func (*SetupRequest_EpidAttestationRequest) isSetupRequest_Req() {}
+
+func (*SetupRequest_DcapAttestationRequest) isSetupRequest_Req() {}
 
 func (*SetupRequest_IsInitialized) isSetupRequest_Req() {}
 
@@ -577,52 +687,68 @@ var file_node_proto_rawDesc = []byte{
 	0x65, 0x73, 0x65, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x52, 0x0b, 0x73, 0x68, 0x6f, 0x75,
 	0x6c, 0x64, 0x52, 0x65, 0x73, 0x65, 0x74, 0x22, 0x1d, 0x0a, 0x1b, 0x49, 0x6e, 0x69, 0x74, 0x69,
 	0x61, 0x6c, 0x69, 0x7a, 0x65, 0x4d, 0x61, 0x73, 0x74, 0x65, 0x72, 0x4b, 0x65, 0x79, 0x52, 0x65,
-	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x28, 0x0a, 0x16, 0x53, 0x74, 0x61, 0x72, 0x74, 0x53,
-	0x65, 0x65, 0x64, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x2d, 0x0a, 0x1b, 0x53, 0x74, 0x61, 0x72, 0x74, 0x42,
+	0x6f, 0x6f, 0x74, 0x73, 0x74, 0x72, 0x61, 0x70, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x52, 0x65,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x0e, 0x0a, 0x02, 0x66, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x05, 0x52, 0x02, 0x66, 0x64, 0x22, 0x1e, 0x0a, 0x1c, 0x53, 0x74, 0x61, 0x72, 0x74, 0x42, 0x6f,
+	0x6f, 0x74, 0x73, 0x74, 0x72, 0x61, 0x70, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x52, 0x65, 0x73,
+	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x44, 0x0a, 0x16, 0x45, 0x50, 0x49, 0x44, 0x41, 0x74, 0x74,
+	0x65, 0x73, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12,
+	0x0e, 0x0a, 0x02, 0x66, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x02, 0x66, 0x64, 0x12,
+	0x1a, 0x0a, 0x08, 0x68, 0x6f, 0x73, 0x74, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x08, 0x68, 0x6f, 0x73, 0x74, 0x6e, 0x61, 0x6d, 0x65, 0x22, 0x19, 0x0a, 0x17, 0x45,
+	0x50, 0x49, 0x44, 0x41, 0x74, 0x74, 0x65, 0x73, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65,
+	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x44, 0x0a, 0x16, 0x44, 0x43, 0x41, 0x50, 0x41, 0x74,
+	0x74, 0x65, 0x73, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
 	0x12, 0x0e, 0x0a, 0x02, 0x66, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x02, 0x66, 0x64,
-	0x22, 0x19, 0x0a, 0x17, 0x53, 0x74, 0x61, 0x72, 0x74, 0x53, 0x65, 0x65, 0x64, 0x53, 0x65, 0x72,
-	0x76, 0x65, 0x72, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x3d, 0x0a, 0x0f, 0x4e,
-	0x6f, 0x64, 0x65, 0x53, 0x65, 0x65, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x0e,
-	0x0a, 0x02, 0x66, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x02, 0x66, 0x64, 0x12, 0x1a,
-	0x0a, 0x08, 0x68, 0x6f, 0x73, 0x74, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09,
-	0x52, 0x08, 0x68, 0x6f, 0x73, 0x74, 0x6e, 0x61, 0x6d, 0x65, 0x22, 0x12, 0x0a, 0x10, 0x4e, 0x6f,
-	0x64, 0x65, 0x53, 0x65, 0x65, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x16,
-	0x0a, 0x14, 0x49, 0x73, 0x49, 0x6e, 0x69, 0x74, 0x69, 0x61, 0x6c, 0x69, 0x7a, 0x65, 0x64, 0x52,
-	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x3d, 0x0a, 0x15, 0x49, 0x73, 0x49, 0x6e, 0x69, 0x74,
-	0x69, 0x61, 0x6c, 0x69, 0x7a, 0x65, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12,
-	0x24, 0x0a, 0x0d, 0x69, 0x73, 0x49, 0x6e, 0x69, 0x74, 0x69, 0x61, 0x6c, 0x69, 0x7a, 0x65, 0x64,
-	0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x52, 0x0d, 0x69, 0x73, 0x49, 0x6e, 0x69, 0x74, 0x69, 0x61,
-	0x6c, 0x69, 0x7a, 0x65, 0x64, 0x22, 0x13, 0x0a, 0x11, 0x4e, 0x6f, 0x64, 0x65, 0x53, 0x74, 0x61,
-	0x74, 0x75, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x14, 0x0a, 0x12, 0x4e, 0x6f,
-	0x64, 0x65, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
-	0x22, 0x82, 0x03, 0x0a, 0x0c, 0x53, 0x65, 0x74, 0x75, 0x70, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
-	0x74, 0x12, 0x59, 0x0a, 0x13, 0x69, 0x6e, 0x69, 0x74, 0x69, 0x61, 0x6c, 0x69, 0x7a, 0x65, 0x4d,
-	0x61, 0x73, 0x74, 0x65, 0x72, 0x4b, 0x65, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x25,
-	0x2e, 0x6e, 0x6f, 0x64, 0x65, 0x2e, 0x6e, 0x6f, 0x64, 0x65, 0x2e, 0x49, 0x6e, 0x69, 0x74, 0x69,
-	0x61, 0x6c, 0x69, 0x7a, 0x65, 0x4d, 0x61, 0x73, 0x74, 0x65, 0x72, 0x4b, 0x65, 0x79, 0x52, 0x65,
-	0x71, 0x75, 0x65, 0x73, 0x74, 0x48, 0x00, 0x52, 0x13, 0x69, 0x6e, 0x69, 0x74, 0x69, 0x61, 0x6c,
-	0x69, 0x7a, 0x65, 0x4d, 0x61, 0x73, 0x74, 0x65, 0x72, 0x4b, 0x65, 0x79, 0x12, 0x4d, 0x0a, 0x0f,
-	0x73, 0x74, 0x61, 0x72, 0x74, 0x53, 0x65, 0x65, 0x64, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x18,
-	0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x21, 0x2e, 0x6e, 0x6f, 0x64, 0x65, 0x2e, 0x6e, 0x6f, 0x64,
-	0x65, 0x2e, 0x53, 0x74, 0x61, 0x72, 0x74, 0x53, 0x65, 0x65, 0x64, 0x53, 0x65, 0x72, 0x76, 0x65,
-	0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x48, 0x00, 0x52, 0x0f, 0x73, 0x74, 0x61, 0x72,
-	0x74, 0x53, 0x65, 0x65, 0x64, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x12, 0x38, 0x0a, 0x08, 0x6e,
-	0x6f, 0x64, 0x65, 0x53, 0x65, 0x65, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e,
-	0x6e, 0x6f, 0x64, 0x65, 0x2e, 0x6e, 0x6f, 0x64, 0x65, 0x2e, 0x4e, 0x6f, 0x64, 0x65, 0x53, 0x65,
-	0x65, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x48, 0x00, 0x52, 0x08, 0x6e, 0x6f, 0x64,
-	0x65, 0x53, 0x65, 0x65, 0x64, 0x12, 0x47, 0x0a, 0x0d, 0x69, 0x73, 0x49, 0x6e, 0x69, 0x74, 0x69,
-	0x61, 0x6c, 0x69, 0x7a, 0x65, 0x64, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1f, 0x2e, 0x6e,
-	0x6f, 0x64, 0x65, 0x2e, 0x6e, 0x6f, 0x64, 0x65, 0x2e, 0x49, 0x73, 0x49, 0x6e, 0x69, 0x74, 0x69,
-	0x61, 0x6c, 0x69, 0x7a, 0x65, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x48, 0x00, 0x52,
-	0x0d, 0x69, 0x73, 0x49, 0x6e, 0x69, 0x74, 0x69, 0x61, 0x6c, 0x69, 0x7a, 0x65, 0x64, 0x12, 0x3e,
-	0x0a, 0x0a, 0x6e, 0x6f, 0x64, 0x65, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x18, 0x05, 0x20, 0x01,
-	0x28, 0x0b, 0x32, 0x1c, 0x2e, 0x6e, 0x6f, 0x64, 0x65, 0x2e, 0x6e, 0x6f, 0x64, 0x65, 0x2e, 0x4e,
-	0x6f, 0x64, 0x65, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
-	0x48, 0x00, 0x52, 0x0a, 0x6e, 0x6f, 0x64, 0x65, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x42, 0x05,
-	0x0a, 0x03, 0x72, 0x65, 0x71, 0x42, 0x26, 0x5a, 0x24, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e,
-	0x63, 0x6f, 0x6d, 0x2f, 0x53, 0x69, 0x67, 0x6d, 0x61, 0x47, 0x6d, 0x62, 0x48, 0x2f, 0x6c, 0x69,
-	0x62, 0x72, 0x75, 0x73, 0x74, 0x67, 0x6f, 0x2f, 0x74, 0x79, 0x70, 0x65, 0x73, 0x62, 0x06, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x12, 0x1a, 0x0a, 0x08, 0x68, 0x6f, 0x73, 0x74, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x08, 0x68, 0x6f, 0x73, 0x74, 0x6e, 0x61, 0x6d, 0x65, 0x22, 0x19, 0x0a, 0x17,
+	0x44, 0x43, 0x41, 0x50, 0x41, 0x74, 0x74, 0x65, 0x73, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x16, 0x0a, 0x14, 0x49, 0x73, 0x49, 0x6e, 0x69,
+	0x74, 0x69, 0x61, 0x6c, 0x69, 0x7a, 0x65, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22,
+	0x3d, 0x0a, 0x15, 0x49, 0x73, 0x49, 0x6e, 0x69, 0x74, 0x69, 0x61, 0x6c, 0x69, 0x7a, 0x65, 0x64,
+	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x24, 0x0a, 0x0d, 0x69, 0x73, 0x49, 0x6e,
+	0x69, 0x74, 0x69, 0x61, 0x6c, 0x69, 0x7a, 0x65, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x52,
+	0x0d, 0x69, 0x73, 0x49, 0x6e, 0x69, 0x74, 0x69, 0x61, 0x6c, 0x69, 0x7a, 0x65, 0x64, 0x22, 0x13,
+	0x0a, 0x11, 0x4e, 0x6f, 0x64, 0x65, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x22, 0x14, 0x0a, 0x12, 0x4e, 0x6f, 0x64, 0x65, 0x53, 0x74, 0x61, 0x74, 0x75,
+	0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x91, 0x04, 0x0a, 0x0c, 0x53, 0x65,
+	0x74, 0x75, 0x70, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x59, 0x0a, 0x13, 0x69, 0x6e,
+	0x69, 0x74, 0x69, 0x61, 0x6c, 0x69, 0x7a, 0x65, 0x4d, 0x61, 0x73, 0x74, 0x65, 0x72, 0x4b, 0x65,
+	0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x25, 0x2e, 0x6e, 0x6f, 0x64, 0x65, 0x2e, 0x6e,
+	0x6f, 0x64, 0x65, 0x2e, 0x49, 0x6e, 0x69, 0x74, 0x69, 0x61, 0x6c, 0x69, 0x7a, 0x65, 0x4d, 0x61,
+	0x73, 0x74, 0x65, 0x72, 0x4b, 0x65, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x48, 0x00,
+	0x52, 0x13, 0x69, 0x6e, 0x69, 0x74, 0x69, 0x61, 0x6c, 0x69, 0x7a, 0x65, 0x4d, 0x61, 0x73, 0x74,
+	0x65, 0x72, 0x4b, 0x65, 0x79, 0x12, 0x5c, 0x0a, 0x14, 0x73, 0x74, 0x61, 0x72, 0x74, 0x42, 0x6f,
+	0x6f, 0x74, 0x73, 0x74, 0x72, 0x61, 0x70, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x0b, 0x32, 0x26, 0x2e, 0x6e, 0x6f, 0x64, 0x65, 0x2e, 0x6e, 0x6f, 0x64, 0x65, 0x2e,
+	0x53, 0x74, 0x61, 0x72, 0x74, 0x42, 0x6f, 0x6f, 0x74, 0x73, 0x74, 0x72, 0x61, 0x70, 0x53, 0x65,
+	0x72, 0x76, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x48, 0x00, 0x52, 0x14, 0x73,
+	0x74, 0x61, 0x72, 0x74, 0x42, 0x6f, 0x6f, 0x74, 0x73, 0x74, 0x72, 0x61, 0x70, 0x53, 0x65, 0x72,
+	0x76, 0x65, 0x72, 0x12, 0x5b, 0x0a, 0x16, 0x65, 0x70, 0x69, 0x64, 0x41, 0x74, 0x74, 0x65, 0x73,
+	0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x18, 0x03, 0x20,
+	0x01, 0x28, 0x0b, 0x32, 0x21, 0x2e, 0x6e, 0x6f, 0x64, 0x65, 0x2e, 0x6e, 0x6f, 0x64, 0x65, 0x2e,
+	0x45, 0x50, 0x49, 0x44, 0x41, 0x74, 0x74, 0x65, 0x73, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x48, 0x00, 0x52, 0x16, 0x65, 0x70, 0x69, 0x64, 0x41, 0x74,
+	0x74, 0x65, 0x73, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x12, 0x5b, 0x0a, 0x16, 0x64, 0x63, 0x61, 0x70, 0x41, 0x74, 0x74, 0x65, 0x73, 0x74, 0x61, 0x74,
+	0x69, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0b,
+	0x32, 0x21, 0x2e, 0x6e, 0x6f, 0x64, 0x65, 0x2e, 0x6e, 0x6f, 0x64, 0x65, 0x2e, 0x44, 0x43, 0x41,
+	0x50, 0x41, 0x74, 0x74, 0x65, 0x73, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x48, 0x00, 0x52, 0x16, 0x64, 0x63, 0x61, 0x70, 0x41, 0x74, 0x74, 0x65, 0x73,
+	0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x47, 0x0a,
+	0x0d, 0x69, 0x73, 0x49, 0x6e, 0x69, 0x74, 0x69, 0x61, 0x6c, 0x69, 0x7a, 0x65, 0x64, 0x18, 0x05,
+	0x20, 0x01, 0x28, 0x0b, 0x32, 0x1f, 0x2e, 0x6e, 0x6f, 0x64, 0x65, 0x2e, 0x6e, 0x6f, 0x64, 0x65,
+	0x2e, 0x49, 0x73, 0x49, 0x6e, 0x69, 0x74, 0x69, 0x61, 0x6c, 0x69, 0x7a, 0x65, 0x64, 0x52, 0x65,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x48, 0x00, 0x52, 0x0d, 0x69, 0x73, 0x49, 0x6e, 0x69, 0x74, 0x69,
+	0x61, 0x6c, 0x69, 0x7a, 0x65, 0x64, 0x12, 0x3e, 0x0a, 0x0a, 0x6e, 0x6f, 0x64, 0x65, 0x53, 0x74,
+	0x61, 0x74, 0x75, 0x73, 0x18, 0x06, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1c, 0x2e, 0x6e, 0x6f, 0x64,
+	0x65, 0x2e, 0x6e, 0x6f, 0x64, 0x65, 0x2e, 0x4e, 0x6f, 0x64, 0x65, 0x53, 0x74, 0x61, 0x74, 0x75,
+	0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x48, 0x00, 0x52, 0x0a, 0x6e, 0x6f, 0x64, 0x65,
+	0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x42, 0x05, 0x0a, 0x03, 0x72, 0x65, 0x71, 0x42, 0x26, 0x5a,
+	0x24, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x53, 0x69, 0x67, 0x6d,
+	0x61, 0x47, 0x6d, 0x62, 0x48, 0x2f, 0x6c, 0x69, 0x62, 0x72, 0x75, 0x73, 0x74, 0x67, 0x6f, 0x2f,
+	0x74, 0x79, 0x70, 0x65, 0x73, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -637,31 +763,34 @@ func file_node_proto_rawDescGZIP() []byte {
 	return file_node_proto_rawDescData
 }
 
-var file_node_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_node_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_node_proto_goTypes = []interface{}{
-	(*InitializeMasterKeyRequest)(nil),  // 0: node.node.InitializeMasterKeyRequest
-	(*InitializeMasterKeyResponse)(nil), // 1: node.node.InitializeMasterKeyResponse
-	(*StartSeedServerRequest)(nil),      // 2: node.node.StartSeedServerRequest
-	(*StartSeedServerResponse)(nil),     // 3: node.node.StartSeedServerResponse
-	(*NodeSeedRequest)(nil),             // 4: node.node.NodeSeedRequest
-	(*NodeSeedResponse)(nil),            // 5: node.node.NodeSeedResponse
-	(*IsInitializedRequest)(nil),        // 6: node.node.IsInitializedRequest
-	(*IsInitializedResponse)(nil),       // 7: node.node.IsInitializedResponse
-	(*NodeStatusRequest)(nil),           // 8: node.node.NodeStatusRequest
-	(*NodeStatusResponse)(nil),          // 9: node.node.NodeStatusResponse
-	(*SetupRequest)(nil),                // 10: node.node.SetupRequest
+	(*InitializeMasterKeyRequest)(nil),   // 0: node.node.InitializeMasterKeyRequest
+	(*InitializeMasterKeyResponse)(nil),  // 1: node.node.InitializeMasterKeyResponse
+	(*StartBootstrapServerRequest)(nil),  // 2: node.node.StartBootstrapServerRequest
+	(*StartBootstrapServerResponse)(nil), // 3: node.node.StartBootstrapServerResponse
+	(*EPIDAttestationRequest)(nil),       // 4: node.node.EPIDAttestationRequest
+	(*EPIDAttestationResponse)(nil),      // 5: node.node.EPIDAttestationResponse
+	(*DCAPAttestationRequest)(nil),       // 6: node.node.DCAPAttestationRequest
+	(*DCAPAttestationResponse)(nil),      // 7: node.node.DCAPAttestationResponse
+	(*IsInitializedRequest)(nil),         // 8: node.node.IsInitializedRequest
+	(*IsInitializedResponse)(nil),        // 9: node.node.IsInitializedResponse
+	(*NodeStatusRequest)(nil),            // 10: node.node.NodeStatusRequest
+	(*NodeStatusResponse)(nil),           // 11: node.node.NodeStatusResponse
+	(*SetupRequest)(nil),                 // 12: node.node.SetupRequest
 }
 var file_node_proto_depIdxs = []int32{
-	0, // 0: node.node.SetupRequest.initializeMasterKey:type_name -> node.node.InitializeMasterKeyRequest
-	2, // 1: node.node.SetupRequest.startSeedServer:type_name -> node.node.StartSeedServerRequest
-	4, // 2: node.node.SetupRequest.nodeSeed:type_name -> node.node.NodeSeedRequest
-	6, // 3: node.node.SetupRequest.isInitialized:type_name -> node.node.IsInitializedRequest
-	8, // 4: node.node.SetupRequest.nodeStatus:type_name -> node.node.NodeStatusRequest
-	5, // [5:5] is the sub-list for method output_type
-	5, // [5:5] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	0,  // 0: node.node.SetupRequest.initializeMasterKey:type_name -> node.node.InitializeMasterKeyRequest
+	2,  // 1: node.node.SetupRequest.startBootstrapServer:type_name -> node.node.StartBootstrapServerRequest
+	4,  // 2: node.node.SetupRequest.epidAttestationRequest:type_name -> node.node.EPIDAttestationRequest
+	6,  // 3: node.node.SetupRequest.dcapAttestationRequest:type_name -> node.node.DCAPAttestationRequest
+	8,  // 4: node.node.SetupRequest.isInitialized:type_name -> node.node.IsInitializedRequest
+	10, // 5: node.node.SetupRequest.nodeStatus:type_name -> node.node.NodeStatusRequest
+	6,  // [6:6] is the sub-list for method output_type
+	6,  // [6:6] is the sub-list for method input_type
+	6,  // [6:6] is the sub-list for extension type_name
+	6,  // [6:6] is the sub-list for extension extendee
+	0,  // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_node_proto_init() }
@@ -695,7 +824,7 @@ func file_node_proto_init() {
 			}
 		}
 		file_node_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*StartSeedServerRequest); i {
+			switch v := v.(*StartBootstrapServerRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -707,7 +836,7 @@ func file_node_proto_init() {
 			}
 		}
 		file_node_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*StartSeedServerResponse); i {
+			switch v := v.(*StartBootstrapServerResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -719,7 +848,7 @@ func file_node_proto_init() {
 			}
 		}
 		file_node_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*NodeSeedRequest); i {
+			switch v := v.(*EPIDAttestationRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -731,7 +860,7 @@ func file_node_proto_init() {
 			}
 		}
 		file_node_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*NodeSeedResponse); i {
+			switch v := v.(*EPIDAttestationResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -743,7 +872,7 @@ func file_node_proto_init() {
 			}
 		}
 		file_node_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*IsInitializedRequest); i {
+			switch v := v.(*DCAPAttestationRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -755,7 +884,7 @@ func file_node_proto_init() {
 			}
 		}
 		file_node_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*IsInitializedResponse); i {
+			switch v := v.(*DCAPAttestationResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -767,7 +896,7 @@ func file_node_proto_init() {
 			}
 		}
 		file_node_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*NodeStatusRequest); i {
+			switch v := v.(*IsInitializedRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -779,7 +908,7 @@ func file_node_proto_init() {
 			}
 		}
 		file_node_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*NodeStatusResponse); i {
+			switch v := v.(*IsInitializedResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -791,6 +920,30 @@ func file_node_proto_init() {
 			}
 		}
 		file_node_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*NodeStatusRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_node_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*NodeStatusResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_node_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SetupRequest); i {
 			case 0:
 				return &v.state
@@ -803,10 +956,11 @@ func file_node_proto_init() {
 			}
 		}
 	}
-	file_node_proto_msgTypes[10].OneofWrappers = []interface{}{
+	file_node_proto_msgTypes[12].OneofWrappers = []interface{}{
 		(*SetupRequest_InitializeMasterKey)(nil),
-		(*SetupRequest_StartSeedServer)(nil),
-		(*SetupRequest_NodeSeed)(nil),
+		(*SetupRequest_StartBootstrapServer)(nil),
+		(*SetupRequest_EpidAttestationRequest)(nil),
+		(*SetupRequest_DcapAttestationRequest)(nil),
 		(*SetupRequest_IsInitialized)(nil),
 		(*SetupRequest_NodeStatus)(nil),
 	}
@@ -816,7 +970,7 @@ func file_node_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_node_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   11,
+			NumMessages:   13,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
