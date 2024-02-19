@@ -80,8 +80,7 @@ pub extern "C" fn ecall_allocate(
 
 #[no_mangle]
 pub extern "C" fn ecall_status() -> sgx_status_t {
-    // attestation::self_attestation::self_attest()
-    attestation::dcap::try_ecdsa()
+    attestation::self_attestation::self_attest()
 }
 
 #[no_mangle]
