@@ -12,6 +12,7 @@ use std::slice;
 
 use crate::protobuf_generated::ffi::{FFIRequest, FFIRequest_oneof_req};
 use crate::querier::GoQuerier;
+use crate::types::{Allocation, AllocationWithResult};
 
 mod backend;
 mod coder;
@@ -28,30 +29,7 @@ mod handlers;
 mod types;
 mod precompiles;
 
-pub const MAX_RESULT_LEN: usize = 4096;
-
-#[repr(C)]
-pub struct AllocationWithResult {
-    pub result_ptr: *mut u8,
-    pub result_len: usize,
-    pub status: sgx_status_t
-}
-
-impl Default for AllocationWithResult {
-    fn default() -> Self {
-        AllocationWithResult {
-            result_ptr: std::ptr::null_mut(),
-            result_len: 0,
-            status: sgx_status_t::SGX_ERROR_UNEXPECTED,
-        }
-    }
-}
-
-#[repr(C)]
-pub struct Allocation {
-    pub result_ptr: *mut u8,
-    pub result_size: usize,
-}
+// TODO: move all ECALLs to lib.rs
 
 #[no_mangle]
 /// Checks if there is already sealed master key
@@ -64,10 +42,12 @@ pub unsafe extern "C" fn ecall_is_initialized() -> i32 {
 } 
 
 #[no_mangle]
+/// Allocates provided data inside Intel SGX Enclave and returns 
+/// pointer to allocated data and data length.
 pub extern "C" fn ecall_allocate(
     data: *const u8,
     len: usize,
-) -> Allocation {
+) -> crate::types::Allocation {
     let slice = unsafe { slice::from_raw_parts(data, len) };
     let mut vector_copy = slice.to_vec();
 
@@ -79,6 +59,8 @@ pub extern "C" fn ecall_allocate(
 }
 
 #[no_mangle]
+/// Performes self attestation and outputs if system was configured
+/// properly and node can pass Remote Attestation.
 pub extern "C" fn ecall_status() -> sgx_status_t {
     attestation::self_attestation::self_attest()
 }

@@ -3,7 +3,7 @@ use sgx_tse::rsgx_create_report;
 use sgx_types::*;
 use std::vec::Vec;
 
-use crate::{attestation::cert, key_manager::RegistrationKey, ocall};
+use crate::{attestation::cert, ocall};
 
 // Intel's PCS signing root certificate.
 const PCS_TRUST_ROOT_CERT: &str = r#"-----BEGIN CERTIFICATE-----
