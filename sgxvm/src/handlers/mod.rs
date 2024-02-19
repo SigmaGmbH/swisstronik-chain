@@ -71,8 +71,8 @@ pub fn handle_public_key_request() -> AllocationWithResult {
 }
 
 /// Handles incoming request for calling contract or transferring value
-/// * querier – GoQuerier which is used to interact with Go (Cosmos) from SGX Enclave
-/// * data – EVM call data (destination, value, etc.)
+/// * querier - GoQuerier which is used to interact with Go (Cosmos) from SGX Enclave
+/// * data - EVM call data (destination, value, etc.)
 pub fn handle_evm_call_request(querier: *mut GoQuerier, data: SGXVMCallRequest) -> AllocationWithResult {
     let res = tx::handle_call_request_inner(querier, data);
     tx::convert_and_allocate_transaction_result(res)

@@ -1,14 +1,16 @@
 use ethereum::Log;
 use evm::backend::{Backend as EvmBackend, ApplyBackend as EvmApplyBackend, Basic, Apply};
-
 use primitive_types::{H160, H256, U256};
 use std::vec::Vec;
 
-use crate::{coder, GoQuerier};
-use crate::ocall;
-use crate::protobuf_generated::ffi;
-use crate::types::{Vicinity, Storage, ExtendedBackend};
-use crate::storage::FFIStorage;
+use crate::{
+    coder, 
+    querier,
+    ocall,
+    protobuf_generated::ffi,
+    types::{Vicinity, Storage, ExtendedBackend},
+    storage::FFIStorage,
+};
 
 /// Contains context of the transaction such as gas price, block hash, block timestamp, etc.
 pub struct TxContext {
@@ -37,7 +39,7 @@ impl From<ffi::TransactionContext> for TxContext {
 
 pub struct FFIBackend<'state> {
     // We keep GoQuerier to make it accessible for `OCALL` handlers
-    pub querier: *mut GoQuerier,
+    pub querier: *mut querier::GoQuerier,
     // Contains gas price and original sender
     pub vicinity: Vicinity,
     // Accounts state
@@ -65,7 +67,7 @@ impl<'state> EvmBackend for FFIBackend<'state> {
 
     fn block_hash(&self, number: U256) -> H256 {
         let encoded_request = coder::encode_query_block_hash(number);
-        match ocall::make_request(self.querier, encoded_request) {
+        match querier::make_request(self.querier, encoded_request) {
             Some(result) => {
                 // Decode protobuf
                 let decoded_result = match protobuf::parse_from_bytes::<ffi::QueryBlockHashResponse>(result.as_slice()) {
@@ -229,7 +231,7 @@ impl<'state> EvmApplyBackend for FFIBackend<'state> {
 
 impl<'state> FFIBackend<'state> {
     pub fn new(
-        querier: *mut GoQuerier,
+        querier: *mut querier::GoQuerier,
         storage: &'state mut FFIStorage,
         vicinity: Vicinity,
         tx_context: TxContext,

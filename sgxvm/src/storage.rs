@@ -2,24 +2,26 @@ use evm::backend::Basic;
 use primitive_types::{H160, H256, U256};
 use std::vec::Vec;
 
-use crate::protobuf_generated::ffi;
-use crate::querier::GoQuerier;
-use crate::ocall;
-use crate::coder;
-use crate::encryption;
-use crate::types::Storage;
+use crate::{
+    protobuf_generated::ffi,
+    querier,
+    ocall,
+    coder,
+    encryption,
+    types::Storage,
+};
 
 /// This struct allows us to obtain state from keeper
 /// that is located outside of Rust code
 pub struct FFIStorage {
-    pub querier: *mut GoQuerier,
+    pub querier: *mut querier::GoQuerier,
     pub context_timestamp: u64,
 }
 
 impl Storage for FFIStorage {
     fn contains_key(&self, key: &H160) -> bool {
         let encoded_request = coder::encode_contains_key(key);
-        if let Some(result) = ocall::make_request(self.querier, encoded_request) {
+        if let Some(result) = querier::make_request(self.querier, encoded_request) {
             // Decode protobuf
             let decoded_result = match protobuf::parse_from_bytes::<ffi::QueryContainsKeyResponse>(result.as_slice()) {
                 Ok(res) => res,
@@ -37,7 +39,7 @@ impl Storage for FFIStorage {
 
     fn get_account_storage_cell(&self, key: &H160, index: &H256) -> Option<H256> {
         let encoded_request = coder::encode_get_storage_cell(key, index);
-        if let Some(result) = ocall::make_request(self.querier, encoded_request) {
+        if let Some(result) = querier::make_request(self.querier, encoded_request) {
             // Decode protobuf
             let decoded_result = match protobuf::parse_from_bytes::<ffi::QueryGetAccountStorageCellResponse>(result.as_slice()) {
                 Ok(res) => res,
@@ -69,7 +71,7 @@ impl Storage for FFIStorage {
 
     fn get_account_code(&self, key: &H160) -> Option<Vec<u8>> {
         let encoded_request = coder::encode_get_account_code(key);
-        if let Some(result) = ocall::make_request(self.querier, encoded_request) {
+        if let Some(result) = querier::make_request(self.querier, encoded_request) {
             // Decode protobuf
             let decoded_result = match protobuf::parse_from_bytes::<ffi::QueryGetAccountCodeResponse>(result.as_slice()) {
                 Ok(res) => res,
@@ -88,7 +90,7 @@ impl Storage for FFIStorage {
 
     fn get_account(&self, key: &H160) -> Basic {
         let encoded_request = coder::encode_get_account(key);
-        if let Some(result) = ocall::make_request(self.querier, encoded_request) {
+        if let Some(result) = querier::make_request(self.querier, encoded_request) {
             // Decode protobuf
             let decoded_result = match protobuf::parse_from_bytes::<ffi::QueryGetAccountResponse>(result.as_slice()) {
                 Ok(res) => res,
@@ -110,7 +112,7 @@ impl Storage for FFIStorage {
 
     fn insert_account(&mut self, key: H160, data: Basic) {
         let encoded_request = coder::encode_insert_account(key, data);
-        if let Some(result) = ocall::make_request(self.querier, encoded_request) {
+        if let Some(result) = querier::make_request(self.querier, encoded_request) {
             match protobuf::parse_from_bytes::<ffi::QueryInsertAccountResponse>(result.as_slice()) {
                 Err(err) => {
                     println!("Cannot decode protobuf. Got error: {:?}", err);
@@ -124,7 +126,7 @@ impl Storage for FFIStorage {
 
     fn insert_account_code(&mut self, key: H160, code: Vec<u8>) {
         let encoded_request = coder::encode_insert_account_code(key, code);
-        if let Some(result) = ocall::make_request(self.querier, encoded_request) {
+        if let Some(result) = querier::make_request(self.querier, encoded_request) {
             match protobuf::parse_from_bytes::<ffi::QueryInsertAccountCodeResponse>(result.as_slice()) {
                 Err(err) => {
                     println!("Cannot decode protobuf. Got error: {:?}", err);
@@ -151,7 +153,7 @@ impl Storage for FFIStorage {
         };
 
         let encoded_request = coder::encode_insert_storage_cell(key, index, encrypted_value);
-        if let Some(result) = ocall::make_request(self.querier, encoded_request) {
+        if let Some(result) = querier::make_request(self.querier, encoded_request) {
             match protobuf::parse_from_bytes::<ffi::QueryInsertStorageCellResponse>(result.as_slice()) {
                 Err(err) => {
                     println!("Cannot decode protobuf. Got error: {:?}", err);
@@ -165,7 +167,7 @@ impl Storage for FFIStorage {
 
     fn remove(&mut self, key: &H160) {
         let encoded_request = coder::encode_remove(key);
-        if let Some(result) = ocall::make_request(self.querier, encoded_request) {
+        if let Some(result) = querier::make_request(self.querier, encoded_request) {
             match protobuf::parse_from_bytes::<ffi::QueryRemoveResponse>(result.as_slice()) {
                 Err(err) => {
                     println!("Cannot decode protobuf. Got error: {:?}", err);
@@ -179,7 +181,7 @@ impl Storage for FFIStorage {
 
     fn remove_storage_cell(&mut self, key: &H160, index: &H256) {
         let encoded_request = coder::encode_remove_storage_cell(key, index);
-        if let Some(result) = ocall::make_request(self.querier, encoded_request) {
+        if let Some(result) = querier::make_request(self.querier, encoded_request) {
             match protobuf::parse_from_bytes::<ffi::QueryRemoveStorageCellResponse>(result.as_slice()) {
                 Err(err) => {
                     println!("Cannot decode protobuf. Got error: {:?}", err);
@@ -193,7 +195,7 @@ impl Storage for FFIStorage {
 }
 
 impl FFIStorage {
-    pub fn new(querier: *mut GoQuerier, context_timestamp: u64) -> Self {
-        Self {querier, context_timestamp}
+    pub fn new(querier: *mut querier::GoQuerier, context_timestamp: u64) -> Self {
+        Self { querier, context_timestamp }
     }
 }
