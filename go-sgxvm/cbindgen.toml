@@ -65,13 +65,14 @@ exclude = [
     "ecall_share_seed",
     "ecall_request_seed",
     "ecall_is_initialized",
+    "ecall_dcap_attestation",
     "ocall_query_raw",
     "ocall_allocate",
     "ocall_sgx_init_quote",
     "ocall_get_ias_socket",
     "ocall_get_update_info",
     "ocall_get_quote",
-    "ecall_dcap_attestation",
+    "ocall_get_ecdsa_quote",
 ]
 # prefix = "CAPI_"
 item_types = []

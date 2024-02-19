@@ -240,7 +240,3 @@ void destroy_unmanaged_vector(struct UnmanagedVector v);
  * The string is owned by sgx_wrapper and must not be mutated or destroyed by the caller.
  */
 const char *version_str(void);
-
-sgx_status_t ocall_get_ecdsa_quote(const sgx_report_t *p_report,
-                                   uint8_t *p_quote,
-                                   uint32_t quote_size);

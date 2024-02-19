@@ -1,3 +1,4 @@
+use crate::dcap;
 /// This file contains implementations of various OCALLs for SGX-enclave
 
 use crate::errors::GoError;
@@ -16,6 +17,15 @@ pub extern "C" fn ocall_get_ecdsa_quote(
     quote_size: u32,
 ) -> sgx_status_t {
     let report = unsafe { *p_report };
+
+    match unsafe { dcap::get_ecdsa_quote(report, quote_size, p_quote) } {
+        Err(err) => {
+            println!("Cannot create DCAP quote. Status code: {:?}", err);
+            return err;
+        },
+        _ => {},
+    }
+
     sgx_status_t::SGX_SUCCESS
 }
 

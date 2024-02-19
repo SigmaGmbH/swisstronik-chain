@@ -31,15 +31,6 @@ pub unsafe extern "C" fn ecall_dcap_attestation(
     qe_target_info: &sgx_target_info_t,
 	quote_size: u32,
 ) -> sgx_status_t {
-    println!("[Enclave] Generating registration key");
-    let reg_key = match RegistrationKey::random() {
-        Ok(rk) => rk,
-        Err(err) => {
-            println!("[Enclave] Cannot generate registration key. Status code: {:?}", err);
-            return sgx_status_t::SGX_ERROR_UNEXPECTED;
-        }
-    };
-
     println!("[Enclave] Getting QE quote");
     let ecc_handle = SgxEccHandle::new();
     let _result = ecc_handle.open();
@@ -50,7 +41,7 @@ pub unsafe extern "C" fn ecall_dcap_attestation(
             return sgx_status_t::SGX_ERROR_UNEXPECTED;
         }
     };
-    let qe_quote = match get_qe_quote(reg_key.public_key().as_bytes(), qe_target_info, quote_size) {
+    let qe_quote = match get_qe_quote(&pub_k, qe_target_info, quote_size) {
         Ok(qe_quote) => qe_quote,
         Err(err) => {
             println!("[Enclave] Cannot obtain qe quote from PCCS. Status code: {:?}", err);
@@ -75,13 +66,19 @@ pub unsafe extern "C" fn ecall_dcap_attestation(
 }
 
 fn get_qe_quote(
-    pub_k: &[u8; 32],
+    pub_k: &sgx_ec256_public_t,
     qe_target_info: &sgx_target_info_t,
     quote_size: u32,
 ) -> SgxResult<Vec<u8>> {
-    // Copy public key to report data
     let mut report_data: sgx_report_data_t = sgx_report_data_t::default();
-    report_data.d.clone_from_slice(&pub_k.as_slice());
+    
+    // Copy public key to report data
+    let mut pub_k_gx = pub_k.gx.clone();
+    pub_k_gx.reverse();
+    let mut pub_k_gy = pub_k.gy.clone();
+    pub_k_gy.reverse();
+    report_data.d[..32].clone_from_slice(&pub_k_gx);
+    report_data.d[32..].clone_from_slice(&pub_k_gy);
 
     // Prepare report
     let report = match rsgx_create_report(qe_target_info, &report_data) {
