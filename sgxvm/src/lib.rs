@@ -6,7 +6,7 @@ extern crate sgx_tstd as std;
 extern crate rustls;
 
 extern crate sgx_types;
-use sgx_types::sgx_status_t;
+use sgx_types::*;
 
 use std::slice;
 
@@ -28,8 +28,6 @@ mod key_manager;
 mod handlers;
 mod types;
 mod precompiles;
-
-// TODO: move all ECALLs to lib.rs
 
 #[no_mangle]
 /// Checks if there is already sealed master key
@@ -72,33 +70,22 @@ pub extern "C" fn handle_request(
     request_data: *const u8,
     len: usize,
 ) -> AllocationWithResult {
-    let request_slice = unsafe { slice::from_raw_parts(request_data, len) };
+    handlers::handle_protobuf_request_inner(querier, request_data, len)
+}
 
-    let ffi_request = match protobuf::parse_from_bytes::<FFIRequest>(request_slice) {
-        Ok(ffi_request) => ffi_request,
-        Err(err) => {
-            println!("Got error during protobuf decoding: {:?}", err);
-            return AllocationWithResult::default();
-        }
-    };
-
-    match ffi_request.req {
-        Some(req) => {
-            match req {
-                FFIRequest_oneof_req::callRequest(data) => {
-                    handlers::handle_evm_call_request(querier, data)
-                },
-                FFIRequest_oneof_req::createRequest(data) => {
-                    handlers::handle_evm_create_request(querier, data)
-                },
-                FFIRequest_oneof_req::publicKeyRequest(_) => {
-                    handlers::handle_public_key_request()
-                }
-            }
-        }
-        None => {
-            println!("Got empty request during protobuf decoding");
-            AllocationWithResult::default()
-        }
-    }
+#[no_mangle]
+pub unsafe extern "C" fn ecall_dcap_attestation(
+    hostname: *const u8,
+    data_len: usize,
+    socket_fd: c_int,
+    qe_target_info: &sgx_target_info_t,
+	quote_size: u32,
+) -> sgx_status_t {
+    attestation::dcap::perform_dcap_attestation(
+        hostname,
+        data_len,
+        socket_fd,
+        qe_target_info,
+        quote_size,
+    )
 }

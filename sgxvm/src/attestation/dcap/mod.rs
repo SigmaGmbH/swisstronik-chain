@@ -23,8 +23,7 @@ KoZIzj0EAwIDSQAwRgIhAOW/5QkR+S9CiSDcNoowLuPRLsWGf/Yi7GSX94BgwTwg
 AiEA4J0lrHoMs+Xo5o/sX6O9QWxHRAvZUGOdRQ7cvqRXaqI=
 -----END CERTIFICATE-----"#;
 
-#[no_mangle]
-pub unsafe extern "C" fn ecall_dcap_attestation(
+pub fn perform_dcap_attestation(
     hostname: *const u8,
     data_len: usize,
     socket_fd: c_int,
