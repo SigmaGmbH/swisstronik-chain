@@ -15,13 +15,8 @@ use crate::attestation::{
 };
 use crate::key_manager::{RegistrationKey, UNSEALED_KEY_MANAGER};
 
-#[no_mangle]
-pub unsafe extern "C" fn ecall_share_seed(socket_fd: c_int) -> sgx_status_t {
-    share_seed_inner(socket_fd)
-}
-
 #[cfg(feature = "hardware_mode")]
-fn share_seed_inner(socket_fd: c_int) -> sgx_status_t {
+pub fn share_seed_inner(socket_fd: c_int) -> sgx_status_t {
     let cfg = match get_server_configuration() {
         Ok(cfg) => cfg,
         Err(err) => {
@@ -86,7 +81,7 @@ fn share_seed_inner(socket_fd: c_int) -> sgx_status_t {
 }
 
 #[cfg(not(feature = "hardware_mode"))]
-fn share_seed_inner(socket_fd: c_int) -> sgx_status_t {
+pub fn share_seed_inner(socket_fd: c_int) -> sgx_status_t {
     let mut conn = match TcpStream::new(socket_fd) {
         Ok(conn) => conn,
         Err(err) => {

@@ -17,26 +17,8 @@ use crate::attestation::{
 };
 use crate::key_manager::{KeyManager, RegistrationKey};
 
-#[no_mangle]
-pub unsafe extern "C" fn ecall_request_seed(
-    hostname: *const u8,
-    data_len: usize,
-    socket_fd: c_int,
-) -> sgx_status_t {
-    let hostname = slice::from_raw_parts(hostname, data_len);
-    let hostname = match String::from_utf8(hostname.to_vec()) {
-        Ok(hostname) => hostname,
-        Err(err) => {
-            println!("[Enclave] Seed Client. Cannot decode hostname. Reason: {:?}", err);
-            return sgx_status_t::SGX_ERROR_UNEXPECTED;
-        }
-    };
-
-    request_seed_inner(hostname, socket_fd)
-}
-
 #[cfg(feature = "hardware_mode")]
-fn request_seed_inner(hostname: String, socket_fd: c_int) -> sgx_status_t {
+pub fn request_seed_inner(hostname: String, socket_fd: c_int) -> sgx_status_t {
     let cfg = match get_client_configuration() {
         Ok(cfg) => cfg,
         Err(err) => {
@@ -141,7 +123,7 @@ fn request_seed_inner(hostname: String, socket_fd: c_int) -> sgx_status_t {
 }
 
 #[cfg(not(feature = "hardware_mode"))]
-fn request_seed_inner(_hostname: String, socket_fd: c_int) -> sgx_status_t {
+pub fn request_seed_inner(_hostname: String, socket_fd: c_int) -> sgx_status_t {
     let mut conn = TcpStream::new(socket_fd).unwrap();
 
     // Generate temporary registration key used for seed encryption during transfer

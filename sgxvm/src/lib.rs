@@ -9,6 +9,7 @@ extern crate sgx_types;
 use sgx_types::*;
 
 use std::slice;
+use std::string::String;
 
 use crate::protobuf_generated::ffi::{FFIRequest, FFIRequest_oneof_req};
 use crate::querier::GoQuerier;
@@ -74,6 +75,7 @@ pub extern "C" fn handle_request(
 }
 
 #[no_mangle]
+/// Handles incoming request for DCAP Remote Attestation
 pub unsafe extern "C" fn ecall_dcap_attestation(
     hostname: *const u8,
     data_len: usize,
@@ -88,4 +90,36 @@ pub unsafe extern "C" fn ecall_dcap_attestation(
         qe_target_info,
         quote_size,
     )
+}
+
+#[no_mangle]
+/// Handles incoming request for sharing master key with new node
+pub unsafe extern "C" fn ecall_share_seed(socket_fd: c_int) -> sgx_status_t {
+    attestation::seed_server::share_seed_inner(socket_fd)
+}
+
+#[no_mangle]
+/// Handles initialization of a new seed node by creating and sealing master key to seed file
+/// If `reset_flag` was set to `true`, it will rewrite existing seed file
+pub unsafe extern "C" fn ecall_init_master_key(reset_flag: i32) -> sgx_status_t {
+    key_manager::init_master_key_inner(reset_flag)
+}
+
+#[no_mangle]
+/// Handles incoming request for EPID Remote Attestation
+pub unsafe extern "C" fn ecall_request_seed(
+    hostname: *const u8,
+    data_len: usize,
+    socket_fd: c_int,
+) -> sgx_status_t {
+    let hostname = slice::from_raw_parts(hostname, data_len);
+    let hostname = match String::from_utf8(hostname.to_vec()) {
+        Ok(hostname) => hostname,
+        Err(err) => {
+            println!("[Enclave] Seed Client. Cannot decode hostname. Reason: {:?}", err);
+            return sgx_status_t::SGX_ERROR_UNEXPECTED;
+        }
+    };
+
+    attestation::seed_client::request_seed_inner(hostname, socket_fd)
 }
