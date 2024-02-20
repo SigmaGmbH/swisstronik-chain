@@ -226,14 +226,21 @@ pub unsafe extern "C" fn handle_initialization_request(
                         }
 
                         // Prepare target info for DCAP attestation
-                        let target_info = match crate::dcap::get_target_info() {
+                        let target_info = match dcap::get_target_info() {
                             Ok(target_info) => target_info,
                             Err(err) => return Err(Error::enclave_error(err.as_str()))
                         };
                         // Prepare quote size for DCAP attestation
-                        let quote_size = match crate::dcap::get_quote_size() {
+                        let quote_size = match dcap::get_quote_size() {
                             Ok(quote_size) => quote_size,
                             Err(err) => return Err(Error::enclave_error(err.as_str()))
+                        };
+                        // Initialize Quote Verification Enclave loading policy. Since quoting library is linked
+                        // we're using SGX_QL_EPHEMERAL for better utilization of EPC.
+                        let qve_load_policy = sgx_ql_request_policy_t::SGX_QL_EPHEMERAL;
+                        match dcap::set_qve_loading_policy(qve_load_policy) {
+                            Ok(()) => {},
+                            Err(err) => return Err(Error::enclave_error(err))
                         };
 
                         let mut retval = sgx_status_t::SGX_SUCCESS;
