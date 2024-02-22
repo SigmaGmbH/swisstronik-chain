@@ -73,6 +73,7 @@ exclude = [
     "ocall_get_update_info",
     "ocall_get_quote",
     "ocall_get_ecdsa_quote",
+    "ocall_get_qve_report",
 ]
 # prefix = "CAPI_"
 item_types = []

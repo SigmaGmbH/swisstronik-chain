@@ -1,6 +1,5 @@
 use crate::dcap;
 /// This file contains implementations of various OCALLs for SGX-enclave
-
 use crate::errors::GoError;
 use crate::memory::{U8SliceView, UnmanagedVector};
 use crate::types::{Allocation, AllocationWithResult, GoQuerier};
@@ -22,8 +21,8 @@ pub extern "C" fn ocall_get_ecdsa_quote(
         Err(err) => {
             println!("Cannot create DCAP quote. Status code: {:?}", err);
             return err;
-        },
-        _ => {},
+        }
+        _ => {}
     }
 
     sgx_status_t::SGX_SUCCESS
@@ -232,3 +231,94 @@ pub extern "C" fn ocall_query_raw(
     };
 }
 
+#[no_mangle]
+pub unsafe extern "C" fn ocall_get_qve_report(
+    p_quote: *const u8,
+    quote_len: u32,
+    timestamp: i64,
+    p_quote_collateral: *const sgx_ql_qve_collateral_t,
+    p_collateral_expiration_status: *mut u32,
+    p_quote_verification_result: *mut sgx_ql_qv_result_t,
+    p_qve_report_info: *mut sgx_ql_qe_report_info_t,
+    p_supplemental_data: *mut u8,
+    supplemental_data_size: u32,
+) -> sgx_status_t {
+    if p_quote.is_null()
+        || quote_len == 0
+        || p_quote_collateral.is_null()
+        || p_collateral_expiration_status.is_null()
+        || p_quote_verification_result.is_null()
+        || p_qve_report_info.is_null()
+        || p_supplemental_data.is_null()
+        || supplemental_data_size == 0
+    {
+        return sgx_status_t::SGX_ERROR_INVALID_PARAMETER;
+    }
+
+    let quote: Vec<u8> = unsafe { slice::from_raw_parts(p_quote, quote_len as usize).to_vec() };
+    let quote_collateral = unsafe { &*p_quote_collateral };
+    let qve_report_info = unsafe { *p_qve_report_info };
+
+    // Initialize Quote Verification Enclave loading policy. Since quoting library is linked
+    // we're using SGX_QL_EPHEMERAL for better utilization of EPC.
+    let qve_load_policy = sgx_ql_request_policy_t::SGX_QL_EPHEMERAL;
+    match dcap::set_qve_loading_policy(qve_load_policy) {
+        Ok(()) => {}
+        Err(err) => return err,
+    };
+
+    // // Obtain QvE supplemental data
+    // let mut qve_supplemental_data_size = 0u32;
+    // let ret_val = unsafe { 
+    //     sgx_qv_get_quote_supplemental_data_size(&mut qve_supplemental_data_size) 
+    // };
+    // if ret_val != sgx_quote3_error_t::SGX_QL_SUCCESS {
+    //     println!("Call to sgx_qv_get_quote_supplemental_data_size failed. Status code: {:?}", ret_val);
+    //     return sgx_status_t::SGX_ERROR_UNEXPECTED;
+    // }
+    // if qve_supplemental_data_size != supplemental_data_size {
+    //     println!("Quote supplemental data size is different from provided. Check if you installed all libraries from the same release");
+    //     return sgx_status_t::SGX_ERROR_UNEXPECTED;
+    // }
+
+    // If quote collateral was not provided, use null_ptr. QvE will obtain it by itself
+    let p_quote_collateral: *const sgx_ql_qve_collateral_t = match quote_collateral.version {
+        0 => std::ptr::null(),
+        _ => quote_collateral as *const sgx_ql_qve_collateral_t,
+    };
+
+    let mut collateral_expiration_status = 1u32;
+    let mut quote_verification_result = sgx_ql_qv_result_t::SGX_QL_QV_RESULT_OK;
+    let mut supplemental_data: Vec<u8> = vec![0; supplemental_data_size as usize];
+    let mut qve_report_info: sgx_ql_qe_report_info_t = qve_report_info;
+
+    let ret_val = unsafe {
+        sgx_qv_verify_quote(
+            quote.as_ptr(),
+            quote.len() as u32,
+            p_quote_collateral,
+            timestamp,
+            &mut collateral_expiration_status as *mut u32,
+            &mut quote_verification_result as *mut sgx_ql_qv_result_t,
+            &mut qve_report_info as *mut sgx_ql_qe_report_info_t,
+            supplemental_data_size,
+            supplemental_data.as_mut_ptr(),
+        )
+    };
+    if ret_val != sgx_quote3_error_t::SGX_QL_SUCCESS {
+        println!("Call to sgx_qv_verify_quote failed. Status code: {:?}", ret_val);
+        return sgx_status_t::SGX_ERROR_UNEXPECTED;
+    }
+
+    // let supplemental_data_slice =
+    //     unsafe { slice::from_raw_parts_mut(p_supplemental_data, supplemental_data_size as usize) };
+    // supplemental_data_slice.clone_from_slice(qve_report.supplemental_data.as_slice());
+
+    // unsafe {
+    //     *p_collateral_expiration_status = qve_report.collateral_expiration_status;
+    //     *p_quote_verification_result = qve_report.quote_verification_result;
+    //     *p_qve_report_info = qve_report.qve_report_info_return_value;
+    // };
+
+    sgx_status_t::SGX_SUCCESS
+}
