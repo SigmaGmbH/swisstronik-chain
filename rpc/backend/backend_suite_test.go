@@ -184,7 +184,7 @@ func (suite *BackendTestSuite) signAndEncodeEthTx(msgHandleTx *evmtypes.MsgHandl
 	err := msgHandleTx.Sign(ethSigner, signer)
 	suite.Require().NoError(err)
 
-	tx, err := msgHandleTx.BuildTx(suite.backend.clientCtx.TxConfig.NewTxBuilder(), "uswtr")
+	tx, err := msgHandleTx.BuildTx(suite.backend.clientCtx.TxConfig.NewTxBuilder(), "aswtr")
 	suite.Require().NoError(err)
 
 	txEncoder := suite.backend.clientCtx.TxConfig.TxEncoder()
