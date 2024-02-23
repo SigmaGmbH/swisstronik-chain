@@ -35,7 +35,7 @@ var (
 
 	UDenomtrace = transfertypes.DenomTrace{
 		Path:      "transfer/channel-0",
-		BaseDenom: "uswtr",
+		BaseDenom: "aswtr",
 	}
 	UIbcdenom = UDenomtrace.IBCDenom()
 

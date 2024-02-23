@@ -114,7 +114,7 @@ func (suite *BackendTestSuite) TestSendTransaction() {
 				msg := callArgsDefault.ToTransaction()
 				err = msg.Sign(ethSigner, suite.backend.clientCtx.Keyring)
 				suite.Require().NoError(err)
-				tx, _ := msg.BuildTx(suite.backend.clientCtx.TxConfig.NewTxBuilder(), "uswtr")
+				tx, _ := msg.BuildTx(suite.backend.clientCtx.TxConfig.NewTxBuilder(), "aswtr")
 				txEncoder := suite.backend.clientCtx.TxConfig.TxEncoder()
 				txBytes, _ := txEncoder(tx)
 				RegisterBroadcastTxError(client, txBytes)
@@ -143,7 +143,7 @@ func (suite *BackendTestSuite) TestSendTransaction() {
 				msg := callArgsDefault.ToTransaction()
 				err = msg.Sign(ethSigner, suite.backend.clientCtx.Keyring)
 				suite.Require().NoError(err)
-				tx, _ := msg.BuildTx(suite.backend.clientCtx.TxConfig.NewTxBuilder(), "uswtr")
+				tx, _ := msg.BuildTx(suite.backend.clientCtx.TxConfig.NewTxBuilder(), "aswtr")
 				txEncoder := suite.backend.clientCtx.TxConfig.TxEncoder()
 				txBytes, _ := txEncoder(tx)
 

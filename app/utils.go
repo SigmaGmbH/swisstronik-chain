@@ -52,7 +52,7 @@ const (
 	// TestnetChainID defines the Cascadia EIP155 chain ID for testnet
 	TestnetChainID = "swisstronik_1291"
 	// BaseDenom defines the Cascadia mainnet denomination
-	BaseDenom = "uswtr"
+	BaseDenom = "aswtr"
 )
 
 // DefaultConsensusParams defines the default Tendermint consensus params used in App testing.

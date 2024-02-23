@@ -354,7 +354,7 @@ func (suite AnteTestSuite) TestAnteHandler() {
 					addr[:],
 					sdk.NewCoins(
 						sdk.NewCoin(
-							"uswtr",
+							"aswtr",
 							sdk.NewInt(1),
 						),
 					),
@@ -384,7 +384,7 @@ func (suite AnteTestSuite) TestAnteHandler() {
 					addr[:],
 					sdk.NewCoins(
 						sdk.NewCoin(
-							"uswtr",
+							"aswtr",
 							sdk.NewInt(1),
 						),
 					),
@@ -414,7 +414,7 @@ func (suite AnteTestSuite) TestAnteHandler() {
 					addr[:],
 					sdk.NewCoins(
 						sdk.NewCoin(
-							"uswtr",
+							"aswtr",
 							sdk.NewInt(1),
 						),
 					),
@@ -469,7 +469,7 @@ func (suite AnteTestSuite) TestAnteHandler() {
 					addr[:],
 					sdk.NewCoins(
 						sdk.NewCoin(
-							"uswtr",
+							"aswtr",
 							sdk.NewInt(1),
 						),
 					),
@@ -499,7 +499,7 @@ func (suite AnteTestSuite) TestAnteHandler() {
 					addr[:],
 					sdk.NewCoins(
 						sdk.NewCoin(
-							"uswtr",
+							"aswtr",
 							sdk.NewInt(1),
 						),
 					),
@@ -529,7 +529,7 @@ func (suite AnteTestSuite) TestAnteHandler() {
 					addr[:],
 					sdk.NewCoins(
 						sdk.NewCoin(
-							"uswtr",
+							"aswtr",
 							sdk.NewInt(1),
 						),
 					),
@@ -559,7 +559,7 @@ func (suite AnteTestSuite) TestAnteHandler() {
 					addr[:],
 					sdk.NewCoins(
 						sdk.NewCoin(
-							"uswtr",
+							"aswtr",
 							sdk.NewInt(1),
 						),
 					),
@@ -592,7 +592,7 @@ func (suite AnteTestSuite) TestAnteHandler() {
 					addr[:],
 					sdk.NewCoins(
 						sdk.NewCoin(
-							"uswtr",
+							"aswtr",
 							sdk.NewInt(1),
 						),
 					),
@@ -621,7 +621,7 @@ func (suite AnteTestSuite) TestAnteHandler() {
 					addr[:],
 					sdk.NewCoins(
 						sdk.NewCoin(
-							"uswtr",
+							"aswtr",
 							sdk.NewInt(1),
 						),
 					),

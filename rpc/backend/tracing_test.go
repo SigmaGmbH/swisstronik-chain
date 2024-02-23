@@ -40,12 +40,12 @@ func (suite *BackendTestSuite) TestTraceTransaction() {
 
 	msgHandleTx.From = from.String()
 	msgHandleTx.Sign(ethSigner, suite.signer)
-	tx, _ := msgHandleTx.BuildTx(suite.backend.clientCtx.TxConfig.NewTxBuilder(), "uswtr")
+	tx, _ := msgHandleTx.BuildTx(suite.backend.clientCtx.TxConfig.NewTxBuilder(), "aswtr")
 	txBz, _ := txEncoder(tx)
 
 	msgHandleTx2.From = from.String()
 	msgHandleTx2.Sign(ethSigner, suite.signer)
-	tx2, _ := msgHandleTx.BuildTx(suite.backend.clientCtx.TxConfig.NewTxBuilder(), "uswtr")
+	tx2, _ := msgHandleTx.BuildTx(suite.backend.clientCtx.TxConfig.NewTxBuilder(), "aswtr")
 	txBz2, _ := txEncoder(tx2)
 
 	testCases := []struct {
