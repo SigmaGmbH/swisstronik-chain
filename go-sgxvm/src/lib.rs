@@ -8,7 +8,6 @@ extern crate parking_lot;
 extern crate libloading;
 
 mod enclave;
-mod cache;
 mod memory;
 mod version;
 mod errors;
