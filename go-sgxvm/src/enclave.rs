@@ -4,18 +4,18 @@ use crate::memory::{ByteSliceView, UnmanagedVector};
 use crate::protobuf_generated::node;
 use crate::types::{Allocation, AllocationWithResult, GoQuerier};
 
+use lazy_static::lazy_static;
+use parking_lot::{Condvar, Mutex};
 use protobuf::Message;
 use sgx_types::*;
 use sgx_urts::SgxEnclave;
-use std::panic::catch_unwind;
 use std::env;
 use std::ops::Deref;
+use std::panic::catch_unwind;
 use std::time::Duration;
-use lazy_static::lazy_static;
-use parking_lot::{Condvar, Mutex};
 
 static ENCLAVE_FILE: &'static str = "enclave.signed.so";
-const ENCLAVE_LOCK_TIMEOUT: u64 = 6*5;
+const ENCLAVE_LOCK_TIMEOUT: u64 = 6 * 5;
 
 lazy_static! {
     pub static ref ENCLAVE_DOORBELL: EnclaveDoorbell = EnclaveDoorbell::new();
@@ -38,7 +38,11 @@ extern "C" {
         len: usize,
     ) -> sgx_status_t;
 
-    pub fn ecall_init_master_key(eid: sgx_enclave_id_t, retval: *mut sgx_status_t, reset_flag: i32) -> sgx_status_t;
+    pub fn ecall_init_master_key(
+        eid: sgx_enclave_id_t,
+        retval: *mut sgx_status_t,
+        reset_flag: i32,
+    ) -> sgx_status_t;
 
     pub fn ecall_is_initialized(eid: sgx_enclave_id_t, retval: *mut i32) -> sgx_status_t;
 
@@ -65,8 +69,153 @@ extern "C" {
         data_len: usize,
         socket_fd: c_int,
         qe_target_info: &sgx_target_info_t,
-	    quote_size: u32,
+        quote_size: u32,
     ) -> sgx_status_t;
+}
+
+pub struct EnclaveApi;
+
+impl EnclaveApi {
+    pub fn check_node_status(eid: sgx_enclave_id_t) -> Result<(), Error> {
+        let mut ret_val = sgx_status_t::SGX_SUCCESS;
+        let res = unsafe { ecall_status(eid, &mut ret_val) };
+
+        match (res, ret_val) {
+            (sgx_status_t::SGX_SUCCESS, sgx_status_t::SGX_SUCCESS) => Ok(()),
+            (_, _) => {
+                let error_str = if res == sgx_status_t::SGX_SUCCESS {
+                    res.as_str()
+                } else {
+                    ret_val.as_str()
+                };
+                Err(Error::enclave_error(error_str))
+            }
+        }
+    }
+
+    pub fn initialize_master_key(eid: sgx_enclave_id_t, reset: bool) -> Result<(), Error> {
+        let mut ret_val = sgx_status_t::SGX_SUCCESS;
+        let res = unsafe { ecall_init_master_key(eid, &mut ret_val, reset as i32) };
+
+        match (res, ret_val) {
+            (sgx_status_t::SGX_SUCCESS, sgx_status_t::SGX_SUCCESS) => Ok(()),
+            (_, _) => {
+                let error_str = if res == sgx_status_t::SGX_SUCCESS {
+                    res.as_str()
+                } else {
+                    ret_val.as_str()
+                };
+                Err(Error::enclave_error(error_str))
+            }
+        }
+    }
+
+    pub fn start_bootstrap_server(eid: sgx_enclave_id_t, fd: i32) -> Result<(), Error> {
+        let mut ret_val = sgx_status_t::SGX_SUCCESS;
+        let res = unsafe { ecall_share_seed(eid, &mut ret_val, fd) };
+
+        match (res, ret_val) {
+            (sgx_status_t::SGX_SUCCESS, sgx_status_t::SGX_SUCCESS) => Ok(()),
+            (_, _) => {
+                let error_str = if res == sgx_status_t::SGX_SUCCESS {
+                    res.as_str()
+                } else {
+                    ret_val.as_str()
+                };
+                Err(Error::enclave_error(error_str))
+            }
+        }
+    }
+
+    pub fn perform_epid_attestation(
+        eid: sgx_enclave_id_t,
+        hostname: String,
+        fd: i32,
+    ) -> Result<(), Error> {
+        if hostname.is_empty() {
+            return Err(Error::unset_arg("Hostname was not set"));
+        }
+
+        let mut ret_val = sgx_status_t::SGX_SUCCESS;
+        let res = unsafe {
+            ecall_request_seed(
+                eid,
+                &mut ret_val,
+                hostname.as_ptr() as *const u8,
+                hostname.len(),
+                fd,
+            )
+        };
+
+        match (res, ret_val) {
+            (sgx_status_t::SGX_SUCCESS, sgx_status_t::SGX_SUCCESS) => Ok(()),
+            (_, _) => {
+                let error_str = if res == sgx_status_t::SGX_SUCCESS {
+                    res.as_str()
+                } else {
+                    ret_val.as_str()
+                };
+                Err(Error::enclave_error(error_str))
+            }
+        }
+    }
+
+    pub fn perform_dcap_attestation(
+        eid: sgx_enclave_id_t,
+        hostname: String,
+        fd: i32,
+    ) -> Result<(), Error> {
+        // Validate provided host
+        if hostname.is_empty() {
+            return Err(Error::unset_arg("Hostname was not set"));
+        }
+
+        // Prepare target info for DCAP attestation
+        let target_info = match unsafe { dcap::get_target_info() } {
+            Ok(target_info) => target_info,
+            Err(err) => return Err(Error::enclave_error(err.as_str())),
+        };
+        // Prepare quote size for DCAP attestation
+        let quote_size = match unsafe { dcap::get_quote_size() } {
+            Ok(quote_size) => quote_size,
+            Err(err) => return Err(Error::enclave_error(err.as_str())),
+        };
+
+        let mut ret_val = sgx_status_t::SGX_SUCCESS;
+        let res = unsafe {
+            ecall_dcap_attestation(
+                eid,
+                &mut ret_val,
+                hostname.as_ptr() as *const u8,
+                hostname.len(),
+                fd,
+                &target_info,
+                quote_size,
+            )
+        };
+
+        match (res, ret_val) {
+            (sgx_status_t::SGX_SUCCESS, sgx_status_t::SGX_SUCCESS) => Ok(()),
+            (_, _) => {
+                let error_str = if res == sgx_status_t::SGX_SUCCESS {
+                    res.as_str()
+                } else {
+                    ret_val.as_str()
+                };
+                Err(Error::enclave_error(error_str))
+            }
+        }
+    }
+
+    pub fn is_enclave_initialized(eid: sgx_enclave_id_t) -> Result<bool, Error> {
+        let mut ret_val = 0i32;
+        let res = unsafe { ecall_is_initialized(eid, &mut ret_val) };
+
+        match res {
+            sgx_status_t::SGX_SUCCESS => Ok(ret_val != 0),
+            _ => Err(Error::enclave_error(res.as_str())),
+        }
+    }
 }
 
 pub fn init_enclave() -> SgxResult<SgxEnclave> {
@@ -83,13 +232,21 @@ pub fn init_enclave() -> SgxResult<SgxEnclave> {
     let enclave_home = match env::var("ENCLAVE_HOME") {
         Ok(home) => home,
         Err(_) => {
-            let dir_path = String::from(std::env::home_dir().expect("Please specify ENCLAVE_HOME env variable explicitly").to_str().unwrap());
+            let dir_path = String::from(
+                std::env::home_dir()
+                    .expect("Please specify ENCLAVE_HOME env variable explicitly")
+                    .to_str()
+                    .unwrap(),
+            );
             format!("{}/.swisstronik-enclave", dir_path)
         }
     };
     let enclave_path = format!("{}/{}", enclave_home, ENCLAVE_FILE);
 
-    println!("[DEBUG] Initialize enclave. Enclave location: {:?}", enclave_path);
+    println!(
+        "[DEBUG] Initialize enclave. Enclave location: {:?}",
+        enclave_path
+    );
 
     SgxEnclave::create(
         enclave_path,
@@ -129,155 +286,41 @@ pub unsafe extern "C" fn handle_initialization_request(
             Some(req) => {
                 match req {
                     node::SetupRequest_oneof_req::nodeStatus(_req) => {
-                        let mut retval = sgx_status_t::SGX_SUCCESS;
-                        let res = ecall_status(evm_enclave.geteid(), &mut retval);
-
-                        match (res, retval) {
-                            (sgx_status_t::SGX_SUCCESS, sgx_status_t::SGX_SUCCESS) => {
-                                let response = node::NodeStatusResponse::new();
-                                let response_bytes: Vec<u8> = response.write_to_bytes()?;
-                                Ok(response_bytes)
-                            },
-                            (_, _) => {
-                                let error_str = if res == sgx_status_t::SGX_SUCCESS {
-                                    res.as_str()
-                                } else {
-                                    retval.as_str()
-                                };
-                                Err(Error::enclave_error(error_str))
-                            }
-                        }
-                    },
+                        EnclaveApi::check_node_status(evm_enclave.geteid())?;
+                        let response = node::NodeStatusResponse::new();
+                        let response_bytes: Vec<u8> = response.write_to_bytes()?;
+                        Ok(response_bytes)
+                    }
                     node::SetupRequest_oneof_req::initializeMasterKey(req) => {
-                        let mut retval = sgx_status_t::SGX_SUCCESS;
-                        let should_reset = req.shouldReset as i32;
-                        let res = ecall_init_master_key(evm_enclave.geteid(), &mut retval, should_reset);
-
-                        match (res, retval) {
-                            (sgx_status_t::SGX_SUCCESS, sgx_status_t::SGX_SUCCESS) => {
-                                let response = node::InitializeMasterKeyResponse::new();
-                                let response_bytes = response.write_to_bytes()?;
-                                Ok(response_bytes)
-                            },
-                            (_, _) => {
-                                let error_str = if res == sgx_status_t::SGX_SUCCESS {
-                                    res.as_str()
-                                } else {
-                                    retval.as_str()
-                                };
-                                Err(Error::enclave_error(error_str))
-                            }
-                        }
-                    },
+                        EnclaveApi::initialize_master_key(evm_enclave.geteid(), req.shouldReset)?;
+                        let response = node::InitializeMasterKeyResponse::new();
+                        let response_bytes = response.write_to_bytes()?;
+                        Ok(response_bytes)
+                    }
                     node::SetupRequest_oneof_req::startBootstrapServer(req) => {
-                        let mut retval = sgx_status_t::SGX_SUCCESS;
-                        let res = ecall_share_seed(evm_enclave.geteid(), &mut retval, req.fd);
-
-                        match (res, retval) {
-                            (sgx_status_t::SGX_SUCCESS, sgx_status_t::SGX_SUCCESS) => {
-                                let response = node::StartBootstrapServerResponse::new();
-                                let response_bytes = response.write_to_bytes()?;
-                                Ok(response_bytes)
-                            },
-                            (_, _) => {
-                                let error_str = if res == sgx_status_t::SGX_SUCCESS {
-                                    res.as_str()
-                                } else {
-                                    retval.as_str()
-                                };
-                                Err(Error::enclave_error(error_str))
-                            }
-                        }
+                        EnclaveApi::start_bootstrap_server(evm_enclave.geteid(), req.fd)?;
+                        let response = node::StartBootstrapServerResponse::new();
+                        let response_bytes = response.write_to_bytes()?;
+                        Ok(response_bytes)
                     }
                     node::SetupRequest_oneof_req::epidAttestationRequest(req) => {
-                        if req.hostname.is_empty() {
-                            return Err(Error::unset_arg("Hostname was not set"));
-                        }
-
-                        let mut retval = sgx_status_t::SGX_SUCCESS;
-                        let res = ecall_request_seed(
-                            evm_enclave.geteid(),
-                            &mut retval,
-                            req.hostname.as_ptr() as *const u8,
-                            req.hostname.len(),
-                            req.fd
-                        );
-
-                        match (res, retval) {
-                            (sgx_status_t::SGX_SUCCESS, sgx_status_t::SGX_SUCCESS) => {
-                                let response = node::EPIDAttestationResponse::new();
-                                let response_bytes = response.write_to_bytes()?;
-                                Ok(response_bytes)
-                            }
-                            (_, _) => {
-                                let error_str = if res == sgx_status_t::SGX_SUCCESS {
-                                    res.as_str()
-                                } else {
-                                    retval.as_str()
-                                };
-                                Err(Error::enclave_error(error_str))
-                            }
-                        }
-                    },
+                        EnclaveApi::perform_epid_attestation(evm_enclave.geteid(), req.hostname, req.fd)?;
+                        let response = node::EPIDAttestationResponse::new();
+                        let response_bytes = response.write_to_bytes()?;
+                        Ok(response_bytes)
+                    }
                     node::SetupRequest_oneof_req::dcapAttestationRequest(req) => {
-                        // Validate provided host
-                        if req.hostname.is_empty() {
-                            return Err(Error::unset_arg("Hostname was not set"));
-                        }
-
-                        // Prepare target info for DCAP attestation
-                        let target_info = match dcap::get_target_info() {
-                            Ok(target_info) => target_info,
-                            Err(err) => return Err(Error::enclave_error(err.as_str()))
-                        };
-                        // Prepare quote size for DCAP attestation
-                        let quote_size = match dcap::get_quote_size() {
-                            Ok(quote_size) => quote_size,
-                            Err(err) => return Err(Error::enclave_error(err.as_str()))
-                        };
-
-                        let mut retval = sgx_status_t::SGX_SUCCESS;
-                        let res = ecall_dcap_attestation(
-                            evm_enclave.geteid(),
-                            &mut retval,
-                            req.hostname.as_ptr() as *const u8,
-                            req.hostname.len(),
-                            req.fd,
-                            &target_info,
-                            quote_size,
-                        );
-
-                        match (res, retval) {
-                            (sgx_status_t::SGX_SUCCESS, sgx_status_t::SGX_SUCCESS) => {
-                                let response = node::DCAPAttestationResponse::new();
-                                let response_bytes = response.write_to_bytes()?;
-                                Ok(response_bytes)
-                            }
-                            (_, _) => {
-                                let error_str = if res == sgx_status_t::SGX_SUCCESS {
-                                    res.as_str()
-                                } else {
-                                    retval.as_str()
-                                };
-                                Err(Error::enclave_error(error_str))
-                            }
-                        }
-                    },
+                        EnclaveApi::perform_dcap_attestation(evm_enclave.geteid(), req.hostname, req.fd)?;
+                        let response = node::DCAPAttestationResponse::new();
+                        let response_bytes = response.write_to_bytes()?;
+                        Ok(response_bytes)
+                    }
                     node::SetupRequest_oneof_req::isInitialized(_) => {
-                        let mut retval = 0i32;
-                        let res = ecall_is_initialized(evm_enclave.geteid(), &mut retval);
-
-                        match res {
-                            sgx_status_t::SGX_SUCCESS => {
-                                let mut response = node::IsInitializedResponse::new();
-                                response.isInitialized = retval != 0;
-                                let response_bytes = response.write_to_bytes()?;
-                                Ok(response_bytes)
-                            },
-                            _ => {
-                                Err(Error::enclave_error(res.as_str()))
-                            }
-                        }
+                        let is_initialized = EnclaveApi::is_enclave_initialized(evm_enclave.geteid())?;
+                        let mut response = node::IsInitializedResponse::new();
+                        response.isInitialized = is_initialized;
+                        let response_bytes = response.write_to_bytes()?;
+                        Ok(response_bytes)
                     }
                 }
             }
@@ -301,7 +344,7 @@ pub struct EnclaveDoorbell {
 
 impl EnclaveDoorbell {
     fn new() -> Self {
-        println!("Setting up enclave doorbell");
+        println!("[Enclave Doorbell] Setting up enclave doorbell");
         Self {
             enclave: init_enclave(),
             condvar: Condvar::new(),
