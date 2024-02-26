@@ -68,6 +68,33 @@ extern "C" {
         qe_target_info: &sgx_target_info_t,
         quote_size: u32,
     ) -> sgx_status_t;
+
+    pub fn ecall_create_report(
+        eid: sgx_enclave_id_t,
+        retval: *mut sgx_status_t,
+        p_qe3_target: *const sgx_target_info_t,
+        p_report: *mut sgx_report_t,
+    ) -> sgx_status_t;
+
+    pub fn ecall_get_target_info(
+        eid: sgx_enclave_id_t,
+        retval: *mut sgx_status_t,
+        target_info: *mut sgx_target_info_t,
+    ) -> sgx_status_t;
+
+    pub fn ecall_tvl_verify_qve_report_and_identity(
+        eid: sgx_enclave_id_t,
+        retval: *mut sgx_status_t,
+        p_quote: *const uint8_t,
+        quote_size: uint32_t,
+        p_qve_report_info: *const sgx_ql_qe_report_info_t,
+        expiration_check_date: time_t,
+        collateral_expiration_status: uint32_t,
+        quote_verification_result: sgx_ql_qv_result_t,
+        p_supplemental_data: *const uint8_t,
+        supplemental_data_size: uint32_t,
+        qve_isvsvn_threshold: sgx_isv_svn_t,
+    ) -> sgx_quote3_error_t;
 }
 
 #[no_mangle]
