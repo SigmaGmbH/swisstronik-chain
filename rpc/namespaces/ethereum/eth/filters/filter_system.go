@@ -23,8 +23,8 @@ import (
 
 	"github.com/pkg/errors"
 
+	"cosmossdk.io/log"
 	tmjson "github.com/cometbft/cometbft/libs/json"
-	"github.com/cometbft/cometbft/libs/log"
 	tmquery "github.com/cometbft/cometbft/libs/pubsub/query"
 	coretypes "github.com/cometbft/cometbft/rpc/core/types"
 	rpcclient "github.com/cometbft/cometbft/rpc/jsonrpc/client"
@@ -43,7 +43,7 @@ import (
 
 var (
 	txEvents  = tmtypes.QueryForEvent(tmtypes.EventTx).String()
-	evmEvents = tmquery.MustParse(fmt.Sprintf("%s='%s' AND %s.%s='%s'",
+	evmEvents = tmquery.MustCompile(fmt.Sprintf("%s='%s' AND %s.%s='%s'",
 		tmtypes.EventTypeKey,
 		tmtypes.EventTx,
 		sdk.EventTypeMessage,

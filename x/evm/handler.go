@@ -21,19 +21,21 @@ import (
 	errortypes "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"swisstronik/x/evm/types"
+
+	bam "github.com/cosmos/cosmos-sdk/baseapp"
 )
 
 // NewHandler returns a handler for Ethermint type messages.
-func NewHandler(server types.MsgServer) sdk.Handler {
+func NewHandler(server types.MsgServer) bam.MsgServiceHandler {
 	return func(ctx sdk.Context, msg sdk.Msg) (result *sdk.Result, err error) {
 		ctx = ctx.WithEventManager(sdk.NewEventManager())
 
 		switch msg := msg.(type) {
 		case *types.MsgHandleTx:
-			res, err := server.HandleTx(sdk.WrapSDKContext(ctx), msg)
+			res, err := server.HandleTx(ctx, msg)
 			return sdk.WrapServiceResult(ctx, res, err)
 		case *types.MsgUpdateParams:
-			res, err := server.UpdateParams(sdk.WrapSDKContext(ctx), msg)
+			res, err := server.UpdateParams(ctx, msg)
 			return sdk.WrapServiceResult(ctx, res, err)
 		default:
 			err := errorsmod.Wrapf(errortypes.ErrUnknownRequest, "unrecognized %s message type: %T", types.ModuleName, msg)

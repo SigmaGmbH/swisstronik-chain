@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"fmt"
 
-	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
-	ibctesting "github.com/cosmos/ibc-go/v7/testing"
+	channeltypes "github.com/cosmos/ibc-go/v8/modules/core/04-channel/types"
+	ibctesting "github.com/cosmos/ibc-go/v8/testing"
 )
 
 // Path contains two endpoints representing two chains connected over IBC
@@ -53,7 +53,7 @@ func (path *Path) RelayPacket(packet channeltypes.Packet) error {
 			return err
 		}
 
-		ack, err := ibctesting.ParseAckFromEvents(res.GetEvents())
+		ack, err := ibctesting.ParseAckFromEvents(res.Events)
 		if err != nil {
 			return err
 		}
@@ -78,7 +78,7 @@ func (path *Path) RelayPacket(packet channeltypes.Packet) error {
 			return err
 		}
 
-		ack, err := ibctesting.ParseAckFromEvents(res.GetEvents())
+		ack, err := ibctesting.ParseAckFromEvents(res.Events)
 		if err != nil {
 			return err
 		}

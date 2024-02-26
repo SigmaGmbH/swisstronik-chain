@@ -9,9 +9,10 @@ import (
 
 	teststypes "swisstronik/types/tests"
 
-	transfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
-	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
-	ibctesting "github.com/cosmos/ibc-go/v7/testing"
+	sdkmath "cosmossdk.io/math"
+	transfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
+	channeltypes "github.com/cosmos/ibc-go/v8/modules/core/04-channel/types"
+	ibctesting "github.com/cosmos/ibc-go/v8/testing"
 )
 
 func init() {
@@ -247,7 +248,7 @@ func TestGetReceivedCoin(t *testing.T) {
 			"channel-0",
 			"uosmo",
 			"10",
-			sdk.Coin{Denom: teststypes.UosmoIbcdenom, Amount: sdk.NewInt(10)},
+			sdk.Coin{Denom: teststypes.UosmoIbcdenom, Amount: sdkmath.NewInt(10)},
 		},
 		{
 			"transfer ibc wrapped coin to destination which is its source",
@@ -257,7 +258,7 @@ func TestGetReceivedCoin(t *testing.T) {
 			"channel-0",
 			"transfer/channel-0/uswtr",
 			"10",
-			sdk.Coin{Denom: "uswtr", Amount: sdk.NewInt(10)},
+			sdk.Coin{Denom: "uswtr", Amount: sdkmath.NewInt(10)},
 		},
 		{
 			"transfer 2x ibc wrapped coin to destination which is its source",
@@ -267,7 +268,7 @@ func TestGetReceivedCoin(t *testing.T) {
 			"channel-2",
 			"transfer/channel-0/transfer/channel-1/uatom",
 			"10",
-			sdk.Coin{Denom: teststypes.UatomIbcdenom, Amount: sdk.NewInt(10)},
+			sdk.Coin{Denom: teststypes.UatomIbcdenom, Amount: sdkmath.NewInt(10)},
 		},
 		{
 			"transfer ibc wrapped coin to destination which is not its source",
@@ -277,7 +278,7 @@ func TestGetReceivedCoin(t *testing.T) {
 			"channel-0",
 			"transfer/channel-1/uatom",
 			"10",
-			sdk.Coin{Denom: teststypes.UatomOsmoIbcdenom, Amount: sdk.NewInt(10)},
+			sdk.Coin{Denom: teststypes.UatomOsmoIbcdenom, Amount: sdkmath.NewInt(10)},
 		},
 	}
 
@@ -298,25 +299,25 @@ func TestGetSentCoin(t *testing.T) {
 			"get unwrapped uswtr coin",
 			"uswtr",
 			"10",
-			sdk.Coin{Denom: "uswtr", Amount: sdk.NewInt(10)},
+			sdk.Coin{Denom: "uswtr", Amount: sdkmath.NewInt(10)},
 		},
 		{
 			"get ibc wrapped uosmo coin",
 			"transfer/channel-0/uosmo",
 			"10",
-			sdk.Coin{Denom: teststypes.UosmoIbcdenom, Amount: sdk.NewInt(10)},
+			sdk.Coin{Denom: teststypes.UosmoIbcdenom, Amount: sdkmath.NewInt(10)},
 		},
 		{
 			"get ibc wrapped uatom coin",
 			"transfer/channel-1/uatom",
 			"10",
-			sdk.Coin{Denom: teststypes.UatomIbcdenom, Amount: sdk.NewInt(10)},
+			sdk.Coin{Denom: teststypes.UatomIbcdenom, Amount: sdkmath.NewInt(10)},
 		},
 		{
 			"get 2x ibc wrapped uatom coin",
 			"transfer/channel-0/transfer/channel-1/uatom",
 			"10",
-			sdk.Coin{Denom: teststypes.UatomOsmoIbcdenom, Amount: sdk.NewInt(10)},
+			sdk.Coin{Denom: teststypes.UatomOsmoIbcdenom, Amount: sdkmath.NewInt(10)},
 		},
 	}
 

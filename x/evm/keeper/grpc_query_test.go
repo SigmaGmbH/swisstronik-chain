@@ -752,25 +752,25 @@ func (suite *KeeperTestSuite) TestQueryBaseFee() {
 			"pass - default Base Fee",
 			func() {
 				initialBaseFee := sdkmath.NewInt(ethparams.InitialBaseFee)
-				expRes = &types.QueryBaseFeeResponse{BaseFee: &initialBaseFee}
+				expRes = &types.QueryBaseFeeResponse{BaseFee: initialBaseFee}
 			},
 			true, true, true,
 		},
 		{
 			"pass - non-nil Base Fee",
 			func() {
-				baseFee := sdk.OneInt().BigInt()
+				baseFee := sdkmath.OneInt().BigInt()
 				suite.app.FeeMarketKeeper.SetBaseFee(suite.ctx, baseFee)
 
 				aux = sdkmath.NewIntFromBigInt(baseFee)
-				expRes = &types.QueryBaseFeeResponse{BaseFee: &aux}
+				expRes = &types.QueryBaseFeeResponse{BaseFee: aux}
 			},
 			true, true, true,
 		},
 		{
 			"pass - nil Base Fee when london hardfork not activated",
 			func() {
-				baseFee := sdk.OneInt().BigInt()
+				baseFee := sdkmath.OneInt().BigInt()
 				suite.app.FeeMarketKeeper.SetBaseFee(suite.ctx, baseFee)
 
 				expRes = &types.QueryBaseFeeResponse{}
@@ -780,8 +780,8 @@ func (suite *KeeperTestSuite) TestQueryBaseFee() {
 		{
 			"pass - zero Base Fee when feemarket not activated",
 			func() {
-				baseFee := sdk.ZeroInt()
-				expRes = &types.QueryBaseFeeResponse{BaseFee: &baseFee}
+				baseFee := sdkmath.ZeroInt()
+				expRes = &types.QueryBaseFeeResponse{BaseFee: baseFee}
 			},
 			true, false, true,
 		},

@@ -16,6 +16,7 @@
 package keeper
 
 import (
+	"context"
 	"fmt"
 	"math/big"
 
@@ -23,10 +24,10 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 
 	errorsmod "cosmossdk.io/errors"
-	"github.com/cometbft/cometbft/libs/log"
+	"cosmossdk.io/log"
+	"cosmossdk.io/store/prefix"
+	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/store/prefix"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/ethereum/go-ethereum/common"
@@ -264,7 +265,7 @@ func (k *Keeper) SetHooks(eh types.EvmHooks) *Keeper {
 }
 
 // PostTxProcessing delegate the call to the hooks. If no hook has been registered, this function returns with a `nil` error
-func (k *Keeper) PostTxProcessing(ctx sdk.Context, msg core.Message, receipt *ethtypes.Receipt) error {
+func (k *Keeper) PostTxProcessing(ctx context.Context, msg core.Message, receipt *ethtypes.Receipt) error {
 	if k.hooks == nil {
 		return nil
 	}
@@ -351,11 +352,11 @@ func (k Keeper) getBaseFee(ctx sdk.Context, london bool) *big.Int {
 }
 
 // GetMinGasMultiplier returns the MinGasMultiplier param from the fee market module
-func (k Keeper) GetMinGasMultiplier(ctx sdk.Context) sdk.Dec {
+func (k Keeper) GetMinGasMultiplier(ctx sdk.Context) sdkmath.LegacyDec {
 	fmkParmas := k.feeMarketKeeper.GetParams(ctx)
 	if fmkParmas.MinGasMultiplier.IsNil() {
 		// in case we are executing eth_call on a legacy block, returns a zero value.
-		return sdk.ZeroDec()
+		return sdkmath.LegacyZeroDec()
 	}
 	return fmkParmas.MinGasMultiplier
 }
@@ -427,7 +428,7 @@ func (k *Keeper) ForEachStorage(ctx sdk.Context, addr common.Address, cb func(ke
 	store := ctx.KVStore(k.storeKey)
 	prefix := types.AddressStoragePrefix(addr)
 
-	iterator := sdk.KVStorePrefixIterator(store, prefix)
+	iterator := storetypes.KVStorePrefixIterator(store, prefix)
 	defer iterator.Close()
 
 	for ; iterator.Valid(); iterator.Next() {

@@ -30,9 +30,9 @@ import (
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	tmtypes "github.com/cometbft/cometbft/types"
 
-	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
-	ibcgotesting "github.com/cosmos/ibc-go/v7/testing"
-	"github.com/cosmos/ibc-go/v7/testing/mock"
+	channeltypes "github.com/cosmos/ibc-go/v8/modules/core/04-channel/types"
+	ibcgotesting "github.com/cosmos/ibc-go/v8/testing"
+	"github.com/cosmos/ibc-go/v8/testing/mock"
 
 	"swisstronik/crypto/ethsecp256k1"
 	"swisstronik/types"
@@ -100,7 +100,7 @@ func NewTestChain(t *testing.T, coord *ibcgotesting.Coordinator, chainID string)
 
 	// create an account to send transactions from
 	chain := &ibcgotesting.TestChain{
-		T:             t,
+		TB:            t,
 		Coordinator:   coord,
 		ChainID:       chainID,
 		App:           app,

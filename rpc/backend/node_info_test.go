@@ -6,15 +6,17 @@ import (
 
 	"google.golang.org/grpc/metadata"
 
+	"swisstronik/crypto/ethsecp256k1"
+	"swisstronik/rpc/backend/mocks"
+	ethermint "swisstronik/types"
+
+	sdkmath "cosmossdk.io/math"
 	tmrpcclient "github.com/cometbft/cometbft/rpc/client"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/spf13/viper"
-	"swisstronik/crypto/ethsecp256k1"
-	"swisstronik/rpc/backend/mocks"
-	ethermint "swisstronik/types"
 )
 
 func (suite *BackendTestSuite) TestRPCMinGasPrice() {
@@ -255,7 +257,7 @@ func (suite *BackendTestSuite) TestSetEtherbase() {
 				RegisterStatus(client)
 				RegisterValidatorAccount(queryClient, suite.acc)
 				RegisterParams(queryClient, &header, 1)
-				c := sdk.NewDecCoin("uswtr", sdk.NewIntFromBigInt(big.NewInt(1)))
+				c := sdk.NewDecCoin("uswtr", sdkmath.NewIntFromBigInt(big.NewInt(1)))
 				suite.backend.cfg.SetMinGasPrices(sdk.DecCoins{c})
 				delAddr, _ := suite.backend.GetCoinbase()
 				// account, _ := suite.backend.clientCtx.AccountRetriever.GetAccount(suite.backend.clientCtx, delAddr)

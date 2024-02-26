@@ -12,6 +12,7 @@ import (
 	"swisstronik/tests"
 	evmtypes "swisstronik/x/evm/types"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	errortypes "github.com/cosmos/cosmos-sdk/types/errors"
 	grpctypes "github.com/cosmos/cosmos-sdk/types/grpc"
@@ -139,13 +140,15 @@ func TestRegisterParamsError(t *testing.T) {
 
 // ETH Call
 func RegisterEthCall(queryClient *mocks.EVMQueryClient, request *evmtypes.EthCallRequest) {
-	ctx, _ := context.WithCancel(rpc.ContextWithHeight(1)) //nolint
+	ctx, cancelFn := context.WithCancel(rpc.ContextWithHeight(1)) //nolint
+	defer cancelFn()
 	queryClient.On("EthCall", ctx, request).
 		Return(&evmtypes.MsgEthereumTxResponse{}, nil)
 }
 
 func RegisterEthCallError(queryClient *mocks.EVMQueryClient, request *evmtypes.EthCallRequest) {
-	ctx, _ := context.WithCancel(rpc.ContextWithHeight(1)) //nolint
+	ctx, cancelFn := context.WithCancel(rpc.ContextWithHeight(1)) //nolint
+	defer cancelFn()
 	queryClient.On("EthCall", ctx, request).
 		Return(nil, errortypes.ErrInvalidRequest)
 }
@@ -158,9 +161,9 @@ func RegisterEstimateGas(queryClient *mocks.EVMQueryClient, args evmtypes.Transa
 }
 
 // BaseFee
-func RegisterBaseFee(queryClient *mocks.EVMQueryClient, baseFee sdk.Int) {
+func RegisterBaseFee(queryClient *mocks.EVMQueryClient, baseFee sdkmath.Int) {
 	queryClient.On("BaseFee", rpc.ContextWithHeight(1), &evmtypes.QueryBaseFeeRequest{}).
-		Return(&evmtypes.QueryBaseFeeResponse{BaseFee: &baseFee}, nil)
+		Return(&evmtypes.QueryBaseFeeResponse{BaseFee: baseFee}, nil)
 }
 
 // Base fee returns error
@@ -176,11 +179,11 @@ func RegisterBaseFeeDisabled(queryClient *mocks.EVMQueryClient) {
 }
 
 func TestRegisterBaseFee(t *testing.T) {
-	baseFee := sdk.NewInt(1)
+	baseFee := sdkmath.NewInt(1)
 	queryClient := mocks.NewEVMQueryClient(t)
 	RegisterBaseFee(queryClient, baseFee)
 	res, err := queryClient.BaseFee(rpc.ContextWithHeight(1), &evmtypes.QueryBaseFeeRequest{})
-	require.Equal(t, &evmtypes.QueryBaseFeeResponse{BaseFee: &baseFee}, res)
+	require.Equal(t, &evmtypes.QueryBaseFeeResponse{BaseFee: baseFee}, res)
 	require.NoError(t, err)
 }
 

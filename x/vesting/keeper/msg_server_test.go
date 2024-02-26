@@ -12,7 +12,6 @@ import (
 	"swisstronik/testutil"
 	"swisstronik/utils"
 
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 )
@@ -36,7 +35,7 @@ func TestCreatingMonthlyVestingAccount(t *testing.T) {
 	// setup the app
 	app, genAcc := app.SetupSwissApp(checkTx, nil, chainID)
 
-	ctx := app.BaseApp.NewContext(false, tmproto.Header{ChainID: "swisstronik_1291-1"})
+	ctx := app.BaseApp.NewContext(false)
 	msgServer := keeper.NewMsgServerImpl(app.VestingKeeper)
 
 	toAcc := app.AccountKeeper.NewAccountWithAddress(ctx, to1AddrAcc)

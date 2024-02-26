@@ -28,7 +28,7 @@ import (
 	authante "github.com/cosmos/cosmos-sdk/x/auth/ante"
 	"github.com/cosmos/cosmos-sdk/x/auth/migrations/legacytx"
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
-	ibcante "github.com/cosmos/ibc-go/v7/modules/core/ante"
+	ibcante "github.com/cosmos/ibc-go/v8/modules/core/ante"
 
 	"swisstronik/crypto/ethsecp256k1"
 	"swisstronik/ethereum/eip712"
@@ -40,6 +40,7 @@ import (
 
 	evmtypes "swisstronik/x/evm/types"
 
+	txsigning "cosmossdk.io/x/tx/signing"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
 
@@ -87,13 +88,13 @@ func NewLegacyCosmosAnteHandlerEip712(options HandlerOptions) sdk.AnteHandler {
 // CONTRACT: Tx must implement SigVerifiableTx interface
 type LegacyEip712SigVerificationDecorator struct {
 	ak              evmtypes.AccountKeeper
-	signModeHandler authsigning.SignModeHandler
+	signModeHandler *txsigning.HandlerMap
 }
 
 // Deprecated: NewLegacyEip712SigVerificationDecorator creates a new LegacyEip712SigVerificationDecorator
 func NewLegacyEip712SigVerificationDecorator(
 	ak evmtypes.AccountKeeper,
-	signModeHandler authsigning.SignModeHandler,
+	signModeHandler *txsigning.HandlerMap,
 ) LegacyEip712SigVerificationDecorator {
 	return LegacyEip712SigVerificationDecorator{
 		ak:              ak,
@@ -130,7 +131,10 @@ func (svd LegacyEip712SigVerificationDecorator) AnteHandle(ctx sdk.Context,
 		return ctx, err
 	}
 
-	signerAddrs := sigTx.GetSigners()
+	signerAddrs, err := sigTx.GetSigners()
+	if err != nil {
+		return ctx, err
+	}
 
 	// EIP712 allows just one signature
 	if len(sigs) != 1 {
@@ -202,7 +206,7 @@ func VerifySignature(
 	pubKey cryptotypes.PubKey,
 	signerData authsigning.SignerData,
 	sigData signing.SignatureData,
-	_ authsigning.SignModeHandler,
+	_ *txsigning.HandlerMap,
 	tx authsigning.Tx,
 ) error {
 	switch data := sigData.(type) {
@@ -233,7 +237,7 @@ func VerifySignature(
 				Amount: tx.GetFee(),
 				Gas:    tx.GetGas(),
 			},
-			msgs, tx.GetMemo(), tx.GetTip(),
+			msgs, tx.GetMemo(),
 		)
 
 		signerChainID, err := ethermint.ParseChainID(signerData.ChainID)

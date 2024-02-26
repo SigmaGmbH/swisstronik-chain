@@ -22,7 +22,6 @@ import (
 	"time"
 
 	abci "github.com/cometbft/cometbft/abci/types"
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	tmtypes "github.com/cometbft/cometbft/types"
 
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
@@ -33,11 +32,13 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/stretchr/testify/require"
 
-	ibcgotesting "github.com/cosmos/ibc-go/v7/testing"
+	ibcgotesting "github.com/cosmos/ibc-go/v8/testing"
 
 	testingApp "swisstronik/app"
 	"swisstronik/types"
 	"swisstronik/utils"
+
+	sdkmath "cosmossdk.io/math"
 )
 
 var DefaultTestingAppInit func(chainID string) (ibcgotesting.TestingApp, map[string]json.RawMessage) = testingApp.SetupTestingApp
@@ -68,15 +69,15 @@ func SetupWithGenesisValSet(t *testing.T, valSet *tmtypes.ValidatorSet, genAccs 
 			Jailed:            false,
 			Status:            stakingtypes.Bonded,
 			Tokens:            bondAmt,
-			DelegatorShares:   sdk.OneDec(),
+			DelegatorShares:   sdkmath.LegacyOneDec(),
 			Description:       stakingtypes.Description{},
 			UnbondingHeight:   int64(0),
 			UnbondingTime:     time.Unix(0, 0).UTC(),
-			Commission:        stakingtypes.NewCommission(sdk.ZeroDec(), sdk.ZeroDec(), sdk.ZeroDec()),
-			MinSelfDelegation: sdk.ZeroInt(),
+			Commission:        stakingtypes.NewCommission(sdkmath.LegacyZeroDec(), sdkmath.LegacyZeroDec(), sdkmath.LegacyZeroDec()),
+			MinSelfDelegation: sdkmath.ZeroInt(),
 		}
 		validators = append(validators, validator)
-		delegations = append(delegations, stakingtypes.NewDelegation(genAccs[0].GetAddress(), val.Address.Bytes(), sdk.OneDec()))
+		delegations = append(delegations, stakingtypes.NewDelegation(genAccs[0].GetAddress().String(), val.Address.String(), sdkmath.LegacyOneDec()))
 	}
 
 	// set validators and delegations
@@ -106,7 +107,7 @@ func SetupWithGenesisValSet(t *testing.T, valSet *tmtypes.ValidatorSet, genAccs 
 
 	// init chain will set the validator set and initialize the genesis accounts
 	app.InitChain(
-		abci.RequestInitChain{
+		&abci.RequestInitChain{
 			ChainId:         chainID,
 			Validators:      []abci.ValidatorUpdate{},
 			ConsensusParams: testingApp.DefaultConsensusParams,
@@ -116,13 +117,14 @@ func SetupWithGenesisValSet(t *testing.T, valSet *tmtypes.ValidatorSet, genAccs 
 
 	// commit genesis changes
 	app.Commit()
-	app.BeginBlock(abci.RequestBeginBlock{Header: tmproto.Header{
-		ChainID:            chainID,
-		Height:             app.LastBlockHeight() + 1,
-		AppHash:            app.LastCommitID().Hash,
-		ValidatorsHash:     valSet.Hash(),
-		NextValidatorsHash: valSet.Hash(),
-	}})
+	// abciReq := abci.RequestBeginBlock{Header: tmproto.Header{
+	// 	ChainID:            chainID,
+	// 	Height:             app.LastBlockHeight() + 1,
+	// 	AppHash:            app.LastCommitID().Hash,
+	// 	ValidatorsHash:     valSet.Hash(),
+	// 	NextValidatorsHash: valSet.Hash(),
+	// }}
+	// app.BeginBlocker()
 
 	return app
 }

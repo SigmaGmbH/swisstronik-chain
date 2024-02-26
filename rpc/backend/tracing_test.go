@@ -8,12 +8,12 @@ import (
 	"swisstronik/rpc/backend/mocks"
 	evmtypes "swisstronik/x/evm/types"
 
-	dbm "github.com/cometbft/cometbft-db"
+	tmlog "cosmossdk.io/log"
 	abci "github.com/cometbft/cometbft/abci/types"
-	tmlog "github.com/cometbft/cometbft/libs/log"
 	tmrpctypes "github.com/cometbft/cometbft/rpc/core/types"
 	"github.com/cometbft/cometbft/types"
 	tmtypes "github.com/cometbft/cometbft/types"
+	dbm "github.com/cosmos/cosmos-db"
 	"github.com/cosmos/cosmos-sdk/crypto"
 	"github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
@@ -52,7 +52,7 @@ func (suite *BackendTestSuite) TestTraceTransaction() {
 		name          string
 		registerMock  func()
 		block         *types.Block
-		responseBlock []*abci.ResponseDeliverTx
+		responseBlock []*abci.ExecTxResult
 		expResult     interface{}
 		expPass       bool
 	}{
@@ -60,7 +60,7 @@ func (suite *BackendTestSuite) TestTraceTransaction() {
 			"fail - tx not found",
 			func() {},
 			&types.Block{Header: types.Header{Height: 1}, Data: types.Data{Txs: []types.Tx{}}},
-			[]*abci.ResponseDeliverTx{
+			[]*abci.ExecTxResult{
 				{
 					Code: 0,
 					Events: []abci.Event{
@@ -86,7 +86,7 @@ func (suite *BackendTestSuite) TestTraceTransaction() {
 				RegisterBlockError(client, 1)
 			},
 			&types.Block{Header: types.Header{Height: 1}, Data: types.Data{Txs: []types.Tx{txBz}}},
-			[]*abci.ResponseDeliverTx{
+			[]*abci.ExecTxResult{
 				{
 					Code: 0,
 					Events: []abci.Event{
@@ -113,7 +113,7 @@ func (suite *BackendTestSuite) TestTraceTransaction() {
 				RegisterTraceTransactionWithPredecessors(queryClient, msgHandleTx, []*evmtypes.MsgHandleTx{msgHandleTx})
 			},
 			&types.Block{Header: types.Header{Height: 1, ChainID: ChainID}, Data: types.Data{Txs: []types.Tx{txBz, txBz2}}},
-			[]*abci.ResponseDeliverTx{
+			[]*abci.ExecTxResult{
 				{
 					Code: 0,
 					Events: []abci.Event{
@@ -153,7 +153,7 @@ func (suite *BackendTestSuite) TestTraceTransaction() {
 				RegisterTraceTransaction(queryClient, msgHandleTx)
 			},
 			&types.Block{Header: types.Header{Height: 1}, Data: types.Data{Txs: []types.Tx{txBz}}},
-			[]*abci.ResponseDeliverTx{
+			[]*abci.ExecTxResult{
 				{
 					Code: 0,
 					Events: []abci.Event{

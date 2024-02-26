@@ -13,7 +13,6 @@ import (
 	evmtypes "swisstronik/x/evm/types"
 
 	abci "github.com/cometbft/cometbft/abci/types"
-	"github.com/cometbft/cometbft/libs/bytes"
 	tmrpcclient "github.com/cometbft/cometbft/rpc/client"
 	tmrpctypes "github.com/cometbft/cometbft/rpc/core/types"
 	"github.com/cometbft/cometbft/types"
@@ -181,7 +180,7 @@ func TestRegisterConsensusParams(t *testing.T) {
 func RegisterBlockResultsWithEventLog(client *mocks.Client, height int64) (*tmrpctypes.ResultBlockResults, error) {
 	res := &tmrpctypes.ResultBlockResults{
 		Height: height,
-		TxsResults: []*abci.ResponseDeliverTx{
+		TxsResults: []*abci.ExecTxResult{
 			{Code: 0, GasUsed: 0, Events: []abci.Event{{
 				Type: evmtypes.EventTypeTxLog,
 				Attributes: []abci.EventAttribute{{
@@ -203,7 +202,7 @@ func RegisterBlockResults(
 ) (*tmrpctypes.ResultBlockResults, error) {
 	res := &tmrpctypes.ResultBlockResults{
 		Height:     height,
-		TxsResults: []*abci.ResponseDeliverTx{{Code: 0, GasUsed: 0}},
+		TxsResults: []*abci.ExecTxResult{{Code: 0, GasUsed: 0}},
 	}
 
 	client.On("BlockResults", rpc.ContextWithHeight(height), mock.AnythingOfType("*int64")).
@@ -224,7 +223,7 @@ func TestRegisterBlockResults(t *testing.T) {
 	res, err := client.BlockResults(rpc.ContextWithHeight(height), &height)
 	expRes := &tmrpctypes.ResultBlockResults{
 		Height:     height,
-		TxsResults: []*abci.ResponseDeliverTx{{Code: 0, GasUsed: 0}},
+		TxsResults: []*abci.ExecTxResult{{Code: 0, GasUsed: 0}},
 	}
 	require.Equal(t, expRes, res)
 	require.NoError(t, err)
@@ -254,7 +253,7 @@ func RegisterBlockByHashNotFound(client *mocks.Client, hash common.Hash, tx []by
 		Return(nil, nil)
 }
 
-func RegisterABCIQueryWithOptions(client *mocks.Client, height int64, path string, data bytes.HexBytes, opts tmrpcclient.ABCIQueryOptions) {
+func RegisterABCIQueryWithOptions(client *mocks.Client, height int64, path string, data []byte, opts tmrpcclient.ABCIQueryOptions) {
 	client.On("ABCIQueryWithOptions", context.Background(), path, data, opts).
 		Return(&tmrpctypes.ResultABCIQuery{
 			Response: abci.ResponseQuery{
@@ -264,12 +263,12 @@ func RegisterABCIQueryWithOptions(client *mocks.Client, height int64, path strin
 		}, nil)
 }
 
-func RegisterABCIQueryWithOptionsError(clients *mocks.Client, path string, data bytes.HexBytes, opts tmrpcclient.ABCIQueryOptions) {
+func RegisterABCIQueryWithOptionsError(clients *mocks.Client, path string, data []byte, opts tmrpcclient.ABCIQueryOptions) {
 	clients.On("ABCIQueryWithOptions", context.Background(), path, data, opts).
 		Return(nil, errortypes.ErrInvalidRequest)
 }
 
-func RegisterABCIQueryAccount(clients *mocks.Client, data bytes.HexBytes, opts tmrpcclient.ABCIQueryOptions, acc client.Account) {
+func RegisterABCIQueryAccount(clients *mocks.Client, data []byte, opts tmrpcclient.ABCIQueryOptions, acc client.Account) {
 	baseAccount := authtypes.NewBaseAccount(acc.GetAddress(), acc.GetPubKey(), acc.GetAccountNumber(), acc.GetSequence())
 	accAny, _ := codectypes.NewAnyWithValue(baseAccount)
 	accResponse := authtypes.QueryAccountResponse{Account: accAny}

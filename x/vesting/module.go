@@ -7,10 +7,9 @@ import (
 
 	// this line is used by starport scaffolding # 1
 
+	"cosmossdk.io/core/appmodule"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/cobra"
-
-	abci "github.com/cometbft/cometbft/abci/types"
 
 	"swisstronik/x/vesting/client/cli"
 	"swisstronik/x/vesting/keeper"
@@ -21,13 +20,19 @@ import (
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
+	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 )
 
 var (
-	_ module.AppModule           = AppModule{}
-	_ module.AppModuleBasic      = AppModuleBasic{}
-	_ module.EndBlockAppModule   = AppModule{}
-	_ module.BeginBlockAppModule = AppModule{}
+	_ module.AppModuleBasic      = (*AppModule)(nil)
+	_ module.AppModuleSimulation = (*AppModule)(nil)
+	_ module.HasGenesis          = (*AppModule)(nil)
+	_ module.HasInvariants       = (*AppModule)(nil)
+	_ module.HasConsensusVersion = (*AppModule)(nil)
+
+	_ appmodule.AppModule       = (*AppModule)(nil)
+	_ appmodule.HasBeginBlocker = (*AppModule)(nil)
+	_ appmodule.HasEndBlocker   = (*AppModule)(nil)
 )
 
 // ----------------------------------------------------------------------------
@@ -119,14 +124,12 @@ func (am AppModule) RegisterServices(cfg module.Configurator) {
 func (am AppModule) RegisterInvariants(_ sdk.InvariantRegistry) {}
 
 // InitGenesis performs the module's genesis initialization. It returns no validator updates.
-func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, gs json.RawMessage) []abci.ValidatorUpdate {
+func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, gs json.RawMessage) {
 	var genState types.GenesisState
 	// Initialize global index to index in genesis state
 	cdc.MustUnmarshalJSON(gs, &genState)
 
 	InitGenesis(ctx, am.keeper, genState)
-
-	return []abci.ValidatorUpdate{}
 }
 
 // ExportGenesis returns the module's exported genesis state as raw JSON bytes.
@@ -139,9 +142,29 @@ func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.Raw
 func (AppModule) ConsensusVersion() uint64 { return 1 }
 
 // BeginBlock contains the logic that is automatically triggered at the beginning of each block
-func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
+func (am AppModule) BeginBlock(_ context.Context) error {
+	return nil
+}
 
 // EndBlock contains the logic that is automatically triggered at the end of each block
-func (am AppModule) EndBlock(_ sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
-	return []abci.ValidatorUpdate{}
+func (am AppModule) EndBlock(_ context.Context) error {
+	return nil
+}
+
+// GenerateGenesisState creates a randomized GenState of the fee market module.
+func (AppModule) GenerateGenesisState(_ *module.SimulationState) {
+}
+
+// RegisterStoreDecoder registers a decoder for fee market module's types
+func (am AppModule) RegisterStoreDecoder(_ simtypes.StoreDecoderRegistry) {}
+
+// IsAppModule implements the appmodule.AppModule interface.
+func (am AppModule) IsAppModule() {}
+
+// IsOnePerModuleType implements the depinject.OnePerModuleType interface.
+func (am AppModule) IsOnePerModuleType() {}
+
+// WeightedOperations returns the all the fee market module operations with their respective weights.
+func (am AppModule) WeightedOperations(_ module.SimulationState) []simtypes.WeightedOperation {
+	return nil
 }

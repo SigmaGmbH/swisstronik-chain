@@ -92,7 +92,7 @@ func TestLedgerPreprocessing(t *testing.T) {
 		// Verify tx fields are unchanged
 		tx := tc.txBuilder.GetTx()
 
-		require.Equal(t, tx.FeePayer().String(), tc.expectedFeePayer)
+		require.Equal(t, string(tx.FeePayer()), tc.expectedFeePayer)
 		require.Equal(t, tx.GetGas(), tc.expectedGas)
 		require.Equal(t, tx.GetFee().AmountOf(evmtypes.DefaultParams().EvmDenom), tc.expectedFee)
 		require.Equal(t, tx.GetMemo(), tc.expectedMemo)

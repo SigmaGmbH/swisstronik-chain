@@ -20,9 +20,10 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	evmcommontypes "swisstronik/types"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/vm"
-	evmcommontypes "swisstronik/types"
 )
 
 // GetHashFn implements vm.GetHashFunc for Ethermint. It handles 3 cases:
@@ -61,8 +62,8 @@ func (k Keeper) GetHashFn(ctx sdk.Context) vm.GetHashFunc {
 		case ctx.BlockHeight() > h:
 			// Case 2: if the chain is not the current height we need to retrieve the hash from the store for the
 			// current chain epoch. This only applies if the current height is greater than the requested height.
-			histInfo, found := k.stakingKeeper.GetHistoricalInfo(ctx, h)
-			if !found {
+			histInfo, err := k.stakingKeeper.GetHistoricalInfo(ctx, h)
+			if err != nil {
 				k.Logger(ctx).Debug("historical info not found", "height", h)
 				return common.Hash{}
 			}

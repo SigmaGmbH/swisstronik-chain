@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"runtime/debug"
 
-	tmlog "github.com/cometbft/cometbft/libs/log"
+	tmlog "cosmossdk.io/log"
 
 	errorsmod "cosmossdk.io/errors"
 	"github.com/cosmos/cosmos-sdk/crypto/types/multisig"
@@ -31,6 +31,7 @@ import (
 
 	"swisstronik/crypto/ethsecp256k1"
 
+	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
 )
 
@@ -115,7 +116,7 @@ var _ authante.SignatureVerificationGasConsumer = DefaultSigVerificationGasConsu
 // for signature verification based upon the public key type. The cost is fetched from the given params and is matched
 // by the concrete type.
 func DefaultSigVerificationGasConsumer(
-	meter sdk.GasMeter, sig signing.SignatureV2, params authtypes.Params,
+	meter storetypes.GasMeter, sig signing.SignatureV2, params authtypes.Params,
 ) error {
 	pubkey := sig.PubKey
 	switch pubkey := pubkey.(type) {
@@ -141,7 +142,7 @@ func DefaultSigVerificationGasConsumer(
 
 // ConsumeMultisignatureVerificationGas consumes gas from a GasMeter for verifying a multisig pubkey signature
 func ConsumeMultisignatureVerificationGas(
-	meter sdk.GasMeter, sig *signing.MultiSignatureData, pubkey multisig.PubKey,
+	meter storetypes.GasMeter, sig *signing.MultiSignatureData, pubkey multisig.PubKey,
 	params authtypes.Params, accSeq uint64,
 ) error {
 	size := sig.BitArray.Count()

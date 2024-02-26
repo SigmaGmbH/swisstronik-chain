@@ -12,6 +12,7 @@ import (
 	types "swisstronik/types"
 	evmtypes "swisstronik/x/evm/types"
 
+	storetypes "cosmossdk.io/store/types"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 )
 
@@ -260,7 +261,7 @@ func (suite *AnteTestSuite) TestEthGasConsumeDecorator() {
 			func() {
 				// TODO: fix
 				// vmdb.AddBalance(addr, big.NewInt(1000000))
-				suite.ctx = suite.ctx.WithBlockGasMeter(sdk.NewGasMeter(1))
+				suite.ctx = suite.ctx.WithBlockGasMeter(storetypes.NewGasMeter(1))
 			},
 			false, true,
 			0,
@@ -273,7 +274,7 @@ func (suite *AnteTestSuite) TestEthGasConsumeDecorator() {
 				// TODO: Fix
 				// vmdb.AddBalance(addr, big.NewInt(1001000000000000))
 				suite.app.EvmKeeper.SetBalance(suite.ctx, addr, big.NewInt(1001000000000000))
-				suite.ctx = suite.ctx.WithBlockGasMeter(sdk.NewGasMeter(10000000000000000000))
+				suite.ctx = suite.ctx.WithBlockGasMeter(storetypes.NewGasMeter(10000000000000000000))
 			},
 			true, false,
 			tx2Priority,
@@ -286,7 +287,7 @@ func (suite *AnteTestSuite) TestEthGasConsumeDecorator() {
 				// TODO: Fix
 				// vmdb.AddBalance(addr, big.NewInt(1001000000000000))
 				suite.app.EvmKeeper.SetBalance(suite.ctx, addr, big.NewInt(1001000000000000))
-				suite.ctx = suite.ctx.WithBlockGasMeter(sdk.NewGasMeter(10000000000000000000))
+				suite.ctx = suite.ctx.WithBlockGasMeter(storetypes.NewGasMeter(10000000000000000000))
 			},
 			true, false,
 			dynamicFeeTxPriority,
@@ -314,12 +315,12 @@ func (suite *AnteTestSuite) TestEthGasConsumeDecorator() {
 
 			if tc.expPanic {
 				suite.Require().Panics(func() {
-					_, _ = dec.AnteHandle(suite.ctx.WithIsCheckTx(true).WithGasMeter(sdk.NewGasMeter(1)), tc.tx, false, NextFn)
+					_, _ = dec.AnteHandle(suite.ctx.WithIsCheckTx(true).WithGasMeter(storetypes.NewGasMeter(1)), tc.tx, false, NextFn)
 				})
 				return
 			}
 
-			ctx, err := dec.AnteHandle(suite.ctx.WithIsCheckTx(true).WithGasMeter(sdk.NewInfiniteGasMeter()), tc.tx, false, NextFn)
+			ctx, err := dec.AnteHandle(suite.ctx.WithIsCheckTx(true).WithGasMeter(storetypes.NewInfiniteGasMeter()), tc.tx, false, NextFn)
 			if tc.expPass {
 				suite.Require().NoError(err)
 				suite.Require().Equal(tc.expPriority, ctx.Priority())
