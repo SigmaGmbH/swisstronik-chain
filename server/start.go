@@ -94,8 +94,8 @@ func NewDefaultStartCmdOptions(appCreator types.AppCreator, defaultNodeHome stri
 
 // StartCmd runs the service passed in, either stand-alone or in-process with
 // CometBFT.
-func StartCmd(appCreator types.AppCreator, defaultNodeHome string) *cobra.Command {
-	return StartCmdWithOptions(appCreator, defaultNodeHome, StartCmdOptions{})
+func StartCmd(appCreator types.AppCreator, defaultNodeHome string, opts StartCmdOptions) *cobra.Command {
+	return StartCmdWithOptions(appCreator, defaultNodeHome, opts)
 }
 
 // StartCmd runs the service passed in, either stand-alone or in-process with
@@ -161,7 +161,7 @@ which accepts a path for the resulting pprof file.
 				serverCtx.Logger.Info("starting ABCI without CometBFT")
 			}
 			return wrapCPUProfile(serverCtx, func() error {
-				return start(serverCtx, clientCtx, opts.AppCreator, withCMT, opts)
+				return start(serverCtx, clientCtx, appCreator, withCMT, opts)
 			})
 		},
 	}

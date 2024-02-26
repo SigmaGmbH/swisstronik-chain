@@ -67,7 +67,7 @@ func AddCommands(
 		cmtcmd.ResetStateCmd,
 	)
 
-	startCmd := StartCmd(appCreator, defaultNodeHome)
+	startCmd := StartCmd(appCreator, defaultNodeHome, opts)
 	addStartFlags(startCmd)
 
 	rootCmd.AddCommand(
