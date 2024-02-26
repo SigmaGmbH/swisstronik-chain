@@ -13,10 +13,14 @@ import (
 	"swisstronik/encoding"
 	"swisstronik/ethereum/eip712"
 
+	"cosmossdk.io/client/v2/autocli"
+	"cosmossdk.io/core/appmodule"
 	"cosmossdk.io/simapp"
 	confixcmd "cosmossdk.io/tools/confix/cmd"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/crypto/keyring"
+	"github.com/cosmos/cosmos-sdk/types/module"
 
 	"cosmossdk.io/log"
 	simappparams "cosmossdk.io/simapp/params"
@@ -54,7 +58,13 @@ import (
 	evmserverconfig "swisstronik/server/config"
 	srvflags "swisstronik/server/flags"
 
+	"swisstronik/utils"
+
 	"github.com/cosmos/cosmos-sdk/client/snapshot"
+	runtimeservices "github.com/cosmos/cosmos-sdk/runtime/services"
+	simutils "github.com/cosmos/cosmos-sdk/testutil/sims"
+	sdktypes "github.com/cosmos/cosmos-sdk/types"
+	authcodec "github.com/cosmos/cosmos-sdk/x/auth/codec"
 )
 
 const ShortBlockWindow uint32 = 20
@@ -148,7 +158,55 @@ func NewRootCmd() (*cobra.Command, simappparams.EncodingConfig) {
 		panic(err)
 	}
 
+	db := dbm.NewMemDB()
+	chainID := utils.TestnetChainID + "-1"
+	newapp := app.New(
+		log.NewNopLogger(),
+		db,
+		nil,
+		true,
+		map[int64]bool{},
+		app.DefaultNodeHome,
+		5,
+		encoding.MakeConfig(app.ModuleBasics),
+		simutils.NewAppOptionsWithFlagHome(app.DefaultNodeHome),
+		baseapp.SetChainID(chainID),
+	)
+	if err := autoCliOpts(newapp, initClientCtx).EnhanceRootCommand(rootCmd); err != nil {
+		panic(err)
+	}
+
 	return rootCmd, encodingConfig
+}
+
+// autoCliOpts returns options based upon the modules in the Swisstronik app.
+//
+// Creates an instance of the application that is discarded to enumerate the modules.
+func autoCliOpts(app *app.App, initClientCtx client.Context) autocli.AppOptions {
+	modules := make(map[string]appmodule.AppModule, 0)
+	for _, m := range app.ModuleManager.Modules {
+		if moduleWithName, ok := m.(module.HasName); ok {
+			moduleName := moduleWithName.Name()
+			if appModule, ok := moduleWithName.(appmodule.AppModule); ok {
+				modules[moduleName] = appModule
+			}
+		}
+	}
+
+	cliKR, err := keyring.NewAutoCLIKeyring(initClientCtx.Keyring)
+	if err != nil {
+		panic(err)
+	}
+
+	return autocli.AppOptions{
+		Modules:               modules,
+		ModuleOptions:         runtimeservices.ExtractAutoCLIOptions(app.ModuleManager.Modules),
+		AddressCodec:          authcodec.NewBech32Codec(sdktypes.GetConfig().GetBech32AccountAddrPrefix()),
+		ValidatorAddressCodec: authcodec.NewBech32Codec(sdktypes.GetConfig().GetBech32ValidatorAddrPrefix()),
+		ConsensusAddressCodec: authcodec.NewBech32Codec(sdktypes.GetConfig().GetBech32ConsensusAddrPrefix()),
+		Keyring:               cliKR,
+		ClientCtx:             initClientCtx,
+	}
 }
 
 // queryCommand returns the sub-command to send queries to the app

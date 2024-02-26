@@ -306,7 +306,7 @@ type App struct {
 	// this line is used by starport scaffolding # stargate/app/keeperDeclaration
 
 	// mm is the module manager
-	mm *module.Manager
+	ModuleManager *module.Manager
 
 	// sm is the simulation manager
 	sm           *module.SimulationManager
@@ -659,7 +659,7 @@ func New(
 	// NOTE: Any module instantiated in the module manager that is later modified
 	// must be passed by reference here.
 
-	app.mm = module.NewManager(
+	app.ModuleManager = module.NewManager(
 		genutil.NewAppModule(
 			app.AccountKeeper, app.StakingKeeper, app.BaseApp,
 			encodingConfig.TxConfig,
@@ -690,13 +690,16 @@ func New(
 		// this line is used by starport scaffolding # stargate/app/appModule
 	)
 
+	app.ModuleManager.SetOrderPreBlockers(
+		upgradetypes.ModuleName,
+	)
+
 	// During begin block slashing happens after distr.BeginBlocker so that
 	// there is nothing left over in the validator fee pool, so as to keep the
 	// CanWithdrawInvariant invariant.
 	// NOTE: staking module is required if HistoricalEntries param > 0
-	app.mm.SetOrderBeginBlockers(
+	app.ModuleManager.SetOrderBeginBlockers(
 		// upgrades should be run first
-		upgradetypes.ModuleName,
 		capabilitytypes.ModuleName,
 		feemarkettypes.ModuleName,
 		evmtypes.ModuleName,
@@ -724,7 +727,7 @@ func New(
 		// this line is used by starport scaffolding # stargate/app/beginBlockers
 	)
 
-	app.mm.SetOrderEndBlockers(
+	app.ModuleManager.SetOrderEndBlockers(
 		crisistypes.ModuleName,
 		govtypes.ModuleName,
 		stakingtypes.ModuleName,
@@ -757,7 +760,7 @@ func New(
 	// NOTE: Capability module must occur first so that it can initialize any capabilities
 	// so that other modules that want to create or claim capabilities afterwards in InitChain
 	// can do so safely.
-	app.mm.SetOrderInitGenesis(
+	app.ModuleManager.SetOrderInitGenesis(
 		capabilitytypes.ModuleName,
 		authtypes.ModuleName,
 		banktypes.ModuleName,
@@ -790,11 +793,11 @@ func New(
 	// Uncomment if you want to set a custom migration order here.
 	// app.mm.SetOrderMigrations(custom order)
 
-	app.mm.RegisterInvariants(&app.CrisisKeeper)
+	app.ModuleManager.RegisterInvariants(&app.CrisisKeeper)
 	// app.mm.RegisterRoutes(app.Router(), app.QueryRouter(), encodingConfig.Amino)
 
 	app.configurator = module.NewConfigurator(app.appCodec, app.MsgServiceRouter(), app.GRPCQueryRouter())
-	app.mm.RegisterServices(app.configurator)
+	app.ModuleManager.RegisterServices(app.configurator)
 
 	// add test gRPC service for testing gRPC queries in isolation
 	// testdata.RegisterTestServiceServer(app.GRPCQueryRouter(), testdata.TestServiceImpl{})
@@ -807,9 +810,9 @@ func New(
 	overrideModules := map[string]module.AppModuleSimulation{
 		authtypes.ModuleName: auth.NewAppModule(app.appCodec, app.AccountKeeper, authsims.RandomGenesisAccounts, app.GetSubspace(authtypes.ModuleName)),
 	}
-	app.sm = module.NewSimulationManagerFromAppModules(app.mm.Modules, overrideModules)
+	app.sm = module.NewSimulationManagerFromAppModules(app.ModuleManager.Modules, overrideModules)
 
-	autocliv1.RegisterQueryServer(app.GRPCQueryRouter(), runtimeservices.NewAutoCLIQueryService(app.mm.Modules))
+	autocliv1.RegisterQueryServer(app.GRPCQueryRouter(), runtimeservices.NewAutoCLIQueryService(app.ModuleManager.Modules))
 	reflectionSvc, err := runtimeservices.NewReflectionService()
 	if err != nil {
 		panic(err)
@@ -825,11 +828,14 @@ func New(
 
 	// initialize BaseApp
 	app.SetInitChainer(app.InitChainer)
+	app.SetPreBlocker(app.PreBlocker)
 	app.SetBeginBlocker(app.BeginBlocker)
 	maxGasWanted := cast.ToUint64(appOpts.Get(srvflags.EVMMaxTxGasWanted))
 	app.setAnteHandler(encodingConfig.TxConfig, maxGasWanted)
 	app.setPostHandler()
 	app.SetEndBlocker(app.EndBlocker)
+	app.SetPrecommiter(app.Precommitter)
+	app.SetPrepareCheckStater(app.PrepareCheckStater)
 	app.SetupHandlers(app.EvmKeeper, app.IBCKeeper.ClientKeeper, app.ParamsKeeper, appCodec)
 
 	if loadLatest {
@@ -884,6 +890,11 @@ func (app *App) GetBaseApp() *baseapp.BaseApp {
 	return app.BaseApp
 }
 
+// PreBlocker application updates before each begin block.
+func (app *App) PreBlocker(ctx sdk.Context, _ *abci.RequestFinalizeBlock) (*sdk.ResponsePreBlock, error) {
+	return app.ModuleManager.PreBlock(ctx)
+}
+
 // GetStakingKeeper implements the TestingApp interface.
 func (app *App) GetStakingKeeper() ibctestingtypes.StakingKeeper {
 	return app.StakingKeeper
@@ -915,12 +926,26 @@ func (app *App) Name() string { return app.BaseApp.Name() }
 
 // BeginBlocker application updates every begin block
 func (app *App) BeginBlocker(ctx sdk.Context) (sdk.BeginBlock, error) {
-	return app.mm.BeginBlock(ctx)
+	return app.ModuleManager.BeginBlock(ctx)
 }
 
 // EndBlocker application updates every end block
 func (app *App) EndBlocker(ctx sdk.Context) (sdk.EndBlock, error) {
-	return app.mm.EndBlock(ctx)
+	return app.ModuleManager.EndBlock(ctx)
+}
+
+// Precommitter application updates before the commital of a block after all transactions have been delivered.
+func (app *App) Precommitter(ctx sdk.Context) {
+	if err := app.ModuleManager.Precommit(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// PrepareCheckStater application updates after commit and before any check state is invoked.
+func (app *App) PrepareCheckStater(ctx sdk.Context) {
+	if err := app.ModuleManager.PrepareCheckState(ctx); err != nil {
+		panic(err)
+	}
 }
 
 // InitChainer application update at chain initialization
@@ -929,8 +954,8 @@ func (app *App) InitChainer(ctx sdk.Context, req *abci.RequestInitChain) (*abci.
 	if err := tmjson.Unmarshal(req.AppStateBytes, &genesisState); err != nil {
 		panic(err)
 	}
-	app.UpgradeKeeper.SetModuleVersionMap(ctx, app.mm.GetVersionMap())
-	return app.mm.InitGenesis(ctx, app.appCodec, genesisState)
+	app.UpgradeKeeper.SetModuleVersionMap(ctx, app.ModuleManager.GetVersionMap())
+	return app.ModuleManager.InitGenesis(ctx, app.appCodec, genesisState)
 }
 
 // LoadHeight loads a particular height

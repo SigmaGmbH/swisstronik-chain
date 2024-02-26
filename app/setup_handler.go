@@ -43,7 +43,7 @@ func (app *App) setUpgradeHandler(
 
 	app.UpgradeKeeper.SetUpgradeHandler(
 		v2_0_0.UpgradeName,
-		v2_0_0.CreateUpgradeHandler(app.mm, ek, app.configurator, app.AccountKeeper, cdc, clientKeeper),
+		v2_0_0.CreateUpgradeHandler(app.ModuleManager, ek, app.configurator, app.AccountKeeper, cdc, clientKeeper),
 	)
 }
 
