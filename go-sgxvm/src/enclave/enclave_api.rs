@@ -207,12 +207,11 @@ impl EnclaveApi {
             return Err(Error::enclave_error(res.as_str()));
         }
 
-        // TODO: Move inside enclave
         println!("[Enclave Wrapper] Step 5. sgx_tvl_verify_qve_report_and_identity");
         let qve_isvsvn_threshold: sgx_isv_svn_t = 3;
-        let mut ret_val = sgx_status_t::SGX_SUCCESS;
+        let mut ret_val = sgx_quote3_error_t::SGX_QL_SUCCESS;
         let res = unsafe {
-            super::ecall_tvl_verify_qve_report_and_identity(
+            super::sgx_tvl_verify_qve_report_and_identity(
                 eid,
                 &mut ret_val,
                 quote.as_ptr(),
@@ -233,7 +232,7 @@ impl EnclaveApi {
             );
             return Err(Error::enclave_error(res.as_str()));
         }
-        if ret_val != sgx_status_t::SGX_SUCCESS {
+        if ret_val != sgx_quote3_error_t::SGX_QL_SUCCESS {
             println!(
                 "[Enclave Wrapper] sgx_tvl_verify_qve_report_and_identity failed. Status code: {:?}",
                 ret_val

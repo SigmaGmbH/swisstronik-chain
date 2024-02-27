@@ -69,18 +69,6 @@ enclave {
         public sgx_status_t ecall_get_target_info(
             [out] sgx_target_info_t* target_info
         );
-
-        public quote3_error_t ecall_tvl_verify_qve_report_and_identity(
-            [in, size=quote_size] const uint8_t *p_quote,
-            uint32_t quote_size,
-            [in, count=1] const sgx_ql_qe_report_info_t *p_qve_report_info,
-            time_t expiration_check_date,
-            uint32_t collateral_expiration_status,
-            sgx_ql_qv_result_t quote_verification_result,
-            [in, size=supplemental_data_size] const uint8_t *p_supplemental_data,
-            uint32_t supplemental_data_size,
-            sgx_isv_svn_t qve_isvsvn_threshold
-        ); 
     };
 
     untrusted {

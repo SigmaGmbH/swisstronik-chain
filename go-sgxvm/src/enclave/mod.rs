@@ -82,9 +82,9 @@ extern "C" {
         target_info: *mut sgx_target_info_t,
     ) -> sgx_status_t;
 
-    pub fn ecall_tvl_verify_qve_report_and_identity(
+    pub fn sgx_tvl_verify_qve_report_and_identity(
         eid: sgx_enclave_id_t,
-        retval: *mut sgx_status_t,
+        retval: *mut sgx_quote3_error_t,
         p_quote: *const uint8_t,
         quote_size: uint32_t,
         p_qve_report_info: *const sgx_ql_qe_report_info_t,

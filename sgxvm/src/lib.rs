@@ -11,7 +11,6 @@ use sgx_types::*;
 use std::slice;
 use std::string::String;
 
-use crate::protobuf_generated::ffi::{FFIRequest, FFIRequest_oneof_req};
 use crate::querier::GoQuerier;
 use crate::types::{Allocation, AllocationWithResult};
 
@@ -152,30 +151,4 @@ pub unsafe extern "C" fn ecall_get_target_info(
     target_info: *mut sgx_target_info_t,
 ) -> sgx_status_t {
     sgx_self_target(target_info)
-}
-
-#[no_mangle]
-pub fn ecall_tvl_verify_qve_report_and_identity(
-    p_quote: *const uint8_t,
-    quote_size: uint32_t,
-    p_qve_report_info: *const sgx_ql_qe_report_info_t,
-    expiration_check_date: time_t,
-    collateral_expiration_status: uint32_t,
-    quote_verification_result: sgx_ql_qv_result_t,
-    p_supplemental_data: *const uint8_t,
-    supplemental_data_size: uint32_t,
-    qve_isvsvn_threshold: sgx_isv_svn_t,
-) -> sgx_quote3_error_t {
-    println!("[Enclave] sgx_tvl_verify_qve_report_and_identity");
-    unsafe { sgx_tvl_verify_qve_report_and_identity(
-        p_quote,
-        quote_size,
-        p_qve_report_info,
-        expiration_check_date,
-        collateral_expiration_status,
-        quote_verification_result,
-        p_supplemental_data,
-        supplemental_data_size,
-        qve_isvsvn_threshold,
-    ) }
 }
