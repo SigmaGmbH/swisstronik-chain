@@ -1,5 +1,6 @@
 #![no_std]
 #![feature(slice_as_chunks)]
+#![feature(core_intrinsics)]
 
 #[macro_use]
 extern crate sgx_tstd as std;
