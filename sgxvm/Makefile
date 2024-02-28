@@ -1,7 +1,6 @@
 SHELL := /bin/bash
 COMPILER = rustc
 TARGET = $(shell rustc --version --verbose 2> /dev/null | awk "/host:/ { print \$$2 }")
-TARGET_DIR = target/release/
 DEFAULT = help
 CC=clang
 CXX=clang++
@@ -46,6 +45,11 @@ define compile_enclave_rust
 	@RUSTFLAGS="-C target-cpu=native" cargo build --release --features $(Enclave_build_feature) --no-default-features
 endef
 
+define compile_enclave_rust_debug
+	@echo "Building enclave rust code"
+	@RUSTFLAGS="-C target-cpu=native -Z threads=4" cargo build --features $(Enclave_build_feature) --no-default-features
+endef
+
 define create_bridge_enclave_rust
 	@echo "Create bridge between enclave and rust"
 	@/opt/intel/sgxsdk/bin/x64/sgx_edger8r --trusted $(CURDIR)/Enclave.edl --search-path /opt/intel/sgxsdk/include --search-path $(CURDIR)/sgx-sdk/edl --trusted-dir $(CURDIR)/
@@ -66,6 +70,11 @@ endef
 define copy_compiled_enclave
  	@echo "Copy compiled enclave files"
 	@cp $(CURDIR)/target/release/libenclave.a $(CURDIR)/sgx-artifacts/lib/libenclave.a
+endef
+
+define copy_compiled_enclave_debug
+ 	@echo "Copy compiled enclave files"
+	@cp $(CURDIR)/target/debug/libenclave.a $(CURDIR)/sgx-artifacts/lib/libenclave.a
 endef
 
 define compile_into_enclave_t_o
@@ -101,7 +110,24 @@ define sgx_build
 	$(call sign_enclave)
 endef
 
+define sgx_build_debug
+	$(call sgx_clean)
+	$(call compile_protobuf)
+	$(call compile_enclave_rust_debug)
+	$(call create_bridge_enclave_rust)
+	$(call compile_enclave_bridge)
+	$(call create_archive)
+	$(call copy_compiled_enclave_debug)
+	$(call compile_into_enclave_t_o)
+	$(call compile_unsigned_enclave)
+	$(call sign_enclave)
+endef
+
 build:
+	$(call sgx_build)
+	@echo "Intel SGX enclave built and signed"
+
+build_d:
 	$(call sgx_build)
 	@echo "Intel SGX enclave built and signed"
 
