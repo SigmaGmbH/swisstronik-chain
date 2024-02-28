@@ -137,7 +137,7 @@ pub unsafe extern "C" fn ecall_create_report(
     p_report: *mut sgx_report_t,
 ) -> sgx_status_t {    
     let report_data = sgx_report_data_t::default();
-    unsafe { sgx_create_report(p_qe3_target, &report_data as *const _, p_report) }
+    unsafe { sgx_create_report(p_qe3_target, &report_data, p_report) }
 }
 
 #[no_mangle]
