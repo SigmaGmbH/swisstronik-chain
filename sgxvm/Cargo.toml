@@ -1,4 +1,3 @@
-cargo-features = ["profile-rustflags"]
 [package]
 name = "sgxvm"
 description = "EVM adapted for execution inside SGX enclave"

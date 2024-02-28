@@ -34,6 +34,15 @@ define sgx_clean
 	@rm -f $(CURDIR)/enclave.unsigned.so
 endef
 
+define sgx_clean_debug
+	@echo "Cleaning enclave dependencies"
+	@rm -rf $(CURDIR)/sgx-artifacts/bin/*
+	@rm -rf $(CURDIR)/sgx-artifacts/lib/*
+	@rm -f $(CURDIR)/Enclave_u*
+	@rm -f $(CURDIR)/Enclave_t*
+	@rm -f $(CURDIR)/enclave.unsigned.so
+endef
+
 define compile_protobuf
 	@echo "Compiling SGXVM protobuf files"
     protoc --rust_out src/protobuf_generated/ proto/ffi.proto
@@ -47,7 +56,7 @@ endef
 
 define compile_enclave_rust_debug
 	@echo "Building enclave rust code"
-	@RUSTFLAGS="-Z threads=4" cargo build --features $(Enclave_build_feature) --no-default-features
+	@RUSTFLAGS="-C target-cpu=native -Z threads=4" cargo build --features $(Enclave_build_feature) --no-default-features
 endef
 
 define create_bridge_enclave_rust
@@ -111,7 +120,7 @@ define sgx_build
 endef
 
 define sgx_build_debug
-	$(call sgx_clean)
+	$(call sgx_clean_debug)
 	$(call compile_protobuf)
 	$(call compile_enclave_rust_debug)
 	$(call create_bridge_enclave_rust)
