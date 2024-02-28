@@ -128,7 +128,7 @@ build:
 	@echo "Intel SGX enclave built and signed"
 
 build_d:
-	$(call sgx_build)
+	$(call sgx_build_debug)
 	@echo "Intel SGX enclave built and signed"
 
 clean:
