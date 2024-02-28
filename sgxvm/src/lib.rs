@@ -146,3 +146,18 @@ pub unsafe extern "C" fn ecall_get_target_info(
 ) -> sgx_status_t {
     sgx_self_target(target_info)
 }
+
+
+
+// Fix https://github.com/apache/incubator-teaclave-sgx-sdk/issues/373 for debug mode
+#[cfg(debug_assertions)]
+#[no_mangle]
+pub extern "C" fn __assert_fail(
+    __assertion: *const u8,
+    __file: *const u8,
+    __line: u32,
+    __function: *const u8,
+) -> ! {
+    use core::intrinsics::abort;
+    abort()
+}

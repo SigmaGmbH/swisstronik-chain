@@ -83,7 +83,7 @@ define compile_into_enclave_t_o
 endef
 
 define compile_unsigned_enclave
-	@echo "Compile into unsinged enclave"
+	@echo "Compile into unsigned enclave"
 	@g++ $(CURDIR)/Enclave_t.o -o $(CURDIR)/enclave.unsigned.so -Wl,--no-undefined -nostdlib -nodefaultlibs -nostartfiles -L/opt/intel/sgxsdk/lib64 \
 		-Wl,--whole-archive -l$(Trts_Library_Name) -Wl,--no-whole-archive \
 		-Wl,--start-group -lsgx_tstdc -lsgx_tcxx -lsgx_dcap_tvl -l$(Service_Library_Name) -lsgx_tcrypto -lsgx_tprotected_fs  -lpthread \
