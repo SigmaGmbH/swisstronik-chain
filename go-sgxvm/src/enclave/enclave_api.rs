@@ -7,6 +7,154 @@ use std::time::*;
 
 pub struct EnclaveApi;
 
+fn generate_quote(eid: sgx_enclave_id_t) -> SgxResult<Vec<u8>> {
+    println!("[Enclave Wrapper] Step 1. Get target info");
+    let mut qe_target_info = sgx_target_info_t::default();
+    let res = unsafe { sgx_qe_get_target_info(&mut qe_target_info as *mut _) };
+    if res != sgx_quote3_error_t::SGX_QL_SUCCESS {
+        println!("[Enclave Wrapper] sgx_qe_get_target_info failed");
+        return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+    }
+
+    println!("[Enclave Wrapper] Step 2. Create app report");
+    let mut ret_val = sgx_status_t::SGX_SUCCESS;
+    let mut app_report = sgx_report_t::default();
+    let res = unsafe {
+        super::ecall_create_report(
+            eid,
+            &mut ret_val,
+            &qe_target_info,
+            &mut app_report as *mut sgx_report_t,
+        )
+    };
+    if res != sgx_status_t::SGX_SUCCESS {
+        println!("[Enclave Wrapper] ecall_create_report failed");
+        return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+    }
+    if ret_val != sgx_status_t::SGX_SUCCESS {
+        println!("[Enclave Wrapper] ecall_create_report returned error code");
+        return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+    }
+
+    println!("[Enclave Wrapper] Step 3. Call sgx_qe_get_quote_size");
+    let mut quote_size = 0u32;
+    let res = unsafe { sgx_qe_get_quote_size(&mut quote_size) };
+    if res != sgx_quote3_error_t::SGX_QL_SUCCESS {
+        println!("[Enclave Wrapper] sgx_qe_get_quote_size failed");
+        return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+    }
+
+    println!("[Enclave Wrapper] Step 4. Call sgx_qe_get_quote");
+    let mut quote = vec![0u8; quote_size as usize];
+    let res = unsafe { sgx_qe_get_quote(&app_report, quote_size, quote.as_mut_ptr()) };
+    if res != sgx_quote3_error_t::SGX_QL_SUCCESS {
+        println!("[Enclave Wrapper] sgx_qe_get_quote failed");
+        return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+    }
+
+    Ok(quote)
+}
+
+fn verify_quote(eid: sgx_enclave_id_t, quote: Vec<u8>) -> Result<(), Error> {
+    println!("[Enclave Wrapper] Step 1. Get target_info from our enclave");
+    let mut app_enclave_target_info = sgx_target_info_t::default();
+    let mut ret_val = sgx_status_t::SGX_SUCCESS;
+    let res = unsafe {
+        super::ecall_get_target_info(eid, &mut ret_val, &mut app_enclave_target_info)
+    };
+    if res != sgx_status_t::SGX_SUCCESS {
+        println!("[Enclave Wrapper] ecall_get_target_info failed");
+        return Err(Error::enclave_error(res.as_str()));
+    }
+    if ret_val != sgx_status_t::SGX_SUCCESS {
+        println!("[Enclave Wrapper] ecall_get_target_info returned error code");
+        return Err(Error::enclave_error(ret_val.as_str()));
+    }
+
+    println!("[Enclave Wrapper] Step 2. sgx_qv_set_enclave_load_policy");
+    let res =
+        unsafe { sgx_qv_set_enclave_load_policy(sgx_ql_request_policy_t::SGX_QL_EPHEMERAL) };
+    if res != sgx_quote3_error_t::SGX_QL_SUCCESS {
+        println!("[Enclave Wrapper] sgx_qv_set_enclave_load_policy failed");
+        return Err(Error::enclave_error(res.as_str()));
+    }
+
+    println!("[Enclave Wrapper] Step 3. sgx_qv_get_quote_supplemental_data_size");
+    let mut supplemental_data_size = 0u32;
+    let res = unsafe { sgx_qv_get_quote_supplemental_data_size(&mut supplemental_data_size) };
+    if res != sgx_quote3_error_t::SGX_QL_SUCCESS {
+        println!("[Enclave Wrapper] sgx_qv_get_quote_supplemental_data_size failed");
+        return Err(Error::enclave_error(res.as_str()));
+    }
+
+    println!("[Enclave Wrapper] Step 4. sgx_qv_verify_quote");
+    let current_time = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_secs();
+    let mut p_collateral_expiration_status = 0u32;
+    let mut p_quote_verification_result = sgx_ql_qv_result_t::SGX_QL_QV_RESULT_UNSPECIFIED;
+    let mut p_qve_report_info = sgx_ql_qe_report_info_t::default();
+    let mut supplemental_data = vec![0u8; supplemental_data_size as usize];
+    let res = unsafe {
+        sgx_qv_verify_quote(
+            quote.as_ptr(),
+            quote.len() as u32,
+            null(),
+            current_time as i64,
+            &mut p_collateral_expiration_status,
+            &mut p_quote_verification_result,
+            &mut p_qve_report_info,
+            supplemental_data_size,
+            supplemental_data.as_mut_ptr(),
+        )
+    };
+    if res != sgx_quote3_error_t::SGX_QL_SUCCESS {
+        println!(
+            "[Enclave Wrapper] sgx_qv_verify_quote failed. Reason: {:?}",
+            res
+        );
+        return Err(Error::enclave_error(res.as_str()));
+    }
+
+    println!("[Enclave Wrapper] Step 5. sgx_tvl_verify_qve_report_and_identity");
+    let qve_isvsvn_threshold: sgx_isv_svn_t = 3;
+    let mut ret_val = sgx_quote3_error_t::SGX_QL_SUCCESS;
+    let res = unsafe {
+        super::sgx_tvl_verify_qve_report_and_identity(
+            eid,
+            &mut ret_val,
+            quote.as_ptr(),
+            quote.len() as u32,
+            &p_qve_report_info,
+            current_time as i64,
+            p_collateral_expiration_status,
+            p_quote_verification_result,
+            supplemental_data.as_ptr(),
+            supplemental_data_size,
+            qve_isvsvn_threshold,
+        )
+    };
+    if res != sgx_quote3_error_t::SGX_QL_SUCCESS {
+        println!(
+            "[Enclave Wrapper] sgx_tvl_verify_qve_report_and_identity failed. Reason: {:?}",
+            res
+        );
+        return Err(Error::enclave_error(res.as_str()));
+    }
+    if ret_val != sgx_quote3_error_t::SGX_QL_SUCCESS {
+        println!(
+            "[Enclave Wrapper] sgx_tvl_verify_qve_report_and_identity failed. Status code: {:?}",
+            ret_val
+        );
+        return Err(Error::enclave_error(ret_val.as_str()));
+    }
+
+    println!("Quote verified. Result: {:?}", p_quote_verification_result);
+
+    Ok(())
+}
+
 impl EnclaveApi {
     pub fn check_node_status(eid: sgx_enclave_id_t) -> Result<(), Error> {
         let mut ret_val = sgx_status_t::SGX_SUCCESS;
@@ -98,151 +246,10 @@ impl EnclaveApi {
         fd: i32,
     ) -> Result<(), Error> {
         println!("[Enclave Wrapper] perform_dcap_attestation");
-        println!("/////\n[Enclave Wrapper] generate quote\n/////");
-
-        println!("[Enclave Wrapper] Step 1. Get target info");
-        let mut qe_target_info = sgx_target_info_t::default();
-        let res = unsafe { sgx_qe_get_target_info(&mut qe_target_info as *mut _) };
-        if res != sgx_quote3_error_t::SGX_QL_SUCCESS {
-            println!("[Enclave Wrapper] sgx_qe_get_target_info failed");
-            return Err(Error::enclave_error(res.as_str()));
-        }
-
-        println!("[Enclave Wrapper] Step 2. Create app report");
-        let mut ret_val = sgx_status_t::SGX_SUCCESS;
-        let mut app_report = sgx_report_t::default();
-        let res = unsafe {
-            super::ecall_create_report(
-                eid,
-                &mut ret_val,
-                &qe_target_info,
-                &mut app_report as *mut sgx_report_t,
-            )
-        };
-        if res != sgx_status_t::SGX_SUCCESS {
-            println!("[Enclave Wrapper] ecall_create_report failed");
-            return Err(Error::enclave_error(res.as_str()));
-        }
-        if ret_val != sgx_status_t::SGX_SUCCESS {
-            println!("[Enclave Wrapper] ecall_create_report returned error code");
-            return Err(Error::enclave_error(ret_val.as_str()));
-        }
-
-        println!("[Enclave Wrapper] Step 3. Call sgx_qe_get_quote_size");
-        let mut quote_size = 0u32;
-        let res = unsafe { sgx_qe_get_quote_size(&mut quote_size) };
-        if res != sgx_quote3_error_t::SGX_QL_SUCCESS {
-            println!("[Enclave Wrapper] sgx_qe_get_quote_size failed");
-            return Err(Error::enclave_error(res.as_str()));
-        }
-
-        println!("[Enclave Wrapper] Step 4. Call sgx_qe_get_quote");
-        let mut quote = vec![0u8; quote_size as usize];
-        let res = unsafe { sgx_qe_get_quote(&app_report, quote_size, quote.as_mut_ptr()) };
-        if res != sgx_quote3_error_t::SGX_QL_SUCCESS {
-            println!("[Enclave Wrapper] sgx_qe_get_quote failed");
-            return Err(Error::enclave_error(res.as_str()));
-        }
-
-        println!("/////\n[Enclave Wrapper] verify quote\n/////");
-
-        println!("[Enclave Wrapper] Step 1. Get target_info from our enclave");
-        let mut app_enclave_target_info = sgx_target_info_t::default();
-        let mut ret_val = sgx_status_t::SGX_SUCCESS;
-        let res = unsafe {
-            super::ecall_get_target_info(eid, &mut ret_val, &mut app_enclave_target_info)
-        };
-        if res != sgx_status_t::SGX_SUCCESS {
-            println!("[Enclave Wrapper] ecall_get_target_info failed");
-            return Err(Error::enclave_error(res.as_str()));
-        }
-        if ret_val != sgx_status_t::SGX_SUCCESS {
-            println!("[Enclave Wrapper] ecall_get_target_info returned error code");
-            return Err(Error::enclave_error(ret_val.as_str()));
-        }
-
-        println!("[Enclave Wrapper] Step 2. sgx_qv_set_enclave_load_policy");
-        let res =
-            unsafe { sgx_qv_set_enclave_load_policy(sgx_ql_request_policy_t::SGX_QL_EPHEMERAL) };
-        if res != sgx_quote3_error_t::SGX_QL_SUCCESS {
-            println!("[Enclave Wrapper] sgx_qv_set_enclave_load_policy failed");
-            return Err(Error::enclave_error(res.as_str()));
-        }
-
-        println!("[Enclave Wrapper] Step 3. sgx_qv_get_quote_supplemental_data_size");
-        let mut supplemental_data_size = 0u32;
-        let res = unsafe { sgx_qv_get_quote_supplemental_data_size(&mut supplemental_data_size) };
-        if res != sgx_quote3_error_t::SGX_QL_SUCCESS {
-            println!("[Enclave Wrapper] sgx_qv_get_quote_supplemental_data_size failed");
-            return Err(Error::enclave_error(res.as_str()));
-        }
-
-        println!("[Enclave Wrapper] Step 4. sgx_qv_verify_quote");
-        let current_time = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap()
-            .as_secs();
-        let mut p_collateral_expiration_status = 0u32;
-        let mut p_quote_verification_result = sgx_ql_qv_result_t::SGX_QL_QV_RESULT_UNSPECIFIED;
-        let mut p_qve_report_info = sgx_ql_qe_report_info_t::default();
-        let mut supplemental_data = vec![0u8; supplemental_data_size as usize];
-        let res = unsafe {
-            sgx_qv_verify_quote(
-                quote.as_ptr(),
-                quote.len() as u32,
-                null(),
-                current_time as i64,
-                &mut p_collateral_expiration_status,
-                &mut p_quote_verification_result,
-                &mut p_qve_report_info,
-                supplemental_data_size,
-                supplemental_data.as_mut_ptr(),
-            )
-        };
-        if res != sgx_quote3_error_t::SGX_QL_SUCCESS {
-            println!(
-                "[Enclave Wrapper] sgx_qv_verify_quote failed. Reason: {:?}",
-                res
-            );
-            return Err(Error::enclave_error(res.as_str()));
-        }
-
-        println!("[Enclave Wrapper] Step 5. sgx_tvl_verify_qve_report_and_identity");
-        let qve_isvsvn_threshold: sgx_isv_svn_t = 3;
-        let mut ret_val = sgx_quote3_error_t::SGX_QL_SUCCESS;
-        let res = unsafe {
-            super::sgx_tvl_verify_qve_report_and_identity(
-                eid,
-                &mut ret_val,
-                quote.as_ptr(),
-                quote.len() as u32,
-                &p_qve_report_info,
-                current_time as i64,
-                p_collateral_expiration_status,
-                p_quote_verification_result,
-                supplemental_data.as_ptr(),
-                supplemental_data_size,
-                qve_isvsvn_threshold,
-            )
-        };
-        if res != sgx_quote3_error_t::SGX_QL_SUCCESS {
-            println!(
-                "[Enclave Wrapper] sgx_tvl_verify_qve_report_and_identity failed. Reason: {:?}",
-                res
-            );
-            return Err(Error::enclave_error(res.as_str()));
-        }
-        if ret_val != sgx_quote3_error_t::SGX_QL_SUCCESS {
-            println!(
-                "[Enclave Wrapper] sgx_tvl_verify_qve_report_and_identity failed. Status code: {:?}",
-                ret_val
-            );
-            return Err(Error::enclave_error(ret_val.as_str()));
-        }
-
-        println!("Quote verified. Result: {:?}", p_quote_verification_result);
-
+        let quote = generate_quote(eid).map_err(|err| Error::enclave_error(err.as_str()))?;
+        verify_quote(eid, quote)?;
         Ok(())
+        
 
         // // Validate provided host
         // if hostname.is_empty() {

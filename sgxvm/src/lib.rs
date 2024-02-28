@@ -4,9 +4,11 @@
 #[macro_use]
 extern crate sgx_tstd as std;
 extern crate rustls;
+extern crate sgx_tse;
 
 extern crate sgx_types;
 use sgx_types::*;
+use sgx_tse::*;
 
 use std::slice;
 use std::string::String;
@@ -133,15 +135,7 @@ pub unsafe extern "C" fn ecall_request_seed(
 pub unsafe extern "C" fn ecall_create_report(
     p_qe3_target: *const sgx_target_info_t,
     p_report: *mut sgx_report_t,
-) -> sgx_status_t {
-    // let report = match rsgx_create_report(qe_target_info, &report_data) {
-    //     Ok(report) => report,
-    //     Err(err) => {
-    //         println!("[Enclave] Call to rsgx_create_report failed. Status code: {:?}", err);
-    //         return Err(err);
-    //     }
-    // };
-
+) -> sgx_status_t {    
     let report_data = sgx_report_data_t::default();
     unsafe { sgx_create_report(p_qe3_target, &report_data as *const _, p_report) }
 }
