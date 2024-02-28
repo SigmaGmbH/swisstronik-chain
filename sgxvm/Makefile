@@ -47,7 +47,7 @@ endef
 
 define compile_enclave_rust_debug
 	@echo "Building enclave rust code"
-	@RUSTFLAGS="-C target-cpu=native -Z threads=4" cargo build --features $(Enclave_build_feature) --no-default-features
+	@RUSTFLAGS="-Z threads=4" cargo build --features $(Enclave_build_feature) --no-default-features
 endef
 
 define create_bridge_enclave_rust
