@@ -10,6 +10,7 @@ use std::panic::catch_unwind;
 
 pub mod enclave_api;
 pub mod doorbell;
+pub mod attestation;
 
 lazy_static! {
     pub static ref ENCLAVE_DOORBELL: doorbell::EnclaveDoorbell = doorbell::EnclaveDoorbell::new();
