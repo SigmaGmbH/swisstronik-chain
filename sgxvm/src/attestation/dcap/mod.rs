@@ -4,15 +4,16 @@ use sgx_types::*;
 use std::untrusted::time::SystemTimeEx;
 use std::{time::SystemTime, vec::Vec};
 
-use std::str::FromStr;
-use yasna::models::ObjectIdentifier;
+use crate::ocall;
 
-use crate::{attestation::cert, ocall};
-
+// In final version this function will be used to pass DCAP remote attestation and to request master key 
+// through TLS connection.
+//
+// In current implementation it generates DCAP Quote and verifies it using QvE
 pub fn perform_dcap_attestation(
-    hostname: *const u8,
-    data_len: usize,
-    socket_fd: c_int,
+    _hostname: *const u8,
+    _data_len: usize,
+    _socket_fd: c_int,
     qe_target_info: &sgx_target_info_t,
     quote_size: u32,
 ) -> sgx_status_t {
@@ -311,11 +312,17 @@ fn verify_dcap_quote(quote: Vec<u8>) -> SgxResult<()> {
         }
     }
 
+    // Inspect quote
+    let p_quote3: *const sgx_quote3_t = quote.as_ptr() as *const sgx_quote3_t;
+    let quote3: sgx_quote3_t = unsafe { *p_quote3 };
+
+    // TODO: Add additional inspection of provided quote
+
     if supplemental_data_size > 0 {
         let p_supplemental_data: *const sgx_ql_qv_supplemental_t = supplemental_data.as_ptr() as *const sgx_ql_qv_supplemental_t;
         let qv_supplemental_data: sgx_ql_qv_supplemental_t = unsafe { *p_supplemental_data };
         
-        // TODO: verify supplemental data
+        // TODO: verify supplemental data. Discover which fields should be verified
         println!("[Enclave] CPU SVN: {:?}", qv_supplemental_data.tcb_cpusvn.svn);
     }
 
