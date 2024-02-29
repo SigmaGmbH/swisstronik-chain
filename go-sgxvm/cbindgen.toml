@@ -66,8 +66,6 @@ exclude = [
     "ecall_request_seed",
     "ecall_is_initialized",
     "ecall_dcap_attestation",
-    "ecall_create_report",
-    "ecall_get_target_info",
     "sgx_tvl_verify_qve_report_and_identity",
     "ocall_query_raw",
     "ocall_allocate",

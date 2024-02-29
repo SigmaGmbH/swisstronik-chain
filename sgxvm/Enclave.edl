@@ -60,15 +60,6 @@ enclave {
         );
 
         public sgx_status_t ecall_status();
-
-        public sgx_status_t ecall_create_report(
-            [in] const sgx_target_info_t* p_qe3_target,
-            [out] sgx_report_t* p_report
-        );
-
-        public sgx_status_t ecall_get_target_info(
-            [out] sgx_target_info_t* target_info
-        );
     };
 
     untrusted {
