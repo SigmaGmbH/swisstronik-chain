@@ -55,4 +55,9 @@ extern "C" {
 		p_supplemental_data: *mut u8,
 		supplemental_data_size: u32,
     ) -> sgx_status_t;
+
+    pub fn ocall_get_supplemental_data_size(
+        ret_val: *mut sgx_status_t,
+        data_size: *mut u32,
+    ) -> sgx_status_t;
 }

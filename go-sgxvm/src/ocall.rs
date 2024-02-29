@@ -303,3 +303,17 @@ pub unsafe extern "C" fn ocall_get_qve_report(
 
     sgx_status_t::SGX_SUCCESS
 }
+
+#[no_mangle]
+pub unsafe extern "C" fn ocall_get_supplemental_data_size(
+    data_size: *mut u32,
+) -> sgx_status_t {
+    let res = unsafe { sgx_qv_get_quote_supplemental_data_size(data_size) };
+    
+    if res != sgx_quote3_error_t::SGX_QL_SUCCESS {
+        println!("[Enclave Wrapper] ocall_get_supplemental_data_size failed. Status code: {:?}", res);
+        return sgx_status_t::SGX_ERROR_UNEXPECTED;
+    }
+
+    sgx_status_t::SGX_SUCCESS
+}

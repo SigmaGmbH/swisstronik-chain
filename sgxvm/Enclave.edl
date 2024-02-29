@@ -123,5 +123,9 @@ enclave {
 			[out, size=supplemental_data_size] uint8_t *p_supplemental_data,
 			uint32_t supplemental_data_size
 		);
+
+        sgx_status_t ocall_get_supplemental_data_size(
+            [out] uint32_t *data_size
+        );
     };
 };
