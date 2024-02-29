@@ -75,6 +75,41 @@ fn generate_quote(eid: sgx_enclave_id_t) -> Result<Vec<u8>, Error> {
     Ok(quote)
 }
 
+fn get_app_enclave_target_info(eid: sgx_enclave_id_t) -> Result<sgx_target_info_t, Error> {
+    let mut retval = sgx_status_t::SGX_SUCCESS;
+    let mut app_enclave_target_info = sgx_target_info_t::default();
+    let res = unsafe {
+        ecall_get_target_info(eid, &mut retval, &mut app_enclave_target_info)
+    };
+    if res != sgx_status_t::SGX_SUCCESS && retval != sgx_status_t::SGX_SUCCESS {
+        println!("[Enclave Wrapper] ecall_get_target_info failed");
+        return Err(Error::enclave_error("ecall_get_target_info failed"));
+    } 
+
+    Ok(app_enclave_target_info)
+}
+
+fn set_qv_enclave_load_policy() -> Result<(), Error> {
+    let res = unsafe { sgx_qv_set_enclave_load_policy(sgx_ql_request_policy_t::SGX_QL_EPHEMERAL) };
+    if res != sgx_quote3_error_t::SGX_QL_SUCCESS {
+        println!("[Enclave Wrapper] sgx_qv_set_enclave_load_policy failed. Status code: {:?}", res);
+        return Err(Error::enclave_error("sgx_qv_set_enclave_load_policy failed"));
+    }
+
+    Ok(())
+}
+
+fn get_qv_enclave_supplemental_data_size() -> Result<u32, Error> {
+    let mut supplemental_data_size = 0u32;
+    let res = unsafe { sgx_qv_get_quote_supplemental_data_size(&mut supplemental_data_size) };
+    if res != sgx_quote3_error_t::SGX_QL_SUCCESS {
+        println!("[Enclave Wrapper] sgx_qv_get_quote_supplemental_data_size failed. Status code: {:?}", res);
+        return Err(Error::enclave_error("sgx_qv_get_quote_supplemental_data_size failed"));
+    }
+
+    Ok(supplemental_data_size)
+}
+
 fn verify_quote(eid: sgx_enclave_id_t, quote: Vec<u8>) -> Result<(), Error> {
     println!("Verifying quote");
 
@@ -83,35 +118,14 @@ fn verify_quote(eid: sgx_enclave_id_t, quote: Vec<u8>) -> Result<(), Error> {
     qve_report_info.nonce.rand = rand_nonce;
     
     println!("[Enclave Wrapper] Step 1. Get target_info from our enclave");
-    let mut get_target_info_ret = sgx_status_t::SGX_SUCCESS;
-    // Use separate variable to fix issue with packed fields
-    let mut app_enclave_target_info = sgx_target_info_t::default();
-    let sgx_ret = unsafe {
-        ecall_get_target_info(eid, &mut get_target_info_ret, &mut app_enclave_target_info)
-    };
-    if sgx_ret != sgx_status_t::SGX_SUCCESS && get_target_info_ret != sgx_status_t::SGX_SUCCESS {
-        println!("[Enclave Wrapper] ecall_get_target_info failed");
-        return Err(Error::enclave_error(get_target_info_ret.as_str()));
-    } 
+    let app_enclave_target_info = get_app_enclave_target_info(eid)?;
     qve_report_info.app_enclave_target_info = app_enclave_target_info;
 
-
-
-
     println!("[Enclave Wrapper] Step 2. sgx_qv_set_enclave_load_policy");
-    let res = unsafe { sgx_qv_set_enclave_load_policy(sgx_ql_request_policy_t::SGX_QL_EPHEMERAL) };
-    if res != sgx_quote3_error_t::SGX_QL_SUCCESS {
-        println!("[Enclave Wrapper] sgx_qv_set_enclave_load_policy failed");
-        return Err(Error::enclave_error(res.as_str()));
-    }
+    set_qv_enclave_load_policy()?;
 
     println!("[Enclave Wrapper] Step 3. sgx_qv_get_quote_supplemental_data_size");
-    let mut supplemental_data_size = 0u32;
-    let res = unsafe { sgx_qv_get_quote_supplemental_data_size(&mut supplemental_data_size) };
-    if res != sgx_quote3_error_t::SGX_QL_SUCCESS {
-        println!("[Enclave Wrapper] sgx_qv_get_quote_supplemental_data_size failed");
-        return Err(Error::enclave_error(res.as_str()));
-    }
+    let supplemental_data_size = get_qv_enclave_supplemental_data_size()?;
 
     // TODO: Maybe add check for supplemental data size
 
