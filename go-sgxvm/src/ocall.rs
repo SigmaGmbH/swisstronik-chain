@@ -266,7 +266,6 @@ pub unsafe extern "C" fn ocall_get_qve_report(
     }
 
     let quote: Vec<u8> = unsafe { slice::from_raw_parts(p_quote, quote_len as usize).to_vec() };
-    // let qve_report_info = unsafe { *p_qve_report_info };
 
     // Obtain QvE supplemental data
     let mut qve_supplemental_data_size = 0u32;
@@ -277,11 +276,6 @@ pub unsafe extern "C" fn ocall_get_qve_report(
         println!("Call to sgx_qv_get_quote_supplemental_data_size failed. Status code: {:?}", ret_val);
         return sgx_status_t::SGX_ERROR_UNEXPECTED;
     }
-
-    // let mut collateral_expiration_status = 1u32;
-    // let mut quote_verification_result = sgx_ql_qv_result_t::SGX_QL_QV_RESULT_OK;
-    // let mut supplemental_data: Vec<u8> = vec![0; supplemental_data_size as usize];
-    // let mut qve_report_info: sgx_ql_qe_report_info_t = qve_report_info;
 
     let ret_val = unsafe {
         sgx_qv_verify_quote(

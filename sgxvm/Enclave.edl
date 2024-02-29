@@ -116,7 +116,6 @@ enclave {
 			[in, size = quote_size] const uint8_t *quote, 
             uint32_t quote_size,
 			time_t timestamp,
-			[in] const sgx_ql_qve_collateral_t *p_quote_collateral,
 			[out] uint32_t *collateral_expiration_status,
 			[out] sgx_ql_qv_result_t *quote_verification_result,
 			[in, out] sgx_ql_qe_report_info_t *qve_report_info,

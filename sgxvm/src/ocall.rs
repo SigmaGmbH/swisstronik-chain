@@ -48,7 +48,6 @@ extern "C" {
 		p_quote: *const u8,
 		quote_len: u32,
 		timestamp: i64,
-		p_quote_collateral: *const sgx_ql_qve_collateral_t,
 		p_collateral_expiration_status: *mut u32,
 		p_quote_verification_result: *mut sgx_ql_qv_result_t,
 		p_qve_report_info: *mut sgx_ql_qe_report_info_t,

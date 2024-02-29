@@ -14,7 +14,6 @@ mod errors;
 mod types;
 mod ocall;
 mod protobuf_generated;
-mod dcap;
 
 // We only interact with this crate via `extern "C"` interfaces, not those public
 // exports. There are no guarantees those exports are stable.
