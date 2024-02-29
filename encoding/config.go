@@ -23,12 +23,24 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth/tx"
 
 	enccodec "swisstronik/encoding/codec"
+
+	"cosmossdk.io/x/tx/signing"
+	addresscodec "github.com/cosmos/cosmos-sdk/codec/address"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	gogoproto "github.com/cosmos/gogoproto/proto"
 )
 
 // MakeConfig creates an EncodingConfig for testing
 func MakeConfig(mb module.BasicManager) params.EncodingConfig {
 	cdc := amino.NewLegacyAmino()
-	interfaceRegistry := types.NewInterfaceRegistry()
+	interfaceRegistry, err := NewInterfaceRegistry(
+		sdk.GetConfig().GetBech32AccountAddrPrefix(),
+		sdk.GetConfig().GetBech32ValidatorAddrPrefix(),
+	)
+
+	if err != nil {
+		panic(err)
+	}
 	codec := amino.NewProtoCodec(interfaceRegistry)
 
 	encodingConfig := params.EncodingConfig{
@@ -43,4 +55,18 @@ func MakeConfig(mb module.BasicManager) params.EncodingConfig {
 	enccodec.RegisterInterfaces(encodingConfig.InterfaceRegistry)
 	mb.RegisterInterfaces(encodingConfig.InterfaceRegistry)
 	return encodingConfig
+}
+
+func NewInterfaceRegistry(addrPrefix string, valAddrPrefix string) (types.InterfaceRegistry, error) {
+	return types.NewInterfaceRegistryWithOptions(types.InterfaceRegistryOptions{
+		ProtoFiles: gogoproto.HybridResolver,
+		SigningOptions: signing.Options{
+			AddressCodec:          addresscodec.NewBech32Codec(addrPrefix),
+			ValidatorAddressCodec: addresscodec.NewBech32Codec(valAddrPrefix),
+			// TODO(CORE-840): cosmos.msg.v1.signer annotation doesn't supported nested messages beyond a depth of 1
+			// which requires any message where the authority is nested further to implement its own accessor. Once
+			// https://github.com/cosmos/cosmos-sdk/issues/18722 is fixed, replace this with the cosmos.msg.v1.signing
+			// annotation on the protos.
+		},
+	})
 }

@@ -19,6 +19,7 @@ import (
 	confixcmd "cosmossdk.io/tools/confix/cmd"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/codec/address"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	"github.com/cosmos/cosmos-sdk/types/module"
 
@@ -42,7 +43,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
-	"github.com/cosmos/cosmos-sdk/x/genutil"
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 	"github.com/spf13/cast"
@@ -61,16 +61,22 @@ import (
 	"swisstronik/utils"
 
 	"github.com/cosmos/cosmos-sdk/client/snapshot"
+	"github.com/cosmos/cosmos-sdk/codec"
 	runtimeservices "github.com/cosmos/cosmos-sdk/runtime/services"
 	simutils "github.com/cosmos/cosmos-sdk/testutil/sims"
 	sdktypes "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authcodec "github.com/cosmos/cosmos-sdk/x/auth/codec"
+	txmodule "github.com/cosmos/cosmos-sdk/x/auth/tx/config"
 )
 
 const ShortBlockWindow uint32 = 20
 
 // NewRootCmd creates a new root command for a Cosmos SDK application
 func NewRootCmd() (*cobra.Command, simappparams.EncodingConfig) {
+	// Initialize the SDK config the first before doing anything else.
+	InitSDKConfig()
+
 	encodingConfig := encoding.MakeConfig(app.ModuleBasics)
 	initClientCtx := client.Context{}.
 		WithCodec(encodingConfig.Codec).
@@ -102,6 +108,22 @@ func NewRootCmd() (*cobra.Command, simappparams.EncodingConfig) {
 				return err
 			}
 
+			// This needs to go after ReadFromClientConfig, as that function
+			// sets the RPC client needed for SIGN_MODE_TEXTUAL.
+			enabledSignModes := append(authtx.DefaultSignModes, signing.SignMode_SIGN_MODE_TEXTUAL)
+			txConfigOpts := authtx.ConfigOptions{
+				EnabledSignModes:           enabledSignModes,
+				TextualCoinMetadataQueryFn: txmodule.NewGRPCCoinMetadataQueryFn(initClientCtx),
+			}
+			txConfigWithTextual, err := authtx.NewTxConfigWithOptions(
+				codec.NewProtoCodec(encodingConfig.InterfaceRegistry),
+				txConfigOpts,
+			)
+			if err != nil {
+				return err
+			}
+			initClientCtx = initClientCtx.WithTxConfig(txConfigWithTextual)
+
 			if err := client.SetCmdClientContextHandler(initClientCtx, cmd); err != nil {
 				return err
 			}
@@ -114,19 +136,18 @@ func NewRootCmd() (*cobra.Command, simappparams.EncodingConfig) {
 		},
 	}
 
-	InitSDKConfig()
-
 	txConfig := authtx.NewTxConfig(encodingConfig.Codec, authtx.DefaultSignModes)
-	gentxModule := app.ModuleBasics[genutiltypes.ModuleName].(genutil.AppModuleBasic)
+	// gentxModule := app.ModuleBasics[genutiltypes.ModuleName].(genutil.AppModuleBasic)
 
+	valOperAddressCodec := address.NewBech32Codec(sdktypes.GetConfig().GetBech32ValidatorAddrPrefix())
 	a := appCreator{encodingConfig}
 	rootCmd.AddCommand(
 		evmmoduleclient.ValidateChainID(
 			genutilcli.InitCmd(app.ModuleBasics, app.DefaultNodeHome),
 		),
-		genutilcli.CollectGenTxsCmd(banktypes.GenesisBalancesIterator{}, app.DefaultNodeHome, gentxModule.GenTxValidator, txConfig.SigningContext().ValidatorAddressCodec()),
+		genutilcli.CollectGenTxsCmd(banktypes.GenesisBalancesIterator{}, app.DefaultNodeHome, genutiltypes.DefaultMessageValidator, valOperAddressCodec),
 		genutilcli.MigrateGenesisCmd(genutilcli.MigrationMap),
-		genutilcli.GenTxCmd(app.ModuleBasics, encodingConfig.TxConfig, banktypes.GenesisBalancesIterator{}, app.DefaultNodeHome, txConfig.SigningContext().ValidatorAddressCodec()),
+		genutilcli.GenTxCmd(app.ModuleBasics, encodingConfig.TxConfig, banktypes.GenesisBalancesIterator{}, app.DefaultNodeHome, valOperAddressCodec),
 		genutilcli.ValidateGenesisCmd(app.ModuleBasics),
 		AddGenesisAccountCmd(app.DefaultNodeHome, txConfig.SigningContext().ValidatorAddressCodec()),
 		tmcli.NewCompletionCmd(rootCmd, true),

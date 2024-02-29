@@ -4,6 +4,7 @@ go 1.21
 
 require (
 	cosmossdk.io/api v0.7.3
+	cosmossdk.io/client/v2 v2.0.0-beta.1.0.20240124105859-5ad1805d0e79
 	cosmossdk.io/core v0.11.0
 	cosmossdk.io/depinject v1.0.0-alpha.4
 	cosmossdk.io/errors v1.0.1
@@ -79,7 +80,6 @@ require (
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	cloud.google.com/go/iam v1.1.5 // indirect
 	cloud.google.com/go/storage v1.35.1 // indirect
-	cosmossdk.io/client/v2 v2.0.0-beta.1.0.20240124105859-5ad1805d0e79 // indirect
 	cosmossdk.io/collections v0.4.0 // indirect
 	github.com/99designs/go-keychain v0.0.0-20191008050251-8e49817e8af4 // indirect
 	github.com/99designs/keyring v1.2.1 // indirect
