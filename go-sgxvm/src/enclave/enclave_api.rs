@@ -10,123 +10,69 @@ use super::ecall_create_report;
 
 pub struct EnclaveApi;
 
-// fn output(quote: Vec<u8>) {
-//     let p_quote3: *const sgx_quote3_t = quote.as_ptr() as *const sgx_quote3_t;
-
-//     // copy heading bytes to a sgx_quote3_t type to simplify access
-//     let quote3: sgx_quote3_t = unsafe { *p_quote3 };
-
-//     let quote_signature_data_vec: Vec<u8> = quote[std::mem::size_of::<sgx_quote3_t>()..].into();
-
-//     //println!("quote3 header says signature data len = {}", quote3.signature_data_len);
-//     //println!("quote_signature_data len = {}", quote_signature_data_vec.len());
-
-//     assert_eq!(
-//         quote3.signature_data_len as usize,
-//         quote_signature_data_vec.len()
-//     );
-
-//     // signature_data has a header of sgx_ql_ecdsa_sig_data_t structure
-//     //let p_sig_data: * const sgx_ql_ecdsa_sig_data_t = quote_signature_data_vec.as_ptr() as _;
-//     // mem copy
-//     //let sig_data = unsafe { * p_sig_data };
-
-//     // sgx_ql_ecdsa_sig_data_t is followed by sgx_ql_auth_data_t
-//     // create a new vec for auth_data
-//     let auth_certification_data_offset = std::mem::size_of::<sgx_ql_ecdsa_sig_data_t>();
-//     let p_auth_data: *const sgx_ql_auth_data_t =
-//         (quote_signature_data_vec[auth_certification_data_offset..]).as_ptr() as _;
-//     let auth_data_header: sgx_ql_auth_data_t = unsafe { *p_auth_data };
-//     //println!("auth_data len = {}", auth_data_header.size);
-
-//     let auth_data_offset =
-//         auth_certification_data_offset + std::mem::size_of::<sgx_ql_auth_data_t>();
-
-//     // It should be [0,1,2,3...]
-//     // defined at https://github.com/intel/SGXDataCenterAttestationPrimitives/blob/4605fae1c606de4ff1191719433f77f050f1c33c/QuoteGeneration/quote_wrapper/quote/qe_logic.cpp#L1452
-//     //let auth_data_vec: Vec<u8> = quote_signature_data_vec[auth_data_offset..auth_data_offset + auth_data_header.size as usize].into();
-//     //println!("Auth data:\n{:?}", auth_data_vec);
-
-//     let temp_cert_data_offset = auth_data_offset + auth_data_header.size as usize;
-//     let p_temp_cert_data: *const sgx_ql_certification_data_t =
-//         quote_signature_data_vec[temp_cert_data_offset..].as_ptr() as _;
-//     let temp_cert_data: sgx_ql_certification_data_t = unsafe { *p_temp_cert_data };
-
-//     //println!("certification data offset = {}", temp_cert_data_offset);
-//     //println!("certification data size = {}", temp_cert_data.size);
-
-//     let cert_info_offset =
-//         temp_cert_data_offset + std::mem::size_of::<sgx_ql_certification_data_t>();
-
-//     //println!("cert info offset = {}", cert_info_offset);
-//     // this should be the last structure
-//     assert_eq!(
-//         quote_signature_data_vec.len(),
-//         cert_info_offset + temp_cert_data.size as usize
-//     );
-
-//     // let tail_content = quote_signature_data_vec[cert_info_offset..].to_vec();
-//     // let enc_ppid_len = 384;
-//     // let enc_ppid: &[u8] = &tail_content[0..enc_ppid_len];
-//     // let pce_id: &[u8] = &tail_content[enc_ppid_len..enc_ppid_len + 2];
-//     // let cpu_svn: &[u8] = &tail_content[enc_ppid_len + 2..enc_ppid_len + 2 + 16];
-//     // let pce_isvsvn: &[u8] = &tail_content[enc_ppid_len + 2 + 16..enc_ppid_len + 2 + 18];
-//     // println!("EncPPID:\n{:02x}", enc_ppid.iter().format(""));
-//     // println!("PCE_ID:\n{:02x}", pce_id.iter().format(""));
-//     // println!("TCBr - CPUSVN:\n{:02x}", cpu_svn.iter().format(""));
-//     // println!("TCBr - PCE_ISVSVN:\n{:02x}", pce_isvsvn.iter().format(""));
-//     // println!("QE_ID:\n{:02x}", quote3.header.user_data.iter().format(""));
-// }
-
 fn create_app_enclave_report(
     eid: sgx_enclave_id_t,
     qe_target_info: sgx_target_info_t,
-    app_report: *mut sgx_report_t,
-) -> bool {
+) -> Result<sgx_report_t, Error> {
     let mut retval = sgx_status_t::SGX_SUCCESS;
-    let sgx_status = unsafe { ecall_create_report(eid, &mut retval, &qe_target_info, app_report) };
-    if sgx_status != sgx_status_t::SGX_SUCCESS && retval != sgx_status_t::SGX_SUCCESS {
-        println!("create_app_enclave_report failed");
-        return false;
+    let mut app_report = sgx_report_t::default();
+    let res = unsafe { ecall_create_report(eid, &mut retval, &qe_target_info, &mut app_report) };
+
+    if res != sgx_status_t::SGX_SUCCESS && retval != sgx_status_t::SGX_SUCCESS {
+        return Err(Error::enclave_error("Cannot create app enclave report"));
     }
 
-    true
+    Ok(app_report)
 }
 
-fn generate_quote(eid: sgx_enclave_id_t) -> SgxResult<Vec<u8>> {
-    println!("[Enclave Wrapper] Step 1. Get target info");
+fn get_qe_target_info() -> Result<sgx_target_info_t, Error> {
     let mut qe_target_info = sgx_target_info_t::default();
     let qe3_ret = unsafe { sgx_qe_get_target_info(&mut qe_target_info) };
     if qe3_ret != sgx_quote3_error_t::SGX_QL_SUCCESS {
-        println!("[Enclave Wrapper] sgx_qe_get_target_info failed");
-        return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+        println!("[Enclave Wrapper] sgx_qe_get_target_info failed. Status code: {:?}", qe3_ret);
+        return Err(Error::enclave_error("sgx_qe_get_target_info failed"));
     }
 
-    println!("[Enclave Wrapper] Step 2. Create app report");
-    let mut app_report = sgx_report_t::default();
-    if create_app_enclave_report(eid, qe_target_info, &mut app_report) != true {
-        println!("FAIL");
-        return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
-    }
+    Ok(qe_target_info)
+}
 
-    println!("[Enclave Wrapper] Step 3. Call sgx_qe_get_quote_size");
+fn get_qe_quote_size() -> Result<u32, Error> {
     let mut quote_size = 0u32;
     let qe3_ret = unsafe { sgx_qe_get_quote_size(&mut quote_size) };
     if qe3_ret != sgx_quote3_error_t::SGX_QL_SUCCESS {
-        println!("[Enclave Wrapper] sgx_qe_get_quote_size failed");
-        return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+        println!("[Enclave Wrapper] sgx_qe_get_quote_size failed. Status code: {:?}", qe3_ret);
+        return Err(Error::enclave_error("sgx_qe_get_quote_size failed"));
     }
 
-    println!("[Enclave Wrapper] Step 4. Call sgx_qe_get_quote");
+    Ok(quote_size)
+}
+
+fn get_qe_quote(app_report: sgx_report_t, quote_size: u32) -> Result<Vec<u8>, Error> {
     let mut quote_buffer = vec![0u8; quote_size as usize];
     let p_quote_buffer = quote_buffer.as_mut_ptr();
     let qe3_ret = unsafe { sgx_qe_get_quote(&app_report, quote_size, p_quote_buffer) };
     if qe3_ret != sgx_quote3_error_t::SGX_QL_SUCCESS {
-        println!("[Enclave Wrapper] sgx_qe_get_quote failed");
-        return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+        println!("[Enclave Wrapper] sgx_qe_get_quote failed. Status code: {:?}", qe3_ret);
+        return Err(Error::enclave_error("sgx_qe_get_quote failed"));
     }
 
     Ok(quote_buffer)
+}
+
+fn generate_quote(eid: sgx_enclave_id_t) -> Result<Vec<u8>, Error> {
+    println!("[Enclave Wrapper] Step 1. Get target info");
+    let qe_target_info = get_qe_target_info()?;
+
+    println!("[Enclave Wrapper] Step 2. Create app report");
+    let app_report = create_app_enclave_report(eid, qe_target_info)?;
+
+    println!("[Enclave Wrapper] Step 3. Call sgx_qe_get_quote_size");
+    let quote_size = get_qe_quote_size()?;
+
+    println!("[Enclave Wrapper] Step 4. Call sgx_qe_get_quote");
+    let quote = get_qe_quote(app_report, quote_size)?;
+
+    Ok(quote)
 }
 
 fn verify_quote(eid: sgx_enclave_id_t, quote: Vec<u8>) -> Result<(), Error> {
@@ -327,7 +273,7 @@ impl EnclaveApi {
         fd: i32,
     ) -> Result<(), Error> {
         println!("[Enclave Wrapper] perform_dcap_attestation");
-        let quote = generate_quote(eid).map_err(|err| Error::enclave_error(err.as_str()))?;
+        let quote = generate_quote(eid)?;
         verify_quote(eid, quote)?;
         Ok(())
 
