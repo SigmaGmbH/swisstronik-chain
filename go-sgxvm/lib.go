@@ -110,10 +110,10 @@ func InitializeMasterKey(shouldReset bool) error {
 	return api.InitializeMasterKey(shouldReset)
 }
 
-// StartBootstrapServer handles incoming request for starting bootstrap server
+// StartAttestationServer handles incoming request for starting attestation server
 // to share master key with new nodes who passed Remote Attestation.
-func StartBootstrapServer(addr string) error {
-	return api.StartSeedServer(addr)
+func StartAttestationServer(epidAddress, dcapAddress string) error {
+	return api.StartAttestationServer(epidAddress, dcapAddress)
 }
 
 // RequestSeed handles requesting seed and passing EPID Remote Attestation.
