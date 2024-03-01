@@ -36,6 +36,7 @@ func TestCreate(t *testing.T) {
 		value,
 		nil,
 		gasLimit,
+		0,
 		txContext,
 		true,
 	)
@@ -88,6 +89,7 @@ func TestCoinTransfer(t *testing.T) {
 		value.Bytes(),
 		nil,
 		gasLimit,
+		0,
 		txContext,
 		true,
 	)
@@ -130,15 +132,24 @@ func TestSeedExchange(t *testing.T) {
 		t.Fail()
 	}
 
-	addr := "localhost:8999"
-	err := api.StartSeedServer(addr)
+	epidAddress := "localhost:8999"
+	dcapAddress := "localhost:8998"
+	err := api.StartAttestationServer(epidAddress, dcapAddress)
 	if err != nil {
 		t.Fail()
 	}
 
-	host := "localhost"
-	port := 8999
-	if err := api.RequestSeed(host, port); err != nil {
+	// Test EPID Attestation
+	epidHost := "localhost"
+	epidPort := 8999
+	if err := api.RequestMasterKey(epidHost, epidPort, false); err != nil {
+		t.Fail()
+	}
+
+	// Test DCAP Attestation
+	dcapHost := "localhost"
+	dcapPort := 8998
+	if err := api.RequestMasterKey(dcapHost, dcapPort, true); err != nil {
 		t.Fail()
 	}
 }
