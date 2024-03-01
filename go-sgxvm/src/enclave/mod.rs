@@ -10,6 +10,7 @@ use std::panic::catch_unwind;
 
 pub mod enclave_api;
 pub mod doorbell;
+pub mod attestation;
 
 lazy_static! {
     pub static ref ENCLAVE_DOORBELL: doorbell::EnclaveDoorbell = doorbell::EnclaveDoorbell::new();
@@ -67,19 +68,6 @@ extern "C" {
         socket_fd: c_int,
         qe_target_info: &sgx_target_info_t,
         quote_size: u32,
-    ) -> sgx_status_t;
-
-    pub fn ecall_create_report(
-        eid: sgx_enclave_id_t,
-        retval: *mut sgx_status_t,
-        p_qe3_target: *const sgx_target_info_t,
-        p_report: *mut sgx_report_t,
-    ) -> sgx_status_t;
-
-    pub fn ecall_get_target_info(
-        eid: sgx_enclave_id_t,
-        retval: *mut sgx_status_t,
-        target_info: *mut sgx_target_info_t,
     ) -> sgx_status_t;
 
     pub fn sgx_tvl_verify_qve_report_and_identity(

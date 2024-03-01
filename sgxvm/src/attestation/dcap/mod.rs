@@ -4,32 +4,39 @@ use sgx_types::*;
 use std::untrusted::time::SystemTimeEx;
 use std::{time::SystemTime, vec::Vec};
 
-use std::str::FromStr;
-use yasna::models::ObjectIdentifier;
+use crate::ocall;
 
-use crate::{attestation::cert, ocall};
-
+// In final version this function will be used to pass DCAP remote attestation and to request master key 
+// through TLS connection.
+//
+// In current implementation it generates DCAP Quote and verifies it using QvE
 pub fn perform_dcap_attestation(
-    hostname: *const u8,
-    data_len: usize,
-    socket_fd: c_int,
+    _hostname: *const u8,
+    _data_len: usize,
+    _socket_fd: c_int,
     qe_target_info: &sgx_target_info_t,
-	quote_size: u32,
+    quote_size: u32,
 ) -> sgx_status_t {
-    println!("[Enclave] Getting QE quote");
+    println!("[Enclave] Generate quote");
     let ecc_handle = SgxEccHandle::new();
     let _result = ecc_handle.open();
     let (prv_k, pub_k) = match ecc_handle.create_key_pair() {
         Ok((prv_k, pub_k)) => (prv_k, pub_k),
         Err(err) => {
-            println!("[Enclave] Cannot create keypair for DCAP Cert. Status code: {:?}", err);
+            println!(
+                "[Enclave] Cannot create keypair for DCAP Cert. Status code: {:?}",
+                err
+            );
             return sgx_status_t::SGX_ERROR_UNEXPECTED;
         }
     };
     let qe_quote = match get_qe_quote(&pub_k, qe_target_info, quote_size) {
         Ok(qe_quote) => qe_quote,
         Err(err) => {
-            println!("[Enclave] Cannot obtain qe quote from PCCS. Status code: {:?}", err);
+            println!(
+                "[Enclave] Cannot obtain qe quote from PCCS. Status code: {:?}",
+                err
+            );
             return sgx_status_t::SGX_ERROR_UNEXPECTED;
         }
     };
@@ -38,10 +45,10 @@ pub fn perform_dcap_attestation(
     match verify_dcap_quote(qe_quote) {
         Ok(_) => {
             println!("[Enclave] Quote verified");
-        },
+        }
         Err(err) => {
             println!("[Enclave] Cannot verify quote. Status code: {:?}", err);
-            return err
+            return err;
         }
     }
 
@@ -54,7 +61,7 @@ fn get_qe_quote(
     quote_size: u32,
 ) -> SgxResult<Vec<u8>> {
     let mut report_data: sgx_report_data_t = sgx_report_data_t::default();
-    
+
     // Copy public key to report data
     let mut pub_k_gx = pub_k.gx.clone();
     pub_k_gx.reverse();
@@ -67,36 +74,44 @@ fn get_qe_quote(
     let report = match rsgx_create_report(qe_target_info, &report_data) {
         Ok(report) => report,
         Err(err) => {
-            println!("[Enclave] Call to rsgx_create_report failed. Status code: {:?}", err);
+            println!(
+                "[Enclave] Call to `rsgx_create_report` failed. Status code: {:?}",
+                err
+            );
             return Err(err);
         }
     };
 
     // Get quote from PCCS
-    let mut ret_val = sgx_status_t::SGX_SUCCESS;
-    let mut quote_buf = vec![0u8; quote_size as usize]; 
+    let mut retval = sgx_status_t::SGX_SUCCESS;
+    let mut quote_buf = vec![0u8; quote_size as usize];
     let res = unsafe {
         ocall::ocall_get_ecdsa_quote(
-            &mut ret_val as *mut sgx_status_t, 
-            &report as *const sgx_report_t, 
+            &mut retval,
+            &report as *const sgx_report_t,
             quote_buf.as_mut_ptr(),
-            quote_size
+            quote_size,
         )
     };
 
-    let qe_quote: Vec<u8> = match (res, ret_val) {
-        (sgx_status_t::SGX_SUCCESS, sgx_status_t::SGX_SUCCESS) => Vec::from(&quote_buf[..quote_size as usize]),
-        (_, _) => {
-            println!(
-                "[Enclave] ocall_get_ecdsa_quote failed. Status codes: res: {:?}, ret_val: {:?}",
-                res, ret_val
-            );
-            return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
-        }
-    };
+    if res != sgx_status_t::SGX_SUCCESS {
+        println!(
+            "[Enclave] Call to `ocall_get_ecdsa_quote` failed. Status code: {:?}",
+            res
+        );
+        return Err(res);
+    }
+
+    if retval != sgx_status_t::SGX_SUCCESS {
+        println!(
+            "[Enclave] Error during `ocall_get_ecdsa_quote`. Status code: {:?}",
+            retval
+        );
+        return Err(retval);
+    }
 
     // Perform additional check if quote was tampered
-    let p_quote3: *const sgx_quote3_t = qe_quote.as_ptr() as *const sgx_quote3_t;
+    let p_quote3: *const sgx_quote3_t = quote_buf.as_ptr() as *const sgx_quote3_t;
     let quote3: sgx_quote3_t = unsafe { *p_quote3 };
 
     if quote3.report_body.mr_enclave.m != report.body.mr_enclave.m {
@@ -104,86 +119,212 @@ fn get_qe_quote(
         return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
     }
 
-    Ok(qe_quote)
+    Ok(quote_buf)
 }
 
-fn verify_dcap_quote(quote_vec: Vec<u8>) -> SgxResult<()> {
-    // Reconstruct quote
-    let p_quote3: *const sgx_quote3_t = quote_vec.as_ptr() as *const sgx_quote3_t;
-    let quote: sgx_quote3_t = unsafe { *p_quote3 };
+fn get_app_enclave_target_info() -> SgxResult<sgx_target_info_t> {
+    let mut app_enclave_target_info = sgx_target_info_t::default();
+    let res = unsafe { sgx_self_target(&mut app_enclave_target_info) };
 
+    if res != sgx_status_t::SGX_SUCCESS {
+        println!(
+            "[Enclave] Error during `sgx_self_target`. Status code: {:?}",
+            res
+        );
+        return Err(res);
+    }
+
+    Ok(app_enclave_target_info)
+}
+
+fn get_random_nonce() -> SgxResult<Vec<u8>> {
+    let mut nonce = vec![0u8; 16];
+    let res = unsafe { sgx_read_rand(nonce.as_mut_ptr(), nonce.len()) };
+    if res != sgx_status_t::SGX_SUCCESS {
+        println!("Call to `sgx_read_rand failed`. Status code: {:?}", res);
+        return Err(res);
+    }
+
+    Ok(nonce)
+}
+
+fn get_supplemental_data_size() -> SgxResult<u32> {
+    let mut ret_val = sgx_status_t::SGX_SUCCESS;
+    let mut data_size = 0u32;
+    let res = unsafe { ocall::ocall_get_supplemental_data_size(&mut ret_val, &mut data_size) };
+
+    if res != sgx_status_t::SGX_SUCCESS {
+        println!(
+            "[Enclave] Call to `ocall_get_supplemental_data_size` failed. Status code: {:?}",
+            res
+        );
+        return Err(res);
+    }
+
+    if ret_val != sgx_status_t::SGX_SUCCESS {
+        println!(
+            "[Enclave] Failure during `ocall_get_supplemental_data_size`. Status code: {:?}",
+            ret_val
+        );
+        return Err(ret_val);
+    }
+
+    Ok(data_size)
+}
+
+fn get_timestamp() -> SgxResult<i64> {
+    let timestamp = match SystemTime::now().duration_since(SystemTime::UNIX_EPOCH) {
+        Ok(res) => res,
+        Err(err) => {
+            println!("[Enclave] Cannot get current timestamp. Reason: {:?}", err);
+            return SgxResult::Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+        }
+    };
+
+    let timestamp_secs: i64 = match timestamp.as_secs().try_into() {
+        Ok(timestamp_secs) => timestamp_secs,
+        Err(err) => {
+            println!(
+                "[Enclave] Cannot convert current timestamp to i64. Reason: {:?}",
+                err
+            );
+            return SgxResult::Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+        }
+    };
+
+    Ok(timestamp_secs)
+}
+
+fn verify_dcap_quote(quote: Vec<u8>) -> SgxResult<()> {
     // Prepare data for enclave
-    let mut self_target_info: sgx_target_info_t = unsafe { std::mem::zeroed() };
-    let quote_collateral: sgx_ql_qve_collateral_t = unsafe { std::mem::zeroed() };
-    let mut report_info: sgx_ql_qe_report_info_t = unsafe { std::mem::zeroed() };
-    let supplemental_data_size = std::mem::size_of::<sgx_ql_qv_supplemental_t>() as u32;
+    let mut qve_report_info = sgx_ql_qe_report_info_t::default();
+
+    // Construct buffer for supplemental data
+    let supplemental_data_size = get_supplemental_data_size()?;
     let mut supplemental_data = vec![0u8; supplemental_data_size as usize];
 
     // Generate target_info for enclave
-    let ret_val = unsafe { sgx_self_target(&mut self_target_info as *mut sgx_target_info_t) };
-    if ret_val != sgx_status_t::SGX_SUCCESS {
-        println!("Call to sgx_self_target failed. Status code: {:?}", ret_val);
-        return Err(sgx_status_t::SGX_ERROR_UNEXPECTED)
-    }
+    let app_enclave_target_info = get_app_enclave_target_info()?;
 
     // Generate random nonce to ensure that quote was not tampered
-    let mut nonce = vec![0u8; 16];
-    let rev_val = unsafe { sgx_read_rand(nonce.as_mut_ptr(), nonce.len()) };
-    if rev_val != sgx_status_t::SGX_SUCCESS {
-        println!("Call to sgx_read_rand failed. Status code: {:?}", ret_val);
-        return Err(sgx_status_t::SGX_ERROR_UNEXPECTED) 
-    }
+    let nonce = get_random_nonce()?;
 
     // Prepare current timestamp
-    let timestamp = match SystemTime::now().duration_since(SystemTime::UNIX_EPOCH) {
-        Ok(timestamp) => timestamp,
-        Err(err) => {
-            println!("Cannot get current timestamp. Reason: {:?}", err);
-            return Err(sgx_status_t::SGX_ERROR_UNEXPECTED)  
-        }
-    };
-    let timestamp_secs: i64 = match timestamp.as_secs().try_into() {
-        Ok(secs) => secs,
-        Err(err) => {
-            println!("Cannot convert current timestamp to i64. Reason: {:?}", err);
-            return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
-        }
-    };
+    let timestamp = get_timestamp()?;
 
-    // Fill report info
-    report_info.nonce.rand.copy_from_slice(&nonce);
-    report_info.app_enclave_target_info = self_target_info;
+    // Prepare report info
+    qve_report_info.nonce.rand.copy_from_slice(&nonce);
+    qve_report_info.app_enclave_target_info = app_enclave_target_info;
 
     // Send OCALL to QvE
-    let mut ret_val = sgx_status_t::SGX_SUCCESS;
-    let mut qve_report_info: sgx_ql_qe_report_info_t = report_info;
+    let mut retval = sgx_status_t::SGX_SUCCESS;
     let mut quote_verification_result = sgx_ql_qv_result_t::SGX_QL_QV_RESULT_UNSPECIFIED;
     let mut collateral_expiration_status = 1u32;
 
     let res = unsafe {
         ocall::ocall_get_qve_report(
-            &mut ret_val as *mut sgx_status_t, 
-            quote_vec.as_ptr(), 
-            quote_vec.len() as u32, 
-            timestamp_secs, 
-            &quote_collateral as *const sgx_ql_qve_collateral_t, 
-            &mut collateral_expiration_status as *mut u32, 
-            &mut quote_verification_result as *mut sgx_ql_qv_result_t, 
-            &mut qve_report_info as *mut sgx_ql_qe_report_info_t, 
-            supplemental_data.as_mut_ptr(), 
+            &mut retval as *mut sgx_status_t,
+            quote.as_ptr(),
+            quote.len() as u32,
+            timestamp,
+            &mut collateral_expiration_status as *mut u32,
+            &mut quote_verification_result as *mut sgx_ql_qv_result_t,
+            &mut qve_report_info as *mut sgx_ql_qe_report_info_t,
+            supplemental_data.as_mut_ptr(),
             supplemental_data_size,
         )
     };
-    match (res, ret_val) {
-        (sgx_status_t::SGX_SUCCESS, sgx_status_t::SGX_SUCCESS) => (),
-        (_, _) => {
+
+    if res != sgx_status_t::SGX_SUCCESS {
+        println!(
+            "[Enclave] Call to `ocall_get_qve_report` failed. Status code: {:?}",
+            res
+        );
+        return Err(res);
+    }
+
+    if retval != sgx_status_t::SGX_SUCCESS {
+        println!(
+            "[Enclave] Failure during `ocall_get_qve_report`. Reason: {:?}",
+            retval
+        );
+        return Err(retval);
+    }
+
+    // Verify returned QvE report
+    if qve_report_info.nonce.rand.to_vec() != nonce {
+        println!("[Enclave] Nonces of input and returned quote are different");
+        return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+    }
+
+    let qve_isvsvn_threshold: sgx_isv_svn_t = 7;
+    let res = unsafe {
+        sgx_tvl_verify_qve_report_and_identity(
+            quote.as_ptr(),
+            quote.len() as u32,
+            &qve_report_info as *const sgx_ql_qe_report_info_t,
+            timestamp,
+            collateral_expiration_status,
+            quote_verification_result,
+            supplemental_data.as_ptr(),
+            supplemental_data_size,
+            qve_isvsvn_threshold,
+        )
+    };
+
+    if res != sgx_quote3_error_t::SGX_QL_SUCCESS {
+        println!(
+            "[Enclave] Call to `sgx_tvl_verify_qve_report_and_identity` failed. Status code: {:?}",
+            res
+        );
+        return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+    }
+
+    // Check verification result
+    match quote_verification_result {
+        sgx_ql_qv_result_t::SGX_QL_QV_RESULT_OK => {
+            if 0u32 == collateral_expiration_status {
+                println!("[Enclave] Quote was verified successfully");
+            } else {
+                println!("[Enclave] Quote was verified, but collateral is out of date");
+                return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+            }
+        }
+        sgx_ql_qv_result_t::SGX_QL_QV_RESULT_CONFIG_NEEDED
+        | sgx_ql_qv_result_t::SGX_QL_QV_RESULT_OUT_OF_DATE
+        | sgx_ql_qv_result_t::SGX_QL_QV_RESULT_OUT_OF_DATE_CONFIG_NEEDED => {
+            println!("[Enclave] Quote was verified, but additional system configuration is required. Reason: {:?}", quote_verification_result);
+            return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+        }
+        sgx_ql_qv_result_t::SGX_QL_QV_RESULT_SW_HARDENING_NEEDED
+        | sgx_ql_qv_result_t::SGX_QL_QV_RESULT_CONFIG_AND_SW_HARDENING_NEEDED => {
             println!(
-                "[Enclave] ocall_get_qve_report failed. Status codes: res: {:?}, ret_val: {:?}",
-                res, ret_val
+                "[Enclave] Quote verification finished with non-terminal result: {:?}",
+                quote_verification_result
+            );
+        }
+        _ => {
+            println!(
+                "[Enclave] Quote was not verified successfully. Reason: {:?}",
+                quote_verification_result
             );
             return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
         }
-    };
+    }
+
+    // Inspect quote
+    let p_quote3: *const sgx_quote3_t = quote.as_ptr() as *const sgx_quote3_t;
+    let quote3: sgx_quote3_t = unsafe { *p_quote3 };
+
+    // TODO: Add additional inspection of provided quote
+
+    if supplemental_data_size > 0 {
+        let p_supplemental_data: *const sgx_ql_qv_supplemental_t = supplemental_data.as_ptr() as *const sgx_ql_qv_supplemental_t;
+        let qv_supplemental_data: sgx_ql_qv_supplemental_t = unsafe { *p_supplemental_data };
+        
+        // TODO: verify supplemental data. Discover which fields should be verified
+        println!("[Enclave] CPU SVN: {:?}", qv_supplemental_data.tcb_cpusvn.svn);
+    }
 
     Ok(())
 }

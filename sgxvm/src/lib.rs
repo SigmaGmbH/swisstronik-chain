@@ -132,24 +132,6 @@ pub unsafe extern "C" fn ecall_request_seed(
     attestation::seed_client::request_seed_inner(hostname, socket_fd)
 }
 
-#[no_mangle]
-pub unsafe extern "C" fn ecall_create_report(
-    p_qe3_target: *const sgx_target_info_t,
-    p_report: *mut sgx_report_t,
-) -> sgx_status_t {    
-    let report_data = sgx_report_data_t::default();
-    unsafe { sgx_create_report(p_qe3_target, &report_data, p_report) }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn ecall_get_target_info(
-    target_info: *mut sgx_target_info_t,
-) -> sgx_status_t {
-    sgx_self_target(target_info)
-}
-
-
-
 // Fix https://github.com/apache/incubator-teaclave-sgx-sdk/issues/373 for debug mode
 #[cfg(debug_assertions)]
 #[no_mangle]

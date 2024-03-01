@@ -60,15 +60,6 @@ enclave {
         );
 
         public sgx_status_t ecall_status();
-
-        public sgx_status_t ecall_create_report(
-            [in] const sgx_target_info_t* p_qe3_target,
-            [out] sgx_report_t* p_report
-        );
-
-        public sgx_status_t ecall_get_target_info(
-            [out] sgx_target_info_t* target_info
-        );
     };
 
     untrusted {
@@ -116,12 +107,15 @@ enclave {
 			[in, size = quote_size] const uint8_t *quote, 
             uint32_t quote_size,
 			time_t timestamp,
-			[in] const sgx_ql_qve_collateral_t *p_quote_collateral,
 			[out] uint32_t *collateral_expiration_status,
 			[out] sgx_ql_qv_result_t *quote_verification_result,
 			[in, out] sgx_ql_qe_report_info_t *qve_report_info,
 			[out, size=supplemental_data_size] uint8_t *p_supplemental_data,
 			uint32_t supplemental_data_size
 		);
+
+        sgx_status_t ocall_get_supplemental_data_size(
+            [out] uint32_t *data_size
+        );
     };
 };

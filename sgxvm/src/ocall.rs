@@ -48,11 +48,15 @@ extern "C" {
 		p_quote: *const u8,
 		quote_len: u32,
 		timestamp: i64,
-		p_quote_collateral: *const sgx_ql_qve_collateral_t,
 		p_collateral_expiration_status: *mut u32,
 		p_quote_verification_result: *mut sgx_ql_qv_result_t,
 		p_qve_report_info: *mut sgx_ql_qe_report_info_t,
 		p_supplemental_data: *mut u8,
 		supplemental_data_size: u32,
+    ) -> sgx_status_t;
+
+    pub fn ocall_get_supplemental_data_size(
+        ret_val: *mut sgx_status_t,
+        data_size: *mut u32,
     ) -> sgx_status_t;
 }
