@@ -7,8 +7,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"cosmossdk.io/depinject"
-
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
 	reflectionv1 "cosmossdk.io/api/cosmos/reflection/v1"
 	"github.com/cosmos/cosmos-sdk/runtime"
@@ -167,23 +165,6 @@ func getGovProposalHandlers() []govclient.ProposalHandler {
 	)
 
 	return govProposalHandlers
-}
-
-// AppConfig returns the default app config.
-func AppConfig() depinject.Config {
-	return depinject.Configs(
-		appConfig,
-		// Loads the app config from a YAML file.
-		// appconfig.LoadYAML(AppConfigYAML),
-		depinject.Supply(
-			// supply custom module basics
-			map[string]module.AppModuleBasic{
-				genutiltypes.ModuleName: genutil.NewAppModuleBasic(genutiltypes.DefaultMessageValidator),
-				govtypes.ModuleName:     gov.NewAppModuleBasic(getGovProposalHandlers()),
-				// this line is used by starport scaffolding # stargate/appConfig/moduleBasic
-			},
-		),
-	)
 }
 
 var (
