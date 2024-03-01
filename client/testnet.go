@@ -176,7 +176,7 @@ Example:
 	cmd.Flags().String(flagStartingIPAddress,
 		"192.167.10.1",
 		"Starting IP address (192.167.10.1 results in persistent peers list ID0@192.167.10.1:46656, ID1@192.167.10.1:46656, ...)")
-	cmd.Flags().String(flags.FlagKeyringBackend, flags.DefaultKeyringBackend, "Select keyring's backend (os|file|test)")
+	cmd.Flags().String(flags.FlagKeyringBackend, keyring.BackendTest, "Select keyring's backend (os|file|test)")
 
 	return cmd
 }
