@@ -8,3 +8,4 @@ pub mod types;
 pub mod utils;
 pub mod self_attestation;
 pub mod dcap;
+pub mod tls;

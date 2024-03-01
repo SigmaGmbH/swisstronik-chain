@@ -128,5 +128,17 @@ pub unsafe extern "C" fn ecall_request_seed(
         }
     };
 
-    attestation::seed_client::request_seed_inner(hostname, socket_fd)
+    // Prepare client config
+    let cfg = match attestation::tls::tls_client::get_client_config_epid() {
+        Ok(cfg) => cfg,
+        Err(err) => {
+            println!(
+                "[Enclave] Attestation Client. Cannot construct client config. Reason: {}",
+                err
+            );
+            return sgx_status_t::SGX_ERROR_UNEXPECTED;
+        }
+    };
+
+    attestation::seed_client::request_master_key(cfg, hostname, socket_fd)
 }
