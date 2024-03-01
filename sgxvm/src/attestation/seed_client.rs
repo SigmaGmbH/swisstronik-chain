@@ -9,10 +9,7 @@ use std::sync::Arc;
 use std::vec::Vec;
 use rustls::ClientConfig;
 
-use crate::attestation::{
-    tls::tls_client::get_client_config_epid,
-    consts::{ENCRYPTED_KEY_SIZE, PUBLIC_KEY_SIZE},
-};
+use crate::attestation::consts::{ENCRYPTED_KEY_SIZE, PUBLIC_KEY_SIZE};
 use crate::key_manager::{KeyManager, RegistrationKey};
 
 #[cfg(feature = "hardware_mode")]
@@ -47,7 +44,7 @@ pub fn request_master_key(cfg: ClientConfig, hostname: String, socket_fd: c_int)
     // Send client public key to the master key exchange server
     if let Err(err) = tls.write(registration_key.public_key().as_bytes()) {
         println!(
-            "[Enclave] Seed Client: cannot send public key to server. Reason: {:?}",
+            "[Enclave] Attestation Client: cannot send public key to server. Reason: {:?}",
             err
         );
         return sgx_status_t::SGX_ERROR_UNEXPECTED;
@@ -69,7 +66,7 @@ pub fn request_master_key(cfg: ClientConfig, hostname: String, socket_fd: c_int)
     // Check size of response. It should be equal or more 90 bytes
     // 32 public key | 16 nonce | ciphertext
     if plaintext.len() < ENCRYPTED_KEY_SIZE {
-        println!("[Enclave] Seed Client: wrong response size");
+        println!("[Enclave] Attestation Client: wrong response size");
         return sgx_status_t::SGX_ERROR_UNEXPECTED;
     }
 
@@ -87,7 +84,7 @@ pub fn request_master_key(cfg: ClientConfig, hostname: String, socket_fd: c_int)
         Ok(key_manager) => key_manager,
         Err(err) => {
             println!(
-                "[Enclave] Seed Client: cannot construct key manager. Reason: {:?}",
+                "[Enclave] Attestation Client: cannot construct key manager. Reason: {:?}",
                 err
             );
             return sgx_status_t::SGX_ERROR_UNEXPECTED;
@@ -97,14 +94,14 @@ pub fn request_master_key(cfg: ClientConfig, hostname: String, socket_fd: c_int)
     // Seal master key
     if let Err(error_status) = key_manager.seal() {
         println!(
-            "[Enclave] Seed Client: cannot seal master key. Reason: {:?}",
+            "[Enclave] Attestation Client: cannot seal master key. Reason: {:?}",
             error_status.as_str()
         );
         return error_status;
     }
 
 
-    println!("[Enclave] Seed successfully sealed");
+    println!("[Enclave] Attestation successfully sealed");
     
     sgx_status_t::SGX_SUCCESS
 }

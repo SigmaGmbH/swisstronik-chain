@@ -55,7 +55,7 @@ pub fn perform_dcap_attestation(
     sgx_status_t::SGX_SUCCESS
 }
 
-fn get_qe_quote(
+pub fn get_qe_quote(
     pub_k: &sgx_ec256_public_t,
     qe_target_info: &sgx_target_info_t,
     quote_size: u32,

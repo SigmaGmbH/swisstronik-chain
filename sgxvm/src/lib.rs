@@ -87,13 +87,34 @@ pub unsafe extern "C" fn ecall_dcap_attestation(
     qe_target_info: &sgx_target_info_t,
     quote_size: u32,
 ) -> sgx_status_t {
-    attestation::dcap::perform_dcap_attestation(
-        hostname,
-        data_len,
-        socket_fd,
+    let hostname = slice::from_raw_parts(hostname, data_len);
+    let hostname = match String::from_utf8(hostname.to_vec()) {
+        Ok(hostname) => hostname,
+        Err(err) => {
+            println!(
+                "[Enclave] Seed Client. Cannot decode hostname. Reason: {:?}",
+                err
+            );
+            return sgx_status_t::SGX_ERROR_UNEXPECTED;
+        }
+    };
+
+    // Prepare client config
+    let cfg = match attestation::tls::tls_client::get_client_config_dcap(
         qe_target_info,
-        quote_size,
-    )
+        quote_size
+    ) {
+        Ok(cfg) => cfg,
+        Err(err) => {
+            println!(
+                "[Enclave] Attestation Client. Cannot construct client config. Reason: {}",
+                err
+            );
+            return sgx_status_t::SGX_ERROR_UNEXPECTED;
+        }
+    };
+
+    attestation::seed_client::request_master_key(cfg, hostname, socket_fd)
 }
 
 #[no_mangle]
