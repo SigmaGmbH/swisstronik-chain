@@ -55,7 +55,7 @@ func EPIDRemoteAttestationCmd() *cobra.Command {
 				return err
 			}
 
-			if err := librustgo.RequestMasterKeyEPID(host, port); err != nil {
+			if err := librustgo.RequestMasterKey(host, port, false); err != nil {
 				return err
 			}
 
@@ -92,7 +92,7 @@ func DCAPRemoteAttestationCmd() *cobra.Command {
 				return err
 			}
 
-			if err := librustgo.RequestMasterKeyDCAP(host, port); err != nil {
+			if err := librustgo.RequestMasterKey(host, port, true); err != nil {
 				return err
 			}
 

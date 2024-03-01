@@ -116,16 +116,10 @@ func StartAttestationServer(epidAddress, dcapAddress string) error {
 	return api.StartAttestationServer(epidAddress, dcapAddress)
 }
 
-// RequestSeed handles requesting seed and passing EPID Remote Attestation.
+// RequestSeed handles requesting seed and passing Remote Attestation.
 // Returns error if Remote Attestation was not passed or provided seed server address is not accessible
-func RequestMasterKeyEPID(host string, port int) error {
-	return api.RequestMasterKeyEPID(host, port)
-}
-
-// RequestSeed handles requesting seed and passing DCAP Remote Attestation.
-// Returns error if Remote Attestation was not passed or provided seed server address is not accessible
-func RequestMasterKeyDCAP(host string, port int) error {
-	return api.RequestMasterKeyDCAP(host, port)
+func RequestMasterKey(host string, port int, isDCAP bool) error {
+	return api.RequestMasterKey(host, port, isDCAP)
 }
 
 // GetNodePublicKey handles request for node public key

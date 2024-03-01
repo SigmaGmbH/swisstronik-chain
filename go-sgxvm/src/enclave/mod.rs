@@ -125,21 +125,15 @@ pub unsafe extern "C" fn handle_initialization_request(
                         let response_bytes = response.write_to_bytes()?;
                         Ok(response_bytes)
                     }
-                    node::SetupRequest_oneof_req::startBootstrapServer(req) => {
-                        enclave_api::EnclaveApi::start_bootstrap_server(evm_enclave.geteid(), req.fd)?;
-                        let response = node::StartBootstrapServerResponse::new();
+                    node::SetupRequest_oneof_req::peerAttestationRequest(req) => {
+                        enclave_api::EnclaveApi::attest_peer(evm_enclave.geteid(), req.fd, req.isDCAP)?;
+                        let response = node::PeerAttestationResponse::new();
                         let response_bytes = response.write_to_bytes()?;
                         Ok(response_bytes)
                     }
-                    node::SetupRequest_oneof_req::epidAttestationRequest(req) => {
-                        enclave_api::EnclaveApi::perform_epid_attestation(evm_enclave.geteid(), req.hostname, req.fd)?;
-                        let response = node::EPIDAttestationResponse::new();
-                        let response_bytes = response.write_to_bytes()?;
-                        Ok(response_bytes)
-                    }
-                    node::SetupRequest_oneof_req::dcapAttestationRequest(req) => {
-                        enclave_api::EnclaveApi::perform_dcap_attestation(evm_enclave.geteid(), req.hostname, req.fd)?;
-                        let response = node::DCAPAttestationResponse::new();
+                    node::SetupRequest_oneof_req::remoteAttestationRequest(req) => {
+                        enclave_api::EnclaveApi::request_remote_attestation(evm_enclave.geteid(), req.hostname, req.fd, req.isDCAP)?;
+                        let response = node::RemoteAttestationResponse::new();
                         let response_bytes = response.write_to_bytes()?;
                         Ok(response_bytes)
                     }

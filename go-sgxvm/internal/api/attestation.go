@@ -89,10 +89,10 @@ func handleIncomingRARequest(connection net.Conn, isDCAP bool) error {
 	}
 
 	// Create protobuf encoded request
-	req := types.SetupRequest{Req: &types.SetupRequest_StartBootstrapServer{
-		StartBootstrapServer: &types.StartBootstrapServerRequest{
+	req := types.SetupRequest{Req: &types.SetupRequest_PeerAttestationRequest{
+		PeerAttestationRequest: &types.PeerAttestationRequest{
 			Fd: int32(file.Fd()),
-			// TODO: Add isDCAP param
+			IsDCAP: isDCAP,
 		},
 	}}
 	reqBytes, err := proto.Marshal(&req)

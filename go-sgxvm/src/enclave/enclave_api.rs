@@ -40,8 +40,9 @@ impl EnclaveApi {
         }
     }
 
-    pub fn start_bootstrap_server(eid: sgx_enclave_id_t, fd: i32) -> Result<(), Error> {
+    pub fn attest_peer(eid: sgx_enclave_id_t, fd: i32, _is_dcap: bool) -> Result<(), Error> {
         let mut ret_val = sgx_status_t::SGX_SUCCESS;
+        // TODO: Renane ecall_share_seed -> ecall_attest_peer
         let res = unsafe { super::ecall_share_seed(eid, &mut ret_val, fd) };
 
         match (res, ret_val) {
@@ -54,6 +55,18 @@ impl EnclaveApi {
                 };
                 Err(Error::enclave_error(error_str))
             }
+        }
+    }
+
+    pub fn request_remote_attestation(
+        eid: sgx_enclave_id_t,
+        hostname: String,
+        fd: i32,
+        is_dcap: bool
+    ) -> Result<(), Error> {
+        match is_dcap {
+            true => EnclaveApi::perform_dcap_attestation(eid, hostname, fd),
+            false => EnclaveApi::perform_epid_attestation(eid, hostname, fd),
         }
     }
 

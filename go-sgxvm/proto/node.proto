@@ -5,26 +5,22 @@ package node.node;
 option go_package = "github.com/SigmaGmbH/librustgo/types";
 
 message InitializeMasterKeyRequest { bool shouldReset = 1; }
-
 message InitializeMasterKeyResponse {}
 
-// Bootstrap server messages
-message StartBootstrapServerRequest { int32 fd = 1; }
-message StartBootstrapServerResponse {}
+// Attestation server messages
+message PeerAttestationRequest { 
+  int32 fd = 1;
+  bool isDCAP = 2;
+}
+message PeerAttestationResponse {}
 
-// EPID Remote Attestation messages
-message EPIDAttestationRequest {
+// Remote Attestation Request
+message RemoteAttestationRequest {
   int32 fd = 1;
   string hostname = 2;
+  bool isDCAP = 3;
 }
-message EPIDAttestationResponse {}
-
-// DCAP Remote Attestation messages
-message DCAPAttestationRequest {
-  int32 fd = 1;
-  string hostname = 2;
-}
-message DCAPAttestationResponse {}
+message RemoteAttestationResponse {}
 
 message IsInitializedRequest {}
 message IsInitializedResponse { bool isInitialized = 1; }
@@ -35,10 +31,9 @@ message NodeStatusResponse {}
 message SetupRequest {
   oneof req {
     InitializeMasterKeyRequest initializeMasterKey = 1;
-    StartBootstrapServerRequest startBootstrapServer = 2;
-    EPIDAttestationRequest epidAttestationRequest = 3;
-    DCAPAttestationRequest dcapAttestationRequest = 4;
-    IsInitializedRequest isInitialized = 5;
-    NodeStatusRequest nodeStatus = 6;
+    PeerAttestationRequest peerAttestationRequest = 2;
+    RemoteAttestationRequest remoteAttestationRequest = 3;
+    IsInitializedRequest isInitialized = 4;
+    NodeStatusRequest nodeStatus = 5;
   }
 }

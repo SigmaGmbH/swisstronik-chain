@@ -102,7 +102,7 @@ func IsNodeInitialized() (bool, error) {
 	return response.IsInitialized, nil
 }
 
-// SetupSeedNode handles initialization of seed node which will share seed with other nodes
+// SetupSeedNode handles initialization of attestation node which will share master key with other nodes
 func InitializeMasterKey(shouldReset bool) error {
 	// Create protobuf encoded request
 	req := types.SetupRequest{Req: &types.SetupRequest_InitializeMasterKey{
@@ -127,8 +127,8 @@ func InitializeMasterKey(shouldReset bool) error {
 	return nil
 }
 
-// RequestMasterKeyEPID handles request of seed from seed server
-func RequestMasterKeyEPID(hostname string, port int) error {
+// RequestMasterKey handles request of master key from attestation server
+func RequestMasterKey(hostname string, port int, isDCAP bool) error {
 	address := fmt.Sprintf("%s:%d", hostname, port)
 	conn, err := net.Dial("tcp", address)
 	if err != nil {
@@ -144,54 +144,11 @@ func RequestMasterKeyEPID(hostname string, port int) error {
 	}
 
 	// Create protobuf encoded request
-	req := types.SetupRequest{Req: &types.SetupRequest_EpidAttestationRequest{
-		EpidAttestationRequest: &types.EPIDAttestationRequest{
+	req := types.SetupRequest{Req: &types.SetupRequest_RemoteAttestationRequest{
+		RemoteAttestationRequest: &types.RemoteAttestationRequest{
 			Fd: int32(file.Fd()),
 			Hostname: hostname,
-		},
-	}}
-	reqBytes, err := proto.Marshal(&req)
-	if err != nil {
-		log.Fatalln("Failed to encode req:", err)
-		conn.Close()
-		return err
-	}
-
-	// Pass request to Rust
-	d := MakeView(reqBytes)
-	defer runtime.KeepAlive(reqBytes)
-
-	errmsg := NewUnmanagedVector(nil)
-	_, err = C.handle_initialization_request(d, &errmsg)
-	if err != nil {
-		conn.Close()
-		return ErrorWithMessage(err, errmsg)
-	}
-
-	return nil
-}
-
-// RequestMasterKeyDCAP handles request of seed from seed server
-func RequestMasterKeyDCAP(hostname string, port int) error {
-	address := fmt.Sprintf("%s:%d", hostname, port)
-	conn, err := net.Dial("tcp", address)
-	if err != nil {
-		fmt.Println("Cannot establish connection with seed server. Reason: ", err.Error())
-		return err
-	}
-
-	file, err := conn.(*net.TCPConn).File()
-	if err != nil {
-		fmt.Println("Cannot get access to the connection. Reason: ", err.Error())
-		conn.Close()
-		return err
-	}
-
-	// Create protobuf encoded request
-	req := types.SetupRequest{Req: &types.SetupRequest_DcapAttestationRequest{
-		DcapAttestationRequest: &types.DCAPAttestationRequest{
-			Fd: int32(file.Fd()),
-			Hostname: hostname,
+			IsDCAP: isDCAP,
 		},
 	}}
 	reqBytes, err := proto.Marshal(&req)
