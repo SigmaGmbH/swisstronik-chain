@@ -193,6 +193,11 @@ func NewRootCmd() (*cobra.Command, simappparams.EncodingConfig) {
 		simutils.NewAppOptionsWithFlagHome(app.DefaultNodeHome),
 		baseapp.SetChainID(chainID),
 	)
+
+	initClientCtx, err = config.ReadDefaultValuesFromDefaultClientConfig(initClientCtx)
+	if err != nil {
+		panic(err)
+	}
 	if err := autoCliOpts(newapp, initClientCtx).EnhanceRootCommand(rootCmd); err != nil {
 		panic(err)
 	}
