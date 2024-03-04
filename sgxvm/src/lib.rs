@@ -103,16 +103,29 @@ pub unsafe extern "C" fn ecall_request_master_key_dcap(
         Some(quote_size),
     ) {
         Ok(_) => sgx_status_t::SGX_SUCCESS,
-        Err(err) => err
+        Err(err) => err,
     }
 }
 
 #[no_mangle]
-/// Handles incoming request for sharing master key with new node
+/// Handles incoming request for sharing master key with new node using DCAP attestation
+pub unsafe extern "C" fn ecall_attest_peer_dcap(
+    socket_fd: c_int,
+    qe_target_info: &sgx_target_info_t,
+    quote_size: u32,
+) -> sgx_status_t {
+    match attestation::tls::perform_master_key_provisioning(socket_fd, Some(qe_target_info), Some(quote_size)) {
+        Ok(_) => sgx_status_t::SGX_SUCCESS,
+        Err(err) => err,
+    }
+}
+
+#[no_mangle]
+/// Handles incoming request for sharing master key with new node using EPID attestation
 pub unsafe extern "C" fn ecall_attest_peer_epid(socket_fd: c_int) -> sgx_status_t {
     match attestation::tls::perform_master_key_provisioning(socket_fd, None, None) {
         Ok(_) => sgx_status_t::SGX_SUCCESS,
-        Err(err) => err
+        Err(err) => err,
     }
 }
 
@@ -144,6 +157,6 @@ pub unsafe extern "C" fn ecall_request_master_key_epid(
 
     match attestation::tls::perform_master_key_request(hostname, socket_fd, None, None) {
         Ok(_) => sgx_status_t::SGX_SUCCESS,
-        Err(err) => err
+        Err(err) => err,
     }
 }

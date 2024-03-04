@@ -63,6 +63,7 @@ exclude = [
     "ecall_status",
     "ecall_init_master_key",
     "ecall_attest_peer_epid",
+    "ecall_attest_peer_dcap",
     "ecall_is_initialized",
     "ecall_request_master_key_epid",
     "ecall_request_master_key_dcap",

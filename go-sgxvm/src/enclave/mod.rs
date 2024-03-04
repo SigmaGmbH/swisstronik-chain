@@ -50,6 +50,14 @@ extern "C" {
         socket_fd: c_int,
     ) -> sgx_status_t;
 
+    pub fn ecall_attest_peer_dcap(
+        eid: sgx_enclave_id_t,
+        retval: *mut sgx_status_t,
+        socket_fd: c_int,
+        qe_target_info: &sgx_target_info_t,
+        quote_size: u32,
+    ) -> sgx_status_t;
+
     pub fn ecall_request_master_key_epid(
         eid: sgx_enclave_id_t,
         retval: *mut sgx_status_t,

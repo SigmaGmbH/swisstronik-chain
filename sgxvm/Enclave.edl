@@ -34,6 +34,12 @@ enclave {
 
         public sgx_status_t ecall_attest_peer_epid(int fd);
 
+        public sgx_status_t ecall_attest_peer_dcap(
+            int fd,
+            [in] const sgx_target_info_t* qe_target_info,
+			uint32_t quote_size
+        );
+
         public sgx_status_t ecall_request_master_key_epid(
             [in, size=len] const uint8_t* hostname,
             size_t len,
