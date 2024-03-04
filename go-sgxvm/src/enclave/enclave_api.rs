@@ -42,8 +42,7 @@ impl EnclaveApi {
 
     pub fn attest_peer(eid: sgx_enclave_id_t, fd: i32, _is_dcap: bool) -> Result<(), Error> {
         let mut ret_val = sgx_status_t::SGX_SUCCESS;
-        // TODO: Renane ecall_share_seed -> ecall_attest_peer
-        let res = unsafe { super::ecall_share_seed(eid, &mut ret_val, fd) };
+        let res = unsafe { super::ecall_attest_peer_epid(eid, &mut ret_val, fd) };
 
         match (res, ret_val) {
             (sgx_status_t::SGX_SUCCESS, sgx_status_t::SGX_SUCCESS) => Ok(()),

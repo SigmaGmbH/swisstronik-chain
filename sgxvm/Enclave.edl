@@ -32,7 +32,7 @@ enclave {
 
         public int ecall_is_initialized();
 
-        public sgx_status_t ecall_share_seed(int fd);
+        public sgx_status_t ecall_attest_peer_epid(int fd);
 
         public sgx_status_t ecall_request_master_key_epid(
             [in, size=len] const uint8_t* hostname,

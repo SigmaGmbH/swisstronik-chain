@@ -109,17 +109,8 @@ pub unsafe extern "C" fn ecall_request_master_key_dcap(
 
 #[no_mangle]
 /// Handles incoming request for sharing master key with new node
-pub unsafe extern "C" fn ecall_share_seed(socket_fd: c_int) -> sgx_status_t {
-    let is_dcap = false;
-    let res = match is_dcap {
-        false => attestation::tls::perform_master_key_provisioning(socket_fd, None, None),
-        true => {
-            println!("[Enclave] DCAP master key provisioning is not supported yet");
-            return sgx_status_t::SGX_ERROR_UNEXPECTED;
-        }
-    };
-
-    match res {
+pub unsafe extern "C" fn ecall_attest_peer_epid(socket_fd: c_int) -> sgx_status_t {
+    match attestation::tls::perform_master_key_provisioning(socket_fd, None, None) {
         Ok(_) => sgx_status_t::SGX_SUCCESS,
         Err(err) => err
     }

@@ -44,7 +44,7 @@ extern "C" {
 
     pub fn ecall_is_initialized(eid: sgx_enclave_id_t, retval: *mut i32) -> sgx_status_t;
 
-    pub fn ecall_share_seed(
+    pub fn ecall_attest_peer_epid(
         eid: sgx_enclave_id_t,
         retval: *mut sgx_status_t,
         socket_fd: c_int,
