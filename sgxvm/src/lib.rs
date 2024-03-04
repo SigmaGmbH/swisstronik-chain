@@ -80,7 +80,7 @@ pub extern "C" fn handle_request(
 
 #[no_mangle]
 /// Handles incoming request for DCAP Remote Attestation
-pub unsafe extern "C" fn ecall_dcap_attestation(
+pub unsafe extern "C" fn ecall_request_master_key_dcap(
     hostname: *const u8,
     data_len: usize,
     socket_fd: c_int,
@@ -134,7 +134,7 @@ pub unsafe extern "C" fn ecall_init_master_key(reset_flag: i32) -> sgx_status_t 
 
 #[no_mangle]
 /// Handles incoming request for EPID Remote Attestation
-pub unsafe extern "C" fn ecall_request_seed(
+pub unsafe extern "C" fn ecall_request_master_key_epid(
     hostname: *const u8,
     data_len: usize,
     socket_fd: c_int,

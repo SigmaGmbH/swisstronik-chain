@@ -50,7 +50,7 @@ extern "C" {
         socket_fd: c_int,
     ) -> sgx_status_t;
 
-    pub fn ecall_request_seed(
+    pub fn ecall_request_master_key_epid(
         eid: sgx_enclave_id_t,
         retval: *mut sgx_status_t,
         hostname: *const u8,
@@ -60,7 +60,7 @@ extern "C" {
 
     pub fn ecall_status(eid: sgx_enclave_id_t, retval: *mut sgx_status_t) -> sgx_status_t;
 
-    pub fn ecall_dcap_attestation(
+    pub fn ecall_request_master_key_dcap(
         eid: sgx_enclave_id_t,
         retval: *mut sgx_status_t,
         hostname: *const u8,
