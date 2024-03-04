@@ -82,57 +82,8 @@ pub fn share_seed_inner(socket_fd: c_int) -> sgx_status_t {
 
 #[cfg(not(feature = "hardware_mode"))]
 pub fn share_seed_inner(socket_fd: c_int) -> sgx_status_t {
-    let mut conn = match TcpStream::new(socket_fd) {
-        Ok(conn) => conn,
-        Err(err) => {
-            println!(
-                "[Enclave] Seed Server: cannot establish connection with client: {:?}",
-                err
-            );
-            return sgx_status_t::SGX_ERROR_UNEXPECTED;
-        }
-    };
-
-    let mut client_public_key = [0u8; 32];
-    if let Err(err) = conn.read(&mut client_public_key) {
-        println!("[Enclave] Seed Server: error in read_to_end: {:?}", err);
-        return sgx_status_t::SGX_ERROR_UNEXPECTED;
-    };
-
-    // Generate registration key for ECDH
-    let registration_key = match RegistrationKey::random() {
-        Ok(key) => key,
-        Err(err) => {
-            return err;
-        }
-    };
-
-    // Unseal key manager to get access to master key
-    let key_manager = match &*UNSEALED_KEY_MANAGER {
-        Some(key_manager) => key_manager,
-        None => {
-            println!("Cannot unseal master key");
-            return sgx_status_t::SGX_ERROR_UNEXPECTED;
-        }
-    };
-
-    // Encrypt master key and send it to the client
-    let encrypted_master_key = match key_manager.to_encrypted_master_key(&registration_key, client_public_key.to_vec()) {
-        Ok(ciphertext) => ciphertext,
-        Err(err) => {
-            println!("[Enclave] Cannot encrypt master key. Reason: {:?}", err);
-            return sgx_status_t::SGX_ERROR_UNEXPECTED;
-        }
-    };
-
-    // Send encrypted master key back to client
-    match conn.write(encrypted_master_key.as_slice()) {
-        Ok(_) => sgx_status_t::SGX_SUCCESS,
-        Err(err) => {
-            println!("[Enclave] Cannot send encrypted master key to client. Reason: {:?}", err);
-            sgx_status_t::SGX_ERROR_UNEXPECTED
-        }
-    }
+    println!("[Enclave] Cannot attest peer in software mode");
+    sgx_status_t::SGX_ERROR_UNEXPECTED
 }
 
 #[cfg(feature = "hardware_mode")]

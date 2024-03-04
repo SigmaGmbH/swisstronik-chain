@@ -7,8 +7,8 @@ extern crate rustls;
 extern crate sgx_tse;
 
 extern crate sgx_types;
-use sgx_types::*;
 use sgx_tse::*;
+use sgx_types::*;
 
 use std::slice;
 use std::string::String;
@@ -91,30 +91,20 @@ pub unsafe extern "C" fn ecall_dcap_attestation(
     let hostname = match String::from_utf8(hostname.to_vec()) {
         Ok(hostname) => hostname,
         Err(err) => {
-            println!(
-                "[Enclave] Seed Client. Cannot decode hostname. Reason: {:?}",
-                err
-            );
+            println!("[Enclave] Cannot decode hostname. Reason: {:?}", err);
             return sgx_status_t::SGX_ERROR_UNEXPECTED;
         }
     };
 
-    // Prepare client config
-    let cfg = match attestation::tls::tls_client::get_client_config_dcap(
-        qe_target_info,
-        quote_size
+    match attestation::tls::tls_handler::perform_master_key_request(
+        hostname,
+        socket_fd,
+        Some(qe_target_info),
+        Some(quote_size),
     ) {
-        Ok(cfg) => cfg,
-        Err(err) => {
-            println!(
-                "[Enclave] Attestation Client. Cannot construct client config. Reason: {}",
-                err
-            );
-            return sgx_status_t::SGX_ERROR_UNEXPECTED;
-        }
-    };
-
-    attestation::seed_client::request_master_key(cfg, hostname, socket_fd)
+        Ok(_) => sgx_status_t::SGX_SUCCESS,
+        Err(err) => err
+    }
 }
 
 #[no_mangle]
@@ -149,17 +139,8 @@ pub unsafe extern "C" fn ecall_request_seed(
         }
     };
 
-    // Prepare client config
-    let cfg = match attestation::tls::tls_client::get_client_config_epid() {
-        Ok(cfg) => cfg,
-        Err(err) => {
-            println!(
-                "[Enclave] Attestation Client. Cannot construct client config. Reason: {}",
-                err
-            );
-            return sgx_status_t::SGX_ERROR_UNEXPECTED;
-        }
-    };
-
-    attestation::seed_client::request_master_key(cfg, hostname, socket_fd)
+    match attestation::tls::tls_handler::perform_master_key_request(hostname, socket_fd, None, None) {
+        Ok(_) => sgx_status_t::SGX_SUCCESS,
+        Err(err) => err
+    }
 }
