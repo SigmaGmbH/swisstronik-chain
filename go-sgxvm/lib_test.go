@@ -144,16 +144,18 @@ func TestSeedExchange(t *testing.T) {
 	epidPort := 8999
 	if err := api.RequestMasterKey(epidHost, epidPort, false); err != nil {
 		t.Fail()
+	} else {
+		println("EPID PASSED")
 	}
-	println("EPID PASSED")
 
 	// Test DCAP Attestation
 	dcapHost := "localhost"
 	dcapPort := 8998
 	if err := api.RequestMasterKey(dcapHost, dcapPort, true); err != nil {
 		t.Fail()
+	} else {
+		println("DCAP PASSED")
 	}
-	println("DCAP PASSED")
 }
 
 func TestNodeInitialized(t *testing.T) {

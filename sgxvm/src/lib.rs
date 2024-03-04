@@ -96,7 +96,7 @@ pub unsafe extern "C" fn ecall_dcap_attestation(
         }
     };
 
-    match attestation::tls::tls_handler::perform_master_key_request(
+    match attestation::tls::perform_master_key_request(
         hostname,
         socket_fd,
         Some(qe_target_info),
@@ -139,7 +139,7 @@ pub unsafe extern "C" fn ecall_request_seed(
         }
     };
 
-    match attestation::tls::tls_handler::perform_master_key_request(hostname, socket_fd, None, None) {
+    match attestation::tls::perform_master_key_request(hostname, socket_fd, None, None) {
         Ok(_) => sgx_status_t::SGX_SUCCESS,
         Err(err) => err
     }
