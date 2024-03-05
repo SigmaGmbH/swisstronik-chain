@@ -6,7 +6,6 @@ use std::vec::Vec;
 use crate::{
     coder, 
     querier,
-    ocall,
     protobuf_generated::ffi,
     types::{Vicinity, Storage, ExtendedBackend},
     storage::FFIStorage,

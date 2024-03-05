@@ -2,11 +2,15 @@ use std::prelude::v1::*;
 
 pub struct ClientAuth {
     outdated_ok: bool,
+    is_dcap: bool,
 }
 
 impl ClientAuth {
-    pub fn new(outdated_ok: bool) -> ClientAuth {
-        ClientAuth { outdated_ok }
+    pub fn new(outdated_ok: bool, is_dcap: bool) -> ClientAuth {
+        ClientAuth {
+            outdated_ok,
+            is_dcap,
+        }
     }
 }
 
@@ -24,6 +28,11 @@ impl rustls::ClientCertVerifier for ClientAuth {
         certs: &[rustls::Certificate],
         _sni: Option<&webpki::DNSName>,
     ) -> Result<rustls::ClientCertVerified, rustls::TLSError> {
+        if self.is_dcap {
+            println!("Skip Client Auth for DCAP");
+            return Ok(rustls::ClientCertVerified::assertion());
+        }
+
         // This call will automatically verify cert is properly signed
         match crate::attestation::cert::verify_ra_cert(&certs[0].0, None) {
             Ok(_) => Ok(rustls::ClientCertVerified::assertion()),
@@ -81,11 +90,15 @@ impl rustls::ClientCertVerifier for ClientAuth {
 
 pub struct ServerAuth {
     outdated_ok: bool,
+    is_dcap: bool,
 }
 
 impl ServerAuth {
-    pub fn new(outdated_ok: bool) -> ServerAuth {
-        ServerAuth { outdated_ok }
+    pub fn new(outdated_ok: bool, is_dcap: bool) -> ServerAuth {
+        ServerAuth {
+            outdated_ok,
+            is_dcap,
+        }
     }
 }
 
@@ -128,6 +141,11 @@ impl rustls::ServerCertVerifier for ServerAuth {
         _hostname: webpki::DNSNameRef,
         _ocsp: &[u8],
     ) -> Result<rustls::ServerCertVerified, rustls::TLSError> {
+        if self.is_dcap {
+            println!("Skip Server Auth report verification for DCAP");
+            return Ok(rustls::ServerCertVerified::assertion());
+        }
+        
         // This call will automatically verify cert is properly signed
         let res = crate::attestation::cert::verify_ra_cert(&certs[0].0, None);
         match res {

@@ -16,7 +16,7 @@ use crate::attestation::tls::auth::{ClientAuth, ServerAuth};
 use crate::key_manager::{KeyManager, RegistrationKey};
 
 /// Prepares config for client side of TLS connection
-pub(super) fn construct_client_config(key_der: Vec<u8>, cert_der: Vec<u8>) -> ClientConfig {
+pub(super) fn construct_client_config(key_der: Vec<u8>, cert_der: Vec<u8>, is_dcap: bool) -> ClientConfig {
     let mut cfg = rustls::ClientConfig::new();
     let mut certs = Vec::new();
     certs.push(rustls::Certificate(cert_der));
@@ -24,15 +24,15 @@ pub(super) fn construct_client_config(key_der: Vec<u8>, cert_der: Vec<u8>) -> Cl
 
     cfg.set_single_client_cert(certs, privkey).unwrap();
     cfg.dangerous()
-        .set_certificate_verifier(Arc::new(ServerAuth::new(true)));
+        .set_certificate_verifier(Arc::new(ServerAuth::new(true, is_dcap)));
     cfg.versions.clear();
     cfg.versions.push(rustls::ProtocolVersion::TLSv1_2);
     cfg
 }
 
 /// Prepares config for server side of TLS connection
-pub(super) fn construct_server_config(key_der: Vec<u8>, cert_der: Vec<u8>) -> ServerConfig {
-    let mut cfg = rustls::ServerConfig::new(Arc::new(ClientAuth::new(true)));
+pub(super) fn construct_server_config(key_der: Vec<u8>, cert_der: Vec<u8>, is_dcap: bool) -> ServerConfig {
+    let mut cfg = rustls::ServerConfig::new(Arc::new(ClientAuth::new(true, is_dcap)));
     let mut certs = Vec::new();
     certs.push(rustls::Certificate(cert_der));
     let privkey = rustls::PrivateKey(key_der);

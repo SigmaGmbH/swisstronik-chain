@@ -7,7 +7,6 @@ extern crate rustls;
 extern crate sgx_tse;
 
 extern crate sgx_types;
-use sgx_tse::*;
 use sgx_types::*;
 
 use std::slice;
@@ -101,6 +100,7 @@ pub unsafe extern "C" fn ecall_request_master_key_dcap(
         socket_fd,
         Some(qe_target_info),
         Some(quote_size),
+        true,
     ) {
         Ok(_) => sgx_status_t::SGX_SUCCESS,
         Err(err) => err,
@@ -114,7 +114,7 @@ pub unsafe extern "C" fn ecall_attest_peer_dcap(
     qe_target_info: &sgx_target_info_t,
     quote_size: u32,
 ) -> sgx_status_t {
-    match attestation::tls::perform_master_key_provisioning(socket_fd, Some(qe_target_info), Some(quote_size)) {
+    match attestation::tls::perform_master_key_provisioning(socket_fd, Some(qe_target_info), Some(quote_size), true) {
         Ok(_) => sgx_status_t::SGX_SUCCESS,
         Err(err) => err,
     }
@@ -123,7 +123,7 @@ pub unsafe extern "C" fn ecall_attest_peer_dcap(
 #[no_mangle]
 /// Handles incoming request for sharing master key with new node using EPID attestation
 pub unsafe extern "C" fn ecall_attest_peer_epid(socket_fd: c_int) -> sgx_status_t {
-    match attestation::tls::perform_master_key_provisioning(socket_fd, None, None) {
+    match attestation::tls::perform_master_key_provisioning(socket_fd, None, None, false) {
         Ok(_) => sgx_status_t::SGX_SUCCESS,
         Err(err) => err,
     }
@@ -155,7 +155,7 @@ pub unsafe extern "C" fn ecall_request_master_key_epid(
         }
     };
 
-    match attestation::tls::perform_master_key_request(hostname, socket_fd, None, None) {
+    match attestation::tls::perform_master_key_request(hostname, socket_fd, None, None, false) {
         Ok(_) => sgx_status_t::SGX_SUCCESS,
         Err(err) => err,
     }

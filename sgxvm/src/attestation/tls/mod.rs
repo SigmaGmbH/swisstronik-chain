@@ -15,9 +15,10 @@ pub fn perform_master_key_request(
     socket_fd: c_int,
     qe_target_info: Option<&sgx_target_info_t>,
     quote_size: Option<u32>,
+    is_dcap: bool,
 ) -> SgxResult<()> {
     let (key_der, cert_der) = helpers::create_tls_cert_and_keys(qe_target_info, quote_size)?;
-    let client_config = helpers::construct_client_config(key_der, cert_der);
+    let client_config = helpers::construct_client_config(key_der, cert_der, is_dcap);
 
     // Prepare TLS connection
     let (mut sess, mut conn) =
@@ -64,9 +65,10 @@ pub fn perform_master_key_provisioning(
     socket_fd: c_int,
     qe_target_info: Option<&sgx_target_info_t>,
     quote_size: Option<u32>,
+    is_dcap: bool,
 ) -> SgxResult<()> {
     let (key_der, cert_der) = helpers::create_tls_cert_and_keys(qe_target_info, quote_size)?;
-    let server_config = helpers::construct_server_config(key_der, cert_der);
+    let server_config = helpers::construct_server_config(key_der, cert_der, is_dcap);
 
     // Prepare TLS connection
     let (mut sess, mut conn) = helpers::create_server_session_stream(socket_fd, server_config)?;
