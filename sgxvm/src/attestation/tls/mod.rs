@@ -7,6 +7,7 @@ use std::string::String;
 use crate::key_manager::{RegistrationKey, UNSEALED_KEY_MANAGER};
 
 pub mod helpers;
+pub mod auth;
 
 /// Initializes new TLS client with report of Remote Attestation
 pub fn perform_master_key_request(

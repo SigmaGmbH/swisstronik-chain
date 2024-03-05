@@ -6,13 +6,13 @@ use std::vec::Vec;
 use std::{net::TcpStream, string::String};
 
 use crate::attestation::consts::{ENCRYPTED_KEY_SIZE, PUBLIC_KEY_SIZE};
-use crate::attestation::utils::ClientAuth;
 use crate::attestation::{
     cert::gen_ecc_cert,
     consts::QUOTE_SIGNATURE_TYPE,
     dcap::get_qe_quote,
-    utils::{create_attestation_report, ServerAuth},
+    utils::create_attestation_report,
 };
+use crate::attestation::tls::auth::{ClientAuth, ServerAuth};
 use crate::key_manager::{KeyManager, RegistrationKey};
 
 /// Prepares config for client side of TLS connection
