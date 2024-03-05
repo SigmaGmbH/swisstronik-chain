@@ -316,7 +316,15 @@ pub fn verify_dcap_quote(quote: Vec<u8>) -> SgxResult<Vec<u8>> {
     let p_quote3: *const sgx_quote3_t = quote.as_ptr() as *const sgx_quote3_t;
     let quote3: sgx_quote3_t = unsafe { *p_quote3 };
 
-    // TODO: Add additional inspection of provided quote
+    // Check MRSIGNER
+    if quote3.report_body.mr_signer.m != crate::attestation::consts::MRSIGNER {
+        println!("[Enclave] Invalid MRSIGNER in received quote");
+        return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+    }
+
+    // TODO: Inspect quote fields
+    // TODO: Check timestamp
+    // TODO: Check ISVSVN quote3.report_body.isv_svn
 
     // Return report public key
     Ok(quote3.report_body.report_data.d.to_vec())
