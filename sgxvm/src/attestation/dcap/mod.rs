@@ -195,7 +195,7 @@ fn get_timestamp() -> SgxResult<i64> {
     Ok(timestamp_secs)
 }
 
-fn verify_dcap_quote(quote: Vec<u8>) -> SgxResult<()> {
+pub fn verify_dcap_quote(quote: Vec<u8>) -> SgxResult<Vec<u8>> {
     // Prepare data for enclave
     let mut qve_report_info = sgx_ql_qe_report_info_t::default();
 
@@ -318,13 +318,6 @@ fn verify_dcap_quote(quote: Vec<u8>) -> SgxResult<()> {
 
     // TODO: Add additional inspection of provided quote
 
-    if supplemental_data_size > 0 {
-        let p_supplemental_data: *const sgx_ql_qv_supplemental_t = supplemental_data.as_ptr() as *const sgx_ql_qv_supplemental_t;
-        let qv_supplemental_data: sgx_ql_qv_supplemental_t = unsafe { *p_supplemental_data };
-        
-        // TODO: verify supplemental data. Discover which fields should be verified
-        println!("[Enclave] CPU SVN: {:?}", qv_supplemental_data.tcb_cpusvn.svn);
-    }
-
-    Ok(())
+    // Return report public key
+    Ok(quote3.report_body.report_data.d.to_vec())
 }

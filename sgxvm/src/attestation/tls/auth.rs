@@ -28,8 +28,13 @@ impl rustls::ClientCertVerifier for ClientAuth {
         certs: &[rustls::Certificate],
         _sni: Option<&webpki::DNSName>,
     ) -> Result<rustls::ClientCertVerified, rustls::TLSError> {
+        if certs.is_empty() {
+            println!("[Enclave] No certs provided for Client Auth");
+            return Err(rustls::TLSError::NoCertificatesPresented);
+        }
+
         if self.is_dcap {
-            println!("Skip Client Auth for DCAP");
+            crate::attestation::cert::verify_dcap_cert(&certs[0].0).unwrap();
             return Ok(rustls::ClientCertVerified::assertion());
         }
 
@@ -141,8 +146,13 @@ impl rustls::ServerCertVerifier for ServerAuth {
         _hostname: webpki::DNSNameRef,
         _ocsp: &[u8],
     ) -> Result<rustls::ServerCertVerified, rustls::TLSError> {
+        if certs.is_empty() {
+            println!("[Enclave] No certs provided for Server Auth");
+            return Err(rustls::TLSError::NoCertificatesPresented);
+        }
+
         if self.is_dcap {
-            println!("Skip Server Auth report verification for DCAP");
+            crate::attestation::cert::verify_dcap_cert(&certs[0].0).unwrap();
             return Ok(rustls::ServerCertVerified::assertion());
         }
         
