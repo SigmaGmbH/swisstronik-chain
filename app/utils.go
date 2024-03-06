@@ -23,6 +23,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
+
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	"github.com/cosmos/cosmos-sdk/testutil/mock"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -157,7 +158,7 @@ func genesisStateWithValSet(codec codec.Codec, genesisState simapp.GenesisState,
 	bondAmt := sdk.DefaultPowerReduction
 
 	for _, val := range valSet.Validators {
-		pk, err := cryptocodec.FromTmPubKeyInterface(val.PubKey)
+		pk, err := cryptocodec.FromCmtPubKeyInterface(val.PubKey)
 		if err != nil {
 			panic(err)
 		}
