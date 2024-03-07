@@ -32,6 +32,7 @@ func StartAttestationServer(epidAddress, dcapAddress string) error {
 	dcapListener, err := net.Listen("tcp", dcapAddress)
 	if err != nil {
 		fmt.Println("[Attestation Server] Cannot start listener for DCAP attestation")
+		return err
 	}
 
 	// Wait for incoming connections to EPID listener
