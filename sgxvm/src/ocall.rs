@@ -2,7 +2,6 @@
 use crate::{querier::GoQuerier, Allocation, AllocationWithResult};
 use sgx_types::sgx_status_t;
 use sgx_types::*;
-use std::vec::Vec;
 
 extern "C" {
     pub fn ocall_query_raw(

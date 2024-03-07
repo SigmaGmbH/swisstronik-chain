@@ -1,12 +1,12 @@
 use std::prelude::v1::*;
+use std::str;
 use std::time::*;
 use std::untrusted::time::SystemTimeEx;
 use std::vec::Vec;
-use std::str;
 
 use sgx_tcrypto::*;
-use sgx_types::*;
 use sgx_tse::rsgx_self_report;
+use sgx_types::*;
 
 use base64;
 use bit_vec::BitVec;
@@ -20,8 +20,8 @@ use yasna;
 use yasna::models::ObjectIdentifier;
 
 use super::consts::*;
-use super::types::*;
 use super::report::*;
+use super::types::*;
 
 extern "C" {
     #[allow(dead_code)]
@@ -215,8 +215,7 @@ pub fn verify_ra_cert(
     cert_der: &[u8],
     override_verify_type: Option<SigningMethod>,
 ) -> Result<Vec<u8>, AuthResult> {
-    let report = AttestationReport::from_cert(cert_der)
-        .map_err(|_| AuthResult::InvalidCert)?;
+    let report = AttestationReport::from_cert(cert_der).map_err(|_| AuthResult::InvalidCert)?;
 
     // this is a small hack - override_verify_type is only used when verifying the master certificate
     // and in that case we don't care about checking vulns etc. Master certificate will also have
@@ -261,12 +260,76 @@ pub fn verify_ra_cert(
     Ok(report_public_key)
 }
 
+pub fn verify_dcap_cert(cert_der: &[u8]) -> Result<(), crate::attestation::report::Error> {
+    // Extract quote payload from cert
+    let payload = get_netscape_comment(cert_der).map_err(|_| {
+        println!("[Enclave] Failed to get netscape comment");
+        crate::attestation::report::Error::ReportParseError
+    })?;
+
+    // Decode base64
+    let base64_payload = String::from_utf8(payload).map_err(|_| {
+        println!("[Enclave] Failed to parse payload");
+        crate::attestation::report::Error::ReportParseError
+    })?;
+    let decoded_payload = base64::decode(base64_payload).map_err(|_| {
+        println!("[Enclave] Failed to decode base64");
+        crate::attestation::report::Error::ReportParseError
+    })?;
+
+    // Verify decoded quote
+    let report_pk = crate::attestation::dcap::verify_dcap_quote(decoded_payload).map_err(|_| {
+        println!("[Enclave] Failed to verify quote");
+        crate::attestation::report::Error::ReportValidationError
+    })?;
+
+    // Verify report public key. It should be the same as cert key
+    let cert_pk = extract_cert_public_key(cert_der).map_err(|_| {
+        println!("[Enclave] Cannot extract public key from cert");
+        crate::attestation::report::Error::ReportParseError
+    })?;
+
+    // Public key from report data should be the same as cert public key.
+    // Cert public key is already checked by WebPKI
+    if report_pk != cert_pk {
+        println!("[Enclave] Public keys from certificate and report are different. Quote was tampered");
+        return Err(crate::attestation::report::Error::ReportValidationError);
+    }
+
+    // TODO: Verify MRSIGNER field 
+    // TODO: Verify timestamp
+    // TODO: Check Enclave ISV
+
+    Ok(())
+}
+
 pub fn get_netscape_comment(cert_der: &[u8]) -> Result<Vec<u8>, Error> {
     // Search for Netscape Comment OID
     let ns_cmt_oid = &[
         0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x86, 0xF8, 0x42, 0x01, 0x0D,
     ];
     extract_asn1_value(cert_der, ns_cmt_oid)
+}
+
+pub fn extract_cert_public_key(cert_der: &[u8]) -> Result<Vec<u8>, Error> {
+    // Search for Public Key prime256v1 OID
+    let prime256v1_oid = &[0x06, 0x08, 0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x03, 0x01, 0x07];
+    let mut offset = cert_der
+        .windows(prime256v1_oid.len())
+        .position(|window| window == prime256v1_oid)
+        .ok_or(Error::GenericError)?;
+    offset += 11; // 10 + TAG (0x03)
+
+    // Obtain Public Key length
+    let mut len = cert_der[offset] as usize;
+    if len > 0x80 {
+        len = (cert_der[offset + 1] as usize) * 0x100 + (cert_der[offset + 2] as usize);
+        offset += 2;
+    }
+
+    // Obtain Public Key
+    offset += 1;
+    Ok(cert_der[offset + 2..offset + len].to_vec()) // skip "00 04"
 }
 
 pub fn get_ias_auth_config() -> (Vec<u8>, rustls::RootCertStore) {
@@ -328,10 +391,10 @@ pub fn verify_quote_status(
     advisories: &AdvisoryIDs,
 ) -> Result<AuthResult, AuthResult> {
     match &report.sgx_quote_status {
-        SgxQuoteStatus::OK | 
-        SgxQuoteStatus::GroupOutOfDate |
-        SgxQuoteStatus::SwHardeningNeeded | 
-        SgxQuoteStatus::ConfigurationAndSwHardeningNeeded => {
+        SgxQuoteStatus::OK
+        | SgxQuoteStatus::GroupOutOfDate
+        | SgxQuoteStatus::SwHardeningNeeded
+        | SgxQuoteStatus::ConfigurationAndSwHardeningNeeded => {
             check_advisories(&report.sgx_quote_status, advisories)?;
 
             Ok(AuthResult::Success)
@@ -352,9 +415,9 @@ pub fn verify_quote_status(
     advisories: &AdvisoryIDs,
 ) -> Result<AuthResult, AuthResult> {
     match &report.sgx_quote_status {
-        SgxQuoteStatus::OK | 
-        SgxQuoteStatus::SwHardeningNeeded | 
-        SgxQuoteStatus::ConfigurationAndSwHardeningNeeded => {
+        SgxQuoteStatus::OK
+        | SgxQuoteStatus::SwHardeningNeeded
+        | SgxQuoteStatus::ConfigurationAndSwHardeningNeeded => {
             check_advisories(&report.sgx_quote_status, advisories)?;
 
             Ok(AuthResult::Success)

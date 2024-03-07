@@ -9,7 +9,6 @@ extern crate sgx_tse;
 
 extern crate sgx_types;
 use sgx_types::*;
-use sgx_tse::*;
 
 use std::slice;
 use std::string::String;
@@ -81,26 +80,54 @@ pub extern "C" fn handle_request(
 
 #[no_mangle]
 /// Handles incoming request for DCAP Remote Attestation
-pub unsafe extern "C" fn ecall_dcap_attestation(
+pub unsafe extern "C" fn ecall_request_master_key_dcap(
     hostname: *const u8,
     data_len: usize,
     socket_fd: c_int,
     qe_target_info: &sgx_target_info_t,
     quote_size: u32,
 ) -> sgx_status_t {
-    attestation::dcap::perform_dcap_attestation(
+    let hostname = slice::from_raw_parts(hostname, data_len);
+    let hostname = match String::from_utf8(hostname.to_vec()) {
+        Ok(hostname) => hostname,
+        Err(err) => {
+            println!("[Enclave] Cannot decode hostname. Reason: {:?}", err);
+            return sgx_status_t::SGX_ERROR_UNEXPECTED;
+        }
+    };
+
+    match attestation::tls::perform_master_key_request(
         hostname,
-        data_len,
         socket_fd,
-        qe_target_info,
-        quote_size,
-    )
+        Some(qe_target_info),
+        Some(quote_size),
+        true,
+    ) {
+        Ok(_) => sgx_status_t::SGX_SUCCESS,
+        Err(err) => err,
+    }
 }
 
 #[no_mangle]
-/// Handles incoming request for sharing master key with new node
-pub unsafe extern "C" fn ecall_share_seed(socket_fd: c_int) -> sgx_status_t {
-    attestation::seed_server::share_seed_inner(socket_fd)
+/// Handles incoming request for sharing master key with new node using DCAP attestation
+pub unsafe extern "C" fn ecall_attest_peer_dcap(
+    socket_fd: c_int,
+    qe_target_info: &sgx_target_info_t,
+    quote_size: u32,
+) -> sgx_status_t {
+    match attestation::tls::perform_master_key_provisioning(socket_fd, Some(qe_target_info), Some(quote_size), true) {
+        Ok(_) => sgx_status_t::SGX_SUCCESS,
+        Err(err) => err,
+    }
+}
+
+#[no_mangle]
+/// Handles incoming request for sharing master key with new node using EPID attestation
+pub unsafe extern "C" fn ecall_attest_peer_epid(socket_fd: c_int) -> sgx_status_t {
+    match attestation::tls::perform_master_key_provisioning(socket_fd, None, None, false) {
+        Ok(_) => sgx_status_t::SGX_SUCCESS,
+        Err(err) => err,
+    }
 }
 
 #[no_mangle]
@@ -112,7 +139,7 @@ pub unsafe extern "C" fn ecall_init_master_key(reset_flag: i32) -> sgx_status_t 
 
 #[no_mangle]
 /// Handles incoming request for EPID Remote Attestation
-pub unsafe extern "C" fn ecall_request_seed(
+pub unsafe extern "C" fn ecall_request_master_key_epid(
     hostname: *const u8,
     data_len: usize,
     socket_fd: c_int,
@@ -129,7 +156,10 @@ pub unsafe extern "C" fn ecall_request_seed(
         }
     };
 
-    attestation::seed_client::request_seed_inner(hostname, socket_fd)
+    match attestation::tls::perform_master_key_request(hostname, socket_fd, None, None, false) {
+        Ok(_) => sgx_status_t::SGX_SUCCESS,
+        Err(err) => err,
+    }
 }
 
 // Fix https://github.com/apache/incubator-teaclave-sgx-sdk/issues/373 for debug mode

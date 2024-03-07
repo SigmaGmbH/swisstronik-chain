@@ -84,3 +84,8 @@ func Create(
 ) (*types.HandleTransactionResponse, error) {
 	return nil, nil
 }
+
+// StartAttestationServer starts attestation server with 2 port (EPID and DCAP attestation)
+func StartAttestationServer(epidAddress, dcapAddress string) error {
+	return nil
+}

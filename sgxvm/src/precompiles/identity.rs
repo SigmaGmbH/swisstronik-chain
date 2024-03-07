@@ -6,7 +6,6 @@ use crate::precompiles::{
 use crate::{
     GoQuerier,
     coder,
-    ocall,
     protobuf_generated::ffi,
     querier,
 };

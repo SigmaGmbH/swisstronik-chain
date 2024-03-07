@@ -44,13 +44,21 @@ extern "C" {
 
     pub fn ecall_is_initialized(eid: sgx_enclave_id_t, retval: *mut i32) -> sgx_status_t;
 
-    pub fn ecall_share_seed(
+    pub fn ecall_attest_peer_epid(
         eid: sgx_enclave_id_t,
         retval: *mut sgx_status_t,
         socket_fd: c_int,
     ) -> sgx_status_t;
 
-    pub fn ecall_request_seed(
+    pub fn ecall_attest_peer_dcap(
+        eid: sgx_enclave_id_t,
+        retval: *mut sgx_status_t,
+        socket_fd: c_int,
+        qe_target_info: &sgx_target_info_t,
+        quote_size: u32,
+    ) -> sgx_status_t;
+
+    pub fn ecall_request_master_key_epid(
         eid: sgx_enclave_id_t,
         retval: *mut sgx_status_t,
         hostname: *const u8,
@@ -60,7 +68,7 @@ extern "C" {
 
     pub fn ecall_status(eid: sgx_enclave_id_t, retval: *mut sgx_status_t) -> sgx_status_t;
 
-    pub fn ecall_dcap_attestation(
+    pub fn ecall_request_master_key_dcap(
         eid: sgx_enclave_id_t,
         retval: *mut sgx_status_t,
         hostname: *const u8,
@@ -125,21 +133,15 @@ pub unsafe extern "C" fn handle_initialization_request(
                         let response_bytes = response.write_to_bytes()?;
                         Ok(response_bytes)
                     }
-                    node::SetupRequest_oneof_req::startBootstrapServer(req) => {
-                        enclave_api::EnclaveApi::start_bootstrap_server(evm_enclave.geteid(), req.fd)?;
-                        let response = node::StartBootstrapServerResponse::new();
+                    node::SetupRequest_oneof_req::peerAttestationRequest(req) => {
+                        enclave_api::EnclaveApi::attest_peer(evm_enclave.geteid(), req.fd, req.isDCAP)?;
+                        let response = node::PeerAttestationResponse::new();
                         let response_bytes = response.write_to_bytes()?;
                         Ok(response_bytes)
                     }
-                    node::SetupRequest_oneof_req::epidAttestationRequest(req) => {
-                        enclave_api::EnclaveApi::perform_epid_attestation(evm_enclave.geteid(), req.hostname, req.fd)?;
-                        let response = node::EPIDAttestationResponse::new();
-                        let response_bytes = response.write_to_bytes()?;
-                        Ok(response_bytes)
-                    }
-                    node::SetupRequest_oneof_req::dcapAttestationRequest(req) => {
-                        enclave_api::EnclaveApi::perform_dcap_attestation(evm_enclave.geteid(), req.hostname, req.fd)?;
-                        let response = node::DCAPAttestationResponse::new();
+                    node::SetupRequest_oneof_req::remoteAttestationRequest(req) => {
+                        enclave_api::EnclaveApi::request_remote_attestation(evm_enclave.geteid(), req.hostname, req.fd, req.isDCAP)?;
+                        let response = node::RemoteAttestationResponse::new();
                         let response_bytes = response.write_to_bytes()?;
                         Ok(response_bytes)
                     }

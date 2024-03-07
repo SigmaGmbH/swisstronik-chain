@@ -10,7 +10,6 @@ import "C"
 import (
 	"fmt"
 	ethcommon "github.com/ethereum/go-ethereum/common"
-	"golang.org/x/net/netutil"
 	"google.golang.org/protobuf/proto"
 	"log"
 	"net"
@@ -103,7 +102,7 @@ func IsNodeInitialized() (bool, error) {
 	return response.IsInitialized, nil
 }
 
-// SetupSeedNode handles initialization of seed node which will share seed with other nodes
+// SetupSeedNode handles initialization of attestation node which will share master key with other nodes
 func InitializeMasterKey(shouldReset bool) error {
 	// Create protobuf encoded request
 	req := types.SetupRequest{Req: &types.SetupRequest_InitializeMasterKey{
@@ -128,91 +127,8 @@ func InitializeMasterKey(shouldReset bool) error {
 	return nil
 }
 
-// StartSeedServer handles initialization of seed server
-func StartSeedServer(addr string) error {
-	fmt.Println("[Seed Server] Trying to start seed server")
-	ln, err := net.Listen("tcp", addr)
-	if err != nil {
-		fmt.Println("[Seed Server] Cannot start seed server")
-		return err
-	}
-
-	go func() {
-		for {
-			connection, err := ln.Accept()
-			if err != nil {
-				fmt.Println("[Seed Server] Got error ", err.Error(), ", connection: ", connection.RemoteAddr().String())
-				connection.Close()
-				continue
-			}
-
-			if err := attestPeer(connection); err != nil {
-				fmt.Println("[Seed Server] Attestation failed. Reason: ", err)
-				connection.Close()
-				continue
-			}
-		}
-	}()
-
-	fmt.Println("[Seed Server] Starting seed server. Address: ", addr)
-
-	return nil
-}
-
-func attestPeer(connection net.Conn) error {
-	defer connection.Close()
-	println("[Seed Server] Attesting peer: ", connection.RemoteAddr().String())
-
-	// Extract file descriptor for socket
-	file, err := connection.(*net.TCPConn).File()
-	if err != nil {
-		fmt.Println("[Seed Server] Cannot get access to the connection. Reason: ", err.Error())
-		return err
-	}
-
-	// Create protobuf encoded request
-	req := types.SetupRequest{Req: &types.SetupRequest_StartBootstrapServer{
-		StartBootstrapServer: &types.StartBootstrapServerRequest{
-			Fd: int32(file.Fd()),
-		},
-	}}
-	reqBytes, err := proto.Marshal(&req)
-	if err != nil {
-		fmt.Println("[Seed Server] Failed to encode req:", err)
-		return err
-	}
-
-	// Pass request to Rust
-	d := MakeView(reqBytes)
-	defer runtime.KeepAlive(reqBytes)
-
-	errmsg := NewUnmanagedVector(nil)
-	_, err = C.handle_initialization_request(d, &errmsg)
-	if err != nil {
-		return ErrorWithMessage(err, errmsg)
-	}
-
-	return nil
-}
-
-// Listen starts a net.Listener on the tcp network on the given address.
-// If there is a specified MaxOpenConnections in the config, it will also set the limitListener.
-func Listen(addr string, maxOpenConnections int) (net.Listener, error) {
-	if addr == "" {
-		addr = ":http"
-	}
-	ln, err := net.Listen("tcp", addr)
-	if err != nil {
-		return nil, err
-	}
-	if maxOpenConnections > 0 {
-		ln = netutil.LimitListener(ln, maxOpenConnections)
-	}
-	return ln, err
-}
-
-// RequestMasterKeyEPID handles request of seed from seed server
-func RequestMasterKeyEPID(hostname string, port int) error {
+// RequestMasterKey handles request of master key from attestation server
+func RequestMasterKey(hostname string, port int, isDCAP bool) error {
 	address := fmt.Sprintf("%s:%d", hostname, port)
 	conn, err := net.Dial("tcp", address)
 	if err != nil {
@@ -228,54 +144,11 @@ func RequestMasterKeyEPID(hostname string, port int) error {
 	}
 
 	// Create protobuf encoded request
-	req := types.SetupRequest{Req: &types.SetupRequest_EpidAttestationRequest{
-		EpidAttestationRequest: &types.EPIDAttestationRequest{
+	req := types.SetupRequest{Req: &types.SetupRequest_RemoteAttestationRequest{
+		RemoteAttestationRequest: &types.RemoteAttestationRequest{
 			Fd: int32(file.Fd()),
 			Hostname: hostname,
-		},
-	}}
-	reqBytes, err := proto.Marshal(&req)
-	if err != nil {
-		log.Fatalln("Failed to encode req:", err)
-		conn.Close()
-		return err
-	}
-
-	// Pass request to Rust
-	d := MakeView(reqBytes)
-	defer runtime.KeepAlive(reqBytes)
-
-	errmsg := NewUnmanagedVector(nil)
-	_, err = C.handle_initialization_request(d, &errmsg)
-	if err != nil {
-		conn.Close()
-		return ErrorWithMessage(err, errmsg)
-	}
-
-	return nil
-}
-
-// RequestMasterKeyDCAP handles request of seed from seed server
-func RequestMasterKeyDCAP(hostname string, port int) error {
-	address := fmt.Sprintf("%s:%d", hostname, port)
-	conn, err := net.Dial("tcp", address)
-	if err != nil {
-		fmt.Println("Cannot establish connection with seed server. Reason: ", err.Error())
-		return err
-	}
-
-	file, err := conn.(*net.TCPConn).File()
-	if err != nil {
-		fmt.Println("Cannot get access to the connection. Reason: ", err.Error())
-		conn.Close()
-		return err
-	}
-
-	// Create protobuf encoded request
-	req := types.SetupRequest{Req: &types.SetupRequest_DcapAttestationRequest{
-		DcapAttestationRequest: &types.DCAPAttestationRequest{
-			Fd: int32(file.Fd()),
-			Hostname: hostname,
+			IsDCAP: isDCAP,
 		},
 	}}
 	reqBytes, err := proto.Marshal(&req)

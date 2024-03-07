@@ -5,7 +5,6 @@ use std::vec::Vec;
 use crate::{
     protobuf_generated::ffi,
     querier,
-    ocall,
     coder,
     encryption,
     types::Storage,

@@ -40,20 +40,73 @@ impl EnclaveApi {
         }
     }
 
-    pub fn start_bootstrap_server(eid: sgx_enclave_id_t, fd: i32) -> Result<(), Error> {
-        let mut ret_val = sgx_status_t::SGX_SUCCESS;
-        let res = unsafe { super::ecall_share_seed(eid, &mut ret_val, fd) };
+    pub fn attest_peer(eid: sgx_enclave_id_t, fd: i32, is_dcap: bool) -> Result<(), Error> {
+        match is_dcap {
+            true => EnclaveApi::attest_peer_dcap(eid, fd),
+            false => EnclaveApi::attest_peer_epid(eid, fd),
+        }
+    }
 
-        match (res, ret_val) {
-            (sgx_status_t::SGX_SUCCESS, sgx_status_t::SGX_SUCCESS) => Ok(()),
-            (_, _) => {
-                let error_str = if res == sgx_status_t::SGX_SUCCESS {
-                    res.as_str()
-                } else {
-                    ret_val.as_str()
-                };
-                Err(Error::enclave_error(error_str))
-            }
+    fn attest_peer_dcap(eid: sgx_enclave_id_t, fd: i32) -> Result<(), Error> {
+        let qe_target_info = dcap_utils::get_qe_target_info()?;
+        let quote_size = dcap_utils::get_quote_size()?;
+
+        let mut retval = sgx_status_t::SGX_SUCCESS;
+        let res = unsafe {
+            super::ecall_attest_peer_dcap(
+                eid,
+                &mut retval,
+                fd,
+                &qe_target_info,
+                quote_size,
+            )
+        };
+
+        if res != sgx_status_t::SGX_SUCCESS {
+            println!("[Enclave Wrapper] Cannot call `ecall_attest_peer_dcap`. Reason: {:?}", res);
+            return Err(Error::enclave_error(res))
+        }
+
+        if retval != sgx_status_t::SGX_SUCCESS {
+            println!("[Enclave Wrapper] `ecall_attest_peer_dcap` failed. Reason: {:?}", retval);
+            return Err(Error::enclave_error(retval))
+        }
+
+        Ok(())
+    }
+
+    fn attest_peer_epid(eid: sgx_enclave_id_t, fd: i32) -> Result<(), Error> {
+        let mut retval = sgx_status_t::SGX_SUCCESS;
+        let res = unsafe {
+            super::ecall_attest_peer_epid(
+                eid,
+                &mut retval,
+                fd,
+            )
+        };
+
+        if res != sgx_status_t::SGX_SUCCESS {
+            println!("[Enclave Wrapper] Cannot call `ecall_attest_peer_epid`. Reason: {:?}", res);
+            return Err(Error::enclave_error(res))
+        }
+
+        if retval != sgx_status_t::SGX_SUCCESS {
+            println!("[Enclave Wrapper] `ecall_attest_peer_epid` failed. Reason: {:?}", retval);
+            return Err(Error::enclave_error(retval))
+        }
+
+        Ok(())
+    }
+
+    pub fn request_remote_attestation(
+        eid: sgx_enclave_id_t,
+        hostname: String,
+        fd: i32,
+        is_dcap: bool
+    ) -> Result<(), Error> {
+        match is_dcap {
+            true => EnclaveApi::perform_dcap_attestation(eid, hostname, fd),
+            false => EnclaveApi::perform_epid_attestation(eid, hostname, fd),
         }
     }
 
@@ -68,7 +121,7 @@ impl EnclaveApi {
 
         let mut ret_val = sgx_status_t::SGX_SUCCESS;
         let res = unsafe {
-            super::ecall_request_seed(
+            super::ecall_request_master_key_epid(
                 eid,
                 &mut ret_val,
                 hostname.as_ptr() as *const u8,
@@ -77,17 +130,17 @@ impl EnclaveApi {
             )
         };
 
-        match (res, ret_val) {
-            (sgx_status_t::SGX_SUCCESS, sgx_status_t::SGX_SUCCESS) => Ok(()),
-            (_, _) => {
-                let error_str = if res == sgx_status_t::SGX_SUCCESS {
-                    res.as_str()
-                } else {
-                    ret_val.as_str()
-                };
-                Err(Error::enclave_error(error_str))
-            }
+        if res != sgx_status_t::SGX_SUCCESS {
+            println!("[Enclave] Call to `ecall_request_master_key_epid` failed. Status code: {:?}", res);
+            return Err(Error::enclave_error(res));
         }
+
+        if ret_val != sgx_status_t::SGX_SUCCESS {
+            println!("[Enclave] `ecall_request_master_key_epid` returned error: {:?}", ret_val);
+            return Err(Error::enclave_error(ret_val));
+        }
+
+        Ok(())
     }
 
     pub fn perform_dcap_attestation(
@@ -107,7 +160,7 @@ impl EnclaveApi {
 
         let mut retval = sgx_status_t::SGX_SUCCESS;
         let res = unsafe {
-            super::ecall_dcap_attestation(
+            super::ecall_request_master_key_dcap(
                 eid,
                 &mut retval,
                 hostname.as_ptr() as *const u8,
@@ -119,12 +172,13 @@ impl EnclaveApi {
         };
 
         if res != sgx_status_t::SGX_SUCCESS {
-            println!("[Enclave Wrapper] Cannot call `ecall_dcap_attestation`. Reason: {:?}", res);
+            println!("[Enclave Wrapper] Cannot call `ecall_request_master_key_dcap`. Reason: {:?}", res);
             return Err(Error::enclave_error(res))
         }
 
         if retval != sgx_status_t::SGX_SUCCESS {
-            println!("[Enclave Wrapper] `ecall_dcap_attestation` failed. Reason: {:?}", retval);
+            println!("[Enclave Wrapper] `ecall_request_master_key_dcap` failed. Reason: {:?}", retval);
+            return Err(Error::enclave_error(retval))
         }
 
         Ok(())

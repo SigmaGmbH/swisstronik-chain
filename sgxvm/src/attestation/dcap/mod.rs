@@ -1,4 +1,3 @@
-use sgx_tcrypto::SgxEccHandle;
 use sgx_tse::rsgx_create_report;
 use sgx_types::*;
 use std::untrusted::time::SystemTimeEx;
@@ -6,56 +5,7 @@ use std::{time::SystemTime, vec::Vec};
 
 use crate::ocall;
 
-// In final version this function will be used to pass DCAP remote attestation and to request master key 
-// through TLS connection.
-//
-// In current implementation it generates DCAP Quote and verifies it using QvE
-pub fn perform_dcap_attestation(
-    _hostname: *const u8,
-    _data_len: usize,
-    _socket_fd: c_int,
-    qe_target_info: &sgx_target_info_t,
-    quote_size: u32,
-) -> sgx_status_t {
-    println!("[Enclave] Generate quote");
-    let ecc_handle = SgxEccHandle::new();
-    let _result = ecc_handle.open();
-    let (prv_k, pub_k) = match ecc_handle.create_key_pair() {
-        Ok((prv_k, pub_k)) => (prv_k, pub_k),
-        Err(err) => {
-            println!(
-                "[Enclave] Cannot create keypair for DCAP Cert. Status code: {:?}",
-                err
-            );
-            return sgx_status_t::SGX_ERROR_UNEXPECTED;
-        }
-    };
-    let qe_quote = match get_qe_quote(&pub_k, qe_target_info, quote_size) {
-        Ok(qe_quote) => qe_quote,
-        Err(err) => {
-            println!(
-                "[Enclave] Cannot obtain qe quote from PCCS. Status code: {:?}",
-                err
-            );
-            return sgx_status_t::SGX_ERROR_UNEXPECTED;
-        }
-    };
-
-    println!("[Enclave] Verify quote");
-    match verify_dcap_quote(qe_quote) {
-        Ok(_) => {
-            println!("[Enclave] Quote verified");
-        }
-        Err(err) => {
-            println!("[Enclave] Cannot verify quote. Status code: {:?}", err);
-            return err;
-        }
-    }
-
-    sgx_status_t::SGX_SUCCESS
-}
-
-fn get_qe_quote(
+pub fn get_qe_quote(
     pub_k: &sgx_ec256_public_t,
     qe_target_info: &sgx_target_info_t,
     quote_size: u32,
@@ -195,7 +145,7 @@ fn get_timestamp() -> SgxResult<i64> {
     Ok(timestamp_secs)
 }
 
-fn verify_dcap_quote(quote: Vec<u8>) -> SgxResult<()> {
+pub fn verify_dcap_quote(quote: Vec<u8>) -> SgxResult<Vec<u8>> {
     // Prepare data for enclave
     let mut qve_report_info = sgx_ql_qe_report_info_t::default();
 
@@ -316,15 +266,28 @@ fn verify_dcap_quote(quote: Vec<u8>) -> SgxResult<()> {
     let p_quote3: *const sgx_quote3_t = quote.as_ptr() as *const sgx_quote3_t;
     let quote3: sgx_quote3_t = unsafe { *p_quote3 };
 
-    // TODO: Add additional inspection of provided quote
-
-    if supplemental_data_size > 0 {
-        let p_supplemental_data: *const sgx_ql_qv_supplemental_t = supplemental_data.as_ptr() as *const sgx_ql_qv_supplemental_t;
-        let qv_supplemental_data: sgx_ql_qv_supplemental_t = unsafe { *p_supplemental_data };
-        
-        // TODO: verify supplemental data. Discover which fields should be verified
-        println!("[Enclave] CPU SVN: {:?}", qv_supplemental_data.tcb_cpusvn.svn);
+    // Check MRSIGNER
+    if quote3.report_body.mr_signer.m != crate::attestation::consts::MRSIGNER {
+        println!("[Enclave] Invalid MRSIGNER in received quote");
+        return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
     }
 
-    Ok(())
+    // Check ISV SVN
+    if (quote3.report_body.isv_svn as u16) < crate::attestation::consts::MIN_REQUIRED_SVN {
+        println!("[Enclave] Quote received from outdated enclave");
+        return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+    }
+
+    // Check for debug mode
+    #[cfg(feature = "mainnet")]
+    {
+        let is_debug_mode = quote3.report_body.attributes.flags & SGX_FLAGS_DEBUG;
+        if (is_debug_mode) != 0 {
+            println!("[Enclave] Peer enclave was built in debug mode");
+            return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+        }
+    }
+
+    // Return report public key
+    Ok(quote3.report_body.report_data.d.to_vec())
 }
