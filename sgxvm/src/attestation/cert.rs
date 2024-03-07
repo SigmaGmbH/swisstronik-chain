@@ -296,10 +296,6 @@ pub fn verify_dcap_cert(cert_der: &[u8]) -> Result<(), crate::attestation::repor
         return Err(crate::attestation::report::Error::ReportValidationError);
     }
 
-    // TODO: Verify MRSIGNER field 
-    // TODO: Verify timestamp
-    // TODO: Check Enclave ISV
-
     Ok(())
 }
 
