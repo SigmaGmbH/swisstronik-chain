@@ -1,0 +1,10 @@
+syntax = "proto3";
+package swisstronik.compliance;
+
+import "gogoproto/gogo.proto";
+import "swisstronik/compliance/params.proto";
+
+option go_package = "swisstronik/x/compliance/types";
+
+// GenesisState defines the vesting module's genesis state.
+message GenesisState { Params params = 1 [ (gogoproto.nullable) = false ]; }
