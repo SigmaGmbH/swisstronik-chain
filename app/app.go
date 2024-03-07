@@ -124,7 +124,9 @@ import (
 	didmodulekeeper "swisstronik/x/did/keeper"
 	didmoduletypes "swisstronik/x/did/types"
 
-	// this line is used by starport scaffolding # stargate/app/moduleImport
+	compliancemodule "swisstronik/x/compliance"
+	compliancemodulekeeper "swisstronik/x/compliance/keeper"
+	compliancemoduletypes "swisstronik/x/compliance/types"
 
 	"swisstronik/docs"
 	"swisstronik/encoding"
@@ -203,6 +205,7 @@ var (
 		// groupmodule.AppModuleBasic{},
 		didmodule.AppModuleBasic{},
 		consensus.AppModuleBasic{},
+		compliancemodule.AppModuleBasic{},
 		// this line is used by starport scaffolding # stargate/app/moduleBasic
 	)
 
@@ -287,6 +290,8 @@ type App struct {
 
 	VestingKeeper vestingmodulekeeper.Keeper
 	DIDKeeper     didmodulekeeper.Keeper
+	ComplianceKeeper compliancemodulekeeper.Keeper
+
 	// this line is used by starport scaffolding # stargate/app/keeperDeclaration
 
 	// mm is the module manager
@@ -344,11 +349,11 @@ func New(
 		ibcexported.StoreKey, ibctransfertypes.StoreKey, icahosttypes.StoreKey, capabilitytypes.StoreKey,
 		consensusparamtypes.StoreKey, group.StoreKey, icacontrollertypes.StoreKey, crisistypes.StoreKey,
 		evmtypes.StoreKey, feemarkettypes.StoreKey,
-		vestingmoduletypes.StoreKey, didmoduletypes.StoreKey,
+		vestingmoduletypes.StoreKey, didmoduletypes.StoreKey, compliancemoduletypes.StoreKey,
 		// this line is used by starport scaffolding # stargate/app/storeKey
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey, evmtypes.TransientKey, feemarkettypes.TransientKey)
-	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey, didmoduletypes.MemStoreKey)
+	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey, didmoduletypes.MemStoreKey, compliancemoduletypes.MemStoreKey)
 
 	// load state streaming if enabled
 	if _, _, err := streaming.LoadStreamingServices(bApp, appOpts, appCodec, logger, keys); err != nil {
@@ -599,6 +604,13 @@ func New(
 	)
 	vestingModule := vestingmodule.NewAppModule(appCodec, app.VestingKeeper, app.AccountKeeper, app.BankKeeper)
 
+	app.ComplianceKeeper = *compliancemodulekeeper.NewKeeper(
+		keys[compliancemoduletypes.StoreKey],
+		keys[compliancemoduletypes.MemStoreKey],
+		app.GetSubspace(compliancemoduletypes.ModuleName),
+	)
+	complianceModule := compliancemodule.NewAppModule(appCodec, app.ComplianceKeeper)
+
 	// this line is used by starport scaffolding # stargate/app/keeperDefinition
 
 	/**** IBC Routing ****/
@@ -660,6 +672,7 @@ func New(
 		evm.NewAppModule(app.EvmKeeper, app.AccountKeeper, evmSs),
 		vestingModule,
 		didModule,
+		complianceModule,
 		// this line is used by starport scaffolding # stargate/app/appModule
 	)
 
@@ -691,6 +704,7 @@ func New(
 		group.ModuleName,
 		paramstypes.ModuleName,
 		vestingmoduletypes.ModuleName,
+		compliancemoduletypes.ModuleName,
 		didmoduletypes.ModuleName,
 		consensusparamtypes.ModuleName,
 
@@ -721,6 +735,7 @@ func New(
 		upgradetypes.ModuleName,
 		vestingmoduletypes.ModuleName,
 		didmoduletypes.ModuleName,
+		compliancemoduletypes.ModuleName,
 		consensusparamtypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/endBlockers
 	)
@@ -756,6 +771,7 @@ func New(
 		crisistypes.ModuleName,
 		vestingmoduletypes.ModuleName,
 		didmoduletypes.ModuleName,
+		compliancemoduletypes.ModuleName,
 		consensusparamtypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/initGenesis
 	)
@@ -1063,6 +1079,7 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 	paramsKeeper.Subspace(feemarkettypes.ModuleName).WithKeyTable(feemarkettypes.ParamKeyTable())
 	paramsKeeper.Subspace(vestingmoduletypes.ModuleName)
 	paramsKeeper.Subspace(didmoduletypes.ModuleName)
+	paramsKeeper.Subspace(compliancemoduletypes.ModuleName)
 	// this line is used by starport scaffolding # stargate/app/paramSubspace
 
 	return paramsKeeper
