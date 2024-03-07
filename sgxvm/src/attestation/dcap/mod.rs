@@ -1,4 +1,3 @@
-use sgx_tcrypto::SgxEccHandle;
 use sgx_tse::rsgx_create_report;
 use sgx_types::*;
 use std::untrusted::time::SystemTimeEx;
@@ -280,13 +279,14 @@ pub fn verify_dcap_quote(quote: Vec<u8>) -> SgxResult<Vec<u8>> {
     }
 
     // Check for debug mode
-    let is_debug_mode = quote3.report_body.attributes.flags & SGX_FLAGS_DEBUG;
-    if (is_debug_mode) != 0 {
-        println!("[Enclave] Peer enclave was built in debug mode");
-        return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+    #[cfg(feature = "mainnet")]
+    {
+        let is_debug_mode = quote3.report_body.attributes.flags & SGX_FLAGS_DEBUG;
+        if (is_debug_mode) != 0 {
+            println!("[Enclave] Peer enclave was built in debug mode");
+            return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+        }
     }
-
-    // TODO: Check timestamp
 
     // Return report public key
     Ok(quote3.report_body.report_data.d.to_vec())

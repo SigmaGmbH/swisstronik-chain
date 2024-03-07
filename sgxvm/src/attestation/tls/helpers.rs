@@ -128,7 +128,6 @@ pub(super) fn create_tls_cert_and_keys(
     let payload = match (qe_target_info, quote_size) {
         (Some(qe_target_info), Some(quote_size)) => {
             let qe_quote = get_qe_quote(&pub_k, qe_target_info, quote_size)?;
-            // println!("[Enclave] create_tls_cert_and_keys. Payload: {:?}", hex::encode(&qe_quote));
             base64::encode(&qe_quote[..])
         }
         _ => {
