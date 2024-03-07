@@ -1,0 +1,39 @@
+syntax = "proto3";
+package swisstronik.compliance;
+
+import "gogoproto/gogo.proto";
+import "swisstronik/compliance/params.proto";
+
+option go_package = "swisstronik/x/compliance/types";
+
+// Contains information about address
+message AddressData {
+    // This field is used during community verification of some address.
+    // Only smart contract can be verified by community.
+    bool is_verified = 1;
+    // This field contains information about address ban. Ban can be done 
+    // only by community decision
+    BanStatus ban_data = 2;
+}
+
+// Contains information about ban, such as timestamp and ban status
+message BanStatus {
+    bool is_banned = 1;
+    uint32 timestamp = 2;
+}
+
+// Contains verification info
+message VerificationData {
+    // On which chain verification was passed
+    string origin_chain = 1;
+    // Original issuance timestamp
+    uint32 issuance_timestamp = 2;
+    // Original expiration timestamp
+    uint32 expiration_timestamp = 3;
+}
+
+// Contains information about issuer alias
+message IssuerAlias {
+    // Issuer company name
+    string issuer_alias = 1;
+}
