@@ -73,10 +73,19 @@ impl rustls::ClientCertVerifier for ClientAuth {
         certs: &[rustls::Certificate],
         _sni: Option<&webpki::DNSName>,
     ) -> Result<rustls::ClientCertVerified, rustls::TLSError> {
-        // This call will automatically verify cert is properly signed
-        match super::cert::verify_ra_cert(&certs[0].0, None) {
+        if certs.is_empty() {
+            println!("[Enclave] No certs provided for Client Auth");
+            return Err(rustls::TLSError::NoCertificatesPresented);
+        }
+
+        if self.is_dcap {
+            crate::attestation::cert::verify_dcap_cert(&certs[0].0).unwrap();
+            return Ok(rustls::ClientCertVerified::assertion());
+        }
+
+        match crate::attestation::cert::verify_ra_cert(&certs[0].0, None) {
             Ok(_) => Ok(rustls::ClientCertVerified::assertion()),
-            Err(super::types::AuthResult::SwHardeningAndConfigurationNeeded) => {
+            Err(crate::attestation::types::AuthResult::SwHardeningAndConfigurationNeeded) => {
                 if self.outdated_ok {
                     println!("outdated_ok is set, overriding outdated error");
                     Ok(rustls::ClientCertVerified::assertion())
@@ -116,11 +125,20 @@ impl rustls::ServerCertVerifier for ServerAuth {
         _hostname: webpki::DNSNameRef,
         _ocsp: &[u8],
     ) -> Result<rustls::ServerCertVerified, rustls::TLSError> {
-        // This call will automatically verify cert is properly signed
-        let res = super::cert::verify_ra_cert(&certs[0].0, None);
+        if certs.is_empty() {
+            println!("[Enclave] No certs provided for Client Auth");
+            return Err(rustls::TLSError::NoCertificatesPresented);
+        }
+
+        if self.is_dcap {
+            crate::attestation::cert::verify_dcap_cert(&certs[0].0).unwrap();
+            return Ok(rustls::ServerCertVerified::assertion());
+        }
+
+        let res = crate::attestation::cert::verify_ra_cert(&certs[0].0, None);
         match res {
             Ok(_) => Ok(rustls::ServerCertVerified::assertion()),
-            Err(super::types::AuthResult::SwHardeningAndConfigurationNeeded) => {
+            Err(crate::attestation::types::AuthResult::SwHardeningAndConfigurationNeeded) => {
                 if self.outdated_ok {
                     println!("outdated_ok is set, overriding outdated error");
                     Ok(rustls::ServerCertVerified::assertion())
