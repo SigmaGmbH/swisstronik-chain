@@ -19,7 +19,7 @@ import (
 	fmt "fmt"
 	math "math"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	storetypes "cosmossdk.io/store/types"
 )
 
 // ErrorNegativeGasConsumed defines an error thrown when the amount of gas refunded results in a
@@ -36,27 +36,27 @@ type ErrorGasOverflow struct {
 }
 
 type infiniteGasMeterWithLimit struct {
-	consumed sdk.Gas
-	limit    sdk.Gas
+	consumed uint64
+	limit    uint64
 }
 
 // NewInfiniteGasMeterWithLimit returns a reference to a new infiniteGasMeter.
-func NewInfiniteGasMeterWithLimit(limit sdk.Gas) sdk.GasMeter {
+func NewInfiniteGasMeterWithLimit(limit uint64) storetypes.GasMeter {
 	return &infiniteGasMeterWithLimit{
 		consumed: 0,
 		limit:    limit,
 	}
 }
 
-func (g *infiniteGasMeterWithLimit) GasConsumed() sdk.Gas {
+func (g *infiniteGasMeterWithLimit) GasConsumed() uint64 {
 	return g.consumed
 }
 
-func (g *infiniteGasMeterWithLimit) GasConsumedToLimit() sdk.Gas {
+func (g *infiniteGasMeterWithLimit) GasConsumedToLimit() uint64 {
 	return g.consumed
 }
 
-func (g *infiniteGasMeterWithLimit) Limit() sdk.Gas {
+func (g *infiniteGasMeterWithLimit) Limit() uint64 {
 	return g.limit
 }
 
@@ -70,7 +70,7 @@ func addUint64Overflow(a, b uint64) (uint64, bool) {
 	return a + b, false
 }
 
-func (g *infiniteGasMeterWithLimit) ConsumeGas(amount sdk.Gas, descriptor string) {
+func (g *infiniteGasMeterWithLimit) ConsumeGas(amount uint64, descriptor string) {
 	var overflow bool
 	// TODO: Should we set the consumed field after overflow checking?
 	g.consumed, overflow = addUint64Overflow(g.consumed, amount)
@@ -85,7 +85,7 @@ func (g *infiniteGasMeterWithLimit) ConsumeGas(amount sdk.Gas, descriptor string
 // Use case: This functionality enables refunding gas to the trasaction or block gas pools so that
 // EVM-compatible chains can fully support the go-ethereum StateDb interface.
 // See https://github.com/cosmos/cosmos-sdk/pull/9403 for reference.
-func (g *infiniteGasMeterWithLimit) RefundGas(amount sdk.Gas, descriptor string) {
+func (g *infiniteGasMeterWithLimit) RefundGas(amount uint64, descriptor string) {
 	if g.consumed < amount {
 		panic(ErrorNegativeGasConsumed{Descriptor: descriptor})
 	}
@@ -105,6 +105,6 @@ func (g *infiniteGasMeterWithLimit) String() string {
 	return fmt.Sprintf("InfiniteGasMeter:\n  consumed: %d", g.consumed)
 }
 
-func (g *infiniteGasMeterWithLimit) GasRemaining() sdk.Gas {
+func (g *infiniteGasMeterWithLimit) GasRemaining() uint64 {
 	return math.MaxUint64
 }

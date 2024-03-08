@@ -30,7 +30,7 @@ func BlockGasLimit(ctx sdk.Context) uint64 {
 
 	// Otherwise get from the consensus parameters
 	cp := ctx.ConsensusParams()
-	if cp == nil || cp.Block == nil {
+	if cp.Block == nil {
 		return 0
 	}
 

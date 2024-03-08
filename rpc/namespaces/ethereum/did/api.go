@@ -20,7 +20,7 @@ import (
 
 	rpctypes "swisstronik/rpc/types"
 
-	"github.com/cometbft/cometbft/libs/log"
+	"cosmossdk.io/log"
 
 	"swisstronik/rpc/backend"
 	didtypes "swisstronik/x/did/types"

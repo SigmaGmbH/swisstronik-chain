@@ -2,12 +2,16 @@ package cmd
 
 import (
 	"bufio"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net"
 	"os"
 	"path/filepath"
 
+	sdkmath "cosmossdk.io/math"
+
+	"github.com/SigmaGmbH/librustgo"
 	"github.com/ethereum/go-ethereum/common"
 
 	tmconfig "github.com/cometbft/cometbft/config"
@@ -43,7 +47,7 @@ import (
 	"swisstronik/testutil/network"
 
 	tmtypes "github.com/cometbft/cometbft/types"
-	"github.com/SigmaGmbH/librustgo"
+	"github.com/cosmos/cosmos-sdk/runtime"
 )
 
 var (
@@ -128,7 +132,7 @@ Example:
 			args.numValidators, _ = cmd.Flags().GetInt(flagNumValidators)
 			args.algo, _ = cmd.Flags().GetString(flags.FlagKeyType)
 
-			return initTestnetConfigs(clientCtx, cmd, serverCtx.Config, mbm, genBalIterator, args)
+			return initTestnetConfigs(clientCtx, cmd, serverCtx.Config, mbm, genBalIterator, args, clientCtx.TxConfig.SigningContext().ValidatorAddressCodec())
 		},
 	}
 
@@ -148,9 +152,9 @@ func initializeEnclave() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "init-testnet-enclave",
 		Short: "Initialize SGX Enclave for local testnet",
-		Long:  `Initializes SGX enclave by creating new master key
+		Long: `Initializes SGX enclave by creating new master key
 		*** WARNING: Do not use this command to setup master key for validator ***`,
-		Args:  cobra.ExactArgs(0),
+		Args: cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			shouldReset, err := cmd.Flags().GetBool(flagShouldReset)
 			if err != nil {
@@ -182,6 +186,7 @@ func initTestnetConfigs(
 	mbm module.BasicManager,
 	genBalIterator banktypes.GenesisBalancesIterator,
 	args initArgs,
+	valAddrCodec runtime.ValidatorAddressCodec,
 ) error {
 	if args.chainID == "" {
 		args.chainID = fmt.Sprintf("swisstronikd_%d-1", tmrand.Int63n(9999999999999)+1)
@@ -280,12 +285,12 @@ func initTestnetConfigs(
 
 		valTokens := sdk.TokensFromConsensusPower(100, evmmoduletypes.PowerReduction)
 		createValMsg, err := stakingtypes.NewMsgCreateValidator(
-			sdk.ValAddress(addr),
+			addr.String(),
 			valPubKeys[i],
 			sdk.NewCoin(evmmoduletypes.SwtrDenom, valTokens),
 			stakingtypes.NewDescription(nodeDirName, "", "", "", ""),
-			stakingtypes.NewCommissionRates(sdk.OneDec(), sdk.OneDec(), sdk.OneDec()),
-			sdk.OneInt(),
+			stakingtypes.NewCommissionRates(sdkmath.LegacyOneDec(), sdkmath.LegacyOneDec(), sdkmath.LegacyOneDec()),
+			sdkmath.OneInt(),
 		)
 		if err != nil {
 			return err
@@ -304,8 +309,9 @@ func initTestnetConfigs(
 			WithMemo(memo).
 			WithKeybase(kb).
 			WithTxConfig(clientCtx.TxConfig)
+		ctx := context.Background()
 
-		if err := tx.Sign(txFactory, nodeDirName, txBuilder, true); err != nil {
+		if err := tx.Sign(ctx, txFactory, nodeDirName, txBuilder, true); err != nil {
 			return err
 		}
 
@@ -333,7 +339,7 @@ func initTestnetConfigs(
 
 	err := collectGenFiles(
 		clientCtx, nodeConfig, args.chainID, nodeIDs, valPubKeys, args.numValidators,
-		args.outputDir, args.nodeDirPrefix, args.nodeDaemonHome, genBalIterator,
+		args.outputDir, args.nodeDirPrefix, args.nodeDaemonHome, genBalIterator, valAddrCodec,
 	)
 	if err != nil {
 		return err
@@ -423,7 +429,7 @@ func initGenFiles(
 func collectGenFiles(
 	clientCtx client.Context, nodeConfig *tmconfig.Config, chainID string,
 	nodeIDs []string, valPubKeys []cryptotypes.PubKey, numValidators int,
-	outputDir, nodeDirPrefix, nodeDaemonHome string, genBalIterator banktypes.GenesisBalancesIterator,
+	outputDir, nodeDirPrefix, nodeDaemonHome string, genBalIterator banktypes.GenesisBalancesIterator, valAddrCodec runtime.ValidatorAddressCodec,
 ) error {
 	var appState json.RawMessage
 	genTime := tmtime.Now()
@@ -439,12 +445,12 @@ func collectGenFiles(
 		nodeID, valPubKey := nodeIDs[i], valPubKeys[i]
 		initCfg := genutiltypes.NewInitConfig(chainID, gentxsDir, nodeID, valPubKey)
 
-		genDoc, err := tmtypes.GenesisDocFromFile(nodeConfig.GenesisFile())
+		appGenesis, err := genutiltypes.AppGenesisFromFile(nodeConfig.GenesisFile())
 		if err != nil {
 			return err
 		}
 
-		nodeAppState, err := genutil.GenAppStateFromConfig(clientCtx.Codec, clientCtx.TxConfig, nodeConfig, initCfg, *genDoc, genBalIterator, genutiltypes.DefaultMessageValidator)
+		nodeAppState, err := genutil.GenAppStateFromConfig(clientCtx.Codec, clientCtx.TxConfig, nodeConfig, initCfg, appGenesis, genBalIterator, genutiltypes.DefaultMessageValidator, valAddrCodec)
 		if err != nil {
 			return err
 		}
@@ -453,17 +459,11 @@ func collectGenFiles(
 			// set the canonical application state (they should not differ)
 			appState = nodeAppState
 		}
-		
+
 		genFile := nodeConfig.GenesisFile()
 
 		// overwrite each validator's genesis file to have a canonical genesis time
-		genDoc.GenesisTime = genTime
-		genDoc.Validators = nil
-		genDoc.AppState = nodeAppState
-		genDoc.ChainID = chainID
-		genDoc.ConsensusParams.Block.MaxGas = 20_000_000
-
-		if err := genutil.ExportGenesisFile(genDoc, genFile); err != nil {
+		if err := genutil.ExportGenesisFileWithTime(genFile, chainID, nil, appState, genTime); err != nil {
 			return err
 		}
 	}

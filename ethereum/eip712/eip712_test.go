@@ -1,6 +1,7 @@
 package eip712_test
 
 import (
+	"context"
 	"testing"
 
 	"cosmossdk.io/math"
@@ -26,10 +27,16 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
 
+	v1beta1 "cosmossdk.io/api/cosmos/base/v1beta1"
+	signingv1beta1 "cosmossdk.io/api/cosmos/tx/signing/v1beta1"
+	txv1beta1 "cosmossdk.io/api/cosmos/tx/v1beta1"
+	txsigning "cosmossdk.io/x/tx/signing"
+	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	distributiontypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/stretchr/testify/suite"
+	"google.golang.org/protobuf/types/known/anypb"
 )
 
 // Unit tests for single-signer EIP-712 signature verification. Multi-signer verification tests are included
@@ -92,9 +99,9 @@ func (suite *EIP712TestSuite) makeCoins(denom string, amount math.Int) sdk.Coins
 func (suite *EIP712TestSuite) TestEIP712SignatureVerification() {
 	suite.SetupTest()
 
-	signModes := []signing.SignMode{
-		signing.SignMode_SIGN_MODE_DIRECT,
-		signing.SignMode_SIGN_MODE_LEGACY_AMINO_JSON,
+	signModes := []signingv1beta1.SignMode{
+		signingv1beta1.SignMode_SIGN_MODE_DIRECT,
+		signingv1beta1.SignMode_SIGN_MODE_LEGACY_AMINO_JSON,
 	}
 
 	// Fixed test address
@@ -156,8 +163,8 @@ func (suite *EIP712TestSuite) TestEIP712SignatureVerification() {
 			memo: "",
 			msgs: []sdk.Msg{
 				stakingtypes.NewMsgDelegate(
-					suite.createTestAddress(),
-					sdk.ValAddress(suite.createTestAddress()),
+					suite.createTestAddress().String(),
+					sdk.ValAddress(suite.createTestAddress()).String(),
 					suite.makeCoins("photon", math.NewInt(1))[0],
 				),
 			},
@@ -174,8 +181,8 @@ func (suite *EIP712TestSuite) TestEIP712SignatureVerification() {
 			memo: "",
 			msgs: []sdk.Msg{
 				distributiontypes.NewMsgWithdrawDelegatorReward(
-					suite.createTestAddress(),
-					sdk.ValAddress(suite.createTestAddress()),
+					suite.createTestAddress().String(),
+					sdk.ValAddress(suite.createTestAddress()).String(),
 				),
 			},
 			accountNumber: 25,
@@ -191,13 +198,13 @@ func (suite *EIP712TestSuite) TestEIP712SignatureVerification() {
 			memo: "",
 			msgs: []sdk.Msg{
 				stakingtypes.NewMsgDelegate(
-					testAddress,
-					sdk.ValAddress(suite.createTestAddress()),
+					testAddress.String(),
+					sdk.ValAddress(suite.createTestAddress()).String(),
 					suite.makeCoins("photon", math.NewInt(1))[0],
 				),
 				stakingtypes.NewMsgDelegate(
-					testAddress,
-					sdk.ValAddress(suite.createTestAddress()),
+					testAddress.String(),
+					sdk.ValAddress(suite.createTestAddress()).String(),
 					suite.makeCoins("photon", math.NewInt(5))[0],
 				),
 			},
@@ -310,16 +317,10 @@ func (suite *EIP712TestSuite) TestEIP712SignatureVerification() {
 			memo: "",
 			msgs: []sdk.Msg{
 				banktypes.NewMsgMultiSend(
-					[]banktypes.Input{
-						banktypes.NewInput(
-							suite.createTestAddress(),
-							suite.makeCoins("photon", math.NewInt(50)),
-						),
-						banktypes.NewInput(
-							suite.createTestAddress(),
-							suite.makeCoins("photon", math.NewInt(50)),
-						),
-					},
+					banktypes.NewInput(
+						suite.createTestAddress(),
+						suite.makeCoins("photon", math.NewInt(50)),
+					),
 					[]banktypes.Output{
 						banktypes.NewOutput(
 							suite.createTestAddress(),
@@ -357,9 +358,11 @@ func (suite *EIP712TestSuite) TestEIP712SignatureVerification() {
 				// Set memo
 				txBuilder.SetMemo(tc.memo)
 
+				defaultSignMode, err := authsigning.APISignModeToInternal(signMode)
+
 				// Prepare signature field
 				txSigData := signing.SingleSignatureData{
-					SignMode:  signMode,
+					SignMode:  defaultSignMode,
 					Signature: nil,
 				}
 				txSig := signing.SignatureV2{
@@ -379,23 +382,65 @@ func (suite *EIP712TestSuite) TestEIP712SignatureVerification() {
 				if tc.timeoutHeight != 0 {
 					txBuilder.SetTimeoutHeight(tc.timeoutHeight)
 				}
+				anyPk, _ := codectypes.NewAnyWithValue(pubKey)
 
 				// Declare signerData
-				signerData := authsigning.SignerData{
+				signerData := txsigning.SignerData{
 					ChainID:       chainId,
 					AccountNumber: tc.accountNumber,
 					Sequence:      tc.sequence,
-					PubKey:        pubKey,
-					Address:       sdk.MustBech32ifyAddressBytes("ethm", pubKey.Bytes()),
+					PubKey: &anypb.Any{
+						TypeUrl: anyPk.TypeUrl,
+						Value:   anyPk.Value,
+					},
+					Address: sdk.MustBech32ifyAddressBytes("ethm", pubKey.Bytes()),
+				}
+
+				tip := &txv1beta1.Tip{
+					Tipper: "tipper",
+					Amount: []*v1beta1.Coin{{Denom: "uswtr", Amount: "1000"}},
+				}
+
+				anyMsgs := make([]*anypb.Any, len(tc.msgs))
+				for j, msg := range tc.msgs {
+					legacyAny, err := codectypes.NewAnyWithValue(msg)
+					suite.Require().NoError(err)
+
+					anyMsgs[j] = &anypb.Any{
+						TypeUrl: legacyAny.TypeUrl,
+						Value:   legacyAny.Value,
+					}
+				}
+				auxBody := &txv1beta1.TxBody{
+					Messages:      anyMsgs,
+					Memo:          tc.memo,
+					TimeoutHeight: tc.timeoutHeight,
+					// AuxTxBuilder has no concern with extension options, so we set them to nil.
+					// This preserves pre-PR#16025 behavior where extension options were ignored, this code path:
+					// https://github.com/cosmos/cosmos-sdk/blob/ac3c209326a26b46f65a6cc6f5b5ebf6beb79b38/client/tx/aux_builder.go#L193
+					// https://github.com/cosmos/cosmos-sdk/blob/ac3c209326a26b46f65a6cc6f5b5ebf6beb79b38/x/auth/migrations/legacytx/stdsign.go#L49
+					ExtensionOptions:            nil,
+					NonCriticalExtensionOptions: nil,
 				}
 
 				bz, err := suite.clientCtx.TxConfig.SignModeHandler().GetSignBytes(
+					context.Background(),
 					signMode,
 					signerData,
-					txBuilder.GetTx(),
+					txsigning.TxData{
+						Body: auxBody,
+						AuthInfo: &txv1beta1.AuthInfo{
+							SignerInfos: nil,
+							// Aux signer never signs over fee.
+							// For LEGACY_AMINO_JSON, we use the convention to sign
+							// over empty fees.
+							// ref: https://github.com/cosmos/cosmos-sdk/pull/10348
+							Fee: &txv1beta1.Fee{},
+							Tip: tip,
+						},
+					},
 				)
 				suite.Require().NoError(err)
-
 				suite.verifyEIP712SignatureVerification(tc.expectSuccess, *privKey, *pubKey, bz)
 			})
 		}

@@ -4,11 +4,12 @@ import (
 	"context"
 	"swisstronik/x/vesting/types"
 
-	"github.com/armon/go-metrics"
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	metrics "github.com/hashicorp/go-metrics"
 
 	errorsmod "cosmossdk.io/errors"
+	sdkmath "cosmossdk.io/math"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	atypes "github.com/cosmos/cosmos-sdk/x/auth/vesting/types"
@@ -64,7 +65,7 @@ func (k msgServer) CreateMonthlyVestingAccount(goCtx context.Context, msg *types
 	}
 
 	// Calculate monthly amount
-	amount := totalCoins.QuoInt(sdk.NewInt(msg.Month))
+	amount := totalCoins.QuoInt(sdkmath.NewInt(msg.Month))
 
 	var periods []atypes.Period
 	for i := 0; i < (int)(msg.Month); i++ {
@@ -74,7 +75,10 @@ func (k msgServer) CreateMonthlyVestingAccount(goCtx context.Context, msg *types
 
 	baseAccount := authtypes.NewBaseAccountWithAddress(to)
 	baseAccount = k.accountKeeper.NewAccount(ctx, baseAccount).(*authtypes.BaseAccount)
-	vestingAccount := atypes.NewPeriodicVestingAccount(baseAccount, totalCoins.Sort(), msg.StartTime, periods)
+	vestingAccount, err := atypes.NewPeriodicVestingAccount(baseAccount, totalCoins.Sort(), msg.StartTime, periods)
+	if err != nil {
+		return nil, err
+	}
 
 	k.accountKeeper.SetAccount(ctx, vestingAccount)
 

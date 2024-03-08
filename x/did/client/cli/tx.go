@@ -9,11 +9,13 @@ import (
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/spf13/cobra"
 
+	sdkerrors "cosmossdk.io/errors"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"swisstronik/x/did/types"
+
+	sdkerr "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 const (
@@ -116,7 +118,7 @@ func AccAddrByKeyRef(keyring keyring.Keyring, keyRef string) (sdk.AccAddress, er
 		return info.GetAddress()
 	}
 
-	if !sdkerrors.IsOf(err, sdkerrors.ErrIO, sdkerrors.ErrKeyNotFound) {
+	if !sdkerrors.IsOf(err, sdkerr.ErrIO, sdkerr.ErrKeyNotFound) {
 		return nil, err
 	}
 

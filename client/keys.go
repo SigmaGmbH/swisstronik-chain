@@ -91,14 +91,20 @@ The pass backend requires GnuPG: https://gnupg.org/
 
 	cmd.PersistentFlags().String(flags.FlagHome, defaultNodeHome, "The application home directory")
 	cmd.PersistentFlags().String(flags.FlagKeyringDir, "", "The client Keyring directory; if omitted, the default 'home' directory will be used")
-	cmd.PersistentFlags().String(flags.FlagKeyringBackend, keyring.BackendOS, "Select keyring's backend (os|file|test)")
+	cmd.PersistentFlags().String(flags.FlagKeyringBackend, keyring.BackendTest, "Select keyring's backend (os|file|test)")
 	cmd.PersistentFlags().String(cli.OutputFlag, "text", "Output format (text|json)")
 	return cmd
 }
 
 func runAddCmd(cmd *cobra.Command, args []string) error {
 	clientCtx := client.GetClientContextFromCmd(cmd).WithKeyringOptions(hd.EthSecp256k1Option())
-	clientCtx, err := client.ReadPersistentCommandFlags(clientCtx, cmd.Flags())
+	flagSet := cmd.Flags()
+
+	if !flagSet.Changed(flags.FlagKeyringBackend) {
+		flagSet.Set(flags.FlagKeyringBackend, keyring.BackendTest)
+	}
+
+	clientCtx, err := client.ReadPersistentCommandFlags(clientCtx, flagSet)
 	if err != nil {
 		return err
 	}

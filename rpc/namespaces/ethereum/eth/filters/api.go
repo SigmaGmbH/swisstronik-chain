@@ -21,10 +21,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cosmos/cosmos-sdk/client"
 	"swisstronik/rpc/types"
 
-	"github.com/cometbft/cometbft/libs/log"
+	"github.com/cosmos/cosmos-sdk/client"
+
+	"cosmossdk.io/log"
 
 	coretypes "github.com/cometbft/cometbft/rpc/core/types"
 	rpcclient "github.com/cometbft/cometbft/rpc/jsonrpc/client"
@@ -350,16 +351,22 @@ func (api *PublicFilterAPI) NewHeads(ctx context.Context) (*rpc.Subscription, er
 					return
 				}
 
-				data, ok := ev.Data.(tmtypes.EventDataNewBlockHeader)
+				data, ok := ev.Data.(tmtypes.EventDataNewBlockEvents)
 				if !ok {
 					api.logger.Debug("event data type mismatch", "type", fmt.Sprintf("%T", ev.Data))
 					continue
 				}
 
-				baseFee := types.BaseFeeFromEvents(data.ResultBeginBlock.Events)
+				baseFee := types.BaseFeeFromEvents(data.Events)
+
+				eventHeader, ok := ev.Data.(tmtypes.EventDataNewBlockHeader)
+				if !ok {
+					api.logger.Debug("header type mismatch", "type", fmt.Sprintf("%T", ev.Data))
+					continue
+				}
 
 				// TODO: fetch bloom from events
-				header := types.EthHeaderFromTendermint(data.Header, ethtypes.Bloom{}, baseFee)
+				header := types.EthHeaderFromTendermint(eventHeader.Header, ethtypes.Bloom{}, baseFee)
 				_ = notifier.Notify(rpcSub.ID, header)
 			case <-rpcSub.Err():
 				headersSub.Unsubscribe(api.events)

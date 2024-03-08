@@ -127,8 +127,9 @@ func decodeAminoSignDoc(signDocBytes []byte) (apitypes.TypedData, error) {
 	// Use first message for fee payer and type inference
 	msg := msgs[0]
 
+	signers, _, err := protoCodec.GetMsgV1Signers(msg)
 	// By convention, the fee payer is the first address in the list of signers.
-	feePayer := msg.GetSigners()[0]
+	feePayer := signers[0]
 	feeDelegation := &FeeDelegationOptions{
 		FeePayer: feePayer,
 	}
@@ -213,12 +214,11 @@ func decodeProtobufSignDoc(signDocBytes []byte) (apitypes.TypedData, error) {
 		Gas:    authInfo.Fee.GasLimit,
 	}
 
-	feePayer := msg.GetSigners()[0]
+	signers, _, err := protoCodec.GetMsgV1Signers(msg)
+	feePayer := signers[0]
 	feeDelegation := &FeeDelegationOptions{
 		FeePayer: feePayer,
 	}
-
-	tip := authInfo.Tip
 
 	// WrapTxToTypedData expects the payload as an Amino Sign Doc
 	signBytes := legacytx.StdSignBytes(
@@ -229,7 +229,6 @@ func decodeProtobufSignDoc(signDocBytes []byte) (apitypes.TypedData, error) {
 		*stdFee,
 		msgs,
 		body.Memo,
-		tip,
 	)
 
 	typedData, err := WrapTxToTypedData(
@@ -271,14 +270,15 @@ func validatePayloadMessages(msgs []sdk.Msg) error {
 		if err != nil {
 			return err
 		}
-
-		if len(m.GetSigners()) != 1 {
+		
+		signers, _, err := protoCodec.GetMsgV1Signers(m)
+		if len(signers) != 1 {
 			return errors.New("unable to build EIP-712 payload: expect exactly 1 signer")
 		}
 
 		if i == 0 {
 			msgType = t
-			msgSigner = m.GetSigners()[0]
+			msgSigner = signers[0]
 			continue
 		}
 
@@ -286,7 +286,7 @@ func validatePayloadMessages(msgs []sdk.Msg) error {
 			return errors.New("unable to build EIP-712 payload: different types of messages detected")
 		}
 
-		if !msgSigner.Equals(m.GetSigners()[0]) {
+		if !msgSigner.Equals(sdk.MustAccAddressFromBech32(string(signers[0]))) {
 			return errors.New("unable to build EIP-712 payload: multiple signers detected")
 		}
 	}

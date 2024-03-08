@@ -16,52 +16,63 @@
 package server
 
 import (
+	"context"
 	"net"
 	"net/http"
 	"time"
+
+	"swisstronik/server/config"
 
 	"github.com/gorilla/mux"
 	"github.com/improbable-eng/grpc-web/go/grpcweb"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/netutil"
-	"swisstronik/server/config"
 
 	sdkserver "github.com/cosmos/cosmos-sdk/server"
 	"github.com/cosmos/cosmos-sdk/server/types"
 	"github.com/cosmos/cosmos-sdk/version"
 
-	tmcmd "github.com/cometbft/cometbft/cmd/cometbft/commands"
-	tmlog "github.com/cometbft/cometbft/libs/log"
+	tmlog "cosmossdk.io/log"
+	cmtcmd "github.com/cometbft/cometbft/cmd/cometbft/commands"
+	cmtcfg "github.com/cometbft/cometbft/config"
 	rpcclient "github.com/cometbft/cometbft/rpc/jsonrpc/client"
+	cmttypes "github.com/cometbft/cometbft/types"
+	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
+	"golang.org/x/sync/errgroup"
 )
+
+const ServerStartTime = 5 * time.Second
 
 // AddCommands adds server commands
 func AddCommands(
 	rootCmd *cobra.Command,
-	opts StartOptions,
+	defaultNodeHome string,
+	appCreator types.AppCreator,
+	opts StartCmdOptions,
 	appExport types.AppExporter,
 	addStartFlags types.ModuleInitFlags,
 ) {
-	tendermintCmd := &cobra.Command{
-		Use:   "tendermint",
-		Short: "Tendermint subcommands",
+	cometCmd := &cobra.Command{
+		Use:     "comet",
+		Aliases: []string{"cometbft", "tendermint"},
+		Short:   "CometBFT subcommands",
 	}
 
-	tendermintCmd.AddCommand(
+	cometCmd.AddCommand(
 		sdkserver.ShowNodeIDCmd(),
 		sdkserver.ShowValidatorCmd(),
 		sdkserver.ShowAddressCmd(),
 		sdkserver.VersionCmd(),
-		tmcmd.ResetAllCmd,
-		tmcmd.ResetStateCmd,
+		cmtcmd.ResetAllCmd,
+		cmtcmd.ResetStateCmd,
 	)
 
-	startCmd := StartCmd(opts)
+	startCmd := StartCmd(appCreator, defaultNodeHome, opts)
 	addStartFlags(startCmd)
 
 	rootCmd.AddCommand(
 		startCmd,
-		tendermintCmd,
+		cometCmd,
 		sdkserver.ExportCmd(appExport, opts.DefaultNodeHome),
 		version.NewVersionCommand(),
 		sdkserver.NewRollbackCmd(opts.AppCreator, opts.DefaultNodeHome),
@@ -137,4 +148,36 @@ func Listen(addr string, config *config.Config) (net.Listener, error) {
 		ln = netutil.LimitListener(ln, config.JSONRPC.MaxOpenConnections)
 	}
 	return ln, err
+}
+
+func getCtx(svrCtx *sdkserver.Context, block bool) (*errgroup.Group, context.Context) {
+	ctx, cancelFn := context.WithCancel(context.Background())
+	g, ctx := errgroup.WithContext(ctx)
+	// listen for quit signals so the calling parent process can gracefully exit
+	sdkserver.ListenForQuitSignals(g, block, cancelFn, svrCtx.Logger)
+	return g, ctx
+}
+
+func getAndValidateConfig(svrCtx *sdkserver.Context) (config.Config, error) {
+	config, err := config.GetConfig(svrCtx.Viper)
+	if err != nil {
+		return config, err
+	}
+
+	if err := config.ValidateBasic(); err != nil {
+		return config, err
+	}
+	return config, nil
+}
+
+// returns a function which returns the genesis doc from the genesis file.
+func getGenDocProvider(cfg *cmtcfg.Config) func() (*cmttypes.GenesisDoc, error) {
+	return func() (*cmttypes.GenesisDoc, error) {
+		appGenesis, err := genutiltypes.AppGenesisFromFile(cfg.GenesisFile())
+		if err != nil {
+			return nil, err
+		}
+
+		return appGenesis.ToGenesisDoc()
+	}
 }

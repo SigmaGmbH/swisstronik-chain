@@ -1,6 +1,7 @@
 package ante_test
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"math"
@@ -37,7 +38,6 @@ import (
 	sdkante "github.com/cosmos/cosmos-sdk/x/auth/ante"
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
 	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	authz "github.com/cosmos/cosmos-sdk/x/authz"
 
 	"swisstronik/app"
@@ -48,7 +48,13 @@ import (
 	evmtypes "swisstronik/x/evm/types"
 	feemarkettypes "swisstronik/x/feemarket/types"
 
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	v1beta1 "cosmossdk.io/api/cosmos/base/v1beta1"
+	signingv1beta1 "cosmossdk.io/api/cosmos/tx/signing/v1beta1"
+	txv1beta1 "cosmossdk.io/api/cosmos/tx/v1beta1"
+	storetypes "cosmossdk.io/store/types"
+	txsigning "cosmossdk.io/x/tx/signing"
+	protov2 "google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/anypb"
 )
 
 type AnteTestSuite struct {
@@ -72,7 +78,7 @@ const TestGasLimit uint64 = 100000
 
 func (suite *AnteTestSuite) SetupTest() {
 	checkTx := false
-	chainID := utils.TestnetChainID + "-1"
+	// chainID := utils.TestnetChainID + "-1"
 
 	priv, err := ethsecp256k1.GenerateKey()
 	suite.Require().NoError(err)
@@ -107,18 +113,14 @@ func (suite *AnteTestSuite) SetupTest() {
 		return genesis
 	})
 
-	suite.ctx = suite.app.BaseApp.NewContext(checkTx, tmproto.Header{Height: 2, ChainID: chainID, Time: time.Now().UTC()})
-	suite.ctx = suite.ctx.WithMinGasPrices(sdk.NewDecCoins(sdk.NewDecCoin(evmtypes.DefaultEVMDenom, sdk.OneInt())))
-	suite.ctx = suite.ctx.WithBlockGasMeter(sdk.NewGasMeter(1000000000000000000))
+	suite.ctx = suite.app.BaseApp.NewContext(checkTx)
+	suite.ctx = suite.ctx.WithMinGasPrices(sdk.NewDecCoins(sdk.NewDecCoin(evmtypes.DefaultEVMDenom, sdkmath.OneInt())))
+	suite.ctx = suite.ctx.WithBlockGasMeter(storetypes.NewGasMeter(1000000000000000000))
 
 	// set staking denomination to default denom
-	params := suite.app.StakingKeeper.GetParams(suite.ctx)
+	params, err := suite.app.StakingKeeper.GetParams(suite.ctx)
 	params.BondDenom = utils.BaseDenom
 	err = suite.app.StakingKeeper.SetParams(suite.ctx, params)
-	suite.Require().NoError(err)
-
-	infCtx := suite.ctx.WithGasMeter(sdk.NewInfiniteGasMeter())
-	err = suite.app.AccountKeeper.SetParams(infCtx, authtypes.DefaultParams())
 	suite.Require().NoError(err)
 
 	encodingConfig := encoding.MakeConfig(app.ModuleBasics)
@@ -230,6 +232,7 @@ func (suite *AnteTestSuite) CreateTestTxBuilder(
 	fees := sdk.NewCoins(sdk.NewCoin(evmtypes.DefaultEVMDenom, sdkmath.NewIntFromBigInt(txData.Fee())))
 	builder.SetFeeAmount(fees)
 	builder.SetGasLimit(msg.GetGas())
+	defaultSignMode, err := authsigning.APISignModeToInternal(suite.clientCtx.TxConfig.SignModeHandler().DefaultMode())
 
 	if signCosmosTx {
 		// First round: we gather all the signer infos. We use the "set empty
@@ -237,7 +240,7 @@ func (suite *AnteTestSuite) CreateTestTxBuilder(
 		sigV2 := signing.SignatureV2{
 			PubKey: priv.PubKey(),
 			Data: &signing.SingleSignatureData{
-				SignMode:  suite.clientCtx.TxConfig.SignModeHandler().DefaultMode(),
+				SignMode:  defaultSignMode,
 				Signature: nil,
 			},
 			Sequence: txData.GetNonce(),
@@ -256,7 +259,8 @@ func (suite *AnteTestSuite) CreateTestTxBuilder(
 			Sequence:      txData.GetNonce(),
 		}
 		sigV2, err = tx.SignWithPrivKey(
-			suite.clientCtx.TxConfig.SignModeHandler().DefaultMode(), signerData,
+			context.Background(),
+			defaultSignMode, signerData,
 			txBuilder, priv, suite.clientCtx.TxConfig, txData.GetNonce(),
 		)
 		suite.Require().NoError(err)
@@ -293,15 +297,6 @@ func StdSignBytes(cdc *codec.LegacyAmino, chainID string, accnum uint64, sequenc
 		msgsBytes = append(msgsBytes, json.RawMessage(legacyMsg.GetSignBytes()))
 	}
 
-	var stdTip *legacytx.StdTip
-	if tip != nil {
-		if tip.Tipper == "" {
-			panic(fmt.Errorf("tipper cannot be empty"))
-		}
-
-		stdTip = &legacytx.StdTip{Amount: tip.Amount, Tipper: tip.Tipper}
-	}
-
 	bz, err := cdc.MarshalJSON(legacytx.StdSignDoc{
 		AccountNumber: accnum,
 		ChainID:       chainID,
@@ -310,7 +305,6 @@ func StdSignBytes(cdc *codec.LegacyAmino, chainID string, accnum uint64, sequenc
 		Msgs:          msgsBytes,
 		Sequence:      sequence,
 		TimeoutHeight: timeout,
-		Tip:           stdTip,
 	})
 	if err != nil {
 		panic(err)
@@ -333,7 +327,7 @@ func (suite *AnteTestSuite) GenerateMultipleKeys(n int) ([]cryptotypes.PrivKey, 
 }
 
 // generateSingleSignature signs the given sign doc bytes using the given signType (EIP-712 or Standard)
-func (suite *AnteTestSuite) generateSingleSignature(signMode signing.SignMode, privKey cryptotypes.PrivKey, signDocBytes []byte, signType string) (signature signing.SignatureV2) {
+func (suite *AnteTestSuite) generateSingleSignature(signMode signingv1beta1.SignMode, privKey cryptotypes.PrivKey, signDocBytes []byte, signType string) (signature signing.SignatureV2) {
 	var (
 		msg []byte
 		err error
@@ -346,9 +340,11 @@ func (suite *AnteTestSuite) generateSingleSignature(signMode signing.SignMode, p
 		suite.Require().NoError(err)
 	}
 
+	defaultSignMode, err := authsigning.APISignModeToInternal(signMode)
+
 	sigBytes, _ := privKey.Sign(msg)
 	sigData := &signing.SingleSignatureData{
-		SignMode:  signMode,
+		SignMode:  defaultSignMode,
 		Signature: sigBytes,
 	}
 
@@ -359,7 +355,7 @@ func (suite *AnteTestSuite) generateSingleSignature(signMode signing.SignMode, p
 }
 
 // generateMultikeySignatures signs a set of messages using each private key within a given multi-key
-func (suite *AnteTestSuite) generateMultikeySignatures(signMode signing.SignMode, privKeys []cryptotypes.PrivKey, signDocBytes []byte, signType string) (signatures []signing.SignatureV2) {
+func (suite *AnteTestSuite) generateMultikeySignatures(signMode signingv1beta1.SignMode, privKeys []cryptotypes.PrivKey, signDocBytes []byte, signType string) (signatures []signing.SignatureV2) {
 	n := len(privKeys)
 	signatures = make([]signing.SignatureV2, n)
 
@@ -396,21 +392,65 @@ func (suite *AnteTestSuite) RegisterAccount(pubKey cryptotypes.PubKey, balance *
 }
 
 // createSignerBytes generates sign doc bytes using the given parameters
-func (suite *AnteTestSuite) createSignerBytes(chainId string, signMode signing.SignMode, pubKey cryptotypes.PubKey, txBuilder client.TxBuilder) []byte {
+func (suite *AnteTestSuite) createSignerBytes(chainId string, signMode signingv1beta1.SignMode, pubKey cryptotypes.PubKey, txBuilder client.TxBuilder, msg sdk.Msg) []byte {
 	acc, err := sdkante.GetSignerAcc(suite.ctx, suite.app.AccountKeeper, sdk.AccAddress(pubKey.Address()))
 	suite.Require().NoError(err)
-	signerInfo := authsigning.SignerData{
-		Address:       sdk.MustBech32ifyAddressBytes(sdk.GetConfig().GetBech32AccountAddrPrefix(), acc.GetAddress().Bytes()),
+
+	anyPk, _ := codectypes.NewAnyWithValue(pubKey)
+	// Declare signerData
+	signerInfo := txsigning.SignerData{
 		ChainID:       chainId,
 		AccountNumber: acc.GetAccountNumber(),
 		Sequence:      acc.GetSequence(),
-		PubKey:        pubKey,
+		PubKey: &anypb.Any{
+			TypeUrl: anyPk.TypeUrl,
+			Value:   anyPk.Value,
+		},
+		Address: sdk.MustBech32ifyAddressBytes(sdk.GetConfig().GetBech32AccountAddrPrefix(), acc.GetAddress().Bytes()),
+	}
+
+	tip := &txv1beta1.Tip{
+		Tipper: "tipper",
+		Amount: []*v1beta1.Coin{{Denom: "uswtr", Amount: "1000"}},
+	}
+
+	anyMsgs := make([]*anypb.Any, 1)
+	legacyAny, err := codectypes.NewAnyWithValue(msg)
+	suite.Require().NoError(err)
+
+	anyMsgs[0] = &anypb.Any{
+		TypeUrl: legacyAny.TypeUrl,
+		Value:   legacyAny.Value,
+	}
+
+	auxBody := &txv1beta1.TxBody{
+		Messages:      anyMsgs,
+		Memo:          "",
+		TimeoutHeight: 1000,
+		// AuxTxBuilder has no concern with extension options, so we set them to nil.
+		// This preserves pre-PR#16025 behavior where extension options were ignored, this code path:
+		// https://github.com/cosmos/cosmos-sdk/blob/ac3c209326a26b46f65a6cc6f5b5ebf6beb79b38/client/tx/aux_builder.go#L193
+		// https://github.com/cosmos/cosmos-sdk/blob/ac3c209326a26b46f65a6cc6f5b5ebf6beb79b38/x/auth/migrations/legacytx/stdsign.go#L49
+		ExtensionOptions:            nil,
+		NonCriticalExtensionOptions: nil,
 	}
 
 	signerBytes, err := suite.clientCtx.TxConfig.SignModeHandler().GetSignBytes(
+		context.Background(),
 		signMode,
 		signerInfo,
-		txBuilder.GetTx(),
+		txsigning.TxData{
+			Body: auxBody,
+			AuthInfo: &txv1beta1.AuthInfo{
+				SignerInfos: nil,
+				// Aux signer never signs over fee.
+				// For LEGACY_AMINO_JSON, we use the convention to sign
+				// over empty fees.
+				// ref: https://github.com/cosmos/cosmos-sdk/pull/10348
+				Fee: &txv1beta1.Fee{},
+				Tip: tip,
+			},
+		},
 	)
 	suite.Require().NoError(err)
 
@@ -423,7 +463,7 @@ func (suite *AnteTestSuite) createBaseTxBuilder(msg sdk.Msg, gas uint64) client.
 
 	txBuilder.SetGasLimit(gas)
 	txBuilder.SetFeeAmount(sdk.NewCoins(
-		sdk.NewCoin(evmtypes.DefaultEVMDenom, sdk.NewInt(int64(gas)*int64(100))),
+		sdk.NewCoin(evmtypes.DefaultEVMDenom, sdkmath.NewInt(int64(gas)*int64(100))),
 	))
 
 	err := txBuilder.SetMsgs(msg)
@@ -436,7 +476,7 @@ func (suite *AnteTestSuite) createBaseTxBuilder(msg sdk.Msg, gas uint64) client.
 
 // CreateTestSignedMultisigTx creates and sign a multi-signed tx for the given message. `signType` indicates whether to use standard signing ("Standard"),
 // EIP-712 signing ("EIP-712"), or a mix of the two ("mixed").
-func (suite *AnteTestSuite) CreateTestSignedMultisigTx(privKeys []cryptotypes.PrivKey, signMode signing.SignMode, msg sdk.Msg, chainId string, gas uint64, signType string) client.TxBuilder {
+func (suite *AnteTestSuite) CreateTestSignedMultisigTx(privKeys []cryptotypes.PrivKey, signMode signingv1beta1.SignMode, msg sdk.Msg, chainId string, gas uint64, signType string) client.TxBuilder {
 	pubKeys := make([]cryptotypes.PubKey, len(privKeys))
 	for i, privKey := range privKeys {
 		pubKeys[i] = privKey.PubKey()
@@ -457,7 +497,7 @@ func (suite *AnteTestSuite) CreateTestSignedMultisigTx(privKeys []cryptotypes.Pr
 		Data:   sig,
 	})
 
-	signerBytes := suite.createSignerBytes(chainId, signMode, multiKey, txBuilder)
+	signerBytes := suite.createSignerBytes(chainId, signMode, multiKey, txBuilder, msg)
 
 	// Sign for each key and update signature field
 	sigs := suite.generateMultikeySignatures(signMode, privKeys, signerBytes, signType)
@@ -474,7 +514,7 @@ func (suite *AnteTestSuite) CreateTestSignedMultisigTx(privKeys []cryptotypes.Pr
 	return txBuilder
 }
 
-func (suite *AnteTestSuite) CreateTestSingleSignedTx(privKey cryptotypes.PrivKey, signMode signing.SignMode, msg sdk.Msg, chainId string, gas uint64, signType string) client.TxBuilder {
+func (suite *AnteTestSuite) CreateTestSingleSignedTx(privKey cryptotypes.PrivKey, signMode signingv1beta1.SignMode, msg sdk.Msg, chainId string, gas uint64, signType string) client.TxBuilder {
 	pubKey := privKey.PubKey()
 
 	suite.RegisterAccount(pubKey, big.NewInt(10000000000))
@@ -489,7 +529,7 @@ func (suite *AnteTestSuite) CreateTestSingleSignedTx(privKey cryptotypes.PrivKey
 	})
 	suite.Require().NoError(err)
 
-	signerBytes := suite.createSignerBytes(chainId, signMode, pubKey, txBuilder)
+	signerBytes := suite.createSignerBytes(chainId, signMode, pubKey, txBuilder, msg)
 
 	sigData := suite.generateSingleSignature(signMode, privKey, signerBytes, signType)
 	err = txBuilder.SetSignatures(sigData)
@@ -549,12 +589,14 @@ func createTx(priv cryptotypes.PrivKey, msgs ...sdk.Msg) (sdk.Tx, error) {
 		return nil, err
 	}
 
+	defaultSignMode, err := authsigning.APISignModeToInternal(encodingConfig.TxConfig.SignModeHandler().DefaultMode())
+
 	// First round: we gather all the signer infos. We use the "set empty
 	// signature" hack to do that.
 	sigV2 := signing.SignatureV2{
 		PubKey: priv.PubKey(),
 		Data: &signing.SingleSignatureData{
-			SignMode:  encodingConfig.TxConfig.SignModeHandler().DefaultMode(),
+			SignMode:  defaultSignMode,
 			Signature: nil,
 		},
 		Sequence: 0,
@@ -571,8 +613,9 @@ func createTx(priv cryptotypes.PrivKey, msgs ...sdk.Msg) (sdk.Tx, error) {
 		AccountNumber: 0,
 		Sequence:      0,
 	}
-	sigV2, err := tx.SignWithPrivKey(
-		encodingConfig.TxConfig.SignModeHandler().DefaultMode(), signerData,
+	sigV2, err = tx.SignWithPrivKey(
+		context.Background(),
+		defaultSignMode, signerData,
 		txBuilder, priv, encodingConfig.TxConfig,
 		0,
 	)
@@ -597,5 +640,6 @@ var _ sdk.Tx = &invalidTx{}
 
 type invalidTx struct{}
 
-func (invalidTx) GetMsgs() []sdk.Msg   { return []sdk.Msg{nil} }
-func (invalidTx) ValidateBasic() error { return nil }
+func (invalidTx) GetMsgs() []sdk.Msg                    { return []sdk.Msg{nil} }
+func (invalidTx) GetMsgsV2() ([]protov2.Message, error) { return make([]protov2.Message, 0), nil }
+func (invalidTx) ValidateBasic() error                  { return nil }

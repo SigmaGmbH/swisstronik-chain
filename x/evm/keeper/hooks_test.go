@@ -1,10 +1,10 @@
 package keeper_test
 
 import (
+	"context"
 	"errors"
 	"math/big"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
@@ -16,7 +16,7 @@ import (
 // FailureHook always fail
 type FailureHook struct{}
 
-func (dh FailureHook) PostTxProcessing(sdk.Context, core.Message, *ethtypes.Receipt) error {
+func (dh FailureHook) PostTxProcessing(context.Context, core.Message, *ethtypes.Receipt) error {
 	return errors.New("post tx processing failed")
 }
 

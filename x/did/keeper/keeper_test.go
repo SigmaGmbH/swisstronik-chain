@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"testing"
 
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/google/uuid"
 	. "github.com/onsi/ginkgo/v2"
@@ -47,8 +46,8 @@ func (suite *KeeperTestSuite) Setup(t *testing.T) {
 	chainID := utils.TestnetChainID + "-1"
 
 	app, _ := app.SetupSwissApp(checkTx, nil, chainID)
-	s.ctx = app.BaseApp.NewContext(false, tmproto.Header{ChainID: "swisstronik_1291-1"})
-	s.goCtx = sdk.WrapSDKContext(s.ctx)
+	s.ctx = app.BaseApp.NewContext(false)
+	s.goCtx = s.ctx
 	s.keeper = app.DIDKeeper
 }
 
@@ -1246,7 +1245,7 @@ func (suite *KeeperTestSuite) TestIndexMultipleDocuments() {
 
 	// Generate 3 did documents with same verification method
 	var createdDocuments []*types.DIDDocument
-	for i:=0; i<documentsAmount; i++ {
+	for i := 0; i < documentsAmount; i++ {
 		did := didutil.GenerateDID(didutil.Base58_16bytes)
 		keyID := did + "#key-1"
 
@@ -1263,20 +1262,20 @@ func (suite *KeeperTestSuite) TestIndexMultipleDocuments() {
 			},
 			VersionId: uuid.NewString(),
 		}
-	
+
 		signatures := []didutil.SignInput{
 			{
 				VerificationMethodID: keyID,
 				Key:                  keypair.Private,
 			},
 		}
-	
+
 		// create DID document
 		createdDoc, err := didutil.CreateDID(suite.ctx, suite.keeper, payload, signatures)
 		suite.Require().NoError(err)
 
 		createdDocuments = append(createdDocuments, createdDoc.Value.DidDoc)
-	} 
+	}
 
 	// Get verification method and obtain DID URLs
 	verificationMaterial := createdDocuments[0].VerificationMethod[0].VerificationMaterial
@@ -1295,7 +1294,7 @@ func (suite *KeeperTestSuite) TestDeactivateOneDocument() {
 
 	// Generate 2 did documents with same verification method
 	var createdDocuments []*types.DIDDocument
-	for i:=0; i<documentsAmount; i++ {
+	for i := 0; i < documentsAmount; i++ {
 		did := didutil.GenerateDID(didutil.Base58_16bytes)
 		keyID := did + "#key-1"
 
@@ -1312,20 +1311,20 @@ func (suite *KeeperTestSuite) TestDeactivateOneDocument() {
 			},
 			VersionId: uuid.NewString(),
 		}
-	
+
 		signatures := []didutil.SignInput{
 			{
 				VerificationMethodID: keyID,
 				Key:                  keypair.Private,
 			},
 		}
-	
+
 		// create DID document
 		createdDoc, err := didutil.CreateDID(suite.ctx, suite.keeper, payload, signatures)
 		suite.Require().NoError(err)
 
 		createdDocuments = append(createdDocuments, createdDoc.Value.DidDoc)
-	} 
+	}
 
 	// Get verification method and obtain DID URLs
 	verificationMaterial := createdDocuments[0].VerificationMethod[0].VerificationMaterial
@@ -1358,7 +1357,7 @@ func (suite *KeeperTestSuite) TestDeactivateOneDocument() {
 	// Check if document was removed from index
 	updatedControlledDocuments, err := suite.keeper.GetDIDsControlledBy(suite.ctx, verificationMaterial)
 	suite.Require().NoError(err)
-	suite.Require().Equal(documentsAmount - 1, len(updatedControlledDocuments))
+	suite.Require().Equal(documentsAmount-1, len(updatedControlledDocuments))
 	suite.Require().NotContains(updatedControlledDocuments, documentToDeactivate.Id)
 	suite.Require().Contains(updatedControlledDocuments, remainingDocument.Id)
 }
@@ -1369,7 +1368,7 @@ func (suite *KeeperTestSuite) TestShouldUpdateIndexOnDocumentUpdate() {
 
 	// Generate 2 did documents with same verification method
 	var createdDocuments []*types.DIDDocument
-	for i:=0; i<documentsAmount; i++ {
+	for i := 0; i < documentsAmount; i++ {
 		did := didutil.GenerateDID(didutil.Base58_16bytes)
 		keyID := did + "#key-1"
 
@@ -1386,20 +1385,20 @@ func (suite *KeeperTestSuite) TestShouldUpdateIndexOnDocumentUpdate() {
 			},
 			VersionId: uuid.NewString(),
 		}
-	
+
 		signatures := []didutil.SignInput{
 			{
 				VerificationMethodID: keyID,
 				Key:                  keypair.Private,
 			},
 		}
-	
+
 		// create DID document
 		createdDoc, err := didutil.CreateDID(suite.ctx, suite.keeper, payload, signatures)
 		suite.Require().NoError(err)
 
 		createdDocuments = append(createdDocuments, createdDoc.Value.DidDoc)
-	} 
+	}
 
 	// Get verification method and obtain DID URLs
 	verificationMaterial := createdDocuments[0].VerificationMethod[0].VerificationMaterial
@@ -1415,7 +1414,7 @@ func (suite *KeeperTestSuite) TestShouldUpdateIndexOnDocumentUpdate() {
 	documentToUpdate := createdDocuments[0]
 	newKeypair := didutil.GenerateKeyPair()
 	payload := &types.MsgUpdateDIDDocumentPayload{
-		Id:         documentToUpdate.Id,
+		Id: documentToUpdate.Id,
 		VerificationMethod: []*types.VerificationMethod{
 			{
 				Id:                     documentToUpdate.Id + "#key-2",
@@ -1447,7 +1446,7 @@ func (suite *KeeperTestSuite) TestShouldUpdateIndexOnDocumentUpdate() {
 	// Check if document was indexed correctly (index still have previous verification material + new verification material)
 	updatedDocuments, err := suite.keeper.GetDIDsControlledBy(suite.ctx, verificationMaterial)
 	suite.Require().NoError(err)
-	
+
 	suite.Require().Equal(documentsAmount, len(updatedDocuments))
 	for _, doc := range createdDocuments {
 		suite.Require().Contains(updatedDocuments, doc.Id)

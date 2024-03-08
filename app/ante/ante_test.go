@@ -20,6 +20,8 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	storetypes "cosmossdk.io/store/types"
+
 	"swisstronik/app"
 	"swisstronik/app/ante"
 	"swisstronik/crypto/ethsecp256k1"
@@ -30,6 +32,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	ethparams "github.com/ethereum/go-ethereum/params"
 
+	signingv1beta1 "cosmossdk.io/api/cosmos/tx/signing/v1beta1"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 )
@@ -355,14 +358,14 @@ func (suite AnteTestSuite) TestAnteHandler() {
 					sdk.NewCoins(
 						sdk.NewCoin(
 							"uswtr",
-							sdk.NewInt(1),
+							sdkmath.NewInt(1),
 						),
 					),
 				)
 
 				txBuilder := suite.CreateTestSingleSignedTx(
 					privKey,
-					signing.SignMode_SIGN_MODE_LEGACY_AMINO_JSON,
+					signingv1beta1.SignMode_SIGN_MODE_LEGACY_AMINO_JSON,
 					msg,
 					suite.ctx.ChainID(),
 					2000000,
@@ -385,14 +388,14 @@ func (suite AnteTestSuite) TestAnteHandler() {
 					sdk.NewCoins(
 						sdk.NewCoin(
 							"uswtr",
-							sdk.NewInt(1),
+							sdkmath.NewInt(1),
 						),
 					),
 				)
 
 				txBuilder := suite.CreateTestSignedMultisigTx(
 					privKeys,
-					signing.SignMode_SIGN_MODE_LEGACY_AMINO_JSON,
+					signingv1beta1.SignMode_SIGN_MODE_LEGACY_AMINO_JSON,
 					msg,
 					suite.ctx.ChainID(),
 					2000000,
@@ -415,14 +418,14 @@ func (suite AnteTestSuite) TestAnteHandler() {
 					sdk.NewCoins(
 						sdk.NewCoin(
 							"uswtr",
-							sdk.NewInt(1),
+							sdkmath.NewInt(1),
 						),
 					),
 				)
 
 				txBuilder := suite.CreateTestSignedMultisigTx(
 					privKeys,
-					signing.SignMode_SIGN_MODE_LEGACY_AMINO_JSON,
+					signingv1beta1.SignMode_SIGN_MODE_LEGACY_AMINO_JSON,
 					msg,
 					suite.ctx.ChainID(),
 					2000000,
@@ -447,7 +450,7 @@ func (suite AnteTestSuite) TestAnteHandler() {
 
 				txBuilder := suite.CreateTestSignedMultisigTx(
 					privKeys,
-					signing.SignMode_SIGN_MODE_LEGACY_AMINO_JSON,
+					signingv1beta1.SignMode_SIGN_MODE_LEGACY_AMINO_JSON,
 					msg,
 					suite.ctx.ChainID(),
 					2000000,
@@ -470,14 +473,14 @@ func (suite AnteTestSuite) TestAnteHandler() {
 					sdk.NewCoins(
 						sdk.NewCoin(
 							"uswtr",
-							sdk.NewInt(1),
+							sdkmath.NewInt(1),
 						),
 					),
 				)
 
 				txBuilder := suite.CreateTestSignedMultisigTx(
 					privKeys,
-					signing.SignMode_SIGN_MODE_LEGACY_AMINO_JSON,
+					signingv1beta1.SignMode_SIGN_MODE_LEGACY_AMINO_JSON,
 					msg,
 					"ethermint_9005-1",
 					2000000,
@@ -500,14 +503,14 @@ func (suite AnteTestSuite) TestAnteHandler() {
 					sdk.NewCoins(
 						sdk.NewCoin(
 							"uswtr",
-							sdk.NewInt(1),
+							sdkmath.NewInt(1),
 						),
 					),
 				)
 
 				txBuilder := suite.CreateTestSignedMultisigTx(
 					privKeys,
-					signing.SignMode_SIGN_MODE_DIRECT,
+					signingv1beta1.SignMode_SIGN_MODE_DIRECT,
 					msg,
 					suite.ctx.ChainID(),
 					2000000,
@@ -530,14 +533,14 @@ func (suite AnteTestSuite) TestAnteHandler() {
 					sdk.NewCoins(
 						sdk.NewCoin(
 							"uswtr",
-							sdk.NewInt(1),
+							sdkmath.NewInt(1),
 						),
 					),
 				)
 
 				txBuilder := suite.CreateTestSignedMultisigTx(
 					privKeys,
-					signing.SignMode_SIGN_MODE_DIRECT,
+					signingv1beta1.SignMode_SIGN_MODE_LEGACY_AMINO_JSON,
 					msg,
 					suite.ctx.ChainID(),
 					2000,
@@ -560,21 +563,21 @@ func (suite AnteTestSuite) TestAnteHandler() {
 					sdk.NewCoins(
 						sdk.NewCoin(
 							"uswtr",
-							sdk.NewInt(1),
+							sdkmath.NewInt(1),
 						),
 					),
 				)
 
 				txBuilder := suite.CreateTestSignedMultisigTx(
 					privKeys,
-					signing.SignMode_SIGN_MODE_DIRECT,
+					signingv1beta1.SignMode_SIGN_MODE_DIRECT,
 					msg,
 					suite.ctx.ChainID(),
 					2000,
 					"EIP-712",
 				)
 
-				msg.Amount[0].Amount = sdk.NewInt(5)
+				msg.Amount[0].Amount = sdkmath.NewInt(5)
 				txBuilder.SetMsgs(msg)
 
 				return txBuilder.GetTx()
@@ -593,14 +596,14 @@ func (suite AnteTestSuite) TestAnteHandler() {
 					sdk.NewCoins(
 						sdk.NewCoin(
 							"uswtr",
-							sdk.NewInt(1),
+							sdkmath.NewInt(1),
 						),
 					),
 				)
 
 				txBuilder := suite.CreateTestSignedMultisigTx(
 					privKeys,
-					signing.SignMode_SIGN_MODE_DIRECT,
+					signingv1beta1.SignMode_SIGN_MODE_DIRECT,
 					msg,
 					suite.ctx.ChainID(),
 					2000,
@@ -622,14 +625,14 @@ func (suite AnteTestSuite) TestAnteHandler() {
 					sdk.NewCoins(
 						sdk.NewCoin(
 							"uswtr",
-							sdk.NewInt(1),
+							sdkmath.NewInt(1),
 						),
 					),
 				)
 
 				txBuilder := suite.CreateTestSingleSignedTx(
 					privKey,
-					signing.SignMode_SIGN_MODE_DIRECT,
+					signingv1beta1.SignMode_SIGN_MODE_DIRECT,
 					msg,
 					suite.ctx.ChainID(),
 					2000,
@@ -1096,7 +1099,7 @@ func (suite *AnteTestSuite) TestConsumeSignatureVerificationGas() {
 	}
 
 	type args struct {
-		meter  sdk.GasMeter
+		meter  storetypes.GasMeter
 		sig    signing.SignatureData
 		pubkey cryptotypes.PubKey
 		params authtypes.Params
@@ -1107,11 +1110,11 @@ func (suite *AnteTestSuite) TestConsumeSignatureVerificationGas() {
 		gasConsumed uint64
 		shouldErr   bool
 	}{
-		{"PubKeyEd25519", args{sdk.NewInfiniteGasMeter(), nil, ed25519.GenPrivKey().PubKey(), params}, p.SigVerifyCostED25519, true},
-		{"PubKeyEthSecp256k1", args{sdk.NewInfiniteGasMeter(), nil, pkSet1[0], params}, 21_000, false},
-		{"PubKeySecp256r1", args{sdk.NewInfiniteGasMeter(), nil, skR1.PubKey(), params}, p.SigVerifyCostSecp256r1(), true},
-		{"Multisig", args{sdk.NewInfiniteGasMeter(), multisignature1, multisigKey1, params}, expectedCost1, false},
-		{"unknown key", args{sdk.NewInfiniteGasMeter(), nil, nil, params}, 0, true},
+		{"PubKeyEd25519", args{storetypes.NewInfiniteGasMeter(), nil, ed25519.GenPrivKey().PubKey(), params}, p.SigVerifyCostED25519, true},
+		{"PubKeyEthSecp256k1", args{storetypes.NewInfiniteGasMeter(), nil, pkSet1[0], params}, 21_000, false},
+		{"PubKeySecp256r1", args{storetypes.NewInfiniteGasMeter(), nil, skR1.PubKey(), params}, p.SigVerifyCostSecp256r1(), true},
+		{"Multisig", args{storetypes.NewInfiniteGasMeter(), multisignature1, multisigKey1, params}, expectedCost1, false},
+		{"unknown key", args{storetypes.NewInfiniteGasMeter(), nil, nil, params}, 0, true},
 	}
 	for _, tt := range tests {
 		sigV2 := signing.SignatureV2{

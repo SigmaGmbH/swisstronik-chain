@@ -26,7 +26,7 @@ import (
 	"swisstronik/crypto/hd"
 	ethermint "swisstronik/types"
 
-	"github.com/cometbft/cometbft/libs/log"
+	"cosmossdk.io/log"
 
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"

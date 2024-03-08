@@ -2,13 +2,14 @@ package keeper
 
 import (
 	"fmt"
-	"github.com/cosmos/gogoproto/proto"
 	"strconv"
 	"strings"
 
-	"github.com/cometbft/cometbft/libs/log"
+	"github.com/cosmos/gogoproto/proto"
+
+	"cosmossdk.io/log"
+	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
@@ -255,7 +256,7 @@ func (k Keeper) GetAllDIDDocumentVersions(ctx sdk.Context, did string) ([]*types
 
 	result := make([]*types.Metadata, 0)
 
-	versionIterator := sdk.KVStorePrefixIterator(store, types.GetDocumentVersionsPrefix(did))
+	versionIterator := storetypes.KVStorePrefixIterator(store, types.GetDocumentVersionsPrefix(did))
 	defer closeIteratorOrPanic(versionIterator)
 
 	for ; versionIterator.Valid(); versionIterator.Next() {
@@ -313,7 +314,7 @@ func (k Keeper) HasDIDDocumentVersion(ctx sdk.Context, id, version string) bool 
 
 func (k Keeper) IterateDIDs(ctx sdk.Context, callback func(did string) (continue_ bool)) {
 	store := ctx.KVStore(k.storeKey)
-	latestVersionIterator := sdk.KVStorePrefixIterator(store, types.GetLatestDocumentVersionPrefix())
+	latestVersionIterator := storetypes.KVStorePrefixIterator(store, types.GetLatestDocumentVersionPrefix())
 	defer closeIteratorOrPanic(latestVersionIterator)
 
 	for ; latestVersionIterator.Valid(); latestVersionIterator.Next() {
@@ -329,7 +330,7 @@ func (k Keeper) IterateDIDs(ctx sdk.Context, callback func(did string) (continue
 
 func (k Keeper) IterateDIDDocumentVersions(ctx sdk.Context, did string, callback func(version types.DIDDocumentWithMetadata) (continue_ bool)) {
 	store := ctx.KVStore(k.storeKey)
-	versionIterator := sdk.KVStorePrefixIterator(store, types.GetDocumentVersionsPrefix(did))
+	versionIterator := storetypes.KVStorePrefixIterator(store, types.GetDocumentVersionsPrefix(did))
 	defer closeIteratorOrPanic(versionIterator)
 
 	for ; versionIterator.Valid(); versionIterator.Next() {
@@ -344,7 +345,7 @@ func (k Keeper) IterateDIDDocumentVersions(ctx sdk.Context, did string, callback
 
 func (k Keeper) IterateAllDIDDocumentVersions(ctx sdk.Context, callback func(version types.DIDDocumentWithMetadata) (continue_ bool)) {
 	store := ctx.KVStore(k.storeKey)
-	allVersionsIterator := sdk.KVStorePrefixIterator(store, []byte(types.DocumentVersionKey))
+	allVersionsIterator := storetypes.KVStorePrefixIterator(store, []byte(types.DocumentVersionKey))
 	defer closeIteratorOrPanic(allVersionsIterator)
 
 	for ; allVersionsIterator.Valid(); allVersionsIterator.Next() {
@@ -530,7 +531,7 @@ func GetSignerIDForErrorMessage(signerID string, existingVersionID string, updat
 	return signerID
 }
 
-func closeIteratorOrPanic(iterator sdk.Iterator) {
+func closeIteratorOrPanic(iterator storetypes.Iterator) {
 	err := iterator.Close()
 	if err != nil {
 		panic(err.Error())
@@ -656,7 +657,7 @@ func (k Keeper) HasResource(ctx sdk.Context, collectionID string, id string) boo
 
 func (k Keeper) GetResourceCollection(ctx sdk.Context, collectionID string) []*types.ResourceMetadata {
 	store := ctx.KVStore(k.storeKey)
-	iterator := sdk.KVStorePrefixIterator(store, types.GetResourceMetadataCollectionPrefix(collectionID))
+	iterator := storetypes.KVStorePrefixIterator(store, types.GetResourceMetadataCollectionPrefix(collectionID))
 
 	var resources []*types.ResourceMetadata
 
@@ -673,7 +674,7 @@ func (k Keeper) GetResourceCollection(ctx sdk.Context, collectionID string) []*t
 }
 
 func (k Keeper) GetLastResourceVersionMetadata(ctx sdk.Context, collectionID, name, resourceType string) (types.ResourceMetadata, bool) {
-	iterator := sdk.KVStorePrefixIterator(ctx.KVStore(k.storeKey), types.GetResourceMetadataCollectionPrefix(collectionID))
+	iterator := storetypes.KVStorePrefixIterator(ctx.KVStore(k.storeKey), types.GetResourceMetadataCollectionPrefix(collectionID))
 
 	defer closeIteratorOrPanic(iterator)
 
@@ -706,7 +707,7 @@ func (k Keeper) UpdateResourceMetadata(ctx sdk.Context, metadata *types.Resource
 }
 
 func (k Keeper) IterateAllResourceMetadatas(ctx sdk.Context, callback func(metadata types.ResourceMetadata) (continue_ bool)) {
-	headerIterator := sdk.KVStorePrefixIterator(ctx.KVStore(k.storeKey), types.StrBytes(types.ResourceMetadataKey))
+	headerIterator := storetypes.KVStorePrefixIterator(ctx.KVStore(k.storeKey), types.StrBytes(types.ResourceMetadataKey))
 	defer closeIteratorOrPanic(headerIterator)
 
 	for headerIterator.Valid() {

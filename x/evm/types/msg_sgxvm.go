@@ -20,9 +20,13 @@ import (
 	"swisstronik/types"
 
 	"swisstronik/crypto/deoxys"
+
+	bankv1beta1 "cosmossdk.io/api/cosmos/bank/v1beta1"
+	signingtypes "github.com/cosmos/cosmos-sdk/types/tx/signing"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	protov2 "google.golang.org/protobuf/proto"
 )
 
 var (
@@ -207,6 +211,12 @@ func (msg *MsgHandleTx) GetMsgs() []sdk.Msg {
 	return []sdk.Msg{msg}
 }
 
+// GetMsgs returns a single MsgHandleTx as an sdk.Msg.
+func (msg *MsgHandleTx) GetMsgsV2() ([]protov2.Message, error) {
+	return []protov2.Message{&bankv1beta1.MsgSend{FromAddress: msg.From}}, nil
+
+}
+
 // GetSigners returns the expected signers for an Ethereum transaction message.
 // For such a message, there should exist only a single 'signer'.
 //
@@ -251,7 +261,8 @@ func (msg *MsgHandleTx) Sign(ethSigner ethtypes.Signer, keyringSigner keyring.Si
 	tx := msg.AsTransaction()
 	txHash := ethSigner.Hash(tx)
 
-	sig, _, err := keyringSigner.SignByAddress(from, txHash.Bytes())
+	// TODO: need check the signing mode.
+	sig, _, err := keyringSigner.SignByAddress(from, txHash.Bytes(), signingtypes.SignMode_SIGN_MODE_LEGACY_AMINO_JSON)
 	if err != nil {
 		return err
 	}
