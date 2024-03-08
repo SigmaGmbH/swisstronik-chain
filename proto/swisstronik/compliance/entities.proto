@@ -18,6 +18,8 @@ enum VerificationType {
     VT_KYW = 2; // Know Your Wallet
     VT_HUMANITY = 3; // Check humanity
     VT_AML = 4; // Anti Money Laundering (check transactions)
+    VT_ADDRESS = 5;
+    VT_CUSTOM = 6;
 }
 
 message AddressInfo {
@@ -47,8 +49,6 @@ message VerificationEntry {
     uint32 expiration_timestamp = 4;
     // Original zk proof
     bytes original_data = 5;
-    // Did it succeeded
-    bool verification_success = 6;
 }
 
 message IssuerAdapterContractDetail {
