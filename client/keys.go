@@ -98,7 +98,13 @@ The pass backend requires GnuPG: https://gnupg.org/
 
 func runAddCmd(cmd *cobra.Command, args []string) error {
 	clientCtx := client.GetClientContextFromCmd(cmd).WithKeyringOptions(hd.EthSecp256k1Option())
-	clientCtx, err := client.ReadPersistentCommandFlags(clientCtx, cmd.Flags())
+	flagSet := cmd.Flags()
+
+	if !flagSet.Changed(flags.FlagKeyringBackend) {
+		flagSet.Set(flags.FlagKeyringBackend, keyring.BackendTest)
+	}
+
+	clientCtx, err := client.ReadPersistentCommandFlags(clientCtx, flagSet)
 	if err != nil {
 		return err
 	}
