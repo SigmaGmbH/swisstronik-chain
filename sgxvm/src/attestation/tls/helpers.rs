@@ -57,8 +57,8 @@ pub(super) fn create_client_session_stream(
         sgx_status_t::SGX_ERROR_INVALID_PARAMETER
     })?;
 
-    let mut sess = rustls::ClientSession::new(&Arc::new(cfg), dns_name);
-    let mut conn = TcpStream::new(socket_fd).map_err(|err| {
+    let sess = rustls::ClientSession::new(&Arc::new(cfg), dns_name);
+    let conn = TcpStream::new(socket_fd).map_err(|err| {
         println!("[Enclave] Cannot start TcpStream. Reason: {:?}", err);
         sgx_status_t::SGX_ERROR_UNEXPECTED
     })?;

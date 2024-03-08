@@ -33,7 +33,7 @@ pub fn get_qe_quote(
     };
 
     // Get quote from PCCS
-    let mut retval = sgx_status_t::SGX_SUCCESS;
+    let mut retval = sgx_status_t::SGX_ERROR_UNEXPECTED;
     let mut quote_buf = vec![0u8; quote_size as usize];
     let res = unsafe {
         ocall::ocall_get_ecdsa_quote(
@@ -99,7 +99,7 @@ fn get_random_nonce() -> SgxResult<Vec<u8>> {
 }
 
 fn get_supplemental_data_size() -> SgxResult<u32> {
-    let mut ret_val = sgx_status_t::SGX_SUCCESS;
+    let mut ret_val = sgx_status_t::SGX_ERROR_UNEXPECTED;
     let mut data_size = 0u32;
     let res = unsafe { ocall::ocall_get_supplemental_data_size(&mut ret_val, &mut data_size) };
 
@@ -167,7 +167,7 @@ pub fn verify_dcap_quote(quote: Vec<u8>) -> SgxResult<Vec<u8>> {
     qve_report_info.app_enclave_target_info = app_enclave_target_info;
 
     // Send OCALL to QvE
-    let mut retval = sgx_status_t::SGX_SUCCESS;
+    let mut retval = sgx_status_t::SGX_ERROR_UNEXPECTED;
     let mut quote_verification_result = sgx_ql_qv_result_t::SGX_QL_QV_RESULT_UNSPECIFIED;
     let mut collateral_expiration_status = 1u32;
 

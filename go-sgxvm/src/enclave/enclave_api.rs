@@ -7,7 +7,7 @@ pub struct EnclaveApi;
 
 impl EnclaveApi {
     pub fn check_node_status(eid: sgx_enclave_id_t) -> Result<(), Error> {
-        let mut ret_val = sgx_status_t::SGX_SUCCESS;
+        let mut ret_val = sgx_status_t::SGX_ERROR_UNEXPECTED;
         let res = unsafe { super::ecall_status(eid, &mut ret_val) };
 
         match (res, ret_val) {
@@ -24,7 +24,7 @@ impl EnclaveApi {
     }
 
     pub fn initialize_master_key(eid: sgx_enclave_id_t, reset: bool) -> Result<(), Error> {
-        let mut ret_val = sgx_status_t::SGX_SUCCESS;
+        let mut ret_val = sgx_status_t::SGX_ERROR_UNEXPECTED;
         let res = unsafe { super::ecall_init_master_key(eid, &mut ret_val, reset as i32) };
 
         match (res, ret_val) {
@@ -51,7 +51,7 @@ impl EnclaveApi {
         let qe_target_info = dcap_utils::get_qe_target_info()?;
         let quote_size = dcap_utils::get_quote_size()?;
 
-        let mut retval = sgx_status_t::SGX_SUCCESS;
+        let mut retval = sgx_status_t::SGX_ERROR_UNEXPECTED;
         let res = unsafe {
             super::ecall_attest_peer_dcap(
                 eid,
@@ -76,7 +76,7 @@ impl EnclaveApi {
     }
 
     fn attest_peer_epid(eid: sgx_enclave_id_t, fd: i32) -> Result<(), Error> {
-        let mut retval = sgx_status_t::SGX_SUCCESS;
+        let mut retval = sgx_status_t::SGX_ERROR_UNEXPECTED;
         let res = unsafe {
             super::ecall_attest_peer_epid(
                 eid,
@@ -119,7 +119,7 @@ impl EnclaveApi {
             return Err(Error::unset_arg("Hostname was not set"));
         }
 
-        let mut ret_val = sgx_status_t::SGX_SUCCESS;
+        let mut ret_val = sgx_status_t::SGX_ERROR_UNEXPECTED;
         let res = unsafe {
             super::ecall_request_master_key_epid(
                 eid,
@@ -158,7 +158,7 @@ impl EnclaveApi {
         let qe_target_info = dcap_utils::get_qe_target_info()?;
         let quote_size = dcap_utils::get_quote_size()?;
 
-        let mut retval = sgx_status_t::SGX_SUCCESS;
+        let mut retval = sgx_status_t::SGX_ERROR_UNEXPECTED;
         let res = unsafe {
             super::ecall_request_master_key_dcap(
                 eid,
