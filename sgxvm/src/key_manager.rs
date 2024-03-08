@@ -30,7 +30,7 @@ lazy_static! {
 #[no_mangle]
 /// Handles initialization of a new seed node by creating and sealing master key to seed file
 /// If `reset_flag` was set to `true`, it will rewrite existing seed file
-pub unsafe extern "C" fn ecall_init_master_key(reset_flag: i32) -> sgx_status_t {
+pub fn init_master_key_inner(reset_flag: i32) -> sgx_status_t {
     // Check if master key exists
     let master_key_exists = match KeyManager::exists() {
         Ok(exists) => exists,

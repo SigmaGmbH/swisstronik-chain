@@ -1,7 +1,9 @@
 use std::vec::Vec;
+use std::slice;
 use sgx_types::sgx_status_t;
 use protobuf::Message;
 
+use crate::protobuf_generated::ffi::{FFIRequest, FFIRequest_oneof_req};
 use crate::{AllocationWithResult, Allocation};
 use crate::ocall;
 use crate::key_manager::KeyManager;
@@ -13,6 +15,43 @@ use crate::protobuf_generated::ffi::{
 use crate::GoQuerier;
 
 pub mod tx;
+
+/// Handles incoming protobuf-encoded request
+pub fn handle_protobuf_request_inner(
+    querier: *mut GoQuerier,
+    request_data: *const u8,
+    len: usize,
+) -> AllocationWithResult {
+    let request_slice = unsafe { slice::from_raw_parts(request_data, len) };
+
+    let ffi_request = match protobuf::parse_from_bytes::<FFIRequest>(request_slice) {
+        Ok(ffi_request) => ffi_request,
+        Err(err) => {
+            println!("Got error during protobuf decoding: {:?}", err);
+            return AllocationWithResult::default();
+        }
+    };
+
+    match ffi_request.req {
+        Some(req) => {
+            match req {
+                FFIRequest_oneof_req::callRequest(data) => {
+                    handle_evm_call_request(querier, data)
+                },
+                FFIRequest_oneof_req::createRequest(data) => {
+                    handle_evm_create_request(querier, data)
+                },
+                FFIRequest_oneof_req::publicKeyRequest(_) => {
+                    handle_public_key_request()
+                }
+            }
+        }
+        None => {
+            println!("Got empty request during protobuf decoding");
+            AllocationWithResult::default()
+        }
+    }
+}
 
 /// Allocates provided data outside of enclave
 /// * data - bytes to allocate outside of enclave
@@ -71,16 +110,16 @@ pub fn handle_public_key_request() -> AllocationWithResult {
 }
 
 /// Handles incoming request for calling contract or transferring value
-/// * querier – GoQuerier which is used to interact with Go (Cosmos) from SGX Enclave
-/// * data – EVM call data (destination, value, etc.)
+/// * querier - GoQuerier which is used to interact with Go (Cosmos) from SGX Enclave
+/// * data - EVM call data (destination, value, etc.)
 pub fn handle_evm_call_request(querier: *mut GoQuerier, data: SGXVMCallRequest) -> AllocationWithResult {
     let res = tx::handle_call_request_inner(querier, data);
     tx::convert_and_allocate_transaction_result(res)
 }
 
 /// Handles incoming request for creation of a new contract
-/// * querier – GoQuerier which is used to interact with Go (Cosmos) from SGX Enclave
-/// * data – EVM call data (value, tx.data, etc.)
+/// * querier - GoQuerier which is used to interact with Go (Cosmos) from SGX Enclave
+/// * data - EVM call data (value, tx.data, etc.)
 pub fn handle_evm_create_request(querier: *mut GoQuerier, data: SGXVMCreateRequest) -> AllocationWithResult {
     let res = tx::handle_create_request_inner(querier, data);
     tx::convert_and_allocate_transaction_result(res)

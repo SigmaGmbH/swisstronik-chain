@@ -1,5 +1,4 @@
-/// This file contains implementations of various OCALLs for SGX-enclave
-
+use crate::enclave::attestation::dcap_utils::get_qe_quote;
 use crate::errors::GoError;
 use crate::memory::{U8SliceView, UnmanagedVector};
 use crate::types::{Allocation, AllocationWithResult, GoQuerier};
@@ -8,6 +7,22 @@ use sgx_types::*;
 use std::net::{SocketAddr, TcpStream};
 use std::os::unix::io::IntoRawFd;
 use std::slice;
+
+#[no_mangle]
+pub extern "C" fn ocall_get_ecdsa_quote(
+    p_report: *const sgx_report_t,
+    p_quote: *mut u8,
+    quote_size: u32,
+) -> sgx_status_t {
+    let report = unsafe { *p_report };
+    match get_qe_quote(report, quote_size, p_quote) {
+        Err(err) => {
+            println!("Cannot create DCAP quote. Status code: {:?}", err);
+            err
+        }
+        _ => sgx_status_t::SGX_SUCCESS
+    }
+}
 
 #[no_mangle]
 pub extern "C" fn ocall_get_quote(
@@ -50,7 +65,7 @@ pub extern "C" fn ocall_get_quote(
     };
 
     if ret != sgx_status_t::SGX_SUCCESS {
-        println!("sgx_calc_quote_size returned {}", ret);
+        println!("sgx_get_quote returned {}", ret);
         return ret;
     }
 
@@ -212,3 +227,87 @@ pub extern "C" fn ocall_query_raw(
     };
 }
 
+#[no_mangle]
+pub unsafe extern "C" fn ocall_get_qve_report(
+    p_quote: *const u8,
+    quote_len: u32,
+    timestamp: i64,
+    p_collateral_expiration_status: *mut u32,
+    p_quote_verification_result: *mut sgx_ql_qv_result_t,
+    p_qve_report_info: *mut sgx_ql_qe_report_info_t,
+    p_supplemental_data: *mut u8,
+    supplemental_data_size: u32,
+) -> sgx_status_t {
+    println!("[Enclave Wrapper] ocall_get_qve_report called");
+    if p_quote.is_null()
+        || quote_len == 0
+        || p_collateral_expiration_status.is_null()
+        || p_quote_verification_result.is_null()
+        || p_qve_report_info.is_null()
+        || p_supplemental_data.is_null()
+        || supplemental_data_size == 0
+    {
+        return sgx_status_t::SGX_ERROR_INVALID_PARAMETER;
+    }
+
+    println!("[Enclave Wrapper] sgx_qv_set_enclave_load_policy");
+    let res = unsafe { sgx_qv_set_enclave_load_policy(sgx_ql_request_policy_t::SGX_QL_EPHEMERAL) };
+    if res != sgx_quote3_error_t::SGX_QL_SUCCESS {
+        println!("[Enclave Wrapper] cannot set qv enclave load policy");
+        return sgx_status_t::SGX_ERROR_UNEXPECTED;
+    }
+
+    println!("[Enclave Wrapper] sgx_qv_get_quote_supplemental_data_size");
+    let mut data_size = 0u32;
+    let res = unsafe { sgx_qv_get_quote_supplemental_data_size(&mut data_size) };
+    if res != sgx_quote3_error_t::SGX_QL_SUCCESS {
+        println!("[Enclave Wrapper] Cannot get quote supplemental data size. Status code: {:?}", res);
+        return sgx_status_t::SGX_ERROR_UNEXPECTED;
+    }
+
+    let quote: Vec<u8> = unsafe { slice::from_raw_parts(p_quote, quote_len as usize).to_vec() };
+
+    // Obtain QvE supplemental data
+    let mut qve_supplemental_data_size = 0u32;
+    let ret_val = unsafe { 
+        sgx_qv_get_quote_supplemental_data_size(&mut qve_supplemental_data_size) 
+    };
+    if ret_val != sgx_quote3_error_t::SGX_QL_SUCCESS {
+        println!("Call to sgx_qv_get_quote_supplemental_data_size failed. Status code: {:?}", ret_val);
+        return sgx_status_t::SGX_ERROR_UNEXPECTED;
+    }
+
+    let ret_val = unsafe {
+        sgx_qv_verify_quote(
+            quote.as_ptr(),
+            quote.len() as u32,
+            std::ptr::null(),
+            timestamp,
+            p_collateral_expiration_status,
+            p_quote_verification_result,
+            p_qve_report_info,
+            supplemental_data_size,
+            p_supplemental_data,
+        )
+    };
+    if ret_val != sgx_quote3_error_t::SGX_QL_SUCCESS {
+        println!("Call to sgx_qv_verify_quote failed. Status code: {:?}", ret_val);
+        return sgx_status_t::SGX_ERROR_UNEXPECTED;
+    }
+
+    sgx_status_t::SGX_SUCCESS
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn ocall_get_supplemental_data_size(
+    data_size: *mut u32,
+) -> sgx_status_t {
+    let res = unsafe { sgx_qv_get_quote_supplemental_data_size(data_size) };
+    
+    if res != sgx_quote3_error_t::SGX_QL_SUCCESS {
+        println!("[Enclave Wrapper] ocall_get_supplemental_data_size failed. Status code: {:?}", res);
+        return sgx_status_t::SGX_ERROR_UNEXPECTED;
+    }
+
+    sgx_status_t::SGX_SUCCESS
+}
