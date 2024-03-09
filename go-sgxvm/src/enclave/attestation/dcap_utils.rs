@@ -48,9 +48,11 @@ pub fn get_qe_quote(report: sgx_report_t, quote_size: u32, p_quote: *mut u8) -> 
 }
 
 /// Generates quote inside the enclave and writes it to the file
-pub fn dump_dcap_quote(eid: sgx_enclave_id_t, filepath: &str) {
-    let qe_target_info = get_qe_target_info().expect("Cannot get qe target info");
-    let quote_size = get_quote_size().expect("Cannot calc quote size");
+/// Since this function will be used only for test and dev purposes, 
+/// we can ignore usages of `unwrap` or `expect`.
+pub fn dump_dcap_quote(eid: sgx_enclave_id_t, filepath: &str) -> Result<(), Error> {
+    let qe_target_info = get_qe_target_info()?;
+    let quote_size = get_quote_size()?;
     let mut retval = std::mem::MaybeUninit::<types::AllocationWithResult>::uninit();
 
     let res = unsafe {
@@ -79,4 +81,6 @@ pub fn dump_dcap_quote(eid: sgx_enclave_id_t, filepath: &str) {
         .expect("Cannot create file to write quote");
 
     quote_file.write_all(&quote_vec).expect("Cannot write quote to file");
+
+    Ok(())
 }

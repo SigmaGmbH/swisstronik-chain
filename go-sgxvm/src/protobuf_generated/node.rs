@@ -1543,6 +1543,301 @@ impl ::protobuf::reflect::ProtobufValue for NodeStatusResponse {
 }
 
 #[derive(PartialEq,Clone,Default)]
+pub struct DumpQuoteRequest {
+    // message fields
+    pub filepath: ::std::string::String,
+    // special fields
+    pub unknown_fields: ::protobuf::UnknownFields,
+    pub cached_size: ::protobuf::CachedSize,
+}
+
+impl<'a> ::std::default::Default for &'a DumpQuoteRequest {
+    fn default() -> &'a DumpQuoteRequest {
+        <DumpQuoteRequest as ::protobuf::Message>::default_instance()
+    }
+}
+
+impl DumpQuoteRequest {
+    pub fn new() -> DumpQuoteRequest {
+        ::std::default::Default::default()
+    }
+
+    // string filepath = 1;
+
+
+    pub fn get_filepath(&self) -> &str {
+        &self.filepath
+    }
+    pub fn clear_filepath(&mut self) {
+        self.filepath.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_filepath(&mut self, v: ::std::string::String) {
+        self.filepath = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_filepath(&mut self) -> &mut ::std::string::String {
+        &mut self.filepath
+    }
+
+    // Take field
+    pub fn take_filepath(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.filepath, ::std::string::String::new())
+    }
+}
+
+impl ::protobuf::Message for DumpQuoteRequest {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                1 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.filepath)?;
+                },
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        if !self.filepath.is_empty() {
+            my_size += ::protobuf::rt::string_size(1, &self.filepath);
+        }
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        if !self.filepath.is_empty() {
+            os.write_string(1, &self.filepath)?;
+        }
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &dyn (::std::any::Any) {
+        self as &dyn (::std::any::Any)
+    }
+    fn as_any_mut(&mut self) -> &mut dyn (::std::any::Any) {
+        self as &mut dyn (::std::any::Any)
+    }
+    fn into_any(self: Box<Self>) -> ::std::boxed::Box<dyn (::std::any::Any)> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> DumpQuoteRequest {
+        DumpQuoteRequest::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
+        };
+        unsafe {
+            descriptor.get(|| {
+                let mut fields = ::std::vec::Vec::new();
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "filepath",
+                    |m: &DumpQuoteRequest| { &m.filepath },
+                    |m: &mut DumpQuoteRequest| { &mut m.filepath },
+                ));
+                ::protobuf::reflect::MessageDescriptor::new::<DumpQuoteRequest>(
+                    "DumpQuoteRequest",
+                    fields,
+                    file_descriptor_proto()
+                )
+            })
+        }
+    }
+
+    fn default_instance() -> &'static DumpQuoteRequest {
+        static mut instance: ::protobuf::lazy::Lazy<DumpQuoteRequest> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const DumpQuoteRequest,
+        };
+        unsafe {
+            instance.get(DumpQuoteRequest::new)
+        }
+    }
+}
+
+impl ::protobuf::Clear for DumpQuoteRequest {
+    fn clear(&mut self) {
+        self.filepath.clear();
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for DumpQuoteRequest {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for DumpQuoteRequest {
+    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
+        ::protobuf::reflect::ProtobufValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
+pub struct DumpQuoteResponse {
+    // special fields
+    pub unknown_fields: ::protobuf::UnknownFields,
+    pub cached_size: ::protobuf::CachedSize,
+}
+
+impl<'a> ::std::default::Default for &'a DumpQuoteResponse {
+    fn default() -> &'a DumpQuoteResponse {
+        <DumpQuoteResponse as ::protobuf::Message>::default_instance()
+    }
+}
+
+impl DumpQuoteResponse {
+    pub fn new() -> DumpQuoteResponse {
+        ::std::default::Default::default()
+    }
+}
+
+impl ::protobuf::Message for DumpQuoteResponse {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &dyn (::std::any::Any) {
+        self as &dyn (::std::any::Any)
+    }
+    fn as_any_mut(&mut self) -> &mut dyn (::std::any::Any) {
+        self as &mut dyn (::std::any::Any)
+    }
+    fn into_any(self: Box<Self>) -> ::std::boxed::Box<dyn (::std::any::Any)> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> DumpQuoteResponse {
+        DumpQuoteResponse::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
+        };
+        unsafe {
+            descriptor.get(|| {
+                let fields = ::std::vec::Vec::new();
+                ::protobuf::reflect::MessageDescriptor::new::<DumpQuoteResponse>(
+                    "DumpQuoteResponse",
+                    fields,
+                    file_descriptor_proto()
+                )
+            })
+        }
+    }
+
+    fn default_instance() -> &'static DumpQuoteResponse {
+        static mut instance: ::protobuf::lazy::Lazy<DumpQuoteResponse> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const DumpQuoteResponse,
+        };
+        unsafe {
+            instance.get(DumpQuoteResponse::new)
+        }
+    }
+}
+
+impl ::protobuf::Clear for DumpQuoteResponse {
+    fn clear(&mut self) {
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for DumpQuoteResponse {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for DumpQuoteResponse {
+    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
+        ::protobuf::reflect::ProtobufValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
 pub struct SetupRequest {
     // message oneof groups
     pub req: ::std::option::Option<SetupRequest_oneof_req>,
@@ -1564,6 +1859,7 @@ pub enum SetupRequest_oneof_req {
     remoteAttestationRequest(RemoteAttestationRequest),
     isInitialized(IsInitializedRequest),
     nodeStatus(NodeStatusRequest),
+    dumpQuote(DumpQuoteRequest),
 }
 
 impl SetupRequest {
@@ -1815,6 +2111,55 @@ impl SetupRequest {
             NodeStatusRequest::new()
         }
     }
+
+    // .node.node.DumpQuoteRequest dumpQuote = 6;
+
+
+    pub fn get_dumpQuote(&self) -> &DumpQuoteRequest {
+        match self.req {
+            ::std::option::Option::Some(SetupRequest_oneof_req::dumpQuote(ref v)) => v,
+            _ => DumpQuoteRequest::default_instance(),
+        }
+    }
+    pub fn clear_dumpQuote(&mut self) {
+        self.req = ::std::option::Option::None;
+    }
+
+    pub fn has_dumpQuote(&self) -> bool {
+        match self.req {
+            ::std::option::Option::Some(SetupRequest_oneof_req::dumpQuote(..)) => true,
+            _ => false,
+        }
+    }
+
+    // Param is passed by value, moved
+    pub fn set_dumpQuote(&mut self, v: DumpQuoteRequest) {
+        self.req = ::std::option::Option::Some(SetupRequest_oneof_req::dumpQuote(v))
+    }
+
+    // Mutable pointer to the field.
+    pub fn mut_dumpQuote(&mut self) -> &mut DumpQuoteRequest {
+        if let ::std::option::Option::Some(SetupRequest_oneof_req::dumpQuote(_)) = self.req {
+        } else {
+            self.req = ::std::option::Option::Some(SetupRequest_oneof_req::dumpQuote(DumpQuoteRequest::new()));
+        }
+        match self.req {
+            ::std::option::Option::Some(SetupRequest_oneof_req::dumpQuote(ref mut v)) => v,
+            _ => panic!(),
+        }
+    }
+
+    // Take field
+    pub fn take_dumpQuote(&mut self) -> DumpQuoteRequest {
+        if self.has_dumpQuote() {
+            match self.req.take() {
+                ::std::option::Option::Some(SetupRequest_oneof_req::dumpQuote(v)) => v,
+                _ => panic!(),
+            }
+        } else {
+            DumpQuoteRequest::new()
+        }
+    }
 }
 
 impl ::protobuf::Message for SetupRequest {
@@ -1840,6 +2185,11 @@ impl ::protobuf::Message for SetupRequest {
             }
         }
         if let Some(SetupRequest_oneof_req::nodeStatus(ref v)) = self.req {
+            if !v.is_initialized() {
+                return false;
+            }
+        }
+        if let Some(SetupRequest_oneof_req::dumpQuote(ref v)) = self.req {
             if !v.is_initialized() {
                 return false;
             }
@@ -1881,6 +2231,12 @@ impl ::protobuf::Message for SetupRequest {
                     }
                     self.req = ::std::option::Option::Some(SetupRequest_oneof_req::nodeStatus(is.read_message()?));
                 },
+                6 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeLengthDelimited {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    self.req = ::std::option::Option::Some(SetupRequest_oneof_req::dumpQuote(is.read_message()?));
+                },
                 _ => {
                     ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
                 },
@@ -1912,6 +2268,10 @@ impl ::protobuf::Message for SetupRequest {
                     my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
                 },
                 &SetupRequest_oneof_req::nodeStatus(ref v) => {
+                    let len = v.compute_size();
+                    my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
+                },
+                &SetupRequest_oneof_req::dumpQuote(ref v) => {
                     let len = v.compute_size();
                     my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
                 },
@@ -1947,6 +2307,11 @@ impl ::protobuf::Message for SetupRequest {
                 },
                 &SetupRequest_oneof_req::nodeStatus(ref v) => {
                     os.write_tag(5, ::protobuf::wire_format::WireTypeLengthDelimited)?;
+                    os.write_raw_varint32(v.get_cached_size())?;
+                    v.write_to_with_cached_sizes(os)?;
+                },
+                &SetupRequest_oneof_req::dumpQuote(ref v) => {
+                    os.write_tag(6, ::protobuf::wire_format::WireTypeLengthDelimited)?;
                     os.write_raw_varint32(v.get_cached_size())?;
                     v.write_to_with_cached_sizes(os)?;
                 },
@@ -2019,6 +2384,11 @@ impl ::protobuf::Message for SetupRequest {
                     SetupRequest::has_nodeStatus,
                     SetupRequest::get_nodeStatus,
                 ));
+                fields.push(::protobuf::reflect::accessor::make_singular_message_accessor::<_, DumpQuoteRequest>(
+                    "dumpQuote",
+                    SetupRequest::has_dumpQuote,
+                    SetupRequest::get_dumpQuote,
+                ));
                 ::protobuf::reflect::MessageDescriptor::new::<SetupRequest>(
                     "SetupRequest",
                     fields,
@@ -2041,6 +2411,7 @@ impl ::protobuf::Message for SetupRequest {
 
 impl ::protobuf::Clear for SetupRequest {
     fn clear(&mut self) {
+        self.req = ::std::option::Option::None;
         self.req = ::std::option::Option::None;
         self.req = ::std::option::Option::None;
         self.req = ::std::option::Option::None;
@@ -2073,63 +2444,74 @@ static file_descriptor_proto_data: &'static [u8] = b"\
     \x01(\x08R\x06isDCAP\"\x1b\n\x19RemoteAttestationResponse\"\x16\n\x14IsI\
     nitializedRequest\"=\n\x15IsInitializedResponse\x12$\n\risInitialized\
     \x18\x01\x20\x01(\x08R\risInitialized\"\x13\n\x11NodeStatusRequest\"\x14\
-    \n\x12NodeStatusResponse\"\xb9\x03\n\x0cSetupRequest\x12Y\n\x13initializ\
-    eMasterKey\x18\x01\x20\x01(\x0b2%.node.node.InitializeMasterKeyRequestH\
-    \0R\x13initializeMasterKey\x12[\n\x16peerAttestationRequest\x18\x02\x20\
-    \x01(\x0b2!.node.node.PeerAttestationRequestH\0R\x16peerAttestationReque\
-    st\x12a\n\x18remoteAttestationRequest\x18\x03\x20\x01(\x0b2#.node.node.R\
-    emoteAttestationRequestH\0R\x18remoteAttestationRequest\x12G\n\risInitia\
-    lized\x18\x04\x20\x01(\x0b2\x1f.node.node.IsInitializedRequestH\0R\risIn\
-    itialized\x12>\n\nnodeStatus\x18\x05\x20\x01(\x0b2\x1c.node.node.NodeSta\
-    tusRequestH\0R\nnodeStatusB\x05\n\x03reqB&Z$github.com/SigmaGmbH/librust\
-    go/typesJ\x9e\x08\n\x06\x12\x04\0\0&\x01\n\x08\n\x01\x0c\x12\x03\0\0\x12\
-    \n\x08\n\x01\x02\x12\x03\x02\0\x12\n\x08\n\x01\x08\x12\x03\x04\0;\n\t\n\
-    \x02\x08\x0b\x12\x03\x04\0;\n\t\n\x02\x04\0\x12\x03\x06\0<\n\n\n\x03\x04\
-    \0\x01\x12\x03\x06\x08\"\n\x0b\n\x04\x04\0\x02\0\x12\x03\x06%:\n\x0c\n\
-    \x05\x04\0\x02\0\x05\x12\x03\x06%)\n\x0c\n\x05\x04\0\x02\0\x01\x12\x03\
-    \x06*5\n\x0c\n\x05\x04\0\x02\0\x03\x12\x03\x0689\n\t\n\x02\x04\x01\x12\
-    \x03\x07\0&\n\n\n\x03\x04\x01\x01\x12\x03\x07\x08#\n)\n\x02\x04\x02\x12\
-    \x04\n\0\r\x01\x1a\x1d\x20Attestation\x20server\x20messages\n\n\n\n\x03\
-    \x04\x02\x01\x12\x03\n\x08\x1e\n\x0b\n\x04\x04\x02\x02\0\x12\x03\x0b\x02\
-    \x0f\n\x0c\n\x05\x04\x02\x02\0\x05\x12\x03\x0b\x02\x07\n\x0c\n\x05\x04\
-    \x02\x02\0\x01\x12\x03\x0b\x08\n\n\x0c\n\x05\x04\x02\x02\0\x03\x12\x03\
-    \x0b\r\x0e\n\x0b\n\x04\x04\x02\x02\x01\x12\x03\x0c\x02\x12\n\x0c\n\x05\
-    \x04\x02\x02\x01\x05\x12\x03\x0c\x02\x06\n\x0c\n\x05\x04\x02\x02\x01\x01\
-    \x12\x03\x0c\x07\r\n\x0c\n\x05\x04\x02\x02\x01\x03\x12\x03\x0c\x10\x11\n\
-    \t\n\x02\x04\x03\x12\x03\x0e\0\"\n\n\n\x03\x04\x03\x01\x12\x03\x0e\x08\
-    \x1f\n(\n\x02\x04\x04\x12\x04\x11\0\x15\x01\x1a\x1c\x20Remote\x20Attesta\
-    tion\x20Request\n\n\n\n\x03\x04\x04\x01\x12\x03\x11\x08\x20\n\x0b\n\x04\
-    \x04\x04\x02\0\x12\x03\x12\x02\x0f\n\x0c\n\x05\x04\x04\x02\0\x05\x12\x03\
-    \x12\x02\x07\n\x0c\n\x05\x04\x04\x02\0\x01\x12\x03\x12\x08\n\n\x0c\n\x05\
-    \x04\x04\x02\0\x03\x12\x03\x12\r\x0e\n\x0b\n\x04\x04\x04\x02\x01\x12\x03\
-    \x13\x02\x16\n\x0c\n\x05\x04\x04\x02\x01\x05\x12\x03\x13\x02\x08\n\x0c\n\
-    \x05\x04\x04\x02\x01\x01\x12\x03\x13\t\x11\n\x0c\n\x05\x04\x04\x02\x01\
-    \x03\x12\x03\x13\x14\x15\n\x0b\n\x04\x04\x04\x02\x02\x12\x03\x14\x02\x12\
-    \n\x0c\n\x05\x04\x04\x02\x02\x05\x12\x03\x14\x02\x06\n\x0c\n\x05\x04\x04\
-    \x02\x02\x01\x12\x03\x14\x07\r\n\x0c\n\x05\x04\x04\x02\x02\x03\x12\x03\
-    \x14\x10\x11\n\t\n\x02\x04\x05\x12\x03\x16\0$\n\n\n\x03\x04\x05\x01\x12\
-    \x03\x16\x08!\n\t\n\x02\x04\x06\x12\x03\x18\0\x1f\n\n\n\x03\x04\x06\x01\
-    \x12\x03\x18\x08\x1c\n\t\n\x02\x04\x07\x12\x03\x19\09\n\n\n\x03\x04\x07\
-    \x01\x12\x03\x19\x08\x1d\n\x0b\n\x04\x04\x07\x02\0\x12\x03\x19\x207\n\
-    \x0c\n\x05\x04\x07\x02\0\x05\x12\x03\x19\x20$\n\x0c\n\x05\x04\x07\x02\0\
-    \x01\x12\x03\x19%2\n\x0c\n\x05\x04\x07\x02\0\x03\x12\x03\x1956\n\t\n\x02\
-    \x04\x08\x12\x03\x1b\0\x1c\n\n\n\x03\x04\x08\x01\x12\x03\x1b\x08\x19\n\t\
-    \n\x02\x04\t\x12\x03\x1c\0\x1d\n\n\n\x03\x04\t\x01\x12\x03\x1c\x08\x1a\n\
-    \n\n\x02\x04\n\x12\x04\x1e\0&\x01\n\n\n\x03\x04\n\x01\x12\x03\x1e\x08\
-    \x14\n\x0c\n\x04\x04\n\x08\0\x12\x04\x1f\x02%\x03\n\x0c\n\x05\x04\n\x08\
-    \0\x01\x12\x03\x1f\x08\x0b\n\x0b\n\x04\x04\n\x02\0\x12\x03\x20\x047\n\
-    \x0c\n\x05\x04\n\x02\0\x06\x12\x03\x20\x04\x1e\n\x0c\n\x05\x04\n\x02\0\
-    \x01\x12\x03\x20\x1f2\n\x0c\n\x05\x04\n\x02\0\x03\x12\x03\x2056\n\x0b\n\
-    \x04\x04\n\x02\x01\x12\x03!\x046\n\x0c\n\x05\x04\n\x02\x01\x06\x12\x03!\
-    \x04\x1a\n\x0c\n\x05\x04\n\x02\x01\x01\x12\x03!\x1b1\n\x0c\n\x05\x04\n\
-    \x02\x01\x03\x12\x03!45\n\x0b\n\x04\x04\n\x02\x02\x12\x03\"\x04:\n\x0c\n\
-    \x05\x04\n\x02\x02\x06\x12\x03\"\x04\x1c\n\x0c\n\x05\x04\n\x02\x02\x01\
-    \x12\x03\"\x1d5\n\x0c\n\x05\x04\n\x02\x02\x03\x12\x03\"89\n\x0b\n\x04\
-    \x04\n\x02\x03\x12\x03#\x04+\n\x0c\n\x05\x04\n\x02\x03\x06\x12\x03#\x04\
-    \x18\n\x0c\n\x05\x04\n\x02\x03\x01\x12\x03#\x19&\n\x0c\n\x05\x04\n\x02\
-    \x03\x03\x12\x03#)*\n\x0b\n\x04\x04\n\x02\x04\x12\x03$\x04%\n\x0c\n\x05\
-    \x04\n\x02\x04\x06\x12\x03$\x04\x15\n\x0c\n\x05\x04\n\x02\x04\x01\x12\
-    \x03$\x16\x20\n\x0c\n\x05\x04\n\x02\x04\x03\x12\x03$#$b\x06proto3\
+    \n\x12NodeStatusResponse\".\n\x10DumpQuoteRequest\x12\x1a\n\x08filepath\
+    \x18\x01\x20\x01(\tR\x08filepath\"\x13\n\x11DumpQuoteResponse\"\xf6\x03\
+    \n\x0cSetupRequest\x12Y\n\x13initializeMasterKey\x18\x01\x20\x01(\x0b2%.\
+    node.node.InitializeMasterKeyRequestH\0R\x13initializeMasterKey\x12[\n\
+    \x16peerAttestationRequest\x18\x02\x20\x01(\x0b2!.node.node.PeerAttestat\
+    ionRequestH\0R\x16peerAttestationRequest\x12a\n\x18remoteAttestationRequ\
+    est\x18\x03\x20\x01(\x0b2#.node.node.RemoteAttestationRequestH\0R\x18rem\
+    oteAttestationRequest\x12G\n\risInitialized\x18\x04\x20\x01(\x0b2\x1f.no\
+    de.node.IsInitializedRequestH\0R\risInitialized\x12>\n\nnodeStatus\x18\
+    \x05\x20\x01(\x0b2\x1c.node.node.NodeStatusRequestH\0R\nnodeStatus\x12;\
+    \n\tdumpQuote\x18\x06\x20\x01(\x0b2\x1b.node.node.DumpQuoteRequestH\0R\t\
+    dumpQuoteB\x05\n\x03reqB&Z$github.com/SigmaGmbH/librustgo/typesJ\xbb\t\n\
+    \x06\x12\x04\0\0,\x01\n\x08\n\x01\x0c\x12\x03\0\0\x12\n\x08\n\x01\x02\
+    \x12\x03\x02\0\x12\n\x08\n\x01\x08\x12\x03\x04\0;\n\t\n\x02\x08\x0b\x12\
+    \x03\x04\0;\n\t\n\x02\x04\0\x12\x03\x06\0<\n\n\n\x03\x04\0\x01\x12\x03\
+    \x06\x08\"\n\x0b\n\x04\x04\0\x02\0\x12\x03\x06%:\n\x0c\n\x05\x04\0\x02\0\
+    \x05\x12\x03\x06%)\n\x0c\n\x05\x04\0\x02\0\x01\x12\x03\x06*5\n\x0c\n\x05\
+    \x04\0\x02\0\x03\x12\x03\x0689\n\t\n\x02\x04\x01\x12\x03\x07\0&\n\n\n\
+    \x03\x04\x01\x01\x12\x03\x07\x08#\n)\n\x02\x04\x02\x12\x04\n\0\r\x01\x1a\
+    \x1d\x20Attestation\x20server\x20messages\n\n\n\n\x03\x04\x02\x01\x12\
+    \x03\n\x08\x1e\n\x0b\n\x04\x04\x02\x02\0\x12\x03\x0b\x02\x0f\n\x0c\n\x05\
+    \x04\x02\x02\0\x05\x12\x03\x0b\x02\x07\n\x0c\n\x05\x04\x02\x02\0\x01\x12\
+    \x03\x0b\x08\n\n\x0c\n\x05\x04\x02\x02\0\x03\x12\x03\x0b\r\x0e\n\x0b\n\
+    \x04\x04\x02\x02\x01\x12\x03\x0c\x02\x12\n\x0c\n\x05\x04\x02\x02\x01\x05\
+    \x12\x03\x0c\x02\x06\n\x0c\n\x05\x04\x02\x02\x01\x01\x12\x03\x0c\x07\r\n\
+    \x0c\n\x05\x04\x02\x02\x01\x03\x12\x03\x0c\x10\x11\n\t\n\x02\x04\x03\x12\
+    \x03\x0e\0\"\n\n\n\x03\x04\x03\x01\x12\x03\x0e\x08\x1f\n(\n\x02\x04\x04\
+    \x12\x04\x11\0\x15\x01\x1a\x1c\x20Remote\x20Attestation\x20Request\n\n\n\
+    \n\x03\x04\x04\x01\x12\x03\x11\x08\x20\n\x0b\n\x04\x04\x04\x02\0\x12\x03\
+    \x12\x02\x0f\n\x0c\n\x05\x04\x04\x02\0\x05\x12\x03\x12\x02\x07\n\x0c\n\
+    \x05\x04\x04\x02\0\x01\x12\x03\x12\x08\n\n\x0c\n\x05\x04\x04\x02\0\x03\
+    \x12\x03\x12\r\x0e\n\x0b\n\x04\x04\x04\x02\x01\x12\x03\x13\x02\x16\n\x0c\
+    \n\x05\x04\x04\x02\x01\x05\x12\x03\x13\x02\x08\n\x0c\n\x05\x04\x04\x02\
+    \x01\x01\x12\x03\x13\t\x11\n\x0c\n\x05\x04\x04\x02\x01\x03\x12\x03\x13\
+    \x14\x15\n\x0b\n\x04\x04\x04\x02\x02\x12\x03\x14\x02\x12\n\x0c\n\x05\x04\
+    \x04\x02\x02\x05\x12\x03\x14\x02\x06\n\x0c\n\x05\x04\x04\x02\x02\x01\x12\
+    \x03\x14\x07\r\n\x0c\n\x05\x04\x04\x02\x02\x03\x12\x03\x14\x10\x11\n\t\n\
+    \x02\x04\x05\x12\x03\x16\0$\n\n\n\x03\x04\x05\x01\x12\x03\x16\x08!\n\t\n\
+    \x02\x04\x06\x12\x03\x18\0\x1f\n\n\n\x03\x04\x06\x01\x12\x03\x18\x08\x1c\
+    \n\t\n\x02\x04\x07\x12\x03\x19\09\n\n\n\x03\x04\x07\x01\x12\x03\x19\x08\
+    \x1d\n\x0b\n\x04\x04\x07\x02\0\x12\x03\x19\x207\n\x0c\n\x05\x04\x07\x02\
+    \0\x05\x12\x03\x19\x20$\n\x0c\n\x05\x04\x07\x02\0\x01\x12\x03\x19%2\n\
+    \x0c\n\x05\x04\x07\x02\0\x03\x12\x03\x1956\n\t\n\x02\x04\x08\x12\x03\x1b\
+    \0\x1c\n\n\n\x03\x04\x08\x01\x12\x03\x1b\x08\x19\n\t\n\x02\x04\t\x12\x03\
+    \x1c\0\x1d\n\n\n\x03\x04\t\x01\x12\x03\x1c\x08\x1a\n\n\n\x02\x04\n\x12\
+    \x04\x1e\0\x20\x01\n\n\n\x03\x04\n\x01\x12\x03\x1e\x08\x18\n\x0b\n\x04\
+    \x04\n\x02\0\x12\x03\x1f\x02\x16\n\x0c\n\x05\x04\n\x02\0\x05\x12\x03\x1f\
+    \x02\x08\n\x0c\n\x05\x04\n\x02\0\x01\x12\x03\x1f\t\x11\n\x0c\n\x05\x04\n\
+    \x02\0\x03\x12\x03\x1f\x14\x15\n\t\n\x02\x04\x0b\x12\x03!\0\x1c\n\n\n\
+    \x03\x04\x0b\x01\x12\x03!\x08\x19\n\n\n\x02\x04\x0c\x12\x04#\0,\x01\n\n\
+    \n\x03\x04\x0c\x01\x12\x03#\x08\x14\n\x0c\n\x04\x04\x0c\x08\0\x12\x04$\
+    \x02+\x03\n\x0c\n\x05\x04\x0c\x08\0\x01\x12\x03$\x08\x0b\n\x0b\n\x04\x04\
+    \x0c\x02\0\x12\x03%\x047\n\x0c\n\x05\x04\x0c\x02\0\x06\x12\x03%\x04\x1e\
+    \n\x0c\n\x05\x04\x0c\x02\0\x01\x12\x03%\x1f2\n\x0c\n\x05\x04\x0c\x02\0\
+    \x03\x12\x03%56\n\x0b\n\x04\x04\x0c\x02\x01\x12\x03&\x046\n\x0c\n\x05\
+    \x04\x0c\x02\x01\x06\x12\x03&\x04\x1a\n\x0c\n\x05\x04\x0c\x02\x01\x01\
+    \x12\x03&\x1b1\n\x0c\n\x05\x04\x0c\x02\x01\x03\x12\x03&45\n\x0b\n\x04\
+    \x04\x0c\x02\x02\x12\x03'\x04:\n\x0c\n\x05\x04\x0c\x02\x02\x06\x12\x03'\
+    \x04\x1c\n\x0c\n\x05\x04\x0c\x02\x02\x01\x12\x03'\x1d5\n\x0c\n\x05\x04\
+    \x0c\x02\x02\x03\x12\x03'89\n\x0b\n\x04\x04\x0c\x02\x03\x12\x03(\x04+\n\
+    \x0c\n\x05\x04\x0c\x02\x03\x06\x12\x03(\x04\x18\n\x0c\n\x05\x04\x0c\x02\
+    \x03\x01\x12\x03(\x19&\n\x0c\n\x05\x04\x0c\x02\x03\x03\x12\x03()*\n\x0b\
+    \n\x04\x04\x0c\x02\x04\x12\x03)\x04%\n\x0c\n\x05\x04\x0c\x02\x04\x06\x12\
+    \x03)\x04\x15\n\x0c\n\x05\x04\x0c\x02\x04\x01\x12\x03)\x16\x20\n\x0c\n\
+    \x05\x04\x0c\x02\x04\x03\x12\x03)#$\n\x0b\n\x04\x04\x0c\x02\x05\x12\x03*\
+    \x04#\n\x0c\n\x05\x04\x0c\x02\x05\x06\x12\x03*\x04\x14\n\x0c\n\x05\x04\
+    \x0c\x02\x05\x01\x12\x03*\x15\x1e\n\x0c\n\x05\x04\x0c\x02\x05\x03\x12\
+    \x03*!\"b\x06proto3\
 ";
 
 static mut file_descriptor_proto_lazy: ::protobuf::lazy::Lazy<::protobuf::descriptor::FileDescriptorProto> = ::protobuf::lazy::Lazy {

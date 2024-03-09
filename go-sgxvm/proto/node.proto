@@ -28,6 +28,11 @@ message IsInitializedResponse { bool isInitialized = 1; }
 message NodeStatusRequest {}
 message NodeStatusResponse {}
 
+message DumpQuoteRequest {
+  string filepath = 1;
+}
+message DumpQuoteResponse {}
+
 message SetupRequest {
   oneof req {
     InitializeMasterKeyRequest initializeMasterKey = 1;
@@ -35,5 +40,6 @@ message SetupRequest {
     RemoteAttestationRequest remoteAttestationRequest = 3;
     IsInitializedRequest isInitialized = 4;
     NodeStatusRequest nodeStatus = 5;
+    DumpQuoteRequest dumpQuote = 6;
   }
 }

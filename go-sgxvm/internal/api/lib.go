@@ -206,6 +206,31 @@ func GetNodePublicKey() (*types.NodePublicKeyResponse, error) {
 	return &response, nil
 }
 
+// DumpDCAPQuote generates DCAP quote for the enclave and writes it to the disk
+func DumpDCAPQuote(filepath string) error {
+	// Create protobuf encoded request
+	req := types.SetupRequest{Req: &types.SetupRequest_DumpQuote{
+		DumpQuote: &types.DumpQuoteRequest{ Filepath: filepath },
+	}}
+	reqBytes, err := proto.Marshal(&req)
+	if err != nil {
+		log.Fatalln("Failed to encode req:", err)
+		return err
+	}
+
+	// Pass request to Rust
+	d := MakeView(reqBytes)
+	defer runtime.KeepAlive(reqBytes)
+
+	errmsg := NewUnmanagedVector(nil)
+	_, err = C.handle_initialization_request(d, &errmsg)
+	if err != nil {
+		return ErrorWithMessage(err, errmsg)
+	}
+
+	return nil
+}
+
 // Call handles incoming call to contract or transfer of value
 func Call(
 	connector Connector,
