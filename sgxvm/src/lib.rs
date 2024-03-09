@@ -8,12 +8,14 @@ extern crate sgx_tse;
 
 extern crate sgx_types;
 use sgx_types::*;
+use sgx_tcrypto::*;
 
 use std::slice;
 use std::string::String;
 
 use crate::querier::GoQuerier;
 use crate::types::{Allocation, AllocationWithResult};
+use crate::attestation::dcap::get_qe_quote;
 
 mod attestation;
 mod backend;
@@ -159,4 +161,32 @@ pub unsafe extern "C" fn ecall_request_master_key_epid(
         Ok(_) => sgx_status_t::SGX_SUCCESS,
         Err(err) => err,
     }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn ecall_dump_dcap_quote(
+    qe_target_info: &sgx_target_info_t,
+    quote_size: u32,
+) -> AllocationWithResult {
+    let ecc_handle = SgxEccHandle::new();
+    let _ = ecc_handle.open();
+    let (_, pub_k) = match ecc_handle.create_key_pair() {
+        Ok(res) => res,
+        Err(status_code) => {
+            println!("[Enclave] Cannot create key pair using SgxEccHandle. Reason: {:?}", status_code);
+            return AllocationWithResult::default();
+        }
+    };
+
+    let qe_quote = match get_qe_quote(&pub_k, qe_target_info, quote_size) {
+        Ok(quote) => quote,
+        Err(status_code) => {
+            println!("[Enclave] Cannot generate QE quote. Reason: {:?}", status_code);
+            return AllocationWithResult::default();
+        } 
+    };
+
+    let _ = ecc_handle.close();
+
+    handlers::allocate_inner(qe_quote)
 }
