@@ -91,6 +91,13 @@ extern "C" {
         supplemental_data_size: uint32_t,
         qve_isvsvn_threshold: sgx_isv_svn_t,
     ) -> sgx_quote3_error_t;
+
+    pub fn ecall_dump_dcap_quote(
+        eid: sgx_enclave_id_t,
+        retval: *mut AllocationWithResult,
+        qe_target_info: &sgx_target_info_t,
+        quote_size: u32,
+    ) -> sgx_status_t;
 }
 
 #[no_mangle]

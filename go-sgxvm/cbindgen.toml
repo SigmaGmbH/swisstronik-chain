@@ -68,6 +68,7 @@ exclude = [
     "ecall_request_master_key_epid",
     "ecall_request_master_key_dcap",
     "sgx_tvl_verify_qve_report_and_identity",
+    "ecall_dump_dcap_quote",
     "ocall_query_raw",
     "ocall_allocate",
     "ocall_sgx_init_quote",
