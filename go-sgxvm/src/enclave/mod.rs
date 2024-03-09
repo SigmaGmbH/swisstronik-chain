@@ -165,6 +165,12 @@ pub unsafe extern "C" fn handle_initialization_request(
                         let response_bytes = response.write_to_bytes()?;
                         Ok(response_bytes)
                     }
+                    node::SetupRequest_oneof_req::verifyQuote(req) => {
+                        enclave_api::EnclaveApi::verify_dcap_quote(evm_enclave.geteid(), &req.filepath)?;
+                        let response = node::VerifyQuoteResponse::new();
+                        let response_bytes = response.write_to_bytes()?;
+                        Ok(response_bytes)
+                    }
                 }
             }
             None => Err(Error::protobuf_decode("Request unwrapping failed")),

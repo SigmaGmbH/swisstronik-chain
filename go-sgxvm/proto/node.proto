@@ -33,6 +33,11 @@ message DumpQuoteRequest {
 }
 message DumpQuoteResponse {}
 
+message VerifyQuoteRequest {
+  string filepath = 1;
+}
+message VerifyQuoteResponse {}
+
 message SetupRequest {
   oneof req {
     InitializeMasterKeyRequest initializeMasterKey = 1;
@@ -41,5 +46,6 @@ message SetupRequest {
     IsInitializedRequest isInitialized = 4;
     NodeStatusRequest nodeStatus = 5;
     DumpQuoteRequest dumpQuote = 6;
+    VerifyQuoteRequest verifyQuote = 7;
   }
 }

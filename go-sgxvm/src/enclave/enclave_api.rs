@@ -51,6 +51,11 @@ impl EnclaveApi {
         dcap_utils::dump_dcap_quote(eid, filepath)
     }
 
+    pub fn verify_dcap_quote(eid: sgx_enclave_id_t, filepath: &str) -> Result<(), Error> {
+        // dcap_utils::verify_dcap_quote(eid, filepath)
+        Err(Error::enclave_error("not implemented"))
+    }
+
     fn attest_peer_dcap(eid: sgx_enclave_id_t, fd: i32) -> Result<(), Error> {
         let qe_target_info = dcap_utils::get_qe_target_info()?;
         let quote_size = dcap_utils::get_quote_size()?;
