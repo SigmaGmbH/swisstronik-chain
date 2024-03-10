@@ -196,6 +196,16 @@ pub unsafe extern "C" fn ecall_verify_dcap_quote(
     quote_ptr: *const u8,
     quote_len: u32,
 ) -> sgx_status_t {
-    println!("Try to verify provided quote");
-    sgx_status_t::SGX_SUCCESS
+    let quote = slice::from_raw_parts(quote_ptr, quote_len as usize);
+
+    match attestation::dcap::verify_dcap_quote(quote.to_vec()) {
+        Ok(_) => {
+            println!("[Enclave] Quote verified");
+            sgx_status_t::SGX_SUCCESS
+        },
+        Err(err) => {
+            println!("[Enlcave] Quote verification failed. Status code: {:?}", err);
+            err
+        }
+    }
 }
