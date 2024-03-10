@@ -12,6 +12,7 @@ use sgx_tcrypto::*;
 
 use std::slice;
 use std::string::String;
+use std::vec::Vec;
 
 use crate::querier::GoQuerier;
 use crate::types::{Allocation, AllocationWithResult};
@@ -196,9 +197,10 @@ pub unsafe extern "C" fn ecall_verify_dcap_quote(
     quote_ptr: *const u8,
     quote_len: u32,
 ) -> sgx_status_t {
-    let quote = slice::from_raw_parts(quote_ptr, quote_len as usize);
+    let slice = unsafe { slice::from_raw_parts(quote_ptr, quote_len as usize) };
+    let quote_buf = slice.to_vec();
 
-    match attestation::dcap::verify_dcap_quote(quote.to_vec()) {
+    match attestation::dcap::verify_dcap_quote(quote_buf.to_vec()) {
         Ok(_) => {
             println!("[Enclave] Quote verified");
             sgx_status_t::SGX_SUCCESS

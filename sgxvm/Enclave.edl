@@ -73,7 +73,7 @@ enclave {
         );
 
         public sgx_status_t ecall_verify_dcap_quote(
-            [in] const uint8_t* quote_ptr,
+            [in, size=quote_len] const uint8_t* quote_ptr,
 			uint32_t quote_len
         );
     };

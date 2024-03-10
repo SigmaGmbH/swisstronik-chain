@@ -48,7 +48,7 @@ pub fn get_qe_quote(report: sgx_report_t, quote_size: u32, p_quote: *mut u8) -> 
 }
 
 /// Generates quote inside the enclave and writes it to the file
-/// Since this function will be used only for test and dev purposes, 
+/// Since this function will be used only for test and dev purposes,
 /// we can ignore usages of `unwrap` or `expect`.
 pub fn dump_dcap_quote(eid: sgx_enclave_id_t, filepath: &str) -> Result<(), Error> {
     let qe_target_info = get_qe_target_info()?;
@@ -56,12 +56,7 @@ pub fn dump_dcap_quote(eid: sgx_enclave_id_t, filepath: &str) -> Result<(), Erro
     let mut retval = std::mem::MaybeUninit::<types::AllocationWithResult>::uninit();
 
     let res = unsafe {
-        enclave::ecall_dump_dcap_quote(
-            eid,
-            retval.as_mut_ptr(),
-            &qe_target_info,
-            quote_size,
-        )
+        enclave::ecall_dump_dcap_quote(eid, retval.as_mut_ptr(), &qe_target_info, quote_size)
     };
 
     if res != sgx_status_t::SGX_SUCCESS {
@@ -70,17 +65,26 @@ pub fn dump_dcap_quote(eid: sgx_enclave_id_t, filepath: &str) -> Result<(), Erro
 
     let quote_res = unsafe { retval.assume_init() };
     if quote_res.status != sgx_status_t::SGX_SUCCESS {
-        panic!("`ecall_dump_dcap_quote` returned error code: {:?}", quote_res.status);
+        panic!(
+            "`ecall_dump_dcap_quote` returned error code: {:?}",
+            quote_res.status
+        );
     }
 
     let quote_vec = unsafe {
-        Vec::from_raw_parts(quote_res.result_ptr, quote_res.result_size, quote_res.result_size)
+        Vec::from_raw_parts(
+            quote_res.result_ptr,
+            quote_res.result_size,
+            quote_res.result_size,
+        )
     };
 
-    let mut quote_file = std::fs::File::create(filepath)
-        .expect("Cannot create file to write quote");
+    let mut quote_file =
+        std::fs::File::create(filepath).expect("Cannot create file to write quote");
 
-    quote_file.write_all(&quote_vec).expect("Cannot write quote to file");
+    quote_file
+        .write_all(&quote_vec)
+        .expect("Cannot write quote to file");
 
     Ok(())
 }
@@ -88,20 +92,32 @@ pub fn dump_dcap_quote(eid: sgx_enclave_id_t, filepath: &str) -> Result<(), Erro
 pub fn verify_dcap_quote(eid: sgx_enclave_id_t, filepath: &str) -> Result<(), Error> {
     let mut file = std::fs::File::open(filepath).expect("Cannot open quote file");
     let mut quote_buf = Vec::new();
-    file.read_to_end(&mut quote_buf).expect("Cannot read quote file");
+    let bytes_read = file.read_to_end(&mut quote_buf)
+        .expect("Cannot read quote file");
 
     let mut retval = sgx_status_t::SGX_ERROR_UNEXPECTED;
     let res = unsafe {
-        enclave::ecall_verify_dcap_quote(eid, &mut retval, quote_buf.as_ptr(), quote_buf.len() as u32)
+        enclave::ecall_verify_dcap_quote(
+            eid,
+            &mut retval,
+            quote_buf.as_ptr(),
+            quote_buf.len() as u32,
+        )
     };
 
     if res != sgx_status_t::SGX_SUCCESS {
-        println!("[Enclave] Call to ecall_verify_dcap_quote failed. Reason: {:?}", res);
+        println!(
+            "[Enclave] Call to ecall_verify_dcap_quote failed. Reason: {:?}",
+            res
+        );
         return Err(Error::enclave_error(res));
     }
 
     if retval != sgx_status_t::SGX_SUCCESS {
-        println!("[Enclave] ecall_verify_dcap_quote returned error code: {:?}", retval);
+        println!(
+            "[Enclave] ecall_verify_dcap_quote returned error code: {:?}",
+            retval
+        );
         return Err(Error::enclave_error(retval));
     }
 
