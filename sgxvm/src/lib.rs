@@ -190,3 +190,12 @@ pub unsafe extern "C" fn ecall_dump_dcap_quote(
 
     handlers::allocate_inner(qe_quote)
 }
+
+#[no_mangle]
+pub unsafe extern "C" fn ecall_verify_dcap_quote(
+    quote_ptr: *const u8,
+    quote_len: u32,
+) -> sgx_status_t {
+    println!("Try to verify provided quote");
+    sgx_status_t::SGX_SUCCESS
+}

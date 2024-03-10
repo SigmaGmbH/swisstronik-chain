@@ -172,3 +172,9 @@ func TestDumpQuote(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestVerifyQuote(t *testing.T) {
+	if err := api.VerifyDCAPQuote("quote.dat"); err != nil {
+		t.Fail()
+	}
+}

@@ -98,6 +98,13 @@ extern "C" {
         qe_target_info: &sgx_target_info_t,
         quote_size: u32,
     ) -> sgx_status_t;
+
+    pub fn ecall_verify_dcap_quote(
+        eid: sgx_enclave_id_t,
+        retval: *mut sgx_status_t,
+        quote_ptr: *const u8,
+        quote_len: u32,
+    ) -> sgx_status_t;
 }
 
 #[no_mangle]

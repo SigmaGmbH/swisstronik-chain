@@ -1,4 +1,4 @@
-use std::io::Write;
+use std::io::{Read, Write};
 
 use crate::enclave;
 use crate::errors::Error;
@@ -81,6 +81,29 @@ pub fn dump_dcap_quote(eid: sgx_enclave_id_t, filepath: &str) -> Result<(), Erro
         .expect("Cannot create file to write quote");
 
     quote_file.write_all(&quote_vec).expect("Cannot write quote to file");
+
+    Ok(())
+}
+
+pub fn verify_dcap_quote(eid: sgx_enclave_id_t, filepath: &str) -> Result<(), Error> {
+    let mut file = std::fs::File::open(filepath).expect("Cannot open quote file");
+    let mut quote_buf = Vec::new();
+    file.read_to_end(&mut quote_buf).expect("Cannot read quote file");
+
+    let mut retval = sgx_status_t::SGX_ERROR_UNEXPECTED;
+    let res = unsafe {
+        enclave::ecall_verify_dcap_quote(eid, &mut retval, quote_buf.as_ptr(), quote_buf.len() as u32)
+    };
+
+    if res != sgx_status_t::SGX_SUCCESS {
+        println!("[Enclave] Call to ecall_verify_dcap_quote failed. Reason: {:?}", res);
+        return Err(Error::enclave_error(res));
+    }
+
+    if retval != sgx_status_t::SGX_SUCCESS {
+        println!("[Enclave] ecall_verify_dcap_quote returned error code: {:?}", retval);
+        return Err(Error::enclave_error(retval));
+    }
 
     Ok(())
 }

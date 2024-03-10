@@ -52,8 +52,7 @@ impl EnclaveApi {
     }
 
     pub fn verify_dcap_quote(eid: sgx_enclave_id_t, filepath: &str) -> Result<(), Error> {
-        // dcap_utils::verify_dcap_quote(eid, filepath)
-        Err(Error::enclave_error("not implemented"))
+        dcap_utils::verify_dcap_quote(eid, filepath)
     }
 
     fn attest_peer_dcap(eid: sgx_enclave_id_t, fd: i32) -> Result<(), Error> {

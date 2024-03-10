@@ -71,6 +71,11 @@ enclave {
             [in] const sgx_target_info_t* qe_target_info,
 			uint32_t quote_size
         );
+
+        public sgx_status_t ecall_verify_dcap_quote(
+            [in] const uint8_t* quote_ptr,
+			uint32_t quote_len
+        );
     };
 
     untrusted {
