@@ -8,10 +8,7 @@ use sgx_types::{sgx_read_rand, sgx_status_t, SgxResult};
 use std::io::{Read, Write};
 use std::vec::Vec;
 
-use k256::sha2::{
-    Sha256 as kSha256, 
-    Digest
-};
+use k256::sha2::{Digest, Sha256 as kSha256};
 
 use crate::error::Error;
 
@@ -74,6 +71,12 @@ pub struct KeyManager {
     state_key: [u8; PRIVATE_KEY_SIZE],
 }
 
+// KeyManager
+// is_initialized - checks if there master key
+// seal - seal master key
+// unseal - unseal master key
+// random - init with random master key
+
 impl KeyManager {
     /// Checks if file with sealed master key exists
     pub fn exists() -> SgxResult<bool> {
@@ -101,17 +104,14 @@ impl KeyManager {
         );
 
         // Prepare file to write master key
-        let mut master_key_file =
-            match SgxFile::create(format!("{}/{}", SEED_HOME.to_str().unwrap(), SEED_FILENAME)) {
-                Ok(master_key_file) => master_key_file,
-                Err(err) => {
-                    println!(
-                        "[KeyManager] Cannot create file for master key. Reason: {:?}",
-                        err
-                    );
-                    return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
-                }
-            };
+        let master_key_path = format!("{}/{}", SEED_HOME.to_str().unwrap(), SEED_FILENAME);
+        let mut master_key_file = SgxFile::create(master_key_path).map_err(|err| {
+            println!(
+                "[KeyManager] Cannot create file for master key. Reason: {:?}",
+                err
+            );
+            sgx_status_t::SGX_ERROR_UNEXPECTED
+        })?;
 
         // Write master key to the file
         if let Err(err) = master_key_file.write(&self.master_key) {
@@ -132,30 +132,40 @@ impl KeyManager {
         );
 
         // Open file with master key
-        let mut master_key_file =
-            match SgxFile::open(format!("{}/{}", SEED_HOME.to_str().unwrap(), SEED_FILENAME)) {
-                Ok(file) => file,
-                Err(err) => {
-                    println!(
-                        "[KeyManager] Cannot open file with master key. Reason: {:?}",
-                        err
-                    );
-                    return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
-                }
-            };
+        let master_key_path = format!("{}/{}", SEED_HOME.to_str().unwrap(), SEED_FILENAME);
+        // let mut master_key_file =
+        //     match SgxFile::open(format!("{}/{}", SEED_HOME.to_str().unwrap(), SEED_FILENAME)) {
+        //         Ok(file) => file,
+        //         Err(err) => {
+        //             println!(
+        //                 "[KeyManager] Cannot open file with master key. Reason: {:?}",
+        //                 err
+        //             );
+        //             return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+        //         }
+        //     };
+        let mut master_key_file = SgxFile::open(master_key_path).map_err(|err| {
+            println!("[KeyManager] Cannot open file with master key. Reason: {:?}", err);
+            sgx_status_t::SGX_ERROR_UNEXPECTED
+        })?;
+
 
         // Prepare buffer for seed and read it from file
         let mut master_key = [0u8; SEED_SIZE];
-        match master_key_file.read(&mut master_key) {
-            Ok(_) => {}
-            Err(err) => {
-                println!(
-                    "[KeyManager] Cannot read file with master key. Reason: {:?}",
-                    err
-                );
-                return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
-            }
-        };
+        // match master_key_file.read(&mut master_key) {
+        //     Ok(_) => {}
+        //     Err(err) => {
+        //         println!(
+        //             "[KeyManager] Cannot read file with master key. Reason: {:?}",
+        //             err
+        //         );
+        //         return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+        //     }
+        // };
+        if let Err(err) = master_key_file.read(&mut master_key) {
+            println!("[KeyManager] Cannot read master key file. Reason: {:?}", err);
+            return Err(sgx_status_t::SGX_ERROR_UNEXPECTED)
+        }
 
         // Derive keys for transaction and state encryption
         let tx_key = KeyManager::derive_key(&master_key, b"TransactionEncryptionKeyV1");
@@ -197,7 +207,12 @@ impl KeyManager {
     /// Encrypts provided value using encryption key, derived from master key and user public key.
     /// To derive shared secret we're using x25519 since its private keys have wider range of acceptable
     /// values than secp256k1, which is used for transaction signing.
-    pub fn encrypt_ecdh(&self, value: Vec<u8>, public_key: Vec<u8>, encryption_salt: Vec<u8>) -> Result<Vec<u8>, Error> {
+    pub fn encrypt_ecdh(
+        &self,
+        value: Vec<u8>,
+        public_key: Vec<u8>,
+        encryption_salt: Vec<u8>,
+    ) -> Result<Vec<u8>, Error> {
         // Convert public key to appropriate format
         let public_key: [u8; PUBLIC_KEY_SIZE] = match public_key.as_slice().try_into() {
             Ok(public_key) => public_key,
@@ -301,7 +316,7 @@ impl KeyManager {
                         )))
                     }
                 }
-            },
+            }
             // Otherwise use encryption_salt as seed for nonce generation
             Some(encryption_salt) => {
                 let mut rng = rand_chacha::ChaCha8Rng::from_seed(encryption_salt);
@@ -366,9 +381,7 @@ impl KeyManager {
         // Convert public key to appropriate format
         let public_key: [u8; 32] = match public_key.try_into() {
             Ok(public_key) => public_key,
-            Err(_) => {
-                return Err(Error::decryption_err("Public key has wrong length"))
-            }
+            Err(_) => return Err(Error::decryption_err("Public key has wrong length")),
         };
         let public_key = x25519_dalek::PublicKey::from(public_key);
 
@@ -393,9 +406,7 @@ impl KeyManager {
         // Convert public key to appropriate format
         let public_key: [u8; 32] = match public_key.try_into() {
             Ok(public_key) => public_key,
-            Err(_) => {
-                return Err(Error::encryption_err("Public key has wrong length"))
-            }
+            Err(_) => return Err(Error::encryption_err("Public key has wrong length")),
         };
         let public_key = x25519_dalek::PublicKey::from(public_key);
 
