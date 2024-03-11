@@ -1,5 +1,5 @@
 use deoxysii::*;
-use hmac::{Hmac, Mac, NewMac as _};
+
 use lazy_static::lazy_static;
 use rand_chacha::rand_core::{RngCore, SeedableRng};
 use sgx_tstd::ffi::OsString;
@@ -13,6 +13,7 @@ use k256::sha2::{Digest, Sha256 as kSha256};
 use crate::error::Error;
 
 pub mod keys;
+pub mod utils;
 
 pub const SEED_SIZE: usize = 32;
 pub const SEED_FILENAME: &str = ".swtr_seed";
@@ -141,8 +142,8 @@ impl KeyManager {
         }
 
         // Derive keys for transaction and state encryption
-        let tx_key = KeyManager::derive_key(&master_key, b"TransactionEncryptionKeyV1");
-        let state_key = KeyManager::derive_key(&master_key, b"StateEncryptionKeyV1");
+        let tx_key = utils::derive_key(&master_key, b"TransactionEncryptionKeyV1");
+        let state_key = utils::derive_key(&master_key, b"StateEncryptionKeyV1");
 
         Ok(Self {
             master_key,
@@ -161,8 +162,8 @@ impl KeyManager {
         }
 
         // Derive keys for transaction and state encryption
-        let tx_key = KeyManager::derive_key(&master_key, b"TransactionEncryptionKeyV1");
-        let state_key = KeyManager::derive_key(&master_key, b"StateEncryptionKeyV1");
+        let tx_key = utils::derive_key(&master_key, b"TransactionEncryptionKeyV1");
+        let state_key = utils::derive_key(&master_key, b"StateEncryptionKeyV1");
 
         Ok(Self {
             master_key,
@@ -193,7 +194,7 @@ impl KeyManager {
         // Derive shared key
         let shared_key = secret_key.diffie_hellman(&public_key);
         // Derive encryption key from shared key
-        let encryption_key = KeyManager::derive_key(shared_key.as_bytes(), b"IOEncryptionKeyV1");
+        let encryption_key = utils::derive_key(shared_key.as_bytes(), b"IOEncryptionKeyV1");
         // Encrypt provided value using shared secret
         KeyManager::encrypt_deoxys(&encryption_key, value, Some(encryption_salt))
     }
@@ -218,7 +219,7 @@ impl KeyManager {
         // Derive shared key
         let shared_key = secret_key.diffie_hellman(&public_key);
         // Derive encryption key from shared key
-        let encryption_key = KeyManager::derive_key(shared_key.as_bytes(), b"IOEncryptionKeyV1");
+        let encryption_key = utils::derive_key(shared_key.as_bytes(), b"IOEncryptionKeyV1");
         // Decrypt provided value using shared secret
         KeyManager::decrypt_deoxys(&encryption_key, encrypted_value)
     }
@@ -234,7 +235,7 @@ impl KeyManager {
         value: Vec<u8>,
     ) -> Result<Vec<u8>, Error> {
         // Derive encryption key for this contract
-        let contract_key = KeyManager::derive_key(&self.state_key, &contract_address);
+        let contract_key = utils::derive_key(&self.state_key, &contract_address);
         // Encrypt contract state using contract encryption key
         KeyManager::encrypt_deoxys(&contract_key, value, Some(encryption_salt))
     }
@@ -246,7 +247,7 @@ impl KeyManager {
         encrypted_value: Vec<u8>,
     ) -> Result<Vec<u8>, Error> {
         // Derive encryption key for this contract
-        let contract_key = KeyManager::derive_key(&self.state_key, &contract_address);
+        let contract_key = utils::derive_key(&self.state_key, &contract_address);
         // Decrypt contract state using contract encryption key
         KeyManager::decrypt_deoxys(&contract_key, encrypted_value)
     }
@@ -393,8 +394,8 @@ impl KeyManager {
         };
 
         // Derive keys for transaction and state encryption
-        let tx_key = KeyManager::derive_key(&master_key, b"TransactionEncryptionKeyV1");
-        let state_key = KeyManager::derive_key(&master_key, b"StateEncryptionKeyV1");
+        let tx_key = utils::derive_key(&master_key, b"TransactionEncryptionKeyV1");
+        let state_key = utils::derive_key(&master_key, b"StateEncryptionKeyV1");
 
         Ok(Self {
             master_key,
@@ -409,26 +410,6 @@ impl KeyManager {
         let public_key = x25519_dalek::PublicKey::from(&secret);
         public_key.as_bytes().to_vec()
     }
-
-    fn derive_key(master_key: &[u8; PRIVATE_KEY_SIZE], info: &[u8]) -> [u8; PRIVATE_KEY_SIZE] {
-        let mut kdf = Hmac::<sha2::Sha256>::new_from_slice(info).expect("Unable to create KDF");
-        kdf.update(master_key);
-        let mut derived_key = [0u8; PRIVATE_KEY_SIZE];
-        let digest = kdf.finalize();
-        derived_key.copy_from_slice(&digest.into_bytes()[..PRIVATE_KEY_SIZE]);
-
-        derived_key
-    }
-
-    // // Converts incoming vector with public key to x25519_dalek::PublicKey
-    // fn x25519_pub_key_from_vec(input: Vec<u8>) -> Result<x25519_dalek::PublicKey, Error> {
-    //     let public_key: [u8; PUBLIC_KEY_SIZE] = public_key.as_slice().try_into().map_err(|err| {
-    //         println!("[KeyManager] Wrong size of provided public key");
-    //         return Err(Error::decryption_err("wrong public key size"));
-    //     })?;
-    //     let public_key = x25519_dalek::PublicKey::from(public_key);
-    //     Ok(public_key)
-    // }
 }
 
 /// Tries to return path to $HOME/.swisstronik-enclave directory.
