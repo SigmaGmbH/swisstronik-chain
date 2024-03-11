@@ -21,16 +21,12 @@ impl RegistrationKey {
         let mut buffer = [0u8; REGISTRATION_KEY_SIZE];
         let res = unsafe { sgx_read_rand(&mut buffer as *mut u8, REGISTRATION_KEY_SIZE) };
 
-        match res {
-            sgx_status_t::SGX_SUCCESS => Ok(Self { inner: buffer }),
-            _ => {
-                println!(
-                    "[KeyManager] Cannot generate random registration key. Reason: {:?}",
-                    res.as_str()
-                );
-                Err(res)
-            }
+        if res != sgx_status_t::SGX_SUCCESS {
+            println!("[Enclave] Cannot generate random reg key. Reason: {:?}", res);
+            return Err(res);
         }
+
+        Ok(Self { inner: buffer})
     }
 
     /// Performes Diffie-Hellman derivation of encryption key for master key encryption
