@@ -1,5 +1,5 @@
 use crate::error::Error;
-use crate::key_manager::{PUBLIC_KEY_SIZE, SEED_SIZE};
+use crate::key_manager::{PUBLIC_KEY_SIZE, SEED_SIZE, utils};
 use sgx_types::{sgx_read_rand, sgx_status_t, SgxResult};
 use std::vec::Vec;
 
@@ -21,19 +21,8 @@ impl RegistrationKey {
 
     /// Generates random registration key
     pub fn random() -> SgxResult<Self> {
-        // Generate random seed
-        let mut buffer = [0u8; REGISTRATION_KEY_SIZE];
-        let res = unsafe { sgx_read_rand(&mut buffer as *mut u8, REGISTRATION_KEY_SIZE) };
-
-        if res != sgx_status_t::SGX_SUCCESS {
-            println!(
-                "[Enclave] Cannot generate random reg key. Reason: {:?}",
-                res
-            );
-            return Err(res);
-        }
-
-        Ok(Self { inner: buffer })
+        let random_key = utils::random_bytes32()?;
+        Ok(Self { inner: random_key })
     }
 
     /// Performes Diffie-Hellman derivation of encryption key for master key encryption
