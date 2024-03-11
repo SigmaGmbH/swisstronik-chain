@@ -24,7 +24,6 @@ lazy_static! {
         env::var_os("SEED_HOME").unwrap_or_else(get_default_seed_home);
 }
 
-#[no_mangle]
 /// Handles initialization of a new seed node by creating and sealing master key to seed file
 /// If `reset_flag` was set to `true`, it will rewrite existing seed file
 pub fn init_master_key_inner(reset_flag: i32) -> sgx_status_t {
@@ -70,12 +69,6 @@ pub struct KeyManager {
     // State key is used for encryption of state fields
     state_key: [u8; PRIVATE_KEY_SIZE],
 }
-
-// KeyManager
-// is_initialized - checks if there master key
-// seal - seal master key
-// unseal - unseal master key
-// random - init with random master key
 
 impl KeyManager {
     /// Checks if file with sealed master key exists
@@ -133,17 +126,6 @@ impl KeyManager {
 
         // Open file with master key
         let master_key_path = format!("{}/{}", SEED_HOME.to_str().unwrap(), SEED_FILENAME);
-        // let mut master_key_file =
-        //     match SgxFile::open(format!("{}/{}", SEED_HOME.to_str().unwrap(), SEED_FILENAME)) {
-        //         Ok(file) => file,
-        //         Err(err) => {
-        //             println!(
-        //                 "[KeyManager] Cannot open file with master key. Reason: {:?}",
-        //                 err
-        //             );
-        //             return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
-        //         }
-        //     };
         let mut master_key_file = SgxFile::open(master_key_path).map_err(|err| {
             println!("[KeyManager] Cannot open file with master key. Reason: {:?}", err);
             sgx_status_t::SGX_ERROR_UNEXPECTED
@@ -152,16 +134,6 @@ impl KeyManager {
 
         // Prepare buffer for seed and read it from file
         let mut master_key = [0u8; SEED_SIZE];
-        // match master_key_file.read(&mut master_key) {
-        //     Ok(_) => {}
-        //     Err(err) => {
-        //         println!(
-        //             "[KeyManager] Cannot read file with master key. Reason: {:?}",
-        //             err
-        //         );
-        //         return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
-        //     }
-        // };
         if let Err(err) = master_key_file.read(&mut master_key) {
             println!("[KeyManager] Cannot read master key file. Reason: {:?}", err);
             return Err(sgx_status_t::SGX_ERROR_UNEXPECTED)
@@ -182,16 +154,10 @@ impl KeyManager {
     pub fn random() -> SgxResult<Self> {
         let mut master_key = [0u8; 32];
         let res = unsafe { sgx_read_rand(&mut master_key as *mut u8, SEED_SIZE) };
-        match res {
-            sgx_status_t::SGX_SUCCESS => {}
-            _ => {
-                println!(
-                    "[KeyManager] Cannot generate random master key. Reason: {:?}",
-                    res.as_str()
-                );
-                return Err(res);
-            }
-        };
+        if res != sgx_status_t::SGX_SUCCESS {
+            println!("[KeyManager] Cannot generate random master key. Reason: {:?}", res);
+            return Err(res);
+        }
 
         // Derive keys for transaction and state encryption
         let tx_key = KeyManager::derive_key(&master_key, b"TransactionEncryptionKeyV1");
@@ -452,6 +418,16 @@ impl KeyManager {
 
         derived_key
     }
+
+    // // Converts incoming vector with public key to x25519_dalek::PublicKey
+    // fn x25519_pub_key_from_vec(input: Vec<u8>) -> Result<x25519_dalek::PublicKey, Error> {
+    //     let public_key: [u8; PUBLIC_KEY_SIZE] = public_key.as_slice().try_into().map_err(|err| {
+    //         println!("[KeyManager] Wrong size of provided public key");
+    //         return Err(Error::decryption_err("wrong public key size"));
+    //     })?;
+    //     let public_key = x25519_dalek::PublicKey::from(public_key);
+    //     Ok(public_key)
+    // }
 }
 
 /// RegistrationKey handles all operations with registration key such as derivation of public key,
