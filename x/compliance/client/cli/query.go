@@ -1,9 +1,11 @@
 package cli
 
 import (
+	"context"
 	"fmt"
-	"github.com/spf13/cobra"
 	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/client/flags"
+	"github.com/spf13/cobra"
 	"swisstronik/x/compliance/types"
 )
 
@@ -17,7 +19,38 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 		RunE:                       client.ValidateCmd,
 	}
 
-	cmd.AddCommand(CmdQueryParams())
+	cmd.AddCommand(
+		CmdQueryParams(),
+		CmdGetVerificationData(),
+	)
+
+	return cmd
+}
+
+func CmdGetVerificationData() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "get-verification-data [userAddress]",
+		Short: "",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx := client.GetClientContextFromCmd(cmd)
+			queryClient := types.NewQueryClient(clientCtx)
+
+			userAddress := args[0]
+			req := &types.QueryVerificationDataRequest{
+				Address: userAddress,
+			}
+
+			resp, err := queryClient.VerificationData(context.Background(), req)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(resp)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
 
 	return cmd
 }
