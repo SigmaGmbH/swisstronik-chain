@@ -10,6 +10,7 @@ const (
 	codeErrSignatureNotFound
 	codeErrBasicValidation
 	codeErrInvalidParam
+	codeErrNotAuthorized
 )
 
 var (

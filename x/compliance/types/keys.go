@@ -16,10 +16,12 @@ const (
 
 const (
 	prefixVerification = iota + 1
-	prefixIssuerAlias
+	prefixIssuerDetails
+	prefixAddressDetails
 )
 
 var (
-	KeyPrefixVerification = []byte{prefixVerification}
-	KeyPrefixIssuerAlias  = []byte{prefixIssuerAlias}
+	KeyPrefixVerification   = []byte{prefixVerification}
+	KeyPrefixIssuerDetails  = []byte{prefixIssuerDetails}
+	KeyPrefixAddressDetails = []byte{prefixAddressDetails}
 )
