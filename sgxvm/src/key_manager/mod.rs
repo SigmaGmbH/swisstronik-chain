@@ -40,19 +40,13 @@ pub fn init_master_key_inner(reset_flag: i32) -> sgx_status_t {
         // Generate random master key
         let key_manager = match KeyManager::random() {
             Ok(manager) => manager,
-            Err(err) => {
-                return err;
-            }
+            Err(err) => return err,
         };
 
         // Seal master key
         match key_manager.seal() {
-            Ok(_) => {
-                return sgx_status_t::SGX_SUCCESS;
-            }
-            Err(err) => {
-                return err;
-            }
+            Ok(_) => return sgx_status_t::SGX_SUCCESS,
+            Err(err) => return err,
         };
     }
 
