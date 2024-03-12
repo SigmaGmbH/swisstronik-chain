@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"cosmossdk.io/errors"
 	"fmt"
 	"github.com/cosmos/gogoproto/proto"
 
@@ -109,4 +110,49 @@ func (k Keeper) GetAddressInfo(ctx sdk.Context, address sdk.Address) (*types.Add
 	}
 
 	return &addrInfo, nil
+}
+
+// SetIssuerDetails sets description about provided issuer address
+func (k Keeper) SetIssuerDetails(ctx sdk.Context, issuerAddress sdk.Address, alias string) error {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixIssuerAlias)
+
+	if len(alias) == 0 {
+		return errors.Wrap(types.ErrInvalidParam, "invalid issuer alias")
+	}
+
+	details := &types.IssuerDetails{IssuerAlias: alias}
+	detailsBytes, err := details.Marshal()
+	if err != nil {
+		return err
+	}
+
+	store.Set(issuerAddress.Bytes(), detailsBytes)
+	return nil
+}
+
+// GetIssuerDetails returns details of provided issuer address
+func (k Keeper) GetIssuerDetails(ctx sdk.Context, issuerAddress sdk.Address) (*types.IssuerDetails, error) {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixIssuerAlias)
+
+	detailsBytes := store.Get(issuerAddress.Bytes())
+	if detailsBytes == nil {
+		return &types.IssuerDetails{}, nil
+	}
+
+	var issuerDetails types.IssuerDetails
+	if err := proto.Unmarshal(detailsBytes, &issuerDetails); err != nil {
+		return nil, err
+	}
+
+	return &issuerDetails, nil
+}
+
+// GetIssuerAlias returns human-readable alias of provided issuer address
+func (k Keeper) GetIssuerAlias(ctx sdk.Context, issuerAddress sdk.Address) (string, error) {
+	issuerDetails, err := k.GetIssuerDetails(ctx, issuerAddress)
+	if err != nil {
+		return "", err
+	}
+
+	return issuerDetails.IssuerAlias, nil
 }

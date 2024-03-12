@@ -9,6 +9,7 @@ const (
 	codeErrInvalidSignature
 	codeErrSignatureNotFound
 	codeErrBasicValidation
+	codeErrInvalidParam
 )
 
 var (
@@ -16,4 +17,5 @@ var (
 	ErrInvalidSignature  = sdkerrors.Register(ModuleName, codeErrInvalidSignature, "invalid signature detected")
 	ErrSignatureNotFound = sdkerrors.Register(ModuleName, codeErrSignatureNotFound, "signature is required but not found")
 	ErrBasicValidation   = sdkerrors.Register(ModuleName, codeErrBasicValidation, "basic validation failed")
+	ErrInvalidParam      = sdkerrors.Register(ModuleName, codeErrInvalidParam, "invalid param provided")
 )

@@ -50,6 +50,10 @@ message VerificationEntry {
     bytes original_data = 5;
 }
 
+message IssuerDetails {
+    string issuer_alias = 1;
+}
+
 message IssuerAdapterContractDetail {
     // Issuer company name
     string issuer_alias = 1;

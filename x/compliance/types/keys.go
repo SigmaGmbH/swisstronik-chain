@@ -16,12 +16,10 @@ const (
 
 const (
 	prefixVerification = iota + 1
+	prefixIssuerAlias
 )
-
-func KeyPrefix(p string) []byte {
-	return []byte(p)
-}
 
 var (
 	KeyPrefixVerification = []byte{prefixVerification}
+	KeyPrefixIssuerAlias  = []byte{prefixIssuerAlias}
 )
