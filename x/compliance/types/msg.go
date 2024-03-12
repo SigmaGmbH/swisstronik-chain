@@ -3,34 +3,33 @@ package types
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/ethereum/go-ethereum/common"
-	"time"
 )
 
-func NewMsgSetAddressInfo(signer, userAddress, issuerAddress string) MsgSetAddressInfo {
-	ethUserAddress := common.HexToAddress(userAddress)
-	ethIssuerAddress := common.HexToAddress(issuerAddress)
-
+func NewMsgSetAddressInfo(
+	signer, userAddress, issuerAddress, issuerAlias, originChain string,
+	creationTimestamp uint32,
+	verificationType VerificationType,
+) MsgSetAddressInfo {
 	adapterData := &IssuerAdapterContractDetail{
-		IssuerAlias:     issuerAddress,
-		ContractAddress: ethIssuerAddress.Bytes(),
+		IssuerAlias:     issuerAlias,
+		ContractAddress: issuerAddress,
 	}
 
 	verificationEntry := &VerificationEntry{
 		AdapterData:         adapterData,
-		OriginChain:         "swisstronik",
-		IssuanceTimestamp:   uint32(time.Now().Unix()),
+		OriginChain:         originChain,
+		IssuanceTimestamp:   creationTimestamp,
 		ExpirationTimestamp: 0,
 		OriginalData:        nil,
 	}
 
 	verificationData := &VerificationData{
-		VerificationType: VerificationType_VT_KYC,
+		VerificationType: verificationType,
 		Entries:          []*VerificationEntry{verificationEntry},
 	}
 
 	addressInfo := &AddressInfo{
-		Address:       ethUserAddress.Bytes(),
+		Address:       userAddress,
 		IsVerified:    true,
 		BanData:       nil,
 		Verifications: []*VerificationData{verificationData},
@@ -39,7 +38,7 @@ func NewMsgSetAddressInfo(signer, userAddress, issuerAddress string) MsgSetAddre
 	return MsgSetAddressInfo{
 		Signer:      signer,
 		Data:        addressInfo,
-		UserAddress: ethUserAddress.String(),
+		UserAddress: userAddress,
 	}
 }
 

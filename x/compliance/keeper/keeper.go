@@ -10,7 +10,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 
-	"github.com/ethereum/go-ethereum/common"
 	"swisstronik/x/compliance/types"
 )
 
@@ -42,7 +41,7 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
 }
 
-func (k *Keeper) SetAddressInfoRaw(ctx sdk.Context, subjectAddress []byte, data *types.AddressInfo) error {
+func (k Keeper) SetAddressInfoRaw(ctx sdk.Context, subjectAddress sdk.Address, data *types.AddressInfo) error {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerification)
 
 	dataBytes, err := data.Marshal()
@@ -50,12 +49,12 @@ func (k *Keeper) SetAddressInfoRaw(ctx sdk.Context, subjectAddress []byte, data 
 		return err
 	}
 
-	store.Set(subjectAddress, dataBytes)
+	store.Set(subjectAddress.Bytes(), dataBytes)
 	return nil
 }
 
 // TODO: methods for ban / unban
-func (k *Keeper) AddVerificationEntry(ctx sdk.Context, subjectAddress, issuerAddress common.Address, originChain string) error {
+func (k Keeper) AddVerificationEntry(ctx sdk.Context, subjectAddress, issuerAddress sdk.Address, originChain string) error {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerification)
 
 	// TODO: Check if entry for address already exists
@@ -63,7 +62,7 @@ func (k *Keeper) AddVerificationEntry(ctx sdk.Context, subjectAddress, issuerAdd
 	// Otherwise, create a new one
 	adapterData := types.IssuerAdapterContractDetail{
 		IssuerAlias:     issuerAddress.String(),
-		ContractAddress: issuerAddress.Bytes(),
+		ContractAddress: issuerAddress.String(),
 	}
 
 	verificationEntry := &types.VerificationEntry{
@@ -80,7 +79,7 @@ func (k *Keeper) AddVerificationEntry(ctx sdk.Context, subjectAddress, issuerAdd
 	}
 
 	addrInfo := types.AddressInfo{
-		Address:       subjectAddress.Bytes(),
+		Address:       subjectAddress.String(),
 		IsVerified:    true,
 		BanData:       nil,
 		Verifications: []*types.VerificationData{&verificationData},
@@ -95,10 +94,11 @@ func (k *Keeper) AddVerificationEntry(ctx sdk.Context, subjectAddress, issuerAdd
 	return nil
 }
 
-func (k *Keeper) GetAddressInfo(ctx sdk.Context, subjectAddress common.Address) (*types.AddressInfo, error) {
+// GetAddressInfo returns `AddressInfo` associated with provided address.
+func (k Keeper) GetAddressInfo(ctx sdk.Context, address sdk.Address) (*types.AddressInfo, error) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerification)
 
-	addrInfoBytes := store.Get(subjectAddress.Bytes())
+	addrInfoBytes := store.Get(address.Bytes())
 	if addrInfoBytes == nil {
 		return &types.AddressInfo{}, nil
 	}

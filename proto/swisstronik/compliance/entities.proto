@@ -23,7 +23,7 @@ enum VerificationType {
 }
 
 message AddressInfo {
-    bytes address = 1;
+    string address = 1;
     // This field is used during community verification of some address.
     // Only smart contract can be verified by community.
     bool is_verified = 2;
@@ -54,7 +54,7 @@ message IssuerAdapterContractDetail {
     // Issuer company name
     string issuer_alias = 1;
     // Adapter contract address
-    bytes contract_address = 2;
+    string contract_address = 2;
 }
 
 

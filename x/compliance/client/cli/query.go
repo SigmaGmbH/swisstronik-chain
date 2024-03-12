@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/spf13/cobra"
+	"strings"
 	"swisstronik/x/compliance/types"
 )
 
@@ -29,16 +32,30 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 
 func CmdGetAddressInfo() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "get-address-info [userAddress]",
-		Short: "",
+		Use:   "get-address-info [bech32-or-hex-address]",
+		Short: "Returns AddressInfo associated with provided address",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx := client.GetClientContextFromCmd(cmd)
 			queryClient := types.NewQueryClient(clientCtx)
+			cfg := sdk.GetConfig()
 
-			userAddress := args[0]
+			var address sdk.AccAddress
+			var err error
+			if !strings.HasPrefix(args[0], cfg.GetBech32AccountAddrPrefix()) {
+				// Assume that was provided eth address
+				ethAddress := common.HexToAddress(args[0])
+				address = ethAddress.Bytes()
+			} else {
+				// Assume that was provided bech32 address
+				address, err = sdk.AccAddressFromBech32(args[0])
+				if err != nil {
+					return err
+				}
+			}
+
 			req := &types.QueryVerificationDataRequest{
-				Address: userAddress,
+				Address: address.String(),
 			}
 
 			resp, err := queryClient.VerificationData(context.Background(), req)
