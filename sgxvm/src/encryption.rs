@@ -15,11 +15,10 @@ pub const DEFAULT_STORAGE_VALUE: [u8; 32] = [0u8; 32];
 /// * contract_address - Address of the contract. Used to derive unique storage encryption key for state of this smart contract
 /// * value - Raw storage value to encrypt
 pub fn encrypt_storage_cell(contract_address: Vec<u8>, encryption_salt: Vec<u8>, value: Vec<u8>) -> Result<Vec<u8>, Error> {
-    if let Some(km) = &*UNSEALED_KEY_MANAGER {
-        return km.encrypt_state(contract_address, encryption_salt, value)
-    };
-
-    Err(Error::encryption_err("Cannot unseal master key"))
+    match &*UNSEALED_KEY_MANAGER {
+        Some(key_manager) => key_manager.encrypt_state(contract_address, encryption_salt, value),
+        None => Err(Error::encryption_err("Cannot unseal master key"))
+    }
 }
 
 /// Decrypts given storage cell value using specific storage key for provided contract address
@@ -32,11 +31,10 @@ pub fn decrypt_storage_cell(contract_address: Vec<u8>, encrypted_value: Vec<u8>)
         return Ok(encrypted_value)
     }
 
-    if let Some(km) = &*UNSEALED_KEY_MANAGER {
-        return km.decrypt_state(contract_address, encrypted_value);
+    match &*UNSEALED_KEY_MANAGER {
+        Some(key_manager) => key_manager.decrypt_state(contract_address, encrypted_value),
+        None => Err(Error::encryption_err("Cannot unseal master key"))
     }
-
-    return Err(Error::encryption_err(format!("Cannot unseal master key")));
 }
 
 /// Extracts user public and encrypted data from provided tx `data` field.
@@ -71,12 +69,6 @@ pub fn extract_public_key_and_data(tx_data: Vec<u8>) -> Result<(Vec<u8>, Vec<u8>
 /// * encrypted_data - Encrypted data 
 /// * public_key - Public key provided by user
 pub fn decrypt_transaction_data(encrypted_data: Vec<u8>, public_key: Vec<u8>) -> Result<Vec<u8>, Error> {
-    // if let Some(km) = &*UNSEALED_KEY_MANAGER {
-    //     // return km.decrypt_ecdh(public_key.to_vec(), encrypted_data);
-    //     return km.tx_key.decrypt(public_key, encrypted_data);
-    // }
-    //
-    // return Err(Error::encryption_err(format!("Cannot unseal master key")));
     match &*UNSEALED_KEY_MANAGER {
         Some(key_manager) => key_manager.tx_key.decrypt(public_key, encrypted_data),
         None => Err(Error::encryption_err("Cannot unseal master key"))
@@ -99,10 +91,4 @@ pub fn encrypt_transaction_data(data: Vec<u8>, user_public_key: Vec<u8>, nonce: 
         Some(key_manager) => key_manager.tx_key.encrypt(user_public_key, data, nonce),
         None => Err(Error::encryption_err("Cannot unseal master key"))
     }
-
-    // if let Some(km) = &*UNSEALED_KEY_MANAGER {
-    //     return km.encrypt_ecdh(data, user_public_key, nonce);
-    // }
-    //
-    // return Err(Error::encryption_err(format!("Cannot unseal master key")));
 }
