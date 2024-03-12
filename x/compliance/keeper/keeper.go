@@ -42,6 +42,18 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
 }
 
+func (k *Keeper) SetAddressInfoRaw(ctx sdk.Context, subjectAddress []byte, data *types.AddressInfo) error {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerification)
+
+	dataBytes, err := data.Marshal()
+	if err != nil {
+		return err
+	}
+
+	store.Set(subjectAddress, dataBytes)
+	return nil
+}
+
 // TODO: methods for ban / unban
 func (k *Keeper) AddVerificationEntry(ctx sdk.Context, subjectAddress, issuerAddress common.Address, originChain string) error {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerification)
@@ -67,7 +79,8 @@ func (k *Keeper) AddVerificationEntry(ctx sdk.Context, subjectAddress, issuerAdd
 		Entries:          []*types.VerificationEntry{verificationEntry},
 	}
 
-	addrInfo := types.AddressInfo{Address: subjectAddress.Bytes(),
+	addrInfo := types.AddressInfo{
+		Address:       subjectAddress.Bytes(),
 		IsVerified:    true,
 		BanData:       nil,
 		Verifications: []*types.VerificationData{&verificationData},

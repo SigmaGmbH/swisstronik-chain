@@ -38,5 +38,5 @@ message QueryVerificationDataRequest {
 // QueryVerificationDataResponse is response type for the Query/VerificationData RPC method.
 message QueryVerificationDataResponse {
   // data holds all the verification data for provided address
-  VerificationData data = 1;
+  AddressInfo data = 1;
 }

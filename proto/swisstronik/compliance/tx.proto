@@ -9,11 +9,12 @@ option go_package = "swisstronik/x/compliance/types";
 
 // Msg defines the Msg service.
 service Msg {
-  rpc SetVerificationData(MsgSetVerificationData) returns (MsgSetVerificationDataResponse);
+  rpc SetAddressInfo(MsgSetAddressInfo) returns (MsgSetAddressInfoResponse);
 }
 
-message MsgSetVerificationData {
-  VerificationData data = 1;
-  string userAddress = 2;
+message MsgSetAddressInfo {
+  string signer = 1;
+  AddressInfo data = 2;
+  string userAddress = 3;
 }
-message MsgSetVerificationDataResponse {}
+message MsgSetAddressInfoResponse {}

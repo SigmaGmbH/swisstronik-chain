@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"fmt"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/ethereum/go-ethereum/common"
 	"swisstronik/x/compliance/types"
@@ -9,7 +10,6 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/tx"
-	"time"
 )
 
 // GetTxCmd returns the transaction commands for this module
@@ -22,17 +22,17 @@ func GetTxCmd() *cobra.Command {
 		RunE:                       client.ValidateCmd,
 	}
 
-	cmd.AddCommand(CmdSetVerificationData())
+	cmd.AddCommand(CmdSetAddressInfo())
 
 	return cmd
 }
 
-// CmdSetVerificationData command sets verification data for specific address.
+// CmdSetAddressInfo command sets sample verification data for specific address.
 // This function is used only for debug purposes and will be removed before chain update.
-func CmdSetVerificationData() *cobra.Command {
+func CmdSetAddressInfo() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "set-verification-data [userAddress] [issuerAddress]",
-		Short: "Sets verification data for provided address",
+		Use:   "set-address-info [userAddress] [issuerAddress]",
+		Short: "Sets sample verification data for provided address",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientTxContext(cmd)
@@ -40,30 +40,21 @@ func CmdSetVerificationData() *cobra.Command {
 				return err
 			}
 
-			userAddress := common.HexToAddress(args[0])
-			issuerAddress := common.HexToAddress(args[1])
-
-			adapterData := types.IssuerAdapterContractDetail{
-				IssuerAlias:     issuerAddress.String(),
-				ContractAddress: issuerAddress.Bytes(),
+			userAddress := args[0]
+			if !common.IsHexAddress(userAddress) {
+				return fmt.Errorf("provided non-eth user address")
 			}
 
-			entry := types.VerificationEntry{
-				AdapterData:         &adapterData,
-				OriginChain:         "swisstronik",
-				IssuanceTimestamp:   uint32(time.Now().Unix()),
-				ExpirationTimestamp: 0,
-				OriginalData:        nil,
-			}
-			verificationData := types.VerificationData{
-				VerificationType: 0,
-				Entries:          []*types.VerificationEntry{&entry},
+			issuerAddress := args[1]
+			if !common.IsHexAddress(issuerAddress) {
+				return fmt.Errorf("provided non-eth user address")
 			}
 
-			msg := types.MsgSetVerificationData{
-				UserAddress: userAddress.String(),
-				Data:        &verificationData,
-			}
+			msg := types.NewMsgSetAddressInfo(
+				clientCtx.GetFromAddress().String(),
+				userAddress,
+				issuerAddress,
+			)
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), &msg)
 		},

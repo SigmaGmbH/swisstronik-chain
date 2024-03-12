@@ -29,23 +29,24 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
-type MsgSetVerificationData struct {
-	Data        *VerificationData `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
-	UserAddress string            `protobuf:"bytes,2,opt,name=userAddress,proto3" json:"userAddress,omitempty"`
+type MsgSetAddressInfo struct {
+	Signer      string       `protobuf:"bytes,1,opt,name=signer,proto3" json:"signer,omitempty"`
+	Data        *AddressInfo `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
+	UserAddress string       `protobuf:"bytes,3,opt,name=userAddress,proto3" json:"userAddress,omitempty"`
 }
 
-func (m *MsgSetVerificationData) Reset()         { *m = MsgSetVerificationData{} }
-func (m *MsgSetVerificationData) String() string { return proto.CompactTextString(m) }
-func (*MsgSetVerificationData) ProtoMessage()    {}
-func (*MsgSetVerificationData) Descriptor() ([]byte, []int) {
+func (m *MsgSetAddressInfo) Reset()         { *m = MsgSetAddressInfo{} }
+func (m *MsgSetAddressInfo) String() string { return proto.CompactTextString(m) }
+func (*MsgSetAddressInfo) ProtoMessage()    {}
+func (*MsgSetAddressInfo) Descriptor() ([]byte, []int) {
 	return fileDescriptor_b617e43f088d8eed, []int{0}
 }
-func (m *MsgSetVerificationData) XXX_Unmarshal(b []byte) error {
+func (m *MsgSetAddressInfo) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *MsgSetVerificationData) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *MsgSetAddressInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_MsgSetVerificationData.Marshal(b, m, deterministic)
+		return xxx_messageInfo_MsgSetAddressInfo.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -55,47 +56,54 @@ func (m *MsgSetVerificationData) XXX_Marshal(b []byte, deterministic bool) ([]by
 		return b[:n], nil
 	}
 }
-func (m *MsgSetVerificationData) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MsgSetVerificationData.Merge(m, src)
+func (m *MsgSetAddressInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgSetAddressInfo.Merge(m, src)
 }
-func (m *MsgSetVerificationData) XXX_Size() int {
+func (m *MsgSetAddressInfo) XXX_Size() int {
 	return m.Size()
 }
-func (m *MsgSetVerificationData) XXX_DiscardUnknown() {
-	xxx_messageInfo_MsgSetVerificationData.DiscardUnknown(m)
+func (m *MsgSetAddressInfo) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgSetAddressInfo.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_MsgSetVerificationData proto.InternalMessageInfo
+var xxx_messageInfo_MsgSetAddressInfo proto.InternalMessageInfo
 
-func (m *MsgSetVerificationData) GetData() *VerificationData {
+func (m *MsgSetAddressInfo) GetSigner() string {
+	if m != nil {
+		return m.Signer
+	}
+	return ""
+}
+
+func (m *MsgSetAddressInfo) GetData() *AddressInfo {
 	if m != nil {
 		return m.Data
 	}
 	return nil
 }
 
-func (m *MsgSetVerificationData) GetUserAddress() string {
+func (m *MsgSetAddressInfo) GetUserAddress() string {
 	if m != nil {
 		return m.UserAddress
 	}
 	return ""
 }
 
-type MsgSetVerificationDataResponse struct {
+type MsgSetAddressInfoResponse struct {
 }
 
-func (m *MsgSetVerificationDataResponse) Reset()         { *m = MsgSetVerificationDataResponse{} }
-func (m *MsgSetVerificationDataResponse) String() string { return proto.CompactTextString(m) }
-func (*MsgSetVerificationDataResponse) ProtoMessage()    {}
-func (*MsgSetVerificationDataResponse) Descriptor() ([]byte, []int) {
+func (m *MsgSetAddressInfoResponse) Reset()         { *m = MsgSetAddressInfoResponse{} }
+func (m *MsgSetAddressInfoResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgSetAddressInfoResponse) ProtoMessage()    {}
+func (*MsgSetAddressInfoResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_b617e43f088d8eed, []int{1}
 }
-func (m *MsgSetVerificationDataResponse) XXX_Unmarshal(b []byte) error {
+func (m *MsgSetAddressInfoResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *MsgSetVerificationDataResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *MsgSetAddressInfoResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_MsgSetVerificationDataResponse.Marshal(b, m, deterministic)
+		return xxx_messageInfo_MsgSetAddressInfoResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -105,45 +113,45 @@ func (m *MsgSetVerificationDataResponse) XXX_Marshal(b []byte, deterministic boo
 		return b[:n], nil
 	}
 }
-func (m *MsgSetVerificationDataResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MsgSetVerificationDataResponse.Merge(m, src)
+func (m *MsgSetAddressInfoResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgSetAddressInfoResponse.Merge(m, src)
 }
-func (m *MsgSetVerificationDataResponse) XXX_Size() int {
+func (m *MsgSetAddressInfoResponse) XXX_Size() int {
 	return m.Size()
 }
-func (m *MsgSetVerificationDataResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_MsgSetVerificationDataResponse.DiscardUnknown(m)
+func (m *MsgSetAddressInfoResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgSetAddressInfoResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_MsgSetVerificationDataResponse proto.InternalMessageInfo
+var xxx_messageInfo_MsgSetAddressInfoResponse proto.InternalMessageInfo
 
 func init() {
-	proto.RegisterType((*MsgSetVerificationData)(nil), "swisstronik.compliance.MsgSetVerificationData")
-	proto.RegisterType((*MsgSetVerificationDataResponse)(nil), "swisstronik.compliance.MsgSetVerificationDataResponse")
+	proto.RegisterType((*MsgSetAddressInfo)(nil), "swisstronik.compliance.MsgSetAddressInfo")
+	proto.RegisterType((*MsgSetAddressInfoResponse)(nil), "swisstronik.compliance.MsgSetAddressInfoResponse")
 }
 
 func init() { proto.RegisterFile("swisstronik/compliance/tx.proto", fileDescriptor_b617e43f088d8eed) }
 
 var fileDescriptor_b617e43f088d8eed = []byte{
-	// 279 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x91, 0xb1, 0x4a, 0xc4, 0x40,
-	0x10, 0x86, 0x6f, 0x55, 0x04, 0xf7, 0xba, 0x28, 0xc7, 0x91, 0x62, 0x0d, 0x07, 0x42, 0xaa, 0x2c,
-	0x77, 0x82, 0x58, 0xd8, 0x28, 0xb6, 0xd7, 0x44, 0xb0, 0xb0, 0xdb, 0x24, 0x63, 0x58, 0xf4, 0x76,
-	0x42, 0x66, 0xd4, 0x58, 0xd8, 0xf9, 0x00, 0x3e, 0x96, 0xe5, 0x95, 0x96, 0x92, 0xbc, 0x88, 0x98,
-	0x53, 0x8c, 0x92, 0x2b, 0xec, 0x96, 0xdd, 0x6f, 0xf6, 0xff, 0xf8, 0x47, 0xee, 0xd3, 0x83, 0x25,
-	0xe2, 0x12, 0x9d, 0xbd, 0xd1, 0x29, 0x2e, 0x8a, 0x5b, 0x6b, 0x5c, 0x0a, 0x9a, 0xab, 0xa8, 0x28,
-	0x91, 0xd1, 0x1b, 0x75, 0x80, 0xe8, 0x07, 0xf0, 0xf7, 0x72, 0xcc, 0xb1, 0x45, 0xf4, 0xe7, 0x69,
-	0x45, 0xfb, 0x2a, 0x45, 0x5a, 0x20, 0xe9, 0xc4, 0x10, 0xe8, 0xfb, 0x69, 0x02, 0x6c, 0xa6, 0x3a,
-	0x45, 0xeb, 0xbe, 0xde, 0x0f, 0xd6, 0xc4, 0x81, 0x63, 0xcb, 0x16, 0x68, 0x85, 0x4d, 0x2a, 0x39,
-	0x9a, 0x53, 0x7e, 0x01, 0x7c, 0x09, 0xa5, 0xbd, 0xb6, 0xa9, 0x61, 0x8b, 0xee, 0xdc, 0xb0, 0xf1,
-	0x4e, 0xe4, 0x56, 0x66, 0xd8, 0x8c, 0x45, 0x20, 0xc2, 0xe1, 0x2c, 0x8c, 0xfa, 0xed, 0xa2, 0xbf,
-	0x73, 0x71, 0x3b, 0xe5, 0x05, 0x72, 0x78, 0x47, 0x50, 0x9e, 0x66, 0x59, 0x09, 0x44, 0xe3, 0x8d,
-	0x40, 0x84, 0x3b, 0x71, 0xf7, 0x6a, 0x12, 0x48, 0xd5, 0x9f, 0x1c, 0x03, 0x15, 0xe8, 0x08, 0x66,
-	0xcf, 0x42, 0x6e, 0xce, 0x29, 0xf7, 0x9e, 0xe4, 0x6e, 0x9f, 0x60, 0xb4, 0x4e, 0xa9, 0xff, 0x5b,
-	0xff, 0xe8, 0x7f, 0xfc, 0xb7, 0xc6, 0xd9, 0xf1, 0x6b, 0xad, 0xc4, 0xb2, 0x56, 0xe2, 0xbd, 0x56,
-	0xe2, 0xa5, 0x51, 0x83, 0x65, 0xa3, 0x06, 0x6f, 0x8d, 0x1a, 0x5c, 0xa9, 0x6e, 0xc7, 0xd5, 0xaf,
-	0xa5, 0x3e, 0x16, 0x40, 0xc9, 0x76, 0xdb, 0xf1, 0xe1, 0x47, 0x00, 0x00, 0x00, 0xff, 0xff, 0x62,
-	0x49, 0x11, 0x86, 0xfb, 0x01, 0x00, 0x00,
+	// 286 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x92, 0x2f, 0x2e, 0xcf, 0x2c,
+	0x2e, 0x2e, 0x29, 0xca, 0xcf, 0xcb, 0xcc, 0xd6, 0x4f, 0xce, 0xcf, 0x2d, 0xc8, 0xc9, 0x4c, 0xcc,
+	0x4b, 0x4e, 0xd5, 0x2f, 0xa9, 0xd0, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0x12, 0x43, 0x52, 0xa0,
+	0x87, 0x50, 0x20, 0x25, 0x92, 0x9e, 0x9f, 0x9e, 0x0f, 0x56, 0xa2, 0x0f, 0x62, 0x41, 0x54, 0x4b,
+	0xc9, 0x25, 0xe7, 0x17, 0xe7, 0xe6, 0x17, 0xeb, 0x27, 0x25, 0x16, 0xa7, 0xea, 0x97, 0x19, 0x26,
+	0xa5, 0x96, 0x24, 0x1a, 0xea, 0x27, 0xe7, 0x67, 0xe6, 0x41, 0xe5, 0x55, 0x71, 0x58, 0x97, 0x9a,
+	0x57, 0x92, 0x59, 0x92, 0x99, 0x5a, 0x0c, 0x51, 0xa6, 0xd4, 0xc6, 0xc8, 0x25, 0xe8, 0x5b, 0x9c,
+	0x1e, 0x9c, 0x5a, 0xe2, 0x98, 0x92, 0x52, 0x94, 0x5a, 0x5c, 0xec, 0x99, 0x97, 0x96, 0x2f, 0x24,
+	0xc6, 0xc5, 0x56, 0x9c, 0x99, 0x9e, 0x97, 0x5a, 0x24, 0xc1, 0xa8, 0xc0, 0xa8, 0xc1, 0x19, 0x04,
+	0xe5, 0x09, 0x99, 0x73, 0xb1, 0xa4, 0x24, 0x96, 0x24, 0x4a, 0x30, 0x29, 0x30, 0x6a, 0x70, 0x1b,
+	0x29, 0xeb, 0x61, 0x77, 0xb1, 0x1e, 0x92, 0x51, 0x41, 0x60, 0x0d, 0x42, 0x0a, 0x5c, 0xdc, 0xa5,
+	0xc5, 0xa9, 0x45, 0x50, 0x09, 0x09, 0x66, 0xb0, 0xa9, 0xc8, 0x42, 0x4a, 0xd2, 0x5c, 0x92, 0x18,
+	0xee, 0x08, 0x4a, 0x2d, 0x2e, 0xc8, 0xcf, 0x2b, 0x4e, 0x35, 0x2a, 0xe5, 0x62, 0xf6, 0x2d, 0x4e,
+	0x17, 0xca, 0xe3, 0xe2, 0x43, 0x73, 0xa8, 0x26, 0x2e, 0x27, 0x60, 0x98, 0x25, 0x65, 0x48, 0xb4,
+	0x52, 0x98, 0xb5, 0x4e, 0x16, 0x27, 0x1e, 0xc9, 0x31, 0x5e, 0x78, 0x24, 0xc7, 0xf8, 0xe0, 0x91,
+	0x1c, 0xe3, 0x84, 0xc7, 0x72, 0x0c, 0x17, 0x1e, 0xcb, 0x31, 0xdc, 0x78, 0x2c, 0xc7, 0x10, 0x25,
+	0x87, 0x1c, 0xba, 0x15, 0x28, 0xd1, 0x59, 0x59, 0x90, 0x5a, 0x9c, 0xc4, 0x06, 0x0e, 0x5d, 0x63,
+	0x40, 0x00, 0x00, 0x00, 0xff, 0xff, 0x8c, 0x6f, 0x6d, 0x9f, 0xf5, 0x01, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -158,7 +166,7 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type MsgClient interface {
-	SetVerificationData(ctx context.Context, in *MsgSetVerificationData, opts ...grpc.CallOption) (*MsgSetVerificationDataResponse, error)
+	SetAddressInfo(ctx context.Context, in *MsgSetAddressInfo, opts ...grpc.CallOption) (*MsgSetAddressInfoResponse, error)
 }
 
 type msgClient struct {
@@ -169,9 +177,9 @@ func NewMsgClient(cc grpc1.ClientConn) MsgClient {
 	return &msgClient{cc}
 }
 
-func (c *msgClient) SetVerificationData(ctx context.Context, in *MsgSetVerificationData, opts ...grpc.CallOption) (*MsgSetVerificationDataResponse, error) {
-	out := new(MsgSetVerificationDataResponse)
-	err := c.cc.Invoke(ctx, "/swisstronik.compliance.Msg/SetVerificationData", in, out, opts...)
+func (c *msgClient) SetAddressInfo(ctx context.Context, in *MsgSetAddressInfo, opts ...grpc.CallOption) (*MsgSetAddressInfoResponse, error) {
+	out := new(MsgSetAddressInfoResponse)
+	err := c.cc.Invoke(ctx, "/swisstronik.compliance.Msg/SetAddressInfo", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -180,35 +188,35 @@ func (c *msgClient) SetVerificationData(ctx context.Context, in *MsgSetVerificat
 
 // MsgServer is the server API for Msg service.
 type MsgServer interface {
-	SetVerificationData(context.Context, *MsgSetVerificationData) (*MsgSetVerificationDataResponse, error)
+	SetAddressInfo(context.Context, *MsgSetAddressInfo) (*MsgSetAddressInfoResponse, error)
 }
 
 // UnimplementedMsgServer can be embedded to have forward compatible implementations.
 type UnimplementedMsgServer struct {
 }
 
-func (*UnimplementedMsgServer) SetVerificationData(ctx context.Context, req *MsgSetVerificationData) (*MsgSetVerificationDataResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SetVerificationData not implemented")
+func (*UnimplementedMsgServer) SetAddressInfo(ctx context.Context, req *MsgSetAddressInfo) (*MsgSetAddressInfoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetAddressInfo not implemented")
 }
 
 func RegisterMsgServer(s grpc1.Server, srv MsgServer) {
 	s.RegisterService(&_Msg_serviceDesc, srv)
 }
 
-func _Msg_SetVerificationData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MsgSetVerificationData)
+func _Msg_SetAddressInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgSetAddressInfo)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MsgServer).SetVerificationData(ctx, in)
+		return srv.(MsgServer).SetAddressInfo(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/swisstronik.compliance.Msg/SetVerificationData",
+		FullMethod: "/swisstronik.compliance.Msg/SetAddressInfo",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgServer).SetVerificationData(ctx, req.(*MsgSetVerificationData))
+		return srv.(MsgServer).SetAddressInfo(ctx, req.(*MsgSetAddressInfo))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -218,15 +226,15 @@ var _Msg_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*MsgServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "SetVerificationData",
-			Handler:    _Msg_SetVerificationData_Handler,
+			MethodName: "SetAddressInfo",
+			Handler:    _Msg_SetAddressInfo_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "swisstronik/compliance/tx.proto",
 }
 
-func (m *MsgSetVerificationData) Marshal() (dAtA []byte, err error) {
+func (m *MsgSetAddressInfo) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -236,12 +244,12 @@ func (m *MsgSetVerificationData) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *MsgSetVerificationData) MarshalTo(dAtA []byte) (int, error) {
+func (m *MsgSetAddressInfo) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *MsgSetVerificationData) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *MsgSetAddressInfo) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -251,7 +259,7 @@ func (m *MsgSetVerificationData) MarshalToSizedBuffer(dAtA []byte) (int, error) 
 		copy(dAtA[i:], m.UserAddress)
 		i = encodeVarintTx(dAtA, i, uint64(len(m.UserAddress)))
 		i--
-		dAtA[i] = 0x12
+		dAtA[i] = 0x1a
 	}
 	if m.Data != nil {
 		{
@@ -263,12 +271,19 @@ func (m *MsgSetVerificationData) MarshalToSizedBuffer(dAtA []byte) (int, error) 
 			i = encodeVarintTx(dAtA, i, uint64(size))
 		}
 		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Signer) > 0 {
+		i -= len(m.Signer)
+		copy(dAtA[i:], m.Signer)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Signer)))
+		i--
 		dAtA[i] = 0xa
 	}
 	return len(dAtA) - i, nil
 }
 
-func (m *MsgSetVerificationDataResponse) Marshal() (dAtA []byte, err error) {
+func (m *MsgSetAddressInfoResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -278,12 +293,12 @@ func (m *MsgSetVerificationDataResponse) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *MsgSetVerificationDataResponse) MarshalTo(dAtA []byte) (int, error) {
+func (m *MsgSetAddressInfoResponse) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *MsgSetVerificationDataResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *MsgSetAddressInfoResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -302,12 +317,16 @@ func encodeVarintTx(dAtA []byte, offset int, v uint64) int {
 	dAtA[offset] = uint8(v)
 	return base
 }
-func (m *MsgSetVerificationData) Size() (n int) {
+func (m *MsgSetAddressInfo) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
+	l = len(m.Signer)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
 	if m.Data != nil {
 		l = m.Data.Size()
 		n += 1 + l + sovTx(uint64(l))
@@ -319,7 +338,7 @@ func (m *MsgSetVerificationData) Size() (n int) {
 	return n
 }
 
-func (m *MsgSetVerificationDataResponse) Size() (n int) {
+func (m *MsgSetAddressInfoResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -334,7 +353,7 @@ func sovTx(x uint64) (n int) {
 func sozTx(x uint64) (n int) {
 	return sovTx(uint64((x << 1) ^ uint64((int64(x) >> 63))))
 }
-func (m *MsgSetVerificationData) Unmarshal(dAtA []byte) error {
+func (m *MsgSetAddressInfo) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -357,13 +376,45 @@ func (m *MsgSetVerificationData) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: MsgSetVerificationData: wiretype end group for non-group")
+			return fmt.Errorf("proto: MsgSetAddressInfo: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MsgSetVerificationData: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: MsgSetAddressInfo: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Signer", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Signer = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Data", wireType)
 			}
@@ -393,13 +444,13 @@ func (m *MsgSetVerificationData) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if m.Data == nil {
-				m.Data = &VerificationData{}
+				m.Data = &AddressInfo{}
 			}
 			if err := m.Data.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
-		case 2:
+		case 3:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field UserAddress", wireType)
 			}
@@ -452,7 +503,7 @@ func (m *MsgSetVerificationData) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *MsgSetVerificationDataResponse) Unmarshal(dAtA []byte) error {
+func (m *MsgSetAddressInfoResponse) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -475,10 +526,10 @@ func (m *MsgSetVerificationDataResponse) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: MsgSetVerificationDataResponse: wiretype end group for non-group")
+			return fmt.Errorf("proto: MsgSetAddressInfoResponse: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MsgSetVerificationDataResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: MsgSetAddressInfoResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		default:

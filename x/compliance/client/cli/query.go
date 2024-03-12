@@ -21,15 +21,15 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 
 	cmd.AddCommand(
 		CmdQueryParams(),
-		CmdGetVerificationData(),
+		CmdGetAddressInfo(),
 	)
 
 	return cmd
 }
 
-func CmdGetVerificationData() *cobra.Command {
+func CmdGetAddressInfo() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "get-verification-data [userAddress]",
+		Use:   "get-address-info [userAddress]",
 		Short: "",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
