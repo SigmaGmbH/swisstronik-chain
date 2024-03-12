@@ -1,5 +1,6 @@
 use crate::error::Error;
 use crate::key_manager::{PUBLIC_KEY_SIZE, SEED_SIZE, utils, KeyManager};
+use crate::encryption::{encrypt_deoxys, decrypt_deoxys};
 use sgx_types::{sgx_read_rand, sgx_status_t, SgxResult};
 use std::vec::Vec;
 
@@ -69,7 +70,7 @@ impl TransactionEncryptionKey {
         // Derive encryption key from shared key
         let encryption_key = utils::derive_key(shared_key.as_bytes(), b"IOEncryptionKeyV1");
 
-        KeyManager::encrypt_deoxys(&encryption_key, plaintext, Some(salt))
+        encrypt_deoxys(&encryption_key, plaintext, Some(salt))
     }
 
     pub fn decrypt(&self, user_public_key: Vec<u8>, ciphertext: Vec<u8>) -> Result<Vec<u8>, Error> {
@@ -94,7 +95,7 @@ impl TransactionEncryptionKey {
         // Derive encryption key from shared key
         let encryption_key = utils::derive_key(shared_key.as_bytes(), b"IOEncryptionKeyV1");
 
-        KeyManager::decrypt_deoxys(&encryption_key, ciphertext)
+        decrypt_deoxys(&encryption_key, ciphertext)
     }
 
     pub fn public_key(&self) -> Vec<u8> {
@@ -128,7 +129,7 @@ impl StateEncryptionKey {
         // Derive encryption key for this contract
         let contract_key = utils::derive_key(&self.inner, &contract_address);
         // Encrypt contract state using contract encryption key
-        KeyManager::encrypt_deoxys(&contract_key, storage_value, Some(encryption_salt))
+        encrypt_deoxys(&contract_key, storage_value, Some(encryption_salt))
     }
 
     /// Decrypts provided storage value using encryption key, derived from StateEncryptionKey
@@ -141,7 +142,7 @@ impl StateEncryptionKey {
         // Derive encryption key for this contract
         let contract_key = utils::derive_key(&self.inner, &contract_address);
         // Decrypt contract state using contract encryption key
-        KeyManager::decrypt_deoxys(&contract_key, encrypted_storage_value)
+        decrypt_deoxys(&contract_key, encrypted_storage_value)
     }
 }
 

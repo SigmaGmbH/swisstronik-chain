@@ -1,9 +1,12 @@
-use deoxysii::NONCE_SIZE;
+use deoxysii::{DeoxysII, NONCE_SIZE, TAG_SIZE};
+use sgx_types::{sgx_read_rand, sgx_status_t};
 
 use crate::{error::Error, key_manager::PUBLIC_KEY_SIZE};
 use std::vec::Vec;
+use k256::sha2::{Digest, Sha256 as kSha256};
+use rand_chacha::rand_core::{RngCore, SeedableRng};
 
-use crate::key_manager::UNSEALED_KEY_MANAGER;
+use crate::key_manager::{PRIVATE_KEY_SIZE, UNSEALED_KEY_MANAGER};
 
 pub const FUNCTION_SELECTOR_LEN: usize = 4;
 pub const ZERO_FUNCTION_SELECTOR: [u8; 4] = [0u8; 4];
@@ -91,4 +94,89 @@ pub fn encrypt_transaction_data(data: Vec<u8>, user_public_key: Vec<u8>, nonce: 
         Some(key_manager) => key_manager.tx_key.encrypt(user_public_key, data, nonce),
         None => Err(Error::encryption_err("Cannot unseal master key"))
     }
+}
+
+/// Encrypts provided plaintext using DEOXYS-II
+/// * encryption_key - Encryption key which will be used for encryption
+/// * plaintext - Data to encrypt
+/// * encryption_salt - Arbitrary data which will be used as seed for derivation of nonce and ad fields
+pub fn encrypt_deoxys(
+    encryption_key: &[u8; PRIVATE_KEY_SIZE],
+    plaintext: Vec<u8>,
+    encryption_salt: Option<Vec<u8>>,
+) -> Result<Vec<u8>, Error> {
+    // Derive encryption salt if provided
+    let encryption_salt = encryption_salt.and_then(|salt| {
+        let mut hasher = kSha256::new();
+        hasher.update(salt);
+        let mut encryption_salt = [0u8; 32];
+        encryption_salt.copy_from_slice(&hasher.finalize());
+        Some(encryption_salt)
+    });
+
+    let nonce = match encryption_salt {
+        // If salt was not provided, generate random nonce field
+        None => {
+            let mut nonce_buffer = [0u8; NONCE_SIZE];
+            let result = unsafe { sgx_read_rand(&mut nonce_buffer as *mut u8, NONCE_SIZE) };
+            match result {
+                sgx_status_t::SGX_SUCCESS => nonce_buffer,
+                _ => {
+                    return Err(Error::encryption_err(format!(
+                        "Cannot generate nonce: {:?}",
+                        result.as_str()
+                    )))
+                }
+            }
+        }
+        // Otherwise use encryption_salt as seed for nonce generation
+        Some(encryption_salt) => {
+            let mut rng = rand_chacha::ChaCha8Rng::from_seed(encryption_salt);
+            let mut nonce = [0u8; NONCE_SIZE];
+            rng.fill_bytes(&mut nonce);
+            nonce
+        }
+    };
+
+    let ad = [0u8; TAG_SIZE];
+
+    // Construct cipher
+    let cipher = DeoxysII::new(encryption_key);
+    // Encrypt storage value
+    let ciphertext = cipher.seal(&nonce, plaintext, ad);
+    // Return concatenated nonce and ciphertext
+    Ok([nonce.as_slice(), ad.as_slice(), &ciphertext].concat())
+}
+
+/// Decrypt DEOXYS-II encrypted ciphertext
+pub fn decrypt_deoxys(
+    encryption_key: &[u8; PRIVATE_KEY_SIZE],
+    encrypted_value: Vec<u8>,
+) -> Result<Vec<u8>, Error> {
+    // 15 bytes nonce | 16 bytes tag size | >=16 bytes ciphertext
+    if encrypted_value.len() < 47 {
+        return Err(Error::decryption_err("corrupted ciphertext"));
+    }
+
+    // Extract nonce from encrypted value
+    let nonce = &encrypted_value[..NONCE_SIZE];
+    let nonce: [u8; 15] = match nonce.try_into() {
+        Ok(nonce) => nonce,
+        Err(_) => {
+            return Err(Error::decryption_err("cannot extract nonce"));
+        }
+    };
+
+    // Extract additional data
+    let ad = &encrypted_value[NONCE_SIZE..NONCE_SIZE + TAG_SIZE];
+
+    // Extract ciphertext
+    let ciphertext = encrypted_value[NONCE_SIZE + TAG_SIZE..].to_vec();
+    // Construct cipher
+    let cipher = DeoxysII::new(encryption_key);
+    // Decrypt ciphertext
+    cipher.open(&nonce, ciphertext, ad).map_err(|err| {
+        println!("[KeyManager] Cannot decrypt value. Reason: {:?}", err);
+        Error::decryption_err("Cannot decrypt value")
+    })
 }

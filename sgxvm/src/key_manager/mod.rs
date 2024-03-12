@@ -1,17 +1,14 @@
-use deoxysii::*;
-
 use lazy_static::lazy_static;
 use rand_chacha::rand_core::{RngCore, SeedableRng};
 use sgx_tstd::ffi::OsString;
 use sgx_tstd::{env, sgxfs::SgxFile};
-use sgx_types::{sgx_read_rand, sgx_status_t, SgxResult};
+use sgx_types::{sgx_status_t, SgxResult};
 use std::io::{Read, Write};
 use std::vec::Vec;
 
-use k256::sha2::{Digest, Sha256 as kSha256};
-
 use crate::error::Error;
 use crate::key_manager::keys::{StateEncryptionKey, TransactionEncryptionKey};
+use crate::encryption::{decrypt_deoxys, encrypt_deoxys};
 
 pub mod keys;
 pub mod utils;
@@ -171,91 +168,6 @@ impl KeyManager {
         })
     }
 
-    /// Encrypts provided plaintext using DEOXYS-II
-    /// * encryption_key - Encryption key which will be used for encryption
-    /// * plaintext - Data to encrypt
-    /// * encryption_salt - Arbitrary data which will be used as seed for derivation of nonce and ad fields
-    fn encrypt_deoxys(
-        encryption_key: &[u8; PRIVATE_KEY_SIZE],
-        plaintext: Vec<u8>,
-        encryption_salt: Option<Vec<u8>>,
-    ) -> Result<Vec<u8>, Error> {
-        // Derive encryption salt if provided
-        let encryption_salt = encryption_salt.and_then(|salt| {
-            let mut hasher = kSha256::new();
-            hasher.update(salt);
-            let mut encryption_salt = [0u8; 32];
-            encryption_salt.copy_from_slice(&hasher.finalize());
-            Some(encryption_salt)
-        });
-
-        let nonce = match encryption_salt {
-            // If salt was not provided, generate random nonce field
-            None => {
-                let mut nonce_buffer = [0u8; NONCE_SIZE];
-                let result = unsafe { sgx_read_rand(&mut nonce_buffer as *mut u8, NONCE_SIZE) };
-                match result {
-                    sgx_status_t::SGX_SUCCESS => nonce_buffer,
-                    _ => {
-                        return Err(Error::encryption_err(format!(
-                            "Cannot generate nonce: {:?}",
-                            result.as_str()
-                        )))
-                    }
-                }
-            }
-            // Otherwise use encryption_salt as seed for nonce generation
-            Some(encryption_salt) => {
-                let mut rng = rand_chacha::ChaCha8Rng::from_seed(encryption_salt);
-                let mut nonce = [0u8; NONCE_SIZE];
-                rng.fill_bytes(&mut nonce);
-                nonce
-            }
-        };
-
-        let ad = [0u8; TAG_SIZE];
-
-        // Construct cipher
-        let cipher = DeoxysII::new(encryption_key);
-        // Encrypt storage value
-        let ciphertext = cipher.seal(&nonce, plaintext, ad);
-        // Return concatenated nonce and ciphertext
-        Ok([nonce.as_slice(), ad.as_slice(), &ciphertext].concat())
-    }
-
-    /// Decrypt DEOXYS-II encrypted ciphertext
-    fn decrypt_deoxys(
-        encryption_key: &[u8; PRIVATE_KEY_SIZE],
-        encrypted_value: Vec<u8>,
-    ) -> Result<Vec<u8>, Error> {
-        // 15 bytes nonce | 16 bytes tag size | >=16 bytes ciphertext
-        if encrypted_value.len() < 47 {
-            return Err(Error::decryption_err("corrupted ciphertext"));
-        }
-
-        // Extract nonce from encrypted value
-        let nonce = &encrypted_value[..NONCE_SIZE];
-        let nonce: [u8; 15] = match nonce.try_into() {
-            Ok(nonce) => nonce,
-            Err(_) => {
-                return Err(Error::decryption_err("cannot extract nonce"));
-            }
-        };
-
-        // Extract additional data
-        let ad = &encrypted_value[NONCE_SIZE..NONCE_SIZE + TAG_SIZE];
-
-        // Extract ciphertext
-        let ciphertext = encrypted_value[NONCE_SIZE + TAG_SIZE..].to_vec();
-        // Construct cipher
-        let cipher = DeoxysII::new(encryption_key);
-        // Decrypt ciphertext
-        cipher.open(&nonce, ciphertext, ad).map_err(|err| {
-            println!("[KeyManager] Cannot decrypt value. Reason: {:?}", err);
-            Error::decryption_err("Cannot decrypt value")
-        })
-    }
-
     /// Encrypts master key using shared key
     pub fn to_encrypted_master_key(
         &self,
@@ -273,8 +185,7 @@ impl KeyManager {
         let shared_secret = reg_key.diffie_hellman(public_key);
 
         // Encrypted master key
-        let encrypted_value =
-            KeyManager::encrypt_deoxys(shared_secret.as_bytes(), self.master_key.to_vec(), None)?;
+        let encrypted_value = encrypt_deoxys(shared_secret.as_bytes(), self.master_key.to_vec(), None)?;
 
         // Add public key as prefix
         let reg_public_key = reg_key.public_key();
@@ -298,8 +209,7 @@ impl KeyManager {
         let shared_secret = reg_key.diffie_hellman(public_key);
 
         // Decrypt master key
-        let master_key =
-            KeyManager::decrypt_deoxys(shared_secret.as_bytes(), encrypted_master_key)?;
+        let master_key = decrypt_deoxys(shared_secret.as_bytes(), encrypted_master_key)?;
 
         // Convert master key to appropriate format
         let master_key: [u8; 32] = match master_key.try_into() {
