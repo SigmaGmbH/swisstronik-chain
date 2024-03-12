@@ -39,7 +39,6 @@ message VerificationData {
 
 }
 message VerificationEntry {
-    //
     IssuerAdapterContractDetail adapter_data = 1;
     // On which chain verification was passed
     string origin_chain = 2;
