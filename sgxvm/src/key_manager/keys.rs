@@ -25,7 +25,7 @@ impl RegistrationKey {
         Ok(Self { inner: random_key })
     }
 
-    /// Performes Diffie-Hellman derivation of encryption key for master key encryption
+    /// Performs Diffie-Hellman derivation of encryption key for master key encryption
     /// * public_key - User public key
     pub fn diffie_hellman(
         &self,
@@ -42,7 +42,7 @@ pub struct TransactionEncryptionKey {
 }
 
 impl TransactionEncryptionKey {
-    fn encrypt(
+    pub fn encrypt(
         &self,
         user_public_key: Vec<u8>,
         plaintext: Vec<u8>,
@@ -72,10 +72,10 @@ impl TransactionEncryptionKey {
         KeyManager::encrypt_deoxys(&encryption_key, plaintext, Some(salt))
     }
 
-    fn decrypt(&self, user_public_key: Vec<u8>, ciphertext: Vec<u8>) -> Result<Vec<u8>, Error> {
+    pub fn decrypt(&self, user_public_key: Vec<u8>, ciphertext: Vec<u8>) -> Result<Vec<u8>, Error> {
         // Check if user_public_key has correct length
         if user_public_key.len() != PUBLIC_KEY_SIZE {
-            return Err(Error::encryption_err(format!(
+            return Err(Error::decryption_err(format!(
                 "[Encryption] Got public key with incorrect length. Expected: {:?}, Got: {:?}",
                 user_public_key.len(),
                 PUBLIC_KEY_SIZE
@@ -95,6 +95,12 @@ impl TransactionEncryptionKey {
         let encryption_key = utils::derive_key(shared_key.as_bytes(), b"IOEncryptionKeyV1");
 
         KeyManager::decrypt_deoxys(&encryption_key, ciphertext)
+    }
+
+    pub fn public_key(&self) -> Vec<u8> {
+        let secret_key = x25519_dalek::StaticSecret::from(self.inner);
+        let public_key = x25519_dalek::PublicKey::from(&secret_key);
+        public_key.as_bytes().to_vec()
     }
 }
 

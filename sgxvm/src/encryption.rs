@@ -71,11 +71,16 @@ pub fn extract_public_key_and_data(tx_data: Vec<u8>) -> Result<(Vec<u8>, Vec<u8>
 /// * encrypted_data - Encrypted data 
 /// * public_key - Public key provided by user
 pub fn decrypt_transaction_data(encrypted_data: Vec<u8>, public_key: Vec<u8>) -> Result<Vec<u8>, Error> {
-    if let Some(km) = &*UNSEALED_KEY_MANAGER {
-        return km.decrypt_ecdh(public_key.to_vec(), encrypted_data);
+    // if let Some(km) = &*UNSEALED_KEY_MANAGER {
+    //     // return km.decrypt_ecdh(public_key.to_vec(), encrypted_data);
+    //     return km.tx_key.decrypt(public_key, encrypted_data);
+    // }
+    //
+    // return Err(Error::encryption_err(format!("Cannot unseal master key")));
+    match &*UNSEALED_KEY_MANAGER {
+        Some(key_manager) => key_manager.tx_key.decrypt(public_key, encrypted_data),
+        None => Err(Error::encryption_err("Cannot unseal master key"))
     }
-
-    return Err(Error::encryption_err(format!("Cannot unseal master key")));
 }
 
 /// Encrypts transaction data or response
@@ -90,9 +95,14 @@ pub fn encrypt_transaction_data(data: Vec<u8>, user_public_key: Vec<u8>, nonce: 
         return Err(Error::ecdh_err("Wrong nonce size"));
     }
 
-    if let Some(km) = &*UNSEALED_KEY_MANAGER {
-        return km.encrypt_ecdh(data, user_public_key, nonce);
+    match &*UNSEALED_KEY_MANAGER {
+        Some(key_manager) => key_manager.tx_key.encrypt(user_public_key, data, nonce),
+        None => Err(Error::encryption_err("Cannot unseal master key"))
     }
 
-    return Err(Error::encryption_err(format!("Cannot unseal master key")));
+    // if let Some(km) = &*UNSEALED_KEY_MANAGER {
+    //     return km.encrypt_ecdh(data, user_public_key, nonce);
+    // }
+    //
+    // return Err(Error::encryption_err(format!("Cannot unseal master key")));
 }

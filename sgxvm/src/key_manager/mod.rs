@@ -11,6 +11,7 @@ use std::vec::Vec;
 use k256::sha2::{Digest, Sha256 as kSha256};
 
 use crate::error::Error;
+use crate::key_manager::keys::TransactionEncryptionKey;
 
 pub mod keys;
 pub mod utils;
@@ -67,7 +68,8 @@ pub struct KeyManager {
     // Master key to derive all keys
     master_key: [u8; 32],
     // Transaction key is used during encryption / decryption of transaction data
-    tx_key: [u8; PRIVATE_KEY_SIZE],
+    // tx_key: [u8; PRIVATE_KEY_SIZE],
+    pub tx_key: keys::TransactionEncryptionKey,
     // State key is used for encryption of state fields
     state_key: [u8; PRIVATE_KEY_SIZE],
 }
@@ -133,7 +135,6 @@ impl KeyManager {
             sgx_status_t::SGX_ERROR_UNEXPECTED
         })?;
 
-
         // Prepare buffer for seed and read it from file
         let mut master_key = [0u8; SEED_SIZE];
         if let Err(err) = master_key_file.read(&mut master_key) {
@@ -142,12 +143,12 @@ impl KeyManager {
         }
 
         // Derive keys for transaction and state encryption
-        let tx_key = utils::derive_key(&master_key, b"TransactionEncryptionKeyV1");
+        let tx_key_bytes = utils::derive_key(&master_key, b"TransactionEncryptionKeyV1");
         let state_key = utils::derive_key(&master_key, b"StateEncryptionKeyV1");
 
         Ok(Self {
             master_key,
-            tx_key,
+            tx_key: TransactionEncryptionKey::from(tx_key_bytes),
             state_key,
         })
     }
@@ -162,12 +163,12 @@ impl KeyManager {
         }
 
         // Derive keys for transaction and state encryption
-        let tx_key = utils::derive_key(&master_key, b"TransactionEncryptionKeyV1");
+        let tx_key_bytes = utils::derive_key(&master_key, b"TransactionEncryptionKeyV1");
         let state_key = utils::derive_key(&master_key, b"StateEncryptionKeyV1");
 
         Ok(Self {
             master_key,
-            tx_key,
+            tx_key: TransactionEncryptionKey::from(tx_key_bytes),
             state_key,
         })
     }
@@ -175,54 +176,54 @@ impl KeyManager {
     /// Encrypts provided value using encryption key, derived from master key and user public key.
     /// To derive shared secret we're using x25519 since its private keys have wider range of acceptable
     /// values than secp256k1, which is used for transaction signing.
-    pub fn encrypt_ecdh(
-        &self,
-        value: Vec<u8>,
-        public_key: Vec<u8>,
-        encryption_salt: Vec<u8>,
-    ) -> Result<Vec<u8>, Error> {
-        // Convert public key to appropriate format
-        let public_key: [u8; PUBLIC_KEY_SIZE] = match public_key.as_slice().try_into() {
-            Ok(public_key) => public_key,
-            Err(_) => {
-                return Err(Error::encryption_err("wrong public key size"));
-            }
-        };
-        let public_key = x25519_dalek::PublicKey::from(public_key);
-        // Convert master key to x25519 private key
-        let secret_key = x25519_dalek::StaticSecret::from(self.tx_key);
-        // Derive shared key
-        let shared_key = secret_key.diffie_hellman(&public_key);
-        // Derive encryption key from shared key
-        let encryption_key = utils::derive_key(shared_key.as_bytes(), b"IOEncryptionKeyV1");
-        // Encrypt provided value using shared secret
-        KeyManager::encrypt_deoxys(&encryption_key, value, Some(encryption_salt))
-    }
+    // pub fn encrypt_ecdh(
+    //     &self,
+    //     value: Vec<u8>,
+    //     public_key: Vec<u8>,
+    //     encryption_salt: Vec<u8>,
+    // ) -> Result<Vec<u8>, Error> {
+    //     // Convert public key to appropriate format
+    //     let public_key: [u8; PUBLIC_KEY_SIZE] = match public_key.as_slice().try_into() {
+    //         Ok(public_key) => public_key,
+    //         Err(_) => {
+    //             return Err(Error::encryption_err("wrong public key size"));
+    //         }
+    //     };
+    //     let public_key = x25519_dalek::PublicKey::from(public_key);
+    //     // Convert master key to x25519 private key
+    //     let secret_key = x25519_dalek::StaticSecret::from(self.tx_key);
+    //     // Derive shared key
+    //     let shared_key = secret_key.diffie_hellman(&public_key);
+    //     // Derive encryption key from shared key
+    //     let encryption_key = utils::derive_key(shared_key.as_bytes(), b"IOEncryptionKeyV1");
+    //     // Encrypt provided value using shared secret
+    //     KeyManager::encrypt_deoxys(&encryption_key, value, Some(encryption_salt))
+    // }
 
     /// Decrypts provided encrypted transaction data using encryption key,
     /// derived from node master key and user public key
-    pub fn decrypt_ecdh(
-        &self,
-        public_key: Vec<u8>,
-        encrypted_value: Vec<u8>,
-    ) -> Result<Vec<u8>, Error> {
-        // Convert public key to appropriate format
-        let public_key: [u8; PUBLIC_KEY_SIZE] = match public_key.as_slice().try_into() {
-            Ok(public_key) => public_key,
-            Err(_) => {
-                return Err(Error::decryption_err("wrong public key size"));
-            }
-        };
-        let public_key = x25519_dalek::PublicKey::from(public_key);
-        // Convert master key to x25519 private key
-        let secret_key = x25519_dalek::StaticSecret::from(self.tx_key);
-        // Derive shared key
-        let shared_key = secret_key.diffie_hellman(&public_key);
-        // Derive encryption key from shared key
-        let encryption_key = utils::derive_key(shared_key.as_bytes(), b"IOEncryptionKeyV1");
-        // Decrypt provided value using shared secret
-        KeyManager::decrypt_deoxys(&encryption_key, encrypted_value)
-    }
+    // pub fn decrypt_ecdh(
+    //     &self,
+    //     public_key: Vec<u8>,
+    //     encrypted_value: Vec<u8>,
+    // ) -> Result<Vec<u8>, Error> {
+    //     // Convert public key to appropriate format
+    //     let public_key: [u8; PUBLIC_KEY_SIZE] = match public_key.as_slice().try_into() {
+    //         Ok(public_key) => public_key,
+    //         Err(_) => {
+    //             return Err(Error::decryption_err("wrong public key size"));
+    //         }
+    //     };
+    //     let public_key = x25519_dalek::PublicKey::from(public_key);
+    //     // Convert master key to x25519 private key
+    //     let secret_key = x25519_dalek::StaticSecret::from(self.tx_key);
+    //     // Derive shared key
+    //     let shared_key = secret_key.diffie_hellman(&public_key);
+    //     // Derive encryption key from shared key
+    //     let encryption_key = utils::derive_key(shared_key.as_bytes(), b"IOEncryptionKeyV1");
+    //     // Decrypt provided value using shared secret
+    //     KeyManager::decrypt_deoxys(&encryption_key, encrypted_value)
+    // }
 
     /// Encrypts smart contract state using simmetric key derived from master key only for specific contract.
     /// That allows us to improve cryptographic strength of our encryption scheme.
@@ -394,21 +395,22 @@ impl KeyManager {
         };
 
         // Derive keys for transaction and state encryption
-        let tx_key = utils::derive_key(&master_key, b"TransactionEncryptionKeyV1");
+        let tx_key_bytes = utils::derive_key(&master_key, b"TransactionEncryptionKeyV1");
         let state_key = utils::derive_key(&master_key, b"StateEncryptionKeyV1");
 
         Ok(Self {
             master_key,
-            tx_key,
+            tx_key: TransactionEncryptionKey::from(tx_key_bytes),
             state_key,
         })
     }
 
     /// Return x25519 public key for transaction encryption
     pub fn get_public_key(&self) -> Vec<u8> {
-        let secret = x25519_dalek::StaticSecret::from(self.tx_key);
-        let public_key = x25519_dalek::PublicKey::from(&secret);
-        public_key.as_bytes().to_vec()
+        // let secret = x25519_dalek::StaticSecret::from(self.tx_key);
+        // let public_key = x25519_dalek::PublicKey::from(&secret);
+        // public_key.as_bytes().to_vec()
+        self.tx_key.public_key()
     }
 }
 
