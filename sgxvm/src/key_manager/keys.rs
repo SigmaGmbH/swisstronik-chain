@@ -1,7 +1,7 @@
 use crate::error::Error;
-use crate::key_manager::{PUBLIC_KEY_SIZE, SEED_SIZE, utils, KeyManager};
+use crate::key_manager::{PUBLIC_KEY_SIZE, SEED_SIZE, utils};
 use crate::encryption::{encrypt_deoxys, decrypt_deoxys};
-use sgx_types::{sgx_read_rand, sgx_status_t, SgxResult};
+use sgx_types::SgxResult;
 use std::vec::Vec;
 
 pub const REGISTRATION_KEY_SIZE: usize = 32;
@@ -10,20 +10,22 @@ pub const PRIVATE_KEY_SIZE: usize = 32;
 /// RegistrationKey handles all operations with registration key such as derivation of public key,
 /// derivation of encryption key, etc.
 pub struct RegistrationKey {
-    inner: [u8; REGISTRATION_KEY_SIZE],
+    inner: x25519_dalek::StaticSecret,
 }
 
 impl RegistrationKey {
     /// Generates public key for seed sharing
     pub fn public_key(&self) -> x25519_dalek::PublicKey {
-        let secret = x25519_dalek::StaticSecret::from(self.inner);
-        x25519_dalek::PublicKey::from(&secret)
+        x25519_dalek::PublicKey::from(&self.inner)
     }
 
     /// Generates random registration key
     pub fn random() -> SgxResult<Self> {
         let random_key = utils::random_bytes32()?;
-        Ok(Self { inner: random_key })
+
+        Ok( Self {
+            inner: x25519_dalek::StaticSecret::from(random_key),
+        })
     }
 
     /// Performs Diffie-Hellman derivation of encryption key for master key encryption
@@ -32,14 +34,13 @@ impl RegistrationKey {
         &self,
         public_key: x25519_dalek::PublicKey,
     ) -> x25519_dalek::SharedSecret {
-        let secret = x25519_dalek::StaticSecret::from(self.inner);
-        secret.diffie_hellman(&public_key)
+        self.inner.diffie_hellman(&public_key)
     }
 }
 
 /// TransactionEncryptionKey is used to decrypt incoming transaction data and to encrypt enclave output
 pub struct TransactionEncryptionKey {
-    inner: [u8; PRIVATE_KEY_SIZE],
+    inner: x25519_dalek::StaticSecret,
 }
 
 impl TransactionEncryptionKey {
@@ -63,10 +64,8 @@ impl TransactionEncryptionKey {
         })?;
 
         let public_key = x25519_dalek::PublicKey::from(public_key);
-        // Convert master key to x25519 private key
-        let secret_key = x25519_dalek::StaticSecret::from(self.inner);
         // Derive shared key
-        let shared_key = secret_key.diffie_hellman(&public_key);
+        let shared_key = self.inner.diffie_hellman(&public_key);
         // Derive encryption key from shared key
         let encryption_key = utils::derive_key(shared_key.as_bytes(), b"IOEncryptionKeyV1");
 
@@ -88,10 +87,8 @@ impl TransactionEncryptionKey {
         })?;
 
         let public_key = x25519_dalek::PublicKey::from(public_key);
-        // Convert master key to x25519 private key
-        let secret_key = x25519_dalek::StaticSecret::from(self.inner);
         // Derive shared key
-        let shared_key = secret_key.diffie_hellman(&public_key);
+        let shared_key = self.inner.diffie_hellman(&public_key);
         // Derive encryption key from shared key
         let encryption_key = utils::derive_key(shared_key.as_bytes(), b"IOEncryptionKeyV1");
 
@@ -99,15 +96,16 @@ impl TransactionEncryptionKey {
     }
 
     pub fn public_key(&self) -> Vec<u8> {
-        let secret_key = x25519_dalek::StaticSecret::from(self.inner);
-        let public_key = x25519_dalek::PublicKey::from(&secret_key);
+        let public_key = x25519_dalek::PublicKey::from(&self.inner);
         public_key.as_bytes().to_vec()
     }
 }
 
 impl From<[u8; SEED_SIZE]> for TransactionEncryptionKey {
     fn from(input: [u8; SEED_SIZE]) -> Self {
-        Self { inner: input }
+        Self {
+            inner: x25519_dalek::StaticSecret::from(input)
+        }
     }
 }
 

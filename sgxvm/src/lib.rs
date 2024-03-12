@@ -5,14 +5,13 @@
 extern crate sgx_tstd as std;
 extern crate rustls;
 extern crate sgx_tse;
-
 extern crate sgx_types;
+
 use sgx_types::*;
 use sgx_tcrypto::*;
 
 use std::slice;
 use std::string::String;
-use std::vec::Vec;
 
 use crate::querier::GoQuerier;
 use crate::types::{Allocation, AllocationWithResult};
