@@ -109,3 +109,44 @@ impl From<[u8; SEED_SIZE]> for TransactionEncryptionKey {
         Self { inner: input }
     }
 }
+
+/// StateEncryptionKey is used to encrypt and decrypt storage values
+pub struct StateEncryptionKey {
+    inner: [u8; PRIVATE_KEY_SIZE],
+}
+
+impl StateEncryptionKey {
+    /// Encrypts provided storage value using encryption key, derived from
+    /// StateEncryptionKey and contract address using KDF. Therefore, each contract state
+    /// is encrypted using unique key.
+    pub fn encrypt(
+        &self,
+        contract_address: Vec<u8>,
+        encryption_salt: Vec<u8>,
+        storage_value: Vec<u8>
+    ) -> Result<Vec<u8>, Error> {
+        // Derive encryption key for this contract
+        let contract_key = utils::derive_key(&self.inner, &contract_address);
+        // Encrypt contract state using contract encryption key
+        KeyManager::encrypt_deoxys(&contract_key, storage_value, Some(encryption_salt))
+    }
+
+    /// Decrypts provided storage value using encryption key, derived from StateEncryptionKey
+    /// and contract address.
+    pub fn decrypt(
+        &self,
+        contract_address: Vec<u8>,
+        encrypted_storage_value: Vec<u8>,
+    ) -> Result<Vec<u8>, Error> {
+        // Derive encryption key for this contract
+        let contract_key = utils::derive_key(&self.inner, &contract_address);
+        // Decrypt contract state using contract encryption key
+        KeyManager::decrypt_deoxys(&contract_key, encrypted_storage_value)
+    }
+}
+
+impl From<[u8; SEED_SIZE]> for StateEncryptionKey {
+    fn from(input: [u8; SEED_SIZE]) -> Self {
+        Self { inner: input }
+    }
+}

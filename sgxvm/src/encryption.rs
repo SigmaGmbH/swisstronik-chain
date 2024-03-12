@@ -16,7 +16,7 @@ pub const DEFAULT_STORAGE_VALUE: [u8; 32] = [0u8; 32];
 /// * value - Raw storage value to encrypt
 pub fn encrypt_storage_cell(contract_address: Vec<u8>, encryption_salt: Vec<u8>, value: Vec<u8>) -> Result<Vec<u8>, Error> {
     match &*UNSEALED_KEY_MANAGER {
-        Some(key_manager) => key_manager.encrypt_state(contract_address, encryption_salt, value),
+        Some(key_manager) => key_manager.state_key.encrypt(contract_address, encryption_salt, value),
         None => Err(Error::encryption_err("Cannot unseal master key"))
     }
 }
@@ -32,7 +32,7 @@ pub fn decrypt_storage_cell(contract_address: Vec<u8>, encrypted_value: Vec<u8>)
     }
 
     match &*UNSEALED_KEY_MANAGER {
-        Some(key_manager) => key_manager.decrypt_state(contract_address, encrypted_value),
+        Some(key_manager) => key_manager.state_key.decrypt(contract_address, encrypted_value),
         None => Err(Error::encryption_err("Cannot unseal master key"))
     }
 }

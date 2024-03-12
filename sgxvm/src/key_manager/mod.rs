@@ -11,7 +11,7 @@ use std::vec::Vec;
 use k256::sha2::{Digest, Sha256 as kSha256};
 
 use crate::error::Error;
-use crate::key_manager::keys::TransactionEncryptionKey;
+use crate::key_manager::keys::{StateEncryptionKey, TransactionEncryptionKey};
 
 pub mod keys;
 pub mod utils;
@@ -68,9 +68,10 @@ pub struct KeyManager {
     // Master key to derive all keys
     master_key: [u8; 32],
     // Transaction key is used during encryption / decryption of transaction data
-    pub tx_key: keys::TransactionEncryptionKey,
+    pub tx_key: TransactionEncryptionKey,
     // State key is used for encryption of state fields
-    state_key: [u8; PRIVATE_KEY_SIZE],
+    // state_key: [u8; PRIVATE_KEY_SIZE],
+    pub state_key: StateEncryptionKey,
 }
 
 impl KeyManager {
@@ -143,12 +144,12 @@ impl KeyManager {
 
         // Derive keys for transaction and state encryption
         let tx_key_bytes = utils::derive_key(&master_key, b"TransactionEncryptionKeyV1");
-        let state_key = utils::derive_key(&master_key, b"StateEncryptionKeyV1");
+        let state_key_bytes = utils::derive_key(&master_key, b"StateEncryptionKeyV1");
 
         Ok(Self {
             master_key,
             tx_key: TransactionEncryptionKey::from(tx_key_bytes),
-            state_key,
+            state_key: StateEncryptionKey::from(state_key_bytes),
         })
     }
 
@@ -161,41 +162,13 @@ impl KeyManager {
 
         // Derive keys for transaction and state encryption
         let tx_key_bytes = utils::derive_key(&master_key, b"TransactionEncryptionKeyV1");
-        let state_key = utils::derive_key(&master_key, b"StateEncryptionKeyV1");
+        let state_key_bytes = utils::derive_key(&master_key, b"StateEncryptionKeyV1");
 
         Ok(Self {
             master_key,
             tx_key: TransactionEncryptionKey::from(tx_key_bytes),
-            state_key,
+            state_key: StateEncryptionKey::from(state_key_bytes),
         })
-    }
-
-    /// Encrypts smart contract state using simmetric key derived from master key only for specific contract.
-    /// That allows us to improve cryptographic strength of our encryption scheme.
-    ///
-    /// As an output, this function returns vector which contains 15 bytes nonce and ciphertext.
-    pub fn encrypt_state(
-        &self,
-        contract_address: Vec<u8>,
-        encryption_salt: Vec<u8>,
-        value: Vec<u8>,
-    ) -> Result<Vec<u8>, Error> {
-        // Derive encryption key for this contract
-        let contract_key = utils::derive_key(&self.state_key, &contract_address);
-        // Encrypt contract state using contract encryption key
-        KeyManager::encrypt_deoxys(&contract_key, value, Some(encryption_salt))
-    }
-
-    /// Decrypts provided encrypted storage value of a smart contract.
-    pub fn decrypt_state(
-        &self,
-        contract_address: Vec<u8>,
-        encrypted_value: Vec<u8>,
-    ) -> Result<Vec<u8>, Error> {
-        // Derive encryption key for this contract
-        let contract_key = utils::derive_key(&self.state_key, &contract_address);
-        // Decrypt contract state using contract encryption key
-        KeyManager::decrypt_deoxys(&contract_key, encrypted_value)
     }
 
     /// Encrypts provided plaintext using DEOXYS-II
@@ -338,12 +311,12 @@ impl KeyManager {
 
         // Derive keys for transaction and state encryption
         let tx_key_bytes = utils::derive_key(&master_key, b"TransactionEncryptionKeyV1");
-        let state_key = utils::derive_key(&master_key, b"StateEncryptionKeyV1");
+        let state_key_bytes = utils::derive_key(&master_key, b"StateEncryptionKeyV1");
 
         Ok(Self {
             master_key,
             tx_key: TransactionEncryptionKey::from(tx_key_bytes),
-            state_key,
+            state_key: StateEncryptionKey::from(state_key_bytes),
         })
     }
 
