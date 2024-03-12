@@ -42,9 +42,13 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
 }
 
+// TODO: methods for ban / unban
 func (k *Keeper) AddVerificationEntry(ctx sdk.Context, subjectAddress, issuerAddress common.Address, originChain string) error {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerification)
 
+	// TODO: Check if entry for address already exists
+	// If entry exists, add verificationData to existing entry
+	// Otherwise, create a new one
 	adapterData := types.IssuerAdapterContractDetail{
 		IssuerAlias:     issuerAddress.String(),
 		ContractAddress: issuerAddress.Bytes(),
@@ -62,27 +66,34 @@ func (k *Keeper) AddVerificationEntry(ctx sdk.Context, subjectAddress, issuerAdd
 		VerificationType: types.VerificationType_VT_KYC,
 		Entries:          []*types.VerificationEntry{verificationEntry},
 	}
-	verificationDataBytes, err := verificationData.Marshal()
+
+	addrInfo := types.AddressInfo{Address: subjectAddress.Bytes(),
+		IsVerified:    true,
+		BanData:       nil,
+		Verifications: []*types.VerificationData{&verificationData},
+	}
+
+	addrInfoBytes, err := addrInfo.Marshal()
 	if err != nil {
 		return err
 	}
 
-	store.Set(subjectAddress.Bytes(), verificationDataBytes)
+	store.Set(subjectAddress.Bytes(), addrInfoBytes)
 	return nil
 }
 
-func (k *Keeper) GetVerificationData(ctx sdk.Context, subjectAddress common.Address) (*types.VerificationData, error) {
+func (k *Keeper) GetVerificationData(ctx sdk.Context, subjectAddress common.Address) (*types.AddressInfo, error) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerification)
 
-	verificationDataBytes := store.Get(subjectAddress.Bytes())
-	if verificationDataBytes == nil {
-		return &types.VerificationData{}, nil
+	addrInfoBytes := store.Get(subjectAddress.Bytes())
+	if addrInfoBytes == nil {
+		return &types.AddressInfo{}, nil
 	}
 
-	var verificationData types.VerificationData
-	if err := proto.Unmarshal(verificationDataBytes, &verificationData); err != nil {
+	var addrInfo types.AddressInfo
+	if err := proto.Unmarshal(addrInfoBytes, &addrInfo); err != nil {
 		return nil, err
 	}
 
-	return &verificationData, nil
+	return &addrInfo, nil
 }

@@ -62,15 +62,21 @@ exclude = [
     "ecall_allocate",
     "ecall_status",
     "ecall_init_master_key",
-    "ecall_share_seed",
-    "ecall_request_seed",
+    "ecall_attest_peer_epid",
+    "ecall_attest_peer_dcap",
     "ecall_is_initialized",
+    "ecall_request_master_key_epid",
+    "ecall_request_master_key_dcap",
+    "sgx_tvl_verify_qve_report_and_identity",
     "ocall_query_raw",
     "ocall_allocate",
     "ocall_sgx_init_quote",
     "ocall_get_ias_socket",
     "ocall_get_update_info",
     "ocall_get_quote",
+    "ocall_get_ecdsa_quote",
+    "ocall_get_qve_report",
+    "ocall_get_supplemental_data_size",
 ]
 # prefix = "CAPI_"
 item_types = []

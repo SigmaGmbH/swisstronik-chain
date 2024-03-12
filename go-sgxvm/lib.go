@@ -110,14 +110,16 @@ func InitializeMasterKey(shouldReset bool) error {
 	return api.InitializeMasterKey(shouldReset)
 }
 
-func StartSeedServer(addr string) error {
-	return api.StartSeedServer(addr)
+// StartAttestationServer handles incoming request for starting attestation server
+// to share master key with new nodes who passed Remote Attestation.
+func StartAttestationServer(epidAddress, dcapAddress string) error {
+	return api.StartAttestationServer(epidAddress, dcapAddress)
 }
 
 // RequestSeed handles requesting seed and passing Remote Attestation.
 // Returns error if Remote Attestation was not passed or provided seed server address is not accessible
-func RequestSeed(host string, port int) error {
-	return api.RequestSeed(host, port)
+func RequestMasterKey(host string, port int, isDCAP bool) error {
+	return api.RequestMasterKey(host, port, isDCAP)
 }
 
 // GetNodePublicKey handles request for node public key
