@@ -95,7 +95,7 @@ func (k *Keeper) AddVerificationEntry(ctx sdk.Context, subjectAddress, issuerAdd
 	return nil
 }
 
-func (k *Keeper) GetVerificationData(ctx sdk.Context, subjectAddress common.Address) (*types.AddressInfo, error) {
+func (k *Keeper) GetAddressInfo(ctx sdk.Context, subjectAddress common.Address) (*types.AddressInfo, error) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerification)
 
 	addrInfoBytes := store.Get(subjectAddress.Bytes())

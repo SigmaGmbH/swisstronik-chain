@@ -31,7 +31,7 @@ func (k Keeper) VerificationData(goCtx context.Context, req *types.QueryVerifica
 		return nil, fmt.Errorf("expected a valid hex or bech32 address (acc prefix %s), got '%s'", cfg.GetBech32AccountAddrPrefix(), req.Address)
 	}
 
-	verificationData, err := k.GetVerificationData(ctx, common.BytesToAddress(userAddress))
+	verificationData, err := k.GetAddressInfo(ctx, common.BytesToAddress(userAddress))
 	if err != nil {
 		return nil, err
 	}
