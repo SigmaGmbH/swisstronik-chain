@@ -28,3 +28,22 @@ func (k Keeper) VerificationData(goCtx context.Context, req *types.QueryVerifica
 
 	return &types.QueryVerificationDataResponse{Data: verificationData}, nil
 }
+
+func (k Keeper) IssuerDetails(goCtx context.Context, req *types.QueryIssuerDetailsRequest) (*types.QueryIssuerDetailsResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	issuerAddress, err := sdk.AccAddressFromBech32(req.IssuerAddress)
+	if err != nil {
+		return nil, err
+	}
+
+	issuerDetails, err := k.GetIssuerDetails(ctx, issuerAddress)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.QueryIssuerDetailsResponse{Details: issuerDetails}, nil
+}
