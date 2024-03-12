@@ -61,7 +61,3 @@ message IssuerAdapterContractDetail {
     string contract_address = 2;
 }
 
-
-message IssuerKV {
-    map<string,IssuerAdapterContractDetail> issuers = 1;
-}
