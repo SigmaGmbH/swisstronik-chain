@@ -4,7 +4,7 @@ use std::io::{Read, Write};
 use std::vec::Vec;
 use std::string::String;
 
-use crate::key_manager::{RegistrationKey, UNSEALED_KEY_MANAGER};
+use crate::key_manager::{keys::RegistrationKey, UNSEALED_KEY_MANAGER};
 
 pub mod helpers;
 pub mod auth;

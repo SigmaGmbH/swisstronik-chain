@@ -166,3 +166,15 @@ func TestNodeInitialized(t *testing.T) {
 
 	fmt.Println("node initialized: ", res)
 }
+
+func TestDumpQuote(t *testing.T) {
+	if err := api.DumpDCAPQuote("quote.dat"); err != nil {
+		t.Fail()
+	}
+}
+
+func TestVerifyQuote(t *testing.T) {
+	if err := api.VerifyDCAPQuote("quote.dat"); err != nil {
+		t.Fail()
+	}
+}
