@@ -14,6 +14,14 @@ const (
 	MemStoreKey = "mem_compliance"
 )
 
+const (
+	prefixVerification = iota + 1
+)
+
 func KeyPrefix(p string) []byte {
 	return []byte(p)
 }
+
+var (
+	KeyPrefixVerification = []byte{prefixVerification}
+)
