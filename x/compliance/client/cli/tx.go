@@ -23,7 +23,10 @@ func GetTxCmd() *cobra.Command {
 		RunE:                       client.ValidateCmd,
 	}
 
-	cmd.AddCommand(CmdSetAddressInfo())
+	cmd.AddCommand(
+		CmdSetAddressInfo(),
+		CmdSetIssuerDetails(),
+	)
 
 	return cmd
 }
@@ -71,6 +74,38 @@ func CmdSetAddressInfo() *cobra.Command {
 				originChain,
 				timestamp,
 				types.VerificationType_VT_KYC,
+			)
+
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), &msg)
+		},
+	}
+
+	flags.AddTxFlagsToCmd(cmd)
+	return cmd
+}
+
+// CmdSetIssuerDetails command sets provided issuer details.
+func CmdSetIssuerDetails() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "set-issuer-details [issuer-address] [issuer-alias]",
+		Short: "Sets issuer details",
+		Args:  cobra.ExactArgs(2),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			issuerAddress, err := types.ParseAddress(args[0])
+			if err != nil {
+				return err
+			}
+
+			issuerAlias := args[1]
+			msg := types.NewSetIssuerDetailsMsg(
+				clientCtx.GetFromAddress().String(),
+				issuerAddress.String(),
+				issuerAlias,
 			)
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), &msg)

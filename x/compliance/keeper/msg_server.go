@@ -32,3 +32,18 @@ func (k msgServer) SetAddressInfo(goCtx context.Context, msg *types.MsgSetAddres
 
 	return &types.MsgSetAddressInfoResponse{}, nil
 }
+
+func (k msgServer) SetIssuerDetails(goCtx context.Context, msg *types.MsgSetIssuerDetails) (*types.MsgSetIssuerDetailsResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	issuerAddress, err := sdk.AccAddressFromBech32(msg.IssuerAddress)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := k.SetIssuerDetailsInner(ctx, issuerAddress, msg.Details.IssuerAlias); err != nil {
+		return nil, err
+	}
+
+	return &types.MsgSetIssuerDetailsResponse{}, nil
+}

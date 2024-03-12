@@ -112,8 +112,8 @@ func (k Keeper) GetAddressInfo(ctx sdk.Context, address sdk.Address) (*types.Add
 	return &addrInfo, nil
 }
 
-// SetIssuerDetails sets description about provided issuer address
-func (k Keeper) SetIssuerDetails(ctx sdk.Context, issuerAddress sdk.Address, alias string) error {
+// SetIssuerDetailsInner sets description about provided issuer address
+func (k Keeper) SetIssuerDetailsInner(ctx sdk.Context, issuerAddress sdk.Address, alias string) error {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixIssuerAlias)
 
 	if len(alias) == 0 {
