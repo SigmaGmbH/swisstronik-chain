@@ -315,22 +315,23 @@ impl ::protobuf::reflect::ProtobufValue for InitializeMasterKeyResponse {
 }
 
 #[derive(PartialEq,Clone,Default)]
-pub struct StartSeedServerRequest {
+pub struct PeerAttestationRequest {
     // message fields
     pub fd: i32,
+    pub isDCAP: bool,
     // special fields
     pub unknown_fields: ::protobuf::UnknownFields,
     pub cached_size: ::protobuf::CachedSize,
 }
 
-impl<'a> ::std::default::Default for &'a StartSeedServerRequest {
-    fn default() -> &'a StartSeedServerRequest {
-        <StartSeedServerRequest as ::protobuf::Message>::default_instance()
+impl<'a> ::std::default::Default for &'a PeerAttestationRequest {
+    fn default() -> &'a PeerAttestationRequest {
+        <PeerAttestationRequest as ::protobuf::Message>::default_instance()
     }
 }
 
-impl StartSeedServerRequest {
-    pub fn new() -> StartSeedServerRequest {
+impl PeerAttestationRequest {
+    pub fn new() -> PeerAttestationRequest {
         ::std::default::Default::default()
     }
 
@@ -348,9 +349,24 @@ impl StartSeedServerRequest {
     pub fn set_fd(&mut self, v: i32) {
         self.fd = v;
     }
+
+    // bool isDCAP = 2;
+
+
+    pub fn get_isDCAP(&self) -> bool {
+        self.isDCAP
+    }
+    pub fn clear_isDCAP(&mut self) {
+        self.isDCAP = false;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_isDCAP(&mut self, v: bool) {
+        self.isDCAP = v;
+    }
 }
 
-impl ::protobuf::Message for StartSeedServerRequest {
+impl ::protobuf::Message for PeerAttestationRequest {
     fn is_initialized(&self) -> bool {
         true
     }
@@ -365,6 +381,13 @@ impl ::protobuf::Message for StartSeedServerRequest {
                     }
                     let tmp = is.read_int32()?;
                     self.fd = tmp;
+                },
+                2 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_bool()?;
+                    self.isDCAP = tmp;
                 },
                 _ => {
                     ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
@@ -381,6 +404,9 @@ impl ::protobuf::Message for StartSeedServerRequest {
         if self.fd != 0 {
             my_size += ::protobuf::rt::value_size(1, self.fd, ::protobuf::wire_format::WireTypeVarint);
         }
+        if self.isDCAP != false {
+            my_size += 2;
+        }
         my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
         self.cached_size.set(my_size);
         my_size
@@ -389,6 +415,9 @@ impl ::protobuf::Message for StartSeedServerRequest {
     fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
         if self.fd != 0 {
             os.write_int32(1, self.fd)?;
+        }
+        if self.isDCAP != false {
+            os.write_bool(2, self.isDCAP)?;
         }
         os.write_unknown_fields(self.get_unknown_fields())?;
         ::std::result::Result::Ok(())
@@ -420,8 +449,8 @@ impl ::protobuf::Message for StartSeedServerRequest {
         Self::descriptor_static()
     }
 
-    fn new() -> StartSeedServerRequest {
-        StartSeedServerRequest::new()
+    fn new() -> PeerAttestationRequest {
+        PeerAttestationRequest::new()
     }
 
     fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
@@ -434,11 +463,16 @@ impl ::protobuf::Message for StartSeedServerRequest {
                 let mut fields = ::std::vec::Vec::new();
                 fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeInt32>(
                     "fd",
-                    |m: &StartSeedServerRequest| { &m.fd },
-                    |m: &mut StartSeedServerRequest| { &mut m.fd },
+                    |m: &PeerAttestationRequest| { &m.fd },
+                    |m: &mut PeerAttestationRequest| { &mut m.fd },
                 ));
-                ::protobuf::reflect::MessageDescriptor::new::<StartSeedServerRequest>(
-                    "StartSeedServerRequest",
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBool>(
+                    "isDCAP",
+                    |m: &PeerAttestationRequest| { &m.isDCAP },
+                    |m: &mut PeerAttestationRequest| { &mut m.isDCAP },
+                ));
+                ::protobuf::reflect::MessageDescriptor::new::<PeerAttestationRequest>(
+                    "PeerAttestationRequest",
                     fields,
                     file_descriptor_proto()
                 )
@@ -446,56 +480,57 @@ impl ::protobuf::Message for StartSeedServerRequest {
         }
     }
 
-    fn default_instance() -> &'static StartSeedServerRequest {
-        static mut instance: ::protobuf::lazy::Lazy<StartSeedServerRequest> = ::protobuf::lazy::Lazy {
+    fn default_instance() -> &'static PeerAttestationRequest {
+        static mut instance: ::protobuf::lazy::Lazy<PeerAttestationRequest> = ::protobuf::lazy::Lazy {
             lock: ::protobuf::lazy::ONCE_INIT,
-            ptr: 0 as *const StartSeedServerRequest,
+            ptr: 0 as *const PeerAttestationRequest,
         };
         unsafe {
-            instance.get(StartSeedServerRequest::new)
+            instance.get(PeerAttestationRequest::new)
         }
     }
 }
 
-impl ::protobuf::Clear for StartSeedServerRequest {
+impl ::protobuf::Clear for PeerAttestationRequest {
     fn clear(&mut self) {
         self.fd = 0;
+        self.isDCAP = false;
         self.unknown_fields.clear();
     }
 }
 
-impl ::std::fmt::Debug for StartSeedServerRequest {
+impl ::std::fmt::Debug for PeerAttestationRequest {
     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
         ::protobuf::text_format::fmt(self, f)
     }
 }
 
-impl ::protobuf::reflect::ProtobufValue for StartSeedServerRequest {
+impl ::protobuf::reflect::ProtobufValue for PeerAttestationRequest {
     fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
         ::protobuf::reflect::ProtobufValueRef::Message(self)
     }
 }
 
 #[derive(PartialEq,Clone,Default)]
-pub struct StartSeedServerResponse {
+pub struct PeerAttestationResponse {
     // special fields
     pub unknown_fields: ::protobuf::UnknownFields,
     pub cached_size: ::protobuf::CachedSize,
 }
 
-impl<'a> ::std::default::Default for &'a StartSeedServerResponse {
-    fn default() -> &'a StartSeedServerResponse {
-        <StartSeedServerResponse as ::protobuf::Message>::default_instance()
+impl<'a> ::std::default::Default for &'a PeerAttestationResponse {
+    fn default() -> &'a PeerAttestationResponse {
+        <PeerAttestationResponse as ::protobuf::Message>::default_instance()
     }
 }
 
-impl StartSeedServerResponse {
-    pub fn new() -> StartSeedServerResponse {
+impl PeerAttestationResponse {
+    pub fn new() -> PeerAttestationResponse {
         ::std::default::Default::default()
     }
 }
 
-impl ::protobuf::Message for StartSeedServerResponse {
+impl ::protobuf::Message for PeerAttestationResponse {
     fn is_initialized(&self) -> bool {
         true
     }
@@ -552,8 +587,8 @@ impl ::protobuf::Message for StartSeedServerResponse {
         Self::descriptor_static()
     }
 
-    fn new() -> StartSeedServerResponse {
-        StartSeedServerResponse::new()
+    fn new() -> PeerAttestationResponse {
+        PeerAttestationResponse::new()
     }
 
     fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
@@ -564,8 +599,8 @@ impl ::protobuf::Message for StartSeedServerResponse {
         unsafe {
             descriptor.get(|| {
                 let fields = ::std::vec::Vec::new();
-                ::protobuf::reflect::MessageDescriptor::new::<StartSeedServerResponse>(
-                    "StartSeedServerResponse",
+                ::protobuf::reflect::MessageDescriptor::new::<PeerAttestationResponse>(
+                    "PeerAttestationResponse",
                     fields,
                     file_descriptor_proto()
                 )
@@ -573,53 +608,54 @@ impl ::protobuf::Message for StartSeedServerResponse {
         }
     }
 
-    fn default_instance() -> &'static StartSeedServerResponse {
-        static mut instance: ::protobuf::lazy::Lazy<StartSeedServerResponse> = ::protobuf::lazy::Lazy {
+    fn default_instance() -> &'static PeerAttestationResponse {
+        static mut instance: ::protobuf::lazy::Lazy<PeerAttestationResponse> = ::protobuf::lazy::Lazy {
             lock: ::protobuf::lazy::ONCE_INIT,
-            ptr: 0 as *const StartSeedServerResponse,
+            ptr: 0 as *const PeerAttestationResponse,
         };
         unsafe {
-            instance.get(StartSeedServerResponse::new)
+            instance.get(PeerAttestationResponse::new)
         }
     }
 }
 
-impl ::protobuf::Clear for StartSeedServerResponse {
+impl ::protobuf::Clear for PeerAttestationResponse {
     fn clear(&mut self) {
         self.unknown_fields.clear();
     }
 }
 
-impl ::std::fmt::Debug for StartSeedServerResponse {
+impl ::std::fmt::Debug for PeerAttestationResponse {
     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
         ::protobuf::text_format::fmt(self, f)
     }
 }
 
-impl ::protobuf::reflect::ProtobufValue for StartSeedServerResponse {
+impl ::protobuf::reflect::ProtobufValue for PeerAttestationResponse {
     fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
         ::protobuf::reflect::ProtobufValueRef::Message(self)
     }
 }
 
 #[derive(PartialEq,Clone,Default)]
-pub struct NodeSeedRequest {
+pub struct RemoteAttestationRequest {
     // message fields
     pub fd: i32,
     pub hostname: ::std::string::String,
+    pub isDCAP: bool,
     // special fields
     pub unknown_fields: ::protobuf::UnknownFields,
     pub cached_size: ::protobuf::CachedSize,
 }
 
-impl<'a> ::std::default::Default for &'a NodeSeedRequest {
-    fn default() -> &'a NodeSeedRequest {
-        <NodeSeedRequest as ::protobuf::Message>::default_instance()
+impl<'a> ::std::default::Default for &'a RemoteAttestationRequest {
+    fn default() -> &'a RemoteAttestationRequest {
+        <RemoteAttestationRequest as ::protobuf::Message>::default_instance()
     }
 }
 
-impl NodeSeedRequest {
-    pub fn new() -> NodeSeedRequest {
+impl RemoteAttestationRequest {
+    pub fn new() -> RemoteAttestationRequest {
         ::std::default::Default::default()
     }
 
@@ -663,9 +699,24 @@ impl NodeSeedRequest {
     pub fn take_hostname(&mut self) -> ::std::string::String {
         ::std::mem::replace(&mut self.hostname, ::std::string::String::new())
     }
+
+    // bool isDCAP = 3;
+
+
+    pub fn get_isDCAP(&self) -> bool {
+        self.isDCAP
+    }
+    pub fn clear_isDCAP(&mut self) {
+        self.isDCAP = false;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_isDCAP(&mut self, v: bool) {
+        self.isDCAP = v;
+    }
 }
 
-impl ::protobuf::Message for NodeSeedRequest {
+impl ::protobuf::Message for RemoteAttestationRequest {
     fn is_initialized(&self) -> bool {
         true
     }
@@ -683,6 +734,13 @@ impl ::protobuf::Message for NodeSeedRequest {
                 },
                 2 => {
                     ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.hostname)?;
+                },
+                3 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_bool()?;
+                    self.isDCAP = tmp;
                 },
                 _ => {
                     ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
@@ -702,6 +760,9 @@ impl ::protobuf::Message for NodeSeedRequest {
         if !self.hostname.is_empty() {
             my_size += ::protobuf::rt::string_size(2, &self.hostname);
         }
+        if self.isDCAP != false {
+            my_size += 2;
+        }
         my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
         self.cached_size.set(my_size);
         my_size
@@ -713,6 +774,9 @@ impl ::protobuf::Message for NodeSeedRequest {
         }
         if !self.hostname.is_empty() {
             os.write_string(2, &self.hostname)?;
+        }
+        if self.isDCAP != false {
+            os.write_bool(3, self.isDCAP)?;
         }
         os.write_unknown_fields(self.get_unknown_fields())?;
         ::std::result::Result::Ok(())
@@ -744,8 +808,8 @@ impl ::protobuf::Message for NodeSeedRequest {
         Self::descriptor_static()
     }
 
-    fn new() -> NodeSeedRequest {
-        NodeSeedRequest::new()
+    fn new() -> RemoteAttestationRequest {
+        RemoteAttestationRequest::new()
     }
 
     fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
@@ -758,16 +822,21 @@ impl ::protobuf::Message for NodeSeedRequest {
                 let mut fields = ::std::vec::Vec::new();
                 fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeInt32>(
                     "fd",
-                    |m: &NodeSeedRequest| { &m.fd },
-                    |m: &mut NodeSeedRequest| { &mut m.fd },
+                    |m: &RemoteAttestationRequest| { &m.fd },
+                    |m: &mut RemoteAttestationRequest| { &mut m.fd },
                 ));
                 fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
                     "hostname",
-                    |m: &NodeSeedRequest| { &m.hostname },
-                    |m: &mut NodeSeedRequest| { &mut m.hostname },
+                    |m: &RemoteAttestationRequest| { &m.hostname },
+                    |m: &mut RemoteAttestationRequest| { &mut m.hostname },
                 ));
-                ::protobuf::reflect::MessageDescriptor::new::<NodeSeedRequest>(
-                    "NodeSeedRequest",
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBool>(
+                    "isDCAP",
+                    |m: &RemoteAttestationRequest| { &m.isDCAP },
+                    |m: &mut RemoteAttestationRequest| { &mut m.isDCAP },
+                ));
+                ::protobuf::reflect::MessageDescriptor::new::<RemoteAttestationRequest>(
+                    "RemoteAttestationRequest",
                     fields,
                     file_descriptor_proto()
                 )
@@ -775,57 +844,58 @@ impl ::protobuf::Message for NodeSeedRequest {
         }
     }
 
-    fn default_instance() -> &'static NodeSeedRequest {
-        static mut instance: ::protobuf::lazy::Lazy<NodeSeedRequest> = ::protobuf::lazy::Lazy {
+    fn default_instance() -> &'static RemoteAttestationRequest {
+        static mut instance: ::protobuf::lazy::Lazy<RemoteAttestationRequest> = ::protobuf::lazy::Lazy {
             lock: ::protobuf::lazy::ONCE_INIT,
-            ptr: 0 as *const NodeSeedRequest,
+            ptr: 0 as *const RemoteAttestationRequest,
         };
         unsafe {
-            instance.get(NodeSeedRequest::new)
+            instance.get(RemoteAttestationRequest::new)
         }
     }
 }
 
-impl ::protobuf::Clear for NodeSeedRequest {
+impl ::protobuf::Clear for RemoteAttestationRequest {
     fn clear(&mut self) {
         self.fd = 0;
         self.hostname.clear();
+        self.isDCAP = false;
         self.unknown_fields.clear();
     }
 }
 
-impl ::std::fmt::Debug for NodeSeedRequest {
+impl ::std::fmt::Debug for RemoteAttestationRequest {
     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
         ::protobuf::text_format::fmt(self, f)
     }
 }
 
-impl ::protobuf::reflect::ProtobufValue for NodeSeedRequest {
+impl ::protobuf::reflect::ProtobufValue for RemoteAttestationRequest {
     fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
         ::protobuf::reflect::ProtobufValueRef::Message(self)
     }
 }
 
 #[derive(PartialEq,Clone,Default)]
-pub struct NodeSeedResponse {
+pub struct RemoteAttestationResponse {
     // special fields
     pub unknown_fields: ::protobuf::UnknownFields,
     pub cached_size: ::protobuf::CachedSize,
 }
 
-impl<'a> ::std::default::Default for &'a NodeSeedResponse {
-    fn default() -> &'a NodeSeedResponse {
-        <NodeSeedResponse as ::protobuf::Message>::default_instance()
+impl<'a> ::std::default::Default for &'a RemoteAttestationResponse {
+    fn default() -> &'a RemoteAttestationResponse {
+        <RemoteAttestationResponse as ::protobuf::Message>::default_instance()
     }
 }
 
-impl NodeSeedResponse {
-    pub fn new() -> NodeSeedResponse {
+impl RemoteAttestationResponse {
+    pub fn new() -> RemoteAttestationResponse {
         ::std::default::Default::default()
     }
 }
 
-impl ::protobuf::Message for NodeSeedResponse {
+impl ::protobuf::Message for RemoteAttestationResponse {
     fn is_initialized(&self) -> bool {
         true
     }
@@ -882,8 +952,8 @@ impl ::protobuf::Message for NodeSeedResponse {
         Self::descriptor_static()
     }
 
-    fn new() -> NodeSeedResponse {
-        NodeSeedResponse::new()
+    fn new() -> RemoteAttestationResponse {
+        RemoteAttestationResponse::new()
     }
 
     fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
@@ -894,8 +964,8 @@ impl ::protobuf::Message for NodeSeedResponse {
         unsafe {
             descriptor.get(|| {
                 let fields = ::std::vec::Vec::new();
-                ::protobuf::reflect::MessageDescriptor::new::<NodeSeedResponse>(
-                    "NodeSeedResponse",
+                ::protobuf::reflect::MessageDescriptor::new::<RemoteAttestationResponse>(
+                    "RemoteAttestationResponse",
                     fields,
                     file_descriptor_proto()
                 )
@@ -903,30 +973,30 @@ impl ::protobuf::Message for NodeSeedResponse {
         }
     }
 
-    fn default_instance() -> &'static NodeSeedResponse {
-        static mut instance: ::protobuf::lazy::Lazy<NodeSeedResponse> = ::protobuf::lazy::Lazy {
+    fn default_instance() -> &'static RemoteAttestationResponse {
+        static mut instance: ::protobuf::lazy::Lazy<RemoteAttestationResponse> = ::protobuf::lazy::Lazy {
             lock: ::protobuf::lazy::ONCE_INIT,
-            ptr: 0 as *const NodeSeedResponse,
+            ptr: 0 as *const RemoteAttestationResponse,
         };
         unsafe {
-            instance.get(NodeSeedResponse::new)
+            instance.get(RemoteAttestationResponse::new)
         }
     }
 }
 
-impl ::protobuf::Clear for NodeSeedResponse {
+impl ::protobuf::Clear for RemoteAttestationResponse {
     fn clear(&mut self) {
         self.unknown_fields.clear();
     }
 }
 
-impl ::std::fmt::Debug for NodeSeedResponse {
+impl ::std::fmt::Debug for RemoteAttestationResponse {
     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
         ::protobuf::text_format::fmt(self, f)
     }
 }
 
-impl ::protobuf::reflect::ProtobufValue for NodeSeedResponse {
+impl ::protobuf::reflect::ProtobufValue for RemoteAttestationResponse {
     fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
         ::protobuf::reflect::ProtobufValueRef::Message(self)
     }
@@ -1490,8 +1560,8 @@ impl<'a> ::std::default::Default for &'a SetupRequest {
 #[derive(Clone,PartialEq,Debug)]
 pub enum SetupRequest_oneof_req {
     initializeMasterKey(InitializeMasterKeyRequest),
-    startSeedServer(StartSeedServerRequest),
-    nodeSeed(NodeSeedRequest),
+    peerAttestationRequest(PeerAttestationRequest),
+    remoteAttestationRequest(RemoteAttestationRequest),
     isInitialized(IsInitializedRequest),
     nodeStatus(NodeStatusRequest),
 }
@@ -1550,101 +1620,101 @@ impl SetupRequest {
         }
     }
 
-    // .node.node.StartSeedServerRequest startSeedServer = 2;
+    // .node.node.PeerAttestationRequest peerAttestationRequest = 2;
 
 
-    pub fn get_startSeedServer(&self) -> &StartSeedServerRequest {
+    pub fn get_peerAttestationRequest(&self) -> &PeerAttestationRequest {
         match self.req {
-            ::std::option::Option::Some(SetupRequest_oneof_req::startSeedServer(ref v)) => v,
-            _ => StartSeedServerRequest::default_instance(),
+            ::std::option::Option::Some(SetupRequest_oneof_req::peerAttestationRequest(ref v)) => v,
+            _ => PeerAttestationRequest::default_instance(),
         }
     }
-    pub fn clear_startSeedServer(&mut self) {
+    pub fn clear_peerAttestationRequest(&mut self) {
         self.req = ::std::option::Option::None;
     }
 
-    pub fn has_startSeedServer(&self) -> bool {
+    pub fn has_peerAttestationRequest(&self) -> bool {
         match self.req {
-            ::std::option::Option::Some(SetupRequest_oneof_req::startSeedServer(..)) => true,
+            ::std::option::Option::Some(SetupRequest_oneof_req::peerAttestationRequest(..)) => true,
             _ => false,
         }
     }
 
     // Param is passed by value, moved
-    pub fn set_startSeedServer(&mut self, v: StartSeedServerRequest) {
-        self.req = ::std::option::Option::Some(SetupRequest_oneof_req::startSeedServer(v))
+    pub fn set_peerAttestationRequest(&mut self, v: PeerAttestationRequest) {
+        self.req = ::std::option::Option::Some(SetupRequest_oneof_req::peerAttestationRequest(v))
     }
 
     // Mutable pointer to the field.
-    pub fn mut_startSeedServer(&mut self) -> &mut StartSeedServerRequest {
-        if let ::std::option::Option::Some(SetupRequest_oneof_req::startSeedServer(_)) = self.req {
+    pub fn mut_peerAttestationRequest(&mut self) -> &mut PeerAttestationRequest {
+        if let ::std::option::Option::Some(SetupRequest_oneof_req::peerAttestationRequest(_)) = self.req {
         } else {
-            self.req = ::std::option::Option::Some(SetupRequest_oneof_req::startSeedServer(StartSeedServerRequest::new()));
+            self.req = ::std::option::Option::Some(SetupRequest_oneof_req::peerAttestationRequest(PeerAttestationRequest::new()));
         }
         match self.req {
-            ::std::option::Option::Some(SetupRequest_oneof_req::startSeedServer(ref mut v)) => v,
+            ::std::option::Option::Some(SetupRequest_oneof_req::peerAttestationRequest(ref mut v)) => v,
             _ => panic!(),
         }
     }
 
     // Take field
-    pub fn take_startSeedServer(&mut self) -> StartSeedServerRequest {
-        if self.has_startSeedServer() {
+    pub fn take_peerAttestationRequest(&mut self) -> PeerAttestationRequest {
+        if self.has_peerAttestationRequest() {
             match self.req.take() {
-                ::std::option::Option::Some(SetupRequest_oneof_req::startSeedServer(v)) => v,
+                ::std::option::Option::Some(SetupRequest_oneof_req::peerAttestationRequest(v)) => v,
                 _ => panic!(),
             }
         } else {
-            StartSeedServerRequest::new()
+            PeerAttestationRequest::new()
         }
     }
 
-    // .node.node.NodeSeedRequest nodeSeed = 3;
+    // .node.node.RemoteAttestationRequest remoteAttestationRequest = 3;
 
 
-    pub fn get_nodeSeed(&self) -> &NodeSeedRequest {
+    pub fn get_remoteAttestationRequest(&self) -> &RemoteAttestationRequest {
         match self.req {
-            ::std::option::Option::Some(SetupRequest_oneof_req::nodeSeed(ref v)) => v,
-            _ => NodeSeedRequest::default_instance(),
+            ::std::option::Option::Some(SetupRequest_oneof_req::remoteAttestationRequest(ref v)) => v,
+            _ => RemoteAttestationRequest::default_instance(),
         }
     }
-    pub fn clear_nodeSeed(&mut self) {
+    pub fn clear_remoteAttestationRequest(&mut self) {
         self.req = ::std::option::Option::None;
     }
 
-    pub fn has_nodeSeed(&self) -> bool {
+    pub fn has_remoteAttestationRequest(&self) -> bool {
         match self.req {
-            ::std::option::Option::Some(SetupRequest_oneof_req::nodeSeed(..)) => true,
+            ::std::option::Option::Some(SetupRequest_oneof_req::remoteAttestationRequest(..)) => true,
             _ => false,
         }
     }
 
     // Param is passed by value, moved
-    pub fn set_nodeSeed(&mut self, v: NodeSeedRequest) {
-        self.req = ::std::option::Option::Some(SetupRequest_oneof_req::nodeSeed(v))
+    pub fn set_remoteAttestationRequest(&mut self, v: RemoteAttestationRequest) {
+        self.req = ::std::option::Option::Some(SetupRequest_oneof_req::remoteAttestationRequest(v))
     }
 
     // Mutable pointer to the field.
-    pub fn mut_nodeSeed(&mut self) -> &mut NodeSeedRequest {
-        if let ::std::option::Option::Some(SetupRequest_oneof_req::nodeSeed(_)) = self.req {
+    pub fn mut_remoteAttestationRequest(&mut self) -> &mut RemoteAttestationRequest {
+        if let ::std::option::Option::Some(SetupRequest_oneof_req::remoteAttestationRequest(_)) = self.req {
         } else {
-            self.req = ::std::option::Option::Some(SetupRequest_oneof_req::nodeSeed(NodeSeedRequest::new()));
+            self.req = ::std::option::Option::Some(SetupRequest_oneof_req::remoteAttestationRequest(RemoteAttestationRequest::new()));
         }
         match self.req {
-            ::std::option::Option::Some(SetupRequest_oneof_req::nodeSeed(ref mut v)) => v,
+            ::std::option::Option::Some(SetupRequest_oneof_req::remoteAttestationRequest(ref mut v)) => v,
             _ => panic!(),
         }
     }
 
     // Take field
-    pub fn take_nodeSeed(&mut self) -> NodeSeedRequest {
-        if self.has_nodeSeed() {
+    pub fn take_remoteAttestationRequest(&mut self) -> RemoteAttestationRequest {
+        if self.has_remoteAttestationRequest() {
             match self.req.take() {
-                ::std::option::Option::Some(SetupRequest_oneof_req::nodeSeed(v)) => v,
+                ::std::option::Option::Some(SetupRequest_oneof_req::remoteAttestationRequest(v)) => v,
                 _ => panic!(),
             }
         } else {
-            NodeSeedRequest::new()
+            RemoteAttestationRequest::new()
         }
     }
 
@@ -1754,12 +1824,12 @@ impl ::protobuf::Message for SetupRequest {
                 return false;
             }
         }
-        if let Some(SetupRequest_oneof_req::startSeedServer(ref v)) = self.req {
+        if let Some(SetupRequest_oneof_req::peerAttestationRequest(ref v)) = self.req {
             if !v.is_initialized() {
                 return false;
             }
         }
-        if let Some(SetupRequest_oneof_req::nodeSeed(ref v)) = self.req {
+        if let Some(SetupRequest_oneof_req::remoteAttestationRequest(ref v)) = self.req {
             if !v.is_initialized() {
                 return false;
             }
@@ -1791,13 +1861,13 @@ impl ::protobuf::Message for SetupRequest {
                     if wire_type != ::protobuf::wire_format::WireTypeLengthDelimited {
                         return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
                     }
-                    self.req = ::std::option::Option::Some(SetupRequest_oneof_req::startSeedServer(is.read_message()?));
+                    self.req = ::std::option::Option::Some(SetupRequest_oneof_req::peerAttestationRequest(is.read_message()?));
                 },
                 3 => {
                     if wire_type != ::protobuf::wire_format::WireTypeLengthDelimited {
                         return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
                     }
-                    self.req = ::std::option::Option::Some(SetupRequest_oneof_req::nodeSeed(is.read_message()?));
+                    self.req = ::std::option::Option::Some(SetupRequest_oneof_req::remoteAttestationRequest(is.read_message()?));
                 },
                 4 => {
                     if wire_type != ::protobuf::wire_format::WireTypeLengthDelimited {
@@ -1829,11 +1899,11 @@ impl ::protobuf::Message for SetupRequest {
                     let len = v.compute_size();
                     my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
                 },
-                &SetupRequest_oneof_req::startSeedServer(ref v) => {
+                &SetupRequest_oneof_req::peerAttestationRequest(ref v) => {
                     let len = v.compute_size();
                     my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
                 },
-                &SetupRequest_oneof_req::nodeSeed(ref v) => {
+                &SetupRequest_oneof_req::remoteAttestationRequest(ref v) => {
                     let len = v.compute_size();
                     my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
                 },
@@ -1860,12 +1930,12 @@ impl ::protobuf::Message for SetupRequest {
                     os.write_raw_varint32(v.get_cached_size())?;
                     v.write_to_with_cached_sizes(os)?;
                 },
-                &SetupRequest_oneof_req::startSeedServer(ref v) => {
+                &SetupRequest_oneof_req::peerAttestationRequest(ref v) => {
                     os.write_tag(2, ::protobuf::wire_format::WireTypeLengthDelimited)?;
                     os.write_raw_varint32(v.get_cached_size())?;
                     v.write_to_with_cached_sizes(os)?;
                 },
-                &SetupRequest_oneof_req::nodeSeed(ref v) => {
+                &SetupRequest_oneof_req::remoteAttestationRequest(ref v) => {
                     os.write_tag(3, ::protobuf::wire_format::WireTypeLengthDelimited)?;
                     os.write_raw_varint32(v.get_cached_size())?;
                     v.write_to_with_cached_sizes(os)?;
@@ -1929,15 +1999,15 @@ impl ::protobuf::Message for SetupRequest {
                     SetupRequest::has_initializeMasterKey,
                     SetupRequest::get_initializeMasterKey,
                 ));
-                fields.push(::protobuf::reflect::accessor::make_singular_message_accessor::<_, StartSeedServerRequest>(
-                    "startSeedServer",
-                    SetupRequest::has_startSeedServer,
-                    SetupRequest::get_startSeedServer,
+                fields.push(::protobuf::reflect::accessor::make_singular_message_accessor::<_, PeerAttestationRequest>(
+                    "peerAttestationRequest",
+                    SetupRequest::has_peerAttestationRequest,
+                    SetupRequest::get_peerAttestationRequest,
                 ));
-                fields.push(::protobuf::reflect::accessor::make_singular_message_accessor::<_, NodeSeedRequest>(
-                    "nodeSeed",
-                    SetupRequest::has_nodeSeed,
-                    SetupRequest::get_nodeSeed,
+                fields.push(::protobuf::reflect::accessor::make_singular_message_accessor::<_, RemoteAttestationRequest>(
+                    "remoteAttestationRequest",
+                    SetupRequest::has_remoteAttestationRequest,
+                    SetupRequest::get_remoteAttestationRequest,
                 ));
                 fields.push(::protobuf::reflect::accessor::make_singular_message_accessor::<_, IsInitializedRequest>(
                     "isInitialized",
@@ -1995,62 +2065,71 @@ impl ::protobuf::reflect::ProtobufValue for SetupRequest {
 static file_descriptor_proto_data: &'static [u8] = b"\
     \n\x10proto/node.proto\x12\tnode.node\">\n\x1aInitializeMasterKeyRequest\
     \x12\x20\n\x0bshouldReset\x18\x01\x20\x01(\x08R\x0bshouldReset\"\x1d\n\
-    \x1bInitializeMasterKeyResponse\"(\n\x16StartSeedServerRequest\x12\x0e\n\
-    \x02fd\x18\x01\x20\x01(\x05R\x02fd\"\x19\n\x17StartSeedServerResponse\"=\
-    \n\x0fNodeSeedRequest\x12\x0e\n\x02fd\x18\x01\x20\x01(\x05R\x02fd\x12\
-    \x1a\n\x08hostname\x18\x02\x20\x01(\tR\x08hostname\"\x12\n\x10NodeSeedRe\
-    sponse\"\x16\n\x14IsInitializedRequest\"=\n\x15IsInitializedResponse\x12\
-    $\n\risInitialized\x18\x01\x20\x01(\x08R\risInitialized\"\x13\n\x11NodeS\
-    tatusRequest\"\x14\n\x12NodeStatusResponse\"\x82\x03\n\x0cSetupRequest\
-    \x12Y\n\x13initializeMasterKey\x18\x01\x20\x01(\x0b2%.node.node.Initiali\
-    zeMasterKeyRequestH\0R\x13initializeMasterKey\x12M\n\x0fstartSeedServer\
-    \x18\x02\x20\x01(\x0b2!.node.node.StartSeedServerRequestH\0R\x0fstartSee\
-    dServer\x128\n\x08nodeSeed\x18\x03\x20\x01(\x0b2\x1a.node.node.NodeSeedR\
-    equestH\0R\x08nodeSeed\x12G\n\risInitialized\x18\x04\x20\x01(\x0b2\x1f.n\
-    ode.node.IsInitializedRequestH\0R\risInitialized\x12>\n\nnodeStatus\x18\
-    \x05\x20\x01(\x0b2\x1c.node.node.NodeStatusRequestH\0R\nnodeStatusB\x05\
-    \n\x03reqB&Z$github.com/SigmaGmbH/librustgo/typesJ\xf2\x06\n\x06\x12\x04\
-    \0\0#\x01\n\x08\n\x01\x0c\x12\x03\0\0\x12\n\x08\n\x01\x02\x12\x03\x02\0\
-    \x12\n\x08\n\x01\x08\x12\x03\x04\0;\n\t\n\x02\x08\x0b\x12\x03\x04\0;\n\t\
-    \n\x02\x04\0\x12\x03\x06\0<\n\n\n\x03\x04\0\x01\x12\x03\x06\x08\"\n\x0b\
-    \n\x04\x04\0\x02\0\x12\x03\x06%:\n\x0c\n\x05\x04\0\x02\0\x05\x12\x03\x06\
-    %)\n\x0c\n\x05\x04\0\x02\0\x01\x12\x03\x06*5\n\x0c\n\x05\x04\0\x02\0\x03\
-    \x12\x03\x0689\n\t\n\x02\x04\x01\x12\x03\x08\0&\n\n\n\x03\x04\x01\x01\
-    \x12\x03\x08\x08#\n\t\n\x02\x04\x02\x12\x03\n\00\n\n\n\x03\x04\x02\x01\
-    \x12\x03\n\x08\x1e\n\x0b\n\x04\x04\x02\x02\0\x12\x03\n!.\n\x0c\n\x05\x04\
-    \x02\x02\0\x05\x12\x03\n!&\n\x0c\n\x05\x04\x02\x02\0\x01\x12\x03\n')\n\
-    \x0c\n\x05\x04\x02\x02\0\x03\x12\x03\n,-\n\t\n\x02\x04\x03\x12\x03\x0c\0\
-    \"\n\n\n\x03\x04\x03\x01\x12\x03\x0c\x08\x1f\n\n\n\x02\x04\x04\x12\x04\
-    \x0e\0\x11\x01\n\n\n\x03\x04\x04\x01\x12\x03\x0e\x08\x17\n\x0b\n\x04\x04\
-    \x04\x02\0\x12\x03\x0f\x02\x0f\n\x0c\n\x05\x04\x04\x02\0\x05\x12\x03\x0f\
-    \x02\x07\n\x0c\n\x05\x04\x04\x02\0\x01\x12\x03\x0f\x08\n\n\x0c\n\x05\x04\
-    \x04\x02\0\x03\x12\x03\x0f\r\x0e\n\x0b\n\x04\x04\x04\x02\x01\x12\x03\x10\
-    \x02\x16\n\x0c\n\x05\x04\x04\x02\x01\x05\x12\x03\x10\x02\x08\n\x0c\n\x05\
-    \x04\x04\x02\x01\x01\x12\x03\x10\t\x11\n\x0c\n\x05\x04\x04\x02\x01\x03\
-    \x12\x03\x10\x14\x15\n\t\n\x02\x04\x05\x12\x03\x13\0\x1b\n\n\n\x03\x04\
-    \x05\x01\x12\x03\x13\x08\x18\n\t\n\x02\x04\x06\x12\x03\x15\0\x1f\n\n\n\
-    \x03\x04\x06\x01\x12\x03\x15\x08\x1c\n\t\n\x02\x04\x07\x12\x03\x16\09\n\
-    \n\n\x03\x04\x07\x01\x12\x03\x16\x08\x1d\n\x0b\n\x04\x04\x07\x02\0\x12\
-    \x03\x16\x207\n\x0c\n\x05\x04\x07\x02\0\x05\x12\x03\x16\x20$\n\x0c\n\x05\
-    \x04\x07\x02\0\x01\x12\x03\x16%2\n\x0c\n\x05\x04\x07\x02\0\x03\x12\x03\
-    \x1656\n\t\n\x02\x04\x08\x12\x03\x18\0\x1c\n\n\n\x03\x04\x08\x01\x12\x03\
-    \x18\x08\x19\n\t\n\x02\x04\t\x12\x03\x19\0\x1d\n\n\n\x03\x04\t\x01\x12\
-    \x03\x19\x08\x1a\n\n\n\x02\x04\n\x12\x04\x1b\0#\x01\n\n\n\x03\x04\n\x01\
-    \x12\x03\x1b\x08\x14\n\x0c\n\x04\x04\n\x08\0\x12\x04\x1c\x02\"\x03\n\x0c\
-    \n\x05\x04\n\x08\0\x01\x12\x03\x1c\x08\x0b\n\x0b\n\x04\x04\n\x02\0\x12\
-    \x03\x1d\x047\n\x0c\n\x05\x04\n\x02\0\x06\x12\x03\x1d\x04\x1e\n\x0c\n\
-    \x05\x04\n\x02\0\x01\x12\x03\x1d\x1f2\n\x0c\n\x05\x04\n\x02\0\x03\x12\
-    \x03\x1d56\n\x0b\n\x04\x04\n\x02\x01\x12\x03\x1e\x04/\n\x0c\n\x05\x04\n\
-    \x02\x01\x06\x12\x03\x1e\x04\x1a\n\x0c\n\x05\x04\n\x02\x01\x01\x12\x03\
-    \x1e\x1b*\n\x0c\n\x05\x04\n\x02\x01\x03\x12\x03\x1e-.\n\x0b\n\x04\x04\n\
-    \x02\x02\x12\x03\x1f\x04!\n\x0c\n\x05\x04\n\x02\x02\x06\x12\x03\x1f\x04\
-    \x13\n\x0c\n\x05\x04\n\x02\x02\x01\x12\x03\x1f\x14\x1c\n\x0c\n\x05\x04\n\
-    \x02\x02\x03\x12\x03\x1f\x1f\x20\n\x0b\n\x04\x04\n\x02\x03\x12\x03\x20\
-    \x04+\n\x0c\n\x05\x04\n\x02\x03\x06\x12\x03\x20\x04\x18\n\x0c\n\x05\x04\
-    \n\x02\x03\x01\x12\x03\x20\x19&\n\x0c\n\x05\x04\n\x02\x03\x03\x12\x03\
-    \x20)*\n\x0b\n\x04\x04\n\x02\x04\x12\x03!\x04%\n\x0c\n\x05\x04\n\x02\x04\
-    \x06\x12\x03!\x04\x15\n\x0c\n\x05\x04\n\x02\x04\x01\x12\x03!\x16\x20\n\
-    \x0c\n\x05\x04\n\x02\x04\x03\x12\x03!#$b\x06proto3\
+    \x1bInitializeMasterKeyResponse\"@\n\x16PeerAttestationRequest\x12\x0e\n\
+    \x02fd\x18\x01\x20\x01(\x05R\x02fd\x12\x16\n\x06isDCAP\x18\x02\x20\x01(\
+    \x08R\x06isDCAP\"\x19\n\x17PeerAttestationResponse\"^\n\x18RemoteAttesta\
+    tionRequest\x12\x0e\n\x02fd\x18\x01\x20\x01(\x05R\x02fd\x12\x1a\n\x08hos\
+    tname\x18\x02\x20\x01(\tR\x08hostname\x12\x16\n\x06isDCAP\x18\x03\x20\
+    \x01(\x08R\x06isDCAP\"\x1b\n\x19RemoteAttestationResponse\"\x16\n\x14IsI\
+    nitializedRequest\"=\n\x15IsInitializedResponse\x12$\n\risInitialized\
+    \x18\x01\x20\x01(\x08R\risInitialized\"\x13\n\x11NodeStatusRequest\"\x14\
+    \n\x12NodeStatusResponse\"\xb9\x03\n\x0cSetupRequest\x12Y\n\x13initializ\
+    eMasterKey\x18\x01\x20\x01(\x0b2%.node.node.InitializeMasterKeyRequestH\
+    \0R\x13initializeMasterKey\x12[\n\x16peerAttestationRequest\x18\x02\x20\
+    \x01(\x0b2!.node.node.PeerAttestationRequestH\0R\x16peerAttestationReque\
+    st\x12a\n\x18remoteAttestationRequest\x18\x03\x20\x01(\x0b2#.node.node.R\
+    emoteAttestationRequestH\0R\x18remoteAttestationRequest\x12G\n\risInitia\
+    lized\x18\x04\x20\x01(\x0b2\x1f.node.node.IsInitializedRequestH\0R\risIn\
+    itialized\x12>\n\nnodeStatus\x18\x05\x20\x01(\x0b2\x1c.node.node.NodeSta\
+    tusRequestH\0R\nnodeStatusB\x05\n\x03reqB&Z$github.com/SigmaGmbH/librust\
+    go/typesJ\x9e\x08\n\x06\x12\x04\0\0&\x01\n\x08\n\x01\x0c\x12\x03\0\0\x12\
+    \n\x08\n\x01\x02\x12\x03\x02\0\x12\n\x08\n\x01\x08\x12\x03\x04\0;\n\t\n\
+    \x02\x08\x0b\x12\x03\x04\0;\n\t\n\x02\x04\0\x12\x03\x06\0<\n\n\n\x03\x04\
+    \0\x01\x12\x03\x06\x08\"\n\x0b\n\x04\x04\0\x02\0\x12\x03\x06%:\n\x0c\n\
+    \x05\x04\0\x02\0\x05\x12\x03\x06%)\n\x0c\n\x05\x04\0\x02\0\x01\x12\x03\
+    \x06*5\n\x0c\n\x05\x04\0\x02\0\x03\x12\x03\x0689\n\t\n\x02\x04\x01\x12\
+    \x03\x07\0&\n\n\n\x03\x04\x01\x01\x12\x03\x07\x08#\n)\n\x02\x04\x02\x12\
+    \x04\n\0\r\x01\x1a\x1d\x20Attestation\x20server\x20messages\n\n\n\n\x03\
+    \x04\x02\x01\x12\x03\n\x08\x1e\n\x0b\n\x04\x04\x02\x02\0\x12\x03\x0b\x02\
+    \x0f\n\x0c\n\x05\x04\x02\x02\0\x05\x12\x03\x0b\x02\x07\n\x0c\n\x05\x04\
+    \x02\x02\0\x01\x12\x03\x0b\x08\n\n\x0c\n\x05\x04\x02\x02\0\x03\x12\x03\
+    \x0b\r\x0e\n\x0b\n\x04\x04\x02\x02\x01\x12\x03\x0c\x02\x12\n\x0c\n\x05\
+    \x04\x02\x02\x01\x05\x12\x03\x0c\x02\x06\n\x0c\n\x05\x04\x02\x02\x01\x01\
+    \x12\x03\x0c\x07\r\n\x0c\n\x05\x04\x02\x02\x01\x03\x12\x03\x0c\x10\x11\n\
+    \t\n\x02\x04\x03\x12\x03\x0e\0\"\n\n\n\x03\x04\x03\x01\x12\x03\x0e\x08\
+    \x1f\n(\n\x02\x04\x04\x12\x04\x11\0\x15\x01\x1a\x1c\x20Remote\x20Attesta\
+    tion\x20Request\n\n\n\n\x03\x04\x04\x01\x12\x03\x11\x08\x20\n\x0b\n\x04\
+    \x04\x04\x02\0\x12\x03\x12\x02\x0f\n\x0c\n\x05\x04\x04\x02\0\x05\x12\x03\
+    \x12\x02\x07\n\x0c\n\x05\x04\x04\x02\0\x01\x12\x03\x12\x08\n\n\x0c\n\x05\
+    \x04\x04\x02\0\x03\x12\x03\x12\r\x0e\n\x0b\n\x04\x04\x04\x02\x01\x12\x03\
+    \x13\x02\x16\n\x0c\n\x05\x04\x04\x02\x01\x05\x12\x03\x13\x02\x08\n\x0c\n\
+    \x05\x04\x04\x02\x01\x01\x12\x03\x13\t\x11\n\x0c\n\x05\x04\x04\x02\x01\
+    \x03\x12\x03\x13\x14\x15\n\x0b\n\x04\x04\x04\x02\x02\x12\x03\x14\x02\x12\
+    \n\x0c\n\x05\x04\x04\x02\x02\x05\x12\x03\x14\x02\x06\n\x0c\n\x05\x04\x04\
+    \x02\x02\x01\x12\x03\x14\x07\r\n\x0c\n\x05\x04\x04\x02\x02\x03\x12\x03\
+    \x14\x10\x11\n\t\n\x02\x04\x05\x12\x03\x16\0$\n\n\n\x03\x04\x05\x01\x12\
+    \x03\x16\x08!\n\t\n\x02\x04\x06\x12\x03\x18\0\x1f\n\n\n\x03\x04\x06\x01\
+    \x12\x03\x18\x08\x1c\n\t\n\x02\x04\x07\x12\x03\x19\09\n\n\n\x03\x04\x07\
+    \x01\x12\x03\x19\x08\x1d\n\x0b\n\x04\x04\x07\x02\0\x12\x03\x19\x207\n\
+    \x0c\n\x05\x04\x07\x02\0\x05\x12\x03\x19\x20$\n\x0c\n\x05\x04\x07\x02\0\
+    \x01\x12\x03\x19%2\n\x0c\n\x05\x04\x07\x02\0\x03\x12\x03\x1956\n\t\n\x02\
+    \x04\x08\x12\x03\x1b\0\x1c\n\n\n\x03\x04\x08\x01\x12\x03\x1b\x08\x19\n\t\
+    \n\x02\x04\t\x12\x03\x1c\0\x1d\n\n\n\x03\x04\t\x01\x12\x03\x1c\x08\x1a\n\
+    \n\n\x02\x04\n\x12\x04\x1e\0&\x01\n\n\n\x03\x04\n\x01\x12\x03\x1e\x08\
+    \x14\n\x0c\n\x04\x04\n\x08\0\x12\x04\x1f\x02%\x03\n\x0c\n\x05\x04\n\x08\
+    \0\x01\x12\x03\x1f\x08\x0b\n\x0b\n\x04\x04\n\x02\0\x12\x03\x20\x047\n\
+    \x0c\n\x05\x04\n\x02\0\x06\x12\x03\x20\x04\x1e\n\x0c\n\x05\x04\n\x02\0\
+    \x01\x12\x03\x20\x1f2\n\x0c\n\x05\x04\n\x02\0\x03\x12\x03\x2056\n\x0b\n\
+    \x04\x04\n\x02\x01\x12\x03!\x046\n\x0c\n\x05\x04\n\x02\x01\x06\x12\x03!\
+    \x04\x1a\n\x0c\n\x05\x04\n\x02\x01\x01\x12\x03!\x1b1\n\x0c\n\x05\x04\n\
+    \x02\x01\x03\x12\x03!45\n\x0b\n\x04\x04\n\x02\x02\x12\x03\"\x04:\n\x0c\n\
+    \x05\x04\n\x02\x02\x06\x12\x03\"\x04\x1c\n\x0c\n\x05\x04\n\x02\x02\x01\
+    \x12\x03\"\x1d5\n\x0c\n\x05\x04\n\x02\x02\x03\x12\x03\"89\n\x0b\n\x04\
+    \x04\n\x02\x03\x12\x03#\x04+\n\x0c\n\x05\x04\n\x02\x03\x06\x12\x03#\x04\
+    \x18\n\x0c\n\x05\x04\n\x02\x03\x01\x12\x03#\x19&\n\x0c\n\x05\x04\n\x02\
+    \x03\x03\x12\x03#)*\n\x0b\n\x04\x04\n\x02\x04\x12\x03$\x04%\n\x0c\n\x05\
+    \x04\n\x02\x04\x06\x12\x03$\x04\x15\n\x0c\n\x05\x04\n\x02\x04\x01\x12\
+    \x03$\x16\x20\n\x0c\n\x05\x04\n\x02\x04\x03\x12\x03$#$b\x06proto3\
 ";
 
 static mut file_descriptor_proto_lazy: ::protobuf::lazy::Lazy<::protobuf::descriptor::FileDescriptorProto> = ::protobuf::lazy::Lazy {

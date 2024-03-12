@@ -6,8 +6,8 @@ use crate::precompiles::{
 use crate::{
     GoQuerier,
     coder,
-    ocall,
     protobuf_generated::ffi,
+    querier,
 };
 use ed25519_dalek::{Signature, Verifier, VerifyingKey};
 use evm::executor::stack::{PrecompileHandle, PrecompileOutput};
@@ -228,7 +228,7 @@ fn base64_decode(input: &str) -> Vec<u8> {
 /// * did_url URL of DID document
 fn get_verification_material(connector: *mut GoQuerier, did_url: String) -> Result<Vec<ffi::VerificationMethod>, PrecompileFailure> {
     let encoded_request = coder::encode_verification_methods_request(did_url);
-    match ocall::make_request(connector, encoded_request) {
+    match querier::make_request(connector, encoded_request) {
         Some(result) => {
             // Decode protobuf and extract verification methods
             protobuf::parse_from_bytes::<ffi::QueryVerificationMethodsResponse>(result.as_slice())

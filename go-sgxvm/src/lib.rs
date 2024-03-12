@@ -7,7 +7,6 @@ extern crate lazy_static;
 extern crate parking_lot;
 
 mod enclave;
-mod cache;
 mod memory;
 mod version;
 mod errors;

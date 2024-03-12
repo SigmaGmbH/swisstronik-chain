@@ -2,7 +2,6 @@
 use crate::{querier::GoQuerier, Allocation, AllocationWithResult};
 use sgx_types::sgx_status_t;
 use sgx_types::*;
-use std::vec::Vec;
 
 extern "C" {
     pub fn ocall_query_raw(
@@ -35,36 +34,28 @@ extern "C" {
         maxlen: u32,
         p_quote_len: *mut u32,
     ) -> sgx_status_t;
-}
 
-pub fn make_request(querier: *mut GoQuerier, request: Vec<u8>) -> Option<Vec<u8>> {
-    let mut allocation = std::mem::MaybeUninit::<AllocationWithResult>::uninit();
+    pub fn ocall_get_ecdsa_quote(
+		ret_val: *mut sgx_status_t,
+		p_report: *const sgx_report_t,
+		p_quote: *mut u8,
+		quote_size: u32,
+	) -> sgx_status_t;
 
-    let result = unsafe {
-        ocall_query_raw(
-            allocation.as_mut_ptr(),
-            querier,
-            request.as_ptr(),
-            request.len(),
-        )
-    };
+    pub fn ocall_get_qve_report(
+		ret_val: *mut sgx_status_t,
+		p_quote: *const u8,
+		quote_len: u32,
+		timestamp: i64,
+		p_collateral_expiration_status: *mut u32,
+		p_quote_verification_result: *mut sgx_ql_qv_result_t,
+		p_qve_report_info: *mut sgx_ql_qe_report_info_t,
+		p_supplemental_data: *mut u8,
+		supplemental_data_size: u32,
+    ) -> sgx_status_t;
 
-    match result {
-        sgx_status_t::SGX_SUCCESS => {
-            let allocation = unsafe { allocation.assume_init() };
-            let result_vec = unsafe {
-                Vec::from_raw_parts(
-                    allocation.result_ptr,
-                    allocation.result_len,
-                    allocation.result_len,
-                )
-            };
-
-            return Some(result_vec);
-        }
-        _ => {
-            println!("make_request failed: Reason: {:?}", result.as_str());
-            return None;
-        }
-    };
+    pub fn ocall_get_supplemental_data_size(
+        ret_val: *mut sgx_status_t,
+        data_size: *mut u32,
+    ) -> sgx_status_t;
 }
