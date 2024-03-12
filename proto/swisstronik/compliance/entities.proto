@@ -36,8 +36,8 @@ message AddressInfo {
 message VerificationData {
     VerificationType verification_type = 1;
     repeated VerificationEntry entries = 2;
-
 }
+
 message VerificationEntry {
     IssuerAdapterContractDetail adapter_data = 1;
     // On which chain verification was passed
@@ -50,14 +50,55 @@ message VerificationEntry {
     bytes original_data = 5;
 }
 
-message IssuerDetails {
-    string issuer_alias = 1;
-}
-
 message IssuerAdapterContractDetail {
     // Issuer company name
     string issuer_alias = 1;
     // Adapter contract address
     string contract_address = 2;
 }
+
+
+/// V1 ///
+
+message IssuerDetails {
+    // Human-readable alias to issuer. Allows to easily understand
+    // what entity can be associated with issuer address.
+    string issuer_alias = 1;
+}
+
+message AddressDetails {
+    // Marks if contract deployed under this address is verified
+    // by community. Only verified contracts will be allowed to write
+    // to x/compliance module.
+    bool is_verified = 1;
+    // Marks if address is banned. Address can be marked as banned by
+    // community proposal.
+    bool is_banned = 2;
+    // Verifications passed by this address
+    repeated Verification verifications = 3;
+}
+
+message Verification {
+    // Contains information about verification type (KYC, proof-of-humanity, etc).
+    VerificationType type = 1;
+    // Contains ID of passed verification in storage.
+    bytes verification_id = 2;
+}
+
+message VerificationDetails {
+    // Verification issuer address
+    string issuer = 1;
+    // From which chain proof was transferred
+    string origin_chain = 2;
+    // Original issuance timestamp
+    uint32 issuance_timestamp = 3;
+    // Original expiration timestamp
+    uint32 expiration_timestamp = 4;
+    // Original proof data (ZK-proof)
+    bytes original_data = 5;
+}
+
+
+
+
 
