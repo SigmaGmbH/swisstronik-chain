@@ -4,6 +4,8 @@ import (
 	"cosmossdk.io/errors"
 	"fmt"
 	"github.com/cosmos/gogoproto/proto"
+	"github.com/ethereum/go-ethereum/crypto"
+	"slices"
 
 	"github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
@@ -174,6 +176,17 @@ func (k Keeper) GetAddressDetails(ctx sdk.Context, address sdk.Address) (*types.
 	return &addressDetails, nil
 }
 
+// SetAddressDetails writes address details to the storage
+func (k Keeper) SetAddressDetails(ctx sdk.Context, address sdk.Address, details *types.AddressDetails) error {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixAddressDetails)
+	detailsBytes, err := details.Marshal()
+	if err != nil {
+		return err
+	}
+	store.Set(address.Bytes(), detailsBytes)
+	return nil
+}
+
 // IsAddressVerified returns information if address is verified and not banned.
 // If address is banned, this function will return `false` to prevent issuer from writing new verification data
 func (k Keeper) IsAddressVerified(ctx sdk.Context, address sdk.Address) (bool, error) {
@@ -189,52 +202,80 @@ func (k Keeper) IsAddressVerified(ctx sdk.Context, address sdk.Address) (bool, e
 // MarkAddressAsVerified marks provided address as verified. This function should be called
 // as a result of accepted governance proposal.
 func (k Keeper) MarkAddressAsVerified(ctx sdk.Context, address sdk.Address) error {
-	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixAddressDetails)
-
 	// TODO: Add call to `x/evm` to check if this address is contract address
+	addressDetails, err := k.GetAddressDetails(ctx, address)
+	if err != nil {
+		return err
+	}
 
-	// If there is already some data, read it from the storage
-	addressDetailsBytes := store.Get(address.Bytes())
-	if addressDetailsBytes == nil {
-		// Create new address details struct
-		addressDetails := &types.AddressDetails{
-			IsVerified:    true,
-			IsBanned:      false,
-			Verifications: nil,
-		}
+	// If address is banned, return error
+	if addressDetails.IsBanned {
+		return errors.Wrap(types.ErrInvalidParam, "address is banned")
+	}
 
-		addressDetailsBytes, err := proto.Marshal(addressDetails)
-		if err != nil {
-			return err
-		}
+	// Skip if address is already verified
+	if addressDetails.IsVerified {
+		return nil
+	}
 
-		store.Set(address.Bytes(), addressDetailsBytes)
-	} else {
-		// Decode already existing data
-		var addressDetails types.AddressDetails
-		if err := proto.Unmarshal(addressDetailsBytes, &addressDetails); err != nil {
-			return err
-		}
+	addressDetails.IsVerified = true
+	if err := k.SetAddressDetails(ctx, address, addressDetails); err != nil {
+		return err
+	}
 
-		// If address is banned, return error
-		if addressDetails.IsBanned {
-			return errors.Wrap(types.ErrInvalidParam, "address is banned")
-		}
+	return nil
+}
 
-		// If address is already verified, skip
-		if addressDetails.IsVerified {
-			return nil
-		}
+// AddVerificationDetails writes details of passed verification by provided address.
+func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.Address, verificationType types.VerificationType, details types.VerificationDetails) error {
+	// Check if issuer is verified and not banned
+	issuerAddress, err := sdk.AccAddressFromBech32(details.Issuer)
+	if err != nil {
+		return err
+	}
 
-		// Mark address as verified and write updated data
-		addressDetails.IsVerified = true
+	isAddressVerified, err := k.IsAddressVerified(ctx, issuerAddress)
+	if err != nil {
+		return err
+	}
 
-		updatedDetailsBytes, err := proto.Marshal(&addressDetails)
-		if err != nil {
-			return err
-		}
+	if !isAddressVerified {
+		return errors.Wrap(types.ErrInvalidParam, "issuer is not verified")
+	}
 
-		store.Set(address.Bytes(), updatedDetailsBytes)
+	detailsBytes, err := details.Marshal()
+	if err != nil {
+		return err
+	}
+
+	// Check if there is no such verification details in storage yet
+	verificationDetailsID := crypto.Keccak256(userAddress.Bytes(), verificationType.ToBytes(), detailsBytes)
+	verificationDetailsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationDetails)
+
+	if verificationDetailsStore.Has(verificationDetailsID) {
+		return errors.Wrap(types.ErrInvalidParam, "provided verification details already in storage")
+	}
+
+	// If there is no such verification details associated with provided address, write them to the table
+	verificationDetailsStore.Set(verificationDetailsID, detailsBytes)
+
+	// Associate provided verification details with user address
+	verification := &types.Verification{
+		Type:           verificationType,
+		VerificationId: verificationDetailsID,
+	}
+	userAddressDetails, err := k.GetAddressDetails(ctx, userAddress)
+	if err != nil {
+		return err
+	}
+
+	if slices.Contains(userAddressDetails.Verifications, verification) {
+		return errors.Wrap(types.ErrInvalidParam, "such verification already associated with user address")
+	}
+
+	userAddressDetails.Verifications = append(userAddressDetails.Verifications, verification)
+	if err := k.SetAddressDetails(ctx, userAddress, userAddressDetails); err != nil {
+		return err
 	}
 
 	return nil
