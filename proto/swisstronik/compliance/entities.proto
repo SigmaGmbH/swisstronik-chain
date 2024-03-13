@@ -81,13 +81,15 @@ message AddressDetails {
 message Verification {
     // Contains information about verification type (KYC, proof-of-humanity, etc).
     VerificationType type = 1;
-    // Contains ID of passed verification in storage.
+    // Contains ID of details of passed verification in storage.
     bytes verification_id = 2;
+    // Issuer of verification
+    string issuer_address = 3;
 }
 
 message VerificationDetails {
     // Verification issuer address
-    string issuer = 1;
+    string issuer_address = 1;
     // From which chain proof was transferred
     string origin_chain = 2;
     // Original issuance timestamp

@@ -1,6 +1,8 @@
 package types
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+)
 
 func (vt VerificationType) ToBytes() []byte {
 	bytes := make([]byte, 4)

@@ -229,7 +229,7 @@ func (k Keeper) MarkAddressAsVerified(ctx sdk.Context, address sdk.Address) erro
 // AddVerificationDetails writes details of passed verification by provided address.
 func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.Address, verificationType types.VerificationType, details types.VerificationDetails) error {
 	// Check if issuer is verified and not banned
-	issuerAddress, err := sdk.AccAddressFromBech32(details.Issuer)
+	issuerAddress, err := sdk.AccAddressFromBech32(details.IssuerAddress)
 	if err != nil {
 		return err
 	}
@@ -263,6 +263,7 @@ func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.Address,
 	verification := &types.Verification{
 		Type:           verificationType,
 		VerificationId: verificationDetailsID,
+		IssuerAddress:  issuerAddress.String(),
 	}
 	userAddressDetails, err := k.GetAddressDetails(ctx, userAddress)
 	if err != nil {
@@ -280,3 +281,38 @@ func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.Address,
 
 	return nil
 }
+
+// HasVerificationOfType checks if user has verifications of specific type (for example, passed KYC) from provided issuers.
+// If there is no provided expected issuers, this function will check if user has any verification of appropriate type.
+func (k Keeper) HasVerificationOfType(ctx sdk.Context, userAddress sdk.Address, expectedType types.VerificationType, expectedIssuers ...sdk.Address) (bool, error) {
+	// Obtain user address details
+	userAddressDetails, err := k.GetAddressDetails(ctx, userAddress)
+	if err != nil {
+		return false, err
+	}
+
+	// Filter verifications with expected type
+	var appropriateTypeVerifications []*types.Verification
+	for _, verification := range userAddressDetails.Verifications {
+		if verification.Type == expectedType {
+			appropriateTypeVerifications = append(appropriateTypeVerifications, verification)
+		}
+	}
+
+	// If there is no provided issuers, check if there are any appropriate verification
+	if len(expectedIssuers) == 0 && len(appropriateTypeVerifications) != 0 {
+		return true, nil
+	}
+
+	// Filter verifications with expected issuers
+	for _, verification := range appropriateTypeVerifications {
+		for _, expectedIssuer := range expectedIssuers {
+			if verification.IssuerAddress == expectedIssuer.String() {
+				return true, nil
+			}
+		}
+	}
+	return false, nil
+}
+
+// TODO: Create fn to obtain all verified issuers with their aliases
