@@ -60,7 +60,6 @@ import (
 
 	"github.com/SigmaGmbH/librustgo"
 	abciserver "github.com/cometbft/cometbft/abci/server"
-	"github.com/cometbft/cometbft/node"
 	sdkserver "github.com/cosmos/cosmos-sdk/server"
 	servercmtlog "github.com/cosmos/cosmos-sdk/server/log"
 	"github.com/cosmos/cosmos-sdk/types/mempool"
@@ -448,8 +447,11 @@ func startInProcess(svrCtx *sdkserver.Context, svrCfg config.Config, clientCtx c
 		httpSrv     *http.Server
 		httpSrvDone chan struct{}
 	)
-	genDocProvider := node.DefaultGenesisDocProviderFunc(cmtCfg)
 
+	// Uses cosmos sdk genutil genesis doc reader instead of CometBFT genesis reader
+	// It crashes in reading genesis file if the Initial_height is specified as string.
+	// Now uses int formatted height. It causes issue with consensus param read in context as well.
+	genDocProvider := getGenDocProvider(cmtCfg)
 	if svrCfg.JSONRPC.Enable {
 		genDoc, err := genDocProvider()
 		if err != nil {
