@@ -212,7 +212,7 @@ func (q Connector) GetVerificationMethods(req *librustgo.CosmosRequest_Verificat
 	}
 
 	// Extract verification methods
-	result := []*librustgo.VerificationMethod{}
+	var result []*librustgo.VerificationMethod
 	for _, method := range didDocument.DidDoc.VerificationMethod {
 		ffiMethod := librustgo.VerificationMethod{
 			VerificationMethodType: method.VerificationMethodType,
@@ -224,4 +224,16 @@ func (q Connector) GetVerificationMethods(req *librustgo.CosmosRequest_Verificat
 	return proto.Marshal(&librustgo.QueryVerificationMethodsResponse{
 		Vm: result,
 	})
+}
+
+// SetVerificationDetails writes provided verification details to x/compliance module
+func (q Connector) SetVerificationDetails() ([]byte, error) {
+	// TODO: Implement
+	return nil, nil
+}
+
+// GetVerificationDetails returns verification details from x/compliance module
+func (q Connector) GetVerificationDetails() ([]byte, error) {
+	// TODO: Implement
+	return nil, nil
 }
