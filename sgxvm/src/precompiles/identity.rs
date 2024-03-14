@@ -84,61 +84,60 @@ impl LinearCostPrecompileWithQuerier for Identity {
         )?;
 
         handle.record_cost(cost)?;
-        let (exit_status, output) = Self::raw_execute(querier, handle.input(), cost)?;
+        let (exit_status, output) = execute_inner(querier, handle.input())?;
         Ok(PrecompileOutput {
             exit_status,
             output,
         })
     }
+}
 
-    fn raw_execute(
-        querier: *mut GoQuerier,
-        input: &[u8],
-        _: u64,
-    ) -> Result<(ExitSucceed, Vec<u8>), PrecompileFailure> {
-        // Expects to receive RLP-encoded JWT proof for Verifiable Credential
-        let jwt: String = rlp::decode(input).map_err(|_| PrecompileFailure::Error {
-            exit_status: ExitError::Other("cannot decode provided JWT proof".into()),
+fn execute_inner(
+    querier: *mut GoQuerier,
+    input: &[u8],
+) -> Result<(ExitSucceed, Vec<u8>), PrecompileFailure> {
+    // Expects to receive RLP-encoded JWT proof for Verifiable Credential
+    let jwt: String = rlp::decode(input).map_err(|_| PrecompileFailure::Error {
+        exit_status: ExitError::Other("cannot decode provided JWT proof".into()),
+    })?;
+
+    // Split JWT into parts
+    let (header, payload, signature, data) = split_jwt(jwt.as_str())?;
+
+    // Parse and validate header
+    let header: Header = serde_json::from_str(header.as_str()).map_err(|_| PrecompileFailure::Error {
+        exit_status: ExitError::Other("Cannot parse JWT header".into()),
+    })?;
+
+    // Validate header
+    header.validate()?;
+
+    // Parse payload
+    let parsed_payload: VerifiableCredential = serde_json::from_str(payload.as_str()).map_err(|_| PrecompileFailure::Error {
+        exit_status: ExitError::Other("Cannot parse JWT payload".into()),
+    })?;
+
+    // Since we issue VC without expiration date, verify nbf (not valid before) field of JWT, it should be less than current timestamp
+    validate_nbf(parsed_payload.nbf)?;
+
+    // Extract issuer from payload and obtain verification material
+    let verification_materials = get_verification_material(querier, parsed_payload.iss.clone())?;
+
+    // Find appropriate verification material
+    let vm = verification_materials
+        .iter()
+        .find(|verification_method| verification_method.verificationMethodType == "Ed25519VerificationKey2020" || verification_method.verificationMethodType == "Ed25519VerificationKey2018")
+        .and_then(|method| Some(method.verificationMaterial.clone()))
+        .ok_or(PrecompileFailure::Error {
+            exit_status: ExitError::Other("Cannot find appropriate verification method".into()),
         })?;
 
-        // Split JWT into parts
-        let (header, payload, signature, data) = split_jwt(jwt.as_str())?;
+    verify_signature(&data, &signature, &vm)?;
 
-        // Parse and validate header
-        let header: Header = serde_json::from_str(header.as_str()).map_err(|_| PrecompileFailure::Error {
-            exit_status: ExitError::Other("Cannot parse JWT header".into()),
-        })?;
+    let credential_subject = convert_bech32_address(parsed_payload.vc.credential_subject.user_address)?;
+    let output = encode_output(credential_subject, parsed_payload.iss);
 
-        // Validate header
-        header.validate()?;
-
-        // Parse payload
-        let parsed_payload: VerifiableCredential = serde_json::from_str(payload.as_str()).map_err(|_| PrecompileFailure::Error {
-            exit_status: ExitError::Other("Cannot parse JWT payload".into()),
-        })?;
-
-        // Since we issue VC without expiration date, verify nbf (not valid before) field of JWT, it should be less than current timestamp 
-        validate_nbf(parsed_payload.nbf)?;
-
-        // Extract issuer from payload and obtain verification material
-        let verification_materials = get_verification_material(querier, parsed_payload.iss.clone())?;
-
-        // Find appropriate verification material
-        let vm = verification_materials
-            .iter()
-            .find(|verification_method| verification_method.verificationMethodType == "Ed25519VerificationKey2020" || verification_method.verificationMethodType == "Ed25519VerificationKey2018")
-            .and_then(|method| Some(method.verificationMaterial.clone()))
-            .ok_or(PrecompileFailure::Error {
-                exit_status: ExitError::Other("Cannot find appropriate verification method".into()),
-            })?;
-        
-        verify_signature(&data, &signature, &vm)?;
-
-        let credential_subject = convert_bech32_address(parsed_payload.vc.credential_subject.user_address)?;
-        let output = encode_output(credential_subject, parsed_payload.iss);
-
-        Ok((ExitSucceed::Returned, output))
-    }
+    Ok((ExitSucceed::Returned, output))
 }
 
 /// Splits provided JWT into header, payload, signature and data.

@@ -26,18 +26,17 @@ impl LinearCostPrecompileWithQuerier for ComplianceBridge {
         )?;
 
         handle.record_cost(cost)?;
-        let (exit_status, output) = Self::raw_execute(querier, handle.input(), cost)?;
+        let (exit_status, output) = execute_inner(querier, handle.input())?;
         Ok(PrecompileOutput {
             exit_status,
             output,
         })
     }
+}
 
-    fn raw_execute(
-        querier: *mut GoQuerier,
-        input: &[u8],
-        _: u64,
-    ) -> Result<(ExitSucceed, Vec<u8>), PrecompileFailure> {
-        Ok((ExitSucceed::Returned, Vec::default()))
-    }
+fn execute_inner(
+    querier: *mut GoQuerier,
+    input: &[u8],
+) -> Result<(ExitSucceed, Vec<u8>), PrecompileFailure> {
+    Ok((ExitSucceed::Returned, Vec::default()))
 }

@@ -46,12 +46,6 @@ pub trait LinearCostPrecompileWithQuerier {
     const WORD: u64;
 
     fn execute(querier: *mut GoQuerier, handle: &mut impl PrecompileHandle) -> PrecompileResult;
-
-    fn raw_execute(
-        querier: *mut GoQuerier,
-        input: &[u8],
-        cost: u64,
-    ) -> Result<(ExitSucceed, Vec<u8>), PrecompileFailure>;
 }
 
 impl<T: LinearCostPrecompile> Precompile for T {
