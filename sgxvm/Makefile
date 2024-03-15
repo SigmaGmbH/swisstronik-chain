@@ -4,7 +4,7 @@ TARGET = $(shell rustc --version --verbose 2> /dev/null | awk "/host:/ { print \
 TARGET_DIR = target/release/
 DEFAULT = help
 CC=clang
-CXX=clang++
+#CXX=clang++
 SGX_MODE ?= HW
 ENCLAVE_HOME ?= $(HOME)/.swisstronik-enclave
 
