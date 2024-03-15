@@ -19,6 +19,7 @@ mod ec_recover;
 mod sha256;
 mod ripemd160;
 mod datacopy;
+mod webauthn;
 
 pub type PrecompileResult = Result<PrecompileOutput, PrecompileFailure>;
 
@@ -103,7 +104,7 @@ impl EVMPrecompiles {
     pub fn new(querier: *mut GoQuerier) -> Self {
         Self{ querier }
     }
-    pub fn used_addresses() -> [H160; 10] {
+    pub fn used_addresses() -> [H160; 12] {
         [
             hash(1),
             hash(2),
@@ -114,8 +115,8 @@ impl EVMPrecompiles {
             hash(7),
             hash(8),
             hash(9),
-            // hash(1024),
-            // hash(1025),
+            hash(1024),
+            hash(1025),
             hash(1027),
         ]
     }
@@ -135,9 +136,8 @@ impl PrecompileSet for EVMPrecompiles {
             a if a == hash(8) => Some(bn128::Bn128Pairing::execute(handle)),
             a if a == hash(9) => Some(blake2f::Blake2F::execute(handle)),
             // Non-Frontier specific nor Ethereum precompiles :
-            // a if a == hash(1024) => Some(Sha3FIPS256::execute(handle)),
-            // a if a == hash(1025) => Some(Sha3FIPS512::execute(handle)),
-            // a if a == hash(1026) => Some(ECRecoverPublicKey::execute(handle)),
+            a if a == hash(1024) => Some(sha3fips::Sha3FIPS256::execute(handle)),
+            a if a == hash(1025) => Some(sha3fips::Sha3FIPS512::execute(handle)),
             // Identity precompile
             a if a == hash(1027) => Some(identity::Identity::execute(self.querier, handle)),
             _ => None,
