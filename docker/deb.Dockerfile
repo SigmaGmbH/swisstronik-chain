@@ -1,5 +1,5 @@
 ############ Install Intel SGX SDK & SGX PSW
-FROM ghcr.io/sigmagmbh/sgx:2.19-bionic as base
+FROM ghcr.io/sigmagmbh/sgx:2.23-focal as base
 RUN wget -qO - https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | apt-key add -
 RUN apt-get update
 
@@ -18,7 +18,7 @@ RUN curl https://sh.rustup.rs -sSf | bash -s -- -y > /dev/null 2>&1
 RUN cargo install protobuf-codegen --version "2.8.1" -f
  
 # Install golang
-ADD https://go.dev/dl/go1.19.linux-amd64.tar.gz go.linux-amd64.tar.gz
+ADD https://go.dev/dl/go1.22.1.linux-amd64.tar.gz go.linux-amd64.tar.gz
 RUN tar -C /usr/local -xzf go.linux-amd64.tar.gz && rm go.linux-amd64.tar.gz
 RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && \
 	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest > /dev/null 2>&1

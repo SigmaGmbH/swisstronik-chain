@@ -2,8 +2,7 @@ name: Build Deb
 
 on:
   push:
-    tags:
-      - "*"
+    branches: [ feat/x-compliance ]
 
 jobs:
   build-deb:
