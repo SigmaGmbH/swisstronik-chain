@@ -59,12 +59,23 @@ fn route(querier: *mut GoQuerier, caller: H160, data: &[u8]) -> Result<(ExitSucc
     let input_signature = hex::encode(data[..4].to_vec());
     match input_signature.as_str() {
         HAS_VERIFICATION_FN_SELECTOR => {
-            // TODO: Decode params
+            let verification_params = vec![ParamType::Address, ParamType::Uint(32), ParamType::Uint(32), ParamType::Uint(32), ParamType::Bytes];
+            let decoded = ethabi::decode_whole(&verification_params, &data[4..]).map_err(|err| {
+                PrecompileFailure::Error {
+                    exit_status: ExitError::Other(format!("cannot decode params: {:?}", err).into()),
+                }
+            })?;
             // TODO: Implement READ from x/compliance
             Ok((ExitSucceed::Returned, Vec::default()))
         },
         ADD_VERIFICATION_FN_SELECTOR => {
             // TODO: Decode params
+            let has_verification_params = vec![ParamType::Address, ParamType::Uint(32), ParamType::Uint(32), ParamType::Array(Box::new(ParamType::Address))];
+            let decoded = ethabi::decode_whole(&has_verification_params, &data[4..]).map_err(|err| {
+                PrecompileFailure::Error {
+                    exit_status: ExitError::Other(format!("cannot decode params: {:?}", err).into()),
+                }
+            })?;
             // TODO: Implement WRITE to x/compliance
             Ok((ExitSucceed::Returned, Vec::default()))
         },
