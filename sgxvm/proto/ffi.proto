@@ -150,6 +150,12 @@ message QueryVerificationMethodsResponse {
   repeated VerificationMethod vm = 1;
 }
 
+message QueryAddVerificationDetails {}
+message QueryAddVerificationDetailsResponse {}
+
+message QueryGetVerificationDetails {}
+message QueryGetVerificationDetailsResponse {}
+
 message CosmosRequest {
   oneof req {
     QueryGetAccount getAccount = 1;
