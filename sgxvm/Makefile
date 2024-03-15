@@ -75,7 +75,7 @@ endef
 
 define compile_unsigned_enclave
 	@echo "Compile into unsinged enclave"
-	@cxx $(CURDIR)/Enclave_t.o -o $(CURDIR)/enclave.unsigned.so -Wl,--no-undefined -nostdlib -nodefaultlibs -nostartfiles -L/opt/intel/sgxsdk/lib64 \
+	@$(CXX) $(CURDIR)/Enclave_t.o -o $(CURDIR)/enclave.unsigned.so -Wl,--no-undefined -nostdlib -nodefaultlibs -nostartfiles -L/opt/intel/sgxsdk/lib64 \
 		-Wl,--whole-archive -l$(Trts_Library_Name) -Wl,--no-whole-archive \
 		-Wl,--start-group -lsgx_tstdc -lsgx_tcxx -lsgx_dcap_tvl -l$(Service_Library_Name) -lsgx_tcrypto -lsgx_tprotected_fs -lpthread \
 		-L$(CURDIR)/sgx-artifacts/lib -lenclave -Wl,--end-group -Wl,--version-script=$(CURDIR)/Enclave.lds -Wl,-z,relro,-z,now,-z,noexecstack -Wl,-Bstatic -Wl,-Bsymbolic \
