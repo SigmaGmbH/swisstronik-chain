@@ -1,3 +1,4 @@
+use ethabi::Address;
 use evm::backend::Basic;
 use primitive_types::{H160, U256, H256};
 use protobuf::Message;
@@ -105,6 +106,48 @@ pub fn encode_verification_methods_request(did_url: String) -> Vec<u8> {
     let mut request = ffi::QueryVerificationMethods::new();
     request.set_did(did_url);
     cosmos_request.set_verificationMethods(request);
+    cosmos_request.write_to_bytes().unwrap()
+}
+
+pub fn encode_add_verification_details_request(
+    user_address: Address,
+    issuer_address: H160,
+    verification_type: u32,
+    issuance_timestamp: u32,
+    expiration_timestamp: u32,
+    proof_data: Vec<u8>
+) -> Vec<u8> {
+    let mut cosmos_request = ffi::CosmosRequest::new();
+    let mut request = ffi::QueryAddVerificationDetails::new();
+
+    request.set_userAddress(user_address.as_bytes().to_vec());
+    request.set_issuerAddress(issuer_address.as_bytes().to_vec());
+    request.set_verificationType(verification_type);
+    request.set_issuanceTimestamp(issuance_timestamp);
+    request.set_expirationTimestamp(expiration_timestamp);
+    request.set_proofData(proof_data);
+
+    cosmos_request.set_addVerificationDetails(request);
+    cosmos_request.write_to_bytes().unwrap()
+}
+
+pub fn encode_has_verification_request(
+    user_address: H160,
+    verification_type: u32,
+    expiration_timestamp: u32,
+    allowed_issuers: Vec<Address>,
+) -> Vec<u8> {
+    let mut cosmos_request = ffi::CosmosRequest::new();
+    let mut request = ffi::QueryHasVerification::new();
+
+    request.set_userAddress(user_address.as_bytes().to_vec());
+    request.set_verificationType(verification_type);
+    request.set_expirationTimestamp(expiration_timestamp);
+
+    let issuers_vec: Vec<Vec<u8>> = allowed_issuers.into_iter().map(|issuer| issuer.as_bytes().to_vec()).collect();
+    request.set_allowedIssuers(issuers_vec.into());
+
+    cosmos_request.set_hasVerification(request);
     cosmos_request.write_to_bytes().unwrap()
 }
 
