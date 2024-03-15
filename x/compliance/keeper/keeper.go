@@ -227,7 +227,7 @@ func (k Keeper) MarkAddressAsVerified(ctx sdk.Context, address sdk.Address) erro
 }
 
 // AddVerificationDetails writes details of passed verification by provided address.
-func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.Address, verificationType types.VerificationType, details types.VerificationDetails) error {
+func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.Address, verificationType types.VerificationType, details *types.VerificationDetails) error {
 	// Check if issuer is verified and not banned
 	issuerAddress, err := sdk.AccAddressFromBech32(details.IssuerAddress)
 	if err != nil {
@@ -300,7 +300,7 @@ func (k Keeper) GetVerificationDetails(ctx sdk.Context, verificationDetailsId []
 
 // HasVerificationOfType checks if user has verifications of specific type (for example, passed KYC) from provided issuers.
 // If there is no provided expected issuers, this function will check if user has any verification of appropriate type.
-func (k Keeper) HasVerificationOfType(ctx sdk.Context, userAddress sdk.Address, expectedType types.VerificationType, expectedIssuers ...sdk.Address) (bool, error) {
+func (k Keeper) HasVerificationOfType(ctx sdk.Context, userAddress sdk.Address, expectedType types.VerificationType, expectedIssuers []sdk.Address) (bool, error) {
 	// Obtain user address details
 	userAddressDetails, err := k.GetAddressDetails(ctx, userAddress)
 	if err != nil {

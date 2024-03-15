@@ -8,6 +8,8 @@ import (
 	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/golang/protobuf/proto"
 	"math/big"
+
+	compliancetypes "swisstronik/x/compliance/types"
 )
 
 // Connector allows our VM interact with existing Cosmos application.
@@ -62,6 +64,10 @@ func (q Connector) Query(req []byte) ([]byte, error) {
 	// Returns verification methods for DID Document
 	case *librustgo.CosmosRequest_VerificationMethods:
 		return q.GetVerificationMethods(request)
+	case *librustgo.CosmosRequest_AddVerificationDetails:
+		return q.AddVerificationDetails(request)
+	case *librustgo.CosmosRequest_HasVerification:
+		return q.HasVerification(request)
 	}
 
 	return nil, errors.New("wrong query received")
@@ -226,14 +232,43 @@ func (q Connector) GetVerificationMethods(req *librustgo.CosmosRequest_Verificat
 	})
 }
 
-// SetVerificationDetails writes provided verification details to x/compliance module
-func (q Connector) SetVerificationDetails() ([]byte, error) {
-	// TODO: Implement
+// AddVerificationDetails writes provided verification details to x/compliance module
+func (q Connector) AddVerificationDetails(req *librustgo.CosmosRequest_AddVerificationDetails) ([]byte, error) {
+	verificationType := compliancetypes.VerificationType(req.AddVerificationDetails.VerificationType)
+	userAddress := sdk.AccAddress(req.AddVerificationDetails.UserAddress)
+	issuerAddress := sdk.AccAddress(req.AddVerificationDetails.IssuerAddress).String()
+
+	verificationDetails := &compliancetypes.VerificationDetails{
+		IssuerAddress:       issuerAddress,
+		OriginChain:         "samplechain", // TODO: Read chain from proto
+		IssuanceTimestamp:   req.AddVerificationDetails.IssuanceTimestamp,
+		ExpirationTimestamp: req.AddVerificationDetails.ExpirationTimestamp,
+		OriginalData:        req.AddVerificationDetails.ProofData,
+	}
+
+	if err := q.EVMKeeper.ComplianceKeeper.AddVerificationDetails(q.Context, userAddress, verificationType, verificationDetails); err != nil {
+		return nil, err
+	}
+
 	return nil, nil
 }
 
-// GetVerificationDetails returns verification details from x/compliance module
-func (q Connector) GetVerificationDetails() ([]byte, error) {
-	// TODO: Implement
-	return nil, nil
+// HasVerification returns if user has verification of provided type from x/compliance module
+func (q Connector) HasVerification(req *librustgo.CosmosRequest_HasVerification) ([]byte, error) {
+	userAddress := sdk.AccAddress(req.HasVerification.UserAddress)
+	verificationType := compliancetypes.VerificationType(req.HasVerification.VerificationType)
+
+	var allowedIssuers []sdk.Address
+	for _, issuer := range req.HasVerification.AllowedIssuers {
+		allowedIssuers = append(allowedIssuers, sdk.AccAddress(issuer))
+	}
+
+	hasVerification, err := q.EVMKeeper.ComplianceKeeper.HasVerificationOfType(q.Context, userAddress, verificationType, allowedIssuers)
+	if err != nil {
+		return nil, err
+	}
+
+	return proto.Marshal(&librustgo.QueryHasVerificationResponse{
+		HasVerification: hasVerification,
+	})
 }
