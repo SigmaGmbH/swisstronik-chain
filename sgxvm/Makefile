@@ -83,7 +83,8 @@ define compile_unsigned_enclave
 endef
 
 define sign_enclave
-	@echo "Sign enclave"
+	@echo "Sign enclave using"
+	@/opt/intel/sgxsdk/bin/x64/sgx_sign -version
 	@mkdir -p $(CURDIR)/sgx-artifacts/bin
 	@/opt/intel/sgxsdk/bin/x64/sgx_sign sign -key $(CURDIR)/Enclave_private.pem -enclave $(CURDIR)/enclave.unsigned.so -out $(CURDIR)/sgx-artifacts/bin/enclave.signed.so -config $(CURDIR)/Enclave.config.xml
 endef
