@@ -4,13 +4,15 @@ TARGET = $(shell rustc --version --verbose 2> /dev/null | awk "/host:/ { print \
 TARGET_DIR = target/release/
 DEFAULT = help
 CC=clang
-CXX=clang++
+#CXX=clang++
 SGX_MODE ?= HW
 ENCLAVE_HOME ?= $(HOME)/.swisstronik-enclave
 
 Trts_Library_Name = sgx_trts
 Service_Library_Name = sgx_tservice
 Enclave_build_feature = hardware_mode
+# Enable the security flags
+Enclave_Security_Link_Flags := -Wl,-z,relro,-z,now,-z,noexecstack
 
 # ENCLAVE SETTINGS
 ifneq ($(SGX_MODE), HW)
@@ -75,11 +77,14 @@ endef
 
 define compile_unsigned_enclave
 	@echo "Compile into unsinged enclave"
-	@g++ $(CURDIR)/Enclave_t.o -o $(CURDIR)/enclave.unsigned.so -Wl,--no-undefined -nostdlib -nodefaultlibs -nostartfiles -L/opt/intel/sgxsdk/lib64 \
-		-Wl,--whole-archive -l$(Trts_Library_Name) -Wl,--no-whole-archive \
-		-Wl,--start-group -lsgx_tstdc -lsgx_tcxx -lsgx_dcap_tvl -l$(Service_Library_Name) -lsgx_tcrypto -lsgx_tprotected_fs \
-		-L$(CURDIR)/sgx-artifacts/lib -lenclave -Wl,--end-group -Wl,--version-script=$(CURDIR)/Enclave.lds -Wl,-z,relro,-z,now,-z,noexecstack -Wl,-Bstatic -Wl,-Bsymbolic \
-		-Wl,--no-undefined -Wl,-pie,-eenclave_entry -Wl,--export-dynamic -Wl,--gc-sections -Wl,--defsym,__ImageBase=0
+	@$(CXX) $(CURDIR)/Enclave_t.o -o $(CURDIR)/enclave.unsigned.so $(Enclave_Security_Link_Flags) -fPIC \
+	    -Wl,--no-undefined -nostdlib -nodefaultlibs -nostartfiles -L/opt/intel/sgxsdk/lib64 \
+		-Wl,--whole-archive -lsgx_dcap_tvl -l$(Trts_Library_Name) -Wl,--no-whole-archive \
+		-Wl,--start-group -lsgx_tstdc -lsgx_tcxx -l$(Service_Library_Name) -lsgx_tcrypto -lsgx_tprotected_fs -lpthread -L$(CURDIR)/sgx-artifacts/lib -lenclave -Wl,--end-group \
+		-Wl,-Bstatic -Wl,-Bsymbolic -Wl,--no-undefined \
+		-Wl,-pie,-eenclave_entry -Wl,--export-dynamic \
+		-Wl,--gc-sections -Wl,--defsym,__ImageBase=0 \
+		-Wl,--version-script=$(CURDIR)/Enclave.lds
 endef
 
 define sign_enclave
