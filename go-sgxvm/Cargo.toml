@@ -17,6 +17,7 @@ hex = "0.4.3"
 protobuf = "=2.8.1"
 sgx_types = { git = "https://github.com/apache/teaclave-sgx-sdk.git", rev = "3c903bda" }
 sgx_urts = { git = "https://github.com/apache/teaclave-sgx-sdk.git", rev = "3c903bda" }
+libloading = "*"
 
 [build-dependencies]
 cbindgen = "0.24.3"
