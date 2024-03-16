@@ -7,6 +7,8 @@ extern crate rustls;
 extern crate sgx_tse;
 
 extern crate sgx_types;
+extern crate alloc;
+
 use sgx_types::*;
 
 use std::slice;

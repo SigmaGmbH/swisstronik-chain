@@ -227,7 +227,7 @@ func (k Keeper) MarkAddressAsVerified(ctx sdk.Context, address sdk.Address) erro
 }
 
 // AddVerificationDetails writes details of passed verification by provided address.
-func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.Address, verificationType types.VerificationType, details types.VerificationDetails) error {
+func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.Address, verificationType types.VerificationType, details *types.VerificationDetails) error {
 	// Check if issuer is verified and not banned
 	issuerAddress, err := sdk.AccAddressFromBech32(details.IssuerAddress)
 	if err != nil {
@@ -282,9 +282,25 @@ func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.Address,
 	return nil
 }
 
+// GetVerificationDetails returns verification details for provided ID
+func (k Keeper) GetVerificationDetails(ctx sdk.Context, verificationDetailsId []byte) (*types.VerificationDetails, error) {
+	verificationDetailsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationDetails)
+	verificationDetailsBytes := verificationDetailsStore.Get(verificationDetailsId)
+	if verificationDetailsBytes == nil {
+		return nil, nil
+	}
+
+	var verificationDetails types.VerificationDetails
+	if err := proto.Unmarshal(verificationDetailsBytes, &verificationDetails); err != nil {
+		return nil, err
+	}
+
+	return &verificationDetails, nil
+}
+
 // HasVerificationOfType checks if user has verifications of specific type (for example, passed KYC) from provided issuers.
 // If there is no provided expected issuers, this function will check if user has any verification of appropriate type.
-func (k Keeper) HasVerificationOfType(ctx sdk.Context, userAddress sdk.Address, expectedType types.VerificationType, expectedIssuers ...sdk.Address) (bool, error) {
+func (k Keeper) HasVerificationOfType(ctx sdk.Context, userAddress sdk.Address, expectedType types.VerificationType, expectedIssuers []sdk.Address) (bool, error) {
 	// Obtain user address details
 	userAddressDetails, err := k.GetAddressDetails(ctx, userAddress)
 	if err != nil {
@@ -313,6 +329,38 @@ func (k Keeper) HasVerificationOfType(ctx sdk.Context, userAddress sdk.Address, 
 		}
 	}
 	return false, nil
+}
+
+func (k Keeper) GetVerificationsOfType(ctx sdk.Context, userAddress sdk.Address, expectedType types.VerificationType, expectedIssuers ...sdk.Address) ([]*types.VerificationDetails, error) {
+	// Obtain user address details
+	userAddressDetails, err := k.GetAddressDetails(ctx, userAddress)
+	if err != nil {
+		return nil, err
+	}
+
+	// Filter verifications with expected type
+	var appropriateTypeVerifications []*types.Verification
+	for _, verification := range userAddressDetails.Verifications {
+		if verification.Type == expectedType {
+			appropriateTypeVerifications = append(appropriateTypeVerifications, verification)
+		}
+	}
+
+	if len(appropriateTypeVerifications) == 0 {
+		return nil, nil
+	}
+
+	// Extract verification data
+	var verifications []*types.VerificationDetails
+	for _, verification := range appropriateTypeVerifications {
+		verificationDetails, err := k.GetVerificationDetails(ctx, verification.VerificationId)
+		if err != nil {
+			return nil, err
+		}
+		verifications = append(verifications, verificationDetails)
+	}
+
+	return verifications, nil
 }
 
 // TODO: Create fn to obtain all verified issuers with their aliases

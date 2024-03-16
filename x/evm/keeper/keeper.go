@@ -66,6 +66,8 @@ type Keeper struct {
 	feeMarketKeeper types.FeeMarketKeeper
 	// access to DID registry
 	DIDKeeper types.DIDKeeper
+	// access to x/compliance module
+	ComplianceKeeper types.ComplianceKeeper
 
 	// chain ID number obtained from the context's chain id
 	eip155ChainID *big.Int
@@ -90,6 +92,7 @@ func NewKeeper(
 	sk types.StakingKeeper,
 	fmk types.FeeMarketKeeper,
 	dk types.DIDKeeper,
+	ck types.ComplianceKeeper,
 	ss paramstypes.Subspace,
 ) *Keeper {
 	// ensure evm module account is set
@@ -111,17 +114,18 @@ func NewKeeper(
 
 	// NOTE: we pass in the parameter space to the CommitStateDB in order to use custom denominations for the EVM operations
 	return &Keeper{
-		cdc:             cdc,
-		authority:       authority,
-		accountKeeper:   ak,
-		bankKeeper:      bankKeeper,
-		stakingKeeper:   sk,
-		feeMarketKeeper: fmk,
-		DIDKeeper:       dk,
-		storeKey:        storeKey,
-		transientKey:    transientKey,
-		ss:              ss,
-		nodePublicKey:   nodePublicKey,
+		cdc:              cdc,
+		authority:        authority,
+		accountKeeper:    ak,
+		bankKeeper:       bankKeeper,
+		stakingKeeper:    sk,
+		feeMarketKeeper:  fmk,
+		DIDKeeper:        dk,
+		ComplianceKeeper: ck,
+		storeKey:         storeKey,
+		transientKey:     transientKey,
+		ss:               ss,
+		nodePublicKey:    nodePublicKey,
 	}
 }
 

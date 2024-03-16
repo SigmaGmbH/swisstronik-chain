@@ -2,12 +2,11 @@ name: Build Deb
 
 on:
   push:
-    tags:
-      - "*"
+    branches: [ feat/x-compliance ]
 
 jobs:
   build-deb:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     env:
       SGX_MODE: HW
     steps:

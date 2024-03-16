@@ -19,6 +19,7 @@ mod ec_recover;
 mod sha256;
 mod ripemd160;
 mod datacopy;
+mod compliance_bridge;
 mod webauthn;
 
 pub type PrecompileResult = Result<PrecompileOutput, PrecompileFailure>;
@@ -37,7 +38,7 @@ pub trait LinearCostPrecompile {
     fn raw_execute(
         input: &[u8],
         cost: u64,
-    ) -> core::result::Result<(ExitSucceed, Vec<u8>), PrecompileFailure>;
+    ) -> Result<(ExitSucceed, Vec<u8>), PrecompileFailure>;
 }
 
 /// Precompile with possibility to interact with Cosmos side using GoQuerier
@@ -46,12 +47,6 @@ pub trait LinearCostPrecompileWithQuerier {
     const WORD: u64;
 
     fn execute(querier: *mut GoQuerier, handle: &mut impl PrecompileHandle) -> PrecompileResult;
-
-    fn raw_execute(
-        querier: *mut GoQuerier,
-        input: &[u8],
-        cost: u64,
-    ) -> core::result::Result<(ExitSucceed, Vec<u8>), PrecompileFailure>;
 }
 
 impl<T: LinearCostPrecompile> Precompile for T {

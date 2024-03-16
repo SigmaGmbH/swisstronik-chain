@@ -288,8 +288,8 @@ type App struct {
 	EvmKeeper       *evmkeeper.Keeper
 	FeeMarketKeeper feemarketkeeper.Keeper
 
-	VestingKeeper vestingmodulekeeper.Keeper
-	DIDKeeper     didmodulekeeper.Keeper
+	VestingKeeper    vestingmodulekeeper.Keeper
+	DIDKeeper        didmodulekeeper.Keeper
 	ComplianceKeeper compliancemodulekeeper.Keeper
 
 	// this line is used by starport scaffolding # stargate/app/keeperDeclaration
@@ -501,11 +501,18 @@ func New(
 	)
 	didModule := didmodule.NewAppModule(appCodec, app.DIDKeeper)
 
+	app.ComplianceKeeper = *compliancemodulekeeper.NewKeeper(
+		keys[compliancemoduletypes.StoreKey],
+		keys[compliancemoduletypes.MemStoreKey],
+		app.GetSubspace(compliancemoduletypes.ModuleName),
+	)
+	complianceModule := compliancemodule.NewAppModule(appCodec, app.ComplianceKeeper)
+
 	// Set authority to x/gov module account to only expect the module account to update params
 	evmSs := app.GetSubspace(evmtypes.ModuleName)
 	app.EvmKeeper = evmkeeper.NewKeeper(
 		appCodec, keys[evmtypes.StoreKey], tkeys[evmtypes.TransientKey], authtypes.NewModuleAddress(govtypes.ModuleName),
-		app.AccountKeeper, app.BankKeeper, app.StakingKeeper, app.FeeMarketKeeper, app.DIDKeeper, evmSs,
+		app.AccountKeeper, app.BankKeeper, app.StakingKeeper, app.FeeMarketKeeper, app.DIDKeeper, app.ComplianceKeeper, evmSs,
 	)
 
 	// ... other modules keepers
@@ -603,13 +610,6 @@ func New(
 		app.BankKeeper,
 	)
 	vestingModule := vestingmodule.NewAppModule(appCodec, app.VestingKeeper, app.AccountKeeper, app.BankKeeper)
-
-	app.ComplianceKeeper = *compliancemodulekeeper.NewKeeper(
-		keys[compliancemoduletypes.StoreKey],
-		keys[compliancemoduletypes.MemStoreKey],
-		app.GetSubspace(compliancemoduletypes.ModuleName),
-	)
-	complianceModule := compliancemodule.NewAppModule(appCodec, app.ComplianceKeeper)
 
 	// this line is used by starport scaffolding # stargate/app/keeperDefinition
 
