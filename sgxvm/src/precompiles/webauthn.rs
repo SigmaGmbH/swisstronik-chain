@@ -1,32 +1,24 @@
 extern crate sgx_tstd as std;
 
-use crate::precompiles::{
-    ExitError, ExitSucceed, LinearCostPrecompileWithQuerier, PrecompileFailure, PrecompileResult,
-};
-use crate::{
-    GoQuerier,
-    coder,
-    protobuf_generated::ffi,
-    querier,
-};
-use ed25519_dalek::{Signature, Verifier, VerifyingKey};
 use evm::executor::stack::{PrecompileHandle, PrecompileOutput};
-use ethabi::{Token as AbiToken, encode as encodeAbi};
+use evm::{ExitError};
 use primitive_types::H160;
-use serde::Deserialize;
-use std::{
-    string::{String, ToString},
-    vec::Vec,
-};
-use bech32::FromBase32;
-
 use std::prelude::v1::*;
-use std::time::*;
-use std::untrusted::time::SystemTimeEx;
-use chrono::TimeZone;
-use chrono::Utc as TzUtc;
+use std::vec::Vec;
+use ethabi::{Address, encode, ParamType, Token as AbiToken};
 
-/// The webauthn precompile.
+use crate::{coder, GoQuerier, querier};
+use crate::precompiles::{
+    ExitSucceed, LinearCostPrecompileWithQuerier, PrecompileFailure, PrecompileResult,
+};
+use crate::protobuf_generated::ffi;
+
+const BEGIN_REGISTRATION_FN_SELECTOR: &str = "455d0d34";
+const FINISH_REGISTRATION_FN_SELECTOR: &str = "4887fcd8";
+const BEGIN_LOGIN_FN_SELECTOR: &str = "455d0d34";
+const FINISH_LOGIN_FN_SELECTOR: &str = "4887fcd8";
+
+/// Precompile for WebauthN (Passkeys) authentication
 pub struct WebAuthn;
 
 impl LinearCostPrecompileWithQuerier for WebAuthn {
@@ -43,59 +35,52 @@ impl LinearCostPrecompileWithQuerier for WebAuthn {
         )?;
 
         handle.record_cost(cost)?;
-        let (exit_status, output) = Self::raw_execute(querier, handle.input(), cost)?;
+
+
+        let context = handle.context();
+        let (exit_status, output) = route(querier, context.address, handle.input())?;
         Ok(PrecompileOutput {
             exit_status,
             output,
         })
     }
+}
 
-    fn raw_execute(
-        querier: *mut GoQuerier,
-        input: &[u8],
-        _: u64,
-    ) -> Result<(ExitSucceed, Vec<u8>), PrecompileFailure> {
-        // Expects to receive RLP-encoded JWT proof for Verifiable Credential
-        let jwt: String = rlp::decode(input).map_err(|_| PrecompileFailure::Error {
-            exit_status: ExitError::Other("cannot decode provided JWT proof".into()),
-        })?;
+fn begin_registration_handler(querier: *mut GoQuerier, existing_credentials:Vec<u8>, user_id: H160){}
 
-        // Split JWT into parts
-        let (header, payload, signature, data) = split_jwt(jwt.as_str())?;
+fn route(querier: *mut GoQuerier, caller: H160, data: &[u8]) -> Result<(ExitSucceed, Vec<u8>), PrecompileFailure> {
+    if data.len() <= 4 {
+        return Err(PrecompileFailure::Error {
+            exit_status: ExitError::Other("cannot decode input".into()),
+        })
+    }
 
-        // Parse and validate header
-        let header: Header = serde_json::from_str(header.as_str()).map_err(|_| PrecompileFailure::Error {
-            exit_status: ExitError::Other("Cannot parse JWT header".into()),
-        })?;
-
-        // Validate header
-        header.validate()?;
-
-        // Parse payload
-        let parsed_payload: VerifiableCredential = serde_json::from_str(payload.as_str()).map_err(|_| PrecompileFailure::Error {
-            exit_status: ExitError::Other("Cannot parse JWT payload".into()),
-        })?;
-
-        // Since we issue VC without expiration date, verify nbf (not valid before) field of JWT, it should be less than current timestamp 
-        validate_nbf(parsed_payload.nbf)?;
-
-        // Extract issuer from payload and obtain verification material
-        let verification_materials = get_verification_material(querier, parsed_payload.iss.clone())?;
-
-        // Find appropriate verification material
-        let vm = verification_materials
-            .iter()
-            .find(|verification_method| verification_method.verificationMethodType == "Ed25519VerificationKey2020" || verification_method.verificationMethodType == "Ed25519VerificationKey2018")
-            .and_then(|method| Some(method.verificationMaterial.clone()))
-            .ok_or(PrecompileFailure::Error {
-                exit_status: ExitError::Other("Cannot find appropriate verification method".into()),
-            })?;
-        
-        verify_signature(&data, &signature, &vm)?;
-
-        let credential_subject = convert_bech32_address(parsed_payload.vc.credential_subject.user_address)?;
-        let output = encode_output(credential_subject, parsed_payload.iss);
-
-        Ok((ExitSucceed::Returned, output))
+    let input_signature = hex::encode(data[..4].to_vec());
+    match input_signature.as_str() {
+        BEGIN_REGISTRATION_FN_SELECTOR => {
+            return Err(PrecompileFailure::Error {
+                exit_status: ExitError::Other("Cannot obtain verification material".into()),
+            })
+        },
+        FINISH_REGISTRATION_FN_SELECTOR => {
+            return Err(PrecompileFailure::Error {
+                exit_status: ExitError::Other("Cannot obtain verification material".into()),
+            })
+        },
+        BEGIN_LOGIN_FN_SELECTOR => {
+            return Err(PrecompileFailure::Error {
+                exit_status: ExitError::Other("Cannot obtain verification material".into()),
+            })
+        },
+        FINISH_LOGIN_FN_SELECTOR => {
+            return Err(PrecompileFailure::Error {
+                exit_status: ExitError::Other("Cannot obtain verification material".into()),
+            })
+        },
+        _ => {
+            Err(PrecompileFailure::Error {
+                exit_status: ExitError::Other("cannot decode input".into()),
+            })
+        }
     }
 }
