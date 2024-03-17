@@ -99,7 +99,7 @@ impl EVMPrecompiles {
     pub fn new(querier: *mut GoQuerier) -> Self {
         Self{ querier }
     }
-    pub fn used_addresses() -> [H160; 12] {
+    pub fn used_addresses() -> [H160; 15] {
         [
             hash(1),
             hash(2),
@@ -113,6 +113,9 @@ impl EVMPrecompiles {
             hash(1024),
             hash(1025),
             hash(1027),
+            hash(1029),
+            hash(1030),
+            hash(1031),
         ]
     }
 }
@@ -135,6 +138,9 @@ impl PrecompileSet for EVMPrecompiles {
             a if a == hash(1025) => Some(sha3fips::Sha3FIPS512::execute(handle)),
             // Identity precompile
             a if a == hash(1027) => Some(identity::Identity::execute(self.querier, handle)),
+            a if a == hash(1029) => Some(curve25519::Curve25519Add::execute(handle)),
+            a if a == hash(1030) => Some(curve25519::Curve25519ScalarMul::execute(handle)),
+            a if a == hash(1031) => Some(curve25519::Ed25519Verify::execute(handle)),
             _ => None,
         }
     }
