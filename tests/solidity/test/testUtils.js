@@ -12,8 +12,9 @@ module.exports.sendShieldedTransaction = async (signer, destination, data, value
         from: signer.address,
         to: destination,
         data: encryptedData,
+        gasLimit: 1_000_000,
         value,
-        gasPrice: 0 // We're using 0 gas price in tests. Comment it, if you're running tests on actual network
+        gasPrice: 7 // We're using 0 gas price in tests. Comment it, if you're running tests on actual network
     })
 }
 

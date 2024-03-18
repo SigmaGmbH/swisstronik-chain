@@ -1,7 +1,7 @@
 extern crate sgx_tstd as std;
 
 use evm::executor::stack::{PrecompileHandle, PrecompileOutput};
-use evm::{ExitError};
+use evm::{ExitError, ExitRevert};
 use primitive_types::H160;
 use std::prelude::v1::*;
 use std::vec::Vec;
@@ -47,24 +47,27 @@ impl LinearCostPrecompileWithQuerier for ComplianceBridge {
 
 fn route(querier: *mut GoQuerier, caller: H160, data: &[u8]) -> Result<(ExitSucceed, Vec<u8>), PrecompileFailure> {
     if data.len() <= 4 {
-        return Err(PrecompileFailure::Error {
-            exit_status: ExitError::Other("cannot decode input".into()),
-        })
+        return Err(PrecompileFailure::Revert {
+            exit_status: ExitRevert::Reverted,
+            output: encode(&vec![AbiToken::String("cannot decode input".into())])
+        });
     }
 
     let input_signature = hex::encode(data[..4].to_vec());
     match input_signature.as_str() {
         HAS_VERIFICATION_FN_SELECTOR => {
             let has_verification_params = vec![ParamType::Address, ParamType::Uint(32), ParamType::Uint(32), ParamType::Array(Box::new(ParamType::Address))];
-            let decoded_params = ethabi::decode_whole(&has_verification_params, &data[4..]).map_err(|err| {
-                PrecompileFailure::Error {
-                    exit_status: ExitError::Other(format!("cannot decode params: {:?}", err).into()),
+            let decoded_params = ethabi::decode(&has_verification_params, &data[4..]).map_err(|err| {
+                PrecompileFailure::Revert {
+                    exit_status: ExitRevert::Reverted,
+                    output: encode(&vec![AbiToken::String(format!("cannot decode params: {:?}", err).into())])
                 }
             })?;
 
             if decoded_params.len() != has_verification_params.len() {
-                return Err(PrecompileFailure::Error {
-                    exit_status: ExitError::Other("incorrect decoded params len".into()),
+                return Err(PrecompileFailure::Revert {
+                    exit_status: ExitRevert::Reverted,
+                    output: encode(&vec![AbiToken::String("incorrect decoded params len".into())])
                 });
             }
 
@@ -86,9 +89,11 @@ fn route(querier: *mut GoQuerier, caller: H160, data: &[u8]) -> Result<(ExitSucc
 
             match querier::make_request(querier, encoded_request) {
                 Some(result) => {
-                    // Decode protobuf and extract verification methods
                     let has_verification = protobuf::parse_from_bytes::<ffi::QueryHasVerificationResponse>(result.as_slice())
-                        .map_err(|_| PrecompileFailure::Error { exit_status: ExitError::Other("Cannot decode protobuf response".into()) })?;
+                        .map_err(|_| PrecompileFailure::Revert {
+                            exit_status: ExitRevert::Reverted,
+                            output: encode(&vec![AbiToken::String("cannot decode protobuf response".into())])
+                        })?;
 
                     let tokens = vec![
                         AbiToken::Bool(has_verification.hasVerification),
@@ -98,23 +103,26 @@ fn route(querier: *mut GoQuerier, caller: H160, data: &[u8]) -> Result<(ExitSucc
                     return Ok((ExitSucceed::Returned, encoded_response.to_vec()))
                 },
                 None => {
-                    return Err(PrecompileFailure::Error {
-                        exit_status: ExitError::Other("Cannot obtain verification material".into()),
+                    return Err(PrecompileFailure::Revert {
+                        exit_status: ExitRevert::Reverted,
+                        output: encode(&vec![AbiToken::String("call to x/compliance failed".into())])
                     })
                 }
             }
         },
         ADD_VERIFICATION_FN_SELECTOR => {
             let verification_params = vec![ParamType::Address, ParamType::Uint(32), ParamType::Uint(32), ParamType::Uint(32), ParamType::Bytes];
-            let decoded_params = ethabi::decode_whole(&verification_params, &data[4..]).map_err(|err| {
-                PrecompileFailure::Error {
-                    exit_status: ExitError::Other(format!("cannot decode params: {:?}", err).into()),
+            let decoded_params = ethabi::decode(&verification_params, &data[4..]).map_err(|err| {
+                PrecompileFailure::Revert {
+                    exit_status: ExitRevert::Reverted,
+                    output: encode(&vec![AbiToken::String(format!("cannot decode params: {:?}", err).into())])
                 }
             })?;
 
             if decoded_params.len() != verification_params.len() {
-                return Err(PrecompileFailure::Error {
-                    exit_status: ExitError::Other("incorrect decoded params len".into()),
+                return Err(PrecompileFailure::Revert {
+                    exit_status: ExitRevert::Reverted,
+                    output: encode(&vec![AbiToken::String("incorrect decoded params len".into())])
                 });
             }
 
@@ -135,22 +143,26 @@ fn route(querier: *mut GoQuerier, caller: H160, data: &[u8]) -> Result<(ExitSucc
 
             match querier::make_request(querier, encoded_request) {
                 Some(result) => {
-                    // Decode protobuf and extract verification methods
                     let _ = protobuf::parse_from_bytes::<ffi::QueryAddVerificationDetailsResponse>(result.as_slice())
-                        .map_err(|_| PrecompileFailure::Error { exit_status: ExitError::Other("Cannot decode protobuf response".into()) })?;
+                        .map_err(|_| PrecompileFailure::Revert {
+                            exit_status: ExitRevert::Reverted,
+                            output: encode(&vec![AbiToken::String("cannot parse protobuf response".into())])
+                        })?;
 
                     Ok((ExitSucceed::Returned, Vec::default()))
                 },
                 None => {
-                    return Err(PrecompileFailure::Error {
-                        exit_status: ExitError::Other("Cannot obtain verification material".into()),
+                    return Err(PrecompileFailure::Revert {
+                        exit_status: ExitRevert::Reverted,
+                        output: encode(&vec![AbiToken::String("call to x/compliance failed".into())])
                     })
                 }
             }
         },
         _ => {
-            Err(PrecompileFailure::Error {
-                exit_status: ExitError::Other("cannot decode input".into()),
+            Err(PrecompileFailure::Revert {
+                exit_status: ExitRevert::Reverted,
+                output: encode(&vec![AbiToken::String("incorrect request".into())])
             })
         }
     }

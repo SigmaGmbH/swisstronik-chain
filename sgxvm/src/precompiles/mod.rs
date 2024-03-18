@@ -99,7 +99,7 @@ impl EVMPrecompiles {
     pub fn new(querier: *mut GoQuerier) -> Self {
         Self{ querier }
     }
-    pub fn used_addresses() -> [H160; 16] {
+    pub fn used_addresses() -> [H160; 17] {
         [
             hash(1),
             hash(2),
@@ -113,6 +113,7 @@ impl EVMPrecompiles {
             hash(1024),
             hash(1025),
             hash(1027),
+            hash(1028),
             hash(1029),
             hash(1030),
             hash(1031),

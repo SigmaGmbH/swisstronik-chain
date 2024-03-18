@@ -18,17 +18,21 @@ interface IComplianceBridge {
 }
 
 contract ComplianceProxy {
+    event VerificationResponse(bool success, bytes data);
+
     uint32 constant public VERIFICATION_TYPE = 2;
 
     function markUserAsVerified(address userAddress) public {
-        bytes memory proofData = new bytes(0);
-
-        IComplianceBridge(address(1028)).addVerificationDetails(
+        bytes memory proofData = new bytes(1);
+        bytes memory payload = abi.encodeCall(IComplianceBridge.addVerificationDetails, (
             userAddress,
             VERIFICATION_TYPE,
             uint32(block.timestamp % 2**32),
             0,
             proofData
-        );
+        ));
+
+        (bool success, bytes memory data) = address(1028).call(payload);
+        emit VerificationResponse(success, data);
     }
 }

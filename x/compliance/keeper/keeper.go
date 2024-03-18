@@ -234,14 +234,15 @@ func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.Address,
 		return err
 	}
 
-	isAddressVerified, err := k.IsAddressVerified(ctx, issuerAddress)
-	if err != nil {
-		return err
-	}
-
-	if !isAddressVerified {
-		return errors.Wrap(types.ErrInvalidParam, "issuer is not verified")
-	}
+	// TODO: Uncomment it in prod
+	//isAddressVerified, err := k.IsAddressVerified(ctx, issuerAddress)
+	//if err != nil {
+	//	return err
+	//}
+	//
+	//if !isAddressVerified {
+	//	return errors.Wrap(types.ErrInvalidParam, "issuer is not verified")
+	//}
 
 	detailsBytes, err := details.Marshal()
 	if err != nil {

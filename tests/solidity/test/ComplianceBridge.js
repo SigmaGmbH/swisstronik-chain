@@ -19,6 +19,7 @@ describe('ComplianceBridge', () => {
             contract.address,
             contract.interface.encodeFunctionData("markUserAsVerified", [signer.address])
         )
-        await tx.wait()
+        const res = await tx.wait()
+        console.log(contract.interface.parseLog(res.logs[0]))
     })
 })
