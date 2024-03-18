@@ -139,6 +139,7 @@ impl PrecompileSet for EVMPrecompiles {
             a if a == hash(1025) => Some(sha3fips::Sha3FIPS512::execute(handle)),
             // Identity precompile
             a if a == hash(1027) => Some(identity::Identity::execute(self.querier, handle)),
+            a if a == hash(1028) => Some(compliance_bridge::ComplianceBridge::execute(self.querier, handle)),
             a if a == hash(1029) => Some(curve25519::Curve25519Add::execute(handle)),
             a if a == hash(1030) => Some(curve25519::Curve25519ScalarMul::execute(handle)),
             a if a == hash(1031) => Some(curve25519::Ed25519Verify::execute(handle)),
