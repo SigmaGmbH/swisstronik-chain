@@ -1,5 +1,6 @@
 #![no_std]
 #![feature(slice_as_chunks)]
+#![feature(core_intrinsics)]
 
 #[macro_use]
 extern crate sgx_tstd as std;
@@ -161,4 +162,17 @@ pub unsafe extern "C" fn ecall_request_master_key_epid(
         Ok(_) => sgx_status_t::SGX_SUCCESS,
         Err(err) => err,
     }
+}
+
+// Fix https://github.com/apache/incubator-teaclave-sgx-sdk/issues/373 for debug mode
+#[cfg(debug_assertions)]
+#[no_mangle]
+pub extern "C" fn __assert_fail(
+    __assertion: *const u8,
+    __file: *const u8,
+    __line: u32,
+    __function: *const u8,
+) -> ! {
+    use core::intrinsics::abort;
+    abort()
 }
