@@ -1389,14 +1389,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sgx_tunittest"
-version = "1.1.6"
-source = "git+https://github.com/apache/teaclave-sgx-sdk.git?rev=3c903bda#3c903bdac4e503dd27b9b1f761c4abfc55f2464c"
-dependencies = [
- "sgx_tstd",
-]
-
-[[package]]
 name = "sgx_types"
 version = "1.1.6"
 
@@ -1446,7 +1438,6 @@ dependencies = [
  "sgx_trts",
  "sgx_tse",
  "sgx_tstd",
- "sgx_tunittest",
  "sgx_types",
  "sha2 0.9.9",
  "sha3",

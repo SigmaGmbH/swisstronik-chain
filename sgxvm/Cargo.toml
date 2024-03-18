@@ -65,7 +65,7 @@ sgx_trts = { git = "https://github.com/apache/teaclave-sgx-sdk.git", rev = "3c90
 sgx_tcrypto = { git = "https://github.com/apache/teaclave-sgx-sdk.git", rev = "3c903bda" }
 sgx_tse = { git = "https://github.com/apache/teaclave-sgx-sdk.git", rev = "3c903bda" }
 sgx_rand = { git = "https://github.com/apache/teaclave-sgx-sdk.git", rev = "3c903bda" }
-sgx_tunittest = { git = "https://github.com/apache/teaclave-sgx-sdk.git", rev = "3c903bda" }
+
 [patch."https://github.com/apache/teaclave-sgx-sdk.git"]
 sgx_tstd = { path = "./sgx-sdk/sgx_tstd" }
 sgx_trts = { path = "./sgx-sdk/sgx_trts" }
