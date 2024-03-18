@@ -34,10 +34,7 @@ import (
 
 	tmlog "cosmossdk.io/log"
 	cmtcmd "github.com/cometbft/cometbft/cmd/cometbft/commands"
-	cmtcfg "github.com/cometbft/cometbft/config"
 	rpcclient "github.com/cometbft/cometbft/rpc/jsonrpc/client"
-	cmttypes "github.com/cometbft/cometbft/types"
-	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -170,14 +167,16 @@ func getAndValidateConfig(svrCtx *sdkserver.Context) (config.Config, error) {
 	return config, nil
 }
 
-// returns a function which returns the genesis doc from the genesis file.
-func getGenDocProvider(cfg *cmtcfg.Config) func() (*cmttypes.GenesisDoc, error) {
-	return func() (*cmttypes.GenesisDoc, error) {
-		appGenesis, err := genutiltypes.AppGenesisFromFile(cfg.GenesisFile())
-		if err != nil {
-			return nil, err
-		}
+// Comment the following function as we use cometbft doc provider
+// But keep this commented code until genesis issue gets solved completely.
+// // returns a function which returns the genesis doc from the genesis file.
+// func getGenDocProvider(cfg *cmtcfg.Config) func() (*cmttypes.GenesisDoc, error) {
+// 	return func() (*cmttypes.GenesisDoc, error) {
+// 		appGenesis, err := genutiltypes.AppGenesisFromFile(cfg.GenesisFile())
+// 		if err != nil {
+// 			return nil, err
+// 		}
 
-		return appGenesis.ToGenesisDoc()
-	}
-}
+// 		return appGenesis.ToGenesisDoc()
+// 	}
+// }
