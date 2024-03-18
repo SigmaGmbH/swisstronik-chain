@@ -19,6 +19,7 @@ interface IComplianceBridge {
 
 contract ComplianceProxy {
     event VerificationResponse(bool success, bytes data);
+    event HasVerificationResponse(bool success, bytes data);
 
     uint32 constant public VERIFICATION_TYPE = 2;
 
@@ -34,5 +35,17 @@ contract ComplianceProxy {
 
         (bool success, bytes memory data) = address(1028).call(payload);
         emit VerificationResponse(success, data);
+    }
+
+    function isUserVerified(address userAddress) public view returns (bool, bytes memory) {
+        address[] memory allowedIssuers;
+        bytes memory payload = abi.encodeCall(IComplianceBridge.hasVerification, (
+            userAddress,
+            VERIFICATION_TYPE,
+            0,
+            allowedIssuers
+        ));
+        (bool success, bytes memory data) = address(1028).staticcall(payload);
+        return (success, data);
     }
 }

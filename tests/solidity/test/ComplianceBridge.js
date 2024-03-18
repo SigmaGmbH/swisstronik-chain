@@ -21,5 +21,13 @@ describe('ComplianceBridge', () => {
         )
         const res = await tx.wait()
         console.log(contract.interface.parseLog(res.logs[0]))
+
+        const isVerifiedResponse = await sendShieldedQuery(
+            signer.provider,
+            contract.address,
+            contract.interface.encodeFunctionData("isUserVerified", [signer.address])
+        );
+        const result = contract.interface.decodeFunctionResult("isUserVerified", isVerifiedResponse)
+        console.log(result)
     })
 })
