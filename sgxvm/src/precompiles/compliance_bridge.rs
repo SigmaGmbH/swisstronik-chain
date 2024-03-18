@@ -5,7 +5,7 @@ use evm::{ExitError, ExitRevert};
 use primitive_types::H160;
 use std::prelude::v1::*;
 use std::vec::Vec;
-use ethabi::{Address, encode, ParamType, Token as AbiToken};
+use ethabi::{Address, encode, ParamType, Token as AbiToken, Token};
 
 use crate::{coder, GoQuerier, querier};
 use crate::precompiles::{
@@ -57,19 +57,7 @@ fn route(querier: *mut GoQuerier, caller: H160, data: &[u8]) -> Result<(ExitSucc
     match input_signature.as_str() {
         HAS_VERIFICATION_FN_SELECTOR => {
             let has_verification_params = vec![ParamType::Address, ParamType::Uint(32), ParamType::Uint(32), ParamType::Array(Box::new(ParamType::Address))];
-            let decoded_params = ethabi::decode(&has_verification_params, &data[4..]).map_err(|err| {
-                PrecompileFailure::Revert {
-                    exit_status: ExitRevert::Reverted,
-                    output: encode(&vec![AbiToken::String(format!("cannot decode params: {:?}", err).into())])
-                }
-            })?;
-
-            if decoded_params.len() != has_verification_params.len() {
-                return Err(PrecompileFailure::Revert {
-                    exit_status: ExitRevert::Reverted,
-                    output: encode(&vec![AbiToken::String("incorrect decoded params len".into())])
-                });
-            }
+            let decoded_params = decode_input(has_verification_params, &data[4..])?;
 
             let user_address = &decoded_params[0];
             let verification_type = &decoded_params[1];
@@ -112,19 +100,7 @@ fn route(querier: *mut GoQuerier, caller: H160, data: &[u8]) -> Result<(ExitSucc
         },
         ADD_VERIFICATION_FN_SELECTOR => {
             let verification_params = vec![ParamType::Address, ParamType::Uint(32), ParamType::Uint(32), ParamType::Uint(32), ParamType::Bytes];
-            let decoded_params = ethabi::decode(&verification_params, &data[4..]).map_err(|err| {
-                PrecompileFailure::Revert {
-                    exit_status: ExitRevert::Reverted,
-                    output: encode(&vec![AbiToken::String(format!("cannot decode params: {:?}", err).into())])
-                }
-            })?;
-
-            if decoded_params.len() != verification_params.len() {
-                return Err(PrecompileFailure::Revert {
-                    exit_status: ExitRevert::Reverted,
-                    output: encode(&vec![AbiToken::String("incorrect decoded params len".into())])
-                });
-            }
+            let decoded_params = decode_input(verification_params, &data[4..])?;
 
             let user_address = &decoded_params[0];
             let verification_type = &decoded_params[1];
@@ -166,4 +142,22 @@ fn route(querier: *mut GoQuerier, caller: H160, data: &[u8]) -> Result<(ExitSucc
             })
         }
     }
+}
+
+fn decode_input(param_types: Vec<ParamType>, input: &[u8]) -> Result<Vec<Token>, PrecompileFailure> {
+    let decoded_params = ethabi::decode(&param_types, input).map_err(|err| {
+        PrecompileFailure::Revert {
+            exit_status: ExitRevert::Reverted,
+            output: encode(&vec![AbiToken::String(format!("cannot decode params: {:?}", err).into())])
+        }
+    })?;
+
+    if decoded_params.len() != param_types.len() {
+        return Err(PrecompileFailure::Revert {
+            exit_status: ExitRevert::Reverted,
+            output: encode(&vec![AbiToken::String("incorrect decoded params len".into())])
+        });
+    }
+
+    Ok(decoded_params)
 }
