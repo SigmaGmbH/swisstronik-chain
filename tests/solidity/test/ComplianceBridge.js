@@ -20,7 +20,9 @@ describe('ComplianceBridge', () => {
             contract.interface.encodeFunctionData("markUserAsVerified", [signer.address])
         )
         const res = await tx.wait()
-        console.log(contract.interface.parseLog(res.logs[0]))
+        const parsedLog = contract.interface.parseLog(res.logs[0])
+
+        expect(parsedLog.args.success).to.be.true
 
         const isVerifiedResponse = await sendShieldedQuery(
             signer.provider,
@@ -28,6 +30,19 @@ describe('ComplianceBridge', () => {
             contract.interface.encodeFunctionData("isUserVerified", [signer.address])
         );
         const result = contract.interface.decodeFunctionResult("isUserVerified", isVerifiedResponse)
-        console.log(result)
+        expect(result.isVerified).to.be.true
+    })
+
+    it('Should be albe to check for specific issuer of verification', async () => {
+        const [signer] = await ethers.getSigners()
+
+        const allowedIssuers = [contract.address]
+        const isVerifiedResponse = await sendShieldedQuery(
+            signer.provider,
+            contract.address,
+            contract.interface.encodeFunctionData("isUserVerifiedBy", [signer.address, allowedIssuers])
+        );
+        const result = contract.interface.decodeFunctionResult("isUserVerifiedBy", isVerifiedResponse)
+        expect(result.isVerified).to.be.true
     })
 })

@@ -37,7 +37,7 @@ contract ComplianceProxy {
         emit VerificationResponse(success, data);
     }
 
-    function isUserVerified(address userAddress) public view returns (bool, bytes memory) {
+    function isUserVerified(address userAddress) public view returns (bool isVerified) {
         address[] memory allowedIssuers;
         bytes memory payload = abi.encodeCall(IComplianceBridge.hasVerification, (
             userAddress,
@@ -46,6 +46,25 @@ contract ComplianceProxy {
             allowedIssuers
         ));
         (bool success, bytes memory data) = address(1028).staticcall(payload);
-        return (success, data);
+        if (success) {
+            isVerified = abi.decode(data, (bool));
+        } else {
+            return false;
+        }
+    }
+
+    function isUserVerifiedBy(address userAddress, address[] memory allowedIssuers) public view returns (bool isVerified) {
+        bytes memory payload = abi.encodeCall(IComplianceBridge.hasVerification, (
+            userAddress,
+            VERIFICATION_TYPE,
+            0,
+            allowedIssuers
+        ));
+        (bool success, bytes memory data) = address(1028).staticcall(payload);
+        if (success) {
+            isVerified = abi.decode(data, (bool));
+        } else {
+            return false;
+        }
     }
 }
