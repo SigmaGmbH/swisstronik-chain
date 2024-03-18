@@ -6,7 +6,8 @@
 extern crate sgx_tstd as std;
 extern crate rustls;
 extern crate sgx_tse;
-
+#[macro_use]
+extern crate sgx_tunittest;
 extern crate sgx_types;
 extern crate alloc;
 
@@ -32,6 +33,14 @@ mod protobuf_generated;
 mod querier;
 mod storage;
 mod types;
+
+#[no_mangle]
+pub extern "C" fn test_main_entrance() -> size_t {
+    use precompiles::*;
+    rsgx_unit_tests!(
+        precompiles
+    )
+}
 
 #[no_mangle]
 /// Checks if there is already sealed master key
