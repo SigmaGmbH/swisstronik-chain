@@ -144,7 +144,7 @@ build:
 
 build_d:
 	$(call sgx_build_debug)
-	@echo "Intel SGX enclave built and signed"
+	@echo "Intel SGX enclave built and signed with debug Rust code"
 
 clean:
 	$(call sgx_clean)

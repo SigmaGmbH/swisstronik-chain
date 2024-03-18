@@ -20,7 +20,6 @@ mod sha256;
 mod ripemd160;
 mod datacopy;
 mod compliance_bridge;
-mod webauthn;
 mod secp256r1;
 
 pub type PrecompileResult = Result<PrecompileOutput, PrecompileFailure>;
