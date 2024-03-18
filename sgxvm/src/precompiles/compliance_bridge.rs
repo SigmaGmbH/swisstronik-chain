@@ -37,7 +37,7 @@ impl LinearCostPrecompileWithQuerier for ComplianceBridge {
         handle.record_cost(cost)?;
 
         let context = handle.context();
-        let (exit_status, output) = route(querier, context.address, handle.input())?;
+        let (exit_status, output) = route(querier, context.caller, handle.input())?;
         Ok(PrecompileOutput {
             exit_status,
             output,
