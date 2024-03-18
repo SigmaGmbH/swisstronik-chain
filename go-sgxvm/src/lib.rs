@@ -5,7 +5,6 @@ extern crate thiserror;
 extern crate protobuf;
 extern crate lazy_static;
 extern crate parking_lot;
-extern crate libloading;
 
 mod enclave;
 mod memory;
