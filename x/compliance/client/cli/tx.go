@@ -61,6 +61,8 @@ func CmdSetIssuerDetails() *cobra.Command {
 				issuerLegalEntity,
 			)
 
+			_ = clientCtx.PrintProto(&msg)
+
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), &msg)
 		},
 	}

@@ -33,8 +33,8 @@ func (k msgServer) HandleSetIssuerDetails(goCtx context.Context, msg *types.MsgS
 		return nil, err
 	}
 
-	if operatorAddress.Equals(signerAddress) {
-		return nil, errors.Wrap(types.ErrInvalidParam, "operator and signer address mismatch")
+	if !operatorAddress.Equals(signerAddress) {
+		return nil, errors.Wrapf(types.ErrInvalidParam, "operator and signer address mismatch %s, %s", operatorAddress.String(), signerAddress.String())
 	}
 
 	// Check if there is no such issuer
