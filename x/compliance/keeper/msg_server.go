@@ -21,6 +21,8 @@ var _ types.MsgServer = msgServer{}
 func (k msgServer) HandleSetIssuerDetails(goCtx context.Context, msg *types.MsgSetIssuerDetails) (*types.MsgSetIssuerDetailsResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
+	// TODO: Double check operator address
+
 	issuerAddress, err := sdk.AccAddressFromBech32(msg.IssuerAddress)
 	if err != nil {
 		return nil, err
@@ -34,11 +36,15 @@ func (k msgServer) HandleSetIssuerDetails(goCtx context.Context, msg *types.MsgS
 }
 
 func (k msgServer) HandleUpdateIssuerDetails(goCtx context.Context, msg *types.MsgUpdateIssuerDetails) (*types.MsgUpdateIssuerDetailsResponse, error) {
-	// TODO: Implement
+	// TODO: check if issuer exists
+	// TODO: check if operator is correct
+	// TODO: if issuer is verified, revoke verification
 	return &types.MsgUpdateIssuerDetailsResponse{}, nil
 }
 
 func (k msgServer) HandleRemoveIssuer(goCtx context.Context, msg *types.MsgRemoveIssuer) (*types.MsgRemoveIssuerResponse, error) {
-	// TODO: Implement
+	// TODO: check if issuer exists
+	// TODO: check if operator is correct
+	// TODO: remove issuer
 	return &types.MsgRemoveIssuerResponse{}, nil
 }

@@ -73,7 +73,7 @@ message IssuerDetails {
     // Legal entity name
     string legalEntity = 5;
     // Operator address. Only this address can manage issuer
-    bytes operator = 6;
+    string operator = 6;
 }
 
 message AddressDetails {

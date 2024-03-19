@@ -5,17 +5,17 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
-func NewSetIssuerDetailsMsg(operator sdk.Address, issuerAddress, issuerName, issuerDescription, issuerURL, issuerLogo, issuerLegalEntity string) MsgSetIssuerDetails {
+func NewSetIssuerDetailsMsg(operator, issuerAddress, issuerName, issuerDescription, issuerURL, issuerLogo, issuerLegalEntity string) MsgSetIssuerDetails {
 	issuerDetails := IssuerDetails{
 		Name:        issuerName,
 		Description: issuerDescription,
 		Url:         issuerURL,
 		Logo:        issuerLogo,
 		LegalEntity: issuerLegalEntity,
-		Operator:    operator.Bytes(),
+		Operator:    operator,
 	}
 	return MsgSetIssuerDetails{
-		Operator:      operator.String(),
+		Operator:      operator,
 		IssuerAddress: issuerAddress,
 		Details:       &issuerDetails,
 	}
@@ -27,14 +27,19 @@ func (msg *MsgSetIssuerDetails) GetSignBytes() []byte {
 }
 
 func (msg *MsgSetIssuerDetails) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.Operator)
+	operatorAddr, err := sdk.AccAddressFromBech32(msg.Operator)
 	if err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid signer address (%s)", err)
+		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid operator address (%s)", err)
 	}
 
 	_, err = sdk.AccAddressFromBech32(msg.IssuerAddress)
 	if err != nil {
 		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid issuer address (%s)", err)
+	}
+
+	issuerOperatorAddr, err := sdk.AccAddressFromBech32(msg.Details.Operator)
+	if !operatorAddr.Equals(issuerOperatorAddr) {
+		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "operator address mismatch (%s)", err)
 	}
 
 	return nil
@@ -48,17 +53,17 @@ func (msg *MsgSetIssuerDetails) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{creator}
 }
 
-func NewUpdateIssuerDetailsMsg(operator sdk.Address, issuerAddress, issuerName, issuerDescription, issuerURL, issuerLogo, issuerLegalEntity string) MsgUpdateIssuerDetails {
+func NewUpdateIssuerDetailsMsg(existingOperator, newOperator, issuerAddress, issuerName, issuerDescription, issuerURL, issuerLogo, issuerLegalEntity string) MsgUpdateIssuerDetails {
 	issuerDetails := IssuerDetails{
 		Name:        issuerName,
 		Description: issuerDescription,
 		Url:         issuerURL,
 		Logo:        issuerLogo,
 		LegalEntity: issuerLegalEntity,
-		Operator:    operator.Bytes(),
+		Operator:    newOperator,
 	}
 	return MsgUpdateIssuerDetails{
-		Operator:      operator.String(),
+		Operator:      existingOperator,
 		IssuerAddress: issuerAddress,
 		Details:       &issuerDetails,
 	}
@@ -72,7 +77,7 @@ func (msg *MsgUpdateIssuerDetails) GetSignBytes() []byte {
 func (msg *MsgUpdateIssuerDetails) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.Operator)
 	if err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid signer address (%s)", err)
+		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid operator address (%s)", err)
 	}
 
 	_, err = sdk.AccAddressFromBech32(msg.IssuerAddress)
@@ -91,9 +96,9 @@ func (msg *MsgUpdateIssuerDetails) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{creator}
 }
 
-func NewRemoveIssuerDetailsMsg(operator sdk.Address, issuerAddress string) MsgRemoveIssuer {
+func NewRemoveIssuerMsg(operator, issuerAddress string) MsgRemoveIssuer {
 	return MsgRemoveIssuer{
-		Operator:      operator.String(),
+		Operator:      operator,
 		IssuerAddress: issuerAddress,
 	}
 }
@@ -106,7 +111,7 @@ func (msg *MsgRemoveIssuer) GetSignBytes() []byte {
 func (msg *MsgRemoveIssuer) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.Operator)
 	if err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid signer address (%s)", err)
+		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid operator address (%s)", err)
 	}
 
 	_, err = sdk.AccAddressFromBech32(msg.IssuerAddress)

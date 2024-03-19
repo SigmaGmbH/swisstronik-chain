@@ -21,6 +21,8 @@ func GetTxCmd() *cobra.Command {
 
 	cmd.AddCommand(
 		CmdSetIssuerDetails(),
+		CmdUpdateIssuerDetails(),
+		CmdRemoveIssuer(),
 	)
 
 	return cmd
@@ -31,7 +33,7 @@ func CmdSetIssuerDetails() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "set-issuer-details [issuer-address] [name] [description] [url] [logo-url] [legalEntity]",
 		Short: "Sets issuer details",
-		Args:  cobra.ExactArgs(2),
+		Args:  cobra.ExactArgs(6),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
@@ -50,13 +52,86 @@ func CmdSetIssuerDetails() *cobra.Command {
 			issuerLegalEntity := args[5]
 
 			msg := types.NewSetIssuerDetailsMsg(
-				clientCtx.GetFromAddress(),
+				clientCtx.GetFromAddress().String(),
 				issuerAddress.String(),
 				issuerName,
 				issuerDescription,
 				issuerURL,
 				issuerLogo,
 				issuerLegalEntity,
+			)
+
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), &msg)
+		},
+	}
+
+	flags.AddTxFlagsToCmd(cmd)
+	return cmd
+}
+
+// CmdUpdateIssuerDetails command updates existing issuer details.
+func CmdUpdateIssuerDetails() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "update-issuer-details [issuer-address] [new-operator] [name] [description] [url] [logo-url] [legalEntity]",
+		Short: "Update issuer details",
+		Args:  cobra.ExactArgs(7),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			issuerAddress, err := types.ParseAddress(args[0])
+			if err != nil {
+				return err
+			}
+
+			newOperator := args[1]
+			issuerName := args[2]
+			issuerDescription := args[3]
+			issuerURL := args[4]
+			issuerLogo := args[5]
+			issuerLegalEntity := args[6]
+
+			msg := types.NewUpdateIssuerDetailsMsg(
+				clientCtx.GetFromAddress().String(),
+				newOperator,
+				issuerAddress.String(),
+				issuerName,
+				issuerDescription,
+				issuerURL,
+				issuerLogo,
+				issuerLegalEntity,
+			)
+
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), &msg)
+		},
+	}
+
+	flags.AddTxFlagsToCmd(cmd)
+	return cmd
+}
+
+// CmdRemoveIssuer command removes existing issuer.
+func CmdRemoveIssuer() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "remove-issuer [issuer-address]",
+		Short: "Removes existing issuer",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			issuerAddress, err := types.ParseAddress(args[0])
+			if err != nil {
+				return err
+			}
+
+			msg := types.NewRemoveIssuerMsg(
+				clientCtx.GetFromAddress().String(),
+				issuerAddress.String(),
 			)
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), &msg)

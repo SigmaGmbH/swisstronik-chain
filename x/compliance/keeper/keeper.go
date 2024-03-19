@@ -187,7 +187,6 @@ func (k Keeper) IsAddressVerified(ctx sdk.Context, address sdk.Address) (bool, e
 // MarkAddressAsVerified marks provided address as verified. This function should be called
 // as a result of accepted governance proposal.
 func (k Keeper) MarkAddressAsVerified(ctx sdk.Context, address sdk.Address) error {
-	// TODO: Add call to `x/evm` to check if this address is contract address
 	addressDetails, err := k.GetAddressDetails(ctx, address)
 	if err != nil {
 		return err
@@ -219,15 +218,14 @@ func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.Address,
 		return err
 	}
 
-	// TODO: Uncomment it in prod
-	//isAddressVerified, err := k.IsAddressVerified(ctx, issuerAddress)
-	//if err != nil {
-	//	return err
-	//}
-	//
-	//if !isAddressVerified {
-	//	return errors.Wrap(types.ErrInvalidParam, "issuer is not verified")
-	//}
+	isAddressVerified, err := k.IsAddressVerified(ctx, issuerAddress)
+	if err != nil {
+		return err
+	}
+
+	if !isAddressVerified {
+		return errors.Wrap(types.ErrInvalidParam, "issuer is not verified")
+	}
 
 	detailsBytes, err := details.Marshal()
 	if err != nil {
