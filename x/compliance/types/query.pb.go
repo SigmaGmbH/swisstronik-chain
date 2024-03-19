@@ -113,23 +113,23 @@ func (m *QueryParamsResponse) GetParams() Params {
 	return Params{}
 }
 
-// QueryVerificationDataRequest is request type for the Query/VerificationData RPC method.
-type QueryVerificationDataRequest struct {
+// QueryAddressInfoRequest is request type for the Query/VerificationData RPC method.
+type QueryAddressInfoRequest struct {
 	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
 }
 
-func (m *QueryVerificationDataRequest) Reset()         { *m = QueryVerificationDataRequest{} }
-func (m *QueryVerificationDataRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryVerificationDataRequest) ProtoMessage()    {}
-func (*QueryVerificationDataRequest) Descriptor() ([]byte, []int) {
+func (m *QueryAddressInfoRequest) Reset()         { *m = QueryAddressInfoRequest{} }
+func (m *QueryAddressInfoRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryAddressInfoRequest) ProtoMessage()    {}
+func (*QueryAddressInfoRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_f80d6bdaf4aa1245, []int{2}
 }
-func (m *QueryVerificationDataRequest) XXX_Unmarshal(b []byte) error {
+func (m *QueryAddressInfoRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryVerificationDataRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryAddressInfoRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryVerificationDataRequest.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryAddressInfoRequest.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -139,43 +139,43 @@ func (m *QueryVerificationDataRequest) XXX_Marshal(b []byte, deterministic bool)
 		return b[:n], nil
 	}
 }
-func (m *QueryVerificationDataRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryVerificationDataRequest.Merge(m, src)
+func (m *QueryAddressInfoRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryAddressInfoRequest.Merge(m, src)
 }
-func (m *QueryVerificationDataRequest) XXX_Size() int {
+func (m *QueryAddressInfoRequest) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryVerificationDataRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryVerificationDataRequest.DiscardUnknown(m)
+func (m *QueryAddressInfoRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryAddressInfoRequest.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryVerificationDataRequest proto.InternalMessageInfo
+var xxx_messageInfo_QueryAddressInfoRequest proto.InternalMessageInfo
 
-func (m *QueryVerificationDataRequest) GetAddress() string {
+func (m *QueryAddressInfoRequest) GetAddress() string {
 	if m != nil {
 		return m.Address
 	}
 	return ""
 }
 
-// QueryVerificationDataResponse is response type for the Query/VerificationData RPC method.
-type QueryVerificationDataResponse struct {
+// QueryAddressInfoResponse is response type for the Query/VerificationData RPC method.
+type QueryAddressInfoResponse struct {
 	// data holds all the verification data for provided address
 	Data *AddressInfo `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
 }
 
-func (m *QueryVerificationDataResponse) Reset()         { *m = QueryVerificationDataResponse{} }
-func (m *QueryVerificationDataResponse) String() string { return proto.CompactTextString(m) }
-func (*QueryVerificationDataResponse) ProtoMessage()    {}
-func (*QueryVerificationDataResponse) Descriptor() ([]byte, []int) {
+func (m *QueryAddressInfoResponse) Reset()         { *m = QueryAddressInfoResponse{} }
+func (m *QueryAddressInfoResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryAddressInfoResponse) ProtoMessage()    {}
+func (*QueryAddressInfoResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_f80d6bdaf4aa1245, []int{3}
 }
-func (m *QueryVerificationDataResponse) XXX_Unmarshal(b []byte) error {
+func (m *QueryAddressInfoResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryVerificationDataResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryAddressInfoResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryVerificationDataResponse.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryAddressInfoResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -185,19 +185,19 @@ func (m *QueryVerificationDataResponse) XXX_Marshal(b []byte, deterministic bool
 		return b[:n], nil
 	}
 }
-func (m *QueryVerificationDataResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryVerificationDataResponse.Merge(m, src)
+func (m *QueryAddressInfoResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryAddressInfoResponse.Merge(m, src)
 }
-func (m *QueryVerificationDataResponse) XXX_Size() int {
+func (m *QueryAddressInfoResponse) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryVerificationDataResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryVerificationDataResponse.DiscardUnknown(m)
+func (m *QueryAddressInfoResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryAddressInfoResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryVerificationDataResponse proto.InternalMessageInfo
+var xxx_messageInfo_QueryAddressInfoResponse proto.InternalMessageInfo
 
-func (m *QueryVerificationDataResponse) GetData() *AddressInfo {
+func (m *QueryAddressInfoResponse) GetData() *AddressInfo {
 	if m != nil {
 		return m.Data
 	}
@@ -292,13 +292,103 @@ func (m *QueryIssuerDetailsResponse) GetDetails() *IssuerDetails {
 	return nil
 }
 
+type QueryVerificationDetailsRequest struct {
+	UserAddress string `protobuf:"bytes,1,opt,name=userAddress,proto3" json:"userAddress,omitempty"`
+}
+
+func (m *QueryVerificationDetailsRequest) Reset()         { *m = QueryVerificationDetailsRequest{} }
+func (m *QueryVerificationDetailsRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryVerificationDetailsRequest) ProtoMessage()    {}
+func (*QueryVerificationDetailsRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_f80d6bdaf4aa1245, []int{6}
+}
+func (m *QueryVerificationDetailsRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryVerificationDetailsRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryVerificationDetailsRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryVerificationDetailsRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryVerificationDetailsRequest.Merge(m, src)
+}
+func (m *QueryVerificationDetailsRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryVerificationDetailsRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryVerificationDetailsRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryVerificationDetailsRequest proto.InternalMessageInfo
+
+func (m *QueryVerificationDetailsRequest) GetUserAddress() string {
+	if m != nil {
+		return m.UserAddress
+	}
+	return ""
+}
+
+type QueryVerificationDetailsResponse struct {
+	Details *VerificationDetails `protobuf:"bytes,1,opt,name=details,proto3" json:"details,omitempty"`
+}
+
+func (m *QueryVerificationDetailsResponse) Reset()         { *m = QueryVerificationDetailsResponse{} }
+func (m *QueryVerificationDetailsResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryVerificationDetailsResponse) ProtoMessage()    {}
+func (*QueryVerificationDetailsResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_f80d6bdaf4aa1245, []int{7}
+}
+func (m *QueryVerificationDetailsResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryVerificationDetailsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryVerificationDetailsResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryVerificationDetailsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryVerificationDetailsResponse.Merge(m, src)
+}
+func (m *QueryVerificationDetailsResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryVerificationDetailsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryVerificationDetailsResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryVerificationDetailsResponse proto.InternalMessageInfo
+
+func (m *QueryVerificationDetailsResponse) GetDetails() *VerificationDetails {
+	if m != nil {
+		return m.Details
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterType((*QueryParamsRequest)(nil), "swisstronik.compliance.QueryParamsRequest")
 	proto.RegisterType((*QueryParamsResponse)(nil), "swisstronik.compliance.QueryParamsResponse")
-	proto.RegisterType((*QueryVerificationDataRequest)(nil), "swisstronik.compliance.QueryVerificationDataRequest")
-	proto.RegisterType((*QueryVerificationDataResponse)(nil), "swisstronik.compliance.QueryVerificationDataResponse")
+	proto.RegisterType((*QueryAddressInfoRequest)(nil), "swisstronik.compliance.QueryAddressInfoRequest")
+	proto.RegisterType((*QueryAddressInfoResponse)(nil), "swisstronik.compliance.QueryAddressInfoResponse")
 	proto.RegisterType((*QueryIssuerDetailsRequest)(nil), "swisstronik.compliance.QueryIssuerDetailsRequest")
 	proto.RegisterType((*QueryIssuerDetailsResponse)(nil), "swisstronik.compliance.QueryIssuerDetailsResponse")
+	proto.RegisterType((*QueryVerificationDetailsRequest)(nil), "swisstronik.compliance.QueryVerificationDetailsRequest")
+	proto.RegisterType((*QueryVerificationDetailsResponse)(nil), "swisstronik.compliance.QueryVerificationDetailsResponse")
 }
 
 func init() {
@@ -306,38 +396,42 @@ func init() {
 }
 
 var fileDescriptor_f80d6bdaf4aa1245 = []byte{
-	// 492 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x93, 0x41, 0x6b, 0x13, 0x41,
-	0x14, 0xc7, 0xb3, 0x5a, 0x53, 0x7c, 0x52, 0x90, 0xb1, 0x48, 0x5d, 0xea, 0x58, 0x27, 0xad, 0x68,
-	0x84, 0x0c, 0x89, 0x8a, 0x3d, 0x08, 0x92, 0xd2, 0x4b, 0x6f, 0x1a, 0x41, 0x44, 0xf0, 0xf0, 0x92,
-	0x4c, 0x97, 0xc1, 0x64, 0x66, 0xbb, 0x33, 0x51, 0x4b, 0xe9, 0xc5, 0x9b, 0x37, 0xc1, 0x6f, 0xe0,
-	0xd1, 0x4f, 0xd2, 0x63, 0xc1, 0x8b, 0x27, 0x91, 0x44, 0xbf, 0x87, 0x74, 0x76, 0x16, 0xb3, 0x9a,
-	0x09, 0xe6, 0xb6, 0xfb, 0xf6, 0xff, 0xff, 0xbf, 0xdf, 0xbc, 0x79, 0x0b, 0xcc, 0xbc, 0x95, 0xc6,
-	0xd8, 0x4c, 0x2b, 0xf9, 0x9a, 0xf7, 0xf4, 0x30, 0x1d, 0x48, 0x54, 0x3d, 0xc1, 0x0f, 0x46, 0x22,
-	0x3b, 0x6c, 0xa4, 0x99, 0xb6, 0x9a, 0x5c, 0x9d, 0xd2, 0x34, 0xfe, 0x68, 0xe2, 0xd5, 0x44, 0x27,
-	0xda, 0x49, 0xf8, 0xd9, 0x53, 0xae, 0x8e, 0xd7, 0x13, 0xad, 0x93, 0x81, 0xe0, 0x98, 0x4a, 0x8e,
-	0x4a, 0x69, 0x8b, 0x56, 0x6a, 0x65, 0xfc, 0xd7, 0x7a, 0x4f, 0x9b, 0xa1, 0x36, 0xbc, 0x8b, 0xc6,
-	0x37, 0xe1, 0x6f, 0x9a, 0x5d, 0x61, 0xb1, 0xc9, 0x53, 0x4c, 0xa4, 0x72, 0x62, 0xaf, 0xad, 0x05,
-	0xd8, 0x52, 0xcc, 0x70, 0x58, 0x04, 0x6e, 0x05, 0x44, 0x42, 0x59, 0x69, 0xa5, 0xf0, 0x32, 0xb6,
-	0x0a, 0xe4, 0xe9, 0x59, 0xb7, 0x27, 0xce, 0xdb, 0x11, 0x07, 0x23, 0x61, 0x2c, 0x7b, 0x06, 0x57,
-	0x4a, 0x55, 0x93, 0x6a, 0x65, 0x04, 0x79, 0x04, 0xd5, 0xbc, 0xc7, 0x5a, 0xb4, 0x11, 0xdd, 0xbe,
-	0xd4, 0xa2, 0x8d, 0xd9, 0x13, 0x68, 0xe4, 0xbe, 0x9d, 0xa5, 0x93, 0xef, 0x37, 0x2a, 0x1d, 0xef,
-	0x61, 0xdb, 0xb0, 0xee, 0x42, 0x9f, 0x8b, 0x4c, 0xee, 0xcb, 0x9e, 0x3b, 0xd1, 0x2e, 0x5a, 0xf4,
-	0x4d, 0xc9, 0x1a, 0x2c, 0x63, 0xbf, 0x9f, 0x09, 0x93, 0xc7, 0x5f, 0xec, 0x14, 0xaf, 0xec, 0x05,
-	0x5c, 0x0f, 0x38, 0x3d, 0xd8, 0x43, 0x58, 0xea, 0xa3, 0x45, 0x8f, 0x55, 0x0b, 0x61, 0xb5, 0xf3,
-	0xbc, 0x3d, 0xb5, 0xaf, 0x3b, 0xce, 0xc0, 0xda, 0x70, 0xcd, 0x25, 0xef, 0x19, 0x33, 0x12, 0xd9,
-	0xae, 0xb0, 0x28, 0x07, 0xc5, 0x14, 0xc8, 0x26, 0xac, 0x48, 0x57, 0x6f, 0x97, 0xb0, 0xca, 0x45,
-	0xf6, 0x0a, 0xe2, 0x59, 0x11, 0x9e, 0xec, 0x31, 0x2c, 0xf7, 0xf3, 0x92, 0x87, 0xdb, 0x0a, 0xc1,
-	0x95, 0xfd, 0x85, 0xab, 0xf5, 0xeb, 0x3c, 0x5c, 0x70, 0xf9, 0xe4, 0x43, 0x04, 0xd5, 0x7c, 0xb0,
-	0xa4, 0x1e, 0x0a, 0xf9, 0xf7, 0x2e, 0xe3, 0xbb, 0xff, 0xa5, 0xcd, 0x71, 0xd9, 0xad, 0xf7, 0x5f,
-	0x7f, 0x7e, 0x3a, 0xb7, 0x41, 0x28, 0x9f, 0xbb, 0x63, 0xe4, 0x4b, 0x04, 0x97, 0xff, 0xbe, 0x0d,
-	0x72, 0x7f, 0x6e, 0xa7, 0xc0, 0xb5, 0xc7, 0x0f, 0x16, 0x74, 0x79, 0xd2, 0x3b, 0x8e, 0xb4, 0x46,
-	0x6e, 0x86, 0x48, 0x8f, 0xfc, 0xf6, 0x1c, 0x93, 0xcf, 0x11, 0xac, 0x94, 0xa6, 0x4b, 0x9a, 0x73,
-	0x7b, 0xce, 0x5a, 0x86, 0xb8, 0xb5, 0x88, 0xc5, 0x33, 0xd6, 0x1d, 0xe3, 0x26, 0x61, 0x25, 0x46,
-	0x1c, 0x48, 0x34, 0xfc, 0xa8, 0xb4, 0x45, 0xc7, 0x3b, 0xdb, 0x27, 0x63, 0x1a, 0x9d, 0x8e, 0x69,
-	0xf4, 0x63, 0x4c, 0xa3, 0x8f, 0x13, 0x5a, 0x39, 0x9d, 0xd0, 0xca, 0xb7, 0x09, 0xad, 0xbc, 0xa4,
-	0xd3, 0xe6, 0x77, 0xd3, 0x47, 0xb4, 0x87, 0xa9, 0x30, 0xdd, 0xaa, 0xfb, 0x93, 0xef, 0xfd, 0x0e,
-	0x00, 0x00, 0xff, 0xff, 0x6e, 0xfd, 0x4e, 0x53, 0xb3, 0x04, 0x00, 0x00,
+	// 558 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x94, 0x31, 0x6f, 0xd3, 0x4e,
+	0x18, 0xc6, 0xe3, 0xbf, 0xda, 0x54, 0xff, 0x37, 0xea, 0x72, 0xad, 0x20, 0x58, 0xc8, 0x0d, 0x17,
+	0x8a, 0xa0, 0x15, 0xbe, 0x26, 0x15, 0xb4, 0x03, 0x12, 0x4a, 0x81, 0xa1, 0x1b, 0xa4, 0x12, 0x03,
+	0x12, 0xc3, 0x25, 0xb9, 0x5a, 0x27, 0x12, 0x9f, 0xeb, 0xbb, 0x00, 0x55, 0x94, 0x85, 0x8d, 0x0d,
+	0x89, 0x91, 0x95, 0x99, 0xaf, 0xc0, 0xda, 0xb1, 0x12, 0x0b, 0x13, 0x42, 0x09, 0x1f, 0x04, 0xf5,
+	0x7c, 0x16, 0x76, 0xe2, 0x8b, 0xda, 0x2d, 0x79, 0xf3, 0x3c, 0xcf, 0xfb, 0xbb, 0xdc, 0x63, 0x03,
+	0x96, 0xef, 0xb8, 0x94, 0x2a, 0x16, 0x21, 0x7f, 0x43, 0xba, 0x62, 0x10, 0xf5, 0x39, 0x0d, 0xbb,
+	0x8c, 0x9c, 0x0c, 0x59, 0x7c, 0xea, 0x47, 0xb1, 0x50, 0x02, 0x5d, 0xcb, 0x68, 0xfc, 0x7f, 0x1a,
+	0x77, 0x3d, 0x10, 0x81, 0xd0, 0x12, 0x72, 0xf1, 0x29, 0x51, 0xbb, 0x37, 0x03, 0x21, 0x82, 0x3e,
+	0x23, 0x34, 0xe2, 0x84, 0x86, 0xa1, 0x50, 0x54, 0x71, 0x11, 0x4a, 0xf3, 0xeb, 0x56, 0x57, 0xc8,
+	0x81, 0x90, 0xa4, 0x43, 0xa5, 0x59, 0x42, 0xde, 0x36, 0x3a, 0x4c, 0xd1, 0x06, 0x89, 0x68, 0xc0,
+	0x43, 0x2d, 0x36, 0xda, 0xba, 0x85, 0x2d, 0xa2, 0x31, 0x1d, 0xa4, 0x81, 0x9b, 0x16, 0x11, 0x0b,
+	0x15, 0x57, 0x9c, 0x19, 0x19, 0x5e, 0x07, 0xf4, 0xe2, 0x62, 0xdb, 0x73, 0xed, 0x6d, 0xb3, 0x93,
+	0x21, 0x93, 0x0a, 0x1f, 0xc1, 0x5a, 0x6e, 0x2a, 0x23, 0x11, 0x4a, 0x86, 0x1e, 0x41, 0x39, 0xd9,
+	0x51, 0x75, 0x6a, 0xce, 0xdd, 0x4a, 0xd3, 0xf3, 0x8b, 0xff, 0x01, 0x3f, 0xf1, 0x1d, 0x2c, 0x9d,
+	0xfd, 0xda, 0x28, 0xb5, 0x8d, 0x07, 0xef, 0xc2, 0x75, 0x1d, 0xda, 0xea, 0xf5, 0x62, 0x26, 0xe5,
+	0x61, 0x78, 0x2c, 0xcc, 0x3e, 0x54, 0x85, 0x15, 0x9a, 0x4c, 0x75, 0xf2, 0xff, 0xed, 0xf4, 0x2b,
+	0x3e, 0x82, 0xea, 0xbc, 0xc9, 0xe0, 0xec, 0xc1, 0x52, 0x8f, 0x2a, 0x6a, 0x60, 0xea, 0x36, 0x98,
+	0xac, 0x55, 0x1b, 0x70, 0x0b, 0x6e, 0xe8, 0xd0, 0x43, 0x29, 0x87, 0x2c, 0x7e, 0xca, 0x14, 0xe5,
+	0xfd, 0xf4, 0xec, 0xe8, 0x36, 0xac, 0x72, 0x3d, 0x6f, 0xe5, 0x88, 0xf2, 0x43, 0xfc, 0x1a, 0xdc,
+	0xa2, 0x08, 0x43, 0xf6, 0x18, 0x56, 0x7a, 0xc9, 0xc8, 0xc0, 0x6d, 0xda, 0xe0, 0xf2, 0xfe, 0xd4,
+	0x85, 0x9f, 0xc0, 0x86, 0x8e, 0x7f, 0xc9, 0x62, 0x7e, 0xcc, 0xbb, 0xfa, 0xf6, 0x67, 0x38, 0x6b,
+	0x50, 0x19, 0xca, 0x59, 0xca, 0xec, 0x08, 0x73, 0xa8, 0xd9, 0x43, 0x0c, 0xe9, 0xb3, 0x59, 0xd2,
+	0x6d, 0x1b, 0x69, 0x51, 0x4a, 0xea, 0x6d, 0x7e, 0x5d, 0x86, 0x65, 0xbd, 0x0b, 0x7d, 0x74, 0xa0,
+	0x9c, 0x5c, 0x3f, 0xda, 0xb2, 0x45, 0xcd, 0x37, 0xce, 0xdd, 0xbe, 0x94, 0x36, 0x81, 0xc6, 0x77,
+	0x3e, 0xfc, 0xf8, 0xf3, 0xf9, 0xbf, 0x1a, 0xf2, 0xc8, 0xc2, 0x27, 0x01, 0x7d, 0x71, 0xa0, 0x92,
+	0xb9, 0x7d, 0x44, 0x16, 0x2e, 0x99, 0xef, 0xa5, 0xbb, 0x73, 0x79, 0x83, 0x41, 0xbb, 0xa7, 0xd1,
+	0xea, 0xe8, 0x96, 0x0d, 0x6d, 0x64, 0x9a, 0x3d, 0x46, 0xdf, 0x1c, 0x58, 0xcd, 0x5d, 0x3f, 0x6a,
+	0x2c, 0x5c, 0x57, 0xd4, 0x56, 0xb7, 0x79, 0x15, 0x8b, 0x61, 0x7c, 0xa8, 0x19, 0x77, 0x90, 0x6f,
+	0x63, 0x4c, 0xaa, 0x4e, 0x46, 0xb9, 0xca, 0x8f, 0xd1, 0x77, 0x07, 0xd6, 0x0a, 0x5a, 0x80, 0xf6,
+	0x16, 0x32, 0xd8, 0x2b, 0xec, 0xee, 0x5f, 0xdd, 0x68, 0x8e, 0xf0, 0x40, 0x1f, 0x81, 0xa0, 0xfb,
+	0xb6, 0x23, 0x98, 0x62, 0x92, 0x51, 0xe6, 0x81, 0x18, 0x1f, 0xec, 0x9f, 0x4d, 0x3c, 0xe7, 0x7c,
+	0xe2, 0x39, 0xbf, 0x27, 0x9e, 0xf3, 0x69, 0xea, 0x95, 0xce, 0xa7, 0x5e, 0xe9, 0xe7, 0xd4, 0x2b,
+	0xbd, 0xf2, 0xb2, 0x39, 0xef, 0xb3, 0x49, 0xea, 0x34, 0x62, 0xb2, 0x53, 0xd6, 0xaf, 0xcb, 0xdd,
+	0xbf, 0x01, 0x00, 0x00, 0xff, 0xff, 0xe4, 0xc7, 0x7b, 0xd4, 0x18, 0x06, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -354,8 +448,9 @@ const _ = grpc.SupportPackageIsVersion4
 type QueryClient interface {
 	// Parameters queries the parameters of the module.
 	Params(ctx context.Context, in *QueryParamsRequest, opts ...grpc.CallOption) (*QueryParamsResponse, error)
-	VerificationData(ctx context.Context, in *QueryVerificationDataRequest, opts ...grpc.CallOption) (*QueryVerificationDataResponse, error)
+	AddressInfo(ctx context.Context, in *QueryAddressInfoRequest, opts ...grpc.CallOption) (*QueryAddressInfoResponse, error)
 	IssuerDetails(ctx context.Context, in *QueryIssuerDetailsRequest, opts ...grpc.CallOption) (*QueryIssuerDetailsResponse, error)
+	VerificationDetails(ctx context.Context, in *QueryVerificationDetailsRequest, opts ...grpc.CallOption) (*QueryVerificationDetailsResponse, error)
 }
 
 type queryClient struct {
@@ -375,9 +470,9 @@ func (c *queryClient) Params(ctx context.Context, in *QueryParamsRequest, opts .
 	return out, nil
 }
 
-func (c *queryClient) VerificationData(ctx context.Context, in *QueryVerificationDataRequest, opts ...grpc.CallOption) (*QueryVerificationDataResponse, error) {
-	out := new(QueryVerificationDataResponse)
-	err := c.cc.Invoke(ctx, "/swisstronik.compliance.Query/VerificationData", in, out, opts...)
+func (c *queryClient) AddressInfo(ctx context.Context, in *QueryAddressInfoRequest, opts ...grpc.CallOption) (*QueryAddressInfoResponse, error) {
+	out := new(QueryAddressInfoResponse)
+	err := c.cc.Invoke(ctx, "/swisstronik.compliance.Query/AddressInfo", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -393,12 +488,22 @@ func (c *queryClient) IssuerDetails(ctx context.Context, in *QueryIssuerDetailsR
 	return out, nil
 }
 
+func (c *queryClient) VerificationDetails(ctx context.Context, in *QueryVerificationDetailsRequest, opts ...grpc.CallOption) (*QueryVerificationDetailsResponse, error) {
+	out := new(QueryVerificationDetailsResponse)
+	err := c.cc.Invoke(ctx, "/swisstronik.compliance.Query/VerificationDetails", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // QueryServer is the server API for Query service.
 type QueryServer interface {
 	// Parameters queries the parameters of the module.
 	Params(context.Context, *QueryParamsRequest) (*QueryParamsResponse, error)
-	VerificationData(context.Context, *QueryVerificationDataRequest) (*QueryVerificationDataResponse, error)
+	AddressInfo(context.Context, *QueryAddressInfoRequest) (*QueryAddressInfoResponse, error)
 	IssuerDetails(context.Context, *QueryIssuerDetailsRequest) (*QueryIssuerDetailsResponse, error)
+	VerificationDetails(context.Context, *QueryVerificationDetailsRequest) (*QueryVerificationDetailsResponse, error)
 }
 
 // UnimplementedQueryServer can be embedded to have forward compatible implementations.
@@ -408,11 +513,14 @@ type UnimplementedQueryServer struct {
 func (*UnimplementedQueryServer) Params(ctx context.Context, req *QueryParamsRequest) (*QueryParamsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Params not implemented")
 }
-func (*UnimplementedQueryServer) VerificationData(ctx context.Context, req *QueryVerificationDataRequest) (*QueryVerificationDataResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method VerificationData not implemented")
+func (*UnimplementedQueryServer) AddressInfo(ctx context.Context, req *QueryAddressInfoRequest) (*QueryAddressInfoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddressInfo not implemented")
 }
 func (*UnimplementedQueryServer) IssuerDetails(ctx context.Context, req *QueryIssuerDetailsRequest) (*QueryIssuerDetailsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method IssuerDetails not implemented")
+}
+func (*UnimplementedQueryServer) VerificationDetails(ctx context.Context, req *QueryVerificationDetailsRequest) (*QueryVerificationDetailsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method VerificationDetails not implemented")
 }
 
 func RegisterQueryServer(s grpc1.Server, srv QueryServer) {
@@ -437,20 +545,20 @@ func _Query_Params_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Query_VerificationData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryVerificationDataRequest)
+func _Query_AddressInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryAddressInfoRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(QueryServer).VerificationData(ctx, in)
+		return srv.(QueryServer).AddressInfo(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/swisstronik.compliance.Query/VerificationData",
+		FullMethod: "/swisstronik.compliance.Query/AddressInfo",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).VerificationData(ctx, req.(*QueryVerificationDataRequest))
+		return srv.(QueryServer).AddressInfo(ctx, req.(*QueryAddressInfoRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -473,6 +581,24 @@ func _Query_IssuerDetails_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Query_VerificationDetails_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryVerificationDetailsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).VerificationDetails(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/swisstronik.compliance.Query/VerificationDetails",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).VerificationDetails(ctx, req.(*QueryVerificationDetailsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Query_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "swisstronik.compliance.Query",
 	HandlerType: (*QueryServer)(nil),
@@ -482,12 +608,16 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Query_Params_Handler,
 		},
 		{
-			MethodName: "VerificationData",
-			Handler:    _Query_VerificationData_Handler,
+			MethodName: "AddressInfo",
+			Handler:    _Query_AddressInfo_Handler,
 		},
 		{
 			MethodName: "IssuerDetails",
 			Handler:    _Query_IssuerDetails_Handler,
+		},
+		{
+			MethodName: "VerificationDetails",
+			Handler:    _Query_VerificationDetails_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -550,7 +680,7 @@ func (m *QueryParamsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryVerificationDataRequest) Marshal() (dAtA []byte, err error) {
+func (m *QueryAddressInfoRequest) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -560,12 +690,12 @@ func (m *QueryVerificationDataRequest) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryVerificationDataRequest) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryAddressInfoRequest) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryVerificationDataRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryAddressInfoRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -580,7 +710,7 @@ func (m *QueryVerificationDataRequest) MarshalToSizedBuffer(dAtA []byte) (int, e
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryVerificationDataResponse) Marshal() (dAtA []byte, err error) {
+func (m *QueryAddressInfoResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -590,12 +720,12 @@ func (m *QueryVerificationDataResponse) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryVerificationDataResponse) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryAddressInfoResponse) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryVerificationDataResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryAddressInfoResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -680,6 +810,71 @@ func (m *QueryIssuerDetailsResponse) MarshalToSizedBuffer(dAtA []byte) (int, err
 	return len(dAtA) - i, nil
 }
 
+func (m *QueryVerificationDetailsRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryVerificationDetailsRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryVerificationDetailsRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.UserAddress) > 0 {
+		i -= len(m.UserAddress)
+		copy(dAtA[i:], m.UserAddress)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.UserAddress)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryVerificationDetailsResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryVerificationDetailsResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryVerificationDetailsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Details != nil {
+		{
+			size, err := m.Details.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintQuery(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintQuery(dAtA []byte, offset int, v uint64) int {
 	offset -= sovQuery(v)
 	base := offset
@@ -711,7 +906,7 @@ func (m *QueryParamsResponse) Size() (n int) {
 	return n
 }
 
-func (m *QueryVerificationDataRequest) Size() (n int) {
+func (m *QueryAddressInfoRequest) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -724,7 +919,7 @@ func (m *QueryVerificationDataRequest) Size() (n int) {
 	return n
 }
 
-func (m *QueryVerificationDataResponse) Size() (n int) {
+func (m *QueryAddressInfoResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -751,6 +946,32 @@ func (m *QueryIssuerDetailsRequest) Size() (n int) {
 }
 
 func (m *QueryIssuerDetailsResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Details != nil {
+		l = m.Details.Size()
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryVerificationDetailsRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.UserAddress)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryVerificationDetailsResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -902,7 +1123,7 @@ func (m *QueryParamsResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryVerificationDataRequest) Unmarshal(dAtA []byte) error {
+func (m *QueryAddressInfoRequest) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -925,10 +1146,10 @@ func (m *QueryVerificationDataRequest) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryVerificationDataRequest: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryAddressInfoRequest: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryVerificationDataRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryAddressInfoRequest: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -984,7 +1205,7 @@ func (m *QueryVerificationDataRequest) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryVerificationDataResponse) Unmarshal(dAtA []byte) error {
+func (m *QueryAddressInfoResponse) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1007,10 +1228,10 @@ func (m *QueryVerificationDataResponse) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryVerificationDataResponse: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryAddressInfoResponse: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryVerificationDataResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryAddressInfoResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -1212,6 +1433,174 @@ func (m *QueryIssuerDetailsResponse) Unmarshal(dAtA []byte) error {
 			}
 			if m.Details == nil {
 				m.Details = &IssuerDetails{}
+			}
+			if err := m.Details.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryVerificationDetailsRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryVerificationDetailsRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryVerificationDetailsRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field UserAddress", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.UserAddress = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryVerificationDetailsResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryVerificationDetailsResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryVerificationDetailsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Details", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Details == nil {
+				m.Details = &VerificationDetails{}
 			}
 			if err := m.Details.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err

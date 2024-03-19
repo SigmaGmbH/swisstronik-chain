@@ -3,8 +3,26 @@ package swisstronik.compliance;
 
 import "gogoproto/gogo.proto";
 import "swisstronik/compliance/params.proto";
+import "swisstronik/compliance/entities.proto";
 
 option go_package = "swisstronik/x/compliance/types";
 
-// GenesisState defines the vesting module's genesis state.
-message GenesisState { Params params = 1 [ (gogoproto.nullable) = false ]; }
+// GenesisState defines the compliance module's genesis state.
+message GenesisState {
+  Params params = 1 [ (gogoproto.nullable) = false ];
+}
+
+message IssuerGenesisAccount {
+  string address = 1;
+  IssuerDetails details = 2;
+}
+
+message GenesisAddressInfo {
+  string address = 1;
+  AddressInfo info = 2;
+}
+
+message GenesisVerificationDetails {
+  string id = 1;
+  VerificationDetails data = 2;
+}

@@ -61,9 +61,19 @@ message IssuerAdapterContractDetail {
 /// V1 ///
 
 message IssuerDetails {
-    // Human-readable alias to issuer. Allows to easily understand
+    // Allows to easily understand
     // what entity can be associated with issuer address.
-    string issuer_alias = 1;
+    string name = 1;
+    // Basic issuer description
+    string description = 2;
+    // URL to issuer website
+    string url = 3;
+    // URL to issuer logo
+    string logo = 4;
+    // Legal entity name
+    string legalEntity = 5;
+    // Operator address. Only this address can manage issuer
+    bytes operator = 6;
 }
 
 message AddressDetails {
