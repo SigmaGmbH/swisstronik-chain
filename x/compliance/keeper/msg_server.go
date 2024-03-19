@@ -23,18 +23,18 @@ func (k msgServer) HandleSetIssuerDetails(goCtx context.Context, msg *types.MsgS
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	// Verify operator address
-	detailsOperatorAddress, err := sdk.AccAddressFromBech32(msg.Details.Operator)
+	operatorAddress, err := sdk.AccAddressFromBech32(msg.Details.Operator)
 	if err != nil {
 		return nil, err
 	}
 
-	operatorAddress, err := sdk.AccAddressFromBech32(msg.Operator)
+	signerAddress, err := sdk.AccAddressFromBech32(msg.Signer)
 	if err != nil {
 		return nil, err
 	}
 
-	if detailsOperatorAddress.Equals(operatorAddress) {
-		return nil, errors.Wrap(types.ErrInvalidParam, "operator address mismatch")
+	if operatorAddress.Equals(signerAddress) {
+		return nil, errors.Wrap(types.ErrInvalidParam, "operator and signer address mismatch")
 	}
 
 	// Check if there is no such issuer
@@ -59,15 +59,87 @@ func (k msgServer) HandleSetIssuerDetails(goCtx context.Context, msg *types.MsgS
 }
 
 func (k msgServer) HandleUpdateIssuerDetails(goCtx context.Context, msg *types.MsgUpdateIssuerDetails) (*types.MsgUpdateIssuerDetailsResponse, error) {
-	// TODO: check if issuer exists
-	// TODO: check if operator is correct
-	// TODO: if issuer is verified, revoke verification
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// Check if issuer exists
+	issuerAddress, err := sdk.AccAddressFromBech32(msg.IssuerAddress)
+	if err != nil {
+		return nil, err
+	}
+
+	issuerExists, err := k.IssuerExists(ctx, issuerAddress)
+	if err != nil {
+		return nil, err
+	}
+	if !issuerExists {
+		return nil, errors.Wrap(types.ErrInvalidParam, "issuer not found")
+	}
+
+	// Check if signer is previous issuer operator
+	issuerDetails, err := k.GetIssuerDetails(ctx, issuerAddress)
+	if err != nil {
+		return nil, err
+	}
+
+	signerAddress, err := sdk.AccAddressFromBech32(msg.Signer)
+	if err != nil {
+		return nil, err
+	}
+
+	prevOperatorAddress, err := sdk.AccAddressFromBech32(issuerDetails.Operator)
+	if err != nil {
+		return nil, err
+	}
+
+	if !signerAddress.Equals(prevOperatorAddress) {
+		return nil, errors.Wrap(types.ErrInvalidSignature, "invalid signer")
+	}
+
+	// Revoke verification if address was verified
+	if err := k.SetAddressVerificationStatus(ctx, issuerAddress, false); err != nil {
+		return nil, err
+	}
+
+	if err := k.SetIssuerDetails(ctx, issuerAddress, msg.Details); err != nil {
+		return nil, err
+	}
 	return &types.MsgUpdateIssuerDetailsResponse{}, nil
 }
 
 func (k msgServer) HandleRemoveIssuer(goCtx context.Context, msg *types.MsgRemoveIssuer) (*types.MsgRemoveIssuerResponse, error) {
-	// TODO: check if issuer exists
-	// TODO: check if operator is correct
-	// TODO: remove issuer
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// Check if issuer exists
+	issuerAddress, err := sdk.AccAddressFromBech32(msg.IssuerAddress)
+	if err != nil {
+		return nil, err
+	}
+
+	issuerExists, err := k.IssuerExists(ctx, issuerAddress)
+	if err != nil {
+		return nil, err
+	}
+	if !issuerExists {
+		return nil, errors.Wrap(types.ErrInvalidParam, "issuer not found")
+	}
+
+	// Check if there is a correct operator
+	issuerDetails, err := k.GetIssuerDetails(ctx, issuerAddress)
+	if err != nil {
+		return nil, err
+	}
+	msgSignerAddr, err := sdk.AccAddressFromBech32(msg.Signer)
+	if err != nil {
+		return nil, err
+	}
+	issuerOperatorAddr, err := sdk.AccAddressFromBech32(issuerDetails.Operator)
+	if err != nil {
+		return nil, err
+	}
+	if !issuerOperatorAddr.Equals(msgSignerAddr) {
+		return nil, errors.Wrap(types.ErrInvalidParam, "operator and signer address mismatch")
+	}
+
+	k.RemoveIssuer(ctx, issuerAddress)
 	return &types.MsgRemoveIssuerResponse{}, nil
 }

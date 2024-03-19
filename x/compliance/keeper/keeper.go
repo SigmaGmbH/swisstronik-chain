@@ -127,6 +127,12 @@ func (k Keeper) SetIssuerDetails(ctx sdk.Context, issuerAddress sdk.Address, det
 	return nil
 }
 
+// RemoveIssuer removes provided issuer
+func (k Keeper) RemoveIssuer(ctx sdk.Context, issuerAddress sdk.Address) {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixIssuerDetails)
+	store.Delete(issuerAddress.Bytes())
+}
+
 // GetIssuerDetails returns details of provided issuer address
 func (k Keeper) GetIssuerDetails(ctx sdk.Context, issuerAddress sdk.Address) (*types.IssuerDetails, error) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixIssuerDetails)
@@ -184,25 +190,25 @@ func (k Keeper) IsAddressVerified(ctx sdk.Context, address sdk.Address) (bool, e
 	return addressDetails.IsVerified && !addressDetails.IsBanned, nil
 }
 
-// MarkAddressAsVerified marks provided address as verified. This function should be called
-// as a result of accepted governance proposal.
-func (k Keeper) MarkAddressAsVerified(ctx sdk.Context, address sdk.Address) error {
+// SetAddressVerificationStatus marks provided address as verified or not verified.
+func (k Keeper) SetAddressVerificationStatus(ctx sdk.Context, address sdk.Address, isVerifiedStatus bool) error {
 	addressDetails, err := k.GetAddressDetails(ctx, address)
 	if err != nil {
 		return err
 	}
 
-	// If address is banned, return error
-	if addressDetails.IsBanned {
-		return errors.Wrap(types.ErrInvalidParam, "address is banned")
-	}
+	// TODO: Prepare more elegant mechanism
+	//// If address is banned, return error
+	//if addressDetails.IsBanned {
+	//	return errors.Wrap(types.ErrInvalidParam, "address is banned")
+	//}
 
-	// Skip if address is already verified
-	if addressDetails.IsVerified {
+	// Skip if address already has provided status
+	if addressDetails.IsVerified == isVerifiedStatus {
 		return nil
 	}
 
-	addressDetails.IsVerified = true
+	addressDetails.IsVerified = isVerifiedStatus
 	if err := k.SetAddressDetails(ctx, address, addressDetails); err != nil {
 		return err
 	}
@@ -218,14 +224,15 @@ func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.Address,
 		return err
 	}
 
-	isAddressVerified, err := k.IsAddressVerified(ctx, issuerAddress)
-	if err != nil {
-		return err
-	}
-
-	if !isAddressVerified {
-		return errors.Wrap(types.ErrInvalidParam, "issuer is not verified")
-	}
+	// TODO: Uncomment once verification mechanism is done
+	//isAddressVerified, err := k.IsAddressVerified(ctx, issuerAddress)
+	//if err != nil {
+	//	return err
+	//}
+	//
+	//if !isAddressVerified {
+	//	return errors.Wrap(types.ErrInvalidParam, "issuer is not verified")
+	//}
 
 	detailsBytes, err := details.Marshal()
 	if err != nil {

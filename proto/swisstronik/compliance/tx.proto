@@ -15,21 +15,21 @@ service Msg {
 }
 
 message MsgSetIssuerDetails {
-  string operator = 1;
+  string signer = 1;
   string issuerAddress = 2;
   IssuerDetails details = 3;
 }
 message MsgSetIssuerDetailsResponse {}
 
 message MsgUpdateIssuerDetails {
-  string operator = 1;
+  string signer = 1;
   string issuerAddress = 2;
   IssuerDetails details = 3;
 }
 message MsgUpdateIssuerDetailsResponse {}
 
 message MsgRemoveIssuer {
-  string operator = 1;
+  string signer = 1;
   string issuerAddress = 2;
 }
 message MsgRemoveIssuerResponse {}
