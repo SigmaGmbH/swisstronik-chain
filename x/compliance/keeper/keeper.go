@@ -114,15 +114,10 @@ func (k Keeper) GetAddressInfo(ctx sdk.Context, address sdk.Address) (*types.Add
 	return &addrInfo, nil
 }
 
-// SetIssuerDetailsInner sets description about provided issuer address
-func (k Keeper) SetIssuerDetailsInner(ctx sdk.Context, issuerAddress sdk.Address, alias string) error {
+// SetIssuerDetails sets details for provided issuer address
+func (k Keeper) SetIssuerDetails(ctx sdk.Context, issuerAddress sdk.Address, details *types.IssuerDetails) error {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixIssuerDetails)
 
-	if len(alias) == 0 {
-		return errors.Wrap(types.ErrInvalidParam, "invalid issuer alias")
-	}
-
-	details := &types.IssuerDetails{IssuerAlias: alias}
 	detailsBytes, err := details.Marshal()
 	if err != nil {
 		return err
@@ -147,16 +142,6 @@ func (k Keeper) GetIssuerDetails(ctx sdk.Context, issuerAddress sdk.Address) (*t
 	}
 
 	return &issuerDetails, nil
-}
-
-// GetIssuerAlias returns human-readable alias of provided issuer address
-func (k Keeper) GetIssuerAlias(ctx sdk.Context, issuerAddress sdk.Address) (string, error) {
-	issuerDetails, err := k.GetIssuerDetails(ctx, issuerAddress)
-	if err != nil {
-		return "", err
-	}
-
-	return issuerDetails.IssuerAlias, nil
 }
 
 // GetAddressDetails returns address details

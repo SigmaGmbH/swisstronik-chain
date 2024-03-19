@@ -10,7 +10,7 @@ import (
 )
 
 // GetQueryCmd returns the cli query commands for this module
-func GetQueryCmd(queryRoute string) *cobra.Command {
+func GetQueryCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                        types.ModuleName,
 		Short:                      fmt.Sprintf("Querying commands for the %s module", types.ModuleName),
@@ -23,6 +23,7 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 		CmdQueryParams(),
 		CmdGetAddressInfo(),
 		CmdGetIssuerDetails(),
+		CmdGetVerificationDetails(),
 	)
 
 	return cmd
@@ -42,11 +43,11 @@ func CmdGetAddressInfo() *cobra.Command {
 				return err
 			}
 
-			req := &types.QueryVerificationDataRequest{
+			req := &types.QueryAddressInfoRequest{
 				Address: address.String(),
 			}
 
-			resp, err := queryClient.VerificationData(context.Background(), req)
+			resp, err := queryClient.AddressInfo(context.Background(), req)
 			if err != nil {
 				return err
 			}
@@ -79,6 +80,38 @@ func CmdGetIssuerDetails() *cobra.Command {
 			}
 
 			resp, err := queryClient.IssuerDetails(context.Background(), req)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(resp)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+func CmdGetVerificationDetails() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "get-verification-details [verification-id]",
+		Short: "Returns details of provided address",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx := client.GetClientContextFromCmd(cmd)
+			queryClient := types.NewQueryClient(clientCtx)
+
+			id, err := types.ParseAddress(args[0])
+			if err != nil {
+				return err
+			}
+
+			req := &types.QueryVerificationDetailsRequest{
+				VerificationID: id.String(),
+			}
+
+			resp, err := queryClient.VerificationDetails(context.Background(), req)
 			if err != nil {
 				return err
 			}

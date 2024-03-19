@@ -25,7 +25,7 @@ service Query {
   }
 
   rpc VerificationDetails(QueryVerificationDetailsRequest) returns (QueryVerificationDetailsResponse) {
-    option (google.api.http).get = "/swisstronik/compliance/details/{userAddress}";
+    option (google.api.http).get = "/swisstronik/compliance/details/{verificationID}";
   }
 }
 
@@ -58,7 +58,7 @@ message QueryIssuerDetailsResponse {
 }
 
 message QueryVerificationDetailsRequest {
-  string userAddress = 1;
+  string verificationID = 1;
 }
 
 message QueryVerificationDetailsResponse {

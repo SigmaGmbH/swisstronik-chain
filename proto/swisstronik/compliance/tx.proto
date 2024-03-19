@@ -9,20 +9,22 @@ option go_package = "swisstronik/x/compliance/types";
 
 // Msg defines the Msg service.
 service Msg {
-  rpc SetIssuerDetails(MsgSetIssuerDetails) returns (MsgSetIssuerDetailsResponse);
-  rpc UpdateIssuerDetails(MsgUpdateIssuerDetails) returns (MsgUpdateIssuerDetailsResponse);
-  rpc RemoveIssuer(MsgRemoveIssuer) returns (MsgRemoveIssuer);
+  rpc HandleSetIssuerDetails(MsgSetIssuerDetails) returns (MsgSetIssuerDetailsResponse);
+  rpc HandleUpdateIssuerDetails(MsgUpdateIssuerDetails) returns (MsgUpdateIssuerDetailsResponse);
+  rpc HandleRemoveIssuer(MsgRemoveIssuer) returns (MsgRemoveIssuerResponse);
 }
 
 message MsgSetIssuerDetails {
   string operator = 1;
-  IssuerDetails details = 2;
+  string issuerAddress = 2;
+  IssuerDetails details = 3;
 }
 message MsgSetIssuerDetailsResponse {}
 
 message MsgUpdateIssuerDetails {
   string operator = 1;
-  IssuerDetails details = 2;
+  string issuerAddress = 2;
+  IssuerDetails details = 3;
 }
 message MsgUpdateIssuerDetailsResponse {}
 

@@ -18,22 +18,7 @@ func NewMsgServerImpl(keeper Keeper) types.MsgServer {
 
 var _ types.MsgServer = msgServer{}
 
-func (k msgServer) SetAddressInfo(goCtx context.Context, msg *types.MsgSetAddressInfo) (*types.MsgSetAddressInfoResponse, error) {
-	ctx := sdk.UnwrapSDKContext(goCtx)
-
-	address, err := sdk.AccAddressFromBech32(msg.UserAddress)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := k.SetAddressInfoRaw(ctx, address, msg.Data); err != nil {
-		return nil, err
-	}
-
-	return &types.MsgSetAddressInfoResponse{}, nil
-}
-
-func (k msgServer) SetIssuerDetails(goCtx context.Context, msg *types.MsgSetIssuerDetails) (*types.MsgSetIssuerDetailsResponse, error) {
+func (k msgServer) HandleSetIssuerDetails(goCtx context.Context, msg *types.MsgSetIssuerDetails) (*types.MsgSetIssuerDetailsResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	issuerAddress, err := sdk.AccAddressFromBech32(msg.IssuerAddress)
@@ -41,9 +26,19 @@ func (k msgServer) SetIssuerDetails(goCtx context.Context, msg *types.MsgSetIssu
 		return nil, err
 	}
 
-	if err := k.SetIssuerDetailsInner(ctx, issuerAddress, msg.Details.IssuerAlias); err != nil {
+	if err := k.SetIssuerDetails(ctx, issuerAddress, msg.Details); err != nil {
 		return nil, err
 	}
 
 	return &types.MsgSetIssuerDetailsResponse{}, nil
+}
+
+func (k msgServer) HandleUpdateIssuerDetails(goCtx context.Context, msg *types.MsgUpdateIssuerDetails) (*types.MsgUpdateIssuerDetailsResponse, error) {
+	// TODO: Implement
+	return &types.MsgUpdateIssuerDetailsResponse{}, nil
+}
+
+func (k msgServer) HandleRemoveIssuer(goCtx context.Context, msg *types.MsgRemoveIssuer) (*types.MsgRemoveIssuerResponse, error) {
+	// TODO: Implement
+	return &types.MsgRemoveIssuerResponse{}, nil
 }

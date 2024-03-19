@@ -170,15 +170,15 @@ func request_Query_VerificationDetails_0(ctx context.Context, marshaler runtime.
 		_   = err
 	)
 
-	val, ok = pathParams["userAddress"]
+	val, ok = pathParams["verificationID"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "userAddress")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "verificationID")
 	}
 
-	protoReq.UserAddress, err = runtime.String(val)
+	protoReq.VerificationID, err = runtime.String(val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "userAddress", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "verificationID", err)
 	}
 
 	msg, err := client.VerificationDetails(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -197,15 +197,15 @@ func local_request_Query_VerificationDetails_0(ctx context.Context, marshaler ru
 		_   = err
 	)
 
-	val, ok = pathParams["userAddress"]
+	val, ok = pathParams["verificationID"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "userAddress")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "verificationID")
 	}
 
-	protoReq.UserAddress, err = runtime.String(val)
+	protoReq.VerificationID, err = runtime.String(val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "userAddress", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "verificationID", err)
 	}
 
 	msg, err := server.VerificationDetails(ctx, &protoReq)
@@ -442,7 +442,7 @@ var (
 
 	pattern_Query_IssuerDetails_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"swisstronik", "compliance", "issuer", "issuerAddress"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_VerificationDetails_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"swisstronik", "compliance", "details", "userAddress"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_VerificationDetails_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"swisstronik", "compliance", "details", "verificationID"}, "", runtime.AssumeColonVerbOpt(false)))
 )
 
 var (
