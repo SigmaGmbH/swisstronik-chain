@@ -347,4 +347,15 @@ func (k Keeper) GetVerificationsOfType(ctx sdk.Context, userAddress sdk.Address,
 	return verifications, nil
 }
 
+// IssuerExists checks if issuer exists by checking operator address
+func (k Keeper) IssuerExists(ctx sdk.Context, issuerAddress sdk.Address) (bool, error) {
+	res, err := k.GetIssuerDetails(ctx, issuerAddress)
+	if err != nil {
+		return false, err
+	}
+
+	exists := len(res.Operator) != 0
+	return exists, nil
+}
+
 // TODO: Create fn to obtain all verified issuers with their aliases

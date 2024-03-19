@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"swisstronik/x/compliance/types"
 )
@@ -21,11 +22,33 @@ var _ types.MsgServer = msgServer{}
 func (k msgServer) HandleSetIssuerDetails(goCtx context.Context, msg *types.MsgSetIssuerDetails) (*types.MsgSetIssuerDetailsResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	// TODO: Double check operator address
+	// Verify operator address
+	detailsOperatorAddress, err := sdk.AccAddressFromBech32(msg.Details.Operator)
+	if err != nil {
+		return nil, err
+	}
 
+	operatorAddress, err := sdk.AccAddressFromBech32(msg.Operator)
+	if err != nil {
+		return nil, err
+	}
+
+	if detailsOperatorAddress.Equals(operatorAddress) {
+		return nil, errors.Wrap(types.ErrInvalidParam, "operator address mismatch")
+	}
+
+	// Check if there is no such issuer
 	issuerAddress, err := sdk.AccAddressFromBech32(msg.IssuerAddress)
 	if err != nil {
 		return nil, err
+	}
+
+	issuerExists, err := k.IssuerExists(ctx, issuerAddress)
+	if err != nil {
+		return nil, err
+	}
+	if issuerExists {
+		return nil, errors.Wrap(types.ErrInvalidParam, "issuer already exists")
 	}
 
 	if err := k.SetIssuerDetails(ctx, issuerAddress, msg.Details); err != nil {
