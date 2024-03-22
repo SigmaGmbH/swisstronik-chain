@@ -85,5 +85,6 @@ func MakeConfig() ethermint.EncodingConfig {
 	// This is needed for the EIP712 txs because currently is using
 	// the deprecated method legacytx.StdSignBytes
 	legacytx.RegressionTestingAminoCodec = cdc
+
 	return encodingConfig
 }

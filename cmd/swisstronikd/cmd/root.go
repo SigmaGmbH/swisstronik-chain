@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 	"time"
 
-	"swisstronik/encoding"
 	"swisstronik/ethereum/eip712"
 
 	"cosmossdk.io/client/v2/autocli"
@@ -18,7 +17,6 @@ import (
 	confixcmd "cosmossdk.io/tools/confix/cmd"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/codec/address"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	"github.com/cosmos/cosmos-sdk/types/module"
 
@@ -77,7 +75,7 @@ func NewRootCmd() (*cobra.Command, ethermint.EncodingConfig) {
 	// Initialize the SDK config the first before doing anything else.
 	InitSDKConfig()
 
-	encodingConfig := encoding.MakeConfig()
+	encodingConfig := app.MakeConfig()
 	initClientCtx := client.Context{}.
 		WithCodec(encodingConfig.Codec).
 		WithInterfaceRegistry(encodingConfig.InterfaceRegistry).
@@ -139,7 +137,7 @@ func NewRootCmd() (*cobra.Command, ethermint.EncodingConfig) {
 	txConfig := authtx.NewTxConfig(encodingConfig.Codec, authtx.DefaultSignModes)
 	// gentxModule := app.ModuleBasics[genutiltypes.ModuleName].(genutil.AppModuleBasic)
 
-	valOperAddressCodec := address.NewBech32Codec(sdktypes.GetConfig().GetBech32ValidatorAddrPrefix())
+	valOperAddressCodec := encodingConfig.TxConfig.SigningContext().ValidatorAddressCodec()
 	a := appCreator{encodingConfig}
 	rootCmd.AddCommand(
 		evmmoduleclient.ValidateChainID(

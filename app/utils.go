@@ -42,6 +42,9 @@ import (
 
 	feemarkettypes "swisstronik/x/feemarket/types"
 
+	"swisstronik/encoding"
+	evmmoduletypes "swisstronik/types"
+
 	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
@@ -339,4 +342,11 @@ func GenesisStateWithValSet(app *App, genesisState simapp.GenesisState,
 	genesisState[banktypes.ModuleName] = app.AppCodec().MustMarshalJSON(bankGenesis)
 
 	return genesisState
+}
+
+func MakeConfig() evmmoduletypes.EncodingConfig {
+	config := encoding.MakeConfig()
+	ModuleBasics.RegisterLegacyAminoCodec(config.Amino)
+	ModuleBasics.RegisterInterfaces(config.InterfaceRegistry)
+	return config
 }
