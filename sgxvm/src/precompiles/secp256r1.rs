@@ -94,11 +94,11 @@ mod tests {
         let target_gas = 3_500u64;
         let (success, res) = P256Verify::raw_execute(&input, target_gas).unwrap();
         assert_eq!(success, ExitSucceed::Returned);
-        assert_eq!(res.len(), 4);
+        assert_eq!(res.len(), 32);
         assert_eq!(res[0], 0u8);
         assert_eq!(res[1], 0u8);
         assert_eq!(res[2], 0u8);
-        assert_eq!(res[3], 0u8);
+        assert_eq!(res[31], 0u8);
     }
 
 }
