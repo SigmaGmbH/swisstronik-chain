@@ -139,6 +139,7 @@ import (
 	"swisstronik/ethereum/eip712"
 
 	sdkmath "cosmossdk.io/math"
+	"cosmossdk.io/simapp"
 	addresscodec "github.com/cosmos/cosmos-sdk/codec/address"
 	"github.com/cosmos/cosmos-sdk/types/mempool"
 	"github.com/cosmos/cosmos-sdk/x/consensus"
@@ -313,7 +314,7 @@ func New(
 	eip712.SetEncodingConfig(encodingConfig)
 	// create and set dummy vote extension handler
 	voteExtOp := func(bApp *baseapp.BaseApp) {
-		voteExtHandler := NewVoteExtensionHandler()
+		voteExtHandler := simapp.NewVoteExtensionHandler()
 		voteExtHandler.SetHandlers(bApp)
 	}
 	baseAppOptions = append(baseAppOptions, voteExtOp, baseapp.SetOptimisticExecution())
