@@ -10,7 +10,7 @@ import (
 
 var _ types.QueryServer = Keeper{}
 
-func (k Keeper) AddressInfo(goCtx context.Context, req *types.QueryAddressInfoRequest) (*types.QueryAddressInfoResponse, error) {
+func (k Keeper) AddressDetails(goCtx context.Context, req *types.QueryAddressDetailsRequest) (*types.QueryAddressDetailsResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
@@ -21,12 +21,12 @@ func (k Keeper) AddressInfo(goCtx context.Context, req *types.QueryAddressInfoRe
 		return nil, err
 	}
 
-	verificationData, err := k.GetAddressInfo(ctx, address)
+	details, err := k.GetAddressDetails(ctx, address)
 	if err != nil {
 		return nil, err
 	}
 
-	return &types.QueryAddressInfoResponse{Data: verificationData}, nil
+	return &types.QueryAddressDetailsResponse{Data: details}, nil
 }
 
 func (k Keeper) IssuerDetails(goCtx context.Context, req *types.QueryIssuerDetailsRequest) (*types.QueryIssuerDetailsResponse, error) {

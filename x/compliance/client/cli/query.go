@@ -31,8 +31,8 @@ func GetQueryCmd() *cobra.Command {
 
 func CmdGetAddressInfo() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "get-address-info [bech32-or-hex-address]",
-		Short: "Returns AddressInfo associated with provided address",
+		Use:   "get-address-details [bech32-or-hex-address]",
+		Short: "Returns AddressDetails associated with provided address",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx := client.GetClientContextFromCmd(cmd)
@@ -43,11 +43,11 @@ func CmdGetAddressInfo() *cobra.Command {
 				return err
 			}
 
-			req := &types.QueryAddressInfoRequest{
+			req := &types.QueryAddressDetailsRequest{
 				Address: address.String(),
 			}
 
-			resp, err := queryClient.AddressInfo(context.Background(), req)
+			resp, err := queryClient.AddressDetails(context.Background(), req)
 			if err != nil {
 				return err
 			}

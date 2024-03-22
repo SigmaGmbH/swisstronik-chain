@@ -16,7 +16,7 @@ service Query {
     option (google.api.http).get = "/swisstronik/compliance/params";
   }
 
-  rpc AddressInfo(QueryAddressDetailsRequest) returns (QueryAddressDetailsResponse) {
+  rpc AddressDetails(QueryAddressDetailsRequest) returns (QueryAddressDetailsResponse) {
     option (google.api.http).get = "/swisstronik/compliance/{address}";
   }
 
