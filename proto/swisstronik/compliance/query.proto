@@ -16,7 +16,7 @@ service Query {
     option (google.api.http).get = "/swisstronik/compliance/params";
   }
 
-  rpc AddressInfo(QueryAddressInfoRequest) returns (QueryAddressInfoResponse) {
+  rpc AddressInfo(QueryAddressDetailsRequest) returns (QueryAddressDetailsResponse) {
     option (google.api.http).get = "/swisstronik/compliance/{address}";
   }
 
@@ -38,15 +38,15 @@ message QueryParamsResponse {
   Params params = 1 [ (gogoproto.nullable) = false ];
 }
 
-// QueryAddressInfoRequest is request type for the Query/VerificationData RPC method.
-message QueryAddressInfoRequest {
+// QueryAddressDetailsRequest is request type for the Query/VerificationData RPC method.
+message QueryAddressDetailsRequest {
   string address = 1;
 }
 
-// QueryAddressInfoResponse is response type for the Query/VerificationData RPC method.
-message QueryAddressInfoResponse {
+// QueryAddressDetailsResponse is response type for the Query/VerificationData RPC method.
+message QueryAddressDetailsResponse {
   // data holds all the verification data for provided address
-  AddressInfo data = 1;
+  AddressDetails data = 1;
 }
 
 message QueryIssuerDetailsRequest {

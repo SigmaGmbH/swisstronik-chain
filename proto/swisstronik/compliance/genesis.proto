@@ -19,7 +19,7 @@ message IssuerGenesisAccount {
 
 message GenesisAddressInfo {
   string address = 1;
-  AddressInfo info = 2;
+  AddressDetails info = 2;
 }
 
 message GenesisVerificationDetails {

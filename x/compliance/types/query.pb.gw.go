@@ -52,7 +52,7 @@ func local_request_Query_Params_0(ctx context.Context, marshaler runtime.Marshal
 }
 
 func request_Query_AddressInfo_0(ctx context.Context, marshaler runtime.Marshaler, client QueryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryAddressInfoRequest
+	var protoReq QueryAddressDetailsRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -79,7 +79,7 @@ func request_Query_AddressInfo_0(ctx context.Context, marshaler runtime.Marshale
 }
 
 func local_request_Query_AddressInfo_0(ctx context.Context, marshaler runtime.Marshaler, server QueryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq QueryAddressInfoRequest
+	var protoReq QueryAddressDetailsRequest
 	var metadata runtime.ServerMetadata
 
 	var (
