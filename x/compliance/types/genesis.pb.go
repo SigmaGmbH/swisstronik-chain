@@ -25,7 +25,10 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 // GenesisState defines the compliance module's genesis state.
 type GenesisState struct {
-	Params Params `protobuf:"bytes,1,opt,name=params,proto3" json:"params"`
+	Params              Params                        `protobuf:"bytes,1,opt,name=params,proto3" json:"params"`
+	Issuers             []*IssuerGenesisAccount       `protobuf:"bytes,2,rep,name=issuers,proto3" json:"issuers,omitempty"`
+	AddressDetails      []*GenesisAddressDetails      `protobuf:"bytes,3,rep,name=addressDetails,proto3" json:"addressDetails,omitempty"`
+	VerificationDetails []*GenesisVerificationDetails `protobuf:"bytes,4,rep,name=verificationDetails,proto3" json:"verificationDetails,omitempty"`
 }
 
 func (m *GenesisState) Reset()         { *m = GenesisState{} }
@@ -66,6 +69,27 @@ func (m *GenesisState) GetParams() Params {
 		return m.Params
 	}
 	return Params{}
+}
+
+func (m *GenesisState) GetIssuers() []*IssuerGenesisAccount {
+	if m != nil {
+		return m.Issuers
+	}
+	return nil
+}
+
+func (m *GenesisState) GetAddressDetails() []*GenesisAddressDetails {
+	if m != nil {
+		return m.AddressDetails
+	}
+	return nil
+}
+
+func (m *GenesisState) GetVerificationDetails() []*GenesisVerificationDetails {
+	if m != nil {
+		return m.VerificationDetails
+	}
+	return nil
 }
 
 type IssuerGenesisAccount struct {
@@ -120,23 +144,23 @@ func (m *IssuerGenesisAccount) GetDetails() *IssuerDetails {
 	return nil
 }
 
-type GenesisAddressInfo struct {
+type GenesisAddressDetails struct {
 	Address string          `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
-	Info    *AddressDetails `protobuf:"bytes,2,opt,name=info,proto3" json:"info,omitempty"`
+	Details *AddressDetails `protobuf:"bytes,2,opt,name=details,proto3" json:"details,omitempty"`
 }
 
-func (m *GenesisAddressInfo) Reset()         { *m = GenesisAddressInfo{} }
-func (m *GenesisAddressInfo) String() string { return proto.CompactTextString(m) }
-func (*GenesisAddressInfo) ProtoMessage()    {}
-func (*GenesisAddressInfo) Descriptor() ([]byte, []int) {
+func (m *GenesisAddressDetails) Reset()         { *m = GenesisAddressDetails{} }
+func (m *GenesisAddressDetails) String() string { return proto.CompactTextString(m) }
+func (*GenesisAddressDetails) ProtoMessage()    {}
+func (*GenesisAddressDetails) Descriptor() ([]byte, []int) {
 	return fileDescriptor_d430e46e02363948, []int{2}
 }
-func (m *GenesisAddressInfo) XXX_Unmarshal(b []byte) error {
+func (m *GenesisAddressDetails) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *GenesisAddressInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *GenesisAddressDetails) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_GenesisAddressInfo.Marshal(b, m, deterministic)
+		return xxx_messageInfo_GenesisAddressDetails.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -146,35 +170,35 @@ func (m *GenesisAddressInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, 
 		return b[:n], nil
 	}
 }
-func (m *GenesisAddressInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GenesisAddressInfo.Merge(m, src)
+func (m *GenesisAddressDetails) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GenesisAddressDetails.Merge(m, src)
 }
-func (m *GenesisAddressInfo) XXX_Size() int {
+func (m *GenesisAddressDetails) XXX_Size() int {
 	return m.Size()
 }
-func (m *GenesisAddressInfo) XXX_DiscardUnknown() {
-	xxx_messageInfo_GenesisAddressInfo.DiscardUnknown(m)
+func (m *GenesisAddressDetails) XXX_DiscardUnknown() {
+	xxx_messageInfo_GenesisAddressDetails.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_GenesisAddressInfo proto.InternalMessageInfo
+var xxx_messageInfo_GenesisAddressDetails proto.InternalMessageInfo
 
-func (m *GenesisAddressInfo) GetAddress() string {
+func (m *GenesisAddressDetails) GetAddress() string {
 	if m != nil {
 		return m.Address
 	}
 	return ""
 }
 
-func (m *GenesisAddressInfo) GetInfo() *AddressDetails {
+func (m *GenesisAddressDetails) GetDetails() *AddressDetails {
 	if m != nil {
-		return m.Info
+		return m.Details
 	}
 	return nil
 }
 
 type GenesisVerificationDetails struct {
-	Id   string               `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Data *VerificationDetails `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
+	Id      []byte               `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Details *VerificationDetails `protobuf:"bytes,2,opt,name=details,proto3" json:"details,omitempty"`
 }
 
 func (m *GenesisVerificationDetails) Reset()         { *m = GenesisVerificationDetails{} }
@@ -210,16 +234,16 @@ func (m *GenesisVerificationDetails) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GenesisVerificationDetails proto.InternalMessageInfo
 
-func (m *GenesisVerificationDetails) GetId() string {
+func (m *GenesisVerificationDetails) GetId() []byte {
 	if m != nil {
 		return m.Id
 	}
-	return ""
+	return nil
 }
 
-func (m *GenesisVerificationDetails) GetData() *VerificationDetails {
+func (m *GenesisVerificationDetails) GetDetails() *VerificationDetails {
 	if m != nil {
-		return m.Data
+		return m.Details
 	}
 	return nil
 }
@@ -227,7 +251,7 @@ func (m *GenesisVerificationDetails) GetData() *VerificationDetails {
 func init() {
 	proto.RegisterType((*GenesisState)(nil), "swisstronik.compliance.GenesisState")
 	proto.RegisterType((*IssuerGenesisAccount)(nil), "swisstronik.compliance.IssuerGenesisAccount")
-	proto.RegisterType((*GenesisAddressInfo)(nil), "swisstronik.compliance.GenesisAddressInfo")
+	proto.RegisterType((*GenesisAddressDetails)(nil), "swisstronik.compliance.GenesisAddressDetails")
 	proto.RegisterType((*GenesisVerificationDetails)(nil), "swisstronik.compliance.GenesisVerificationDetails")
 }
 
@@ -236,28 +260,31 @@ func init() {
 }
 
 var fileDescriptor_d430e46e02363948 = []byte{
-	// 328 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x7c, 0x91, 0xc1, 0x4a, 0xc3, 0x30,
-	0x1c, 0x87, 0xdb, 0x31, 0x36, 0x8c, 0xe2, 0x21, 0x0c, 0x19, 0x3d, 0x44, 0xa9, 0x4e, 0x04, 0xa1,
-	0x03, 0xbd, 0x88, 0x08, 0xc3, 0x21, 0xc8, 0xc0, 0x83, 0x54, 0xf0, 0xe0, 0x2d, 0x36, 0xd9, 0xf8,
-	0xeb, 0x96, 0xd4, 0x24, 0x43, 0x7d, 0x0b, 0x1f, 0x6b, 0xc7, 0x1d, 0x3d, 0x89, 0xac, 0x2f, 0x22,
-	0x26, 0x29, 0xf6, 0xb0, 0x7a, 0x6b, 0xe1, 0xfb, 0x7d, 0x5f, 0xe0, 0x8f, 0x0e, 0xf4, 0x2b, 0x68,
-	0x6d, 0x94, 0x14, 0xf0, 0xdc, 0xcf, 0xe4, 0x2c, 0x9f, 0x02, 0x15, 0x19, 0xef, 0x4f, 0xb8, 0xe0,
-	0x1a, 0x74, 0x92, 0x2b, 0x69, 0x24, 0xde, 0xa9, 0x50, 0xc9, 0x1f, 0x15, 0x75, 0x26, 0x72, 0x22,
-	0x2d, 0xd2, 0xff, 0xfd, 0x72, 0x74, 0xb4, 0x5f, 0xe3, 0xcc, 0xa9, 0xa2, 0x33, 0xaf, 0x8c, 0x7a,
-	0x35, 0x10, 0x17, 0x06, 0x0c, 0x70, 0x8f, 0xc5, 0x37, 0x68, 0xeb, 0xda, 0x3d, 0xe5, 0xce, 0x50,
-	0xc3, 0xf1, 0x05, 0x6a, 0x39, 0x4d, 0x37, 0xdc, 0x0b, 0x8f, 0x36, 0x4f, 0x48, 0xb2, 0xfe, 0x69,
-	0xc9, 0xad, 0xa5, 0x86, 0xcd, 0xc5, 0xd7, 0x6e, 0x90, 0xfa, 0x4d, 0xfc, 0x82, 0x3a, 0x23, 0xad,
-	0xe7, 0x5c, 0x79, 0xe7, 0x65, 0x96, 0xc9, 0xb9, 0x30, 0xb8, 0x8b, 0xda, 0x94, 0x31, 0xc5, 0xb5,
-	0xd3, 0x6e, 0xa4, 0xe5, 0x2f, 0x1e, 0xa0, 0x36, 0xe3, 0x86, 0xc2, 0x54, 0x77, 0x1b, 0x36, 0xd8,
-	0xab, 0x0b, 0x3a, 0xf1, 0x95, 0x83, 0xd3, 0x72, 0x15, 0x3f, 0x21, 0x5c, 0xc6, 0x9c, 0x72, 0x24,
-	0xc6, 0xf2, 0x9f, 0xe0, 0x39, 0x6a, 0x82, 0x18, 0x4b, 0x5f, 0x3b, 0xac, 0xab, 0x79, 0x59, 0x99,
-	0xb3, 0x9b, 0x78, 0x86, 0x22, 0xdf, 0xba, 0xe7, 0x0a, 0xc6, 0x90, 0x51, 0x03, 0x52, 0x78, 0x06,
-	0x6f, 0xa3, 0x06, 0x30, 0x9f, 0x6b, 0x00, 0xc3, 0x03, 0xd4, 0x64, 0xd4, 0x50, 0x5f, 0x3a, 0xae,
-	0x2b, 0xad, 0x51, 0xa5, 0x76, 0x38, 0x3c, 0x5b, 0xac, 0x48, 0xb8, 0x5c, 0x91, 0xf0, 0x7b, 0x45,
-	0xc2, 0x8f, 0x82, 0x04, 0xcb, 0x82, 0x04, 0x9f, 0x05, 0x09, 0x1e, 0x48, 0xf5, 0xb8, 0x6f, 0xd5,
-	0xf3, 0x9a, 0xf7, 0x9c, 0xeb, 0xc7, 0x96, 0x3d, 0xee, 0xe9, 0x4f, 0x00, 0x00, 0x00, 0xff, 0xff,
-	0x41, 0x52, 0xc4, 0xd4, 0x7e, 0x02, 0x00, 0x00,
+	// 374 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x84, 0x92, 0xcf, 0x4b, 0xc3, 0x30,
+	0x1c, 0xc5, 0xdb, 0x6e, 0x6c, 0x98, 0x8d, 0x1d, 0xe2, 0x94, 0xd2, 0x43, 0x1c, 0xd3, 0xc9, 0x40,
+	0xed, 0x60, 0x5e, 0x3c, 0x08, 0xea, 0xf0, 0x07, 0xde, 0xa4, 0xa2, 0x07, 0x6f, 0xb1, 0x8d, 0x23,
+	0xb8, 0x35, 0xb5, 0xc9, 0xfc, 0xf1, 0x5f, 0xf8, 0x67, 0xed, 0x38, 0x6f, 0x9e, 0x44, 0xb6, 0x7f,
+	0x44, 0xcc, 0x1a, 0xac, 0xb5, 0x99, 0xb7, 0x16, 0xde, 0xfb, 0xbc, 0x97, 0xc7, 0x17, 0x6c, 0xf0,
+	0x27, 0xca, 0xb9, 0x88, 0x59, 0x48, 0xef, 0x3b, 0x3e, 0x1b, 0x46, 0x03, 0x8a, 0x43, 0x9f, 0x74,
+	0xfa, 0x24, 0x24, 0x9c, 0x72, 0x37, 0x8a, 0x99, 0x60, 0x70, 0x35, 0xa5, 0x72, 0x7f, 0x54, 0x4e,
+	0xbd, 0xcf, 0xfa, 0x4c, 0x4a, 0x3a, 0xdf, 0x5f, 0x73, 0xb5, 0xb3, 0xae, 0x61, 0x46, 0x38, 0xc6,
+	0xc3, 0x04, 0xe9, 0xb4, 0x34, 0x22, 0x12, 0x0a, 0x2a, 0x28, 0x49, 0x64, 0xcd, 0x37, 0x0b, 0x54,
+	0xcf, 0xe6, 0x5d, 0x2e, 0x05, 0x16, 0x04, 0xee, 0x83, 0xd2, 0x9c, 0x63, 0x9b, 0x0d, 0xb3, 0x5d,
+	0xe9, 0x22, 0x37, 0xbf, 0x9b, 0x7b, 0x21, 0x55, 0xbd, 0xe2, 0xf8, 0x63, 0xcd, 0xf0, 0x12, 0x0f,
+	0x3c, 0x05, 0x65, 0xca, 0xf9, 0x88, 0xc4, 0xdc, 0xb6, 0x1a, 0x85, 0x76, 0xa5, 0xbb, 0xad, 0xb3,
+	0x9f, 0x4b, 0x59, 0x12, 0x7d, 0xe4, 0xfb, 0x6c, 0x14, 0x0a, 0x4f, 0x99, 0xe1, 0x15, 0xa8, 0xe1,
+	0x20, 0x88, 0x09, 0xe7, 0xc7, 0x44, 0x60, 0x3a, 0xe0, 0x76, 0x41, 0xe2, 0x76, 0x74, 0x38, 0x05,
+	0xfa, 0x65, 0xf2, 0x32, 0x10, 0x18, 0x80, 0xe5, 0x47, 0x12, 0xd3, 0x3b, 0xea, 0x63, 0x41, 0x59,
+	0xa8, 0xd8, 0x45, 0xc9, 0xee, 0xfe, 0xc3, 0xbe, 0xfe, 0xeb, 0xf4, 0xf2, 0x70, 0xcd, 0x07, 0x50,
+	0xcf, 0x7b, 0x1d, 0xb4, 0x41, 0x39, 0xe9, 0x23, 0xb7, 0x5d, 0xf2, 0xd4, 0x2f, 0x3c, 0x00, 0xe5,
+	0x20, 0xe9, 0x62, 0xc9, 0xd5, 0x5b, 0x8b, 0x67, 0x53, 0xf1, 0xca, 0xd5, 0xe4, 0x60, 0x25, 0x77,
+	0x81, 0x05, 0x99, 0x87, 0xd9, 0xcc, 0x4d, 0x5d, 0x66, 0x66, 0xd4, 0x54, 0xa8, 0xa3, 0x9f, 0x06,
+	0xd6, 0x80, 0x45, 0x03, 0x19, 0x5a, 0xf5, 0x2c, 0x1a, 0xc0, 0x93, 0x6c, 0xde, 0x96, 0x2e, 0x2f,
+	0x6f, 0x68, 0xe5, 0xed, 0xed, 0x8d, 0xa7, 0xc8, 0x9c, 0x4c, 0x91, 0xf9, 0x39, 0x45, 0xe6, 0xeb,
+	0x0c, 0x19, 0x93, 0x19, 0x32, 0xde, 0x67, 0xc8, 0xb8, 0x41, 0xe9, 0x8b, 0x7f, 0x4e, 0xdf, 0xbc,
+	0x78, 0x89, 0x08, 0xbf, 0x2d, 0xc9, 0x8b, 0xdf, 0xfd, 0x0a, 0x00, 0x00, 0xff, 0xff, 0x2b, 0x2a,
+	0x61, 0x5d, 0x93, 0x03, 0x00, 0x00,
 }
 
 func (m *GenesisState) Marshal() (dAtA []byte, err error) {
@@ -280,6 +307,48 @@ func (m *GenesisState) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if len(m.VerificationDetails) > 0 {
+		for iNdEx := len(m.VerificationDetails) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.VerificationDetails[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintGenesis(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x22
+		}
+	}
+	if len(m.AddressDetails) > 0 {
+		for iNdEx := len(m.AddressDetails) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.AddressDetails[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintGenesis(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x1a
+		}
+	}
+	if len(m.Issuers) > 0 {
+		for iNdEx := len(m.Issuers) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Issuers[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintGenesis(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x12
+		}
+	}
 	{
 		size, err := m.Params.MarshalToSizedBuffer(dAtA[:i])
 		if err != nil {
@@ -335,7 +404,7 @@ func (m *IssuerGenesisAccount) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *GenesisAddressInfo) Marshal() (dAtA []byte, err error) {
+func (m *GenesisAddressDetails) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -345,19 +414,19 @@ func (m *GenesisAddressInfo) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *GenesisAddressInfo) MarshalTo(dAtA []byte) (int, error) {
+func (m *GenesisAddressDetails) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *GenesisAddressInfo) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *GenesisAddressDetails) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if m.Info != nil {
+	if m.Details != nil {
 		{
-			size, err := m.Info.MarshalToSizedBuffer(dAtA[:i])
+			size, err := m.Details.MarshalToSizedBuffer(dAtA[:i])
 			if err != nil {
 				return 0, err
 			}
@@ -397,9 +466,9 @@ func (m *GenesisVerificationDetails) MarshalToSizedBuffer(dAtA []byte) (int, err
 	_ = i
 	var l int
 	_ = l
-	if m.Data != nil {
+	if m.Details != nil {
 		{
-			size, err := m.Data.MarshalToSizedBuffer(dAtA[:i])
+			size, err := m.Details.MarshalToSizedBuffer(dAtA[:i])
 			if err != nil {
 				return 0, err
 			}
@@ -438,6 +507,24 @@ func (m *GenesisState) Size() (n int) {
 	_ = l
 	l = m.Params.Size()
 	n += 1 + l + sovGenesis(uint64(l))
+	if len(m.Issuers) > 0 {
+		for _, e := range m.Issuers {
+			l = e.Size()
+			n += 1 + l + sovGenesis(uint64(l))
+		}
+	}
+	if len(m.AddressDetails) > 0 {
+		for _, e := range m.AddressDetails {
+			l = e.Size()
+			n += 1 + l + sovGenesis(uint64(l))
+		}
+	}
+	if len(m.VerificationDetails) > 0 {
+		for _, e := range m.VerificationDetails {
+			l = e.Size()
+			n += 1 + l + sovGenesis(uint64(l))
+		}
+	}
 	return n
 }
 
@@ -458,7 +545,7 @@ func (m *IssuerGenesisAccount) Size() (n int) {
 	return n
 }
 
-func (m *GenesisAddressInfo) Size() (n int) {
+func (m *GenesisAddressDetails) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -468,8 +555,8 @@ func (m *GenesisAddressInfo) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovGenesis(uint64(l))
 	}
-	if m.Info != nil {
-		l = m.Info.Size()
+	if m.Details != nil {
+		l = m.Details.Size()
 		n += 1 + l + sovGenesis(uint64(l))
 	}
 	return n
@@ -485,8 +572,8 @@ func (m *GenesisVerificationDetails) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovGenesis(uint64(l))
 	}
-	if m.Data != nil {
-		l = m.Data.Size()
+	if m.Details != nil {
+		l = m.Details.Size()
 		n += 1 + l + sovGenesis(uint64(l))
 	}
 	return n
@@ -557,6 +644,108 @@ func (m *GenesisState) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if err := m.Params.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Issuers", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowGenesis
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthGenesis
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthGenesis
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Issuers = append(m.Issuers, &IssuerGenesisAccount{})
+			if err := m.Issuers[len(m.Issuers)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AddressDetails", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowGenesis
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthGenesis
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthGenesis
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.AddressDetails = append(m.AddressDetails, &GenesisAddressDetails{})
+			if err := m.AddressDetails[len(m.AddressDetails)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field VerificationDetails", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowGenesis
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthGenesis
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthGenesis
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.VerificationDetails = append(m.VerificationDetails, &GenesisVerificationDetails{})
+			if err := m.VerificationDetails[len(m.VerificationDetails)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -699,7 +888,7 @@ func (m *IssuerGenesisAccount) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *GenesisAddressInfo) Unmarshal(dAtA []byte) error {
+func (m *GenesisAddressDetails) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -722,10 +911,10 @@ func (m *GenesisAddressInfo) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: GenesisAddressInfo: wiretype end group for non-group")
+			return fmt.Errorf("proto: GenesisAddressDetails: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: GenesisAddressInfo: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: GenesisAddressDetails: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -762,7 +951,7 @@ func (m *GenesisAddressInfo) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Info", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Details", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -789,10 +978,10 @@ func (m *GenesisAddressInfo) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.Info == nil {
-				m.Info = &AddressDetails{}
+			if m.Details == nil {
+				m.Details = &AddressDetails{}
 			}
-			if err := m.Info.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.Details.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -850,7 +1039,7 @@ func (m *GenesisVerificationDetails) Unmarshal(dAtA []byte) error {
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
 			}
-			var stringLen uint64
+			var byteLen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowGenesis
@@ -860,27 +1049,29 @@ func (m *GenesisVerificationDetails) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
+				byteLen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
+			if byteLen < 0 {
 				return ErrInvalidLengthGenesis
 			}
-			postIndex := iNdEx + intStringLen
+			postIndex := iNdEx + byteLen
 			if postIndex < 0 {
 				return ErrInvalidLengthGenesis
 			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Id = string(dAtA[iNdEx:postIndex])
+			m.Id = append(m.Id[:0], dAtA[iNdEx:postIndex]...)
+			if m.Id == nil {
+				m.Id = []byte{}
+			}
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Data", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Details", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -907,10 +1098,10 @@ func (m *GenesisVerificationDetails) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.Data == nil {
-				m.Data = &VerificationDetails{}
+			if m.Details == nil {
+				m.Details = &VerificationDetails{}
 			}
-			if err := m.Data.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.Details.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

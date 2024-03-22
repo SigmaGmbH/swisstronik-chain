@@ -3,15 +3,14 @@ package keeper
 import (
 	"cosmossdk.io/errors"
 	"fmt"
-	"github.com/cosmos/gogoproto/proto"
-	"github.com/ethereum/go-ethereum/crypto"
-	"slices"
-
 	"github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
+	"github.com/cosmos/gogoproto/proto"
+	"github.com/ethereum/go-ethereum/crypto"
+	"slices"
 
 	"swisstronik/x/compliance/types"
 )
@@ -42,18 +41,6 @@ func NewKeeper(
 
 func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
-}
-
-func (k Keeper) SetAddressDetailsRaw(ctx sdk.Context, subjectAddress sdk.Address, data *types.AddressDetails) error {
-	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerification)
-
-	dataBytes, err := data.Marshal()
-	if err != nil {
-		return err
-	}
-
-	store.Set(subjectAddress.Bytes(), dataBytes)
-	return nil
 }
 
 // SetIssuerDetails sets details for provided issuer address
@@ -208,6 +195,23 @@ func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.Address,
 	return nil
 }
 
+// SetVerificationDetails writes verification details
+func (k Keeper) SetVerificationDetails(ctx sdk.Context, verificationDetailsId []byte, details *types.VerificationDetails) error {
+	verificationDetailsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationDetails)
+	if verificationDetailsStore.Has(verificationDetailsId) {
+		return errors.Wrap(types.ErrInvalidParam, "provided verification details already in storage")
+	}
+
+	detailsBytes, err := details.Marshal()
+	if err != nil {
+		return err
+	}
+
+	// If there is no such verification details associated with provided address, write them to the table
+	verificationDetailsStore.Set(verificationDetailsId, detailsBytes)
+	return nil
+}
+
 // GetVerificationDetails returns verification details for provided ID
 func (k Keeper) GetVerificationDetails(ctx sdk.Context, verificationDetailsId []byte) (*types.VerificationDetails, error) {
 	verificationDetailsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationDetails)
@@ -298,6 +302,111 @@ func (k Keeper) IssuerExists(ctx sdk.Context, issuerAddress sdk.Address) (bool, 
 
 	exists := len(res.Operator) != 0
 	return exists, nil
+}
+
+func (k Keeper) IterateVerificationDetails(ctx sdk.Context, callback func(id []byte) (continue_ bool)) {
+	latestVersionIterator := sdk.KVStorePrefixIterator(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationDetails)
+	defer closeIteratorOrPanic(latestVersionIterator)
+
+	for ; latestVersionIterator.Valid(); latestVersionIterator.Next() {
+		key := latestVersionIterator.Key()
+		if !callback(key) {
+			break
+		}
+	}
+}
+
+func (k Keeper) IterateAddressDetails(ctx sdk.Context, callback func(address sdk.Address) (continue_ bool)) {
+	latestVersionIterator := sdk.KVStorePrefixIterator(ctx.KVStore(k.storeKey), types.KeyPrefixAddressDetails)
+	defer closeIteratorOrPanic(latestVersionIterator)
+
+	for ; latestVersionIterator.Valid(); latestVersionIterator.Next() {
+		key := latestVersionIterator.Key()
+		address := sdk.AccAddress(key)
+		if !callback(address) {
+			break
+		}
+	}
+}
+
+func (k Keeper) IterateIssuerDetails(ctx sdk.Context, callback func(address sdk.Address) (continue_ bool)) {
+	latestVersionIterator := sdk.KVStorePrefixIterator(ctx.KVStore(k.storeKey), types.KeyPrefixIssuerDetails)
+	defer closeIteratorOrPanic(latestVersionIterator)
+
+	for ; latestVersionIterator.Valid(); latestVersionIterator.Next() {
+		key := latestVersionIterator.Key()
+		address := sdk.AccAddress(key)
+		if !callback(address) {
+			break
+		}
+	}
+}
+
+func (k Keeper) ExportVerificationDetails(ctx sdk.Context) ([]*types.GenesisVerificationDetails, error) {
+	var allVerificationDetails []*types.GenesisVerificationDetails
+	var err error
+
+	k.IterateVerificationDetails(ctx, func(id []byte) bool {
+		details, err := k.GetVerificationDetails(ctx, id)
+		if err != nil {
+			return false
+		}
+		allVerificationDetails = append(allVerificationDetails, &types.GenesisVerificationDetails{Id: id, Details: details})
+		return true
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return allVerificationDetails, nil
+}
+
+func (k Keeper) ExportAddressDetails(ctx sdk.Context) ([]*types.GenesisAddressDetails, error) {
+	var allAddressDetails []*types.GenesisAddressDetails
+	var err error
+
+	k.IterateAddressDetails(ctx, func(address sdk.Address) bool {
+		details, err := k.GetAddressDetails(ctx, address)
+		if err != nil {
+			return false
+		}
+		allAddressDetails = append(allAddressDetails, &types.GenesisAddressDetails{Address: address.String(), Details: details})
+		return true
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return allAddressDetails, nil
+}
+
+func (k Keeper) ExportIssuerAccounts(ctx sdk.Context) ([]*types.IssuerGenesisAccount, error) {
+	var issuerAccs []*types.IssuerGenesisAccount
+	var err error
+
+	k.IterateIssuerDetails(ctx, func(address sdk.Address) bool {
+		details, err := k.GetIssuerDetails(ctx, address)
+		if err != nil {
+			return false
+		}
+		issuerAccs = append(issuerAccs, &types.IssuerGenesisAccount{Address: address.String(), Details: details})
+		return true
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return issuerAccs, nil
+}
+
+func closeIteratorOrPanic(iterator sdk.Iterator) {
+	err := iterator.Close()
+	if err != nil {
+		panic(err.Error())
+	}
 }
 
 // TODO: Create fn to obtain all verified issuers with their aliases

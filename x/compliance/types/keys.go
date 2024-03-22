@@ -15,14 +15,12 @@ const (
 )
 
 const (
-	prefixVerification = iota + 1
-	prefixIssuerDetails
+	prefixIssuerDetails = iota + 1
 	prefixAddressDetails
 	prefixVerificationDetails
 )
 
 var (
-	KeyPrefixVerification        = []byte{prefixVerification}
 	KeyPrefixIssuerDetails       = []byte{prefixIssuerDetails}
 	KeyPrefixAddressDetails      = []byte{prefixAddressDetails}
 	KeyPrefixVerificationDetails = []byte{prefixVerificationDetails}
