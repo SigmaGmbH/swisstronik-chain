@@ -134,9 +134,6 @@ func NewRootCmd() (*cobra.Command, ethermint.EncodingConfig) {
 		},
 	}
 
-	txConfig := authtx.NewTxConfig(encodingConfig.Codec, authtx.DefaultSignModes)
-	// gentxModule := app.ModuleBasics[genutiltypes.ModuleName].(genutil.AppModuleBasic)
-
 	valOperAddressCodec := encodingConfig.TxConfig.SigningContext().ValidatorAddressCodec()
 	a := appCreator{encodingConfig}
 	rootCmd.AddCommand(
@@ -147,7 +144,7 @@ func NewRootCmd() (*cobra.Command, ethermint.EncodingConfig) {
 		genutilcli.MigrateGenesisCmd(genutilcli.MigrationMap),
 		genutilcli.GenTxCmd(app.ModuleBasics, encodingConfig.TxConfig, banktypes.GenesisBalancesIterator{}, app.DefaultNodeHome, valOperAddressCodec),
 		genutilcli.ValidateGenesisCmd(app.ModuleBasics),
-		AddGenesisAccountCmd(app.DefaultNodeHome, txConfig.SigningContext().ValidatorAddressCodec()),
+		AddGenesisAccountCmd(app.DefaultNodeHome, valOperAddressCodec),
 		tmcli.NewCompletionCmd(rootCmd, true),
 		NewTestnetCmd(app.ModuleBasics, banktypes.GenesisBalancesIterator{}),
 		confixcmd.ConfigCommand(),

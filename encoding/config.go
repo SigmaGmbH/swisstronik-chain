@@ -17,7 +17,7 @@ package encoding
 
 import (
 	amino "github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/codec/address"
+	addresscodec "github.com/cosmos/cosmos-sdk/codec/address"
 	"github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/tx"
 	"github.com/ethereum/go-ethereum/common"
@@ -49,13 +49,11 @@ func customGetSignerFn(path string) func(msg proto.Message) ([][]byte, error) {
 // MakeConfig creates an EncodingConfig for testing
 func MakeConfig() ethermint.EncodingConfig {
 	cdc := amino.NewLegacyAmino()
+	addrPrefix := sdk.GetConfig().GetBech32AccountAddrPrefix()
+	valAddrPrefix := sdk.GetConfig().GetBech32ValidatorAddrPrefix()
 	signingOptions := signing.Options{
-		AddressCodec: address.Bech32Codec{
-			Bech32Prefix: sdk.GetConfig().GetBech32AccountAddrPrefix(),
-		},
-		ValidatorAddressCodec: address.Bech32Codec{
-			Bech32Prefix: sdk.GetConfig().GetBech32ValidatorAddrPrefix(),
-		},
+		AddressCodec:          addresscodec.NewBech32Codec(addrPrefix),
+		ValidatorAddressCodec: addresscodec.NewBech32Codec(valAddrPrefix),
 		CustomGetSigners: map[protoreflect.FullName]signing.GetSignersFunc{
 			"ethermint.evm.v1.MsgHandleTx": customGetSignerFn("from"),
 		},
