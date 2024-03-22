@@ -68,8 +68,3 @@ message VerificationDetails {
     // ZK-proof original schema
     string proof_schema = 6;
 }
-
-
-
-
-
