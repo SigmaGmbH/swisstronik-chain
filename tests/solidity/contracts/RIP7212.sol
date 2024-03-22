@@ -18,9 +18,9 @@ contract RIP7212 {
         }
 
         // Decode the result
-        bool result = abi.decode(data, (bool));
+        uint256 result = abi.decode(data, (uint256));
         
-        // Check it's 0 (valid signature)
-        return result;
+        // Check it's 1 (valid signature)
+        return result == uint256(1);
     }
 }

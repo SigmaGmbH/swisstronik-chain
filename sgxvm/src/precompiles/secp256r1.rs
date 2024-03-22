@@ -98,7 +98,6 @@ mod tests {
         assert_eq!(res[0], 0u8);
         assert_eq!(res[1], 0u8);
         assert_eq!(res[2], 0u8);
-        assert_eq!(res[31], 0u8);
+        assert_eq!(res[31], 1u8);
     }
-
 }
