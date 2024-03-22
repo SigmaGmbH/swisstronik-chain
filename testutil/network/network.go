@@ -44,7 +44,6 @@ import (
 	"google.golang.org/grpc"
 
 	"cosmossdk.io/simapp"
-	"cosmossdk.io/simapp/params"
 	pruningtypes "cosmossdk.io/store/pruning/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -86,11 +85,10 @@ var lock = new(sync.Mutex)
 type AppConstructor = func(val Validator) servertypes.Application
 
 // NewAppConstructor returns a new simapp AppConstructor
-func NewAppConstructor(encodingCfg params.EncodingConfig, chainID string) AppConstructor {
+func NewAppConstructor(encodingCfg evmmoduletypes.EncodingConfig, chainID string) AppConstructor {
 	return func(val Validator) servertypes.Application {
 		return app.New(
 			val.Ctx.Logger, dbm.NewMemDB(), nil, true, make(map[int64]bool), val.Ctx.Config.RootDir, 0,
-			encodingCfg,
 			simutils.NewAppOptionsWithFlagHome(val.Ctx.Config.RootDir),
 			baseapp.SetPruning(pruningtypes.NewPruningOptionsFromString(val.AppConfig.Pruning)),
 			baseapp.SetMinGasPrices(val.AppConfig.MinGasPrices),

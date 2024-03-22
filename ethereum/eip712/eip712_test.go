@@ -8,7 +8,6 @@ import (
 
 	"swisstronik/ethereum/eip712"
 
-	"cosmossdk.io/simapp/params"
 	"github.com/cosmos/cosmos-sdk/client"
 
 	"github.com/ethereum/go-ethereum/crypto"
@@ -26,6 +25,8 @@ import (
 	txtypes "github.com/cosmos/cosmos-sdk/types/tx"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
+
+	ethermint "swisstronik/types"
 
 	v1beta1 "cosmossdk.io/api/cosmos/base/v1beta1"
 	signingv1beta1 "cosmossdk.io/api/cosmos/tx/signing/v1beta1"
@@ -45,7 +46,7 @@ import (
 type EIP712TestSuite struct {
 	suite.Suite
 
-	config    params.EncodingConfig
+	config    ethermint.EncodingConfig
 	clientCtx client.Context
 }
 

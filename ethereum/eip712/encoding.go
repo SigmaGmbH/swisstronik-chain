@@ -20,7 +20,6 @@ import (
 	"errors"
 	"fmt"
 
-	"cosmossdk.io/simapp/params"
 	"github.com/cosmos/cosmos-sdk/x/auth/migrations/legacytx"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -47,7 +46,7 @@ var (
 // The process of unmarshaling SignDoc bytes into a SignDoc object requires having a codec
 // populated with all relevant message types. As a result, we must call this method on app
 // initialization with the app's encoding config.
-func SetEncodingConfig(cfg params.EncodingConfig) {
+func SetEncodingConfig(cfg ethermint.EncodingConfig) {
 	aminoCodec = cfg.Amino
 	protoCodec = codec.NewProtoCodec(cfg.InterfaceRegistry)
 }
@@ -128,6 +127,10 @@ func decodeAminoSignDoc(signDocBytes []byte) (apitypes.TypedData, error) {
 	msg := msgs[0]
 
 	signers, _, err := protoCodec.GetMsgV1Signers(msg)
+	if err != nil {
+		return apitypes.TypedData{}, errors.New("invalid signers")
+	}
+
 	// By convention, the fee payer is the first address in the list of signers.
 	feePayer := signers[0]
 	feeDelegation := &FeeDelegationOptions{
@@ -215,6 +218,9 @@ func decodeProtobufSignDoc(signDocBytes []byte) (apitypes.TypedData, error) {
 	}
 
 	signers, _, err := protoCodec.GetMsgV1Signers(msg)
+	if err != nil {
+		return apitypes.TypedData{}, errors.New("invalid signers as argument")
+	}
 	feePayer := signers[0]
 	feeDelegation := &FeeDelegationOptions{
 		FeePayer: feePayer,
@@ -270,8 +276,11 @@ func validatePayloadMessages(msgs []sdk.Msg) error {
 		if err != nil {
 			return err
 		}
-		
+
 		signers, _, err := protoCodec.GetMsgV1Signers(m)
+		if err != nil {
+			return errors.New("invalid signers as argument")
+		}
 		if len(signers) != 1 {
 			return errors.New("unable to build EIP-712 payload: expect exactly 1 signer")
 		}

@@ -30,7 +30,6 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
-	"swisstronik/encoding"
 	"swisstronik/utils"
 
 	"cosmossdk.io/log"
@@ -90,7 +89,6 @@ func SetupWithDB(isCheckTx bool, patchGenesis func(*App, simapp.GenesisState) si
 		map[int64]bool{},
 		DefaultNodeHome,
 		5,
-		encoding.MakeConfig(ModuleBasics),
 		simtestutil.NewAppOptionsWithFlagHome(DefaultNodeHome),
 		baseapp.SetChainID(chainID),
 	)
@@ -215,8 +213,7 @@ func genesisStateWithValSet(codec codec.Codec, genesisState simapp.GenesisState,
 // SetupTestingApp initializes the IBC-go testing application
 func SetupTestingApp(chainID string) (ibctesting.TestingApp, map[string]json.RawMessage) {
 	db := dbm.NewMemDB()
-	cfg := encoding.MakeConfig(ModuleBasics)
-	app := New(log.NewNopLogger(), db, nil, true, map[int64]bool{}, DefaultNodeHome, 5, cfg, simtestutil.NewAppOptionsWithFlagHome(DefaultNodeHome), baseapp.SetChainID(chainID))
+	app := New(log.NewNopLogger(), db, nil, true, map[int64]bool{}, DefaultNodeHome, 5, simtestutil.NewAppOptionsWithFlagHome(DefaultNodeHome), baseapp.SetChainID(chainID))
 	return app, NewDefaultGenesisState()
 }
 
@@ -246,7 +243,6 @@ func SetupSwissApp(
 		log.NewNopLogger(),
 		db, nil, true, map[int64]bool{},
 		DefaultNodeHome, 5,
-		encoding.MakeConfig(ModuleBasics),
 		simtestutil.NewAppOptionsWithFlagHome(DefaultNodeHome),
 		baseapp.SetChainID(chainID),
 	)

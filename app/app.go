@@ -128,8 +128,6 @@ import (
 	"swisstronik/docs"
 	"swisstronik/encoding"
 
-	simappparams "cosmossdk.io/simapp/params"
-
 	evmante "swisstronik/app/ante"
 	srvflags "swisstronik/server/flags"
 	evmcommontypes "swisstronik/types"
@@ -287,7 +285,8 @@ type App struct {
 	// this line is used by starport scaffolding # stargate/app/keeperDeclaration
 
 	// mm is the module manager
-	ModuleManager *module.Manager
+	ModuleManager      *module.Manager
+	BasicModuleManager module.BasicManager
 
 	// sm is the simulation manager
 	sm           *module.SimulationManager
@@ -303,10 +302,10 @@ func New(
 	skipUpgradeHeights map[int64]bool,
 	homePath string,
 	invCheckPeriod uint,
-	encodingConfig simappparams.EncodingConfig,
 	appOpts servertypes.AppOptions,
 	baseAppOptions ...func(*baseapp.BaseApp),
 ) *App {
+	encodingConfig := encoding.MakeConfig(ModuleBasics)
 	appCodec := encodingConfig.Codec
 	cdc := encodingConfig.Amino
 	interfaceRegistry := encodingConfig.InterfaceRegistry
@@ -407,7 +406,7 @@ func New(
 		evmcommontypes.ProtoAccount,
 		maccPerms,
 		addresscodec.NewBech32Codec(sdk.GetConfig().GetBech32AccountAddrPrefix()),
-		sdk.Bech32PrefixAccAddr,
+		sdk.GetConfig().GetBech32AccountAddrPrefix(),
 		authAddr,
 	)
 
@@ -676,6 +675,24 @@ func New(
 		didModule,
 		// this line is used by starport scaffolding # stargate/app/appModule
 	)
+
+	// BasicModuleManager defines the module BasicManager which is in charge of setting up basic,
+	// non-dependant module elements, such as codec registration and genesis verification.
+	// By default, it is composed of all the modules from the module manager.
+	// Additionally, app module basics can be overwritten by passing them as an argument.
+	app.BasicModuleManager = module.NewBasicManagerFromManager(
+		app.ModuleManager,
+		map[string]module.AppModuleBasic{
+			genutiltypes.ModuleName: genutil.NewAppModuleBasic(genutiltypes.DefaultMessageValidator),
+			govtypes.ModuleName: gov.NewAppModuleBasic(
+				[]govclient.ProposalHandler{
+					paramsclient.ProposalHandler,
+				},
+			),
+		},
+	)
+	app.BasicModuleManager.RegisterLegacyAminoCodec(cdc)
+	app.BasicModuleManager.RegisterInterfaces(interfaceRegistry)
 
 	app.ModuleManager.SetOrderPreBlockers(
 		upgradetypes.ModuleName,
@@ -1031,7 +1048,7 @@ func (app *App) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APIConfig
 	nodeservice.RegisterGRPCGatewayRoutes(clientCtx, apiSvr.GRPCGatewayRouter)
 
 	// Register grpc-gateway routes for all modules.
-	ModuleBasics.RegisterGRPCGatewayRoutes(clientCtx, apiSvr.GRPCGatewayRouter)
+	app.BasicModuleManager.RegisterGRPCGatewayRoutes(clientCtx, apiSvr.GRPCGatewayRouter)
 
 	// register app's OpenAPI routes.
 	docs.RegisterOpenAPIService(Name, apiSvr.Router)

@@ -24,7 +24,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/module"
 
 	"cosmossdk.io/log"
-	simappparams "cosmossdk.io/simapp/params"
 	"cosmossdk.io/store"
 	"cosmossdk.io/store/snapshots"
 	snapshottypes "cosmossdk.io/store/snapshots/types"
@@ -60,6 +59,8 @@ import (
 
 	"swisstronik/utils"
 
+	ethermint "swisstronik/types"
+
 	"github.com/cosmos/cosmos-sdk/client/snapshot"
 	"github.com/cosmos/cosmos-sdk/codec"
 	runtimeservices "github.com/cosmos/cosmos-sdk/runtime/services"
@@ -73,7 +74,7 @@ import (
 const ShortBlockWindow uint32 = 20
 
 // NewRootCmd creates a new root command for a Cosmos SDK application
-func NewRootCmd() (*cobra.Command, simappparams.EncodingConfig) {
+func NewRootCmd() (*cobra.Command, ethermint.EncodingConfig) {
 	// Initialize the SDK config the first before doing anything else.
 	InitSDKConfig()
 
@@ -189,7 +190,6 @@ func NewRootCmd() (*cobra.Command, simappparams.EncodingConfig) {
 		map[int64]bool{},
 		app.DefaultNodeHome,
 		5,
-		encoding.MakeConfig(app.ModuleBasics),
 		simutils.NewAppOptionsWithFlagHome(app.DefaultNodeHome),
 		baseapp.SetChainID(chainID),
 	)
@@ -290,7 +290,7 @@ func addModuleInitFlags(startCmd *cobra.Command) {
 }
 
 type appCreator struct {
-	encodingConfig simappparams.EncodingConfig
+	encodingConfig ethermint.EncodingConfig
 }
 
 // newApp creates a new Cosmos SDK app
@@ -357,7 +357,6 @@ func (a appCreator) newApp(
 		skipUpgradeHeights,
 		cast.ToString(appOpts.Get(flags.FlagHome)),
 		cast.ToUint(appOpts.Get(sdkserver.FlagInvCheckPeriod)),
-		a.encodingConfig,
 		appOpts,
 		baseapp.SetPruning(pruningOpts),
 		baseapp.SetMinGasPrices(cast.ToString(appOpts.Get(sdkserver.FlagMinGasPrices))),
@@ -402,11 +401,10 @@ func (a appCreator) appExport(
 			map[int64]bool{},
 			homePath,
 			uint(1),
-			a.encodingConfig,
 			appOpts,
 		)
 	} else {
-		swissApp = app.New(logger, db, traceStore, true, map[int64]bool{}, "", uint(1), a.encodingConfig, appOpts)
+		swissApp = app.New(logger, db, traceStore, true, map[int64]bool{}, "", uint(1), appOpts)
 
 	}
 

@@ -16,34 +16,62 @@
 package encoding
 
 import (
-	"cosmossdk.io/simapp/params"
 	amino "github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/codec/address"
 	"github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/x/auth/tx"
+	"github.com/ethereum/go-ethereum/common"
+	"google.golang.org/protobuf/proto"
 
 	enccodec "swisstronik/encoding/codec"
 
+	ethermint "swisstronik/types"
+
 	"cosmossdk.io/x/tx/signing"
-	addresscodec "github.com/cosmos/cosmos-sdk/codec/address"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth/migrations/legacytx"
 	gogoproto "github.com/cosmos/gogoproto/proto"
+	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
+var InterfaceRegistry types.InterfaceRegistry
+
+func customGetSignerFn(path string) func(msg proto.Message) ([][]byte, error) {
+	return func(msg proto.Message) ([][]byte, error) {
+		m := msg.ProtoReflect()
+		fieldDesc := m.Descriptor().Fields().ByName(protoreflect.Name(path))
+		addr := common.BytesToAddress((m.Get(fieldDesc).Bytes()))
+		signer := sdk.AccAddress(addr.Bytes())
+		return [][]byte{signer}, nil
+	}
+}
+
 // MakeConfig creates an EncodingConfig for testing
-func MakeConfig(mb module.BasicManager) params.EncodingConfig {
+func MakeConfig(mb module.BasicManager) ethermint.EncodingConfig {
 	cdc := amino.NewLegacyAmino()
-	interfaceRegistry, err := NewInterfaceRegistry(
-		sdk.GetConfig().GetBech32AccountAddrPrefix(),
-		sdk.GetConfig().GetBech32ValidatorAddrPrefix(),
-	)
+	signingOptions := signing.Options{
+		AddressCodec: address.Bech32Codec{
+			Bech32Prefix: sdk.GetConfig().GetBech32AccountAddrPrefix(),
+		},
+		ValidatorAddressCodec: address.Bech32Codec{
+			Bech32Prefix: sdk.GetConfig().GetBech32ValidatorAddrPrefix(),
+		},
+		CustomGetSigners: map[protoreflect.FullName]signing.GetSignersFunc{
+			"ethermint.evm.v1.MsgHandleTx": customGetSignerFn("from"),
+		},
+	}
+	interfaceRegistry, err := types.NewInterfaceRegistryWithOptions(types.InterfaceRegistryOptions{
+		ProtoFiles:     gogoproto.HybridResolver,
+		SigningOptions: signingOptions,
+	})
 
 	if err != nil {
 		panic(err)
 	}
 	codec := amino.NewProtoCodec(interfaceRegistry)
 
-	encodingConfig := params.EncodingConfig{
+	encodingConfig := ethermint.EncodingConfig{
 		InterfaceRegistry: interfaceRegistry,
 		Codec:             codec,
 		TxConfig:          tx.NewTxConfig(codec, tx.DefaultSignModes),
@@ -51,22 +79,12 @@ func MakeConfig(mb module.BasicManager) params.EncodingConfig {
 	}
 
 	enccodec.RegisterLegacyAminoCodec(encodingConfig.Amino)
-	mb.RegisterLegacyAminoCodec(encodingConfig.Amino)
+	// mb.RegisterLegacyAminoCodec(encodingConfig.Amino)
 	enccodec.RegisterInterfaces(encodingConfig.InterfaceRegistry)
-	mb.RegisterInterfaces(encodingConfig.InterfaceRegistry)
-	return encodingConfig
-}
+	// mb.RegisterInterfaces(encodingConfig.InterfaceRegistry)
 
-func NewInterfaceRegistry(addrPrefix string, valAddrPrefix string) (types.InterfaceRegistry, error) {
-	return types.NewInterfaceRegistryWithOptions(types.InterfaceRegistryOptions{
-		ProtoFiles: gogoproto.HybridResolver,
-		SigningOptions: signing.Options{
-			AddressCodec:          addresscodec.NewBech32Codec(addrPrefix),
-			ValidatorAddressCodec: addresscodec.NewBech32Codec(valAddrPrefix),
-			// TODO(CORE-840): cosmos.msg.v1.signer annotation doesn't supported nested messages beyond a depth of 1
-			// which requires any message where the authority is nested further to implement its own accessor. Once
-			// https://github.com/cosmos/cosmos-sdk/issues/18722 is fixed, replace this with the cosmos.msg.v1.signing
-			// annotation on the protos.
-		},
-	})
+	// This is needed for the EIP712 txs because currently is using
+	// the deprecated method legacytx.StdSignBytes
+	legacytx.RegressionTestingAminoCodec = cdc
+	return encodingConfig
 }
