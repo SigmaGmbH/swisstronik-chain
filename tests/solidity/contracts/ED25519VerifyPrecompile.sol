@@ -15,9 +15,9 @@ contract ED25519VerifyPrecompile {
         }
 
         // Decode the result
-        bytes4 result = abi.decode(data, (bytes4));
+        uint256 result = abi.decode(data, (uint256));
 
         // Check it's 0 (valid signature)
-        return result == bytes4(0);
+        return result == uint256(0);
     }
 }

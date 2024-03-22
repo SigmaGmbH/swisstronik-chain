@@ -29,7 +29,7 @@ impl LinearCostPrecompile for Ed25519Verify {
         let mut i = [0u8; 128];
         i[..128].copy_from_slice(&input[..128]);
 
-        let mut buf = [0u8; 4];
+        let mut buf = [0u8; 32];
 
         let msg = &i[0..32];
         let pk = VerifyingKey::try_from(&i[32..64]).map_err(|_| PrecompileFailure::Error {
@@ -41,9 +41,9 @@ impl LinearCostPrecompile for Ed25519Verify {
 
         // https://docs.rs/rust-crypto/0.2.36/crypto/ed25519/fn.verify.html
         if pk.verify(msg, &sig).is_ok() {
-            buf[3] = 0u8;
+            buf[31] = 0u8;
         } else {
-            buf[3] = 1u8;
+            buf[31] = 1u8;
         };
 
         Ok((ExitSucceed::Returned, buf.to_vec()))
