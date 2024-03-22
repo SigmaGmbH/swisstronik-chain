@@ -39,6 +39,8 @@ message AddressDetails {
     // by community. Only verified contracts will be allowed to write
     // to x/compliance module.
     bool is_verified = 1;
+    // Marks if verification for this address was revoked.
+    bool is_revoked = 2;
     // Verifications passed by this address
     repeated Verification verifications = 3;
 }
