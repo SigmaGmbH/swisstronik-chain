@@ -3,6 +3,8 @@ name: Build Deb
 on:
   push:
     branches: [ feat/x-compliance ]
+env:
+  BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
 
 jobs:
   build-deb:
@@ -42,9 +44,9 @@ jobs:
           target: build-deb
       - name: Run .deb Package Image
         run: |
-          docker run -e VERSION=${{ steps.get_version.outputs.version-without-v }} -v $GITHUB_WORKSPACE/build:/build deb_build
-          cp build/swisstronik_${{ steps.get_version.outputs.version-without-v }}_amd64.deb swisstronik_${{ steps.get_version.outputs.version-without-v }}_amd64.deb
+          docker run -e VERSION=${{ steps.vars.outputs.short_sha }} -v $GITHUB_WORKSPACE/build:/build deb_build
+          cp build/swisstronik_${{ steps.vars.outputs.short_sha }}_amd64.deb swisstronik_${{ steps.vars.outputs.short_sha }}_${{ env.BRANCH_NAME }}_amd64.deb
       - uses: actions/upload-artifact@v3
         with:
-          name: swisstronik_${{ steps.get_version.outputs.version-without-v }}_amd64.deb
-          path: swisstronik_${{ steps.get_version.outputs.version-without-v }}_amd64.deb
+          name: swisstronik_${{ steps.vars.outputs.short_sha }}_${{ env.BRANCH_NAME }}_amd64.deb
+          path: swisstronik_${{ steps.vars.outputs.short_sha }}_${{ env.BRANCH_NAME }}_amd64.deb
