@@ -52,13 +52,13 @@ impl LinearCostPrecompile for P256Verify {
         })?;
 
 
-        let mut buf = [0u8; 4];
+        let mut buf = [0u8; 32];
 
         // verify
         if public_key.verify_prehash(&msg, &signature).is_ok() {
-            buf[3] = 0u8;
+            buf[31] = 1u8;
         } else {
-            buf[3] = 1u8;
+            buf[31] = 0u8;
         }
         Ok((ExitSucceed::Returned, buf.to_vec()))
 
