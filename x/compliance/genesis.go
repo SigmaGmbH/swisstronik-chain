@@ -46,5 +46,23 @@ func ExportGenesis(ctx sdk.Context, k keeper.Keeper) *types.GenesisState {
 	genesis := types.DefaultGenesis()
 	genesis.Params = k.GetParams(ctx)
 
+	issuers, err := k.ExportIssuerAccounts(ctx)
+	if err != nil {
+		panic(err)
+	}
+	genesis.Issuers = issuers
+
+	addressDetails, err := k.ExportAddressDetails(ctx)
+	if err != nil {
+		panic(err)
+	}
+	genesis.AddressDetails = addressDetails
+
+	verificationDetails, err := k.ExportVerificationDetails(ctx)
+	if err != nil {
+		panic(err)
+	}
+	genesis.VerificationDetails = verificationDetails
+
 	return genesis
 }

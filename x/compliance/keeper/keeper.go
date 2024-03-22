@@ -342,6 +342,66 @@ func (k Keeper) IterateIssuerDetails(ctx sdk.Context, callback func(address sdk.
 	}
 }
 
+func (k Keeper) ExportVerificationDetails(ctx sdk.Context) ([]*types.GenesisVerificationDetails, error) {
+	var allVerificationDetails []*types.GenesisVerificationDetails
+	var err error
+
+	k.IterateVerificationDetails(ctx, func(id []byte) bool {
+		details, err := k.GetVerificationDetails(ctx, id)
+		if err != nil {
+			return false
+		}
+		allVerificationDetails = append(allVerificationDetails, &types.GenesisVerificationDetails{Id: id, Details: details})
+		return true
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return allVerificationDetails, nil
+}
+
+func (k Keeper) ExportAddressDetails(ctx sdk.Context) ([]*types.GenesisAddressDetails, error) {
+	var allAddressDetails []*types.GenesisAddressDetails
+	var err error
+
+	k.IterateAddressDetails(ctx, func(address sdk.Address) bool {
+		details, err := k.GetAddressDetails(ctx, address)
+		if err != nil {
+			return false
+		}
+		allAddressDetails = append(allAddressDetails, &types.GenesisAddressDetails{Address: address.String(), Details: details})
+		return true
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return allAddressDetails, nil
+}
+
+func (k Keeper) ExportIssuerAccounts(ctx sdk.Context) ([]*types.IssuerGenesisAccount, error) {
+	var issuerAccs []*types.IssuerGenesisAccount
+	var err error
+
+	k.IterateIssuerDetails(ctx, func(address sdk.Address) bool {
+		details, err := k.GetIssuerDetails(ctx, address)
+		if err != nil {
+			return false
+		}
+		issuerAccs = append(issuerAccs, &types.IssuerGenesisAccount{Address: address.String(), Details: details})
+		return true
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return issuerAccs, nil
+}
+
 func closeIteratorOrPanic(iterator sdk.Iterator) {
 	err := iterator.Close()
 	if err != nil {
