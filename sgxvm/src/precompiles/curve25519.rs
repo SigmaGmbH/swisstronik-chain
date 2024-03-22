@@ -186,11 +186,11 @@ mod tests {
 
         match Ed25519Verify::raw_execute(&input, cost) {
             Ok((_, output)) => {
-                assert_eq!(output.len(), 4);
+                assert_eq!(output.len(), 32);
                 assert_eq!(output[0], 0u8);
                 assert_eq!(output[1], 0u8);
                 assert_eq!(output[2], 0u8);
-                assert_eq!(output[3], 0u8);
+                assert_eq!(output[31], 0u8);
             }
             Err(e) => {
                 return Err(e);
@@ -208,11 +208,11 @@ mod tests {
 
         match Ed25519Verify::raw_execute(&input, cost) {
             Ok((_, output)) => {
-                assert_eq!(output.len(), 4);
+                assert_eq!(output.len(), 32);
                 assert_eq!(output[0], 0u8);
                 assert_eq!(output[1], 0u8);
                 assert_eq!(output[2], 0u8);
-                assert_eq!(output[3], 1u8); // non-zero indicates error (in our case, 1)
+                assert_eq!(output[31], 1u8); // non-zero indicates error (in our case, 1)
             }
             Err(e) => {
                 return Err(e);
