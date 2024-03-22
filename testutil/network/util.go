@@ -21,6 +21,8 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"cosmossdk.io/log"
+	cmtcfg "github.com/cometbft/cometbft/config"
 	tmos "github.com/cometbft/cometbft/libs/os"
 	"github.com/cometbft/cometbft/node"
 	"github.com/cometbft/cometbft/p2p"
@@ -28,56 +30,55 @@ import (
 	"github.com/cometbft/cometbft/proxy"
 	"github.com/cometbft/cometbft/rpc/client/local"
 	"github.com/cometbft/cometbft/types"
-	tmtime "github.com/cometbft/cometbft/types/time"
+	cmttime "github.com/cometbft/cometbft/types/time"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"golang.org/x/sync/errgroup"
 
+	sdkserver "github.com/cosmos/cosmos-sdk/server"
 	"github.com/cosmos/cosmos-sdk/server/api"
 	servergrpc "github.com/cosmos/cosmos-sdk/server/grpc"
+	servercmtlog "github.com/cosmos/cosmos-sdk/server/log"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	crisistypes "github.com/cosmos/cosmos-sdk/x/crisis/types"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
-	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
+
+	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	mintypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
 	"swisstronik/server"
 	evmtypes "swisstronik/x/evm/types"
-
-	cmtcfg "github.com/cometbft/cometbft/config"
-	servercmtlog "github.com/cosmos/cosmos-sdk/server/log"
 )
 
 func startInProcess(cfg Config, val *Validator) error {
 	logger := val.Ctx.Logger
-	tmCfg := val.Ctx.Config
-	tmCfg.Instrumentation.Prometheus = false
+	cmtCfg := val.Ctx.Config
+	cmtCfg.Instrumentation.Prometheus = false
 
 	if err := val.AppConfig.ValidateBasic(); err != nil {
 		return err
 	}
 
-	nodeKey, err := p2p.LoadOrGenNodeKey(tmCfg.NodeKeyFile())
+	nodeKey, err := p2p.LoadOrGenNodeKey(cmtCfg.NodeKeyFile())
 	if err != nil {
 		return err
 	}
 
 	app := cfg.AppConstructor(*val)
-	val.app = app
 
-	genDocProvider := node.DefaultGenesisDocProviderFunc(tmCfg)
-	cmtApp := server.NewCometABCIWrapper(app)
-
+	genDocProvider := server.GenDocProvider(cmtCfg)
+	cmtApp := sdkserver.NewCometABCIWrapper(app)
 	tmNode, err := node.NewNode(
-		tmCfg,
-		pvm.LoadOrGenFilePV(tmCfg.PrivValidatorKeyFile(), tmCfg.PrivValidatorStateFile()),
+		cmtCfg,
+		pvm.LoadOrGenFilePV(cmtCfg.PrivValidatorKeyFile(), cmtCfg.PrivValidatorStateFile()),
 		nodeKey,
 		proxy.NewLocalClientCreator(cmtApp),
 		genDocProvider,
 		cmtcfg.DefaultDBProvider,
-		node.DefaultMetricsProvider(tmCfg.Instrumentation),
+		node.DefaultMetricsProvider(cmtCfg.Instrumentation),
 		servercmtlog.CometLoggerWrapper{Logger: logger.With("module", val.Moniker)},
 	)
 	if err != nil {
@@ -93,7 +94,6 @@ func startInProcess(cfg Config, val *Validator) error {
 	if val.RPCAddress != "" {
 		val.RPCClient = local.New(tmNode)
 	}
-	ctx := context.Background()
 
 	// We'll need a RPC client if the validator exposes a gRPC or REST endpoint.
 	if val.APIAddress != "" || val.AppConfig.GRPC.Enable {
@@ -105,7 +105,12 @@ func startInProcess(cfg Config, val *Validator) error {
 
 		// Add the tendermint queries service in the gRPC router.
 		app.RegisterTendermintService(val.ClientCtx)
+		app.RegisterNodeService(val.ClientCtx, val.AppConfig.Config)
 	}
+
+	ctx := context.Background()
+	ctx, val.cancelFn = context.WithCancel(ctx)
+	val.errGroup, ctx = errgroup.WithContext(ctx)
 
 	if val.AppConfig.API.Enable && val.APIAddress != "" {
 		apiSrv := api.New(val.ClientCtx, logger.With("module", "api-server"), val.grpc)
@@ -127,8 +132,9 @@ func startInProcess(cfg Config, val *Validator) error {
 		// Start the gRPC server in a goroutine. Note, the provided ctx will ensure
 		// that the server is gracefully shut down.
 		val.errGroup.Go(func() error {
-			return servergrpc.StartGRPCServer(ctx, logger.With("module", "grpc-server"), val.AppConfig.GRPC, grpcSrv)
+			return servergrpc.StartGRPCServer(ctx, logger.With(log.ModuleKey, "grpc-server"), val.AppConfig.GRPC, grpcSrv)
 		})
+
 		val.grpc = grpcSrv
 	}
 
@@ -137,10 +143,7 @@ func startInProcess(cfg Config, val *Validator) error {
 			return fmt.Errorf("validator %s context is nil", val.Moniker)
 		}
 
-		tmEndpoint := "/websocket"
-		tmRPCAddr := val.RPCAddress
-
-		val.jsonrpc, val.jsonrpcDone, err = server.StartJSONRPC(val.Ctx, val.ClientCtx, tmRPCAddr, tmEndpoint, val.AppConfig, nil)
+		val.jsonrpc, val.jsonrpcDone, err = server.StartJSONRPC(val.Ctx, val.ClientCtx, val.errGroup, val.AppConfig, nil)
 		if err != nil {
 			return err
 		}
@@ -157,7 +160,7 @@ func startInProcess(cfg Config, val *Validator) error {
 }
 
 func collectGenFiles(cfg Config, vals []*Validator, outputDir string) error {
-	genTime := tmtime.Now()
+	genTime := cmttime.Now()
 
 	for i := 0; i < cfg.NumValidators; i++ {
 		tmCfg := vals[i].Ctx.Config
@@ -171,14 +174,19 @@ func collectGenFiles(cfg Config, vals []*Validator, outputDir string) error {
 		initCfg := genutiltypes.NewInitConfig(cfg.ChainID, gentxsDir, vals[i].NodeID, vals[i].PubKey)
 
 		genFile := tmCfg.GenesisFile()
-
-		appGenesis, err := genutiltypes.AppGenesisFromFile(genFile)
+		genDoc, err := genutiltypes.AppGenesisFromFile(genFile)
 		if err != nil {
 			return err
 		}
 
 		appState, err := genutil.GenAppStateFromConfig(cfg.Codec, cfg.TxConfig,
-			tmCfg, initCfg, appGenesis, banktypes.GenesisBalancesIterator{}, genutiltypes.DefaultMessageValidator, cfg.TxConfig.SigningContext().ValidatorAddressCodec())
+			tmCfg,
+			initCfg,
+			genDoc,
+			banktypes.GenesisBalancesIterator{},
+			genutiltypes.DefaultMessageValidator,
+			cfg.TxConfig.SigningContext().ValidatorAddressCodec(),
+		)
 		if err != nil {
 			return err
 		}
@@ -221,7 +229,7 @@ func initGenFiles(cfg Config, genAccounts []authtypes.GenesisAccount, genBalance
 	var govGenState govv1.GenesisState
 	cfg.Codec.MustUnmarshalJSON(cfg.GenesisState[govtypes.ModuleName], &govGenState)
 
-	govGenState.DepositParams.MinDeposit[0].Denom = cfg.BondDenom
+	govGenState.Params.MinDeposit[0].Denom = cfg.BondDenom
 	cfg.GenesisState[govtypes.ModuleName] = cfg.Codec.MustMarshalJSON(&govGenState)
 
 	var mintGenState mintypes.GenesisState

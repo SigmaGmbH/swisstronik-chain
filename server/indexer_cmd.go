@@ -12,7 +12,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the Ethermint library. If not, see https://github.com/evmos/ethermint/blob/main/LICENSE
+// along with the Ethermint library. If not, see https://swisstronik/blob/main/LICENSE
 package server
 
 import (
@@ -22,9 +22,9 @@ import (
 
 	"swisstronik/indexer"
 
-	cmtconfig "github.com/cometbft/cometbft/config"
+	cmtnode "github.com/cometbft/cometbft/config"
 	sm "github.com/cometbft/cometbft/state"
-	tmstore "github.com/cometbft/cometbft/store"
+	cmtstore "github.com/cometbft/cometbft/store"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/server"
 )
@@ -64,13 +64,13 @@ func NewIndexTxCmd() *cobra.Command {
 			idxer := indexer.NewKVIndexer(idxDB, logger.With("module", "evmindex"), clientCtx)
 
 			// open local tendermint db, because the local rpc won't be available.
-			tmdb, err := cmtconfig.DefaultDBProvider(&cmtconfig.DBContext{ID: "blockstore", Config: cfg})
+			cmtdb, err := cmtnode.DefaultDBProvider(&cmtnode.DBContext{ID: "blockstore", Config: cfg})
 			if err != nil {
 				return err
 			}
-			blockStore := tmstore.NewBlockStore(tmdb)
+			blockStore := cmtstore.NewBlockStore(cmtdb)
 
-			stateDB, err := cmtconfig.DefaultDBProvider(&cmtconfig.DBContext{ID: "state", Config: cfg})
+			stateDB, err := cmtnode.DefaultDBProvider(&cmtnode.DBContext{ID: "state", Config: cfg})
 			if err != nil {
 				return err
 			}

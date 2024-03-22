@@ -123,7 +123,7 @@ func (suite *AnteTestSuite) SetupTest() {
 	err = suite.app.StakingKeeper.SetParams(suite.ctx, params)
 	suite.Require().NoError(err)
 
-	encodingConfig := encoding.MakeConfig(app.ModuleBasics)
+	encodingConfig := encoding.MakeConfig()
 	// We're using TestMsg amino encoding in some tests, so register it here.
 	encodingConfig.Amino.RegisterConcrete(&testdata.TestMsg{}, "testdata.TestMsg", nil)
 	eip712.SetEncodingConfig(encodingConfig)
@@ -581,7 +581,7 @@ func createNestedMsgExec(a sdk.AccAddress, nestedLvl int, lastLvlMsgs []sdk.Msg)
 }
 
 func createTx(priv cryptotypes.PrivKey, msgs ...sdk.Msg) (sdk.Tx, error) {
-	encodingConfig := encoding.MakeConfig(app.ModuleBasics)
+	encodingConfig := encoding.MakeConfig()
 	txBuilder := encodingConfig.TxConfig.NewTxBuilder()
 
 	txBuilder.SetGasLimit(1000000)

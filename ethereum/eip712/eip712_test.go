@@ -17,7 +17,6 @@ import (
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"swisstronik/app"
 	"swisstronik/encoding"
 
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
@@ -56,7 +55,7 @@ func TestEIP712TestSuite(t *testing.T) {
 
 // Set up test env to replicate prod. environment
 func (suite *EIP712TestSuite) SetupTest() {
-	suite.config = encoding.MakeConfig(app.ModuleBasics)
+	suite.config = encoding.MakeConfig()
 	suite.clientCtx = client.Context{}.WithTxConfig(suite.config.TxConfig)
 
 	sdk.GetConfig().SetBech32PrefixForAccount("ethm", "")

@@ -4,7 +4,6 @@ import (
 	"math/big"
 	"testing"
 
-	"swisstronik/app"
 	"swisstronik/crypto/ethsecp256k1"
 	evmenc "swisstronik/encoding"
 	"swisstronik/indexer"
@@ -187,5 +186,5 @@ func TestKVIndexer(t *testing.T) {
 
 // MakeEncodingConfig creates the EncodingConfig
 func MakeEncodingConfig() ethermint.EncodingConfig {
-	return evmenc.MakeConfig(app.ModuleBasics)
+	return evmenc.MakeConfig()
 }

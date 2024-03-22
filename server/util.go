@@ -19,7 +19,9 @@ import (
 	"context"
 	"net"
 	"net/http"
-	"time"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"swisstronik/server/config"
 
@@ -27,6 +29,7 @@ import (
 	"github.com/improbable-eng/grpc-web/go/grpcweb"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/netutil"
+	"golang.org/x/sync/errgroup"
 
 	sdkserver "github.com/cosmos/cosmos-sdk/server"
 	"github.com/cosmos/cosmos-sdk/server/types"
@@ -34,18 +37,12 @@ import (
 
 	tmlog "cosmossdk.io/log"
 	cmtcmd "github.com/cometbft/cometbft/cmd/cometbft/commands"
-	rpcclient "github.com/cometbft/cometbft/rpc/jsonrpc/client"
-	"golang.org/x/sync/errgroup"
 )
-
-const ServerStartTime = 5 * time.Second
 
 // AddCommands adds server commands
 func AddCommands(
 	rootCmd *cobra.Command,
-	defaultNodeHome string,
-	appCreator types.AppCreator,
-	opts StartCmdOptions,
+	opts StartOptions,
 	appExport types.AppExporter,
 	addStartFlags types.ModuleInitFlags,
 ) {
@@ -62,9 +59,10 @@ func AddCommands(
 		sdkserver.VersionCmd(),
 		cmtcmd.ResetAllCmd,
 		cmtcmd.ResetStateCmd,
+		sdkserver.BootstrapStateCmd(opts.AppCreator),
 	)
 
-	startCmd := StartCmd(appCreator, defaultNodeHome, opts)
+	startCmd := StartCmd(opts)
 	addStartFlags(startCmd)
 
 	rootCmd.AddCommand(
@@ -77,34 +75,6 @@ func AddCommands(
 		// custom tx indexer command
 		NewIndexTxCmd(),
 	)
-}
-
-func ConnectTmWS(tmRPCAddr, tmEndpoint string, logger tmlog.Logger) *rpcclient.WSClient {
-	tmWsClient, err := rpcclient.NewWS(tmRPCAddr, tmEndpoint,
-		rpcclient.MaxReconnectAttempts(256),
-		rpcclient.ReadWait(120*time.Second),
-		rpcclient.WriteWait(120*time.Second),
-		rpcclient.PingPeriod(50*time.Second),
-		rpcclient.OnReconnect(func() {
-			logger.Debug("EVM RPC reconnects to Tendermint WS", "address", tmRPCAddr+tmEndpoint)
-		}),
-	)
-
-	if err != nil {
-		logger.Error(
-			"Tendermint WS client could not be created",
-			"address", tmRPCAddr+tmEndpoint,
-			"error", err,
-		)
-	} else if err := tmWsClient.OnStart(); err != nil {
-		logger.Error(
-			"Tendermint WS client could not start",
-			"address", tmRPCAddr+tmEndpoint,
-			"error", err,
-		)
-	}
-
-	return tmWsClient
 }
 
 func MountGRPCWebServices(
@@ -147,36 +117,29 @@ func Listen(addr string, config *config.Config) (net.Listener, error) {
 	return ln, err
 }
 
-func getCtx(svrCtx *sdkserver.Context, block bool) (*errgroup.Group, context.Context) {
-	ctx, cancelFn := context.WithCancel(context.Background())
-	g, ctx := errgroup.WithContext(ctx)
-	// listen for quit signals so the calling parent process can gracefully exit
-	sdkserver.ListenForQuitSignals(g, block, cancelFn, svrCtx.Logger)
-	return g, ctx
-}
+// ListenForQuitSignals listens for SIGINT and SIGTERM. When a signal is received,
+// the cleanup function is called, indicating the caller can gracefully exit or
+// return.
+//
+// Note, the blocking behavior of this depends on the block argument.
+// The caller must ensure the corresponding context derived from the cancelFn is used correctly.
+func ListenForQuitSignals(g *errgroup.Group, block bool, cancelFn context.CancelFunc, logger tmlog.Logger) {
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
 
-func getAndValidateConfig(svrCtx *sdkserver.Context) (config.Config, error) {
-	config, err := config.GetConfig(svrCtx.Viper)
-	if err != nil {
-		return config, err
+	f := func() {
+		sig := <-sigCh
+		cancelFn()
+
+		logger.Info("caught signal", "signal", sig.String())
 	}
 
-	if err := config.ValidateBasic(); err != nil {
-		return config, err
+	if block {
+		g.Go(func() error {
+			f()
+			return nil
+		})
+	} else {
+		go f()
 	}
-	return config, nil
 }
-
-// Comment the following function as we use cometbft doc provider
-// But keep this commented code until genesis issue gets solved completely.
-// // returns a function which returns the genesis doc from the genesis file.
-// func getGenDocProvider(cfg *cmtcfg.Config) func() (*cmttypes.GenesisDoc, error) {
-// 	return func() (*cmttypes.GenesisDoc, error) {
-// 		appGenesis, err := genutiltypes.AppGenesisFromFile(cfg.GenesisFile())
-// 		if err != nil {
-// 			return nil, err
-// 		}
-
-// 		return appGenesis.ToGenesisDoc()
-// 	}
-// }

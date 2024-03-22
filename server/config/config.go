@@ -137,6 +137,8 @@ type JSONRPCConfig struct {
 	MaxOpenConnections int `mapstructure:"max-open-connections"`
 	// EnableIndexer defines if enable the custom indexer service.
 	EnableIndexer bool `mapstructure:"enable-indexer"`
+	// AllowIndexerGap defines if allow block gap for the custom indexer service.
+	AllowIndexerGap bool `mapstructure:"allow-indexer-gap"`
 	// MetricsAddress defines the metrics server to listen on
 	MetricsAddress string `mapstructure:"metrics-address"`
 	// FixRevertGasRefundHeight defines the upgrade height for fix of revert gas refund logic when transaction reverted
@@ -242,6 +244,7 @@ func DefaultJSONRPCConfig() *JSONRPCConfig {
 		AllowUnprotectedTxs:      DefaultAllowUnprotectedTxs,
 		MaxOpenConnections:       DefaultMaxOpenConnections,
 		EnableIndexer:            false,
+		AllowIndexerGap:          true,
 		MetricsAddress:           DefaultJSONRPCMetricsAddress,
 		FixRevertGasRefundHeight: DefaultFixRevertGasRefundHeight,
 	}
@@ -352,6 +355,7 @@ func GetConfig(v *viper.Viper) (Config, error) {
 			HTTPIdleTimeout:          v.GetDuration("json-rpc.http-idle-timeout"),
 			MaxOpenConnections:       v.GetInt("json-rpc.max-open-connections"),
 			EnableIndexer:            v.GetBool("json-rpc.enable-indexer"),
+			AllowIndexerGap:          v.GetBool("json-rpc.allow-indexer-gap"),
 			MetricsAddress:           v.GetString("json-rpc.metrics-address"),
 			FixRevertGasRefundHeight: v.GetInt64("json-rpc.fix-revert-gas-refund-height"),
 		},

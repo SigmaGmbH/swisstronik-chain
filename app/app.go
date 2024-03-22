@@ -305,7 +305,7 @@ func New(
 	appOpts servertypes.AppOptions,
 	baseAppOptions ...func(*baseapp.BaseApp),
 ) *App {
-	encodingConfig := encoding.MakeConfig(ModuleBasics)
+	encodingConfig := encoding.MakeConfig()
 	appCodec := encodingConfig.Codec
 	cdc := encodingConfig.Amino
 	interfaceRegistry := encodingConfig.InterfaceRegistry
@@ -921,7 +921,7 @@ func (app *App) GetScopedIBCKeeper() capabilitykeeper.ScopedKeeper {
 
 // GetTxConfig implements the TestingApp interface.
 func (app *App) GetTxConfig() client.TxConfig {
-	cfg := encoding.MakeConfig(ModuleBasics)
+	cfg := encoding.MakeConfig()
 	return cfg.TxConfig
 }
 

@@ -12,12 +12,11 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the Ethermint library. If not, see https://github.com/evmos/ethermint/blob/main/LICENSE
+// along with the Ethermint library. If not, see https://swisstronik/blob/main/LICENSE
 package server
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -28,64 +27,60 @@ import (
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	"github.com/cosmos/cosmos-sdk/telemetry"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/spf13/cobra"
-
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	cmtcfg "github.com/cometbft/cometbft/config"
-	rpcclient "github.com/cometbft/cometbft/rpc/client"
-
+	abciserver "github.com/cometbft/cometbft/abci/server"
 	tcmd "github.com/cometbft/cometbft/cmd/cometbft/commands"
+	cmtcfg "github.com/cometbft/cometbft/config"
+	"github.com/cometbft/cometbft/node"
+	"github.com/cometbft/cometbft/p2p"
+	pvm "github.com/cometbft/cometbft/privval"
+	"github.com/cometbft/cometbft/proxy"
+	rpcclient "github.com/cometbft/cometbft/rpc/client"
 	"github.com/cometbft/cometbft/rpc/client/local"
+	cmttypes "github.com/cometbft/cometbft/types"
 	dbm "github.com/cosmos/cosmos-db"
 
 	ethmetricsexp "github.com/ethereum/go-ethereum/metrics/exp"
 
+	errorsmod "cosmossdk.io/errors"
 	pruningtypes "cosmossdk.io/store/pruning/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
+	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/cosmos/cosmos-sdk/server/api"
 	serverconfig "github.com/cosmos/cosmos-sdk/server/config"
 	servergrpc "github.com/cosmos/cosmos-sdk/server/grpc"
+	servercmtlog "github.com/cosmos/cosmos-sdk/server/log"
 	"github.com/cosmos/cosmos-sdk/server/types"
+	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 
-	swissapp "swisstronik/app"
 	"swisstronik/indexer"
+	ethdebug "swisstronik/rpc/namespaces/ethereum/debug"
 	"swisstronik/server/config"
 	srvflags "swisstronik/server/flags"
-	evmcommontypes "swisstronik/types"
-
-	"github.com/SigmaGmbH/librustgo"
-	abciserver "github.com/cometbft/cometbft/abci/server"
-	"github.com/cometbft/cometbft/node"
-	sdkserver "github.com/cosmos/cosmos-sdk/server"
-	servercmtlog "github.com/cosmos/cosmos-sdk/server/log"
-	"github.com/cosmos/cosmos-sdk/types/mempool"
-	"github.com/spf13/pflag"
-	"golang.org/x/sync/errgroup"
+	ethermint "swisstronik/types"
 )
 
 // DBOpener is a function to open `application.db`, potentially with customized options.
 type DBOpener func(opts types.AppOptions, rootDir string, backend dbm.BackendType) (dbm.DB, error)
 
 // StartOptions defines options that can be customized in `StartCmd`
-type StartCmdOptions struct {
+type StartOptions struct {
 	AppCreator      types.AppCreator
 	DefaultNodeHome string
 	DBOpener        DBOpener
-	// AddFlags add custom flags to start cmd
-	AddFlags func(cmd *cobra.Command)
-	// PostSetup can be used to setup extra services under the same cancellable context,
-	// it's not called in stand-alone mode, only for in-process mode.
-	PostSetup func(svrCtx *sdkserver.Context, clientCtx client.Context, ctx context.Context, g *errgroup.Group) error
 }
 
 // NewDefaultStartOptions use the default db opener provided in tm-db.
-func NewDefaultStartCmdOptions(appCreator types.AppCreator, defaultNodeHome string) StartCmdOptions {
-	return StartCmdOptions{
+func NewDefaultStartOptions(appCreator types.AppCreator, defaultNodeHome string) StartOptions {
+	return StartOptions{
 		AppCreator:      appCreator,
 		DefaultNodeHome: defaultNodeHome,
 		DBOpener:        openDB,
@@ -94,13 +89,7 @@ func NewDefaultStartCmdOptions(appCreator types.AppCreator, defaultNodeHome stri
 
 // StartCmd runs the service passed in, either stand-alone or in-process with
 // CometBFT.
-func StartCmd(appCreator types.AppCreator, defaultNodeHome string, opts StartCmdOptions) *cobra.Command {
-	return StartCmdWithOptions(appCreator, defaultNodeHome, opts)
-}
-
-// StartCmd runs the service passed in, either stand-alone or in-process with
-// CometBFT.
-func StartCmdWithOptions(appCreator types.AppCreator, defaultNodeHome string, opts StartCmdOptions) *cobra.Command {
+func StartCmd(opts StartOptions) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "start",
 		Short: "Run the full node",
@@ -127,7 +116,7 @@ For profiling and benchmarking purposes, CPU profiling can be enabled via the '-
 which accepts a path for the resulting pprof file.
 `,
 		PreRunE: func(cmd *cobra.Command, _ []string) error {
-			serverCtx := sdkserver.GetServerContextFromCmd(cmd)
+			serverCtx := server.GetServerContextFromCmd(cmd)
 
 			// Bind flags to the Context's Viper so the app construction can set
 			// options accordingly.
@@ -136,53 +125,66 @@ which accepts a path for the resulting pprof file.
 				return err
 			}
 
-			_, err = sdkserver.GetPruningOptionsFromFlags(serverCtx.Viper)
+			_, err = server.GetPruningOptionsFromFlags(serverCtx.Viper)
 			return err
 		},
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			serverCtx := sdkserver.GetServerContextFromCmd(cmd)
+			serverCtx := server.GetServerContextFromCmd(cmd)
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
 				return err
 			}
 
-			// check if node has sealed master key
-			nodeInitialized, err := librustgo.IsNodeInitialized()
+			withTM, _ := cmd.Flags().GetBool(srvflags.WithCometBFT)
+			if !withTM {
+				serverCtx.Logger.Info("starting ABCI without CometBFT")
+				return wrapCPUProfile(serverCtx, func() error {
+					return startStandAlone(serverCtx, opts)
+				})
+			}
+
+			serverCtx.Logger.Info("Unlocking keyring")
+
+			// fire unlock precess for keyring
+			keyringBackend, _ := cmd.Flags().GetString(flags.FlagKeyringBackend)
+			if keyringBackend == keyring.BackendFile {
+				_, err = clientCtx.Keyring.List()
+				if err != nil {
+					return err
+				}
+			}
+
+			serverCtx.Logger.Info("starting ABCI with CometBFT")
+
+			// amino is needed here for backwards compatibility of REST routes
+			err = wrapCPUProfile(serverCtx, func() error {
+				return startInProcess(serverCtx, clientCtx, opts)
+			})
 			if err != nil {
 				return err
 			}
 
-			if !nodeInitialized {
-				return errors.New("sealed master key was not found. Request it by using `swisstronikd enclave request-master-key`")
-			}
-
-			withCMT, _ := cmd.Flags().GetBool(srvflags.WithComet)
-			if !withCMT {
-				serverCtx.Logger.Info("starting ABCI without CometBFT")
-			}
-			return wrapCPUProfile(serverCtx, func() error {
-				return start(serverCtx, clientCtx, appCreator, withCMT, opts)
-			})
+			return nil
 		},
 	}
 
 	cmd.Flags().String(flags.FlagHome, opts.DefaultNodeHome, "The application home directory")
-	cmd.Flags().Bool(srvflags.WithComet, true, "Run abci app embedded in-process with CometBFT")
+	cmd.Flags().Bool(srvflags.WithCometBFT, true, "Run abci app embedded in-process with tendermint")
 	cmd.Flags().String(srvflags.Address, "tcp://0.0.0.0:26658", "Listen address")
 	cmd.Flags().String(srvflags.Transport, "socket", "Transport protocol: socket, grpc")
 	cmd.Flags().String(srvflags.TraceStore, "", "Enable KVStore tracing to an output file")
-	cmd.Flags().String(sdkserver.FlagMinGasPrices, "", "Minimum gas prices to accept for transactions; Any fee in a tx must meet this minimum (e.g. 0.01photon;0.0001stake)") //nolint:lll
-	cmd.Flags().IntSlice(sdkserver.FlagUnsafeSkipUpgrades, []int{}, "Skip a set of upgrade heights to continue the old binary")
-	cmd.Flags().Uint64(sdkserver.FlagHaltHeight, 0, "Block height at which to gracefully halt the chain and shutdown the node")
-	cmd.Flags().Uint64(sdkserver.FlagHaltTime, 0, "Minimum block time (in Unix seconds) at which to gracefully halt the chain and shutdown the node")
-	cmd.Flags().Bool(sdkserver.FlagInterBlockCache, true, "Enable inter-block caching")
+	cmd.Flags().String(server.FlagMinGasPrices, "", "Minimum gas prices to accept for transactions; Any fee in a tx must meet this minimum (e.g. 0.01photon;0.0001stake)") //nolint:lll
+	cmd.Flags().IntSlice(server.FlagUnsafeSkipUpgrades, []int{}, "Skip a set of upgrade heights to continue the old binary")
+	cmd.Flags().Uint64(server.FlagHaltHeight, 0, "Block height at which to gracefully halt the chain and shutdown the node")
+	cmd.Flags().Uint64(server.FlagHaltTime, 0, "Minimum block time (in Unix seconds) at which to gracefully halt the chain and shutdown the node")
+	cmd.Flags().Bool(server.FlagInterBlockCache, true, "Enable inter-block caching")
 	cmd.Flags().String(srvflags.CPUProfile, "", "Enable CPU profiling and write to the provided file")
-	cmd.Flags().Bool(sdkserver.FlagTrace, false, "Provide full stack traces for errors in ABCI Log")
-	cmd.Flags().String(sdkserver.FlagPruning, pruningtypes.PruningOptionDefault, "Pruning strategy (default|nothing|everything|custom)")
-	cmd.Flags().Uint64(sdkserver.FlagPruningKeepRecent, 0, "Number of recent heights to keep on disk (ignored if pruning is not 'custom')")
-	cmd.Flags().Uint64(sdkserver.FlagPruningInterval, 0, "Height interval at which pruned heights are removed from disk (ignored if pruning is not 'custom')") //nolint:lll
-	cmd.Flags().Uint(sdkserver.FlagInvCheckPeriod, 0, "Assert registered invariants every N blocks")
-	cmd.Flags().Uint64(sdkserver.FlagMinRetainBlocks, 0, "Minimum block height offset during ABCI commit to prune CometBFT blocks")
+	cmd.Flags().Bool(server.FlagTrace, false, "Provide full stack traces for errors in ABCI Log")
+	cmd.Flags().String(server.FlagPruning, pruningtypes.PruningOptionDefault, "Pruning strategy (default|nothing|everything|custom)")
+	cmd.Flags().Uint64(server.FlagPruningKeepRecent, 0, "Number of recent heights to keep on disk (ignored if pruning is not 'custom')")
+	cmd.Flags().Uint64(server.FlagPruningInterval, 0, "Height interval at which pruned heights are removed from disk (ignored if pruning is not 'custom')") //nolint:lll
+	cmd.Flags().Uint(server.FlagInvCheckPeriod, 0, "Assert registered invariants every N blocks")
+	cmd.Flags().Uint64(server.FlagMinRetainBlocks, 0, "Minimum block height offset during ABCI commit to prune CometBFT blocks")
 	cmd.Flags().String(srvflags.AppDBBackend, "", "The type of database for application and snapshots databases")
 
 	cmd.Flags().Bool(srvflags.GRPCOnly, false, "Start the node in gRPC query only mode without CometBFT process")
@@ -197,7 +199,7 @@ which accepts a path for the resulting pprof file.
 	cmd.Flags().StringSlice(srvflags.JSONRPCAPI, config.GetDefaultAPINamespaces(), "Defines a list of JSON-RPC namespaces that should be enabled")
 	cmd.Flags().String(srvflags.JSONRPCAddress, config.DefaultJSONRPCAddress, "the JSON-RPC server address to listen on")
 	cmd.Flags().String(srvflags.JSONWsAddress, config.DefaultJSONRPCWsAddress, "the JSON-RPC WS server address to listen on")
-	cmd.Flags().Uint64(srvflags.JSONRPCGasCap, config.DefaultGasCap, "Sets a cap on gas that can be used in eth_call/estimateGas unit is uswtr (0=infinite)")       //nolint:lll
+	cmd.Flags().Uint64(srvflags.JSONRPCGasCap, config.DefaultGasCap, "Sets a cap on gas that can be used in eth_call/estimateGas unit is aphoton (0=infinite)")     //nolint:lll
 	cmd.Flags().Float64(srvflags.JSONRPCTxFeeCap, config.DefaultTxFeeCap, "Sets a cap on transaction fee that can be sent via the RPC APIs (1 = default 1 photon)") //nolint:lll
 	cmd.Flags().Int32(srvflags.JSONRPCFilterCap, config.DefaultFilterCap, "Sets the global cap for total number of filters that can be created")
 	cmd.Flags().Duration(srvflags.JSONRPCEVMTimeout, config.DefaultEVMTimeout, "Sets a timeout used for eth_call (0=infinite)")
@@ -208,8 +210,8 @@ which accepts a path for the resulting pprof file.
 	cmd.Flags().Int32(srvflags.JSONRPCBlockRangeCap, config.DefaultBlockRangeCap, "Sets the max block range allowed for `eth_getLogs` query")
 	cmd.Flags().Int(srvflags.JSONRPCMaxOpenConnections, config.DefaultMaxOpenConnections, "Sets the maximum number of simultaneous connections for the server listener") //nolint:lll
 	cmd.Flags().Bool(srvflags.JSONRPCEnableIndexer, false, "Enable the custom tx indexer for json-rpc")
+	cmd.Flags().Bool(srvflags.JSONRPCAllowIndexerGap, true, "Allow block gap for the custom tx indexer for json-rpc")
 	cmd.Flags().Bool(srvflags.JSONRPCEnableMetrics, false, "Define if EVM rpc metrics server should be enabled")
-	cmd.Flags().Int32(srvflags.JSONRPCFeeHistoryCap, config.DefaultFeeHistoryCap, "Sets a max fee history depth")
 
 	cmd.Flags().String(srvflags.EVMTracer, config.DefaultEVMTracer, "the EVM tracer type to collect execution traces from the EVM transaction execution (json|struct|access_list|markdown)") //nolint:lll
 	cmd.Flags().Uint64(srvflags.EVMMaxTxGasWanted, config.DefaultMaxTxGasWanted, "the gas wanted for each eth tx returned in ante handler in check tx mode")                                 //nolint:lll
@@ -217,136 +219,66 @@ which accepts a path for the resulting pprof file.
 	cmd.Flags().String(srvflags.TLSCertPath, "", "the cert.pem file path for the server TLS configuration")
 	cmd.Flags().String(srvflags.TLSKeyPath, "", "the key.pem file path for the server TLS configuration")
 
-	cmd.Flags().Uint64(sdkserver.FlagStateSyncSnapshotInterval, 0, "State sync snapshot interval")
-	cmd.Flags().Uint32(sdkserver.FlagStateSyncSnapshotKeepRecent, 2, "State sync snapshot to keep")
-	cmd.Flags().Bool(sdkserver.FlagDisableIAVLFastNode, false, "Disable fast node for IAVL tree")
-	cmd.Flags().Int(sdkserver.FlagMempoolMaxTxs, mempool.DefaultMaxTx, "Sets MaxTx value for the app-side mempool")
-
-	// support old flags name for backwards compatibility
-	cmd.Flags().SetNormalizeFunc(func(f *pflag.FlagSet, name string) pflag.NormalizedName {
-		if name == "with-CometBFT" {
-			name = "with-comet"
-		}
-
-		return pflag.NormalizedName(name)
-	})
+	cmd.Flags().Uint64(server.FlagStateSyncSnapshotInterval, 0, "State sync snapshot interval")
+	cmd.Flags().Uint32(server.FlagStateSyncSnapshotKeepRecent, 2, "State sync snapshot to keep")
 
 	// add support for all CometBFT-specific command line options
 	tcmd.AddNodeFlags(cmd)
-
 	return cmd
 }
 
-// wrapCPUProfile starts CPU profiling, if enabled, and executes the provided
-// callbackFn in a separate goroutine, then will wait for that callback to
-// return.
-//
-// NOTE: We expect the caller to handle graceful shutdown and signal handling.
-func wrapCPUProfile(svrCtx *sdkserver.Context, callbackFn func() error) error {
-	if cpuProfile := svrCtx.Viper.GetString(srvflags.CPUProfile); cpuProfile != "" {
-		f, err := os.Create(cpuProfile)
-		if err != nil {
-			return err
-		}
-
-		svrCtx.Logger.Info("starting CPU profiler", "profile", cpuProfile)
-
-		if err := pprof.StartCPUProfile(f); err != nil {
-			return err
-		}
-
-		defer func() {
-			svrCtx.Logger.Info("stopping CPU profiler", "profile", cpuProfile)
-			pprof.StopCPUProfile()
-
-			if err := f.Close(); err != nil {
-				svrCtx.Logger.Info("failed to close cpu-profile file", "profile", cpuProfile, "err", err.Error())
-			}
-		}()
-	}
-
-	return callbackFn()
-}
-
-func start(svrCtx *sdkserver.Context, clientCtx client.Context, appCreator types.AppCreator, withCmt bool, opts StartCmdOptions) error {
-	svrCfg, err := getAndValidateConfig(svrCtx)
-	if err != nil {
-		return err
-	}
-
-	app, appCleanupFn, err := startApp(svrCtx, appCreator, opts)
-	if err != nil {
-		return err
-	}
-	defer appCleanupFn()
-
-	metrics, err := startTelemetry(svrCfg)
-	if err != nil {
-		return err
-	}
-
-	if !withCmt {
-		return startStandAlone(svrCtx, app, opts)
-	}
-	return startInProcess(svrCtx, svrCfg, clientCtx, app, metrics, opts)
-}
-
-func startApp(svrCtx *sdkserver.Context, appCreator types.AppCreator, opts StartCmdOptions) (app types.Application, cleanupFn func(), err error) {
-	traceWriter, traceCleanupFn, err := setupTraceWriter(svrCtx)
-	if err != nil {
-		return app, traceCleanupFn, err
-	}
-
-	home := svrCtx.Config.RootDir
-	db, err := opts.DBOpener(svrCtx.Viper, home, sdkserver.GetAppDBBackend(svrCtx.Viper))
-	if err != nil {
-		return app, traceCleanupFn, err
-	}
-
-	app = appCreator(svrCtx.Logger, db, traceWriter, svrCtx.Viper)
-	cleanupFn = func() {
-		traceCleanupFn()
-		if localErr := app.Close(); localErr != nil {
-			svrCtx.Logger.Error(localErr.Error())
-		}
-	}
-	return app, cleanupFn, nil
-}
-
-func setupTraceWriter(svrCtx *sdkserver.Context) (traceWriter io.WriteCloser, cleanup func(), err error) {
-	// clean up the traceWriter when the server is shutting down
-	cleanup = func() {}
-
-	traceWriterFile := svrCtx.Viper.GetString(srvflags.TraceStore)
-	traceWriter, err = openTraceWriter(traceWriterFile)
-	if err != nil {
-		return traceWriter, cleanup, err
-	}
-
-	// if flagTraceStore is not used then traceWriter is nil
-	if traceWriter != nil {
-		cleanup = func() {
-			if err = traceWriter.Close(); err != nil {
-				svrCtx.Logger.Error("failed to close trace writer", "err", err)
-			}
-		}
-	}
-
-	return traceWriter, cleanup, nil
-}
-
-func startStandAlone(svrCtx *sdkserver.Context, app types.Application, opts StartCmdOptions) error {
+func startStandAlone(svrCtx *server.Context, opts StartOptions) error {
 	addr := svrCtx.Viper.GetString(srvflags.Address)
 	transport := svrCtx.Viper.GetString(srvflags.Transport)
+	home := svrCtx.Viper.GetString(flags.FlagHome)
 
-	cmtApp := NewCometABCIWrapper(app)
+	db, err := opts.DBOpener(svrCtx.Viper, home, server.GetAppDBBackend(svrCtx.Viper))
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if err := db.Close(); err != nil {
+			svrCtx.Logger.Error("error closing db", "error", err.Error())
+		}
+	}()
+
+	traceWriterFile := svrCtx.Viper.GetString(srvflags.TraceStore)
+	traceWriter, err := openTraceWriter(traceWriterFile)
+	if err != nil {
+		return err
+	}
+
+	app := opts.AppCreator(svrCtx.Logger, db, traceWriter, svrCtx.Viper)
+	defer func() {
+		if err := app.Close(); err != nil {
+			svrCtx.Logger.Error("close application failed", "error", err.Error())
+		}
+	}()
+
+	config, err := config.GetConfig(svrCtx.Viper)
+	if err != nil {
+		svrCtx.Logger.Error("failed to get server config", "error", err.Error())
+		return err
+	}
+
+	if err := config.ValidateBasic(); err != nil {
+		svrCtx.Logger.Error("invalid server config", "error", err.Error())
+		return err
+	}
+
+	_, err = startTelemetry(config)
+	if err != nil {
+		return err
+	}
+
+	cmtApp := server.NewCometABCIWrapper(app)
 	svr, err := abciserver.NewServer(addr, transport, cmtApp)
 	if err != nil {
 		return fmt.Errorf("error creating listener: %v", err)
 	}
 
-	svr.SetLogger(servercmtlog.CometLoggerWrapper{Logger: svrCtx.Logger.With("module", "abci-server")})
-
+	svr.SetLogger(servercmtlog.CometLoggerWrapper{Logger: svrCtx.Logger.With("server", "abci")})
 	g, ctx := getCtx(svrCtx, false)
 
 	g.Go(func() error {
@@ -359,111 +291,174 @@ func startStandAlone(svrCtx *sdkserver.Context, app types.Application, opts Star
 		// so we can gracefully stop the ABCI server.
 		<-ctx.Done()
 		svrCtx.Logger.Info("stopping the ABCI server...")
-		return errors.Join(svr.Stop(), app.Close())
+		return svr.Stop()
 	})
 
 	return g.Wait()
 }
 
 // legacyAminoCdc is used for the legacy REST API
-func startInProcess(svrCtx *sdkserver.Context, svrCfg config.Config, clientCtx client.Context, app types.Application, metrics *telemetry.Metrics, opts StartCmdOptions) (err error) {
-	cmtCfg := svrCtx.Config
-	home := cmtCfg.RootDir
+func startInProcess(svrCtx *server.Context, clientCtx client.Context, opts StartOptions) (err error) {
+	cfg := svrCtx.Config
+	home := cfg.RootDir
 	logger := svrCtx.Logger
-
-	gRPCOnly := svrCtx.Viper.GetBool(srvflags.GRPCOnly)
-
 	g, ctx := getCtx(svrCtx, true)
 
-	if gRPCOnly {
-		// TODO: Generalize logic so that gRPC only is really in startStandAlone
-		svrCtx.Logger.Info("starting node in gRPC only mode; CometBFT is disabled")
-		svrCfg.GRPC.Enable = true
-	} else {
-		svrCtx.Logger.Info("starting node with ABCI CometBFT in-process")
-		tmNode, cleanupFn, err := startCmtNode(ctx, cmtCfg, app, svrCtx)
-		if err != nil {
-			return err
-		}
-		defer cleanupFn()
-
-		// Add the tx service to the gRPC router. We only need to register this
-		// service if API or gRPC is enabled, and avoid doing so in the general
-		// case, because it spawns a new local CometBFT RPC client.
-		if svrCfg.API.Enable || svrCfg.GRPC.Enable {
-			// Re-assign for making the client available below do not use := to avoid
-			// shadowing the clientCtx variable.
-			clientCtx = clientCtx.WithClient(local.New(tmNode))
-
-			app.(*swissapp.App).RegisterTxService(clientCtx)
-			app.(*swissapp.App).RegisterTendermintService(clientCtx)
-			app.(*swissapp.App).RegisterNodeService(clientCtx, svrCfg.Config)
-		}
-	}
-
-	grpcSrv, clientCtx, err := startGrpcServer(ctx, g, svrCfg.GRPC, clientCtx, svrCtx, app)
+	db, err := opts.DBOpener(svrCtx.Viper, home, server.GetAppDBBackend(svrCtx.Viper))
 	if err != nil {
+		logger.Error("failed to open DB", "error", err.Error())
 		return err
 	}
 
-	err = startAPIServer(ctx, g, cmtCfg, svrCfg, clientCtx, svrCtx, app, home, grpcSrv, metrics)
+	defer func() {
+		if err := db.Close(); err != nil {
+			logger.With("error", err).Error("error closing db")
+		}
+	}()
+
+	traceWriterFile := svrCtx.Viper.GetString(srvflags.TraceStore)
+	traceWriter, err := openTraceWriter(traceWriterFile)
+	if err != nil {
+		logger.Error("failed to open trace writer", "error", err.Error())
+		return err
+	}
+
+	config, err := config.GetConfig(svrCtx.Viper)
+	if err != nil {
+		logger.Error("failed to get server config", "error", err.Error())
+		return err
+	}
+
+	if err := config.ValidateBasic(); err != nil {
+		logger.Error("invalid server config", "error", err.Error())
+		return err
+	}
+
+	app := opts.AppCreator(svrCtx.Logger, db, traceWriter, svrCtx.Viper)
+	defer func() {
+		if err := app.Close(); err != nil {
+			logger.Error("close application failed", "error", err.Error())
+		}
+	}()
+
+	nodeKey, err := p2p.LoadOrGenNodeKey(cfg.NodeKeyFile())
+	if err != nil {
+		logger.Error("failed load or gen node key", "error", err.Error())
+		return err
+	}
+
+	genDocProvider := GenDocProvider(cfg)
+
+	var (
+		tmNode   *node.Node
+		gRPCOnly = svrCtx.Viper.GetBool(srvflags.GRPCOnly)
+	)
+
+	if gRPCOnly {
+		logger.Info("starting node in query only mode; CometBFT is disabled")
+		config.GRPC.Enable = true
+		config.JSONRPC.EnableIndexer = false
+	} else {
+		logger.Info("starting node with ABCI CometBFT in-process")
+
+		cmtApp := server.NewCometABCIWrapper(app)
+		tmNode, err = node.NewNodeWithContext(
+			ctx,
+			cfg,
+			pvm.LoadOrGenFilePV(cfg.PrivValidatorKeyFile(), cfg.PrivValidatorStateFile()),
+			nodeKey,
+			proxy.NewLocalClientCreator(cmtApp),
+			genDocProvider,
+			cmtcfg.DefaultDBProvider,
+			node.DefaultMetricsProvider(cfg.Instrumentation),
+			servercmtlog.CometLoggerWrapper{Logger: svrCtx.Logger.With("server", "node")},
+		)
+		if err != nil {
+			logger.Error("failed init node", "error", err.Error())
+			return err
+		}
+
+		if err := tmNode.Start(); err != nil {
+			logger.Error("failed start tendermint server", "error", err.Error())
+			return err
+		}
+
+		defer func() {
+			if tmNode.IsRunning() {
+				_ = tmNode.Stop()
+			}
+		}()
+	}
+
+	// Add the tx service to the gRPC router. We only need to register this
+	// service if API or gRPC or JSONRPC is enabled, and avoid doing so in the general
+	// case, because it spawns a new local tendermint RPC client.
+	if (config.API.Enable || config.GRPC.Enable || config.JSONRPC.Enable || config.JSONRPC.EnableIndexer) && tmNode != nil {
+		clientCtx = clientCtx.WithClient(local.New(tmNode))
+
+		app.RegisterTxService(clientCtx)
+		app.RegisterTendermintService(clientCtx)
+		app.RegisterNodeService(clientCtx, config.Config)
+	}
+
+	metrics, err := startTelemetry(config)
 	if err != nil {
 		return err
 	}
 
 	// Enable metrics if JSONRPC is enabled and --metrics is passed
 	// Flag not added in config to avoid user enabling in config without passing in CLI
-	if svrCfg.JSONRPC.Enable && svrCtx.Viper.GetBool(srvflags.JSONRPCEnableMetrics) {
-		ethmetricsexp.Setup(svrCfg.JSONRPC.MetricsAddress)
+	if config.JSONRPC.Enable && svrCtx.Viper.GetBool(srvflags.JSONRPCEnableMetrics) {
+		ethmetricsexp.Setup(config.JSONRPC.MetricsAddress)
 	}
 
-	var idxer evmcommontypes.EVMTxIndexer
-	if svrCfg.JSONRPC.EnableIndexer {
-		idxDB, err := OpenIndexerDB(home, sdkserver.GetAppDBBackend(svrCtx.Viper))
+	var idxer ethermint.EVMTxIndexer
+	if config.JSONRPC.EnableIndexer {
+		idxDB, err := OpenIndexerDB(home, server.GetAppDBBackend(svrCtx.Viper))
 		if err != nil {
 			logger.Error("failed to open evm indexer DB", "error", err.Error())
 			return err
 		}
 
-		idxLogger := svrCtx.Logger.With("indexer", "evm")
+		idxLogger := logger.With("indexer", "evm")
 		idxer = indexer.NewKVIndexer(idxDB, idxLogger, clientCtx)
-		indexerService := NewEVMIndexerService(idxer, clientCtx.Client.(rpcclient.Client))
-		// indexerService.SetLogger(idxLogger)
+		indexerService := NewEVMIndexerService(idxer, clientCtx.Client.(rpcclient.Client), config.JSONRPC.AllowIndexerGap)
+		indexerService.SetLogger(servercmtlog.CometLoggerWrapper{Logger: idxLogger})
 
-		errCh := make(chan error)
-		go func() {
-			if err := indexerService.Start(); err != nil {
-				errCh <- err
-			}
-		}()
-
-		select {
-		case err := <-errCh:
-			return err
-		case <-time.After(ServerStartTime): // assume server started successfully
-		}
+		g.Go(func() error {
+			return indexerService.Start()
+		})
 	}
 
-	var (
-		httpSrv     *http.Server
-		httpSrvDone chan struct{}
-	)
-	genDocProvider := node.DefaultGenesisDocProviderFunc(cmtCfg)
-
-	if svrCfg.JSONRPC.Enable {
-		genDoc, err := genDocProvider()
-		if err != nil {
-			return err
+	if config.API.Enable || config.JSONRPC.Enable {
+		chainID := svrCtx.Viper.GetString(flags.FlagChainID)
+		if chainID == "" {
+			genDoc, err := genDocProvider()
+			if err != nil {
+				return err
+			}
+			chainID = genDoc.ChainID
 		}
+		clientCtx = clientCtx.
+			WithHomeDir(home).
+			WithChainID(chainID)
+	}
 
-		clientCtx := clientCtx.WithChainID(genDoc.ChainID)
+	grpcSrv, clientCtx, err := startGrpcServer(ctx, svrCtx, clientCtx, g, config.GRPC, app)
+	if err != nil {
+		return err
+	}
+	if grpcSrv != nil {
+		defer grpcSrv.GracefulStop()
+	}
 
-		tmEndpoint := "/websocket"
-		tmRPCAddr := cmtCfg.RPC.ListenAddress
-		httpSrv, httpSrvDone, err = StartJSONRPC(svrCtx, clientCtx, tmRPCAddr, tmEndpoint, &svrCfg, idxer)
-		if err != nil {
-			return err
-		}
+	apiSrv := startAPIServer(ctx, svrCtx, clientCtx, g, config.Config, app, grpcSrv, metrics)
+	if apiSrv != nil {
+		defer apiSrv.Close()
+	}
+
+	clientCtx, httpSrv, httpSrvDone, err := StartJSONRPCServer(svrCtx, clientCtx, g, config, genDocProvider, idxer)
+	if httpSrv != nil {
 		defer func() {
 			shutdownCtx, cancelFn := context.WithTimeout(context.Background(), 10*time.Second)
 			defer cancelFn()
@@ -479,105 +474,10 @@ func startInProcess(svrCtx *sdkserver.Context, svrCfg config.Config, clientCtx c
 		}()
 	}
 
-	if opts.PostSetup != nil {
-		if err := opts.PostSetup(svrCtx, clientCtx, ctx, g); err != nil {
-			return err
-		}
-	}
+	// At this point it is safe to block the process if we're in query only mode as
+	// we do not need to start Rosetta or handle any CometBFT related processes.
 
-	// wait for signal capture and gracefully return
-	// we are guaranteed to be waiting for the "ListenForQuitSignals" goroutine.
 	return g.Wait()
-}
-
-func startGrpcServer(
-	ctx context.Context,
-	g *errgroup.Group,
-	config serverconfig.GRPCConfig,
-	clientCtx client.Context,
-	svrCtx *sdkserver.Context,
-	app types.Application,
-) (*grpc.Server, client.Context, error) {
-	if !config.Enable {
-		// return grpcServer as nil if gRPC is disabled
-		return nil, clientCtx, nil
-	}
-	_, port, err := net.SplitHostPort(config.Address)
-	if err != nil {
-		return nil, clientCtx, err
-	}
-
-	maxSendMsgSize := config.MaxSendMsgSize
-	if maxSendMsgSize == 0 {
-		maxSendMsgSize = serverconfig.DefaultGRPCMaxSendMsgSize
-	}
-
-	maxRecvMsgSize := config.MaxRecvMsgSize
-	if maxRecvMsgSize == 0 {
-		maxRecvMsgSize = serverconfig.DefaultGRPCMaxRecvMsgSize
-	}
-
-	grpcAddress := fmt.Sprintf("127.0.0.1:%s", port)
-
-	// if gRPC is enabled, configure gRPC client for gRPC gateway
-	grpcClient, err := grpc.Dial(
-		grpcAddress,
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithDefaultCallOptions(
-			grpc.ForceCodec(codec.NewProtoCodec(clientCtx.InterfaceRegistry).GRPCCodec()),
-			grpc.MaxCallRecvMsgSize(maxRecvMsgSize),
-			grpc.MaxCallSendMsgSize(maxSendMsgSize),
-		),
-	)
-	if err != nil {
-		return nil, clientCtx, err
-	}
-
-	clientCtx = clientCtx.WithGRPCClient(grpcClient)
-	svrCtx.Logger.Debug("gRPC client assigned to client context", "target", grpcAddress)
-
-	grpcSrv, err := servergrpc.NewGRPCServer(clientCtx, app, config)
-	if err != nil {
-		return nil, clientCtx, err
-	}
-
-	// Start the gRPC server in a goroutine. Note, the provided ctx will ensure
-	// that the server is gracefully shut down.
-	g.Go(func() error {
-		return servergrpc.StartGRPCServer(ctx, svrCtx.Logger.With("module", "grpc-server"), config, grpcSrv)
-	})
-	return grpcSrv, clientCtx, nil
-}
-
-func startAPIServer(
-	ctx context.Context,
-	g *errgroup.Group,
-	cmtCfg *cmtcfg.Config,
-	svrCfg config.Config,
-	clientCtx client.Context,
-	svrCtx *sdkserver.Context,
-	app types.Application,
-	home string,
-	grpcSrv *grpc.Server,
-	metrics *telemetry.Metrics,
-) error {
-	if !svrCfg.API.Enable {
-		return nil
-	}
-
-	clientCtx = clientCtx.WithHomeDir(home)
-
-	apiSrv := api.New(clientCtx, svrCtx.Logger.With("module", "api-server"), grpcSrv)
-	app.RegisterAPIRoutes(apiSrv, svrCfg.API)
-
-	if svrCfg.Telemetry.Enabled {
-		apiSrv.SetTelemetry(metrics)
-	}
-
-	g.Go(func() error {
-		return apiSrv.Start(ctx, svrCfg.Config)
-	})
-	return nil
 }
 
 func openDB(_ types.AppOptions, rootDir string, backendType dbm.BackendType) (dbm.DB, error) {
@@ -591,7 +491,7 @@ func OpenIndexerDB(rootDir string, backendType dbm.BackendType) (dbm.DB, error) 
 	return dbm.NewDB("evmindexer", backendType, dataDir)
 }
 
-func openTraceWriter(traceWriterFile string) (w io.WriteCloser, err error) {
+func openTraceWriter(traceWriterFile string) (w io.Writer, err error) {
 	if traceWriterFile == "" {
 		return
 	}
@@ -609,4 +509,165 @@ func startTelemetry(cfg config.Config) (*telemetry.Metrics, error) {
 		return nil, nil
 	}
 	return telemetry.New(cfg.Telemetry)
+}
+
+// wrapCPUProfile runs callback in a goroutine, then wait for quit signals.
+func wrapCPUProfile(ctx *server.Context, callback func() error) error {
+	if cpuProfile := ctx.Viper.GetString(srvflags.CPUProfile); cpuProfile != "" {
+		fp, err := ethdebug.ExpandHome(cpuProfile)
+		if err != nil {
+			ctx.Logger.Debug("failed to get filepath for the CPU profile file", "error", err.Error())
+			return err
+		}
+		f, err := os.Create(fp)
+		if err != nil {
+			return err
+		}
+
+		ctx.Logger.Info("starting CPU profiler", "profile", cpuProfile)
+		if err := pprof.StartCPUProfile(f); err != nil {
+			return err
+		}
+
+		defer func() {
+			ctx.Logger.Info("stopping CPU profiler", "profile", cpuProfile)
+			pprof.StopCPUProfile()
+			if err := f.Close(); err != nil {
+				ctx.Logger.Info("failed to close cpu-profile file", "profile", cpuProfile, "err", err.Error())
+			}
+		}()
+	}
+
+	return callback()
+}
+
+func getCtx(svrCtx *server.Context, block bool) (*errgroup.Group, context.Context) {
+	ctx, cancelFn := context.WithCancel(context.Background())
+	g, ctx := errgroup.WithContext(ctx)
+	// listen for quit signals so the calling parent process can gracefully exit
+	server.ListenForQuitSignals(g, block, cancelFn, svrCtx.Logger)
+	return g, ctx
+}
+
+func startGrpcServer(
+	ctx context.Context,
+	svrCtx *server.Context,
+	clientCtx client.Context,
+	g *errgroup.Group,
+	config serverconfig.GRPCConfig,
+	app types.Application,
+) (*grpc.Server, client.Context, error) {
+	if !config.Enable {
+		// return grpcServer as nil if gRPC is disabled
+		return nil, clientCtx, nil
+	}
+	_, _, err := net.SplitHostPort(config.Address)
+	if err != nil {
+		return nil, clientCtx, errorsmod.Wrapf(err, "invalid grpc address %s", config.Address)
+	}
+
+	maxSendMsgSize := config.MaxSendMsgSize
+	if maxSendMsgSize == 0 {
+		maxSendMsgSize = serverconfig.DefaultGRPCMaxSendMsgSize
+	}
+
+	maxRecvMsgSize := config.MaxRecvMsgSize
+	if maxRecvMsgSize == 0 {
+		maxRecvMsgSize = serverconfig.DefaultGRPCMaxRecvMsgSize
+	}
+
+	// if gRPC is enabled, configure gRPC client for gRPC gateway and json-rpc
+	grpcClient, err := grpc.Dial(
+		config.Address,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithDefaultCallOptions(
+			grpc.ForceCodec(codec.NewProtoCodec(clientCtx.InterfaceRegistry).GRPCCodec()),
+			grpc.MaxCallRecvMsgSize(maxRecvMsgSize),
+			grpc.MaxCallSendMsgSize(maxSendMsgSize),
+		),
+	)
+	if err != nil {
+		return nil, clientCtx, err
+	}
+	// Set `GRPCClient` to `clientCtx` to enjoy concurrent grpc query.
+	// only use it if gRPC server is enabled.
+	clientCtx = clientCtx.WithGRPCClient(grpcClient)
+	svrCtx.Logger.Debug("gRPC client assigned to client context", "address", config.Address)
+
+	grpcSrv, err := servergrpc.NewGRPCServer(clientCtx, app, config)
+	if err != nil {
+		return nil, clientCtx, err
+	}
+
+	// Start the gRPC server in a goroutine. Note, the provided ctx will ensure
+	// that the server is gracefully shut down.
+	g.Go(func() error {
+		return servergrpc.StartGRPCServer(ctx, svrCtx.Logger.With("module", "grpc-server"), config, grpcSrv)
+	})
+	return grpcSrv, clientCtx, nil
+}
+
+func startAPIServer(
+	ctx context.Context,
+	svrCtx *server.Context,
+	clientCtx client.Context,
+	g *errgroup.Group,
+	svrCfg serverconfig.Config,
+	app types.Application,
+	grpcSrv *grpc.Server,
+	metrics *telemetry.Metrics,
+) *api.Server {
+	if !svrCfg.API.Enable {
+		return nil
+	}
+
+	apiSrv := api.New(clientCtx, svrCtx.Logger.With("server", "api"), grpcSrv)
+	app.RegisterAPIRoutes(apiSrv, svrCfg.API)
+
+	if svrCfg.Telemetry.Enabled {
+		apiSrv.SetTelemetry(metrics)
+	}
+
+	g.Go(func() error {
+		return apiSrv.Start(ctx, svrCfg)
+	})
+	return apiSrv
+}
+
+func StartJSONRPCServer(
+	svrCtx *server.Context,
+	clientCtx client.Context,
+	g *errgroup.Group,
+	config config.Config,
+	genDocProvider node.GenesisDocProvider,
+	idxer ethermint.EVMTxIndexer,
+) (ctx client.Context, httpSrv *http.Server, httpSrvDone chan struct{}, err error) {
+	ctx = clientCtx
+	if !config.JSONRPC.Enable {
+		return
+	}
+
+	genDoc, err := genDocProvider()
+	if err != nil {
+		return ctx, httpSrv, httpSrvDone, err
+	}
+
+	ctx = clientCtx.WithChainID(genDoc.ChainID)
+	g.Go(func() error {
+		httpSrv, httpSrvDone, err = StartJSONRPC(svrCtx, clientCtx, g, &config, idxer)
+		return err
+	})
+	return
+}
+
+// returns a function which returns the genesis doc from the genesis file.
+func GenDocProvider(cfg *cmtcfg.Config) func() (*cmttypes.GenesisDoc, error) {
+	return func() (*cmttypes.GenesisDoc, error) {
+		appGenesis, err := genutiltypes.AppGenesisFromFile(cfg.GenesisFile())
+		if err != nil {
+			return nil, err
+		}
+
+		return appGenesis.ToGenesisDoc()
+	}
 }

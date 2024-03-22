@@ -15,7 +15,6 @@ import (
 
 	"cosmossdk.io/client/v2/autocli"
 	"cosmossdk.io/core/appmodule"
-	"cosmossdk.io/simapp"
 	confixcmd "cosmossdk.io/tools/confix/cmd"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -78,7 +77,7 @@ func NewRootCmd() (*cobra.Command, ethermint.EncodingConfig) {
 	// Initialize the SDK config the first before doing anything else.
 	InitSDKConfig()
 
-	encodingConfig := encoding.MakeConfig(app.ModuleBasics)
+	encodingConfig := encoding.MakeConfig()
 	initClientCtx := client.Context{}.
 		WithCodec(encodingConfig.Codec).
 		WithInterfaceRegistry(encodingConfig.InterfaceRegistry).
@@ -161,12 +160,9 @@ func NewRootCmd() (*cobra.Command, ethermint.EncodingConfig) {
 
 	evmmoduleserver.AddCommands(
 		rootCmd,
-		simapp.DefaultNodeHome,
-		a.newApp,
-		evmmoduleserver.NewDefaultStartCmdOptions(a.newApp, app.DefaultNodeHome),
+		evmmoduleserver.NewDefaultStartOptions(a.newApp, app.DefaultNodeHome),
 		a.appExport,
-		addModuleInitFlags,
-	)
+		addModuleInitFlags)
 
 	// add keybase, auxiliary RPC, query, and tx child commands
 	rootCmd.AddCommand(

@@ -22,7 +22,6 @@ import (
 
 	storetypes "cosmossdk.io/store/types"
 
-	"swisstronik/app"
 	"swisstronik/app/ante"
 	"swisstronik/crypto/ethsecp256k1"
 	"swisstronik/encoding"
@@ -38,7 +37,7 @@ import (
 )
 
 func (suite AnteTestSuite) TestAnteHandler() {
-	var acc authtypes.AccountI
+	var acc sdk.AccountI
 	addr, privKey := tests.RandomEthAddressWithPrivateKey()
 	to := tests.RandomEthAddress()
 
@@ -1078,7 +1077,7 @@ func (suite AnteTestSuite) TestAnteHandlerWithParams() {
 func (suite *AnteTestSuite) TestConsumeSignatureVerificationGas() {
 	params := authtypes.DefaultParams()
 	msg := []byte{1, 2, 3, 4}
-	encodingConfig := encoding.MakeConfig(app.ModuleBasics)
+	encodingConfig := encoding.MakeConfig()
 	cdc := encodingConfig.Amino
 
 	p := authtypes.DefaultParams()

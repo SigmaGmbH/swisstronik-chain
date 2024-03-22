@@ -19,7 +19,6 @@ import (
 	amino "github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/codec/address"
 	"github.com/cosmos/cosmos-sdk/codec/types"
-	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/x/auth/tx"
 	"github.com/ethereum/go-ethereum/common"
 	"google.golang.org/protobuf/proto"
@@ -48,7 +47,7 @@ func customGetSignerFn(path string) func(msg proto.Message) ([][]byte, error) {
 }
 
 // MakeConfig creates an EncodingConfig for testing
-func MakeConfig(mb module.BasicManager) ethermint.EncodingConfig {
+func MakeConfig() ethermint.EncodingConfig {
 	cdc := amino.NewLegacyAmino()
 	signingOptions := signing.Options{
 		AddressCodec: address.Bech32Codec{

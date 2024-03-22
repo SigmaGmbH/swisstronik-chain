@@ -12,38 +12,64 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the Ethermint library. If not, see https://github.com/evmos/ethermint/blob/main/LICENSE
+// along with the Ethermint library. If not, see https://swisstronik/blob/main/LICENSE
 package server
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
+	"golang.org/x/sync/errgroup"
 
 	"swisstronik/rpc"
+	"swisstronik/rpc/stream"
 
+	rpcclient "github.com/cometbft/cometbft/rpc/client"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/server"
 	ethlog "github.com/ethereum/go-ethereum/log"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
 
 	"swisstronik/server/config"
-	evmcommontypes "swisstronik/types"
+	ethermint "swisstronik/types"
+)
+
+const (
+	ServerStartTime = 5 * time.Second
+	MaxRetry        = 6
 )
 
 // StartJSONRPC starts the JSON-RPC server
-func StartJSONRPC(ctx *server.Context,
+func StartJSONRPC(srvCtx *server.Context,
 	clientCtx client.Context,
-	tmRPCAddr,
-	tmEndpoint string,
+	g *errgroup.Group,
 	config *config.Config,
-	indexer evmcommontypes.EVMTxIndexer,
+	indexer ethermint.EVMTxIndexer,
 ) (*http.Server, chan struct{}, error) {
-	tmWsClient := ConnectTmWS(tmRPCAddr, tmEndpoint, ctx.Logger)
+	logger := srvCtx.Logger.With("module", "geth")
 
-	logger := ctx.Logger.With("module", "geth")
+	evtClient, ok := clientCtx.Client.(rpcclient.EventsClient)
+	if !ok {
+		return nil, nil, fmt.Errorf("client %T does not implement EventsClient", clientCtx.Client)
+	}
+
+	var rpcStream *stream.RPCStream
+	var err error
+	for i := 0; i < MaxRetry; i++ {
+		rpcStream, err = stream.NewRPCStreams(evtClient, logger, clientCtx.TxConfig.TxDecoder())
+		if err == nil {
+			break
+		}
+		time.Sleep(time.Second)
+	}
+
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to create rpc streams after %d attempts: %w", MaxRetry, err)
+	}
+
 	ethlog.Root().SetHandler(ethlog.FuncHandler(func(r *ethlog.Record) error {
 		switch r.Lvl {
 		case ethlog.LvlTrace, ethlog.LvlDebug:
@@ -61,11 +87,11 @@ func StartJSONRPC(ctx *server.Context,
 	allowUnprotectedTxs := config.JSONRPC.AllowUnprotectedTxs
 	rpcAPIArr := config.JSONRPC.API
 
-	apis := rpc.GetRPCAPIs(ctx, clientCtx, tmWsClient, allowUnprotectedTxs, indexer, rpcAPIArr)
+	apis := rpc.GetRPCAPIs(srvCtx, clientCtx, rpcStream, allowUnprotectedTxs, indexer, rpcAPIArr)
 
 	for _, api := range apis {
 		if err := rpcServer.RegisterName(api.Namespace, api.Service); err != nil {
-			ctx.Logger.Error(
+			srvCtx.Logger.Error(
 				"failed to register service in JSON RPC namespace",
 				"namespace", api.Namespace,
 				"service", api.Service,
@@ -97,32 +123,22 @@ func StartJSONRPC(ctx *server.Context,
 		return nil, nil, err
 	}
 
-	errCh := make(chan error)
-	go func() {
-		ctx.Logger.Info("Starting JSON-RPC server", "address", config.JSONRPC.Address)
+	g.Go(func() error {
+		srvCtx.Logger.Info("Starting JSON-RPC server", "address", config.JSONRPC.Address)
 		if err := httpSrv.Serve(ln); err != nil {
 			if err == http.ErrServerClosed {
 				close(httpSrvDone)
-				return
 			}
 
-			ctx.Logger.Error("failed to start JSON-RPC server", "error", err.Error())
-			errCh <- err
+			srvCtx.Logger.Error("failed to start JSON-RPC server", "error", err.Error())
+			return err
 		}
-	}()
+		return nil
+	})
 
-	select {
-	case err := <-errCh:
-		ctx.Logger.Error("failed to boot JSON-RPC server", "error", err.Error())
-		return nil, nil, err
-	case <-time.After(ServerStartTime): // assume JSON RPC server started successfully
-	}
+	srvCtx.Logger.Info("Starting JSON WebSocket server", "address", config.JSONRPC.WsAddress)
 
-	ctx.Logger.Info("Starting JSON WebSocket server", "address", config.JSONRPC.WsAddress)
-
-	// allocate separate WS connection to Tendermint
-	tmWsClient = ConnectTmWS(tmRPCAddr, tmEndpoint, ctx.Logger)
-	wsSrv := rpc.NewWebsocketsServer(clientCtx, ctx.Logger, tmWsClient, config)
+	wsSrv := rpc.NewWebsocketsServer(clientCtx, srvCtx.Logger, rpcStream, config)
 	wsSrv.Start()
 	return httpSrv, httpSrvDone, nil
 }

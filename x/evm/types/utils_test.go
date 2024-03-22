@@ -5,7 +5,6 @@ import (
 	"math/big"
 	"testing"
 
-	"swisstronik/app"
 	"swisstronik/encoding"
 	evmtypes "swisstronik/x/evm/types"
 
@@ -53,7 +52,7 @@ func TestUnwrapEthereumMsg(t *testing.T) {
 	_, err := evmtypes.UnwrapEthereumMsg(nil, common.Hash{})
 	require.NotNil(t, err)
 
-	encodingConfig := encoding.MakeConfig(app.ModuleBasics)
+	encodingConfig := encoding.MakeConfig()
 	clientCtx := client.Context{}.WithTxConfig(encodingConfig.TxConfig)
 	builder, _ := clientCtx.TxConfig.NewTxBuilder().(authtx.ExtensionOptionsTxBuilder)
 
@@ -63,6 +62,7 @@ func TestUnwrapEthereumMsg(t *testing.T) {
 
 	msg := evmtypes.NewTx(big.NewInt(1), 0, &common.Address{}, big.NewInt(0), 0, big.NewInt(0), nil, nil, make([]byte, 0), nil, nil, nil)
 	err = builder.SetMsgs(msg)
+	require.Nil(t, err)
 
 	tx = builder.GetTx().(sdk.Tx)
 	msg_, err := evmtypes.UnwrapEthereumMsg(&tx, msg.AsTransaction().Hash())

@@ -18,6 +18,6 @@ type GenesisState map[string]json.RawMessage
 
 // NewDefaultGenesisState generates the default state for the application.
 func NewDefaultGenesisState() simapp.GenesisState {
-	encCfg := encoding.MakeConfig(ModuleBasics)
+	encCfg := encoding.MakeConfig()
 	return ModuleBasics.DefaultGenesis(encCfg.Codec)
 }

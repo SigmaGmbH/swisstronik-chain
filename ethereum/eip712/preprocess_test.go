@@ -5,7 +5,6 @@ import (
 	"strings"
 	"testing"
 
-	"swisstronik/app"
 	"swisstronik/encoding"
 	"swisstronik/ethereum/eip712"
 	"swisstronik/tests"
@@ -27,7 +26,7 @@ import (
 var (
 	chainId = "ethermint_9000-1"
 	ctx     = client.Context{}.WithTxConfig(
-		encoding.MakeConfig(app.ModuleBasics).TxConfig,
+		encoding.MakeConfig().TxConfig,
 	)
 )
 var feePayerAddress = "ethm17xpfvakm2amg962yls6f84z3kell8c5lthdzgl"

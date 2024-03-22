@@ -415,7 +415,7 @@ func buildEthTx(
 }
 
 func prepareEthTx(priv *ethsecp256k1.PrivKey, msgEthereumTx *evmtypes.MsgHandleTx) []byte {
-	encodingConfig := encoding.MakeConfig(app.ModuleBasics)
+	encodingConfig := encoding.MakeConfig()
 	option, err := codectypes.NewAnyWithValue(&evmtypes.ExtensionOptionsEthereumTx{})
 	s.Require().NoError(err)
 
@@ -454,7 +454,7 @@ func checkEthTx(priv *ethsecp256k1.PrivKey, msgEthereumTx *evmtypes.MsgHandleTx)
 }
 
 func prepareCosmosTx(priv *ethsecp256k1.PrivKey, gasPrice *sdkmath.Int, msgs ...sdk.Msg) []byte {
-	encodingConfig := encoding.MakeConfig(app.ModuleBasics)
+	encodingConfig := encoding.MakeConfig()
 	accountAddress := sdk.AccAddress(priv.PubKey().Address().Bytes())
 
 	txBuilder := encodingConfig.TxConfig.NewTxBuilder()

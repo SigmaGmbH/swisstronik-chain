@@ -24,11 +24,11 @@ import (
 
 // WithComet/cosmos-sdk full-node start flags
 const (
-	WithComet  = "with-comet"
-	Address    = "address"
-	Transport  = "transport"
-	TraceStore = "trace-store"
-	CPUProfile = "cpu-profile"
+	WithCometBFT = "with-cometbft"
+	Address      = "address"
+	Transport    = "transport"
+	TraceStore   = "trace-store"
+	CPUProfile   = "cpu-profile"
 	// The type of database for application and snapshots databases
 	AppDBBackend = "app-db-backend"
 )
@@ -65,6 +65,7 @@ const (
 	JSONRPCAllowUnprotectedTxs = "json-rpc.allow-unprotected-txs"
 	JSONRPCMaxOpenConnections  = "json-rpc.max-open-connections"
 	JSONRPCEnableIndexer       = "json-rpc.enable-indexer"
+	JSONRPCAllowIndexerGap     = "json-rpc.allow-indexer-gap"
 	JSONRPCFeeHistoryCap       = "json-rpc.feehistory-cap"
 	// JSONRPCEnableMetrics enables EVM RPC metrics server.
 	// Set to `metrics` which is hardcoded flag from go-ethereum.

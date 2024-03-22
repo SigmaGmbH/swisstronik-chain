@@ -8,7 +8,6 @@ import (
 
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 
-	"swisstronik/app"
 	"swisstronik/encoding"
 	"swisstronik/tests"
 	evmtypes "swisstronik/x/evm/types"
@@ -25,7 +24,7 @@ func TestTxEncoding(t *testing.T) {
 	err := msg.Sign(ethSigner, signer)
 	require.NoError(t, err)
 
-	cfg := encoding.MakeConfig(app.ModuleBasics)
+	cfg := encoding.MakeConfig()
 
 	_, err = cfg.TxConfig.TxEncoder()(msg)
 	require.Error(t, err, "encoding failed")

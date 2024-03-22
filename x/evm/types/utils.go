@@ -26,6 +26,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/math"
+	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 )
 
@@ -66,6 +67,65 @@ func DecodeTransactionLogs(data []byte) (TransactionLogs, error) {
 	err := proto.Unmarshal(data, &logs)
 	if err != nil {
 		return TransactionLogs{}, err
+	}
+	return logs, nil
+}
+
+// DecodeTxResponses decodes a protobuf-encoded byte slice into TxResponses
+func DecodeTxResponses(in []byte) ([]*MsgEthereumTxResponse, error) {
+	var txMsgData sdk.TxMsgData
+	if err := proto.Unmarshal(in, &txMsgData); err != nil {
+		return nil, err
+	}
+	responses := make([]*MsgEthereumTxResponse, 0, len(txMsgData.MsgResponses))
+	for _, res := range txMsgData.MsgResponses {
+		var response MsgEthereumTxResponse
+		if res.TypeUrl != "/"+proto.MessageName(&response) {
+			continue
+		}
+		err := proto.Unmarshal(res.Value, &response)
+		if err != nil {
+			return nil, errorsmod.Wrap(err, "failed to unmarshal tx response message data")
+		}
+		responses = append(responses, &response)
+	}
+	return responses, nil
+}
+
+func logsFromTxResponse(dst []*ethtypes.Log, rsp *MsgEthereumTxResponse, blockNumber uint64) []*ethtypes.Log {
+	if len(rsp.Logs) == 0 {
+		return nil
+	}
+
+	if dst == nil {
+		dst = make([]*ethtypes.Log, 0, len(rsp.Logs))
+	}
+
+	txHash := common.HexToHash(rsp.Hash)
+	for _, log := range rsp.Logs {
+		// fill in the tx/block informations
+		l := log.ToEthereum()
+		l.TxHash = txHash
+		l.BlockNumber = blockNumber
+		// TODO:
+		// Comment the following as we don't have BlockHash in MsgEthereumTxResponse
+		// if len(rsp.BlockHash) > 0 {
+		// 	l.BlockHash = common.BytesToHash(rsp.BlockHash)
+		// }
+		dst = append(dst, l)
+	}
+	return dst
+}
+
+// DecodeTxLogsFromEvents decodes a protobuf-encoded byte slice into ethereum logs
+func DecodeTxLogsFromEvents(in []byte, blockNumber uint64) ([]*ethtypes.Log, error) {
+	txResponses, err := DecodeTxResponses(in)
+	if err != nil {
+		return nil, err
+	}
+	var logs []*ethtypes.Log
+	for _, response := range txResponses {
+		logs = logsFromTxResponse(logs, response, blockNumber)
 	}
 	return logs, nil
 }
