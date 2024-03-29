@@ -32,13 +32,14 @@ import (
 
 	"swisstronik/crypto/ethsecp256k1"
 	"swisstronik/ethereum/eip712"
-	ethermint "swisstronik/types"
 
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/crypto/secp256k1"
 	"github.com/ethereum/go-ethereum/signer/core/apitypes"
 
 	evmtypes "swisstronik/x/evm/types"
+
+	swisstroniktypes "swisstronik/types"
 
 	txsigning "cosmossdk.io/x/tx/signing"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
@@ -48,7 +49,7 @@ var ethermintCodec codec.ProtoCodecMarshaler
 
 func init() {
 	registry := codectypes.NewInterfaceRegistry()
-	ethermint.RegisterInterfaces(registry)
+	swisstroniktypes.RegisterInterfaces(registry)
 	ethermintCodec = codec.NewProtoCodec(registry)
 }
 
@@ -240,7 +241,7 @@ func VerifySignature(
 			msgs, tx.GetMemo(),
 		)
 
-		signerChainID, err := ethermint.ParseChainID(signerData.ChainID)
+		signerChainID, err := swisstroniktypes.ParseChainID(signerData.ChainID)
 		if err != nil {
 			return errorsmod.Wrapf(err, "failed to parse chain-id: %s", signerData.ChainID)
 		}
@@ -254,7 +255,7 @@ func VerifySignature(
 			return errorsmod.Wrap(errortypes.ErrUnknownExtensionOptions, "tx doesnt contain expected amount of extension options")
 		}
 
-		extOpt, ok := opts[0].GetCachedValue().(*ethermint.ExtensionOptionsWeb3Tx)
+		extOpt, ok := opts[0].GetCachedValue().(*swisstroniktypes.ExtensionOptionsWeb3Tx)
 		if !ok {
 			return errorsmod.Wrap(errortypes.ErrUnknownExtensionOptions, "unknown extension option")
 		}

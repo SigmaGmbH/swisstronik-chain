@@ -25,9 +25,10 @@ import (
 	"swisstronik/crypto/ethsecp256k1"
 	"swisstronik/encoding"
 	"swisstronik/tests"
-	ethermint "swisstronik/types"
 	evmtypes "swisstronik/x/evm/types"
 	"swisstronik/x/feemarket/types"
+
+	swisstroniktypes "swisstronik/types"
 
 	sdkmath "cosmossdk.io/math"
 	"github.com/ethereum/go-ethereum/common"
@@ -115,7 +116,7 @@ func (suite *KeeperTestSuite) SetupApp(checkTx bool) {
 	types.RegisterQueryServer(queryHelper, suite.app.FeeMarketKeeper)
 	suite.queryClient = types.NewQueryClient(queryHelper)
 
-	acc := &ethermint.EthAccount{
+	acc := &swisstroniktypes.EthAccount{
 		BaseAccount: authtypes.NewBaseAccount(sdk.AccAddress(suite.address.Bytes()), nil, 0, 0),
 		CodeHash:    common.BytesToHash(crypto.Keccak256(nil)).String(),
 	}

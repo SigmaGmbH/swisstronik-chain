@@ -65,12 +65,13 @@ import (
 
 	"swisstronik/crypto/hd"
 	"swisstronik/server/config"
-	ethermint "swisstronik/types"
 	evmtypes "swisstronik/x/evm/types"
 
 	"swisstronik/app"
 
 	"swisstronik/encoding"
+
+	swisstroniktypes "swisstronik/types"
 
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 )
@@ -149,11 +150,11 @@ func DefaultConfig() Config {
 		TimeoutCommit:     2 * time.Second,
 		ChainID:           chainID,
 		NumValidators:     4,
-		BondDenom:         ethermint.SwtrDenom,
-		MinGasPrices:      fmt.Sprintf("0.000006%s", ethermint.SwtrDenom),
-		AccountTokens:     sdk.TokensFromConsensusPower(1000, ethermint.PowerReduction),
-		StakingTokens:     sdk.TokensFromConsensusPower(500, ethermint.PowerReduction),
-		BondedTokens:      sdk.TokensFromConsensusPower(100, ethermint.PowerReduction),
+		BondDenom:         swisstroniktypes.SwtrDenom,
+		MinGasPrices:      fmt.Sprintf("0.000006%s", swisstroniktypes.SwtrDenom),
+		AccountTokens:     sdk.TokensFromConsensusPower(1000, swisstroniktypes.PowerReduction),
+		StakingTokens:     sdk.TokensFromConsensusPower(500, swisstroniktypes.PowerReduction),
+		BondedTokens:      sdk.TokensFromConsensusPower(100, swisstroniktypes.PowerReduction),
 		PruningStrategy:   pruningtypes.PruningOptionNothing,
 		CleanupDir:        true,
 		SigningAlgo:       string(hd.EthSecp256k1Type),
@@ -245,7 +246,7 @@ func New(l Logger, baseDir string, cfg Config) (*Network, error) {
 	l.Log("acquiring test network lock")
 	lock.Lock()
 
-	if !ethermint.IsValidChainID(cfg.ChainID) {
+	if !swisstroniktypes.IsValidChainID(cfg.ChainID) {
 		return nil, fmt.Errorf("invalid chain-id: %s", cfg.ChainID)
 	}
 
@@ -433,7 +434,7 @@ func New(l Logger, baseDir string, cfg Config) (*Network, error) {
 
 		genFiles = append(genFiles, cmtCfg.GenesisFile())
 		genBalances = append(genBalances, banktypes.Balance{Address: addr.String(), Coins: balances.Sort()})
-		genAccounts = append(genAccounts, &ethermint.EthAccount{
+		genAccounts = append(genAccounts, &swisstroniktypes.EthAccount{
 			BaseAccount: authtypes.NewBaseAccount(addr, nil, 0, 0),
 			CodeHash:    common.BytesToHash(evmtypes.EmptyCodeHash).Hex(),
 		})
@@ -491,7 +492,7 @@ func New(l Logger, baseDir string, cfg Config) (*Network, error) {
 			return nil, err
 		}
 
-		customAppTemplate, _ := config.AppConfig(ethermint.SwtrDenom)
+		customAppTemplate, _ := config.AppConfig(swisstroniktypes.SwtrDenom)
 		srvconfig.SetConfigTemplate(customAppTemplate)
 		srvconfig.WriteConfigFile(filepath.Join(nodeDir, "config/app.toml"), appCfg)
 

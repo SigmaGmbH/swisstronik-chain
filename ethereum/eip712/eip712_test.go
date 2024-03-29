@@ -7,6 +7,7 @@ import (
 	"cosmossdk.io/math"
 
 	"swisstronik/ethereum/eip712"
+	ethermint "swisstronik/types"
 
 	"github.com/cosmos/cosmos-sdk/client"
 
@@ -24,8 +25,6 @@ import (
 	txtypes "github.com/cosmos/cosmos-sdk/types/tx"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
-
-	ethermint "swisstronik/types"
 
 	v1beta1 "cosmossdk.io/api/cosmos/base/v1beta1"
 	signingv1beta1 "cosmossdk.io/api/cosmos/tx/signing/v1beta1"

@@ -24,8 +24,9 @@ import (
 	"swisstronik/crypto/ethsecp256k1"
 	rpctypes "swisstronik/rpc/types"
 	"swisstronik/server/config"
-	ethermint "swisstronik/types"
 	evmtypes "swisstronik/x/evm/types"
+
+	swisstroniktypes "swisstronik/types"
 
 	errorsmod "cosmossdk.io/errors"
 	sdkmath "cosmossdk.io/math"
@@ -337,13 +338,13 @@ func (b *Backend) RPCBlockRangeCap() int32 {
 func (b *Backend) RPCMinGasPrice() int64 {
 	evmParams, err := b.queryClient.Params(b.ctx, &evmtypes.QueryParamsRequest{})
 	if err != nil {
-		return ethermint.DefaultGasPrice
+		return swisstroniktypes.DefaultGasPrice
 	}
 
 	minGasPrice := b.cfg.GetMinGasPrices()
 	amt := minGasPrice.AmountOf(evmParams.Params.EvmDenom).TruncateInt64()
 	if amt == 0 {
-		return ethermint.DefaultGasPrice
+		return swisstroniktypes.DefaultGasPrice
 	}
 
 	return amt

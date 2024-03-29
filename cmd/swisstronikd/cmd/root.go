@@ -56,7 +56,7 @@ import (
 
 	"swisstronik/utils"
 
-	ethermint "swisstronik/types"
+	swisstroniktypes "swisstronik/types"
 
 	"github.com/cosmos/cosmos-sdk/client/snapshot"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -71,7 +71,7 @@ import (
 const ShortBlockWindow uint32 = 20
 
 // NewRootCmd creates a new root command for a Cosmos SDK application
-func NewRootCmd() (*cobra.Command, ethermint.EncodingConfig) {
+func NewRootCmd() (*cobra.Command, swisstroniktypes.EncodingConfig) {
 	// Initialize the SDK config the first before doing anything else.
 	InitSDKConfig()
 
@@ -281,7 +281,7 @@ func addModuleInitFlags(startCmd *cobra.Command) {
 }
 
 type appCreator struct {
-	encodingConfig ethermint.EncodingConfig
+	encodingConfig swisstroniktypes.EncodingConfig
 }
 
 // newApp creates a new Cosmos SDK app

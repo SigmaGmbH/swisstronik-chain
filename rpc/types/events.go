@@ -19,8 +19,9 @@ import (
 	"fmt"
 	"strconv"
 
-	ethermint "swisstronik/types"
 	evmtypes "swisstronik/x/evm/types"
+
+	swisstroniktypes "swisstronik/types"
 
 	abci "github.com/cometbft/cometbft/abci/types"
 	tmrpctypes "github.com/cometbft/cometbft/rpc/core/types"
@@ -153,7 +154,7 @@ func ParseTxResult(result *abci.ExecTxResult, tx sdk.Tx) (*ParsedTxs, error) {
 }
 
 // ParseTxIndexerResult parse tm tx result to a format compatible with the custom tx indexer.
-func ParseTxIndexerResult(txResult *tmrpctypes.ResultTx, tx sdk.Tx, getter func(*ParsedTxs) *ParsedTx) (*ethermint.TxResult, error) {
+func ParseTxIndexerResult(txResult *tmrpctypes.ResultTx, tx sdk.Tx, getter func(*ParsedTxs) *ParsedTx) (*swisstroniktypes.TxResult, error) {
 	txs, err := ParseTxResult(&txResult.TxResult, tx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse tx events: block %d, index %d, %v", txResult.Height, txResult.Index, err)
@@ -164,7 +165,7 @@ func ParseTxIndexerResult(txResult *tmrpctypes.ResultTx, tx sdk.Tx, getter func(
 		return nil, fmt.Errorf("ethereum tx not found in msgs: block %d, index %d", txResult.Height, txResult.Index)
 	}
 
-	return &ethermint.TxResult{
+	return &swisstroniktypes.TxResult{
 		Height:            txResult.Height,
 		TxIndex:           txResult.Index,
 		MsgIndex:          uint32(parsedTx.MsgIndex),

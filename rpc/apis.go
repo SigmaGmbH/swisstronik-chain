@@ -35,7 +35,7 @@ import (
 	"swisstronik/rpc/namespaces/ethereum/web3"
 	"swisstronik/rpc/namespaces/utils"
 	"swisstronik/rpc/stream"
-	ethermint "swisstronik/types"
+	swisstroniktypes "swisstronik/types"
 )
 
 // RPC namespaces and API version
@@ -66,7 +66,7 @@ type APICreator = func(
 	clientCtx client.Context,
 	stream *stream.RPCStream,
 	allowUnprotectedTxs bool,
-	indexer ethermint.EVMTxIndexer,
+	indexer swisstroniktypes.EVMTxIndexer,
 ) []rpc.API
 
 // apiCreators defines the JSON-RPC API namespaces.
@@ -78,7 +78,7 @@ func init() {
 			clientCtx client.Context,
 			stream *stream.RPCStream,
 			allowUnprotectedTxs bool,
-			indexer ethermint.EVMTxIndexer,
+			indexer swisstroniktypes.EVMTxIndexer,
 		) []rpc.API {
 			evmBackend := backend.NewBackend(ctx, ctx.Logger, clientCtx, allowUnprotectedTxs, indexer)
 			return []rpc.API{
@@ -96,7 +96,7 @@ func init() {
 				},
 			}
 		},
-		Web3Namespace: func(*server.Context, client.Context, *stream.RPCStream, bool, ethermint.EVMTxIndexer) []rpc.API {
+		Web3Namespace: func(*server.Context, client.Context, *stream.RPCStream, bool, swisstroniktypes.EVMTxIndexer) []rpc.API {
 			return []rpc.API{
 				{
 					Namespace: Web3Namespace,
@@ -106,7 +106,7 @@ func init() {
 				},
 			}
 		},
-		NetNamespace: func(_ *server.Context, clientCtx client.Context, _ *stream.RPCStream, _ bool, _ ethermint.EVMTxIndexer) []rpc.API {
+		NetNamespace: func(_ *server.Context, clientCtx client.Context, _ *stream.RPCStream, _ bool, _ swisstroniktypes.EVMTxIndexer) []rpc.API {
 			return []rpc.API{
 				{
 					Namespace: NetNamespace,
@@ -120,7 +120,7 @@ func init() {
 			clientCtx client.Context,
 			_ *stream.RPCStream,
 			allowUnprotectedTxs bool,
-			indexer ethermint.EVMTxIndexer,
+			indexer swisstroniktypes.EVMTxIndexer,
 		) []rpc.API {
 			evmBackend := backend.NewBackend(ctx, ctx.Logger, clientCtx, allowUnprotectedTxs, indexer)
 			return []rpc.API{
@@ -132,7 +132,7 @@ func init() {
 				},
 			}
 		},
-		TxPoolNamespace: func(ctx *server.Context, _ client.Context, _ *stream.RPCStream, _ bool, _ ethermint.EVMTxIndexer) []rpc.API {
+		TxPoolNamespace: func(ctx *server.Context, _ client.Context, _ *stream.RPCStream, _ bool, _ swisstroniktypes.EVMTxIndexer) []rpc.API {
 			return []rpc.API{
 				{
 					Namespace: TxPoolNamespace,
@@ -146,7 +146,7 @@ func init() {
 			clientCtx client.Context,
 			_ *stream.RPCStream,
 			allowUnprotectedTxs bool,
-			indexer ethermint.EVMTxIndexer,
+			indexer swisstroniktypes.EVMTxIndexer,
 		) []rpc.API {
 			evmBackend := backend.NewBackend(ctx, ctx.Logger, clientCtx, allowUnprotectedTxs, indexer)
 			return []rpc.API{
@@ -162,7 +162,7 @@ func init() {
 			clientCtx client.Context,
 			_ *stream.RPCStream,
 			allowUnprotectedTxs bool,
-			indexer ethermint.EVMTxIndexer,
+			indexer swisstroniktypes.EVMTxIndexer,
 		) []rpc.API {
 			evmBackend := backend.NewBackend(ctx, ctx.Logger, clientCtx, allowUnprotectedTxs, indexer)
 			return []rpc.API{
@@ -178,7 +178,7 @@ func init() {
 			clientCtx client.Context,
 			_ *stream.RPCStream,
 			allowUnprotectedTxs bool,
-			indexer ethermint.EVMTxIndexer,
+			indexer swisstroniktypes.EVMTxIndexer,
 		) []rpc.API {
 			didBackend := backend.NewBackend(ctx, ctx.Logger, clientCtx, allowUnprotectedTxs, indexer)
 			return []rpc.API{
@@ -194,7 +194,7 @@ func init() {
 			_ client.Context,
 			_ *stream.RPCStream,
 			_ bool,
-			_ ethermint.EVMTxIndexer,
+			_ swisstroniktypes.EVMTxIndexer,
 		) []rpc.API {
 			return []rpc.API{
 				{
@@ -213,7 +213,7 @@ func GetRPCAPIs(ctx *server.Context,
 	clientCtx client.Context,
 	stream *stream.RPCStream,
 	allowUnprotectedTxs bool,
-	indexer ethermint.EVMTxIndexer,
+	indexer swisstroniktypes.EVMTxIndexer,
 	selectedAPIs []string,
 ) []rpc.API {
 	var apis []rpc.API

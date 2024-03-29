@@ -10,7 +10,7 @@ import (
 	"swisstronik/tests"
 	"swisstronik/x/evm/types"
 
-	ethermint "swisstronik/types"
+	swisstroniktypes "swisstronik/types"
 
 	tmlog "cosmossdk.io/log"
 	abci "github.com/cometbft/cometbft/abci/types"
@@ -185,6 +185,6 @@ func TestKVIndexer(t *testing.T) {
 }
 
 // MakeEncodingConfig creates the EncodingConfig
-func MakeEncodingConfig() ethermint.EncodingConfig {
+func MakeEncodingConfig() swisstroniktypes.EncodingConfig {
 	return evmenc.MakeConfig()
 }

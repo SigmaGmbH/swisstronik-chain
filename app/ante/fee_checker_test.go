@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"swisstronik/encoding"
-	ethermint "swisstronik/types"
+	swisstroniktypes "swisstronik/types"
 	"swisstronik/x/evm/types"
 	evmtypes "swisstronik/x/evm/types"
 
@@ -173,7 +173,7 @@ func TestSDKTxFeeChecker(t *testing.T) {
 				txBuilder.SetGasLimit(1)
 				txBuilder.SetFeeAmount(sdk.NewCoins(sdk.NewCoin("uswtr", sdkmath.NewInt(10).Mul(types.DefaultPriorityReduction))))
 
-				option, err := codectypes.NewAnyWithValue(&ethermint.ExtensionOptionDynamicFeeTx{})
+				option, err := codectypes.NewAnyWithValue(&swisstroniktypes.ExtensionOptionDynamicFeeTx{})
 				require.NoError(t, err)
 				txBuilder.SetExtensionOptions(option)
 				return txBuilder.GetTx()
@@ -193,7 +193,7 @@ func TestSDKTxFeeChecker(t *testing.T) {
 				txBuilder.SetGasLimit(1)
 				txBuilder.SetFeeAmount(sdk.NewCoins(sdk.NewCoin("uswtr", sdkmath.NewInt(10).Mul(types.DefaultPriorityReduction).Add(sdkmath.NewInt(10)))))
 
-				option, err := codectypes.NewAnyWithValue(&ethermint.ExtensionOptionDynamicFeeTx{
+				option, err := codectypes.NewAnyWithValue(&swisstroniktypes.ExtensionOptionDynamicFeeTx{
 					MaxPriorityPrice: sdkmath.NewInt(5).Mul(types.DefaultPriorityReduction),
 				})
 				require.NoError(t, err)

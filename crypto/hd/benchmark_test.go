@@ -1,9 +1,9 @@
 package hd
 
 import (
+	ethermint "swisstronik/types"
 	"testing"
 
-	ethermint "swisstronik/types"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 )
 

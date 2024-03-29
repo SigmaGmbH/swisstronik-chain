@@ -25,7 +25,7 @@ import (
 
 	enccodec "swisstronik/encoding/codec"
 
-	ethermint "swisstronik/types"
+	swisstroniktypes "swisstronik/types"
 
 	"cosmossdk.io/x/tx/signing"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -47,7 +47,7 @@ func customGetSignerFn(path string) func(msg proto.Message) ([][]byte, error) {
 }
 
 // MakeConfig creates an EncodingConfig for testing
-func MakeConfig() ethermint.EncodingConfig {
+func MakeConfig() swisstroniktypes.EncodingConfig {
 	cdc := amino.NewLegacyAmino()
 	addrPrefix := sdk.GetConfig().GetBech32AccountAddrPrefix()
 	valAddrPrefix := sdk.GetConfig().GetBech32ValidatorAddrPrefix()
@@ -68,7 +68,7 @@ func MakeConfig() ethermint.EncodingConfig {
 	}
 	codec := amino.NewProtoCodec(interfaceRegistry)
 
-	encodingConfig := ethermint.EncodingConfig{
+	encodingConfig := swisstroniktypes.EncodingConfig{
 		InterfaceRegistry: interfaceRegistry,
 		Codec:             codec,
 		TxConfig:          tx.NewTxConfig(codec, tx.DefaultSignModes),

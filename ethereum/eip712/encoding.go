@@ -25,9 +25,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	txTypes "github.com/cosmos/cosmos-sdk/types/tx"
 
-	ethermint "swisstronik/types"
-
 	apitypes "github.com/ethereum/go-ethereum/signer/core/apitypes"
+
+	swisstroniktypes "swisstronik/types"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 )
@@ -46,7 +46,7 @@ var (
 // The process of unmarshaling SignDoc bytes into a SignDoc object requires having a codec
 // populated with all relevant message types. As a result, we must call this method on app
 // initialization with the app's encoding config.
-func SetEncodingConfig(cfg ethermint.EncodingConfig) {
+func SetEncodingConfig(cfg swisstroniktypes.EncodingConfig) {
 	aminoCodec = cfg.Amino
 	protoCodec = codec.NewProtoCodec(cfg.InterfaceRegistry)
 }
@@ -137,7 +137,7 @@ func decodeAminoSignDoc(signDocBytes []byte) (apitypes.TypedData, error) {
 		FeePayer: feePayer,
 	}
 
-	chainID, err := ethermint.ParseChainID(aminoDoc.ChainID)
+	chainID, err := swisstroniktypes.ParseChainID(aminoDoc.ChainID)
 	if err != nil {
 		return apitypes.TypedData{}, errors.New("invalid chain ID passed as argument")
 	}
@@ -207,7 +207,7 @@ func decodeProtobufSignDoc(signDocBytes []byte) (apitypes.TypedData, error) {
 
 	signerInfo := authInfo.SignerInfos[0]
 
-	chainID, err := ethermint.ParseChainID(signDoc.ChainId)
+	chainID, err := swisstroniktypes.ParseChainID(signDoc.ChainId)
 	if err != nil {
 		return apitypes.TypedData{}, fmt.Errorf("invalid chain ID passed as argument: %w", err)
 	}

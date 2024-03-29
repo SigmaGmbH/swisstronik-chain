@@ -26,6 +26,7 @@ import (
 
 	"swisstronik/rpc"
 	"swisstronik/rpc/stream"
+	ethermint "swisstronik/types"
 
 	rpcclient "github.com/cometbft/cometbft/rpc/client"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -34,7 +35,6 @@ import (
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
 
 	"swisstronik/server/config"
-	ethermint "swisstronik/types"
 )
 
 const (

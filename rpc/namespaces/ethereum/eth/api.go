@@ -31,7 +31,7 @@ import (
 	"swisstronik/rpc/backend"
 
 	rpctypes "swisstronik/rpc/types"
-	ethermint "swisstronik/types"
+	swisstroniktypes "swisstronik/types"
 	evmtypes "swisstronik/x/evm/types"
 )
 
@@ -314,7 +314,7 @@ func (e *PublicAPI) GetNodePublicKey(blockNrOrHash rpctypes.BlockNumberOrHash) (
 // ProtocolVersion returns the supported Ethereum protocol version.
 func (e *PublicAPI) ProtocolVersion() hexutil.Uint {
 	e.logger.Debug("eth_protocolVersion")
-	return hexutil.Uint(ethermint.ProtocolVersion)
+	return hexutil.Uint(swisstroniktypes.ProtocolVersion)
 }
 
 // GasPrice returns the current gas price based on Ethermint's gas price oracle.

@@ -18,14 +18,13 @@ package server
 import (
 	"context"
 	"strings"
+	ethermint "swisstronik/types"
 	"time"
 
 	"github.com/cometbft/cometbft/libs/service"
 	rpcclient "github.com/cometbft/cometbft/rpc/client"
 	ctypes "github.com/cometbft/cometbft/rpc/core/types"
 	"github.com/cometbft/cometbft/types"
-
-	ethermint "swisstronik/types"
 )
 
 const (

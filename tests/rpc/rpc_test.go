@@ -18,8 +18,9 @@ import (
 	"github.com/stretchr/testify/require"
 
 	rpctypes "swisstronik/rpc/types"
-	ethermint "swisstronik/types"
 	evmtypes "swisstronik/x/evm/types"
+
+	swisstroniktypes "swisstronik/types"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -136,7 +137,7 @@ func callWithError(method string, params interface{}) (*Response, error) {
 }
 
 func TestEth_protocolVersion(t *testing.T) {
-	expectedRes := hexutil.Uint(ethermint.ProtocolVersion)
+	expectedRes := hexutil.Uint(swisstroniktypes.ProtocolVersion)
 
 	rpcRes := call(t, "eth_protocolVersion", []string{})
 

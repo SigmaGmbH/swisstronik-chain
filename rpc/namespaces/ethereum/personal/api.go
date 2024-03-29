@@ -24,7 +24,6 @@ import (
 	"swisstronik/rpc/backend"
 
 	"swisstronik/crypto/hd"
-	ethermint "swisstronik/types"
 
 	"cosmossdk.io/log"
 
@@ -36,6 +35,7 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 
+	swisstroniktypes "swisstronik/types"
 	evmtypes "swisstronik/x/evm/types"
 )
 
@@ -43,7 +43,7 @@ import (
 type PrivateAccountAPI struct {
 	backend    backend.EVMBackend
 	logger     log.Logger
-	hdPathIter ethermint.HDPathIterator
+	hdPathIter swisstroniktypes.HDPathIterator
 }
 
 // NewAPI creates an instance of the public Personal Eth API.
@@ -54,7 +54,7 @@ func NewAPI(
 	cfg := sdk.GetConfig()
 	basePath := cfg.GetFullBIP44Path()
 
-	iterator, err := ethermint.NewHDPathIterator(basePath, true)
+	iterator, err := swisstroniktypes.NewHDPathIterator(basePath, true)
 	if err != nil {
 		panic(err)
 	}
