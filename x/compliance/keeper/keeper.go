@@ -310,7 +310,8 @@ func (k Keeper) IterateVerificationDetails(ctx sdk.Context, callback func(id []b
 
 	for ; latestVersionIterator.Valid(); latestVersionIterator.Next() {
 		key := latestVersionIterator.Key()
-		if !callback(key) {
+		id := types.VerificationIdFromKey(key)
+		if !callback(id) {
 			break
 		}
 	}
@@ -322,7 +323,7 @@ func (k Keeper) IterateAddressDetails(ctx sdk.Context, callback func(address sdk
 
 	for ; latestVersionIterator.Valid(); latestVersionIterator.Next() {
 		key := latestVersionIterator.Key()
-		address := sdk.AccAddress(key)
+		address := types.AccAddressFromKey(key)
 		if !callback(address) {
 			break
 		}
@@ -335,7 +336,7 @@ func (k Keeper) IterateIssuerDetails(ctx sdk.Context, callback func(address sdk.
 
 	for ; latestVersionIterator.Valid(); latestVersionIterator.Next() {
 		key := latestVersionIterator.Key()
-		address := sdk.AccAddress(key)
+		address := types.AccAddressFromKey(key)
 		if !callback(address) {
 			break
 		}
