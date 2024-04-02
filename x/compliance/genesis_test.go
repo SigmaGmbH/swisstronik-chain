@@ -205,16 +205,29 @@ func TestInitGenesis_Validation(t *testing.T) {
 	}
 }
 
+func TestGenesis_Default(t *testing.T) {
+	// Initialize test keeper and context
+	k, ctx := testkeeper.ComplianceKeeper(t)
+
+	// Generate a sample genesis state
+	defaultGenesis := types.DefaultGenesis()
+
+	// Import genesis state
+	compliance.InitGenesis(ctx, *k, *defaultGenesis)
+
+	// Export genesis state
+	exportedGenesis := compliance.ExportGenesis(ctx, *k)
+
+	// Ensure exported genesis state matches the sample genesis state
+	require.Equal(t, defaultGenesis.Params, exportedGenesis.Params)
+}
+
 func TestGenesis_Success(t *testing.T) {
 	testCases := []struct {
 		name     string
 		genState *types.GenesisState
 		expPanic bool
 	}{
-		{
-			name:     "default",
-			genState: types.DefaultGenesis(),
-		},
 		{
 			name: "valid issuers, verifications and addresses",
 			genState: &types.GenesisState{
@@ -306,8 +319,11 @@ func TestGenesis_Success(t *testing.T) {
 					},
 				)
 				return
+			} else {
+				require.NotPanics(t, func() {
+					compliance.InitGenesis(ctx, *k, *tc.genState)
+				})
 			}
-			compliance.InitGenesis(ctx, *k, *tc.genState)
 
 			// Check if issuers were already initialized
 			for _, issuerData := range tc.genState.Issuers {

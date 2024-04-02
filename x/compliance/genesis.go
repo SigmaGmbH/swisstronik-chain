@@ -29,8 +29,6 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 
 	// Restore verification data
 	for _, verificationData := range genState.VerificationDetails {
-		// TODO, Check if issuer address is valid or timestamp of issuance/expiration are valid
-
 		// Check if issuer address is valid
 		issuerAddress, err := sdk.AccAddressFromBech32(verificationData.Details.IssuerAddress)
 		if err != nil {
