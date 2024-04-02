@@ -7,22 +7,18 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/status-im/keycard-go/hexutils"
 	"github.com/stretchr/testify/require"
-	
+
 	testkeeper "swisstronik/testutil/keeper"
 	"swisstronik/x/compliance"
 	"swisstronik/x/compliance/types"
 )
 
-func TestGenesis_Validation(t *testing.T) {
+func TestInitGenesis_Validation(t *testing.T) {
 	testCases := []struct {
 		name     string
 		genState *types.GenesisState
 		expPanic bool
 	}{
-		{
-			name:     "default",
-			genState: types.DefaultGenesis(),
-		},
 		{
 			name: "invalid issuers",
 			genState: &types.GenesisState{
@@ -33,7 +29,66 @@ func TestGenesis_Validation(t *testing.T) {
 			expPanic: true,
 		},
 		{
-			name: "invalid address",
+			name: "invalid issuers with no operators",
+			genState: &types.GenesisState{
+				Issuers: []*types.IssuerGenesisAccount{
+					{Address: "cosmos1qtu30xdvzkqxkluwpmacmluyxw23rw7ces8qtusn"},
+				},
+			},
+			expPanic: true,
+		},
+		{
+			name: "invalid issuer in verification data",
+			genState: &types.GenesisState{
+				VerificationDetails: []*types.GenesisVerificationDetails{
+					{
+						Id: hexutils.HexToBytes("0273FBBAFFC58F732199B20833643248C213C5DBA8F4A05DF505713FD36B8CE2"),
+						Details: &types.VerificationDetails{
+							IssuerAddress: "invalid issuer",
+						},
+					},
+				},
+			},
+			expPanic: true,
+		},
+		{
+			name: "invalid timestamp in verification data",
+			genState: &types.GenesisState{
+				VerificationDetails: []*types.GenesisVerificationDetails{
+					{
+						Id: hexutils.HexToBytes("0273FBBAFFC58F732199B20833643248C213C5DBA8F4A05DF505713FD36B8CE2"),
+						Details: &types.VerificationDetails{
+							IssuerAddress:       "cosmos1qyqs2z8qvvy6f3gm2f2hlpayje3wtcpfpnzqjn6pp6",
+							OriginChain:         "test chain",
+							IssuanceTimestamp:   1715018692,
+							ExpirationTimestamp: 1712018692,
+							OriginalData:        hexutils.HexToBytes("B639DF194671CDE06EFAA368A404F72E3306DF0359117AC7E78EC2BE04B7629D"),
+						},
+					},
+				},
+			},
+			expPanic: true,
+		},
+		{
+			name: "no proof in verification data",
+			genState: &types.GenesisState{
+				VerificationDetails: []*types.GenesisVerificationDetails{
+					{
+						Id: hexutils.HexToBytes("0273FBBAFFC58F732199B20833643248C213C5DBA8F4A05DF505713FD36B8CE2"),
+						Details: &types.VerificationDetails{
+							IssuerAddress:       "cosmos1qyqs2z8qvvy6f3gm2f2hlpayje3wtcpfpnzqjn6pp6",
+							OriginChain:         "test chain",
+							IssuanceTimestamp:   1712018692,
+							ExpirationTimestamp: 1715018692,
+							OriginalData:        nil,
+						},
+					},
+				},
+			},
+			expPanic: true,
+		},
+		{
+			name: "invalid account address",
 			genState: &types.GenesisState{
 				AddressDetails: []*types.GenesisAddressDetails{
 					{Address: "wrong address"},
@@ -42,28 +97,93 @@ func TestGenesis_Validation(t *testing.T) {
 			expPanic: true,
 		},
 		{
-			name:     "not found verification data", // there's no verification data with verification_id
-			genState: &types.GenesisState{},         // todo
+			name: "issuer of verification not found for verified account ",
+			genState: &types.GenesisState{
+				AddressDetails: []*types.GenesisAddressDetails{
+					{
+						Address: "cosmos1q9al9ge3frrrwylkd8j5usp9a4pur5ajhgjgry7x",
+						Details: &types.AddressDetails{
+							IsVerified: true,
+							IsRevoked:  false,
+							Verifications: []*types.Verification{{
+								Type:           types.VerificationType_VT_KYC,
+								VerificationId: nil,
+								IssuerAddress:  "cosmos1qyqs2z8qvvy6f3gm2f2hlpayje3wtcpfpnzqjn6pp6",
+							}},
+						},
+					},
+				},
+			},
 			expPanic: true,
 		},
 		{
-			name:     "invalid issuer in verification data",
-			genState: &types.GenesisState{}, // todo
+			name: "verification id for verified account is nil", // there's no verification data with verification_id
+			genState: &types.GenesisState{
+				Issuers: []*types.IssuerGenesisAccount{
+					{
+						Address: "cosmos1qyqs2z8qvvy6f3gm2f2hlpayje3wtcpfpnzqjn6pp6",
+						Details: &types.IssuerDetails{
+							Name:     "test issuer",
+							Operator: "test operator",
+						},
+					},
+				},
+				AddressDetails: []*types.GenesisAddressDetails{
+					{
+						Address: "cosmos1q9al9ge3frrrwylkd8j5usp9a4pur5ajhgjgry7x",
+						Details: &types.AddressDetails{
+							IsVerified: true,
+							IsRevoked:  false,
+							Verifications: []*types.Verification{{
+								Type:           types.VerificationType_VT_KYC,
+								VerificationId: nil,
+								IssuerAddress:  "cosmos1qyqs2z8qvvy6f3gm2f2hlpayje3wtcpfpnzqjn6pp6",
+							}},
+						},
+					},
+				},
+			},
 			expPanic: true,
 		},
 		{
-			name:     "invalid timestamp in verification data",
-			genState: &types.GenesisState{}, // todo
-			expPanic: true,
-		},
-		{
-			name:     "issuer not found",
-			genState: &types.GenesisState{}, // todo
-			expPanic: true,
-		},
-		{
-			name:     "verification id not valid", // Refer: Keeper.AddVerificationDetails
-			genState: &types.GenesisState{},       // todo
+			name: "not found verification data for verified account", // there's no verification data with verification_id
+			genState: &types.GenesisState{
+				Issuers: []*types.IssuerGenesisAccount{
+					{
+						Address: "cosmos1qyqs2z8qvvy6f3gm2f2hlpayje3wtcpfpnzqjn6pp6",
+						Details: &types.IssuerDetails{
+							Name:     "test issuer",
+							Operator: "test operator",
+						},
+					},
+				},
+				AddressDetails: []*types.GenesisAddressDetails{
+					{
+						Address: "cosmos1q9al9ge3frrrwylkd8j5usp9a4pur5ajhgjgry7x",
+						Details: &types.AddressDetails{
+							IsVerified: true,
+							IsRevoked:  false,
+							Verifications: []*types.Verification{{
+								Type:           types.VerificationType_VT_KYC,
+								VerificationId: hexutils.HexToBytes("1075ee73240c62b820651c22f22f9371dccde1963dec74afffa493902439def2"),
+								IssuerAddress:  "cosmos1qyqs2z8qvvy6f3gm2f2hlpayje3wtcpfpnzqjn6pp6",
+							}},
+						},
+					},
+				},
+				VerificationDetails: []*types.GenesisVerificationDetails{
+					{
+						Id: hexutils.HexToBytes("0273FBBAFFC58F732199B20833643248C213C5DBA8F4A05DF505713FD36B8CE2"),
+						Details: &types.VerificationDetails{
+							IssuerAddress:       "cosmos1qyqs2z8qvvy6f3gm2f2hlpayje3wtcpfpnzqjn6pp6",
+							OriginChain:         "test chain",
+							IssuanceTimestamp:   1712018692,
+							ExpirationTimestamp: 1715018692,
+							OriginalData:        hexutils.HexToBytes("B639DF194671CDE06EFAA368A404F72E3306DF0359117AC7E78EC2BE04B7629D"),
+						},
+					},
+				},
+			},
 			expPanic: true,
 		},
 	}
@@ -92,13 +212,18 @@ func TestGenesis_Success(t *testing.T) {
 		expPanic bool
 	}{
 		{
-			name: "issuers",
+			name:     "default",
+			genState: types.DefaultGenesis(),
+		},
+		{
+			name: "valid issuers, verifications and addresses",
 			genState: &types.GenesisState{
 				Issuers: []*types.IssuerGenesisAccount{
 					{
-						Address: "cosmos1q9y7yywh0npj2qvgey7geluuhu6j8yyd3gxf2ayk",
+						Address: "cosmos1qyqs2z8qvvy6f3gm2f2hlpayje3wtcpfpnzqjn6pp6",
 						Details: &types.IssuerDetails{
-							Name: "test issuer",
+							Name:     "test issuer",
+							Operator: "test operator",
 						},
 					},
 					{
@@ -106,34 +231,11 @@ func TestGenesis_Success(t *testing.T) {
 						Details: &types.IssuerDetails{
 							Name:        "test issuer2",
 							Description: "test description2",
-						},
-					},
-					{
-						Address: "cosmos1qgqhhu4rx9yvvdcn7e572njqyhk58swnk2aqgepj2r",
-						Details: &types.IssuerDetails{
-							Name: "test issuer3",
-							Logo: "test logo3",
+							Operator:    "test operator2",
 						},
 					},
 				},
-			},
-		},
-		{
-			name: "addresses",
-			genState: &types.GenesisState{
 				AddressDetails: []*types.GenesisAddressDetails{
-					{
-						Address: "cosmos1q9al9ge3frrrwylkd8j5usp9a4pur5ajhgjgry7x",
-						Details: &types.AddressDetails{
-							IsVerified: true,
-							IsRevoked:  false,
-							Verifications: []*types.Verification{{
-								Type:           types.VerificationType_VT_KYC,
-								VerificationId: nil,
-								IssuerAddress:  "0x64e739a7d5f9d9e53c7D28be3693Cc0c951d5dC0",
-							}},
-						},
-					},
 					{
 						Address: "cosmos1qydee7scj8wvd5vemkqtfr6gy7794ul9egn69yfy",
 						Details: &types.AddressDetails{
@@ -143,28 +245,35 @@ func TestGenesis_Success(t *testing.T) {
 						},
 					},
 					{
+						Address: "cosmos1q9al9ge3frrrwylkd8j5usp9a4pur5ajhgjgry7x",
+						Details: &types.AddressDetails{
+							IsVerified: true,
+							IsRevoked:  false,
+							Verifications: []*types.Verification{{
+								Type:           types.VerificationType_VT_KYC,
+								VerificationId: hexutils.HexToBytes("1075ee73240c62b820651c22f22f9371dccde1963dec74afffa493902439def2"),
+								IssuerAddress:  "cosmos1qyqs2z8qvvy6f3gm2f2hlpayje3wtcpfpnzqjn6pp6",
+							}},
+						},
+					},
+					{
 						Address: "cosmos1lytentq4sp4hlrswlwxllppnj5gmhkxvpep445",
 						Details: &types.AddressDetails{
 							IsVerified: false,
 							IsRevoked:  false,
 							Verifications: []*types.Verification{{
 								Type:           types.VerificationType_VT_KYC,
-								VerificationId: nil,
-								IssuerAddress:  "0x3826539Cbd8d68DCF119e80B994557B4278CeC9f",
+								VerificationId: hexutils.HexToBytes("0273FBBAFFC58F732199B20833643248C213C5DBA8F4A05DF505713FD36B8CE2"),
+								IssuerAddress:  "cosmos1qyqs2z8qvvy6f3gm2f2hlpayje3wtcpfpnzqjn6pp6",
 							}},
 						},
 					},
 				},
-			},
-		},
-		{
-			name: "verifications",
-			genState: &types.GenesisState{
 				VerificationDetails: []*types.GenesisVerificationDetails{
 					{
 						Id: hexutils.HexToBytes("0273FBBAFFC58F732199B20833643248C213C5DBA8F4A05DF505713FD36B8CE2"),
 						Details: &types.VerificationDetails{
-							IssuerAddress:       "cosmos1qtu30xdvzkqxkluwpmacmluyxw23rw7ces8qtusn",
+							IssuerAddress:       "cosmos1qyqs2z8qvvy6f3gm2f2hlpayje3wtcpfpnzqjn6pp6",
 							OriginChain:         "test chain",
 							IssuanceTimestamp:   1712018692,
 							ExpirationTimestamp: 1715018692,
@@ -174,7 +283,7 @@ func TestGenesis_Success(t *testing.T) {
 					{
 						Id: hexutils.HexToBytes("1075ee73240c62b820651c22f22f9371dccde1963dec74afffa493902439def2"),
 						Details: &types.VerificationDetails{
-							IssuerAddress:       "cosmos1qgq3h886rzgae3k3n8wcpdy0fqnmckhnuh9q20czzp",
+							IssuerAddress:       "cosmos1qyqs2z8qvvy6f3gm2f2hlpayje3wtcpfpnzqjn6pp6",
 							OriginChain:         "test chain",
 							IssuanceTimestamp:   1712022843,
 							ExpirationTimestamp: 1712052843,
