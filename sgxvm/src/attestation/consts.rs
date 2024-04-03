@@ -12,4 +12,4 @@ pub const ENCRYPTED_KEY_SIZE: usize = 78;
 
 pub const QUOTE_SIGNATURE_TYPE: sgx_quote_sign_type_t = sgx_quote_sign_type_t::SGX_LINKABLE_SIGNATURE; 
 pub const MIN_REQUIRED_TCB: u64 = 16;
-pub const MIN_REQUIRED_SVN: u16 = 1;
+pub const MIN_REQUIRED_SVN: u16 = 0;
