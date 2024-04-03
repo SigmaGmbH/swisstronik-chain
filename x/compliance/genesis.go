@@ -58,23 +58,21 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 		}
 
 		// If address is verified, verification data must exist and issuer must be valid
-		if addressData.Details.IsVerified {
-			for _, verificationData := range addressData.Details.Verifications {
-				// Check if issuer is valid
-				issuerAddress, err := sdk.AccAddressFromBech32(verificationData.IssuerAddress)
-				if err != nil {
-					panic(err)
-				}
-				if exists, err := k.IssuerExists(ctx, issuerAddress); !exists || err != nil {
-					panic(err)
-				}
-				// Check if verification data exists
-				if verificationData.VerificationId == nil {
-					panic(errors.Wrap(types.ErrInvalidParam, "verification id is nil"))
-				}
-				if details, err := k.GetVerificationDetails(ctx, verificationData.VerificationId); details == nil || err != nil {
-					panic(err)
-				}
+		for _, verificationData := range addressData.Details.Verifications {
+			// Check if issuer is valid
+			issuerAddress, err := sdk.AccAddressFromBech32(verificationData.IssuerAddress)
+			if err != nil {
+				panic(err)
+			}
+			if exists, err := k.IssuerExists(ctx, issuerAddress); !exists || err != nil {
+				panic(err)
+			}
+			// Check if verification data exists
+			if verificationData.VerificationId == nil {
+				panic(errors.Wrap(types.ErrInvalidParam, "verification id is nil"))
+			}
+			if details, err := k.GetVerificationDetails(ctx, verificationData.VerificationId); details == nil || err != nil {
+				panic(err)
 			}
 		}
 

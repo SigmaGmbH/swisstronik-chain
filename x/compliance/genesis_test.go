@@ -146,7 +146,8 @@ func TestInitGenesis_Validation(t *testing.T) {
 			expPanic: true,
 		},
 		{
-			name: "not found verification data for verified account", // there's no verification data with verification_id
+			// There's no verification data with verification_id
+			name: "not found verification data for verified account",
 			genState: &types.GenesisState{
 				Issuers: []*types.IssuerGenesisAccount{
 					{

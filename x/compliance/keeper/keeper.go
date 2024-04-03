@@ -60,6 +60,8 @@ func (k Keeper) SetIssuerDetails(ctx sdk.Context, issuerAddress sdk.Address, det
 func (k Keeper) RemoveIssuer(ctx sdk.Context, issuerAddress sdk.Address) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixIssuerDetails)
 	store.Delete(issuerAddress.Bytes())
+	// NOTE, all the verification data verified by removed issuer will be deleted from store
+	// every time when call `GetVerificationData` or `GetAddressDetails`
 }
 
 // GetIssuerDetails returns details of provided issuer address
@@ -212,6 +214,11 @@ func (k Keeper) SetVerificationDetails(ctx sdk.Context, verificationDetailsId []
 	return nil
 }
 
+func (k Keeper) RemoveVerificationData(ctx sdk.Context, verificationDetailsId []byte) {
+	verificationDetailsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationDetails)
+	verificationDetailsStore.Delete(verificationDetailsId)
+}
+
 // GetVerificationDetails returns verification details for provided ID
 func (k Keeper) GetVerificationDetails(ctx sdk.Context, verificationDetailsId []byte) (*types.VerificationDetails, error) {
 	verificationDetailsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationDetails)
@@ -223,6 +230,20 @@ func (k Keeper) GetVerificationDetails(ctx sdk.Context, verificationDetailsId []
 	var verificationDetails types.VerificationDetails
 	if err := proto.Unmarshal(verificationDetailsBytes, &verificationDetails); err != nil {
 		return nil, err
+	}
+
+	// Check if issuer exists. If removed, delete verification data from store
+	issuerAddress, err := sdk.AccAddressFromBech32(verificationDetails.IssuerAddress)
+	if err != nil {
+		return nil, err
+	}
+	exists, err := k.IssuerExists(ctx, issuerAddress)
+	if err != nil {
+		return nil, err
+	}
+	if !exists { // Already removed and verification data exists, delete verification data
+		k.RemoveVerificationData(ctx, verificationDetailsId)
+		return nil, nil
 	}
 
 	return &verificationDetails, nil
