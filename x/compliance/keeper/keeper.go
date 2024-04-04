@@ -61,8 +61,9 @@ func (k Keeper) SetIssuerDetails(ctx sdk.Context, issuerAddress sdk.Address, det
 func (k Keeper) RemoveIssuer(ctx sdk.Context, issuerAddress sdk.Address) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixIssuerDetails)
 	store.Delete(issuerAddress.Bytes())
-	// NOTE, all the verification data verified by removed issuer will be deleted from store
-	// every time when call `GetVerificationData` or `GetAddressDetails`
+	// NOTE, all the verification data verified by removed issuer must be deleted from store
+	// But for now, let's keep those verifications.
+	// They will be removed at the time when call `GetAddressDetails` or `GetVerificationDetails`
 
 	// Remove address details for issuer
 	k.RemoveAddressDetails(ctx, issuerAddress)
@@ -99,6 +100,31 @@ func (k Keeper) GetAddressDetails(ctx sdk.Context, address sdk.Address) (*types.
 		return nil, err
 	}
 
+	// Check if issuer exists. If removed, delete verification details from store
+	var newVerifications []*types.Verification
+	for _, verification := range addressDetails.Verifications {
+		issuerAddress, err := sdk.AccAddressFromBech32(verification.IssuerAddress)
+		if err != nil {
+			return nil, err
+		}
+		exists, err := k.IssuerExists(ctx, issuerAddress)
+		if err != nil {
+			return nil, err
+		}
+		if !exists { // Already removed and verification data exists, delete verification data
+			k.RemoveVerificationDetails(ctx, verification.VerificationId)
+		} else {
+			newVerifications = append(newVerifications, verification)
+		}
+	}
+	if len(newVerifications) != len(addressDetails.Verifications) {
+		// If found invalid verification, update address details with latest
+		if err := k.SetAddressDetails(ctx, address, &addressDetails); err != nil {
+			return nil, err
+		}
+	}
+	addressDetails.Verifications = newVerifications
+
 	return &addressDetails, nil
 }
 
@@ -113,6 +139,7 @@ func (k Keeper) SetAddressDetails(ctx sdk.Context, address sdk.Address, details 
 	return nil
 }
 
+// RemoveAddressDetails deletes address details from store
 func (k Keeper) RemoveAddressDetails(ctx sdk.Context, address sdk.Address) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixAddressDetails)
 	store.Delete(address.Bytes())

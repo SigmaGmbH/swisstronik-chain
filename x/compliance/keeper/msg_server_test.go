@@ -133,6 +133,11 @@ func (suite *KeeperTestSuite) TestSetIssuerDetails() {
 				suite.Require().Equal("issuer logo", details.Logo)
 				suite.Require().Equal("issuer legal entity", details.LegalEntity)
 				suite.Require().Equal(operator.String(), details.Operator)
+
+				// Check if issuer's verification status is false
+				verified, error := suite.keeper.IsAddressVerified(suite.ctx, issuer)
+				suite.Require().NoError(err)
+				suite.Require().False(verified)
 			},
 		},
 		{
