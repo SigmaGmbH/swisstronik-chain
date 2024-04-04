@@ -71,7 +71,7 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 			if verificationData.VerificationId == nil {
 				panic(errors.Wrap(types.ErrInvalidParam, "verification id is nil"))
 			}
-			if details, err := k.GetVerificationDetails(ctx, verificationData.VerificationId); details == nil || err != nil {
+			if _, err = k.GetVerificationDetails(ctx, verificationData.VerificationId); err != nil {
 				panic(err)
 			}
 		}

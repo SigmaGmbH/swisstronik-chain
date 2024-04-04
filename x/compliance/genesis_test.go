@@ -185,7 +185,7 @@ func TestInitGenesis_Validation(t *testing.T) {
 					},
 				},
 			},
-			expPanic: true,
+			expPanic: false,
 		},
 	}
 
