@@ -4,7 +4,6 @@ use crate::encryption::{encrypt_deoxys, decrypt_deoxys};
 use sgx_types::SgxResult;
 use std::vec::Vec;
 
-pub const REGISTRATION_KEY_SIZE: usize = 32;
 pub const PRIVATE_KEY_SIZE: usize = 32;
 
 /// RegistrationKey handles all operations with registration key such as derivation of public key,

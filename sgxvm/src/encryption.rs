@@ -106,7 +106,7 @@ pub fn encrypt_deoxys(
     encryption_salt: Option<Vec<u8>>,
 ) -> Result<Vec<u8>, Error> {
     // Derive encryption salt if provided
-    let encryption_salt = encryption_salt.and_then(|salt| {
+    let _encryption_salt = encryption_salt.and_then(|salt| {
         let mut hasher = kSha256::new();
         hasher.update(salt);
         let mut encryption_salt = [0u8; 32];
@@ -114,30 +114,32 @@ pub fn encrypt_deoxys(
         Some(encryption_salt)
     });
 
-    let nonce = match encryption_salt {
-        // If salt was not provided, generate random nonce field
-        None => {
-            let mut nonce_buffer = [0u8; NONCE_SIZE];
-            let result = unsafe { sgx_read_rand(&mut nonce_buffer as *mut u8, NONCE_SIZE) };
-            match result {
-                sgx_status_t::SGX_SUCCESS => nonce_buffer,
-                _ => {
-                    return Err(Error::encryption_err(format!(
-                        "Cannot generate nonce: {:?}",
-                        result.as_str()
-                    )))
-                }
-            }
-        }
-        // Otherwise use encryption_salt as seed for nonce generation
-        Some(encryption_salt) => {
-            let mut rng = rand_chacha::ChaCha8Rng::from_seed(encryption_salt);
-            let mut nonce = [0u8; NONCE_SIZE];
-            rng.fill_bytes(&mut nonce);
-            nonce
-        }
-    };
+    // Non-constant nonces will be enabled in v1.0.3 chain upgrade.
+    // let nonce = match encryption_salt {
+    //     // If salt was not provided, generate random nonce field
+    //     None => {
+    //         let mut nonce_buffer = [0u8; NONCE_SIZE];
+    //         let result = unsafe { sgx_read_rand(&mut nonce_buffer as *mut u8, NONCE_SIZE) };
+    //         match result {
+    //             sgx_status_t::SGX_SUCCESS => nonce_buffer,
+    //             _ => {
+    //                 return Err(Error::encryption_err(format!(
+    //                     "Cannot generate nonce: {:?}",
+    //                     result.as_str()
+    //                 )))
+    //             }
+    //         }
+    //     }
+    //     // Otherwise use encryption_salt as seed for nonce generation
+    //     Some(encryption_salt) => {
+    //         let mut rng = rand_chacha::ChaCha8Rng::from_seed(encryption_salt);
+    //         let mut nonce = [0u8; NONCE_SIZE];
+    //         rng.fill_bytes(&mut nonce);
+    //         nonce
+    //     }
+    // };
 
+    let nonce = [0u8; NONCE_SIZE];
     let ad = [0u8; TAG_SIZE];
 
     // Construct cipher
