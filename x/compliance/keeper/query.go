@@ -8,9 +8,14 @@ import (
 	"swisstronik/x/compliance/types"
 )
 
-var _ types.QueryServer = Keeper{}
+// Querier is used as Keeper will have duplicate methods if used directly, and gRPC names take precedence over keeper
+type Querier struct {
+	Keeper
+}
 
-func (k Keeper) AddressDetails(goCtx context.Context, req *types.QueryAddressDetailsRequest) (*types.QueryAddressDetailsResponse, error) {
+var _ types.QueryServer = Querier{}
+
+func (k Querier) AddressDetails(goCtx context.Context, req *types.QueryAddressDetailsRequest) (*types.QueryAddressDetailsResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
@@ -29,7 +34,7 @@ func (k Keeper) AddressDetails(goCtx context.Context, req *types.QueryAddressDet
 	return &types.QueryAddressDetailsResponse{Data: details}, nil
 }
 
-func (k Keeper) IssuerDetails(goCtx context.Context, req *types.QueryIssuerDetailsRequest) (*types.QueryIssuerDetailsResponse, error) {
+func (k Querier) IssuerDetails(goCtx context.Context, req *types.QueryIssuerDetailsRequest) (*types.QueryIssuerDetailsResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
@@ -48,7 +53,7 @@ func (k Keeper) IssuerDetails(goCtx context.Context, req *types.QueryIssuerDetai
 	return &types.QueryIssuerDetailsResponse{Details: issuerDetails}, nil
 }
 
-func (k Keeper) VerificationDetails(goCtx context.Context, req *types.QueryVerificationDetailsRequest) (*types.QueryVerificationDetailsResponse, error) {
+func (k Querier) VerificationDetails(goCtx context.Context, req *types.QueryVerificationDetailsRequest) (*types.QueryVerificationDetailsResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}

@@ -177,25 +177,25 @@ func (k Keeper) SetAddressVerificationStatus(ctx sdk.Context, address sdk.Addres
 }
 
 // AddVerificationDetails writes details of passed verification by provided address.
-func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.Address, verificationType types.VerificationType, details *types.VerificationDetails) error {
+func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.Address, verificationType types.VerificationType, details *types.VerificationDetails) ([]byte, error) {
 	// Check if issuer is verified and not banned
 	issuerAddress, err := sdk.AccAddressFromBech32(details.IssuerAddress)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	isAddressVerified, err := k.IsAddressVerified(ctx, issuerAddress)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if !isAddressVerified {
-		return errors.Wrap(types.ErrInvalidParam, "issuer is not verified")
+		return nil, errors.Wrap(types.ErrInvalidParam, "issuer is not verified")
 	}
 
 	detailsBytes, err := details.Marshal()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// Check if there is no such verification details in storage yet
@@ -203,7 +203,7 @@ func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.Address,
 	verificationDetailsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationDetails)
 
 	if verificationDetailsStore.Has(verificationDetailsID) {
-		return errors.Wrap(types.ErrInvalidParam, "provided verification details already in storage")
+		return nil, errors.Wrap(types.ErrInvalidParam, "provided verification details already in storage")
 	}
 
 	// If there is no such verification details associated with provided address, write them to the table
@@ -217,19 +217,19 @@ func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.Address,
 	}
 	userAddressDetails, err := k.GetAddressDetails(ctx, userAddress)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if slices.Contains(userAddressDetails.Verifications, verification) {
-		return errors.Wrap(types.ErrInvalidParam, "such verification already associated with user address")
+		return nil, errors.Wrap(types.ErrInvalidParam, "such verification already associated with user address")
 	}
 
 	userAddressDetails.Verifications = append(userAddressDetails.Verifications, verification)
 	if err := k.SetAddressDetails(ctx, userAddress, userAddressDetails); err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return verificationDetailsID, nil
 }
 
 // SetVerificationDetails writes verification details
@@ -251,6 +251,9 @@ func (k Keeper) SetVerificationDetails(ctx sdk.Context, verificationDetailsId []
 
 // RemoveVerificationDetails removes verification details for provided ID
 func (k Keeper) RemoveVerificationDetails(ctx sdk.Context, verificationDetailsId []byte) {
+	if verificationDetailsId == nil {
+		return
+	}
 	verificationDetailsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationDetails)
 	verificationDetailsStore.Delete(verificationDetailsId)
 }
@@ -260,7 +263,7 @@ func (k Keeper) GetVerificationDetails(ctx sdk.Context, verificationDetailsId []
 	verificationDetailsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationDetails)
 	verificationDetailsBytes := verificationDetailsStore.Get(verificationDetailsId)
 	if verificationDetailsBytes == nil {
-		return nil, nil
+		return &types.VerificationDetails{}, nil
 	}
 
 	var verificationDetails types.VerificationDetails
@@ -279,7 +282,7 @@ func (k Keeper) GetVerificationDetails(ctx sdk.Context, verificationDetailsId []
 	}
 	if !exists { // Already removed and verification data exists, delete verification data
 		k.RemoveVerificationDetails(ctx, verificationDetailsId)
-		return nil, nil
+		return &types.VerificationDetails{}, nil
 	}
 
 	return &verificationDetails, nil
@@ -340,6 +343,16 @@ func (k Keeper) GetVerificationsOfType(ctx sdk.Context, userAddress sdk.Address,
 	// Extract verification data
 	var verifications []*types.VerificationDetails
 	for _, verification := range appropriateTypeVerifications {
+		// Filter verifications by expected issuer
+		if expectedIssuers != nil && slices.ContainsFunc(expectedIssuers, func(expectedIssuer sdk.Address) bool {
+			if expectedIssuer.String() == verification.IssuerAddress {
+				return true
+			}
+			return false
+		}) == false {
+			continue
+		}
+
 		verificationDetails, err := k.GetVerificationDetails(ctx, verification.VerificationId)
 		if err != nil {
 			return nil, err

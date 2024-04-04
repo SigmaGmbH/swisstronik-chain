@@ -3,6 +3,7 @@ package keeper_test
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/status-im/keycard-go/hexutils"
+
 	"swisstronik/tests"
 	"swisstronik/x/compliance/keeper"
 	"swisstronik/x/compliance/types"
@@ -432,7 +433,7 @@ func (suite *KeeperTestSuite) TestUpdateIssuerDetails() {
 				signer = sdk.AccAddress(from.Bytes())
 
 				// Add address details with verification details
-				_ = suite.keeper.AddVerificationDetails(
+				_, _ = suite.keeper.AddVerificationDetails(
 					suite.ctx,
 					signer,
 					types.VerificationType_VT_KYC,
@@ -628,7 +629,7 @@ func (suite *KeeperTestSuite) TestRemoveIssuer() {
 				signer = sdk.AccAddress(from.Bytes())
 
 				// Add address details with verification details
-				_ = suite.keeper.AddVerificationDetails(
+				_, _ = suite.keeper.AddVerificationDetails(
 					suite.ctx,
 					signer,
 					types.VerificationType_VT_KYC,

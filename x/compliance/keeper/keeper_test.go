@@ -87,7 +87,7 @@ func (suite *KeeperTestSuite) TestSuspendedIssuer() {
 
 	// Should not allow to add verification details verified by suspended issuer
 	// Even if issuer was suspended, verification data should exist
-	err = suite.keeper.AddVerificationDetails(
+	verificationId, err := suite.keeper.AddVerificationDetails(
 		suite.ctx,
 		signer,
 		types.VerificationType_VT_KYC,
@@ -100,6 +100,11 @@ func (suite *KeeperTestSuite) TestSuspendedIssuer() {
 		},
 	)
 	suite.Require().Error(err)
+	suite.Require().Nil(verificationId)
+
+	has, err := suite.keeper.HasVerificationOfType(suite.ctx, signer, types.VerificationType_VT_KYC, []sdk.Address{issuer})
+	suite.Require().NoError(err)
+	suite.Require().False(has)
 }
 
 func (suite *KeeperTestSuite) TestRemovedIssuer() {
@@ -123,7 +128,7 @@ func (suite *KeeperTestSuite) TestRemovedIssuer() {
 			IsVerified: true,
 			IsRevoked:  false,
 		})
-	err = suite.keeper.AddVerificationDetails(
+	verificationId, err := suite.keeper.AddVerificationDetails(
 		suite.ctx,
 		signer,
 		types.VerificationType_VT_KYC,
@@ -142,6 +147,10 @@ func (suite *KeeperTestSuite) TestRemovedIssuer() {
 	suite.Require().Equal(i, &types.IssuerDetails{})
 	suite.Require().NoError(err)
 
+	exists, err := suite.keeper.IssuerExists(suite.ctx, issuer)
+	suite.Require().False(exists)
+	suite.Require().NoError(err)
+
 	// AddressDetails for removed issuer should not exist
 	addressDetails, err := suite.keeper.GetAddressDetails(suite.ctx, issuer)
 	suite.Require().Equal(addressDetails, &types.AddressDetails{})
@@ -157,10 +166,14 @@ func (suite *KeeperTestSuite) TestRemovedIssuer() {
 	)
 	suite.Require().NoError(err)
 	suite.Require().Equal(0, len(verificationDetails))
+
+	verificationDetailsBy, err := suite.keeper.GetVerificationDetails(suite.ctx, verificationId)
+	suite.Require().NoError(err)
+	suite.Require().Equal(verificationDetailsBy, &types.VerificationDetails{})
 }
 
 func (suite *KeeperTestSuite) TestAddVerificationDetails() {
-	details := &types.IssuerDetails{Name: "testIssuer"}
+	details := &types.IssuerDetails{Name: "testIssuer", Operator: "testOperator"}
 	from, _ := tests.RandomEthAddressWithPrivateKey()
 	issuer := sdk.AccAddress(from.Bytes())
 	err := suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
@@ -173,7 +186,7 @@ func (suite *KeeperTestSuite) TestAddVerificationDetails() {
 	signer := sdk.AccAddress(from.Bytes())
 
 	// Allow to add verification details verified by active issuer
-	err = suite.keeper.AddVerificationDetails(
+	verificationId, err := suite.keeper.AddVerificationDetails(
 		suite.ctx,
 		signer,
 		types.VerificationType_VT_KYC,
@@ -186,22 +199,39 @@ func (suite *KeeperTestSuite) TestAddVerificationDetails() {
 		},
 	)
 	suite.Require().NoError(err)
+	suite.Require().NotNil(verificationId)
+
+	has, err := suite.keeper.HasVerificationOfType(suite.ctx, signer, types.VerificationType_VT_KYC, []sdk.Address{issuer})
+	suite.Require().NoError(err)
+	suite.Require().True(has)
+
+	// No provided issuer, but has verification details
+	has, err = suite.keeper.HasVerificationOfType(suite.ctx, signer, types.VerificationType_VT_KYC, nil)
+	suite.Require().NoError(err)
+	suite.Require().True(has)
 }
 
 func (suite *KeeperTestSuite) TestAddressDetailsCRUD() {
+	issuerDetails := &types.IssuerDetails{Name: "testIssuer", Operator: "testOperator"}
 	from, _ := tests.RandomEthAddressWithPrivateKey()
+	issuer := sdk.AccAddress(from.Bytes())
+	err := suite.keeper.SetIssuerDetails(suite.ctx, issuer, issuerDetails)
+	suite.Require().NoError(err)
+
+	from, _ = tests.RandomEthAddressWithPrivateKey()
 	address := sdk.AccAddress(from.Bytes())
-	details := &types.AddressDetails{IsVerified: true,
+
+	addressDetails := &types.AddressDetails{IsVerified: true,
 		IsRevoked: false,
 		Verifications: []*types.Verification{{
 			Type:           types.VerificationType_VT_KYC,
 			VerificationId: nil,
-			IssuerAddress:  address.String(),
+			IssuerAddress:  issuer.String(),
 		}}}
-	err := suite.keeper.SetAddressDetails(suite.ctx, address, details)
+	err = suite.keeper.SetAddressDetails(suite.ctx, address, addressDetails)
 	suite.Require().NoError(err)
 	i, err := suite.keeper.GetAddressDetails(suite.ctx, address)
-	suite.Require().Equal(details, i)
+	suite.Require().Equal(addressDetails, i)
 	suite.Require().NoError(err)
 }
 
@@ -257,4 +287,27 @@ func (suite *KeeperTestSuite) TestAddressDetailsSetVerificationStatus() {
 	i, err = suite.keeper.GetAddressDetails(suite.ctx, address)
 	suite.Require().Equal(false, i.IsVerified)
 	suite.Require().NoError(err)
+}
+
+func (suite *KeeperTestSuite) TestSetVerificationDetails() {
+	from, _ := tests.RandomEthAddressWithPrivateKey()
+	issuer := sdk.AccAddress(from.Bytes())
+	issuerDetails := &types.IssuerDetails{Name: "testIssuer", Operator: "testOperator"}
+	err := suite.keeper.SetIssuerDetails(suite.ctx, issuer, issuerDetails)
+	suite.Require().NoError(err)
+
+	verificationDetails := &types.VerificationDetails{
+		IssuerAddress:       issuer.String(),
+		OriginChain:         "test chain",
+		IssuanceTimestamp:   1712018692,
+		ExpirationTimestamp: 1715018692,
+		OriginalData:        hexutils.HexToBytes("B639DF194671CDE06EFAA368A404F72E3306DF0359117AC7E78EC2BE04B7629D"),
+	}
+	verificationId := hexutils.HexToBytes("83456ef3b8ea6777da69d1509cf51861985e2b4e24cf7f5d4c5080996bf8cf4e")
+	err = suite.keeper.SetVerificationDetails(suite.ctx, verificationId, verificationDetails)
+	suite.Require().NoError(err)
+
+	resp, err := suite.keeper.GetVerificationDetails(suite.ctx, verificationId)
+	suite.Require().NoError(err)
+	suite.Require().Equal(verificationDetails, resp)
 }
