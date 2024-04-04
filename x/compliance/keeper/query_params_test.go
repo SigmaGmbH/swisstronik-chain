@@ -1,12 +1,14 @@
 package keeper_test
 
 import (
+	"testing"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
+
 	testkeeper "swisstronik/testutil/keeper"
 	"swisstronik/x/compliance/keeper"
 	"swisstronik/x/compliance/types"
-	"testing"
 )
 
 func TestQueryParams(t *testing.T) {
