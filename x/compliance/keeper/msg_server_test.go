@@ -421,6 +421,8 @@ func (suite *KeeperTestSuite) TestUpdateIssuerDetails() {
 				details := &types.IssuerDetails{Name: "test issuer", Operator: operator.String()}
 				_ = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
 
+				_ = suite.keeper.SetAddressVerificationStatus(suite.ctx, issuer, true)
+
 				from, _ = tests.RandomEthAddressWithPrivateKey()
 				signer = sdk.AccAddress(from.Bytes())
 
@@ -593,9 +595,14 @@ func (suite *KeeperTestSuite) TestRemoveIssuer() {
 				suite.Require().NoError(err)
 
 				// Same for issuer details
-				details, err := suite.keeper.GetIssuerDetails(suite.ctx, issuer)
+				issuerDetails, err := suite.keeper.GetIssuerDetails(suite.ctx, issuer)
 				suite.Require().NoError(err)
-				suite.Require().Equal(details, &types.IssuerDetails{})
+				suite.Require().Equal(issuerDetails, &types.IssuerDetails{})
+
+				// Address details for removed issuer should not exit
+				addressDetails, err := suite.keeper.GetAddressDetails(suite.ctx, issuer)
+				suite.Require().NoError(err)
+				suite.Require().Equal(addressDetails, &types.AddressDetails{})
 			},
 		},
 		{
@@ -609,6 +616,8 @@ func (suite *KeeperTestSuite) TestRemoveIssuer() {
 				issuer = sdk.AccAddress(from.Bytes())
 				details := &types.IssuerDetails{Name: "test issuer", Operator: operator.String()}
 				_ = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
+
+				_ = suite.keeper.SetAddressVerificationStatus(suite.ctx, issuer, true)
 
 				from, _ = tests.RandomEthAddressWithPrivateKey()
 				signer = sdk.AccAddress(from.Bytes())

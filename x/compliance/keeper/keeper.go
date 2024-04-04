@@ -1,8 +1,10 @@
 package keeper
 
 import (
-	"cosmossdk.io/errors"
 	"fmt"
+	"slices"
+
+	"cosmossdk.io/errors"
 	"github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
@@ -10,7 +12,6 @@ import (
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/cosmos/gogoproto/proto"
 	"github.com/ethereum/go-ethereum/crypto"
-	"slices"
 
 	"swisstronik/x/compliance/types"
 )
@@ -62,6 +63,9 @@ func (k Keeper) RemoveIssuer(ctx sdk.Context, issuerAddress sdk.Address) {
 	store.Delete(issuerAddress.Bytes())
 	// NOTE, all the verification data verified by removed issuer will be deleted from store
 	// every time when call `GetVerificationData` or `GetAddressDetails`
+
+	// Remove address details for issuer
+	k.RemoveAddressDetails(ctx, issuerAddress)
 }
 
 // GetIssuerDetails returns details of provided issuer address
@@ -109,6 +113,11 @@ func (k Keeper) SetAddressDetails(ctx sdk.Context, address sdk.Address, details 
 	return nil
 }
 
+func (k Keeper) RemoveAddressDetails(ctx sdk.Context, address sdk.Address) {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixAddressDetails)
+	store.Delete(address.Bytes())
+}
+
 // IsAddressVerified returns information if address is verified.
 func (k Keeper) IsAddressVerified(ctx sdk.Context, address sdk.Address) (bool, error) {
 	addressDetails, err := k.GetAddressDetails(ctx, address)
@@ -148,15 +157,14 @@ func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.Address,
 		return err
 	}
 
-	// TODO: Uncomment once verification mechanism is done
-	//isAddressVerified, err := k.IsAddressVerified(ctx, issuerAddress)
-	//if err != nil {
-	//	return err
-	//}
-	//
-	//if !isAddressVerified {
-	//	return errors.Wrap(types.ErrInvalidParam, "issuer is not verified")
-	//}
+	isAddressVerified, err := k.IsAddressVerified(ctx, issuerAddress)
+	if err != nil {
+		return err
+	}
+
+	if !isAddressVerified {
+		return errors.Wrap(types.ErrInvalidParam, "issuer is not verified")
+	}
 
 	detailsBytes, err := details.Marshal()
 	if err != nil {
@@ -214,7 +222,8 @@ func (k Keeper) SetVerificationDetails(ctx sdk.Context, verificationDetailsId []
 	return nil
 }
 
-func (k Keeper) RemoveVerificationData(ctx sdk.Context, verificationDetailsId []byte) {
+// RemoveVerificationDetails removes verification details for provided ID
+func (k Keeper) RemoveVerificationDetails(ctx sdk.Context, verificationDetailsId []byte) {
 	verificationDetailsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationDetails)
 	verificationDetailsStore.Delete(verificationDetailsId)
 }
@@ -242,7 +251,7 @@ func (k Keeper) GetVerificationDetails(ctx sdk.Context, verificationDetailsId []
 		return nil, err
 	}
 	if !exists { // Already removed and verification data exists, delete verification data
-		k.RemoveVerificationData(ctx, verificationDetailsId)
+		k.RemoveVerificationDetails(ctx, verificationDetailsId)
 		return nil, nil
 	}
 
