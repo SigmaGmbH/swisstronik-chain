@@ -63,7 +63,7 @@ func (k Keeper) RemoveIssuer(ctx sdk.Context, issuerAddress sdk.Address) {
 	store.Delete(issuerAddress.Bytes())
 	// NOTE, all the verification data verified by removed issuer must be deleted from store
 	// But for now, let's keep those verifications.
-	// They will be removed at the time when call `GetAddressDetails` or `GetVerificationDetails`
+	// They will be filtered out at the time when call `GetAddressDetails` or `GetVerificationDetails`
 
 	// Remove address details for issuer
 	k.RemoveAddressDetails(ctx, issuerAddress)
@@ -100,7 +100,7 @@ func (k Keeper) GetAddressDetails(ctx sdk.Context, address sdk.Address) (*types.
 		return nil, err
 	}
 
-	// Check if issuer exists. If removed, delete verification details from store
+	// Filter verification details by issuer's existance
 	var newVerifications []*types.Verification
 	for _, verification := range addressDetails.Verifications {
 		issuerAddress, err := sdk.AccAddressFromBech32(verification.IssuerAddress)
@@ -111,9 +111,7 @@ func (k Keeper) GetAddressDetails(ctx sdk.Context, address sdk.Address) (*types.
 		if err != nil {
 			return nil, err
 		}
-		if !exists { // Already removed and verification data exists, delete verification data
-			k.RemoveVerificationDetails(ctx, verification.VerificationId)
-		} else {
+		if exists {
 			newVerifications = append(newVerifications, verification)
 		}
 	}
@@ -280,8 +278,7 @@ func (k Keeper) GetVerificationDetails(ctx sdk.Context, verificationDetailsId []
 	if err != nil {
 		return nil, err
 	}
-	if !exists { // Already removed and verification data exists, delete verification data
-		k.RemoveVerificationDetails(ctx, verificationDetailsId)
+	if !exists {
 		return &types.VerificationDetails{}, nil
 	}
 

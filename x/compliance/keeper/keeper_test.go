@@ -2,7 +2,6 @@ package keeper_test
 
 import (
 	"context"
-	"swisstronik/tests"
 	"testing"
 
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
@@ -13,6 +12,7 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"swisstronik/app"
+	"swisstronik/tests"
 	"swisstronik/utils"
 	"swisstronik/x/compliance/keeper"
 	"swisstronik/x/compliance/types"
@@ -27,6 +27,11 @@ type KeeperTestSuite struct {
 	goCtx  context.Context
 	keeper keeper.Keeper
 	app    *app.App
+}
+
+func init() {
+	cfg := sdk.GetConfig()
+	cfg.SetBech32PrefixForAccount("swtr", "swtrpub")
 }
 
 func TestKeeperTestSuite(t *testing.T) {
