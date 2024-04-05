@@ -115,12 +115,6 @@ func (k Keeper) GetAddressDetails(ctx sdk.Context, address sdk.Address) (*types.
 			newVerifications = append(newVerifications, verification)
 		}
 	}
-	if len(newVerifications) != len(addressDetails.Verifications) {
-		// If found invalid verification, update address details with latest
-		if err := k.SetAddressDetails(ctx, address, &addressDetails); err != nil {
-			return nil, err
-		}
-	}
 	addressDetails.Verifications = newVerifications
 
 	return &addressDetails, nil
