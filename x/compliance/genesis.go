@@ -1,7 +1,9 @@
 package compliance
 
 import (
+	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"swisstronik/x/compliance/keeper"
 	"swisstronik/x/compliance/types"
 )
@@ -16,7 +18,34 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 		if err != nil {
 			panic(err)
 		}
+		// Operator address must not be empty
+		if len(issuerData.Details.Operator) < 1 {
+			panic(errors.Wrap(types.ErrInvalidParam, "empty operator of issuer"))
+		}
 		if err := k.SetIssuerDetails(ctx, issuerAddress, issuerData.Details); err != nil {
+			panic(err)
+		}
+	}
+
+	// Restore verification data
+	for _, verificationData := range genState.VerificationDetails {
+		// Check if issuer address is valid
+		issuerAddress, err := sdk.AccAddressFromBech32(verificationData.Details.IssuerAddress)
+		if err != nil {
+			panic(err)
+		}
+		if exists, err := k.IssuerExists(ctx, issuerAddress); !exists || err != nil {
+			panic(err)
+		}
+		// Check the issuance timestamp and proof
+		if verificationData.Details.IssuanceTimestamp >= verificationData.Details.ExpirationTimestamp {
+			panic(errors.Wrap(types.ErrInvalidParam, "invalid issuance timestamp"))
+		}
+		if len(verificationData.Details.OriginalData) < 1 {
+			panic(errors.Wrap(types.ErrInvalidParam, "empty proof data"))
+		}
+
+		if err := k.SetVerificationDetails(ctx, verificationData.Id, verificationData.Details); err != nil {
 			panic(err)
 		}
 	}
@@ -28,14 +57,26 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 			panic(err)
 		}
 
-		if err := k.SetAddressDetails(ctx, address, addressData.Details); err != nil {
-			panic(err)
+		// If address is verified, verification data must exist and issuer must be valid
+		for _, verificationData := range addressData.Details.Verifications {
+			// Check if issuer is valid
+			issuerAddress, err := sdk.AccAddressFromBech32(verificationData.IssuerAddress)
+			if err != nil {
+				panic(err)
+			}
+			if exists, err := k.IssuerExists(ctx, issuerAddress); !exists || err != nil {
+				panic(err)
+			}
+			// Check if verification data exists
+			if verificationData.VerificationId == nil {
+				panic(errors.Wrap(types.ErrInvalidParam, "verification id is nil"))
+			}
+			if _, err = k.GetVerificationDetails(ctx, verificationData.VerificationId); err != nil {
+				panic(err)
+			}
 		}
-	}
 
-	// Restore verification data
-	for _, verificationData := range genState.VerificationDetails {
-		if err := k.SetVerificationDetails(ctx, verificationData.Id, verificationData.Details); err != nil {
+		if err := k.SetAddressDetails(ctx, address, addressData.Details); err != nil {
 			panic(err)
 		}
 	}

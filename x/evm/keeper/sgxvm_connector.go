@@ -246,7 +246,7 @@ func (q Connector) AddVerificationDetails(req *librustgo.CosmosRequest_AddVerifi
 		OriginalData:        req.AddVerificationDetails.ProofData,
 	}
 
-	if err := q.EVMKeeper.ComplianceKeeper.AddVerificationDetails(q.Context, userAddress, verificationType, verificationDetails); err != nil {
+	if _, err := q.EVMKeeper.ComplianceKeeper.AddVerificationDetails(q.Context, userAddress, verificationType, verificationDetails); err != nil {
 		return nil, err
 	}
 

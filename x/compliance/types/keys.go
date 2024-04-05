@@ -1,5 +1,10 @@
 package types
 
+import (
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/kv"
+)
+
 const (
 	// ModuleName defines the module name
 	ModuleName = "compliance"
@@ -25,3 +30,13 @@ var (
 	KeyPrefixAddressDetails      = []byte{prefixAddressDetails}
 	KeyPrefixVerificationDetails = []byte{prefixVerificationDetails}
 )
+
+func AccAddressFromKey(key []byte) sdk.AccAddress {
+	kv.AssertKeyAtLeastLength(key, 1)
+	return key[1:]
+}
+
+func VerificationIdFromKey(key []byte) []byte {
+	kv.AssertKeyAtLeastLength(key, 1)
+	return key[1:]
+}
