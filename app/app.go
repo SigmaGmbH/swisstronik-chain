@@ -125,6 +125,7 @@ import (
 	didmoduletypes "swisstronik/x/did/types"
 
 	compliancemodule "swisstronik/x/compliance"
+	compliancemoduleclient "swisstronik/x/compliance/client"
 	compliancemodulekeeper "swisstronik/x/compliance/keeper"
 	compliancemoduletypes "swisstronik/x/compliance/types"
 
@@ -166,6 +167,7 @@ func getGovProposalHandlers() []govclient.ProposalHandler {
 		upgradeclient.LegacyCancelProposalHandler,
 		ibcclientclient.UpdateClientProposalHandler,
 		ibcclientclient.UpgradeProposalHandler,
+		compliancemoduleclient.VerifyIssuerProposalHandler,
 		// this line is used by starport scaffolding # stargate/app/govProposalHandler
 	)
 
@@ -578,7 +580,8 @@ func New(
 		AddRoute(govtypes.RouterKey, govv1beta1.ProposalHandler).
 		AddRoute(paramproposal.RouterKey, params.NewParamChangeProposalHandler(app.ParamsKeeper)).
 		AddRoute(upgradetypes.RouterKey, upgrade.NewSoftwareUpgradeProposalHandler(&app.UpgradeKeeper)).
-		AddRoute(ibcclienttypes.RouterKey, ibcclient.NewClientProposalHandler(app.IBCKeeper.ClientKeeper))
+		AddRoute(ibcclienttypes.RouterKey, ibcclient.NewClientProposalHandler(app.IBCKeeper.ClientKeeper)).
+		AddRoute(compliancemoduletypes.RouterKey, compliancemodule.NewComplianceProposalHandler(&app.ComplianceKeeper))
 	govConfig := govtypes.Config{
 		MaxMetadataLen: 5000,
 	}
