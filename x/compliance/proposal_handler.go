@@ -45,10 +45,5 @@ func handleVerifyIssuerProposal(ctx sdk.Context, k *keeper.Keeper, p *types.Veri
 		return errorsmod.Wrapf(errortypes.ErrInvalidRequest, "issuer not exist")
 	}
 
-	// Compare issuer details with state in keeper
-	if issuerDetails != p.IssuerDetails {
-		return errorsmod.Wrapf(errortypes.ErrInvalidRequest, "issuer details not match")
-	}
-
 	return nil
 }
