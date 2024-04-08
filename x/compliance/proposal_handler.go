@@ -1,10 +1,13 @@
 package compliance
 
 import (
+	"fmt"
+
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	errortypes "github.com/cosmos/cosmos-sdk/types/errors"
 	govv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
+	
 	"swisstronik/x/compliance/keeper"
 	"swisstronik/x/compliance/types"
 )
@@ -25,25 +28,18 @@ func handleVerifyIssuerProposal(ctx sdk.Context, k *keeper.Keeper, p *types.Veri
 	if err != nil {
 		return err
 	}
-	// Issuer should be verified
-	verified, err := k.IsAddressVerified(ctx, issuerAddress)
-	if err != nil {
-		return err
-	}
-	if !verified {
-		return errorsmod.Wrapf(errortypes.ErrInvalidRequest, "issuer not verified")
-	}
 
-	// Issuer should exist
-	issuerDetails, err := k.GetIssuerDetails(ctx, issuerAddress)
-	if err != nil {
-		return err
-	}
-	// Same checking with IssuerExists
-	if len(issuerDetails.Operator) == 0 {
-		// If issuer not exist
-		return errorsmod.Wrapf(errortypes.ErrInvalidRequest, "issuer not exist")
-	}
+	// Issuer should exist and be verified
+	exists, _ := k.IssuerExists(ctx, issuerAddress)
+	verified, _ := k.IsAddressVerified(ctx, issuerAddress)
+	verified = verified && exists
 
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeVerifyIssuer,
+			sdk.NewAttribute(types.AttributeKeyIssuer, p.IssuerAddress),
+			sdk.NewAttribute(types.AttributeKeyVerified, fmt.Sprintf("%t", verified)),
+		),
+	)
 	return nil
 }
