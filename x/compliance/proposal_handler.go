@@ -1,8 +1,6 @@
 package compliance
 
 import (
-	"fmt"
-
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	errortypes "github.com/cosmos/cosmos-sdk/types/errors"
@@ -24,21 +22,31 @@ func NewComplianceProposalHandler(k *keeper.Keeper) govv1beta1.Handler {
 }
 
 func handleVerifyIssuerProposal(ctx sdk.Context, k *keeper.Keeper, p *types.VerifyIssuerProposal) error {
-	issuerAddress, err := sdk.AccAddressFromBech32(p.IssuerAddress)
+	issuer, err := sdk.AccAddressFromBech32(p.IssuerAddress)
 	if err != nil {
 		return err
 	}
 
 	// Issuer should exist and be verified
-	exists, _ := k.IssuerExists(ctx, issuerAddress)
-	verified, _ := k.IsAddressVerified(ctx, issuerAddress)
-	verified = verified && exists
+	exists, _ := k.IssuerExists(ctx, issuer)
+	if !exists {
+		return errorsmod.Wrapf(errortypes.ErrInvalidRequest, "unknown issuer address %s", p.IssuerAddress)
+	}
+	verified, _ := k.IsAddressVerified(ctx, issuer)
+	if verified {
+		return errorsmod.Wrapf(errortypes.ErrInvalidRequest, "issuer already verified %s", p.IssuerAddress)
+	}
+
+	// Set issuer verified through governance proposal
+	err = k.SetAddressVerificationStatus(ctx, issuer, true)
+	if err != nil {
+		return err
+	}
 
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeVerifyIssuer,
 			sdk.NewAttribute(types.AttributeKeyIssuer, p.IssuerAddress),
-			sdk.NewAttribute(types.AttributeKeyVerified, fmt.Sprintf("%t", verified)),
 		),
 	)
 	return nil
