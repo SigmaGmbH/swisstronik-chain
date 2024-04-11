@@ -1,7 +1,19 @@
 ############ Install Intel SGX SDK & SGX PSW
 FROM ghcr.io/sigmagmbh/sgx:2.19-bionic as base
 RUN wget -qO - https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | apt-key add -
-RUN apt-get update
+RUN apt-get update && apt-get install -y  \
+    libsgx-aesm-ecdsa-plugin \     
+	libsgx-ae-qve \
+	libsgx-aesm-quote-ex-plugin \   
+	libsgx-dcap-default-qpl \    
+	libsgx-dcap-ql \
+	libsgx-dcap-quote-verify \
+	libsgx-epid \
+	libsgx-headers \
+	libsgx-quote-ex \
+	libsgx-ra-network \
+	libsgx-ra-uefi \
+	libsgx-uae-service
 
 
 ############ Compilation base
