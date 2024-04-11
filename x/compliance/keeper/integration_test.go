@@ -30,6 +30,9 @@ var _ = Describe("VerifyIssuer", Ordered, func() {
 	from, accountPrivKey := tests.RandomEthAddressWithPrivateKey()
 	account := sdk.AccAddress(from.Bytes())
 
+	from, emptyPrivKey := tests.RandomEthAddressWithPrivateKey()
+	empty := sdk.AccAddress(from.Bytes())
+
 	BeforeEach(func() {
 		govParams := s.app.GovKeeper.GetParams(s.ctx)
 		govParams.Quorum = "0.0000000001"
@@ -139,6 +142,14 @@ var _ = Describe("VerifyIssuer", Ordered, func() {
 				// Submit proposal with sufficient deposit
 				content := types.NewVerifyIssuerProposal("test title", "test description", validIssuer.String())
 				_, err := testutil.SubmitProposal(s.ctx, s.app, validIssuerPrivKey, content)
+				s.Require().Error(err)
+			})
+		})
+
+		Describe("should not create a proposal for empty issuer that doesn't exist", func() {
+			It("should fail in submitting proposal", func() {
+				content := types.NewVerifyIssuerProposal("test title", "test description", empty.String())
+				_, err := testutil.SubmitProposal(s.ctx, s.app, emptyPrivKey, content)
 				s.Require().Error(err)
 			})
 		})

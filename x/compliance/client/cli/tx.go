@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/cosmos/cosmos-sdk/client"
@@ -185,6 +186,19 @@ func CmdVerifyIssuerProposal() *cobra.Command {
 
 			issuerAddress := args[0]
 			from := clientCtx.GetFromAddress()
+
+			// Verified issuer can't create proposal
+			queryClient := types.NewQueryClient(clientCtx)
+			addressDetails, err := queryClient.AddressDetails(cmd.Context(), &types.QueryAddressDetailsRequest{
+				Address: issuerAddress,
+			})
+			if err != nil {
+				return err
+			}
+			if addressDetails.Data.IsVerified {
+				return errors.New("issuer was already verified")
+			}
+
 			content := types.NewVerifyIssuerProposal(title, description, issuerAddress)
 
 			msg, err := govv1beta1.NewMsgSubmitProposal(content, deposit, from)
@@ -198,7 +212,8 @@ func CmdVerifyIssuerProposal() *cobra.Command {
 
 	cmd.Flags().String(cli.FlagTitle, "", "title of proposal")
 	cmd.Flags().String(cli.FlagDescription, "", "description of proposal")
-	cmd.Flags().String(cli.FlagDeposit, "1swtr", "deposit of proposal")
+	// TODO, should be renamed to `aswtr` when merge into main
+	cmd.Flags().String(cli.FlagDeposit, "1uswtr", "deposit of proposal")
 	if err := cmd.MarkFlagRequired(cli.FlagTitle); err != nil {
 		panic(err)
 	}
