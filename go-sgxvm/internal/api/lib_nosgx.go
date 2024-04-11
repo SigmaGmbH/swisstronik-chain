@@ -89,3 +89,11 @@ func Create(
 func StartAttestationServer(epidAddress, dcapAddress string) error {
 	return nil
 }
+
+func CheckNodeStatus() error {
+	return nil
+}
+
+func RequestMasterKey(host string, port int, isDCAP bool) error {
+	return nil
+}
