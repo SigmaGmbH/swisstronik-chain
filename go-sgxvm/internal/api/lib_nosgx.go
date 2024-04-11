@@ -8,9 +8,10 @@ package api
 import "C"
 
 import (
-	"net"
 	"github.com/SigmaGmbH/librustgo/types"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	"math/rand"
+	"net"
 )
 
 // Value types
@@ -31,6 +32,13 @@ type cu8_ptr = *C.uint8_t
 
 // Connector is our custom connector
 type Connector = types.Connector
+
+func CheckNodeStatus() error {
+	return nil
+}
+func RequestMasterKey(host string, port int, isDCAP bool) error {
+	return nil
+}
 
 // IsNodeInitialized checks if node was initialized and master key was sealed
 func IsNodeInitialized() (bool, error) {
@@ -58,7 +66,9 @@ func RequestSeed(hostname string, port int) error {
 
 // GetNodePublicKey handles request for node public key
 func GetNodePublicKey() (*types.NodePublicKeyResponse, error) {
-	return nil, nil
+	key := make([]byte, 32)
+	rand.Read(key)
+	return &types.NodePublicKeyResponse{PublicKey: key}, nil
 }
 
 // Call handles incoming call to contract or transfer of value
@@ -87,13 +97,5 @@ func Create(
 
 // StartAttestationServer starts attestation server with 2 port (EPID and DCAP attestation)
 func StartAttestationServer(epidAddress, dcapAddress string) error {
-	return nil
-}
-
-func CheckNodeStatus() error {
-	return nil
-}
-
-func RequestMasterKey(host string, port int, isDCAP bool) error {
 	return nil
 }
