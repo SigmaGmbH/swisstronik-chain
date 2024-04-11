@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-22.04
     env:
       SGX_MODE: HW
+      VERSION: "v1.0.2"
     steps:
       - uses: actions/checkout@v3
         with:
@@ -45,9 +46,9 @@ jobs:
           target: build-deb
       - name: Run .deb Package Image
         run: |
-          docker run -e VERSION=${{ steps.vars.outputs.short_sha }} -v $GITHUB_WORKSPACE/build:/build deb_build
-          cp build/swisstronik_${{ steps.vars.outputs.short_sha }}_amd64.deb swisstronik_${{ steps.vars.outputs.short_sha }}_${{ env.BRANCH_NAME }}_amd64.deb
+          docker run -e VERSION=${{ env.VERSION }} -v $GITHUB_WORKSPACE/build:/build deb_build
+          cp build/swisstronik_${{ env.VERSION }}_amd64.deb swisstronik_${{ env.VERSION }}_amd64.deb
       - uses: actions/upload-artifact@v3
         with:
-          name: swisstronik_${{ steps.vars.outputs.short_sha }}_${{ env.BRANCH_NAME }}_amd64.deb
-          path: swisstronik_${{ steps.vars.outputs.short_sha }}_${{ env.BRANCH_NAME }}_amd64.deb
+          name: swisstronik_${{ env.VERSION }}_amd64.deb
+          path: swisstronik_${{ env.VERSION }}_amd64.deb
