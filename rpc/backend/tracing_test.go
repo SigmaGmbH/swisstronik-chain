@@ -6,6 +6,7 @@ import (
 	"swisstronik/crypto/ethsecp256k1"
 	"swisstronik/indexer"
 	"swisstronik/rpc/backend/mocks"
+	"swisstronik/utils"
 	evmtypes "swisstronik/x/evm/types"
 
 	dbm "github.com/cometbft/cometbft-db"
@@ -40,12 +41,12 @@ func (suite *BackendTestSuite) TestTraceTransaction() {
 
 	msgHandleTx.From = from.String()
 	msgHandleTx.Sign(ethSigner, suite.signer)
-	tx, _ := msgHandleTx.BuildTx(suite.backend.clientCtx.TxConfig.NewTxBuilder(), "aswtr")
+	tx, _ := msgHandleTx.BuildTx(suite.backend.clientCtx.TxConfig.NewTxBuilder(), utils.BaseDenom)
 	txBz, _ := txEncoder(tx)
 
 	msgHandleTx2.From = from.String()
 	msgHandleTx2.Sign(ethSigner, suite.signer)
-	tx2, _ := msgHandleTx.BuildTx(suite.backend.clientCtx.TxConfig.NewTxBuilder(), "aswtr")
+	tx2, _ := msgHandleTx.BuildTx(suite.backend.clientCtx.TxConfig.NewTxBuilder(), utils.BaseDenom)
 	txBz2, _ := txEncoder(tx2)
 
 	testCases := []struct {

@@ -9,6 +9,7 @@ import (
 	evmenc "swisstronik/encoding"
 	"swisstronik/indexer"
 	"swisstronik/tests"
+	"swisstronik/utils"
 	"swisstronik/x/evm/types"
 
 	"cosmossdk.io/simapp/params"
@@ -41,7 +42,7 @@ func TestKVIndexer(t *testing.T) {
 	clientCtx := client.Context{}.WithTxConfig(encodingConfig.TxConfig).WithCodec(encodingConfig.Codec)
 
 	// build cosmos-sdk wrapper tx
-	tmTx, err := tx.BuildTx(clientCtx.TxConfig.NewTxBuilder(), "aswtr")
+	tmTx, err := tx.BuildTx(clientCtx.TxConfig.NewTxBuilder(), utils.BaseDenom)
 	require.NoError(t, err)
 	txBz, err := clientCtx.TxConfig.TxEncoder()(tmTx)
 	require.NoError(t, err)

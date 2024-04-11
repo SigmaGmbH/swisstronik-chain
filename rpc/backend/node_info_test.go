@@ -15,6 +15,7 @@ import (
 	"swisstronik/crypto/ethsecp256k1"
 	"swisstronik/rpc/backend/mocks"
 	ethermint "swisstronik/types"
+	"swisstronik/utils"
 )
 
 func (suite *BackendTestSuite) TestRPCMinGasPrice() {
@@ -255,7 +256,7 @@ func (suite *BackendTestSuite) TestSetEtherbase() {
 				RegisterStatus(client)
 				RegisterValidatorAccount(queryClient, suite.acc)
 				RegisterParams(queryClient, &header, 1)
-				c := sdk.NewDecCoin("aswtr", sdk.NewIntFromBigInt(big.NewInt(1)))
+				c := sdk.NewDecCoin(utils.BaseDenom, sdk.NewIntFromBigInt(big.NewInt(1)))
 				suite.backend.cfg.SetMinGasPrices(sdk.DecCoins{c})
 				delAddr, _ := suite.backend.GetCoinbase()
 				// account, _ := suite.backend.clientCtx.AccountRetriever.GetAccount(suite.backend.clientCtx, delAddr)

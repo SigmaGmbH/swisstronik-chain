@@ -6,6 +6,7 @@ import (
 	"swisstronik/crypto/ethsecp256k1"
 	"swisstronik/rpc/backend/mocks"
 	"swisstronik/tests"
+	"swisstronik/utils"
 	evmtypes "swisstronik/x/evm/types"
 
 	"github.com/cosmos/cosmos-sdk/crypto"
@@ -114,7 +115,7 @@ func (suite *BackendTestSuite) TestSendTransaction() {
 				msg := callArgsDefault.ToTransaction()
 				err = msg.Sign(ethSigner, suite.backend.clientCtx.Keyring)
 				suite.Require().NoError(err)
-				tx, _ := msg.BuildTx(suite.backend.clientCtx.TxConfig.NewTxBuilder(), "aswtr")
+				tx, _ := msg.BuildTx(suite.backend.clientCtx.TxConfig.NewTxBuilder(), utils.BaseDenom)
 				txEncoder := suite.backend.clientCtx.TxConfig.TxEncoder()
 				txBytes, _ := txEncoder(tx)
 				RegisterBroadcastTxError(client, txBytes)
@@ -143,7 +144,7 @@ func (suite *BackendTestSuite) TestSendTransaction() {
 				msg := callArgsDefault.ToTransaction()
 				err = msg.Sign(ethSigner, suite.backend.clientCtx.Keyring)
 				suite.Require().NoError(err)
-				tx, _ := msg.BuildTx(suite.backend.clientCtx.TxConfig.NewTxBuilder(), "aswtr")
+				tx, _ := msg.BuildTx(suite.backend.clientCtx.TxConfig.NewTxBuilder(), utils.BaseDenom)
 				txEncoder := suite.backend.clientCtx.TxConfig.TxEncoder()
 				txBytes, _ := txEncoder(tx)
 

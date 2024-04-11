@@ -19,6 +19,7 @@ import (
 
 	"swisstronik/app"
 	"swisstronik/encoding"
+	"swisstronik/utils"
 
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 
@@ -114,7 +115,7 @@ func (suite *EIP712TestSuite) TestEIP712SignatureVerification() {
 		{
 			title: "Succeeds - Standard MsgSend",
 			fee: txtypes.Fee{
-				Amount:   suite.makeCoins("aswtr", math.NewInt(2000)),
+				Amount:   suite.makeCoins(utils.BaseDenom, math.NewInt(2000)),
 				GasLimit: 20000,
 			},
 			memo: "",
@@ -132,7 +133,7 @@ func (suite *EIP712TestSuite) TestEIP712SignatureVerification() {
 		{
 			title: "Succeeds - Standard MsgVote",
 			fee: txtypes.Fee{
-				Amount:   suite.makeCoins("aswtr", math.NewInt(2000)),
+				Amount:   suite.makeCoins(utils.BaseDenom, math.NewInt(2000)),
 				GasLimit: 20000,
 			},
 			memo: "",
@@ -150,7 +151,7 @@ func (suite *EIP712TestSuite) TestEIP712SignatureVerification() {
 		{
 			title: "Succeeds - Standard MsgDelegate",
 			fee: txtypes.Fee{
-				Amount:   suite.makeCoins("aswtr", math.NewInt(2000)),
+				Amount:   suite.makeCoins(utils.BaseDenom, math.NewInt(2000)),
 				GasLimit: 20000,
 			},
 			memo: "",
@@ -168,7 +169,7 @@ func (suite *EIP712TestSuite) TestEIP712SignatureVerification() {
 		{
 			title: "Succeeds - Standard MsgWithdrawDelegationReward",
 			fee: txtypes.Fee{
-				Amount:   suite.makeCoins("aswtr", math.NewInt(2000)),
+				Amount:   suite.makeCoins(utils.BaseDenom, math.NewInt(2000)),
 				GasLimit: 20000,
 			},
 			memo: "",
@@ -185,7 +186,7 @@ func (suite *EIP712TestSuite) TestEIP712SignatureVerification() {
 		{
 			title: "Succeeds - Two Single-Signer MsgDelegate",
 			fee: txtypes.Fee{
-				Amount:   suite.makeCoins("aswtr", math.NewInt(2000)),
+				Amount:   suite.makeCoins(utils.BaseDenom, math.NewInt(2000)),
 				GasLimit: 20000,
 			},
 			memo: "",
@@ -208,7 +209,7 @@ func (suite *EIP712TestSuite) TestEIP712SignatureVerification() {
 		{
 			title: "Fails - Two MsgVotes with Different Signers",
 			fee: txtypes.Fee{
-				Amount:   suite.makeCoins("aswtr", math.NewInt(2000)),
+				Amount:   suite.makeCoins(utils.BaseDenom, math.NewInt(2000)),
 				GasLimit: 20000,
 			},
 			memo: "",
@@ -231,7 +232,7 @@ func (suite *EIP712TestSuite) TestEIP712SignatureVerification() {
 		{
 			title: "Fails - Empty transaction",
 			fee: txtypes.Fee{
-				Amount:   suite.makeCoins("aswtr", math.NewInt(2000)),
+				Amount:   suite.makeCoins(utils.BaseDenom, math.NewInt(2000)),
 				GasLimit: 20000,
 			},
 			memo:          "",
@@ -243,7 +244,7 @@ func (suite *EIP712TestSuite) TestEIP712SignatureVerification() {
 		{
 			title: "Fails - Single-Signer MsgSend + MsgVote",
 			fee: txtypes.Fee{
-				Amount:   suite.makeCoins("aswtr", math.NewInt(2000)),
+				Amount:   suite.makeCoins(utils.BaseDenom, math.NewInt(2000)),
 				GasLimit: 20000,
 			},
 			memo: "",
@@ -267,7 +268,7 @@ func (suite *EIP712TestSuite) TestEIP712SignatureVerification() {
 			title:   "Fails - Invalid ChainID",
 			chainId: "invalidchainid",
 			fee: txtypes.Fee{
-				Amount:   suite.makeCoins("aswtr", math.NewInt(2000)),
+				Amount:   suite.makeCoins(utils.BaseDenom, math.NewInt(2000)),
 				GasLimit: 20000,
 			},
 			memo: "",
@@ -285,7 +286,7 @@ func (suite *EIP712TestSuite) TestEIP712SignatureVerification() {
 		{
 			title: "Fails - Includes TimeoutHeight",
 			fee: txtypes.Fee{
-				Amount:   suite.makeCoins("aswtr", math.NewInt(2000)),
+				Amount:   suite.makeCoins(utils.BaseDenom, math.NewInt(2000)),
 				GasLimit: 20000,
 			},
 			memo: "",
@@ -304,7 +305,7 @@ func (suite *EIP712TestSuite) TestEIP712SignatureVerification() {
 		{
 			title: "Fails - Single Message / Multi-Signer",
 			fee: txtypes.Fee{
-				Amount:   suite.makeCoins("aswtr", math.NewInt(2000)),
+				Amount:   suite.makeCoins(utils.BaseDenom, math.NewInt(2000)),
 				GasLimit: 20000,
 			},
 			memo: "",

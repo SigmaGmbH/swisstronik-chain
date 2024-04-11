@@ -25,6 +25,7 @@ import (
 	"swisstronik/crypto/ethsecp256k1"
 	"swisstronik/encoding"
 	"swisstronik/tests"
+	"swisstronik/utils"
 	evmtypes "swisstronik/x/evm/types"
 
 	"github.com/ethereum/go-ethereum/core/types"
@@ -354,7 +355,7 @@ func (suite AnteTestSuite) TestAnteHandler() {
 					addr[:],
 					sdk.NewCoins(
 						sdk.NewCoin(
-							"aswtr",
+							utils.BaseDenom,
 							sdk.NewInt(1),
 						),
 					),
@@ -384,7 +385,7 @@ func (suite AnteTestSuite) TestAnteHandler() {
 					addr[:],
 					sdk.NewCoins(
 						sdk.NewCoin(
-							"aswtr",
+							utils.BaseDenom,
 							sdk.NewInt(1),
 						),
 					),
@@ -414,7 +415,7 @@ func (suite AnteTestSuite) TestAnteHandler() {
 					addr[:],
 					sdk.NewCoins(
 						sdk.NewCoin(
-							"aswtr",
+							utils.BaseDenom,
 							sdk.NewInt(1),
 						),
 					),
@@ -469,7 +470,7 @@ func (suite AnteTestSuite) TestAnteHandler() {
 					addr[:],
 					sdk.NewCoins(
 						sdk.NewCoin(
-							"aswtr",
+							utils.BaseDenom,
 							sdk.NewInt(1),
 						),
 					),
@@ -499,7 +500,7 @@ func (suite AnteTestSuite) TestAnteHandler() {
 					addr[:],
 					sdk.NewCoins(
 						sdk.NewCoin(
-							"aswtr",
+							utils.BaseDenom,
 							sdk.NewInt(1),
 						),
 					),
@@ -529,7 +530,7 @@ func (suite AnteTestSuite) TestAnteHandler() {
 					addr[:],
 					sdk.NewCoins(
 						sdk.NewCoin(
-							"aswtr",
+							utils.BaseDenom,
 							sdk.NewInt(1),
 						),
 					),
@@ -559,7 +560,7 @@ func (suite AnteTestSuite) TestAnteHandler() {
 					addr[:],
 					sdk.NewCoins(
 						sdk.NewCoin(
-							"aswtr",
+							utils.BaseDenom,
 							sdk.NewInt(1),
 						),
 					),
@@ -592,7 +593,7 @@ func (suite AnteTestSuite) TestAnteHandler() {
 					addr[:],
 					sdk.NewCoins(
 						sdk.NewCoin(
-							"aswtr",
+							utils.BaseDenom,
 							sdk.NewInt(1),
 						),
 					),
@@ -621,7 +622,7 @@ func (suite AnteTestSuite) TestAnteHandler() {
 					addr[:],
 					sdk.NewCoins(
 						sdk.NewCoin(
-							"aswtr",
+							utils.BaseDenom,
 							sdk.NewInt(1),
 						),
 					),

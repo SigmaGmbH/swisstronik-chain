@@ -26,6 +26,7 @@ import (
 	"swisstronik/rpc/backend/mocks"
 	rpctypes "swisstronik/rpc/types"
 	"swisstronik/tests"
+	"swisstronik/utils"
 	evmtypes "swisstronik/x/evm/types"
 )
 
@@ -184,7 +185,7 @@ func (suite *BackendTestSuite) signAndEncodeEthTx(msgHandleTx *evmtypes.MsgHandl
 	err := msgHandleTx.Sign(ethSigner, signer)
 	suite.Require().NoError(err)
 
-	tx, err := msgHandleTx.BuildTx(suite.backend.clientCtx.TxConfig.NewTxBuilder(), "aswtr")
+	tx, err := msgHandleTx.BuildTx(suite.backend.clientCtx.TxConfig.NewTxBuilder(), utils.BaseDenom)
 	suite.Require().NoError(err)
 
 	txEncoder := suite.backend.clientCtx.TxConfig.TxEncoder()
