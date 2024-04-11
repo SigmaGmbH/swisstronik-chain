@@ -3,19 +3,26 @@ package keeper_test
 import (
 	"context"
 	"testing"
+	"time"
 
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
+	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	"github.com/ethereum/go-ethereum/common"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/status-im/keycard-go/hexutils"
+	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
 	"swisstronik/app"
+	"swisstronik/crypto/ethsecp256k1"
 	"swisstronik/tests"
+	"swisstronik/testutil"
 	"swisstronik/utils"
 	"swisstronik/x/compliance/keeper"
 	"swisstronik/x/compliance/types"
+	feemarkettypes "swisstronik/x/feemarket/types"
 )
 
 var s *KeeperTestSuite
@@ -23,10 +30,11 @@ var s *KeeperTestSuite
 type KeeperTestSuite struct {
 	suite.Suite
 
-	ctx    sdk.Context
-	goCtx  context.Context
-	keeper keeper.Keeper
-	app    *app.App
+	ctx       sdk.Context
+	goCtx     context.Context
+	keeper    keeper.Keeper
+	validator stakingtypes.Validator
+	app       *app.App
 }
 
 func init() {
@@ -46,10 +54,65 @@ func TestKeeperTestSuite(t *testing.T) {
 
 func (suite *KeeperTestSuite) Setup(t *testing.T) {
 	chainID := utils.TestnetChainID + "-1"
-	app, _ := app.SetupSwissApp(false, nil, chainID)
-	s.ctx = app.BaseApp.NewContext(false, tmproto.Header{ChainID: chainID})
-	s.goCtx = sdk.WrapSDKContext(s.ctx)
-	s.keeper = app.ComplianceKeeper
+	suite.app, _ = app.SetupSwissApp(false, nil, chainID)
+
+	// account key
+	priv, err := ethsecp256k1.GenerateKey()
+	require.NoError(t, err)
+	address := common.BytesToAddress(priv.PubKey().Address().Bytes())
+
+	// consensus key
+	privCons, err := ethsecp256k1.GenerateKey()
+	require.NoError(t, err)
+	consAddress := sdk.ConsAddress(privCons.PubKey().Address())
+
+	header := testutil.NewHeader(
+		1, time.Now().UTC(), chainID, consAddress, nil, nil,
+	)
+	suite.ctx = suite.app.BaseApp.NewContext(false, header)
+	suite.goCtx = sdk.WrapSDKContext(suite.ctx)
+	suite.keeper = suite.app.ComplianceKeeper
+
+	//// bond denom
+	//stakingParams := suite.app.StakingKeeper.GetParams(suite.ctx)
+	//stakingParams.BondDenom = utils.BaseDenom
+	//err = suite.app.StakingKeeper.SetParams(suite.ctx, stakingParams)
+	//require.NoError(t, err)
+
+	feeParams := feemarkettypes.DefaultParams()
+	feeParams.MinGasPrice = sdk.NewDec(1)
+	_ = suite.app.FeeMarketKeeper.SetParams(suite.ctx, feeParams)
+	suite.app.FeeMarketKeeper.SetBaseFee(suite.ctx, sdk.ZeroInt().BigInt())
+
+	// Set Validator
+	valAddr := sdk.ValAddress(address.Bytes())
+	validator, err := stakingtypes.NewValidator(valAddr, privCons.PubKey(), stakingtypes.Description{})
+	require.NoError(t, err)
+	validator = stakingkeeper.TestingUpdateValidator(&suite.app.StakingKeeper, suite.ctx, validator, true)
+	err = suite.app.StakingKeeper.Hooks().AfterValidatorCreated(suite.ctx, validator.GetOperator())
+	require.NoError(t, err)
+	err = suite.app.StakingKeeper.SetValidatorByConsAddr(suite.ctx, validator)
+	require.NoError(t, err)
+
+	validators := s.app.StakingKeeper.GetValidators(s.ctx, 2)
+	// set a bonded validator that takes part in consensus
+	if validators[0].Status == stakingtypes.Bonded {
+		suite.validator = validators[0]
+	} else {
+		suite.validator = validators[1]
+	}
+}
+
+// Commit commits and starts a new block with an updated context.
+func (suite *KeeperTestSuite) Commit() {
+	suite.CommitAfter(time.Second * 0)
+}
+
+// Commit commits a block at a given time.
+func (suite *KeeperTestSuite) CommitAfter(t time.Duration) {
+	var err error
+	suite.ctx, err = testutil.CommitAndCreateNewCtx(suite.ctx, suite.app, t)
+	suite.Require().NoError(err)
 }
 
 func (suite *KeeperTestSuite) TestCreateSimpleAndFetchSimpleIssuer() {

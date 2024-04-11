@@ -33,3 +33,14 @@ message MsgRemoveIssuer {
   string issuerAddress = 2;
 }
 message MsgRemoveIssuerResponse {}
+
+// VerifyIssuerProposal is a gov Content type to verify issuer
+message VerifyIssuerProposal {
+  option (gogoproto.equal) = false;
+  // title of the proposal
+  string title = 1;
+  // description of the proposal
+  string description = 2;
+  // issuerAddress is an address of issuer to verify
+  string issuerAddress = 3;
+}

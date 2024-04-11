@@ -2,15 +2,17 @@ package keeper_test
 
 import (
 	"context"
+	"testing"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/status-im/keycard-go/hexutils"
 	"github.com/stretchr/testify/suite"
+
 	"swisstronik/app"
 	"swisstronik/tests"
 	testkeeper "swisstronik/testutil/keeper"
 	"swisstronik/x/compliance/keeper"
 	"swisstronik/x/compliance/types"
-	"testing"
 )
 
 type QuerierTestSuite struct {

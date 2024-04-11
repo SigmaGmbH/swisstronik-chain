@@ -47,7 +47,7 @@ func TestCreatingMonthlyVestingAccount(t *testing.T) {
 
 	// prefund account
 	coinsToMint := sdk.NewCoins(periodCoin)
-	testutil.FundAccount(app.BankKeeper, ctx, genAcc.GetAddress(), coinsToMint)
+	testutil.FundAccount(ctx, app.BankKeeper, genAcc.GetAddress(), coinsToMint)
 
 	testCases := []struct {
 		name      string
