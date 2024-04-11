@@ -2,8 +2,9 @@ name: Build Deb
 
 on:
   push:
-    tags:
-      - "*"
+    branches: [ feat/x-compliance, '**-release' ]
+env:
+  BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
 
 jobs:
   build-deb:
