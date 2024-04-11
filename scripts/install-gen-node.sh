@@ -23,16 +23,16 @@ echo "exotic merit wrestle sad bundle age purity ability collect immense place t
 echo "faculty head please solid picnic benefit hurt gloom flag transfer thrive zebra" | swisstronikd keys add validator4 --keyring-backend test --recover
 echo "betray theory cargo way left cricket doll room donkey wire reunion fall left surprise hamster corn village happy bulb token artist twelve whisper expire" | swisstronikd keys add test1 --keyring-backend test --recover
 echo "toss sense candy point cost rookie jealous snow ankle electric sauce forward oblige tourist stairs horror grunt tenant afford master violin final genre reason" | swisstronikd keys add test2 --keyring-backend test --recover
-swisstronikd add-genesis-account $(swisstronikd keys show validator -a --keyring-backend test) 100000000000000000000000uswtr
-swisstronikd add-genesis-account $(swisstronikd keys show validator1 -a --keyring-backend test) 110000000000000000000000uswtr
-swisstronikd add-genesis-account $(swisstronikd keys show validator2 -a --keyring-backend test) 120000000000000000000000uswtr
-swisstronikd add-genesis-account $(swisstronikd keys show validator3 -a --keyring-backend test) 130000000000000000000000uswtr
-swisstronikd add-genesis-account $(swisstronikd keys show validator4 -a --keyring-backend test) 140000000000000000000000uswtr
-swisstronikd add-genesis-account $(swisstronikd keys show test1 -a --keyring-backend test) 10000000000000000000000uswtr
-swisstronikd add-genesis-account $(swisstronikd keys show test2 -a --keyring-backend test) 10000000000000000000000uswtr
-swisstronikd gentx validator 90000000000000000000000uswtr --keyring-backend test --chain-id swisstronik_1291-1
+swisstronikd add-genesis-account $(swisstronikd keys show validator -a --keyring-backend test) 100000000000000000000000aswtr
+swisstronikd add-genesis-account $(swisstronikd keys show validator1 -a --keyring-backend test) 110000000000000000000000aswtr
+swisstronikd add-genesis-account $(swisstronikd keys show validator2 -a --keyring-backend test) 120000000000000000000000aswtr
+swisstronikd add-genesis-account $(swisstronikd keys show validator3 -a --keyring-backend test) 130000000000000000000000aswtr
+swisstronikd add-genesis-account $(swisstronikd keys show validator4 -a --keyring-backend test) 140000000000000000000000aswtr
+swisstronikd add-genesis-account $(swisstronikd keys show test1 -a --keyring-backend test) 10000000000000000000000aswtr
+swisstronikd add-genesis-account $(swisstronikd keys show test2 -a --keyring-backend test) 10000000000000000000000aswtr
+swisstronikd gentx validator 90000000000000000000000aswtr --keyring-backend test --chain-id swisstronik_1291-1
 swisstronikd collect-gentxs
-sed -i 's/stake/uswtr/g' "$GENESIS"
+sed -i 's/stake/aswtr/g' "$GENESIS"
 sed -i 's/pruning = "default"/pruning = "custom"/g' "$CONFIG"
 sed -i 's/pruning-keep-recent = "0"/pruning-keep-recent = "2"/g' "$APP_TOML"
 sed -i 's/pruning-interval = "0"/pruning-interval = "10"/g' "$APP_TOML"
@@ -40,6 +40,6 @@ sed -i 's/127.0.0.1:26657/0.0.0.0:26657/g' "$CONFIG"
 sed -i 's/cors_allowed_origins\s*=\s*\[\]/cors_allowed_origins = ["*",]/g' "$CONFIG"
 # Enable prometheus on genesis node
 sed -i 's/prometheus = false/prometheus = true/g' "$CONFIG"
-jq '.app_state["evm"]["params"]["evm_denom"]="uswtr"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
+jq '.app_state["evm"]["params"]["evm_denom"]="aswtr"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
 jq '.consensus_params["block"]["max_gas"]="10000000000"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
 jq '.app_state["feemarket"]["last_block_gas"]="10000000000"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"

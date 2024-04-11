@@ -1075,5 +1075,5 @@ func (*App) SimulationManager() *module.SimulationManager {
 
 func RegisterCoinDenominations() {
 	_ = sdk.RegisterDenom("swtr", sdk.OneDec())
-	_ = sdk.RegisterDenom("uswtr", sdk.NewDecWithPrec(1, 18))
+	_ = sdk.RegisterDenom("aswtr", sdk.NewDecWithPrec(1, 18))
 }

@@ -31,11 +31,11 @@ echo "toss sense candy point cost rookie jealous snow ankle electric sauce forwa
 
 swisstronikd init $MONIKER -o --chain-id $CHAINID --home "$HOMEDIR"
 
-jq '.app_state["staking"]["params"]["bond_denom"]="uswtr"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
-jq '.app_state["crisis"]["constant_fee"]["denom"]="uswtr"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
-jq '.app_state["gov"]["deposit_params"]["min_deposit"][0]["denom"]="uswtr"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
-jq '.app_state["evm"]["params"]["evm_denom"]="uswtr"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
-jq '.app_state["inflation"]["params"]["mint_denom"]="uswtr"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
+jq '.app_state["staking"]["params"]["bond_denom"]="aswtr"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
+jq '.app_state["crisis"]["constant_fee"]["denom"]="aswtr"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
+jq '.app_state["gov"]["deposit_params"]["min_deposit"][0]["denom"]="aswtr"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
+jq '.app_state["evm"]["params"]["evm_denom"]="aswtr"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
+jq '.app_state["inflation"]["params"]["mint_denom"]="aswtr"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
 jq '.consensus_params["block"]["max_gas"]="10000000"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
 
 # expose ports
@@ -49,7 +49,7 @@ sed -i 's/prometheus-retention-time  = "0"/prometheus-retention-time  = "1000000
 sed -i 's/enabled = false/enabled = true/g' "$APP_TOML"
 
 # set min gas price
-sed -i 's/minimum-gas-prices = ""/minimum-gas-prices = "0uswtr"/' "$APP_TOML"
+sed -i 's/minimum-gas-prices = ""/minimum-gas-prices = "0aswtr"/' "$APP_TOML"
 
 # Change proposal periods to pass within a reasonable time for local testing
 sed -i.bak 's/"max_deposit_period": "172800s"/"max_deposit_period": "30s"/g' "$HOMEDIR"/config/genesis.json
@@ -61,11 +61,11 @@ sed -i.bak 's/pruning-keep-recent = "0"/pruning-keep-recent = "2"/g' "$APP_TOML"
 sed -i.bak 's/pruning-interval = "0"/pruning-interval = "10"/g' "$APP_TOML"
 
 # Allocate genesis accounts
-swisstronikd add-genesis-account alice 10000000000000000000000000uswtr --keyring-backend $KEYRING --home "$HOMEDIR"
-swisstronikd add-genesis-account bob 10000000000000000000000000uswtr --keyring-backend $KEYRING --home "$HOMEDIR"
+swisstronikd add-genesis-account alice 10000000000000000000000000aswtr --keyring-backend $KEYRING --home "$HOMEDIR"
+swisstronikd add-genesis-account bob 10000000000000000000000000aswtr --keyring-backend $KEYRING --home "$HOMEDIR"
 
 # Sign genesis transaction
-swisstronikd gentx alice 1000000000000000000000uswtr --keyring-backend $KEYRING --chain-id $CHAINID --home "$HOMEDIR"
+swisstronikd gentx alice 1000000000000000000000aswtr --keyring-backend $KEYRING --chain-id $CHAINID --home "$HOMEDIR"
 
 # Collect genesis tx
 swisstronikd collect-gentxs --home "$HOMEDIR"
