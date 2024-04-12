@@ -1,17 +1,13 @@
 package keeper_test
 
 import (
-	"math/big"
-	"math/rand"
-	evmkeeper "swisstronik/x/evm/keeper"
-	"time"
-
 	"github.com/SigmaGmbH/librustgo"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/golang/protobuf/proto"
-
-	didtypes "swisstronik/x/did/types"
+	"math/big"
+	"math/rand"
+	evmkeeper "swisstronik/x/evm/keeper"
 )
 
 func insertAccount(
@@ -234,66 +230,6 @@ func (suite *KeeperTestSuite) TestSGXVMConnector() {
 				accCodeDecodingErr := proto.Unmarshal(responseAccountCodeBytes, accountCodeResponse)
 				suite.Require().NoError(accCodeDecodingErr)
 				suite.Require().Equal(bytecode, accountCodeResponse.Code)
-			},
-		},
-		{
-			"Should be able to verify JWT VC",
-			func() {
-				var err error
-
-				// Create DID Document for issuer
-				metadata := didtypes.Metadata{
-					Created:   time.Now(),
-					VersionId: "123e4567-e89b-12d3-a456-426655440000",
-				}
-				didUrl := "did:swtr:2MGhkRKWKi7ztnBFa8DpQ3"
-				verificationMethods := []*didtypes.VerificationMethod{{
-					Id:                     "did:swtr:2MGhkRKWKi7ztnBFa8DpQ3#6c1527f2f57601ea2f481a0ab1e605d196f3d952689299491638925cd6f26a7e-1",
-					VerificationMethodType: "Ed25519VerificationKey2020",
-					Controller:             didUrl,
-					VerificationMaterial:   "z6MkmjAncvMFDiqyquFLt2G3CGYaqLfDjqKuzJnmUX3y68JZ",
-				}}
-				document := didtypes.DIDDocument{
-					Id:                 didUrl,
-					Controller:         []string{didUrl},
-					VerificationMethod: verificationMethods,
-					Authentication:     []string{"did:swtr:2MGhkRKWKi7ztnBFa8DpQ3#6c1527f2f57601ea2f481a0ab1e605d196f3d952689299491638925cd6f26a7e-1"},
-				}
-				didDocument := didtypes.DIDDocumentWithMetadata{
-					Metadata: &metadata,
-					DidDoc:   &document,
-				}
-				err = connector.EVMKeeper.DIDKeeper.AddNewDIDDocumentVersion(connector.Context, &didDocument)
-				suite.Require().NoError(err)
-
-				// Encode request for DID
-				request, err := proto.Marshal(&librustgo.CosmosRequest{
-					Req: &librustgo.CosmosRequest_VerificationMethods{
-						VerificationMethods: &librustgo.QueryVerificationMethods{
-							Did: didUrl,
-						},
-					},
-				})
-				suite.Require().NoError(err)
-
-				response, err := connector.Query(request)
-				suite.Require().NoError(err)
-
-				vmResponse := &librustgo.QueryVerificationMethodsResponse{}
-				err = proto.Unmarshal(response, vmResponse)
-				suite.Require().NoError(err)
-
-				// Extract verification methods
-				expected := []*librustgo.VerificationMethod{}
-				for _, method := range verificationMethods {
-					ffiMethod := librustgo.VerificationMethod{
-						VerificationMethodType: method.VerificationMethodType,
-						VerificationMaterial:   method.VerificationMaterial,
-					}
-					expected = append(expected, &ffiMethod)
-				}
-
-				suite.Require().Equal(expected, vmResponse.Vm)
 			},
 		},
 	}
