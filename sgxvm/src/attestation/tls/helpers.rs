@@ -92,6 +92,7 @@ pub(super) fn decrypt_and_seal_master_key(
     }
 
     // Extract public key and nonce + ciphertext
+    println!("[Enclave] Attestation Client: decrypting master key");
     let public_key = &attn_server_response[..PUBLIC_KEY_SIZE];
     let encrypted_master_key = &attn_server_response[PUBLIC_KEY_SIZE..];
 
@@ -110,6 +111,7 @@ pub(super) fn decrypt_and_seal_master_key(
     })?;
 
     // Seal decrypted master key
+    println!("[Enclave] Attestation Client: sealing master key");
     km.seal()?;
     println!("[Enclave] Master key successfully sealed");
 

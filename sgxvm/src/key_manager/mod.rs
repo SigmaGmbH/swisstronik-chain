@@ -85,14 +85,17 @@ impl KeyManager {
     /// For now, enclaves with same MRSIGNER will be able to recover that file, but
     /// we'll use MRENCLAVE since Upgradeability Protocol will be implemented
     pub fn seal(&self) -> SgxResult<()> {
-        println!(
-            "[KeyManager] Seed location: {}/{}",
-            SEED_HOME.to_str().unwrap(),
-            SEED_FILENAME
-        );
-
         // Prepare file to write master key
-        let master_key_path = format!("{}/{}", SEED_HOME.to_str().unwrap(), SEED_FILENAME);
+        let seed_home_path = match SEED_HOME.to_str() {
+            Some(path) => path,
+            None => {
+                println!("[KeyManager] Cannot get SEED_HOME env");
+                return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+            }
+        };
+
+        let master_key_path = format!("{}/{}", seed_home_path, SEED_FILENAME);
+        println!("[KeyManager] Creating file for master key. Location: {:?}", master_key_path);
         let mut master_key_file = SgxFile::create(master_key_path).map_err(|err| {
             println!(
                 "[KeyManager] Cannot create file for master key. Reason: {:?}",
@@ -101,6 +104,7 @@ impl KeyManager {
             sgx_status_t::SGX_ERROR_UNEXPECTED
         })?;
 
+        println!("[KeyManager] File created");
         // Write master key to the file
         if let Err(err) = master_key_file.write(&self.master_key) {
             println!("[KeyManager] Cannot write master key. Reason: {:?}", err);
