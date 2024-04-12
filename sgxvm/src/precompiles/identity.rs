@@ -120,19 +120,19 @@ impl LinearCostPrecompileWithQuerier for Identity {
         // Since we issue VC without expiration date, verify nbf (not valid before) field of JWT, it should be less than current timestamp 
         validate_nbf(parsed_payload.nbf)?;
 
-        // Extract issuer from payload and obtain verification material
-        let verification_materials = get_verification_material(querier, parsed_payload.iss.clone())?;
-
-        // Find appropriate verification material
-        let vm = verification_materials
-            .iter()
-            .find(|verification_method| verification_method.verificationMethodType == "Ed25519VerificationKey2020" || verification_method.verificationMethodType == "Ed25519VerificationKey2018")
-            .and_then(|method| Some(method.verificationMaterial.clone()))
-            .ok_or(PrecompileFailure::Error {
-                exit_status: ExitError::Other("Cannot find appropriate verification method".into()),
-            })?;
-        
-        verify_signature(&data, &signature, &vm)?;
+//         // Extract issuer from payload and obtain verification material
+//         let verification_materials = get_verification_material(querier, parsed_payload.iss.clone())?;
+//
+//         // Find appropriate verification material
+//         let vm = verification_materials
+//             .iter()
+//             .find(|verification_method| verification_method.verificationMethodType == "Ed25519VerificationKey2020" || verification_method.verificationMethodType == "Ed25519VerificationKey2018")
+//             .and_then(|method| Some(method.verificationMaterial.clone()))
+//             .ok_or(PrecompileFailure::Error {
+//                 exit_status: ExitError::Other("Cannot find appropriate verification method".into()),
+//             })?;
+//
+//         verify_signature(&data, &signature, &vm)?;
 
         let credential_subject = convert_bech32_address(parsed_payload.vc.credential_subject.user_address)?;
         let output = encode_output(credential_subject, parsed_payload.iss);
@@ -221,26 +221,6 @@ fn convert_bech32_address(address: String) -> Result<Vec<u8>, PrecompileFailure>
 
 fn base64_decode(input: &str) -> Vec<u8> {
     base64::decode_config(&input, base64::URL_SAFE).unwrap_or_default()
-}
-
-/// Makes `OCALL` to obtain verification methods from DID registry
-/// * connector Pointer to GoQuerier, which will be used to make queries to `x/did` module
-/// * did_url URL of DID document
-fn get_verification_material(connector: *mut GoQuerier, did_url: String) -> Result<Vec<ffi::VerificationMethod>, PrecompileFailure> {
-    let encoded_request = coder::encode_verification_methods_request(did_url);
-    match querier::make_request(connector, encoded_request) {
-        Some(result) => {
-            // Decode protobuf and extract verification methods
-            protobuf::parse_from_bytes::<ffi::QueryVerificationMethodsResponse>(result.as_slice())
-                .map_err(|_| PrecompileFailure::Error { exit_status: ExitError::Other("Cannot decode protobuf response".into()) })
-                .and_then(|decoded_result| Ok(decoded_result.vm.to_vec()))
-        },
-        None => {
-            return Err(PrecompileFailure::Error {
-                exit_status: ExitError::Other("Cannot obtain verification material".into()),
-            })
-        }
-    }
 }
 
 /// Decodes multibase encoded verification material to bytes

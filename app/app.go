@@ -120,10 +120,6 @@ import (
 	vestingmodulekeeper "swisstronik/x/vesting/keeper"
 	vestingmoduletypes "swisstronik/x/vesting/types"
 
-	didmodule "swisstronik/x/did"
-	didmodulekeeper "swisstronik/x/did/keeper"
-	didmoduletypes "swisstronik/x/did/types"
-
 	// this line is used by starport scaffolding # stargate/app/moduleImport
 
 	"swisstronik/docs"
@@ -201,7 +197,6 @@ var (
 		feemarket.AppModuleBasic{},
 		mint.AppModuleBasic{},
 		// groupmodule.AppModuleBasic{},
-		didmodule.AppModuleBasic{},
 		consensus.AppModuleBasic{},
 		// this line is used by starport scaffolding # stargate/app/moduleBasic
 	)
@@ -286,7 +281,6 @@ type App struct {
 	FeeMarketKeeper feemarketkeeper.Keeper
 
 	VestingKeeper vestingmodulekeeper.Keeper
-	DIDKeeper     didmodulekeeper.Keeper
 	// this line is used by starport scaffolding # stargate/app/keeperDeclaration
 
 	// mm is the module manager
@@ -344,11 +338,11 @@ func New(
 		ibcexported.StoreKey, ibctransfertypes.StoreKey, icahosttypes.StoreKey, capabilitytypes.StoreKey,
 		consensusparamtypes.StoreKey, group.StoreKey, icacontrollertypes.StoreKey, crisistypes.StoreKey,
 		evmtypes.StoreKey, feemarkettypes.StoreKey,
-		vestingmoduletypes.StoreKey, didmoduletypes.StoreKey,
+		vestingmoduletypes.StoreKey,
 		// this line is used by starport scaffolding # stargate/app/storeKey
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey, evmtypes.TransientKey, feemarkettypes.TransientKey)
-	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey, didmoduletypes.MemStoreKey)
+	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
 
 	// load state streaming if enabled
 	if _, _, err := streaming.LoadStreamingServices(bApp, appOpts, appCodec, logger, keys); err != nil {
@@ -488,19 +482,11 @@ func New(
 		keys[feemarkettypes.StoreKey], tkeys[feemarkettypes.TransientKey], feeMarketSs,
 	)
 
-	app.DIDKeeper = *didmodulekeeper.NewKeeper(
-		appCodec,
-		keys[didmoduletypes.StoreKey],
-		keys[didmoduletypes.MemStoreKey],
-		app.GetSubspace(didmoduletypes.ModuleName),
-	)
-	didModule := didmodule.NewAppModule(appCodec, app.DIDKeeper)
-
 	// Set authority to x/gov module account to only expect the module account to update params
 	evmSs := app.GetSubspace(evmtypes.ModuleName)
 	app.EvmKeeper = evmkeeper.NewKeeper(
 		appCodec, keys[evmtypes.StoreKey], tkeys[evmtypes.TransientKey], authtypes.NewModuleAddress(govtypes.ModuleName),
-		app.AccountKeeper, app.BankKeeper, app.StakingKeeper, app.FeeMarketKeeper, app.DIDKeeper, evmSs,
+		app.AccountKeeper, app.BankKeeper, app.StakingKeeper, app.FeeMarketKeeper, evmSs,
 	)
 
 	// ... other modules keepers
@@ -659,7 +645,6 @@ func New(
 		feemarket.NewAppModule(app.FeeMarketKeeper, feeMarketSs),
 		evm.NewAppModule(app.EvmKeeper, app.AccountKeeper, evmSs),
 		vestingModule,
-		didModule,
 		// this line is used by starport scaffolding # stargate/app/appModule
 	)
 
@@ -691,7 +676,6 @@ func New(
 		group.ModuleName,
 		paramstypes.ModuleName,
 		vestingmoduletypes.ModuleName,
-		didmoduletypes.ModuleName,
 		consensusparamtypes.ModuleName,
 
 		// this line is used by starport scaffolding # stargate/app/beginBlockers
@@ -720,7 +704,6 @@ func New(
 		paramstypes.ModuleName,
 		upgradetypes.ModuleName,
 		vestingmoduletypes.ModuleName,
-		didmoduletypes.ModuleName,
 		consensusparamtypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/endBlockers
 	)
@@ -755,7 +738,6 @@ func New(
 		upgradetypes.ModuleName,
 		crisistypes.ModuleName,
 		vestingmoduletypes.ModuleName,
-		didmoduletypes.ModuleName,
 		consensusparamtypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/initGenesis
 	)
@@ -1062,7 +1044,6 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 	paramsKeeper.Subspace(evmtypes.ModuleName).WithKeyTable(evmtypes.ParamKeyTable()) //nolint:staticcheck
 	paramsKeeper.Subspace(feemarkettypes.ModuleName).WithKeyTable(feemarkettypes.ParamKeyTable())
 	paramsKeeper.Subspace(vestingmoduletypes.ModuleName)
-	paramsKeeper.Subspace(didmoduletypes.ModuleName)
 	// this line is used by starport scaffolding # stargate/app/paramSubspace
 
 	return paramsKeeper
