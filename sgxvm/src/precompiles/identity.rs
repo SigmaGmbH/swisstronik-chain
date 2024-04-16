@@ -120,19 +120,19 @@ impl LinearCostPrecompileWithQuerier for Identity {
         // Since we issue VC without expiration date, verify nbf (not valid before) field of JWT, it should be less than current timestamp 
         validate_nbf(parsed_payload.nbf)?;
 
-//         // Extract issuer from payload and obtain verification material
-//         let verification_materials = get_verification_material(querier, parsed_payload.iss.clone())?;
-//
-//         // Find appropriate verification material
-//         let vm = verification_materials
-//             .iter()
-//             .find(|verification_method| verification_method.verificationMethodType == "Ed25519VerificationKey2020" || verification_method.verificationMethodType == "Ed25519VerificationKey2018")
-//             .and_then(|method| Some(method.verificationMaterial.clone()))
-//             .ok_or(PrecompileFailure::Error {
-//                 exit_status: ExitError::Other("Cannot find appropriate verification method".into()),
-//             })?;
-//
-//         verify_signature(&data, &signature, &vm)?;
+        // // Extract issuer from payload and obtain verification material
+        // let verification_materials = get_verification_material(querier, parsed_payload.iss.clone())?;
+
+        // // Find appropriate verification material
+        // let vm = verification_materials
+        //     .iter()
+        //     .find(|verification_method| verification_method.verificationMethodType == "Ed25519VerificationKey2020" || verification_method.verificationMethodType == "Ed25519VerificationKey2018")
+        //     .and_then(|method| Some(method.verificationMaterial.clone()))
+        //     .ok_or(PrecompileFailure::Error {
+        //         exit_status: ExitError::Other("Cannot find appropriate verification method".into()),
+        //     })?;
+        
+        // verify_signature(&data, &signature, &vm)?;
 
         let credential_subject = convert_bech32_address(parsed_payload.vc.credential_subject.user_address)?;
         let output = encode_output(credential_subject, parsed_payload.iss);
