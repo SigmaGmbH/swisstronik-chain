@@ -12,7 +12,6 @@ use crate::GoQuerier;
 mod blake2f;
 mod bn128;
 mod curve25519;
-mod identity;
 mod modexp;
 mod sha3fips;
 mod ec_recover;
@@ -138,8 +137,6 @@ impl PrecompileSet for EVMPrecompiles {
             // a if a == hash(1024) => Some(Sha3FIPS256::execute(handle)),
             // a if a == hash(1025) => Some(Sha3FIPS512::execute(handle)),
             // a if a == hash(1026) => Some(ECRecoverPublicKey::execute(handle)),
-            // Identity precompile
-            a if a == hash(1027) => Some(identity::Identity::execute(self.querier, handle)),
             _ => None,
         }
     }
