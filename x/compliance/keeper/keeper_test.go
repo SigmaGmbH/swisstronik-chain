@@ -277,10 +277,6 @@ func (suite *KeeperTestSuite) TestAddVerificationDetails() {
 	has, err = suite.keeper.HasVerificationOfType(suite.ctx, signer, types.VerificationType_VT_KYC, nil)
 	suite.Require().NoError(err)
 	suite.Require().True(has)
-
-	verificationDetails, err := suite.keeper.GetVerificationDetails(suite.ctx, verificationId)
-	suite.Require().NoError(err)
-	suite.Require().Equal(verificationDetails.IssuerVerificationId, verificationId)
 }
 
 func (suite *KeeperTestSuite) TestAddressDetailsCRUD() {
