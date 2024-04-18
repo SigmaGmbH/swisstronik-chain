@@ -69,5 +69,5 @@ message VerificationDetails {
     // ZK-proof original schema
     string proof_schema = 6;
     // Verification id for checking(KYC/KYB/AML etc) from issuer side
-    bytes issuer_verification_id = 7;
+    string issuer_verification_id = 7;
 }
