@@ -140,6 +140,12 @@ pub fn handle_call_request_inner(
                 nonce
             };
 
+            println!("DEBUG: Handle call inner. Exec result: {:?}", exec_result);
+            // Return unencrypted transaction response in case of revert
+            if !exec_result.vm_error.is_empty() {
+                return exec_result;
+            }
+
             // Encrypt transaction data output
             let encrypted_data =
                 match encrypt_transaction_data(exec_result.data, user_public_key, nonce) {
@@ -244,7 +250,10 @@ fn execute_call(
     let gas_used = executor.used_gas();
     let exit_value = match handle_evm_result(exit_reason, ret) {
         Ok(data) => data,
-        Err((err, data)) => return ExecutionResult::from_error(err, data, Some(gas_used)),
+        Err((err, data)) => {
+            println!("DEBUG: execute call. Revert reason: {:?}, data: {:?}", err, data);
+            return ExecutionResult::from_error(err, data, Some(gas_used));
+        }
     };
 
     if commit {

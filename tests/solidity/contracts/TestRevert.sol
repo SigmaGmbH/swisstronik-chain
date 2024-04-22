@@ -7,7 +7,7 @@ contract TestRevert {
     event Passed();
     
     function testRevert(uint256 value) public {
-        require(value >= 10, "Expected value >= 10");
+        require(value >= 10, "Sample Test text Expected value >= 10");
         emit Passed();
     }
 

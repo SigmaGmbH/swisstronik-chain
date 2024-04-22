@@ -314,6 +314,10 @@ func (k *Keeper) ApplyMessageWithConfig(
 		return nil, err
 	}
 
+	if res.VmError != "" {
+		print("DEBUG: VM error: ", res.VmError)
+	}
+
 	// calculate gas refund
 	if msg.Gas() < leftoverGas {
 		return nil, errorsmod.Wrap(types.ErrGasOverflow, "apply message")
