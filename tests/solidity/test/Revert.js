@@ -14,11 +14,14 @@ describe('Revert / Error', () => {
     })
 
     it('testRevert: should revert if provided value < 10', async () => {
-        const tx = await sendShieldedQuery(
-            signer.provider,
+        console.log('to: ', revertContract.address)
+        
+        const tx = await sendShieldedTransaction(
+            signer,
             revertContract.address,
             revertContract.interface.encodeFunctionData("testRevert", [5])
         )
+        await tx.wait()
     })
 
     // it('testRevert: should not revert if provided value >= 10', async () => {
