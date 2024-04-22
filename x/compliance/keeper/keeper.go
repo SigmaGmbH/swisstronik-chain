@@ -182,7 +182,7 @@ func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.Address,
 	}
 
 	if !isAddressVerified {
-		return nil, errors.Wrap(types.ErrInvalidParam, "issuer is not verified")
+		return nil, errors.Wrap(types.ErrInvalidIssuer, "issuer not verified")
 	}
 
 	detailsBytes, err := details.Marshal()
@@ -418,7 +418,7 @@ func (k Keeper) AddRegularOperator(ctx sdk.Context, operator sdk.AccAddress) err
 func (k Keeper) RemoveRegularOperator(ctx sdk.Context, operator sdk.AccAddress) error {
 	operatorDetails, err := k.GetOperatorDetails(ctx, operator)
 	if err != nil || operatorDetails == nil {
-		return types.ErrOperatorNotExist
+		return errors.Wrapf(types.ErrInvalidOperator, "operator not exists")
 	}
 
 	if operatorDetails.OperatorType != types.OperatorType_OT_REGULAR {

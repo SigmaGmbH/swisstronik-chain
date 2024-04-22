@@ -47,7 +47,7 @@ func (k msgServer) HandleAddOperator(goCtx context.Context, msg *types.MsgAddOpe
 		return nil, err
 	}
 	if exists {
-		return nil, errors.Wrapf(types.ErrInvalidParam, "operator already exists")
+		return nil, errors.Wrapf(types.ErrInvalidOperator, "operator already exists")
 	}
 
 	if err := k.AddRegularOperator(ctx, operator); err != nil {
@@ -80,7 +80,7 @@ func (k msgServer) HandleRemoveOperator(goCtx context.Context, msg *types.MsgRem
 
 	// Do not allow to remove itself
 	if signer.Equals(operator) {
-		return nil, errors.Wrapf(types.ErrInvalidParam, "same operator")
+		return nil, errors.Wrapf(types.ErrInvalidOperator, "same operator")
 	}
 
 	// Only allowed to remove regular operator
@@ -113,7 +113,7 @@ func (k msgServer) HandleSetVerificationStatus(goCtx context.Context, msg *types
 	}
 
 	if exists, err := k.IssuerExists(ctx, issuer); !exists || err != nil {
-		return nil, errors.Wrap(types.ErrInvalidParam, "issuer not exists")
+		return nil, errors.Wrap(types.ErrInvalidIssuer, "issuer not exists")
 	}
 
 	if err = k.SetAddressVerificationStatus(ctx, issuer, msg.IsVerified); err != nil {
@@ -143,7 +143,7 @@ func (k msgServer) HandleSetIssuerDetails(goCtx context.Context, msg *types.MsgS
 		return nil, err
 	}
 	if exists, err := k.IssuerExists(ctx, issuer); exists || err != nil {
-		return nil, errors.Wrap(types.ErrInvalidParam, "issuer already exists")
+		return nil, errors.Wrap(types.ErrInvalidIssuer, "issuer already exists")
 	}
 
 	if err := k.SetIssuerDetails(ctx, issuer, msg.Details); err != nil {
@@ -178,7 +178,7 @@ func (k msgServer) HandleUpdateIssuerDetails(goCtx context.Context, msg *types.M
 		return nil, err
 	}
 	if exists, err := k.IssuerExists(ctx, issuer); !exists || err != nil {
-		return nil, errors.Wrap(types.ErrInvalidParam, "issuer not exists")
+		return nil, errors.Wrap(types.ErrInvalidIssuer, "issuer not exists")
 	}
 
 	// Revoke verification if address was verified
@@ -212,7 +212,7 @@ func (k msgServer) HandleRemoveIssuer(goCtx context.Context, msg *types.MsgRemov
 		return nil, err
 	}
 	if exists, err := k.IssuerExists(ctx, issuer); !exists || err != nil {
-		return nil, errors.Wrap(types.ErrInvalidParam, "issuer already exists")
+		return nil, errors.Wrap(types.ErrInvalidIssuer, "issuer not exists")
 	}
 
 	k.RemoveIssuer(ctx, issuer)

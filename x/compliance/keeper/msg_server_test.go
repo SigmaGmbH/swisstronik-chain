@@ -30,7 +30,7 @@ func (suite *KeeperTestSuite) TestAddOperator() {
 				return &msg
 			},
 			expected: func(resp *types.MsgAddOperatorResponse, error error) {
-				suite.Require().Error(error)
+				suite.Require().ErrorContains(error, "decoding bech32")
 				suite.Require().Nil(resp)
 			},
 		},
@@ -48,7 +48,7 @@ func (suite *KeeperTestSuite) TestAddOperator() {
 				return &msg
 			},
 			expected: func(resp *types.MsgAddOperatorResponse, error error) {
-				suite.Require().Error(error)
+				suite.Require().ErrorIs(error, types.ErrNotOperator)
 				suite.Require().Nil(resp)
 			},
 		},
@@ -103,7 +103,7 @@ func (suite *KeeperTestSuite) TestAddOperator() {
 				return &msg
 			},
 			expected: func(resp *types.MsgAddOperatorResponse, error error) {
-				suite.Require().Error(error)
+				suite.Require().ErrorIs(error, types.ErrInvalidOperator)
 				suite.Require().Nil(resp)
 			},
 		},
@@ -143,7 +143,7 @@ func (suite *KeeperTestSuite) TestRemoveOperator() {
 				return &msg
 			},
 			expected: func(resp *types.MsgRemoveOperatorResponse, error error) {
-				suite.Require().Error(error)
+				suite.Require().ErrorContains(error, "decoding bech32")
 				suite.Require().Nil(resp)
 			},
 		},
@@ -161,7 +161,7 @@ func (suite *KeeperTestSuite) TestRemoveOperator() {
 				return &msg
 			},
 			expected: func(resp *types.MsgRemoveOperatorResponse, error error) {
-				suite.Require().Error(error)
+				suite.Require().ErrorIs(error, types.ErrNotOperator)
 				suite.Require().Nil(resp)
 			},
 		},
@@ -219,7 +219,7 @@ func (suite *KeeperTestSuite) TestRemoveOperator() {
 				return &msg
 			},
 			expected: func(resp *types.MsgRemoveOperatorResponse, error error) {
-				suite.Require().Error(error)
+				suite.Require().ErrorIs(error, types.ErrInvalidOperator)
 				suite.Require().Nil(resp)
 
 				// Operator should exist
@@ -256,7 +256,7 @@ func (suite *KeeperTestSuite) TestRemoveOperator() {
 				return &msg
 			},
 			expected: func(resp *types.MsgRemoveOperatorResponse, error error) {
-				suite.Require().Error(error)
+				suite.Require().ErrorIs(error, types.ErrNotAuthorized)
 				suite.Require().Nil(resp)
 
 				// Operator should exist
@@ -307,7 +307,7 @@ func (suite *KeeperTestSuite) TestSetVerificationStatus() {
 				return &msg
 			},
 			expected: func(resp *types.MsgSetVerificationStatusResponse, error error) {
-				suite.Require().Error(error)
+				suite.Require().ErrorContains(error, "decoding bech32")
 				suite.Require().Nil(resp)
 			},
 		},
@@ -329,7 +329,7 @@ func (suite *KeeperTestSuite) TestSetVerificationStatus() {
 				return &msg
 			},
 			expected: func(resp *types.MsgSetVerificationStatusResponse, error error) {
-				suite.Require().Error(error)
+				suite.Require().ErrorIs(error, types.ErrNotOperator)
 				suite.Require().Nil(resp)
 			},
 		},
@@ -354,12 +354,12 @@ func (suite *KeeperTestSuite) TestSetVerificationStatus() {
 				return &msg
 			},
 			expected: func(resp *types.MsgSetVerificationStatusResponse, error error) {
-				suite.Require().Error(error)
+				suite.Require().ErrorIs(error, types.ErrInvalidIssuer)
 				suite.Require().Nil(resp)
 			},
 		},
 		{
-			name: "issuer not exist",
+			name: "success",
 			init: func() {
 				from, _ := tests.RandomEthAddressWithPrivateKey()
 				operator = sdk.AccAddress(from.Bytes())
@@ -432,7 +432,7 @@ func (suite *KeeperTestSuite) TestSetIssuerDetails() {
 				return &msg
 			},
 			expected: func(resp *types.MsgSetIssuerDetailsResponse, error error) {
-				suite.Require().Error(error)
+				suite.Require().ErrorContains(error, "decoding bech32")
 				suite.Require().Nil(resp)
 			},
 		},
@@ -458,7 +458,7 @@ func (suite *KeeperTestSuite) TestSetIssuerDetails() {
 				return &msg
 			},
 			expected: func(resp *types.MsgSetIssuerDetailsResponse, error error) {
-				suite.Require().Error(error)
+				suite.Require().ErrorContains(error, "decoding bech32")
 				suite.Require().Nil(resp)
 			},
 		},
@@ -525,6 +525,9 @@ func (suite *KeeperTestSuite) TestSetIssuerDetails() {
 
 				from, _ = tests.RandomEthAddressWithPrivateKey()
 				operator = sdk.AccAddress(from.Bytes())
+
+				err := suite.keeper.AddRegularOperator(suite.ctx, operator)
+				suite.Require().NoError(err)
 			},
 			malleate: func() *types.MsgSetIssuerDetails {
 				msg := types.NewSetIssuerDetailsMsg(
@@ -539,7 +542,7 @@ func (suite *KeeperTestSuite) TestSetIssuerDetails() {
 				return &msg
 			},
 			expected: func(resp *types.MsgSetIssuerDetailsResponse, error error) {
-				suite.Require().Error(error)
+				suite.Require().ErrorIs(error, types.ErrInvalidIssuer)
 				suite.Require().Nil(resp)
 			},
 		},
@@ -586,7 +589,33 @@ func (suite *KeeperTestSuite) TestUpdateIssuerDetails() {
 				return &msg
 			},
 			expected: func(resp *types.MsgUpdateIssuerDetailsResponse, err error) {
-				suite.Require().Error(err)
+				suite.Require().ErrorContains(err, "decoding bech32")
+				suite.Require().Nil(resp)
+			},
+		},
+		{
+			name: "not operator",
+			init: func() {
+				from, _ := tests.RandomEthAddressWithPrivateKey()
+				issuer = sdk.AccAddress(from.Bytes())
+
+				from, _ = tests.RandomEthAddressWithPrivateKey()
+				operator = sdk.AccAddress(from.Bytes())
+			},
+			malleate: func() *types.MsgUpdateIssuerDetails {
+				msg := types.NewUpdateIssuerDetailsMsg(
+					operator.String(),
+					issuer.String(),
+					"issuer name",
+					"issuer description",
+					"issuer url",
+					"issuer logo",
+					"issuer legal entity",
+				)
+				return &msg
+			},
+			expected: func(resp *types.MsgUpdateIssuerDetailsResponse, err error) {
+				suite.Require().ErrorIs(err, types.ErrNotOperator)
 				suite.Require().Nil(resp)
 			},
 		},
@@ -598,35 +627,9 @@ func (suite *KeeperTestSuite) TestUpdateIssuerDetails() {
 
 				from, _ = tests.RandomEthAddressWithPrivateKey()
 				operator = sdk.AccAddress(from.Bytes())
-			},
-			malleate: func() *types.MsgUpdateIssuerDetails {
-				msg := types.NewUpdateIssuerDetailsMsg(
-					operator.String(),
-					issuer.String(),
-					"issuer name",
-					"issuer description",
-					"issuer url",
-					"issuer logo",
-					"issuer legal entity",
-				)
-				return &msg
-			},
-			expected: func(resp *types.MsgUpdateIssuerDetailsResponse, err error) {
-				suite.Require().Error(err)
-				suite.Require().Nil(resp)
-			},
-		},
-		{
-			name: "invalid issuer exist",
-			init: func() {
-				// Invalid issuer details were added in the store
-				details := &types.IssuerDetails{Name: "test issuer"} // missing operator
-				from, _ := tests.RandomEthAddressWithPrivateKey()
-				issuer = sdk.AccAddress(from.Bytes())
-				_ = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
 
-				from, _ = tests.RandomEthAddressWithPrivateKey()
-				operator = sdk.AccAddress(from.Bytes())
+				err := suite.keeper.AddRegularOperator(suite.ctx, operator)
+				suite.Require().NoError(err)
 			},
 			malleate: func() *types.MsgUpdateIssuerDetails {
 				msg := types.NewUpdateIssuerDetailsMsg(
@@ -641,7 +644,7 @@ func (suite *KeeperTestSuite) TestUpdateIssuerDetails() {
 				return &msg
 			},
 			expected: func(resp *types.MsgUpdateIssuerDetailsResponse, err error) {
-				suite.Require().Error(err)
+				suite.Require().ErrorIs(err, types.ErrInvalidIssuer)
 				suite.Require().Nil(resp)
 			},
 		},
@@ -796,7 +799,7 @@ func (suite *KeeperTestSuite) TestRemoveIssuer() {
 				return &msg
 			},
 			expected: func(resp *types.MsgRemoveIssuerResponse, err error) {
-				suite.Require().Error(err)
+				suite.Require().ErrorContains(err, "decoding bech32")
 				suite.Require().Nil(resp)
 			},
 		},
@@ -808,21 +811,23 @@ func (suite *KeeperTestSuite) TestRemoveIssuer() {
 
 				from, _ = tests.RandomEthAddressWithPrivateKey()
 				operator = sdk.AccAddress(from.Bytes())
+
+				err := suite.keeper.AddRegularOperator(suite.ctx, operator)
+				suite.Require().NoError(err)
 			},
 			malleate: func() *types.MsgRemoveIssuer {
 				msg := types.NewRemoveIssuerMsg(operator.String(), issuer.String())
 				return &msg
 			},
 			expected: func(resp *types.MsgRemoveIssuerResponse, err error) {
-				suite.Require().Error(err)
+				suite.Require().ErrorIs(err, types.ErrInvalidIssuer)
 				suite.Require().Nil(resp)
 			},
 		},
 		{
-			name: "invalid issuer exist",
+			name: "not operator",
 			init: func() {
-				// Invalid issuer details were added in the store
-				details := &types.IssuerDetails{Name: "test issuer"} // missing operator
+				details := &types.IssuerDetails{Name: "test issuer"}
 				from, _ := tests.RandomEthAddressWithPrivateKey()
 				issuer = sdk.AccAddress(from.Bytes())
 				_ = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
@@ -835,7 +840,7 @@ func (suite *KeeperTestSuite) TestRemoveIssuer() {
 				return &msg
 			},
 			expected: func(resp *types.MsgRemoveIssuerResponse, err error) {
-				suite.Require().Error(err)
+				suite.Require().ErrorIs(err, types.ErrNotOperator)
 				suite.Require().Nil(resp)
 			},
 		},
