@@ -61,8 +61,6 @@ message VerifyIssuerProposal {
   string title = 1;
   // description of the proposal
   string description = 2;
-  // address of issuer to verify
-  string issuer_address = 3;
-  // verification status of issuer
-  bool is_verified = 4;
+  // issuerAddress is an address of issuer to verify
+  string issuerAddress = 3;
 }
