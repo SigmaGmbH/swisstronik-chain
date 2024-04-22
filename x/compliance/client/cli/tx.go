@@ -3,6 +3,7 @@ package cli
 import (
 	"errors"
 	"fmt"
+	"strconv"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -29,6 +30,7 @@ func GetTxCmd() *cobra.Command {
 	cmd.AddCommand(
 		CmdAddOperator(),
 		CmdRemoveOperator(),
+		CmdSetIssuerVerificationStatus(),
 		CmdSetIssuerDetails(),
 		CmdUpdateIssuerDetails(),
 		CmdRemoveIssuer(),
@@ -89,6 +91,43 @@ func CmdRemoveOperator() *cobra.Command {
 			msg := types.NewMsgRemoveOperator(
 				clientCtx.GetFromAddress().String(),
 				operator.String(),
+			)
+
+			_ = clientCtx.PrintProto(&msg)
+
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), &msg)
+		},
+	}
+
+	flags.AddTxFlagsToCmd(cmd)
+	return cmd
+}
+
+// CmdSetIssuerVerificationStatus command set issuer's verification status with given parameter.
+func CmdSetIssuerVerificationStatus() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "set-issuer-verification [issuer-address] [verification-status]",
+		Short: "Set issuer's verification status",
+		Args:  cobra.ExactArgs(2),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			issuer, err := types.ParseAddress(args[0])
+			if err != nil {
+				return err
+			}
+			isVerified, err := strconv.ParseBool(args[1])
+			if err != nil {
+				return err
+			}
+
+			msg := types.NewMsgSetVerificationStatus(
+				clientCtx.GetFromAddress().String(),
+				issuer.String(),
+				isVerified,
 			)
 
 			_ = clientCtx.PrintProto(&msg)
