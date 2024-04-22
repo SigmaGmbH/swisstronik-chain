@@ -52,10 +52,10 @@ pub fn self_attest() -> sgx_status_t {
     };    
 
     // Verify tcb
-    if report.tcb < MIN_REQUIRED_TCB {
-        println!("Your TCB is out of date. Required TCB: {:?}, current TCB: {:?}", MIN_REQUIRED_TCB, report.tcb);
-        return sgx_status_t::SGX_SUCCESS;
-    }
+    // if report.tcb < MIN_REQUIRED_TCB {
+    //     println!("Your TCB is out of date. Required TCB: {:?}, current TCB: {:?}", MIN_REQUIRED_TCB, report.tcb);
+    //     return sgx_status_t::SGX_SUCCESS;
+    // }
 
     // Verify quote
     match verify_quote_status(&report, &report.advisory_ids) {

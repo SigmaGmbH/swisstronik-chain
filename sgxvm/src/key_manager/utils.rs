@@ -1,4 +1,5 @@
 use super::PRIVATE_KEY_SIZE;
+use deoxysii::NONCE_SIZE;
 use hmac::{Hmac, Mac, NewMac as _};
 use sgx_types::*;
 
@@ -20,6 +21,22 @@ pub fn random_bytes32() -> SgxResult<[u8; 32]> {
     if res != sgx_status_t::SGX_SUCCESS {
         println!(
             "[Enclave] Cannot generate random 32 bytes. Reason: {:?}",
+            res
+        );
+        return Err(res);
+    }
+
+    Ok(buffer)
+}
+
+/// Generates random 32 bytes slice using `sgx_read_rand` function
+pub fn random_nonce() -> SgxResult<[u8; NONCE_SIZE]> {
+    let mut buffer = [0u8; NONCE_SIZE];
+    let res = unsafe { sgx_read_rand(&mut buffer as *mut u8, NONCE_SIZE as usize) };
+
+    if res != sgx_status_t::SGX_SUCCESS {
+        println!(
+            "[Enclave] Cannot generate random bytes for nonce. Reason: {:?}",
             res
         );
         return Err(res);
