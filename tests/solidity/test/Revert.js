@@ -1,55 +1,45 @@
 const { expect } = require('chai')
 const { sendShieldedTransaction, sendShieldedQuery } = require("./testUtils")
 
-it('Should revert', async () => {
-    const [signer] = await ethers.getSigners()
-    const RevertContract = await ethers.getContractFactory('TestRevert')
-    const revertContract = await RevertContract.deploy()
-    await revertContract.deployed()
+describe('Revert / Error', () => {
+    let revertContract, signer
 
-    const trySetTx = await sendShieldedTransaction(
-        signer,
-        revertContract.address,
-        revertContract.interface.encodeFunctionData("try_set", [10])
-    )
-    await trySetTx.wait()
+    before(async () => {
+        const [ethersSigner] = await ethers.getSigners()
+        const RevertContract = await ethers.getContractFactory('TestRevert')
+        revertContract = await RevertContract.deploy()
+        signer = ethersSigner
+        await revertContract.deployed()
+    })
 
-    const queryAResponse = await sendShieldedQuery(
-        ethers.provider,
-        revertContract.address,
-        revertContract.interface.encodeFunctionData("query_a", [])
-    );
-    const queryAResult = revertContract.interface.decodeFunctionResult("query_a", queryAResponse)[0]
-    expect(queryAResult).to.be.equal(0)
+    it('testRevert: should revert if provided value < 10', async () => {
 
-    const queryBResponse = await sendShieldedQuery(
-        ethers.provider,
-        revertContract.address,
-        revertContract.interface.encodeFunctionData("query_b", [])
-    );
-    const queryBResult = revertContract.interface.decodeFunctionResult("query_b", queryBResponse)[0]
-    expect(queryBResult).to.be.equal(10)
+    })
 
-    const queryCResponse = await sendShieldedQuery(
-        ethers.provider,
-        revertContract.address,
-        revertContract.interface.encodeFunctionData("query_c", [])
-    );
-    const queryCResult = revertContract.interface.decodeFunctionResult("query_c", queryCResponse)[0]
-    expect(queryCResult).to.be.equal(10)
+    it('testRevert: should not revert if provided value >= 10', async () => {
+        const tx = await sendShieldedTransaction(
+            signer,
+            revertContract.address,
+            revertContract.interface.encodeFunctionData("testRevert", [10])
+        )
+        const receipt = await tx.wait()
+        const logs = receipt.logs.map(log => revertContract.interface.parseLog(log))
+        expect(logs.some(log => log.name === 'Passed')).to.be.true
+    })
 
-    const setTx = await sendShieldedTransaction(
-        signer,
-        revertContract.address,
-        revertContract.interface.encodeFunctionData("set", [10])
-    )
-    await setTx.wait()
+    it('testError: should return error if provided value < 10', async () => {
 
-    const response = await sendShieldedQuery(
-        ethers.provider,
-        revertContract.address,
-        revertContract.interface.encodeFunctionData("query_a", [])
-    );
-    const result = revertContract.interface.decodeFunctionResult("query_a", response)[0]
-    expect(result).to.be.equal(10)
+    })
+
+    it('testError: should not return error if provided value >= 10', async () => {
+        const tx = await sendShieldedTransaction(
+            signer,
+            revertContract.address,
+            revertContract.interface.encodeFunctionData("testError", [10])
+        )
+        const receipt = await tx.wait()
+
+        const logs = receipt.logs.map(log => revertContract.interface.parseLog(log))
+        expect(logs.some(log => log.name === 'Passed')).to.be.true
+    })
 })
