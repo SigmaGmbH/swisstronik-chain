@@ -9,11 +9,287 @@ import (
 	"swisstronik/x/compliance/types"
 )
 
+func (suite *KeeperTestSuite) TestAddOperator() {
+	var (
+		operator    sdk.AccAddress
+		newOperator sdk.AccAddress
+	)
+	testCases := []struct {
+		name     string
+		init     func()
+		malleate func() *types.MsgAddOperator
+		expected func(resp *types.MsgAddOperatorResponse, error error)
+	}{
+		{
+			name: "invalid fields",
+			malleate: func() *types.MsgAddOperator {
+				msg := types.NewMsgAddOperator(
+					"operator address",
+					"new operator address",
+				)
+				return &msg
+			},
+			expected: func(resp *types.MsgAddOperatorResponse, error error) {
+				suite.Require().Error(error)
+				suite.Require().Nil(resp)
+			},
+		},
+		{
+			name: "operator not exist",
+			init: func() {
+				from, _ := tests.RandomEthAddressWithPrivateKey()
+				operator = sdk.AccAddress(from.Bytes())
+			},
+			malleate: func() *types.MsgAddOperator {
+				msg := types.NewMsgAddOperator(
+					operator.String(),
+					operator.String(),
+				)
+				return &msg
+			},
+			expected: func(resp *types.MsgAddOperatorResponse, error error) {
+				suite.Require().Error(error)
+				suite.Require().Nil(resp)
+			},
+		},
+		{
+			name: "success",
+			init: func() {
+				from, _ := tests.RandomEthAddressWithPrivateKey()
+				operator = sdk.AccAddress(from.Bytes())
+
+				err := suite.keeper.AddRegularOperator(suite.ctx, operator)
+				suite.Require().NoError(err)
+
+				from, _ = tests.RandomEthAddressWithPrivateKey()
+				newOperator = sdk.AccAddress(from.Bytes())
+			},
+			malleate: func() *types.MsgAddOperator {
+				msg := types.NewMsgAddOperator(
+					operator.String(),
+					newOperator.String(),
+				)
+				return &msg
+			},
+			expected: func(resp *types.MsgAddOperatorResponse, error error) {
+				suite.Require().NoError(error)
+				suite.Require().Equal(resp, &types.MsgAddOperatorResponse{})
+
+				// Operator should exist
+				exist, err := suite.keeper.OperatorExists(suite.ctx, newOperator)
+				suite.Require().NoError(err)
+				suite.Require().True(exist)
+
+				// Check operator details
+				details, err := suite.keeper.GetOperatorDetails(suite.ctx, newOperator)
+				suite.Require().NoError(err)
+				suite.Require().Equal(newOperator.String(), details.Operator)
+			},
+		},
+		{
+			name: "existing operator",
+			init: func() {
+				from, _ := tests.RandomEthAddressWithPrivateKey()
+				operator = sdk.AccAddress(from.Bytes())
+
+				err := suite.keeper.AddRegularOperator(suite.ctx, operator)
+				suite.Require().NoError(err)
+			},
+			malleate: func() *types.MsgAddOperator {
+				msg := types.NewMsgAddOperator(
+					operator.String(),
+					operator.String(),
+				)
+				return &msg
+			},
+			expected: func(resp *types.MsgAddOperatorResponse, error error) {
+				suite.Require().Error(error)
+				suite.Require().Nil(resp)
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		suite.Run(tc.name, func() {
+			msgServer := keeper.NewMsgServerImpl(suite.keeper)
+			if tc.init != nil {
+				tc.init()
+			}
+			msg := tc.malleate()
+			resp, err := msgServer.HandleAddOperator(sdk.WrapSDKContext(suite.ctx), msg)
+			tc.expected(resp, err)
+		})
+	}
+}
+
+func (suite *KeeperTestSuite) TestRemoveOperator() {
+	var (
+		operator    sdk.AccAddress
+		newOperator sdk.AccAddress
+	)
+	testCases := []struct {
+		name     string
+		init     func()
+		malleate func() *types.MsgRemoveOperator
+		expected func(resp *types.MsgRemoveOperatorResponse, error error)
+	}{
+		{
+			name: "invalid fields",
+			malleate: func() *types.MsgRemoveOperator {
+				msg := types.NewMsgRemoveOperator(
+					"operator address",
+					"new operator address",
+				)
+				return &msg
+			},
+			expected: func(resp *types.MsgRemoveOperatorResponse, error error) {
+				suite.Require().Error(error)
+				suite.Require().Nil(resp)
+			},
+		},
+		{
+			name: "operator not exist",
+			init: func() {
+				from, _ := tests.RandomEthAddressWithPrivateKey()
+				operator = sdk.AccAddress(from.Bytes())
+			},
+			malleate: func() *types.MsgRemoveOperator {
+				msg := types.NewMsgRemoveOperator(
+					operator.String(),
+					operator.String(),
+				)
+				return &msg
+			},
+			expected: func(resp *types.MsgRemoveOperatorResponse, error error) {
+				suite.Require().Error(error)
+				suite.Require().Nil(resp)
+			},
+		},
+		{
+			name: "success",
+			init: func() {
+				from, _ := tests.RandomEthAddressWithPrivateKey()
+				operator = sdk.AccAddress(from.Bytes())
+
+				err := suite.keeper.AddRegularOperator(suite.ctx, operator)
+				suite.Require().NoError(err)
+
+				from, _ = tests.RandomEthAddressWithPrivateKey()
+				newOperator = sdk.AccAddress(from.Bytes())
+
+				err = suite.keeper.AddRegularOperator(suite.ctx, newOperator)
+				suite.Require().NoError(err)
+			},
+			malleate: func() *types.MsgRemoveOperator {
+				msg := types.NewMsgRemoveOperator(
+					operator.String(),
+					newOperator.String(),
+				)
+				return &msg
+			},
+			expected: func(resp *types.MsgRemoveOperatorResponse, error error) {
+				suite.Require().NoError(error)
+				suite.Require().Equal(resp, &types.MsgRemoveOperatorResponse{})
+
+				// Operator should exist
+				exist, err := suite.keeper.OperatorExists(suite.ctx, newOperator)
+				suite.Require().NoError(err)
+				suite.Require().False(exist)
+
+				// Check operator details
+				details, err := suite.keeper.GetOperatorDetails(suite.ctx, newOperator)
+				suite.Require().NoError(err)
+				suite.Require().Equal(details, &types.OperatorDetails{})
+			},
+		},
+		{
+			name: "remove itself",
+			init: func() {
+				from, _ := tests.RandomEthAddressWithPrivateKey()
+				operator = sdk.AccAddress(from.Bytes())
+
+				err := suite.keeper.AddRegularOperator(suite.ctx, operator)
+				suite.Require().NoError(err)
+			},
+			malleate: func() *types.MsgRemoveOperator {
+				msg := types.NewMsgRemoveOperator(
+					operator.String(),
+					operator.String(),
+				)
+				return &msg
+			},
+			expected: func(resp *types.MsgRemoveOperatorResponse, error error) {
+				suite.Require().Error(error)
+				suite.Require().Nil(resp)
+
+				// Operator should exist
+				exist, err := suite.keeper.OperatorExists(suite.ctx, operator)
+				suite.Require().NoError(err)
+				suite.Require().True(exist)
+
+				// Check operator details
+				details, err := suite.keeper.GetOperatorDetails(suite.ctx, operator)
+				suite.Require().NoError(err)
+				suite.Require().Equal(operator.String(), details.Operator)
+			},
+		},
+		{
+			name: "remove initial operator",
+			init: func() {
+				from, _ := tests.RandomEthAddressWithPrivateKey()
+				operator = sdk.AccAddress(from.Bytes())
+
+				err := suite.keeper.AddInitialOperator(suite.ctx, operator)
+				suite.Require().NoError(err)
+
+				from, _ = tests.RandomEthAddressWithPrivateKey()
+				newOperator = sdk.AccAddress(from.Bytes())
+
+				err = suite.keeper.AddInitialOperator(suite.ctx, newOperator)
+				suite.Require().NoError(err)
+			},
+			malleate: func() *types.MsgRemoveOperator {
+				msg := types.NewMsgRemoveOperator(
+					operator.String(),
+					newOperator.String(),
+				)
+				return &msg
+			},
+			expected: func(resp *types.MsgRemoveOperatorResponse, error error) {
+				suite.Require().Error(error)
+				suite.Require().Nil(resp)
+
+				// Operator should exist
+				exist, err := suite.keeper.OperatorExists(suite.ctx, newOperator)
+				suite.Require().NoError(err)
+				suite.Require().True(exist)
+
+				// Check operator details
+				details, err := suite.keeper.GetOperatorDetails(suite.ctx, newOperator)
+				suite.Require().NoError(err)
+				suite.Require().Equal(newOperator.String(), details.Operator)
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		suite.Run(tc.name, func() {
+			msgServer := keeper.NewMsgServerImpl(suite.keeper)
+			if tc.init != nil {
+				tc.init()
+			}
+			msg := tc.malleate()
+			resp, err := msgServer.HandleRemoveOperator(sdk.WrapSDKContext(suite.ctx), msg)
+			tc.expected(resp, err)
+		})
+	}
+
+}
+
 func (suite *KeeperTestSuite) TestSetIssuerDetails() {
 	var (
 		operator sdk.AccAddress
 		issuer   sdk.AccAddress
-		signer   sdk.AccAddress
 	)
 	testCases := []struct {
 		name     string
@@ -33,33 +309,6 @@ func (suite *KeeperTestSuite) TestSetIssuerDetails() {
 					"issuer logo",
 					"issuer legal entity",
 				)
-				return &msg
-			},
-			expected: func(resp *types.MsgSetIssuerDetailsResponse, error error) {
-				suite.Require().Error(error)
-				suite.Require().Nil(resp)
-			},
-		},
-		{
-			name: "mismatch operator and signer",
-			init: func() {
-				from, _ := tests.RandomEthAddressWithPrivateKey()
-				operator = sdk.AccAddress(from.Bytes())
-
-				from, _ = tests.RandomEthAddressWithPrivateKey()
-				signer = sdk.AccAddress(from.Bytes())
-			},
-			malleate: func() *types.MsgSetIssuerDetails {
-				msg := types.NewSetIssuerDetailsMsg(
-					operator.String(),
-					"issuer address",
-					"issuer name",
-					"issuer description",
-					"issuer url",
-					"issuer logo",
-					"issuer legal entity",
-				)
-				msg.Signer = signer.String()
 				return &msg
 			},
 			expected: func(resp *types.MsgSetIssuerDetailsResponse, error error) {
@@ -95,6 +344,9 @@ func (suite *KeeperTestSuite) TestSetIssuerDetails() {
 			init: func() {
 				from, _ := tests.RandomEthAddressWithPrivateKey()
 				operator = sdk.AccAddress(from.Bytes())
+
+				err := suite.keeper.AddRegularOperator(suite.ctx, operator)
+				suite.Require().NoError(err)
 
 				from, _ = tests.RandomEthAddressWithPrivateKey()
 				issuer = sdk.AccAddress(from.Bytes())
@@ -133,7 +385,6 @@ func (suite *KeeperTestSuite) TestSetIssuerDetails() {
 				suite.Require().Equal("issuer url", details.Url)
 				suite.Require().Equal("issuer logo", details.Logo)
 				suite.Require().Equal("issuer legal entity", details.LegalEntity)
-				suite.Require().Equal(operator.String(), details.Operator)
 
 				// Check if issuer's verification status is false
 				verified, error := suite.keeper.IsAddressVerified(suite.ctx, issuer)
@@ -144,7 +395,7 @@ func (suite *KeeperTestSuite) TestSetIssuerDetails() {
 		{
 			name: "existing issuer",
 			init: func() {
-				details := &types.IssuerDetails{Name: "test issuer", Operator: "operator"}
+				details := &types.IssuerDetails{Name: "test issuer"}
 				from, _ := tests.RandomEthAddressWithPrivateKey()
 				issuer = sdk.AccAddress(from.Bytes())
 				_ = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
@@ -186,10 +437,9 @@ func (suite *KeeperTestSuite) TestSetIssuerDetails() {
 
 func (suite *KeeperTestSuite) TestUpdateIssuerDetails() {
 	var (
-		issuer      sdk.AccAddress
-		operator    sdk.AccAddress
-		newOperator sdk.AccAddress
-		signer      sdk.AccAddress
+		issuer   sdk.AccAddress
+		operator sdk.AccAddress
+		signer   sdk.AccAddress
 	)
 
 	testCases := []struct {
@@ -202,8 +452,7 @@ func (suite *KeeperTestSuite) TestUpdateIssuerDetails() {
 			name: "invalid fields",
 			malleate: func() *types.MsgUpdateIssuerDetails {
 				msg := types.NewUpdateIssuerDetailsMsg(
-					"exiting operator",
-					"new operator",
+					"operator address",
 					"issuer address",
 					"issuer name",
 					"issuer description",
@@ -229,7 +478,6 @@ func (suite *KeeperTestSuite) TestUpdateIssuerDetails() {
 			},
 			malleate: func() *types.MsgUpdateIssuerDetails {
 				msg := types.NewUpdateIssuerDetailsMsg(
-					operator.String(),
 					operator.String(),
 					issuer.String(),
 					"issuer name",
@@ -260,41 +508,6 @@ func (suite *KeeperTestSuite) TestUpdateIssuerDetails() {
 			malleate: func() *types.MsgUpdateIssuerDetails {
 				msg := types.NewUpdateIssuerDetailsMsg(
 					operator.String(),
-					operator.String(),
-					issuer.String(),
-					"issuer name",
-					"issuer description",
-					"issuer url",
-					"issuer logo",
-					"issuer legal entity",
-				)
-				return &msg
-			},
-			expected: func(resp *types.MsgUpdateIssuerDetailsResponse, err error) {
-				suite.Require().Error(err)
-				suite.Require().Nil(resp)
-			},
-		},
-		{
-			name: "mismatch operator and signer",
-			init: func() {
-				from, _ := tests.RandomEthAddressWithPrivateKey()
-				operator = sdk.AccAddress(from.Bytes())
-
-				from, _ = tests.RandomEthAddressWithPrivateKey()
-				issuer = sdk.AccAddress(from.Bytes())
-				details := &types.IssuerDetails{Name: "test issuer", Operator: operator.String()}
-				_ = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
-
-				// New signer, different from previous operator
-				from, _ = tests.RandomEthAddressWithPrivateKey()
-				signer = sdk.AccAddress(from.Bytes())
-			},
-			malleate: func() *types.MsgUpdateIssuerDetails {
-				// existing operator (should pass operator, but passing signer) and new operator(no change operator)
-				msg := types.NewUpdateIssuerDetailsMsg(
-					signer.String(),
-					operator.String(),
 					issuer.String(),
 					"issuer name",
 					"issuer description",
@@ -315,14 +528,16 @@ func (suite *KeeperTestSuite) TestUpdateIssuerDetails() {
 				from, _ := tests.RandomEthAddressWithPrivateKey()
 				operator = sdk.AccAddress(from.Bytes())
 
+				err := suite.keeper.AddRegularOperator(suite.ctx, operator)
+				suite.Require().NoError(err)
+
 				from, _ = tests.RandomEthAddressWithPrivateKey()
 				issuer = sdk.AccAddress(from.Bytes())
-				details := &types.IssuerDetails{Name: "test issuer", Operator: operator.String()}
+				details := &types.IssuerDetails{Name: "test issuer"}
 				_ = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
 			},
 			malleate: func() *types.MsgUpdateIssuerDetails {
 				msg := types.NewUpdateIssuerDetailsMsg(
-					operator.String(),
 					operator.String(),
 					issuer.String(),
 					"issuer name",
@@ -355,64 +570,11 @@ func (suite *KeeperTestSuite) TestUpdateIssuerDetails() {
 				suite.Require().Equal("issuer url", details.Url)
 				suite.Require().Equal("issuer logo", details.Logo)
 				suite.Require().Equal("issuer legal entity", details.LegalEntity)
-				suite.Require().Equal(operator.String(), details.Operator)
 
 				// Check if issuer was revoked
 				verified, err := suite.keeper.IsAddressVerified(suite.ctx, issuer)
 				suite.Require().NoError(err)
 				suite.Require().False(verified)
-			},
-		},
-		{
-			name: "new operator over existing",
-			init: func() {
-				from, _ := tests.RandomEthAddressWithPrivateKey()
-				operator = sdk.AccAddress(from.Bytes())
-
-				from, _ = tests.RandomEthAddressWithPrivateKey()
-				issuer = sdk.AccAddress(from.Bytes())
-				details := &types.IssuerDetails{Name: "test issuer", Operator: operator.String()}
-				_ = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
-
-				from, _ = tests.RandomEthAddressWithPrivateKey()
-				newOperator = sdk.AccAddress(from.Bytes())
-			},
-			malleate: func() *types.MsgUpdateIssuerDetails {
-				msg := types.NewUpdateIssuerDetailsMsg(
-					operator.String(),
-					newOperator.String(), // replace with new operator
-					issuer.String(),
-					"issuer name",
-					"issuer description",
-					"issuer url",
-					"issuer logo",
-					"issuer legal entity",
-				)
-				return &msg
-			},
-			expected: func(resp *types.MsgUpdateIssuerDetailsResponse, err error) {
-				suite.Require().NoError(err)
-				suite.Require().Equal(resp, &types.MsgUpdateIssuerDetailsResponse{})
-
-				// Issuer details should exist
-				issuerExists, err := suite.keeper.IssuerExists(suite.ctx, issuer)
-				suite.Require().True(issuerExists)
-				suite.Require().NoError(err)
-
-				// Should be revoked verification if issuer address was verified
-				addressDetails, err := suite.keeper.GetAddressDetails(suite.ctx, issuer)
-				suite.Require().NoError(err)
-				suite.Require().Equal(false, addressDetails.IsVerified)
-
-				// Check if issuer details are stored correctly, especially new operator
-				details, err := suite.keeper.GetIssuerDetails(suite.ctx, issuer)
-				suite.Require().NoError(err)
-				suite.Require().Equal("issuer name", details.Name)
-				suite.Require().Equal("issuer description", details.Description)
-				suite.Require().Equal("issuer url", details.Url)
-				suite.Require().Equal("issuer logo", details.Logo)
-				suite.Require().Equal("issuer legal entity", details.LegalEntity)
-				suite.Require().Equal(newOperator.String(), details.Operator)
 			},
 		},
 		{
@@ -422,9 +584,12 @@ func (suite *KeeperTestSuite) TestUpdateIssuerDetails() {
 				from, _ := tests.RandomEthAddressWithPrivateKey()
 				operator = sdk.AccAddress(from.Bytes())
 
+				err := suite.keeper.AddRegularOperator(suite.ctx, operator)
+				suite.Require().NoError(err)
+
 				from, _ = tests.RandomEthAddressWithPrivateKey()
 				issuer = sdk.AccAddress(from.Bytes())
-				details := &types.IssuerDetails{Name: "test issuer", Operator: operator.String()}
+				details := &types.IssuerDetails{Name: "test issuer"}
 				_ = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
 
 				_ = suite.keeper.SetAddressVerificationStatus(suite.ctx, issuer, true)
@@ -448,7 +613,6 @@ func (suite *KeeperTestSuite) TestUpdateIssuerDetails() {
 			},
 			malleate: func() *types.MsgUpdateIssuerDetails {
 				msg := types.NewUpdateIssuerDetailsMsg(
-					operator.String(),
 					operator.String(),
 					issuer.String(),
 					"issuer name",
@@ -553,38 +717,17 @@ func (suite *KeeperTestSuite) TestRemoveIssuer() {
 			},
 		},
 		{
-			name: "mismatch operator and signer",
-			init: func() {
-				from, _ := tests.RandomEthAddressWithPrivateKey()
-				operator = sdk.AccAddress(from.Bytes())
-
-				from, _ = tests.RandomEthAddressWithPrivateKey()
-				issuer = sdk.AccAddress(from.Bytes())
-				details := &types.IssuerDetails{Name: "test issuer", Operator: operator.String()}
-				_ = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
-
-				// New signer, different from previous operator
-				from, _ = tests.RandomEthAddressWithPrivateKey()
-				signer = sdk.AccAddress(from.Bytes())
-			},
-			malleate: func() *types.MsgRemoveIssuer {
-				msg := types.NewRemoveIssuerMsg(signer.String(), issuer.String())
-				return &msg
-			},
-			expected: func(resp *types.MsgRemoveIssuerResponse, err error) {
-				suite.Require().Error(err)
-				suite.Require().Nil(resp)
-			},
-		},
-		{
 			name: "success",
 			init: func() {
 				from, _ := tests.RandomEthAddressWithPrivateKey()
 				operator = sdk.AccAddress(from.Bytes())
 
+				err := suite.keeper.AddRegularOperator(suite.ctx, operator)
+				suite.Require().NoError(err)
+
 				from, _ = tests.RandomEthAddressWithPrivateKey()
 				issuer = sdk.AccAddress(from.Bytes())
-				details := &types.IssuerDetails{Name: "test issuer", Operator: operator.String()}
+				details := &types.IssuerDetails{Name: "test issuer"}
 				_ = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
 			},
 			malleate: func() *types.MsgRemoveIssuer {
@@ -618,9 +761,12 @@ func (suite *KeeperTestSuite) TestRemoveIssuer() {
 				from, _ := tests.RandomEthAddressWithPrivateKey()
 				operator = sdk.AccAddress(from.Bytes())
 
+				err := suite.keeper.AddRegularOperator(suite.ctx, operator)
+				suite.Require().NoError(err)
+
 				from, _ = tests.RandomEthAddressWithPrivateKey()
 				issuer = sdk.AccAddress(from.Bytes())
-				details := &types.IssuerDetails{Name: "test issuer", Operator: operator.String()}
+				details := &types.IssuerDetails{Name: "test issuer"}
 				_ = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
 
 				_ = suite.keeper.SetAddressVerificationStatus(suite.ctx, issuer, true)

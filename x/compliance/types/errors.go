@@ -11,6 +11,8 @@ const (
 	codeErrBasicValidation
 	codeErrInvalidParam
 	codeErrNotAuthorized
+	codeErrOperatorNotExist
+	codeErrNotOperator
 )
 
 var (
@@ -19,4 +21,7 @@ var (
 	ErrSignatureNotFound = sdkerrors.Register(ModuleName, codeErrSignatureNotFound, "signature is required but not found")
 	ErrBasicValidation   = sdkerrors.Register(ModuleName, codeErrBasicValidation, "basic validation failed")
 	ErrInvalidParam      = sdkerrors.Register(ModuleName, codeErrInvalidParam, "invalid param provided")
+	ErrNotAuthorized     = sdkerrors.Register(ModuleName, codeErrNotAuthorized, "not authorized")
+	ErrOperatorNotExist  = sdkerrors.Register(ModuleName, codeErrOperatorNotExist, "operator not exist")
+	ErrNotOperator       = sdkerrors.Register(ModuleName, codeErrNotOperator, "not operator")
 )

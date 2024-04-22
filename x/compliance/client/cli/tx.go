@@ -81,7 +81,7 @@ func CmdSetIssuerDetails() *cobra.Command {
 // CmdUpdateIssuerDetails command updates existing issuer details.
 func CmdUpdateIssuerDetails() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "update-issuer-details [issuer-address] [new-operator] [name] [description] [url] [logo-url] [legalEntity]",
+		Use:   "update-issuer-details [issuer-address] [name] [description] [url] [logo-url] [legalEntity]",
 		Short: "Update issuer details",
 		Args:  cobra.ExactArgs(7),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -95,16 +95,14 @@ func CmdUpdateIssuerDetails() *cobra.Command {
 				return err
 			}
 
-			newOperator := args[1]
-			issuerName := args[2]
-			issuerDescription := args[3]
-			issuerURL := args[4]
-			issuerLogo := args[5]
-			issuerLegalEntity := args[6]
+			issuerName := args[1]
+			issuerDescription := args[2]
+			issuerURL := args[3]
+			issuerLogo := args[4]
+			issuerLegalEntity := args[5]
 
 			msg := types.NewUpdateIssuerDetailsMsg(
 				clientCtx.GetFromAddress().String(),
-				newOperator,
 				issuerAddress.String(),
 				issuerName,
 				issuerDescription,

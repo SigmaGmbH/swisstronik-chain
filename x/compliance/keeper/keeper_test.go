@@ -241,7 +241,7 @@ func (suite *KeeperTestSuite) TestRemovedIssuer() {
 }
 
 func (suite *KeeperTestSuite) TestAddVerificationDetails() {
-	details := &types.IssuerDetails{Name: "testIssuer", Operator: "testOperator"}
+	details := &types.IssuerDetails{Name: "testIssuer"}
 	from, _ := tests.RandomEthAddressWithPrivateKey()
 	issuer := sdk.AccAddress(from.Bytes())
 	err := suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
@@ -280,7 +280,7 @@ func (suite *KeeperTestSuite) TestAddVerificationDetails() {
 }
 
 func (suite *KeeperTestSuite) TestAddressDetailsCRUD() {
-	issuerDetails := &types.IssuerDetails{Name: "testIssuer", Operator: "testOperator"}
+	issuerDetails := &types.IssuerDetails{Name: "testIssuer"}
 	from, _ := tests.RandomEthAddressWithPrivateKey()
 	issuer := sdk.AccAddress(from.Bytes())
 	err := suite.keeper.SetIssuerDetails(suite.ctx, issuer, issuerDetails)
@@ -360,7 +360,7 @@ func (suite *KeeperTestSuite) TestAddressDetailsSetVerificationStatus() {
 func (suite *KeeperTestSuite) TestSetVerificationDetails() {
 	from, _ := tests.RandomEthAddressWithPrivateKey()
 	issuer := sdk.AccAddress(from.Bytes())
-	issuerDetails := &types.IssuerDetails{Name: "testIssuer", Operator: "testOperator"}
+	issuerDetails := &types.IssuerDetails{Name: "testIssuer"}
 	err := suite.keeper.SetIssuerDetails(suite.ctx, issuer, issuerDetails)
 	suite.Require().NoError(err)
 
@@ -378,4 +378,45 @@ func (suite *KeeperTestSuite) TestSetVerificationDetails() {
 	resp, err := suite.keeper.GetVerificationDetails(suite.ctx, verificationId)
 	suite.Require().NoError(err)
 	suite.Require().Equal(verificationDetails, resp)
+}
+
+func (suite *KeeperTestSuite) TestInitialOperator() {
+	from, _ := tests.RandomEthAddressWithPrivateKey()
+	operator := sdk.AccAddress(from.Bytes())
+
+	err := suite.keeper.AddInitialOperator(suite.ctx, operator)
+	suite.Require().NoError(err)
+
+	operatorDetails, err := suite.keeper.GetOperatorDetails(suite.ctx, operator)
+	suite.Require().NoError(err)
+	suite.Require().Equal(operator.String(), operatorDetails.Operator)
+	suite.Require().Equal(operatorDetails.OperatorType, types.OperatorType_OT_INITIAL)
+
+	// Can not remove initial operator
+	err = suite.keeper.RemoveRegularOperator(suite.ctx, operator)
+	suite.Require().Error(err)
+
+	exists, err := suite.keeper.OperatorExists(suite.ctx, operator)
+	suite.Require().True(exists)
+	suite.Require().NoError(err)
+}
+
+func (suite *KeeperTestSuite) TestRegularOperator() {
+	from, _ := tests.RandomEthAddressWithPrivateKey()
+	operator := sdk.AccAddress(from.Bytes())
+
+	err := suite.keeper.AddRegularOperator(suite.ctx, operator)
+	suite.Require().NoError(err)
+
+	operatorDetails, err := suite.keeper.GetOperatorDetails(suite.ctx, operator)
+	suite.Require().NoError(err)
+	suite.Require().Equal(operator.String(), operatorDetails.Operator)
+	suite.Require().Equal(operatorDetails.OperatorType, types.OperatorType_OT_REGULAR)
+
+	err = suite.keeper.RemoveRegularOperator(suite.ctx, operator)
+	suite.Require().NoError(err)
+
+	exists, err := suite.keeper.OperatorExists(suite.ctx, operator)
+	suite.Require().False(exists)
+	suite.Require().NoError(err)
 }

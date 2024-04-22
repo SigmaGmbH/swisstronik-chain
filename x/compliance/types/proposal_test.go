@@ -35,7 +35,7 @@ func (suite *ProposalTestSuite) SetupTest() {
 	suite.validIssuer = sdk.AccAddress(from.Bytes())
 
 	// Set issuer details
-	issuerDetails := &types.IssuerDetails{Name: "testIssuer", Operator: "testOperator"}
+	issuerDetails := &types.IssuerDetails{Name: "testIssuer"}
 	err := suite.keeper.SetIssuerDetails(suite.ctx, suite.validIssuer, issuerDetails)
 	suite.Require().NoError(err)
 

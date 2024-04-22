@@ -128,8 +128,7 @@ func TestInitGenesis_Validation(t *testing.T) {
 					{
 						Address: "swtr199wynlfwhj6ytkvujjf6mel5z7fl0mwzqck8l6",
 						Details: &types.IssuerDetails{
-							Name:     "test issuer",
-							Operator: "test operator",
+							Name: "test issuer",
 						},
 					},
 				},
@@ -158,8 +157,7 @@ func TestInitGenesis_Validation(t *testing.T) {
 					{
 						Address: "swtr199wynlfwhj6ytkvujjf6mel5z7fl0mwzqck8l6",
 						Details: &types.IssuerDetails{
-							Name:     "test issuer",
-							Operator: "test operator",
+							Name: "test issuer",
 						},
 					},
 				},
@@ -241,8 +239,7 @@ func TestGenesis_Success(t *testing.T) {
 					{
 						Address: "swtr199wynlfwhj6ytkvujjf6mel5z7fl0mwzqck8l6",
 						Details: &types.IssuerDetails{
-							Name:     "test issuer",
-							Operator: "test operator",
+							Name: "test issuer",
 						},
 					},
 					{
@@ -250,7 +247,6 @@ func TestGenesis_Success(t *testing.T) {
 						Details: &types.IssuerDetails{
 							Name:        "test issuer2",
 							Description: "test description2",
-							Operator:    "test operator2",
 						},
 					},
 				},

@@ -19,6 +19,20 @@ enum VerificationType {
 
 /// V1 ///
 
+enum OperatorType {
+    // Initial Operator, can't be removed from the list of operators.
+    // Both initial (constant) and regular operators can add or remove regular operators.
+    OT_INITIAL = 0;
+    OT_REGULAR = 1; 
+}
+
+message OperatorDetails {
+    // Operator address, who can add / update / remove issuers
+    string operator = 1;
+    // Operator type
+    OperatorType operator_type = 2;
+}
+
 message IssuerDetails {
     // Allows to easily understand
     // what entity can be associated with issuer address.
@@ -31,8 +45,6 @@ message IssuerDetails {
     string logo = 4;
     // Legal entity name
     string legalEntity = 5;
-    // Operator address. Only this address can manage issuer
-    string operator = 6;
 }
 
 message AddressDetails {

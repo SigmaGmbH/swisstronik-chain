@@ -360,9 +360,83 @@ func (k Keeper) IssuerExists(ctx sdk.Context, issuerAddress sdk.Address) (bool, 
 	if err != nil {
 		return false, err
 	}
+	return len(res.Name) > 0, nil
+}
 
-	exists := len(res.Operator) != 0
-	return exists, nil
+// GetOperatorDetails returns the operator details
+func (k Keeper) GetOperatorDetails(ctx sdk.Context, operator sdk.AccAddress) (*types.OperatorDetails, error) {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixOperatorDetails)
+
+	detailsBytes := store.Get(operator.Bytes())
+	if detailsBytes == nil {
+		return &types.OperatorDetails{}, nil
+	}
+
+	var operatorDetails types.OperatorDetails
+	if err := proto.Unmarshal(detailsBytes, &operatorDetails); err != nil {
+		return nil, err
+	}
+
+	return &operatorDetails, nil
+}
+
+// AddInitialOperator adds initial operator. Initial operator can not be removed
+func (k Keeper) AddInitialOperator(ctx sdk.Context, operator sdk.AccAddress) error {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixOperatorDetails)
+
+	details := &types.OperatorDetails{
+		Operator:     operator.String(),
+		OperatorType: types.OperatorType_OT_INITIAL,
+	}
+	detailsBytes, err := details.Marshal()
+	if err != nil {
+		return err
+	}
+
+	store.Set(operator.Bytes(), detailsBytes)
+	return nil
+}
+
+// AddRegularOperator adds regular operator.
+func (k Keeper) AddRegularOperator(ctx sdk.Context, operator sdk.AccAddress) error {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixOperatorDetails)
+
+	details := &types.OperatorDetails{
+		Operator:     operator.String(),
+		OperatorType: types.OperatorType_OT_REGULAR,
+	}
+	detailsBytes, err := details.Marshal()
+	if err != nil {
+		return err
+	}
+
+	store.Set(operator.Bytes(), detailsBytes)
+	return nil
+}
+
+// RemoveRegularOperator removes regular operator
+func (k Keeper) RemoveRegularOperator(ctx sdk.Context, operator sdk.AccAddress) error {
+	operatorDetails, err := k.GetOperatorDetails(ctx, operator)
+	if err != nil || operatorDetails == nil {
+		return types.ErrOperatorNotExist
+	}
+
+	if operatorDetails.OperatorType != types.OperatorType_OT_REGULAR {
+		return errors.Wrapf(types.ErrNotAuthorized, "operator not a regular type")
+	}
+
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixOperatorDetails)
+	store.Delete(operator.Bytes())
+	return nil
+}
+
+// OperatorExists checks if operator exists
+func (k Keeper) OperatorExists(ctx sdk.Context, operator sdk.AccAddress) (bool, error) {
+	res, err := k.GetOperatorDetails(ctx, operator)
+	if err != nil || res == nil {
+		return false, err
+	}
+	return len(res.Operator) > 0, nil
 }
 
 func (k Keeper) IterateVerificationDetails(ctx sdk.Context, callback func(id []byte) (continue_ bool)) {
