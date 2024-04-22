@@ -133,7 +133,7 @@ pub struct AttestationReport {
     pub platform_info_blob: Option<Vec<u8>>,
     pub advisory_ids: AdvisoryIDs,
     // TCB Evaluation Data number
-    // pub tcb: u64,
+    pub tcb: u64,
 }
 
 impl AttestationReport {
@@ -207,8 +207,8 @@ impl AttestationReport {
             .as_u64()
             .ok_or(Error::ReportParseError)?;
 
-        // TODO: Change API version to v5 in next upgrade
-        if version != 4 {
+
+        if version != 5 {
             println!("API version incompatible");
             return Err(Error::ReportParseError);
         };
@@ -255,11 +255,10 @@ impl AttestationReport {
             vec![]
         };
 
-        // TODO: Extract TCB
-        // let tcb = attn_report["tcbEvaluationDataNumber"].as_u64().ok_or_else(|| {
-        //     println!("Error extracting TCB");
-        //     Error::ReportParseError
-        // })?;
+        let tcb = attn_report["tcbEvaluationDataNumber"].as_u64().ok_or_else(|| {
+            println!("Error extracting TCB");
+            Error::ReportParseError
+        })?;
 
         // Extract timestamp from report
         let timestamp = attn_report["timestamp"].as_str().ok_or_else(|| {
@@ -286,7 +285,7 @@ impl AttestationReport {
             sgx_quote_body,
             platform_info_blob,
             advisory_ids: AdvisoryIDs(advisories),
-            // tcb,
+            tcb,
         })
     }
 }
