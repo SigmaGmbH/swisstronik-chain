@@ -35,7 +35,7 @@ const (
 	// TestnetChainID defines the EIP155 chain ID for testnet
 	TestnetChainID = "swisstronik_1291"
 	// BaseDenom defines the denomination
-	BaseDenom = "uswtr"
+	BaseDenom = "aswtr"
 )
 
 // IsMainnet returns true if the chain-id has the mainnet EIP155 chain prefix.

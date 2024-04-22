@@ -8,6 +8,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	teststypes "swisstronik/types/tests"
+	"swisstronik/utils"
 
 	transfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
 	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
@@ -255,9 +256,9 @@ func TestGetReceivedCoin(t *testing.T) {
 			"channel-0",
 			"transfer",
 			"channel-0",
-			"transfer/channel-0/uswtr",
+			"transfer/channel-0/aswtr",
 			"10",
-			sdk.Coin{Denom: "uswtr", Amount: sdk.NewInt(10)},
+			sdk.Coin{Denom: utils.BaseDenom, Amount: sdk.NewInt(10)},
 		},
 		{
 			"transfer 2x ibc wrapped coin to destination which is its source",
@@ -295,10 +296,10 @@ func TestGetSentCoin(t *testing.T) {
 		expCoin   sdk.Coin
 	}{
 		{
-			"get unwrapped uswtr coin",
-			"uswtr",
+			"get unwrapped aswtr coin",
+			utils.BaseDenom,
 			"10",
-			sdk.Coin{Denom: "uswtr", Amount: sdk.NewInt(10)},
+			sdk.Coin{Denom: utils.BaseDenom, Amount: sdk.NewInt(10)},
 		},
 		{
 			"get ibc wrapped uosmo coin",

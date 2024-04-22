@@ -2,8 +2,6 @@ package evm_test
 
 import (
 	"math/big"
-	"swisstronik/utils"
-	"swisstronik/x/evm/keeper"
 	"testing"
 	"time"
 
@@ -38,7 +36,9 @@ import (
 	"swisstronik/crypto/ethsecp256k1"
 	"swisstronik/tests"
 	evmcommontypes "swisstronik/types"
+	"swisstronik/utils"
 	"swisstronik/x/evm"
+	"swisstronik/x/evm/keeper"
 	"swisstronik/x/evm/types"
 
 	"github.com/cometbft/cometbft/crypto/tmhash"
@@ -616,7 +616,7 @@ func (suite *EvmTestSuite) TestERC20TransferReverted() {
 
 			txData, err := types.UnpackTxData(tx.Data)
 			suite.Require().NoError(err)
-			fees, err := keeper.VerifyFee(txData, "uswtr", baseFee, true, true, suite.ctx.IsCheckTx())
+			fees, err := keeper.VerifyFee(txData, utils.BaseDenom, baseFee, true, true, suite.ctx.IsCheckTx())
 			suite.Require().NoError(err)
 			err = k.DeductTxCostsFromUserBalance(suite.ctx, fees, common.HexToAddress(tx.From))
 			suite.Require().NoError(err)

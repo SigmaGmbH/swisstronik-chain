@@ -1,7 +1,6 @@
 package app
 
 import (
-	didmoduletypes "swisstronik/x/did/types"
 	evmkeeper "swisstronik/x/evm/keeper"
 	evmmoduletypes "swisstronik/x/evm/types"
 	feemarketmoduletypes "swisstronik/x/feemarket/types"
@@ -68,8 +67,6 @@ func setUpgradeHandler(
 			keyTable = govv1.ParamKeyTable() //nolint:staticcheck
 		case crisistypes.ModuleName:
 			keyTable = crisistypes.ParamKeyTable() //nolint:staticcheck
-		case didmoduletypes.ModuleName:
-			keyTable = didmoduletypes.ParamKeyTable()
 		case evmmoduletypes.ModuleName:
 			keyTable = evmmoduletypes.ParamKeyTable()
 		case feemarketmoduletypes.ModuleName:
@@ -139,7 +136,6 @@ func loadUpgradeStore(app *App) {
 	if shouldLoadUpgradeStore(app, upgradeInfo) {
 		storeUpgrades := storetypes.StoreUpgrades{
 			Added: []string{
-				didmoduletypes.StoreKey,
 				consensusparamtypes.StoreKey,
 				crisistypes.ModuleName,
 			},

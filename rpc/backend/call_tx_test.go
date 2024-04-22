@@ -8,6 +8,7 @@ import (
 	"swisstronik/rpc/backend/mocks"
 	rpctypes "swisstronik/rpc/types"
 	"swisstronik/tests"
+	"swisstronik/utils"
 	evmtypes "swisstronik/x/evm/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -287,7 +288,7 @@ func (suite *BackendTestSuite) TestResend() {
 func (suite *BackendTestSuite) TestSendRawTransaction() {
 	ethTx, bz := suite.buildEthereumTx()
 	rlpEncodedBz, _ := rlp.EncodeToBytes(ethTx.AsTransaction())
-	cosmosTx, _ := ethTx.BuildTx(suite.backend.clientCtx.TxConfig.NewTxBuilder(), "uswtr")
+	cosmosTx, _ := ethTx.BuildTx(suite.backend.clientCtx.TxConfig.NewTxBuilder(), utils.BaseDenom)
 	txBytes, _ := suite.backend.clientCtx.TxConfig.TxEncoder()(cosmosTx)
 
 	testCases := []struct {

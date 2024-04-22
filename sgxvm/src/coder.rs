@@ -99,12 +99,3 @@ pub fn encode_remove_storage_cell(account_address: &H160, index: &H256) -> Vec<u
     cosmos_request.set_removeStorageCell(request);
     cosmos_request.write_to_bytes().unwrap()
 }
-
-pub fn encode_verification_methods_request(did_url: String) -> Vec<u8> {
-    let mut cosmos_request = ffi::CosmosRequest::new();
-    let mut request = ffi::QueryVerificationMethods::new();
-    request.set_did(did_url);
-    cosmos_request.set_verificationMethods(request);
-    cosmos_request.write_to_bytes().unwrap()
-}
-
