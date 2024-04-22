@@ -1,5 +1,4 @@
 use lazy_static::lazy_static;
-use rand_chacha::rand_core::{RngCore, SeedableRng};
 use sgx_tstd::ffi::OsString;
 use sgx_tstd::{env, sgxfs::SgxFile};
 use sgx_types::{sgx_status_t, SgxResult};

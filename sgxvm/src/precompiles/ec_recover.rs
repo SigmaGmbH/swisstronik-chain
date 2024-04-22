@@ -1,7 +1,7 @@
 use std::vec::Vec;
 use core::cmp::min;
 use k256::sha2::Digest;
-use sha3::{Keccak256};
+use sha3::Keccak256;
 use k256::{
     ecdsa::recoverable,
     elliptic_curve::{sec1::ToEncodedPoint, IsHigh},

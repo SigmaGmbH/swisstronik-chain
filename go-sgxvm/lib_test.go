@@ -127,7 +127,7 @@ func TestCoinTransfer(t *testing.T) {
 	}
 }
 
-func TestSeedExchange(t *testing.T) {
+func TestSeedExchangeEPID(t *testing.T) {
 	if err := api.InitializeMasterKey(true); err != nil {
 		t.Fail()
 	}
@@ -146,6 +146,19 @@ func TestSeedExchange(t *testing.T) {
 		t.Fail()
 	} else {
 		println("EPID PASSED")
+	}
+}
+
+func TestSeedExchangeDCAP(t *testing.T) {
+	if err := api.InitializeMasterKey(true); err != nil {
+		t.Fail()
+	}
+
+	epidAddress := "localhost:8999"
+	dcapAddress := "localhost:8998"
+	err := api.StartAttestationServer(epidAddress, dcapAddress)
+	if err != nil {
+		t.Fail()
 	}
 
 	// Test DCAP Attestation
