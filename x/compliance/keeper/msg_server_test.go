@@ -283,7 +283,127 @@ func (suite *KeeperTestSuite) TestRemoveOperator() {
 			tc.expected(resp, err)
 		})
 	}
+}
 
+func (suite *KeeperTestSuite) TestSetVerificationStatus() {
+	var (
+		operator sdk.AccAddress
+		issuer   sdk.AccAddress
+	)
+	testCases := []struct {
+		name     string
+		init     func()
+		malleate func() *types.MsgSetVerificationStatus
+		expected func(resp *types.MsgSetVerificationStatusResponse, error error)
+	}{
+		{
+			name: "invalid fields",
+			malleate: func() *types.MsgSetVerificationStatus {
+				msg := types.NewMsgSetVerificationStatus(
+					"operator address",
+					"issuer address",
+					true,
+				)
+				return &msg
+			},
+			expected: func(resp *types.MsgSetVerificationStatusResponse, error error) {
+				suite.Require().Error(error)
+				suite.Require().Nil(resp)
+			},
+		},
+		{
+			name: "operator not exist",
+			init: func() {
+				from, _ := tests.RandomEthAddressWithPrivateKey()
+				operator = sdk.AccAddress(from.Bytes())
+
+				from, _ = tests.RandomEthAddressWithPrivateKey()
+				issuer = sdk.AccAddress(from.Bytes())
+			},
+			malleate: func() *types.MsgSetVerificationStatus {
+				msg := types.NewMsgSetVerificationStatus(
+					operator.String(),
+					issuer.String(),
+					true,
+				)
+				return &msg
+			},
+			expected: func(resp *types.MsgSetVerificationStatusResponse, error error) {
+				suite.Require().Error(error)
+				suite.Require().Nil(resp)
+			},
+		},
+		{
+			name: "issuer not exist",
+			init: func() {
+				from, _ := tests.RandomEthAddressWithPrivateKey()
+				operator = sdk.AccAddress(from.Bytes())
+
+				err := suite.keeper.AddRegularOperator(suite.ctx, operator)
+				suite.Require().NoError(err)
+
+				from, _ = tests.RandomEthAddressWithPrivateKey()
+				issuer = sdk.AccAddress(from.Bytes())
+			},
+			malleate: func() *types.MsgSetVerificationStatus {
+				msg := types.NewMsgSetVerificationStatus(
+					operator.String(),
+					issuer.String(),
+					true,
+				)
+				return &msg
+			},
+			expected: func(resp *types.MsgSetVerificationStatusResponse, error error) {
+				suite.Require().Error(error)
+				suite.Require().Nil(resp)
+			},
+		},
+		{
+			name: "issuer not exist",
+			init: func() {
+				from, _ := tests.RandomEthAddressWithPrivateKey()
+				operator = sdk.AccAddress(from.Bytes())
+
+				err := suite.keeper.AddRegularOperator(suite.ctx, operator)
+				suite.Require().NoError(err)
+
+				from, _ = tests.RandomEthAddressWithPrivateKey()
+				issuer = sdk.AccAddress(from.Bytes())
+
+				details := &types.IssuerDetails{Name: "testIssuer"}
+				err = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
+				suite.Require().NoError(err)
+			},
+			malleate: func() *types.MsgSetVerificationStatus {
+				msg := types.NewMsgSetVerificationStatus(
+					operator.String(),
+					issuer.String(),
+					true,
+				)
+				return &msg
+			},
+			expected: func(resp *types.MsgSetVerificationStatusResponse, error error) {
+				suite.Require().NoError(error)
+				suite.Require().Equal(resp, &types.MsgSetVerificationStatusResponse{})
+
+				verified, err := suite.keeper.IsAddressVerified(suite.ctx, issuer)
+				suite.Require().NoError(err)
+				suite.Require().True(verified)
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		suite.Run(tc.name, func() {
+			msgServer := keeper.NewMsgServerImpl(suite.keeper)
+			if tc.init != nil {
+				tc.init()
+			}
+			msg := tc.malleate()
+			resp, err := msgServer.HandleSetVerificationStatus(sdk.WrapSDKContext(suite.ctx), msg)
+			tc.expected(resp, err)
+		})
+	}
 }
 
 func (suite *KeeperTestSuite) TestSetIssuerDetails() {
@@ -321,6 +441,9 @@ func (suite *KeeperTestSuite) TestSetIssuerDetails() {
 			init: func() {
 				from, _ := tests.RandomEthAddressWithPrivateKey()
 				operator = sdk.AccAddress(from.Bytes())
+
+				err := suite.keeper.AddRegularOperator(suite.ctx, operator)
+				suite.Require().NoError(err)
 			},
 			malleate: func() *types.MsgSetIssuerDetails {
 				msg := types.NewSetIssuerDetailsMsg(
@@ -387,7 +510,7 @@ func (suite *KeeperTestSuite) TestSetIssuerDetails() {
 				suite.Require().Equal("issuer legal entity", details.LegalEntity)
 
 				// Check if issuer's verification status is false
-				verified, error := suite.keeper.IsAddressVerified(suite.ctx, issuer)
+				verified, err := suite.keeper.IsAddressVerified(suite.ctx, issuer)
 				suite.Require().NoError(err)
 				suite.Require().False(verified)
 			},

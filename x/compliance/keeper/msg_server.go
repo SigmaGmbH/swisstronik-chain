@@ -91,6 +91,38 @@ func (k msgServer) HandleRemoveOperator(goCtx context.Context, msg *types.MsgRem
 	return &types.MsgRemoveOperatorResponse{}, nil
 }
 
+func (k msgServer) HandleSetVerificationStatus(goCtx context.Context, msg *types.MsgSetVerificationStatus) (*types.MsgSetVerificationStatusResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// Check validity of signer address
+	signer, err := sdk.AccAddressFromBech32(msg.Signer)
+	if err != nil {
+		return nil, err
+	}
+
+	// Only operator can set issuer's verification status, (todo, for now, in centralized way)
+	// NOTE, for now, use centralized solution, will move to decentralized way later.
+	if exists, err := k.OperatorExists(ctx, signer); !exists || err != nil {
+		return nil, types.ErrNotOperator
+	}
+
+	// Check validity of issuer addresses
+	issuer, err := sdk.AccAddressFromBech32(msg.IssuerAddress)
+	if err != nil {
+		return nil, err
+	}
+
+	if exists, err := k.IssuerExists(ctx, issuer); !exists || err != nil {
+		return nil, errors.Wrap(types.ErrInvalidParam, "issuer not exists")
+	}
+
+	if err = k.SetAddressVerificationStatus(ctx, issuer, msg.IsVerified); err != nil {
+		return nil, err
+	}
+
+	return &types.MsgSetVerificationStatusResponse{}, nil
+}
+
 func (k msgServer) HandleSetIssuerDetails(goCtx context.Context, msg *types.MsgSetIssuerDetails) (*types.MsgSetIssuerDetailsResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 

@@ -73,6 +73,41 @@ func (msg *MsgRemoveOperator) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{signer}
 }
 
+func NewMsgSetVerificationStatus(operatorAddress, issuerAddress string, isVerified bool) MsgSetVerificationStatus {
+	return MsgSetVerificationStatus{
+		Signer:        operatorAddress,
+		IssuerAddress: issuerAddress,
+		IsVerified:    isVerified,
+	}
+}
+
+func (msg *MsgSetVerificationStatus) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(msg)
+	return sdk.MustSortJSON(bz)
+}
+
+func (msg *MsgSetVerificationStatus) ValidateBasic() error {
+	_, err := sdk.AccAddressFromBech32(msg.Signer)
+	if err != nil {
+		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid signer address (%s)", err)
+	}
+
+	_, err = sdk.AccAddressFromBech32(msg.IssuerAddress)
+	if err != nil {
+		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid issuer address (%s)", err)
+	}
+
+	return nil
+}
+
+func (msg *MsgSetVerificationStatus) GetSigners() []sdk.AccAddress {
+	signer, err := sdk.AccAddressFromBech32(msg.Signer)
+	if err != nil {
+		panic(err)
+	}
+	return []sdk.AccAddress{signer}
+}
+
 func NewSetIssuerDetailsMsg(operatorAddress, issuerAddress, issuerName, issuerDescription, issuerURL, issuerLogo, issuerLegalEntity string) MsgSetIssuerDetails {
 	issuerDetails := IssuerDetails{
 		Name:        issuerName,
