@@ -73,7 +73,7 @@ type DIDKeeper interface {
 
 // ComplianceKeeper
 type ComplianceKeeper interface {
-	AddVerificationDetails(ctx sdk.Context, userAddress sdk.Address, verificationType compliancetypes.VerificationType, details *compliancetypes.VerificationDetails) error
+	AddVerificationDetails(ctx sdk.Context, userAddress sdk.Address, verificationType compliancetypes.VerificationType, details *compliancetypes.VerificationDetails) ([]byte, error)
 	HasVerificationOfType(ctx sdk.Context, userAddress sdk.Address, expectedType compliancetypes.VerificationType, expectedIssuers []sdk.Address) (bool, error)
 }
 

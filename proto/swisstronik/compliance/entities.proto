@@ -14,6 +14,7 @@ enum VerificationType {
     VT_AML = 4; // Anti Money Laundering (check transactions)
     VT_ADDRESS = 5;
     VT_CUSTOM = 6;
+    VT_CREDIT_SCORE = 7;
 }
 
 /// V1 ///
@@ -67,4 +68,6 @@ message VerificationDetails {
     bytes original_data = 5;
     // ZK-proof original schema
     string proof_schema = 6;
+    // Verification id for checking(KYC/KYB/AML etc) from issuer side
+    string issuer_verification_id = 7;
 }

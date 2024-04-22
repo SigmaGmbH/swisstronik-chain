@@ -8,3 +8,4 @@ release/
 build/
 .testnets/
 **.uuid
+vendor

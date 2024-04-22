@@ -1,8 +1,10 @@
 package keeper
 
 import (
-	"cosmossdk.io/errors"
 	"fmt"
+	"slices"
+
+	"cosmossdk.io/errors"
 	"github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
@@ -10,7 +12,6 @@ import (
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/cosmos/gogoproto/proto"
 	"github.com/ethereum/go-ethereum/crypto"
-	"slices"
 
 	"swisstronik/x/compliance/types"
 )
@@ -60,6 +61,12 @@ func (k Keeper) SetIssuerDetails(ctx sdk.Context, issuerAddress sdk.Address, det
 func (k Keeper) RemoveIssuer(ctx sdk.Context, issuerAddress sdk.Address) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixIssuerDetails)
 	store.Delete(issuerAddress.Bytes())
+	// NOTE, all the verification data verified by removed issuer must be deleted from store
+	// But for now, let's keep those verifications.
+	// They will be filtered out at the time when call `GetAddressDetails` or `GetVerificationDetails`
+
+	// Remove address details for issuer
+	k.RemoveAddressDetails(ctx, issuerAddress)
 }
 
 // GetIssuerDetails returns details of provided issuer address
@@ -93,6 +100,23 @@ func (k Keeper) GetAddressDetails(ctx sdk.Context, address sdk.Address) (*types.
 		return nil, err
 	}
 
+	// Filter verification details by issuer's existance
+	var newVerifications []*types.Verification
+	for _, verification := range addressDetails.Verifications {
+		issuerAddress, err := sdk.AccAddressFromBech32(verification.IssuerAddress)
+		if err != nil {
+			return nil, err
+		}
+		exists, err := k.IssuerExists(ctx, issuerAddress)
+		if err != nil {
+			return nil, err
+		}
+		if exists {
+			newVerifications = append(newVerifications, verification)
+		}
+	}
+	addressDetails.Verifications = newVerifications
+
 	return &addressDetails, nil
 }
 
@@ -105,6 +129,12 @@ func (k Keeper) SetAddressDetails(ctx sdk.Context, address sdk.Address, details 
 	}
 	store.Set(address.Bytes(), detailsBytes)
 	return nil
+}
+
+// RemoveAddressDetails deletes address details from store
+func (k Keeper) RemoveAddressDetails(ctx sdk.Context, address sdk.Address) {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixAddressDetails)
+	store.Delete(address.Bytes())
 }
 
 // IsAddressVerified returns information if address is verified.
@@ -139,26 +169,25 @@ func (k Keeper) SetAddressVerificationStatus(ctx sdk.Context, address sdk.Addres
 }
 
 // AddVerificationDetails writes details of passed verification by provided address.
-func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.Address, verificationType types.VerificationType, details *types.VerificationDetails) error {
+func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.Address, verificationType types.VerificationType, details *types.VerificationDetails) ([]byte, error) {
 	// Check if issuer is verified and not banned
 	issuerAddress, err := sdk.AccAddressFromBech32(details.IssuerAddress)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	// TODO: Uncomment once verification mechanism is done
-	//isAddressVerified, err := k.IsAddressVerified(ctx, issuerAddress)
-	//if err != nil {
-	//	return err
-	//}
-	//
-	//if !isAddressVerified {
-	//	return errors.Wrap(types.ErrInvalidParam, "issuer is not verified")
-	//}
+	isAddressVerified, err := k.IsAddressVerified(ctx, issuerAddress)
+	if err != nil {
+		return nil, err
+	}
+
+	if !isAddressVerified {
+		return nil, errors.Wrap(types.ErrInvalidParam, "issuer is not verified")
+	}
 
 	detailsBytes, err := details.Marshal()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// Check if there is no such verification details in storage yet
@@ -166,7 +195,7 @@ func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.Address,
 	verificationDetailsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationDetails)
 
 	if verificationDetailsStore.Has(verificationDetailsID) {
-		return errors.Wrap(types.ErrInvalidParam, "provided verification details already in storage")
+		return nil, errors.Wrap(types.ErrInvalidParam, "provided verification details already in storage")
 	}
 
 	// If there is no such verification details associated with provided address, write them to the table
@@ -180,19 +209,19 @@ func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.Address,
 	}
 	userAddressDetails, err := k.GetAddressDetails(ctx, userAddress)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if slices.Contains(userAddressDetails.Verifications, verification) {
-		return errors.Wrap(types.ErrInvalidParam, "such verification already associated with user address")
+		return nil, errors.Wrap(types.ErrInvalidParam, "such verification already associated with user address")
 	}
 
 	userAddressDetails.Verifications = append(userAddressDetails.Verifications, verification)
 	if err := k.SetAddressDetails(ctx, userAddress, userAddressDetails); err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return verificationDetailsID, nil
 }
 
 // SetVerificationDetails writes verification details
@@ -212,17 +241,39 @@ func (k Keeper) SetVerificationDetails(ctx sdk.Context, verificationDetailsId []
 	return nil
 }
 
+// RemoveVerificationDetails removes verification details for provided ID
+func (k Keeper) RemoveVerificationDetails(ctx sdk.Context, verificationDetailsId []byte) {
+	if verificationDetailsId == nil {
+		return
+	}
+	verificationDetailsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationDetails)
+	verificationDetailsStore.Delete(verificationDetailsId)
+}
+
 // GetVerificationDetails returns verification details for provided ID
 func (k Keeper) GetVerificationDetails(ctx sdk.Context, verificationDetailsId []byte) (*types.VerificationDetails, error) {
 	verificationDetailsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationDetails)
 	verificationDetailsBytes := verificationDetailsStore.Get(verificationDetailsId)
 	if verificationDetailsBytes == nil {
-		return nil, nil
+		return &types.VerificationDetails{}, nil
 	}
 
 	var verificationDetails types.VerificationDetails
 	if err := proto.Unmarshal(verificationDetailsBytes, &verificationDetails); err != nil {
 		return nil, err
+	}
+
+	// Check if issuer exists. If removed, delete verification data from store
+	issuerAddress, err := sdk.AccAddressFromBech32(verificationDetails.IssuerAddress)
+	if err != nil {
+		return nil, err
+	}
+	exists, err := k.IssuerExists(ctx, issuerAddress)
+	if err != nil {
+		return nil, err
+	}
+	if !exists {
+		return &types.VerificationDetails{}, nil
 	}
 
 	return &verificationDetails, nil
@@ -283,6 +334,16 @@ func (k Keeper) GetVerificationsOfType(ctx sdk.Context, userAddress sdk.Address,
 	// Extract verification data
 	var verifications []*types.VerificationDetails
 	for _, verification := range appropriateTypeVerifications {
+		// Filter verifications by expected issuer
+		if expectedIssuers != nil && slices.ContainsFunc(expectedIssuers, func(expectedIssuer sdk.Address) bool {
+			if expectedIssuer.String() == verification.IssuerAddress {
+				return true
+			}
+			return false
+		}) == false {
+			continue
+		}
+
 		verificationDetails, err := k.GetVerificationDetails(ctx, verification.VerificationId)
 		if err != nil {
 			return nil, err
@@ -310,7 +371,8 @@ func (k Keeper) IterateVerificationDetails(ctx sdk.Context, callback func(id []b
 
 	for ; latestVersionIterator.Valid(); latestVersionIterator.Next() {
 		key := latestVersionIterator.Key()
-		if !callback(key) {
+		id := types.VerificationIdFromKey(key)
+		if !callback(id) {
 			break
 		}
 	}
@@ -322,7 +384,7 @@ func (k Keeper) IterateAddressDetails(ctx sdk.Context, callback func(address sdk
 
 	for ; latestVersionIterator.Valid(); latestVersionIterator.Next() {
 		key := latestVersionIterator.Key()
-		address := sdk.AccAddress(key)
+		address := types.AccAddressFromKey(key)
 		if !callback(address) {
 			break
 		}
@@ -335,7 +397,7 @@ func (k Keeper) IterateIssuerDetails(ctx sdk.Context, callback func(address sdk.
 
 	for ; latestVersionIterator.Valid(); latestVersionIterator.Next() {
 		key := latestVersionIterator.Key()
-		address := sdk.AccAddress(key)
+		address := types.AccAddressFromKey(key)
 		if !callback(address) {
 			break
 		}

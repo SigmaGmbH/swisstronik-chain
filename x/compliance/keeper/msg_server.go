@@ -2,8 +2,10 @@ package keeper
 
 import (
 	"context"
+
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"swisstronik/x/compliance/types"
 )
 
@@ -52,6 +54,11 @@ func (k msgServer) HandleSetIssuerDetails(goCtx context.Context, msg *types.MsgS
 	}
 
 	if err := k.SetIssuerDetails(ctx, issuerAddress, msg.Details); err != nil {
+		return nil, err
+	}
+
+	// If issuer is freshly created, verification status should be false
+	if err = k.SetAddressVerificationStatus(ctx, issuerAddress, false); err != nil {
 		return nil, err
 	}
 
