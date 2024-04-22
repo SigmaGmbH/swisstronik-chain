@@ -311,8 +311,6 @@ func Call(
 		return nil, err
 	}
 
-	println("DEBUG: Go got response: ", response.Ret)
-
 	return &response, nil
 }
 

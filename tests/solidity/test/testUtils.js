@@ -19,8 +19,6 @@ module.exports.sendShieldedTransaction = async (signer, destination, data, value
 }
 
 module.exports.sendShieldedQuery = async (provider, destination, data, value) => {
-
-    console.log('DEBUG: ', provider.connection)
     // Encrypt call data
     const [encryptedData, usedEncryptedKey] = await encryptDataField(
         provider.connection.url,

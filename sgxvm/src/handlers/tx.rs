@@ -140,7 +140,6 @@ pub fn handle_call_request_inner(
                 nonce
             };
 
-            println!("DEBUG: Handle call inner. Exec result: {:?}", exec_result);
             // Return unencrypted transaction response in case of revert
             if !exec_result.vm_error.is_empty() {
                 return exec_result;
@@ -251,7 +250,6 @@ fn execute_call(
     let exit_value = match handle_evm_result(exit_reason, ret) {
         Ok(data) => data,
         Err((err, data)) => {
-            println!("DEBUG: execute call. Revert reason: {:?}, data: {:?}", err, data);
             return ExecutionResult::from_error(err, data, Some(gas_used));
         }
     };

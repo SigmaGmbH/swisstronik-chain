@@ -13,9 +13,7 @@ describe('Revert / Error', () => {
         await revertContract.deployed()
     })
 
-    it('testRevert: should revert if provided value < 10', async () => {
-        console.log('to: ', revertContract.address)
-        
+    it('testRevert: should revert if provided value < 10', async () => {        
         const tx = await sendShieldedTransaction(
             signer,
             revertContract.address,
