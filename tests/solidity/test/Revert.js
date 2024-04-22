@@ -13,7 +13,12 @@ describe('Revert / Error', () => {
     })
 
     it('testRevert: should revert if provided value < 10', async () => {
-
+        const tx = await sendShieldedTransaction(
+            signer,
+            revertContract.address,
+            revertContract.interface.encodeFunctionData("testRevert", [5])
+        )
+        await tx.wait()
     })
 
     it('testRevert: should not revert if provided value >= 10', async () => {
@@ -28,7 +33,12 @@ describe('Revert / Error', () => {
     })
 
     it('testError: should return error if provided value < 10', async () => {
-
+        const tx = await sendShieldedTransaction(
+            signer,
+            revertContract.address,
+            revertContract.interface.encodeFunctionData("testError", [5])
+        )
+        await tx.wait()
     })
 
     it('testError: should not return error if provided value >= 10', async () => {
