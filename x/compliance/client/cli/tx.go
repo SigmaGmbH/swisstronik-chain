@@ -27,11 +27,77 @@ func GetTxCmd() *cobra.Command {
 	}
 
 	cmd.AddCommand(
+		CmdAddOperator(),
+		CmdRemoveOperator(),
 		CmdSetIssuerDetails(),
 		CmdUpdateIssuerDetails(),
 		CmdRemoveIssuer(),
 	)
 
+	return cmd
+}
+
+// CmdAddOperator command adds regular operator.
+func CmdAddOperator() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "add-operator [operator-address]",
+		Short: "Add regular operator",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			operator, err := types.ParseAddress(args[0])
+			if err != nil {
+				return err
+			}
+
+			msg := types.NewMsgAddOperator(
+				clientCtx.GetFromAddress().String(),
+				operator.String(),
+			)
+
+			_ = clientCtx.PrintProto(&msg)
+
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), &msg)
+		},
+	}
+
+	flags.AddTxFlagsToCmd(cmd)
+	return cmd
+}
+
+// CmdRemoveOperator command removes regular operator.
+func CmdRemoveOperator() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "remove-operator [operator-address]",
+		Short: "Remove regular operator",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			operator, err := types.ParseAddress(args[0])
+			if err != nil {
+				return err
+			}
+
+			msg := types.NewMsgRemoveOperator(
+				clientCtx.GetFromAddress().String(),
+				operator.String(),
+			)
+
+			_ = clientCtx.PrintProto(&msg)
+
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), &msg)
+		},
+	}
+
+	flags.AddTxFlagsToCmd(cmd)
 	return cmd
 }
 
