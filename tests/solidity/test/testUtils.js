@@ -32,6 +32,10 @@ module.exports.sendShieldedQuery = async (provider, destination, data, value) =>
         value
     })
 
+    if (response.startsWith("0x08c379a0")) {
+        return response
+    }
+
     console.log('response: ', response)
 
     // Decrypt call result
