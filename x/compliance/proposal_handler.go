@@ -38,7 +38,7 @@ func handleVerifyIssuerProposal(ctx sdk.Context, k *keeper.Keeper, p *types.Veri
 	}
 
 	// Set issuer verified through governance proposal
-	err = k.SetAddressVerificationStatus(ctx, issuer, true)
+	err = k.SetAddressVerificationStatus(ctx, issuer, p.IsVerified)
 	if err != nil {
 		return err
 	}
