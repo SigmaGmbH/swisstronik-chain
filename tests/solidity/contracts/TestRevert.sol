@@ -11,6 +11,7 @@ contract TestRevert {
         emit Passed();
     }
 
+    // Format with `error` is not supported yet.
     function testError(uint256 value) public {
         if (value < 10) {
             revert SampleError({

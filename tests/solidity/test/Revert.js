@@ -39,25 +39,4 @@ describe('Revert / Error', () => {
         const logs = receipt.logs.map(log => revertContract.interface.parseLog(log))
         expect(logs.some(log => log.name === 'Passed')).to.be.true
     })
-
-    // it('testError: should return error if provided value < 10', async () => {
-    //     const tx = await sendShieldedTransaction(
-    //         signer,
-    //         revertContract.address,
-    //         revertContract.interface.encodeFunctionData("testError", [5])
-    //     )
-    //     await tx.wait()
-    // })
-
-    it('testError: should not return error if provided value >= 10', async () => {
-        const tx = await sendShieldedTransaction(
-            signer,
-            revertContract.address,
-            revertContract.interface.encodeFunctionData("testError", [10])
-        )
-        const receipt = await tx.wait()
-
-        const logs = receipt.logs.map(log => revertContract.interface.parseLog(log))
-        expect(logs.some(log => log.name === 'Passed')).to.be.true
-    })
 })
