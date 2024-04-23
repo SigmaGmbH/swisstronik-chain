@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 contract RIP7212 {
     /// @dev The address of the pre-compiled p256 verifier contract (following RIP-7212)
-    address internal constant PRECOMPILED_P256_VERIFIER = address(1032);
+    address internal constant PRECOMPILED_P256_VERIFIER = address(0x100);
 
     /// @dev Check if the pre-compiled p256 verifier is available on this chain
     function isPreCompiledP256Available() public view returns (bool) {

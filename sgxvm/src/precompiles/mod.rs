@@ -110,6 +110,7 @@ impl EVMPrecompiles {
             hash(7),
             hash(8),
             hash(9),
+            hash(0x100),
             hash(1024),
             hash(1025),
             hash(1027),
@@ -117,7 +118,6 @@ impl EVMPrecompiles {
             hash(1029),
             hash(1030),
             hash(1031),
-            hash(1032)
         ]
     }
 }
@@ -135,6 +135,8 @@ impl PrecompileSet for EVMPrecompiles {
             a if a == hash(7) => Some(bn128::Bn128Mul::execute(handle)),
             a if a == hash(8) => Some(bn128::Bn128Pairing::execute(handle)),
             a if a == hash(9) => Some(blake2f::Blake2F::execute(handle)),
+            // RIP-7212
+            a if a == hash(0x100) => Some(secp256r1::P256Verify::execute(handle)),
             // Non-Frontier specific nor Ethereum precompiles :
             a if a == hash(1024) => Some(sha3fips::Sha3FIPS256::execute(handle)),
             a if a == hash(1025) => Some(sha3fips::Sha3FIPS512::execute(handle)),
@@ -144,7 +146,6 @@ impl PrecompileSet for EVMPrecompiles {
             a if a == hash(1029) => Some(curve25519::Curve25519Add::execute(handle)),
             a if a == hash(1030) => Some(curve25519::Curve25519ScalarMul::execute(handle)),
             a if a == hash(1031) => Some(curve25519::Ed25519Verify::execute(handle)),
-            a if a == hash(1032) => Some(secp256r1::P256Verify::execute(handle)),
             _ => None,
         }
     }
