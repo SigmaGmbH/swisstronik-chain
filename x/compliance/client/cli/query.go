@@ -21,7 +21,7 @@ func GetQueryCmd() *cobra.Command {
 
 	cmd.AddCommand(
 		CmdQueryParams(),
-		CmdQueryOperators(),
+		CmdGetOperators(),
 		CmdGetAddressInfo(),
 		CmdGetIssuerDetails(),
 		CmdGetVerificationDetails(),
@@ -30,7 +30,7 @@ func GetQueryCmd() *cobra.Command {
 	return cmd
 }
 
-func CmdQueryOperators() *cobra.Command {
+func CmdGetOperators() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get-operator [bech32-or-hex-address]",
 		Short: "Returns OperatorDetails associated with provided address",

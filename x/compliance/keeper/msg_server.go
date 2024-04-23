@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"strconv"
 
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -55,6 +56,13 @@ func (k msgServer) HandleAddOperator(goCtx context.Context, msg *types.MsgAddOpe
 		return nil, err
 	}
 
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeAddOperator,
+			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
+		),
+	)
+
 	return &types.MsgAddOperatorResponse{}, nil
 }
 
@@ -88,6 +96,13 @@ func (k msgServer) HandleRemoveOperator(goCtx context.Context, msg *types.MsgRem
 		return nil, err
 	}
 
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeRemoveOperator,
+			sdk.NewAttribute(types.AttributeKeyOperator, msg.Operator),
+		),
+	)
+
 	return &types.MsgRemoveOperatorResponse{}, nil
 }
 
@@ -119,6 +134,14 @@ func (k msgServer) HandleSetVerificationStatus(goCtx context.Context, msg *types
 	if err = k.SetAddressVerificationStatus(ctx, issuer, msg.IsVerified); err != nil {
 		return nil, err
 	}
+
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeVerifyIssuer,
+			sdk.NewAttribute(types.AttributeKeyIssuer, msg.IssuerAddress),
+			sdk.NewAttribute(types.AttributeKeyVerificationStatus, strconv.FormatBool(msg.IsVerified)),
+		),
+	)
 
 	return &types.MsgSetVerificationStatusResponse{}, nil
 }
@@ -155,6 +178,15 @@ func (k msgServer) HandleSetIssuerDetails(goCtx context.Context, msg *types.MsgS
 		return nil, err
 	}
 
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeAddIssuer,
+			sdk.NewAttribute(types.AttributeKeyOperator, msg.Signer),
+			sdk.NewAttribute(types.AttributeKeyIssuer, msg.Issuer),
+			sdk.NewAttribute(types.AttributeKeyIssuerDetails, msg.Details.String()),
+		),
+	)
+
 	return &types.MsgSetIssuerDetailsResponse{}, nil
 }
 
@@ -189,6 +221,16 @@ func (k msgServer) HandleUpdateIssuerDetails(goCtx context.Context, msg *types.M
 	if err := k.SetIssuerDetails(ctx, issuer, msg.Details); err != nil {
 		return nil, err
 	}
+
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeUpdateIssuer,
+			sdk.NewAttribute(types.AttributeKeyOperator, msg.Signer),
+			sdk.NewAttribute(types.AttributeKeyIssuer, msg.Issuer),
+			sdk.NewAttribute(types.AttributeKeyIssuerDetails, msg.Details.String()),
+		),
+	)
+
 	return &types.MsgUpdateIssuerDetailsResponse{}, nil
 }
 
@@ -216,5 +258,14 @@ func (k msgServer) HandleRemoveIssuer(goCtx context.Context, msg *types.MsgRemov
 	}
 
 	k.RemoveIssuer(ctx, issuer)
+
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeRemoveIssuer,
+			sdk.NewAttribute(types.AttributeKeyOperator, msg.Signer),
+			sdk.NewAttribute(types.AttributeKeyIssuer, msg.Issuer),
+		),
+	)
+
 	return &types.MsgRemoveIssuerResponse{}, nil
 }
