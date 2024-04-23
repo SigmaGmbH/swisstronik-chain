@@ -36,8 +36,6 @@ module.exports.sendShieldedQuery = async (provider, destination, data, value) =>
         return response
     }
 
-    console.log('response: ', response)
-
     // Decrypt call result
     return await decryptNodeResponse(provider.connection.url, response, usedEncryptedKey)
 }
