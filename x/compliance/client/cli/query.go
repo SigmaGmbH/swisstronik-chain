@@ -21,10 +21,43 @@ func GetQueryCmd() *cobra.Command {
 
 	cmd.AddCommand(
 		CmdQueryParams(),
+		CmdQueryOperators(),
 		CmdGetAddressInfo(),
 		CmdGetIssuerDetails(),
 		CmdGetVerificationDetails(),
 	)
+
+	return cmd
+}
+
+func CmdQueryOperators() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "get-operator [bech32-or-hex-address]",
+		Short: "Returns OperatorDetails associated with provided address",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx := client.GetClientContextFromCmd(cmd)
+			queryClient := types.NewQueryClient(clientCtx)
+
+			address, err := types.ParseAddress(args[0])
+			if err != nil {
+				return err
+			}
+
+			req := &types.QueryOperatorDetailsRequest{
+				Address: address.String(),
+			}
+
+			resp, err := queryClient.OperatorDetails(context.Background(), req)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(resp)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
 
 	return cmd
 }

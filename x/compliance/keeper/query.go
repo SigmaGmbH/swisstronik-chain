@@ -15,6 +15,25 @@ type Querier struct {
 
 var _ types.QueryServer = Querier{}
 
+func (k Querier) OperatorDetails(goCtx context.Context, req *types.QueryOperatorDetailsRequest) (*types.QueryOperatorDetailsResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	address, err := sdk.AccAddressFromBech32(req.Address)
+	if err != nil {
+		return nil, err
+	}
+
+	details, err := k.GetOperatorDetails(ctx, address)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.QueryOperatorDetailsResponse{Details: details}, nil
+}
+
 func (k Querier) AddressDetails(goCtx context.Context, req *types.QueryAddressDetailsRequest) (*types.QueryAddressDetailsResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request")

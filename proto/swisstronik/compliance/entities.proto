@@ -23,7 +23,7 @@ enum OperatorType {
     // Initial Operator, can't be removed from the list of operators.
     // Both initial (constant) and regular operators can add or remove regular operators.
     OT_INITIAL = 0;
-    OT_REGULAR = 1; 
+    OT_REGULAR = 1;
 }
 
 message OperatorDetails {
