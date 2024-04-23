@@ -21,11 +21,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/big"
+	"strings"
 
 	errorsmod "cosmossdk.io/errors"
-	rpctypes "swisstronik/rpc/types"
-	ethermint "swisstronik/types"
-	evmtypes "swisstronik/x/evm/types"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
@@ -35,6 +33,9 @@ import (
 	"github.com/pkg/errors"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	rpctypes "swisstronik/rpc/types"
+	ethermint "swisstronik/types"
+	evmtypes "swisstronik/x/evm/types"
 )
 
 // Resend accepts an existing transaction and a new gas price and limit. It will remove
@@ -310,25 +311,25 @@ func (b *Backend) EstimateGas(args evmtypes.TransactionArgs, blockNrOptional *rp
 	if blockNrOptional != nil {
 		blockNr = *blockNrOptional
 	}
-	
+
 	bz, err := json.Marshal(&args)
 	if err != nil {
 		return 0, err
 	}
-	
+
 	header, err := b.TendermintBlockByNumber(blockNr)
 	if err != nil {
 		// the error message imitates geth behavior
 		return 0, errors.New("header not found")
 	}
-	
+
 	req := evmtypes.EthCallRequest{
 		Args:            bz,
 		GasCap:          b.RPCGasCap(),
 		ProposerAddress: sdk.ConsAddress(header.Block.ProposerAddress),
 		ChainId:         b.chainID.Int64(),
 	}
-	
+
 	// From ContextWithHeight: if the provided height is 0,
 	// it will return an empty context and the gRPC query will use
 	// the latest block height for querying.
@@ -386,7 +387,7 @@ func (b *Backend) DoCall(
 	}
 
 	if res.Failed() {
-		if res.VmError != vm.ErrExecutionReverted.Error() {
+		if !strings.Contains(res.VmError, vm.ErrExecutionReverted.Error()) {
 			return nil, status.Error(codes.Internal, res.VmError)
 		}
 		return nil, evmtypes.NewExecErrorWithReason(res.Ret)
