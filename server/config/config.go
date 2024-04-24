@@ -215,12 +215,12 @@ func (c EVMConfig) Validate() error {
 
 // GetDefaultAPINamespaces returns the default list of JSON-RPC namespaces that should be enabled
 func GetDefaultAPINamespaces() []string {
-	return []string{"eth", "net", "web3", "utils", "did"}
+	return []string{"eth", "net", "web3", "utils"}
 }
 
 // GetAPINamespaces returns the all the available JSON-RPC API namespaces.
 func GetAPINamespaces() []string {
-	return []string{"web3", "eth", "personal", "net", "txpool", "debug", "miner", "utils", "did"}
+	return []string{"web3", "eth", "personal", "net", "txpool", "debug", "miner", "utils"}
 }
 
 // DefaultJSONRPCConfig returns an EVM config with the JSON-RPC API enabled by default

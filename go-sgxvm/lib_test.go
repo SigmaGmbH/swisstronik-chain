@@ -127,7 +127,7 @@ func TestCoinTransfer(t *testing.T) {
 	}
 }
 
-func TestSeedExchange(t *testing.T) {
+func TestSeedExchangeEPID(t *testing.T) {
 	if err := api.InitializeMasterKey(true); err != nil {
 		t.Fail()
 	}
@@ -147,6 +147,19 @@ func TestSeedExchange(t *testing.T) {
 	} else {
 		println("EPID PASSED")
 	}
+}
+
+func TestSeedExchangeDCAP(t *testing.T) {
+	if err := api.InitializeMasterKey(true); err != nil {
+		t.Fail()
+	}
+
+	epidAddress := "localhost:8999"
+	dcapAddress := "localhost:8998"
+	err := api.StartAttestationServer(epidAddress, dcapAddress)
+	if err != nil {
+		t.Fail()
+	}
 
 	// Test DCAP Attestation
 	dcapHost := "localhost"
@@ -165,4 +178,16 @@ func TestNodeInitialized(t *testing.T) {
 	}
 
 	fmt.Println("node initialized: ", res)
+}
+
+func TestDumpQuote(t *testing.T) {
+	if err := api.DumpDCAPQuote("quote.dat"); err != nil {
+		t.Fail()
+	}
+}
+
+func TestVerifyQuote(t *testing.T) {
+	if err := api.VerifyDCAPQuote("quote.dat"); err != nil {
+		t.Fail()
+	}
 }

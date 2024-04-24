@@ -64,8 +64,6 @@ type Keeper struct {
 	stakingKeeper types.StakingKeeper
 	// fetch EIP1559 base fee and parameters
 	feeMarketKeeper types.FeeMarketKeeper
-	// access to DID registry
-	DIDKeeper types.DIDKeeper
 	// access to x/compliance module
 	ComplianceKeeper types.ComplianceKeeper
 
@@ -91,7 +89,6 @@ func NewKeeper(
 	bankKeeper types.BankKeeper,
 	sk types.StakingKeeper,
 	fmk types.FeeMarketKeeper,
-	dk types.DIDKeeper,
 	ck types.ComplianceKeeper,
 	ss paramstypes.Subspace,
 ) *Keeper {
@@ -120,7 +117,6 @@ func NewKeeper(
 		bankKeeper:       bankKeeper,
 		stakingKeeper:    sk,
 		feeMarketKeeper:  fmk,
-		DIDKeeper:        dk,
 		ComplianceKeeper: ck,
 		storeKey:         storeKey,
 		transientKey:     transientKey,

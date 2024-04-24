@@ -9,6 +9,7 @@ use crate::backend::{FFIBackend, TxContext};
 use crate::encryption::{
     decrypt_transaction_data, encrypt_transaction_data, extract_public_key_and_data,
 };
+use crate::key_manager::utils::random_nonce;
 use crate::precompiles::EVMPrecompiles;
 use crate::protobuf_generated::ffi::{
     AccessListItem, HandleTransactionResponse, Log, SGXVMCallRequest, SGXVMCreateRequest, Topic,
@@ -123,6 +124,27 @@ pub fn handle_call_request_inner(
                 params.commit,
             );
 
+            // If there is transaction with no incoming transaction data, use random nonce to encrypt output
+            let nonce = if nonce.is_empty() {
+                match random_nonce() {
+                    Ok(nonce) => nonce.to_vec(),
+                    Err(err) => {
+                        return ExecutionResult::from_error(
+                            format!("{:?}", err),
+                            Vec::default(),
+                            None,
+                        );
+                    } 
+                }
+            } else {
+                nonce
+            };
+
+            // Return unencrypted transaction response in case of revert
+            if !exec_result.vm_error.is_empty() {
+                return exec_result;
+            }
+
             // Encrypt transaction data output
             let encrypted_data =
                 match encrypt_transaction_data(exec_result.data, user_public_key, nonce) {
@@ -227,7 +249,9 @@ fn execute_call(
     let gas_used = executor.used_gas();
     let exit_value = match handle_evm_result(exit_reason, ret) {
         Ok(data) => data,
-        Err((err, data)) => return ExecutionResult::from_error(err, data, Some(gas_used)),
+        Err((err, data)) => {
+            return ExecutionResult::from_error(err, data, Some(gas_used));
+        }
     };
 
     if commit {

@@ -9,3 +9,4 @@ build/
 .testnets/
 **.uuid
 vendor
+**quote.dat

@@ -26,7 +26,6 @@ import (
 	"github.com/ethereum/go-ethereum/core"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	compliancetypes "swisstronik/x/compliance/types"
-	didtypes "swisstronik/x/did/types"
 	feemarkettypes "swisstronik/x/feemarket/types"
 )
 
@@ -63,12 +62,6 @@ type FeeMarketKeeper interface {
 	GetBaseFee(ctx sdk.Context) *big.Int
 	GetParams(ctx sdk.Context) feemarkettypes.Params
 	AddTransientGasWanted(ctx sdk.Context, gasWanted uint64) (uint64, error)
-}
-
-// DIDKeeper
-type DIDKeeper interface {
-	GetLatestDIDDocument(ctx sdk.Context, did string) (didtypes.DIDDocumentWithMetadata, error)
-	AddNewDIDDocumentVersion(ctx sdk.Context, didDoc *didtypes.DIDDocumentWithMetadata) error
 }
 
 // ComplianceKeeper

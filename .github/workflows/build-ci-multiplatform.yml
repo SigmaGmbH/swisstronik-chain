@@ -2,10 +2,10 @@ name: Build CI multiplatform
 
 on:
   push:
-    tags:
-      - "*"
-  # Allows you to run this workflow manually from the Actions tab
+    branches: [ develop, '**-release' ]
   workflow_dispatch:
+env:
+  BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
 
 
 jobs:

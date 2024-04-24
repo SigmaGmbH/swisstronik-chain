@@ -12,7 +12,6 @@ use crate::GoQuerier;
 mod blake2f;
 mod bn128;
 mod curve25519;
-mod identity;
 mod modexp;
 mod sha3fips;
 mod ec_recover;
@@ -140,8 +139,6 @@ impl PrecompileSet for EVMPrecompiles {
             // Non-Frontier specific nor Ethereum precompiles :
             a if a == hash(1024) => Some(sha3fips::Sha3FIPS256::execute(handle)),
             a if a == hash(1025) => Some(sha3fips::Sha3FIPS512::execute(handle)),
-            // Identity precompile
-            a if a == hash(1027) => Some(identity::Identity::execute(self.querier, handle)),
             a if a == hash(1028) => Some(compliance_bridge::ComplianceBridge::execute(self.querier, handle)),
             a if a == hash(1029) => Some(curve25519::Curve25519Add::execute(handle)),
             a if a == hash(1030) => Some(curve25519::Curve25519ScalarMul::execute(handle)),

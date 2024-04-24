@@ -13,7 +13,7 @@ use crate::attestation::{
     utils::create_attestation_report,
 };
 use crate::attestation::tls::auth::{ClientAuth, ServerAuth};
-use crate::key_manager::{KeyManager, RegistrationKey};
+use crate::key_manager::{KeyManager, keys::RegistrationKey};
 
 /// Prepares config for client side of TLS connection
 pub(super) fn construct_client_config(key_der: Vec<u8>, cert_der: Vec<u8>, is_dcap: bool) -> ClientConfig {
@@ -92,6 +92,7 @@ pub(super) fn decrypt_and_seal_master_key(
     }
 
     // Extract public key and nonce + ciphertext
+    println!("[Enclave] Attestation Client: decrypting master key");
     let public_key = &attn_server_response[..PUBLIC_KEY_SIZE];
     let encrypted_master_key = &attn_server_response[PUBLIC_KEY_SIZE..];
 
@@ -110,6 +111,7 @@ pub(super) fn decrypt_and_seal_master_key(
     })?;
 
     // Seal decrypted master key
+    println!("[Enclave] Attestation Client: sealing master key");
     km.seal()?;
     println!("[Enclave] Master key successfully sealed");
 

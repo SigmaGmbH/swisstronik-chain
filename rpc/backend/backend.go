@@ -25,8 +25,6 @@ import (
 	ethermint "swisstronik/types"
 	evmtypes "swisstronik/x/evm/types"
 
-	didtypes "swisstronik/x/did/types"
-
 	"github.com/cometbft/cometbft/libs/log"
 	tmrpctypes "github.com/cometbft/cometbft/rpc/core/types"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -45,7 +43,6 @@ import (
 type BackendI interface { //nolint: revive
 	CosmosBackend
 	EVMBackend
-	DIDBackend
 }
 
 // CosmosBackend implements the functionality shared within cosmos namespaces
@@ -143,12 +140,6 @@ type EVMBackend interface {
 	// Tracing
 	TraceTransaction(hash common.Hash, config *evmtypes.TraceConfig) (interface{}, error)
 	TraceBlock(height rpctypes.BlockNumber, config *evmtypes.TraceConfig, block *tmrpctypes.ResultBlock) ([]*evmtypes.TxTraceResult, error)
-}
-
-// DIDBackend implements the functionality shared within did namespaces
-type DIDBackend interface {
-	DIDResolve(blockNrOrHash rpctypes.BlockNumberOrHash, Id string) (*didtypes.DIDDocumentWithMetadata, error)
-	DocumentsControlledBy(blockNrOrHash rpctypes.BlockNumberOrHash, VerificationMethod string) ([]string, error)
 }
 
 var _ BackendI = (*Backend)(nil)

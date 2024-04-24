@@ -45,7 +45,7 @@ RUN make build
 ############ Node binary for deb package
 FROM compile-base as build-deb
 
-ARG BUILD_VERSION="v1.0.1"
+ARG BUILD_VERSION="v1.0.2"
 ENV VERSION=${BUILD_VERSION}
 ARG DEB_BIN_DIR=/usr/local/bin
 ENV DEB_BIN_DIR=${DEB_BIN_DIR}

@@ -91,6 +91,20 @@ extern "C" {
         supplemental_data_size: uint32_t,
         qve_isvsvn_threshold: sgx_isv_svn_t,
     ) -> sgx_quote3_error_t;
+
+    pub fn ecall_dump_dcap_quote(
+        eid: sgx_enclave_id_t,
+        retval: *mut AllocationWithResult,
+        qe_target_info: &sgx_target_info_t,
+        quote_size: u32,
+    ) -> sgx_status_t;
+
+    pub fn ecall_verify_dcap_quote(
+        eid: sgx_enclave_id_t,
+        retval: *mut sgx_status_t,
+        quote_ptr: *const u8,
+        quote_len: u32,
+    ) -> sgx_status_t;
 }
 
 #[no_mangle]
@@ -149,6 +163,18 @@ pub unsafe extern "C" fn handle_initialization_request(
                         let is_initialized = enclave_api::EnclaveApi::is_enclave_initialized(evm_enclave.geteid())?;
                         let mut response = node::IsInitializedResponse::new();
                         response.isInitialized = is_initialized;
+                        let response_bytes = response.write_to_bytes()?;
+                        Ok(response_bytes)
+                    }
+                    node::SetupRequest_oneof_req::dumpQuote(req) => {
+                        enclave_api::EnclaveApi::dump_dcap_quote(evm_enclave.geteid(), &req.filepath)?;
+                        let response = node::DumpQuoteResponse::new();
+                        let response_bytes = response.write_to_bytes()?;
+                        Ok(response_bytes)
+                    }
+                    node::SetupRequest_oneof_req::verifyQuote(req) => {
+                        enclave_api::EnclaveApi::verify_dcap_quote(evm_enclave.geteid(), &req.filepath)?;
+                        let response = node::VerifyQuoteResponse::new();
                         let response_bytes = response.write_to_bytes()?;
                         Ok(response_bytes)
                     }
