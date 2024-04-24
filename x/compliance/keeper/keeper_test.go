@@ -384,7 +384,7 @@ func (suite *KeeperTestSuite) TestInitialOperator() {
 	from, _ := tests.RandomEthAddressWithPrivateKey()
 	operator := sdk.AccAddress(from.Bytes())
 
-	err := suite.keeper.AddInitialOperator(suite.ctx, operator)
+	err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_INITIAL)
 	suite.Require().NoError(err)
 
 	operatorDetails, err := suite.keeper.GetOperatorDetails(suite.ctx, operator)
@@ -405,7 +405,7 @@ func (suite *KeeperTestSuite) TestRegularOperator() {
 	from, _ := tests.RandomEthAddressWithPrivateKey()
 	operator := sdk.AccAddress(from.Bytes())
 
-	err := suite.keeper.AddRegularOperator(suite.ctx, operator)
+	err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_REGULAR)
 	suite.Require().NoError(err)
 
 	operatorDetails, err := suite.keeper.GetOperatorDetails(suite.ctx, operator)

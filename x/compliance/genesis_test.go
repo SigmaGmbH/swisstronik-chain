@@ -25,6 +25,15 @@ func TestInitGenesis_Validation(t *testing.T) {
 		expPanic bool
 	}{
 		{
+			name: "invalid operators",
+			genState: &types.GenesisState{
+				Operators: []*types.OperatorDetails{
+					{Operator: "wrong address"},
+				},
+			},
+			expPanic: true,
+		},
+		{
 			name: "invalid issuers",
 			genState: &types.GenesisState{
 				Issuers: []*types.IssuerGenesisAccount{
@@ -34,7 +43,7 @@ func TestInitGenesis_Validation(t *testing.T) {
 			expPanic: true,
 		},
 		{
-			name: "invalid issuers with no operators",
+			name: "invalid issuer details",
 			genState: &types.GenesisState{
 				Issuers: []*types.IssuerGenesisAccount{
 					{Address: "swtr1tpvqt6zfl9yef58gl7jcdpkw88thgrkf38d5zx"},
@@ -235,6 +244,16 @@ func TestGenesis_Success(t *testing.T) {
 		{
 			name: "valid issuers, verifications and addresses",
 			genState: &types.GenesisState{
+				Operators: []*types.OperatorDetails{
+					{
+						Operator:     "swtr15srdmqa9934z6utqywsagt456va5xwjpwvmpth",
+						OperatorType: types.OperatorType_OT_INITIAL,
+					},
+					{
+						Operator:     "swtr16vgqffr8v0sh3n5qeqdksfpzdkqf3rtk49thun",
+						OperatorType: types.OperatorType_OT_REGULAR,
+					},
+				},
 				Issuers: []*types.IssuerGenesisAccount{
 					{
 						Address: "swtr199wynlfwhj6ytkvujjf6mel5z7fl0mwzqck8l6",
@@ -328,31 +347,41 @@ func TestGenesis_Success(t *testing.T) {
 			}
 
 			// Check if issuers were already initialized
+			for _, operatorData := range tc.genState.Operators {
+				address, err := sdk.AccAddressFromBech32(operatorData.Operator)
+				require.NoError(t, err)
+				details, err := k.GetOperatorDetails(ctx, address)
+				require.NoError(t, err)
+				require.NotNil(t, details)
+				require.Equal(t, operatorData, details)
+			}
+
+			// Check if issuers were already initialized
 			for _, issuerData := range tc.genState.Issuers {
 				address, err := sdk.AccAddressFromBech32(issuerData.Address)
 				require.NoError(t, err)
-				i, err := k.GetIssuerDetails(ctx, address)
+				details, err := k.GetIssuerDetails(ctx, address)
 				require.NoError(t, err)
-				require.NotNil(t, i)
-				require.Equal(t, issuerData.Details, i)
+				require.NotNil(t, details)
+				require.Equal(t, issuerData.Details, details)
 			}
 
 			// Check if addresses were already initialized
 			for _, addressData := range tc.genState.AddressDetails {
 				address, err := sdk.AccAddressFromBech32(addressData.Address)
 				require.NoError(t, err)
-				i, err := k.GetAddressDetails(ctx, address)
+				details, err := k.GetAddressDetails(ctx, address)
 				require.NoError(t, err)
-				require.NotNil(t, i)
-				require.Equal(t, addressData.Details, i)
+				require.NotNil(t, details)
+				require.Equal(t, addressData.Details, details)
 			}
 
 			// Check if verification data was already initialized
 			for _, verificationData := range tc.genState.VerificationDetails {
-				i, err := k.GetVerificationDetails(ctx, verificationData.Id)
+				details, err := k.GetVerificationDetails(ctx, verificationData.Id)
 				require.NoError(t, err)
-				require.NotNil(t, i)
-				require.Equal(t, verificationData.Details, i)
+				require.NotNil(t, details)
+				require.Equal(t, verificationData.Details, details)
 			}
 
 			got := compliance.ExportGenesis(ctx, *k)

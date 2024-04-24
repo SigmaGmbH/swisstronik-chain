@@ -58,7 +58,7 @@ func (suite *KeeperTestSuite) TestAddOperator() {
 				from, _ := tests.RandomEthAddressWithPrivateKey()
 				operator = sdk.AccAddress(from.Bytes())
 
-				err := suite.keeper.AddRegularOperator(suite.ctx, operator)
+				err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_REGULAR)
 				suite.Require().NoError(err)
 
 				from, _ = tests.RandomEthAddressWithPrivateKey()
@@ -92,7 +92,7 @@ func (suite *KeeperTestSuite) TestAddOperator() {
 				from, _ := tests.RandomEthAddressWithPrivateKey()
 				operator = sdk.AccAddress(from.Bytes())
 
-				err := suite.keeper.AddRegularOperator(suite.ctx, operator)
+				err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_REGULAR)
 				suite.Require().NoError(err)
 			},
 			malleate: func() *types.MsgAddOperator {
@@ -171,13 +171,13 @@ func (suite *KeeperTestSuite) TestRemoveOperator() {
 				from, _ := tests.RandomEthAddressWithPrivateKey()
 				operator = sdk.AccAddress(from.Bytes())
 
-				err := suite.keeper.AddRegularOperator(suite.ctx, operator)
+				err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_REGULAR)
 				suite.Require().NoError(err)
 
 				from, _ = tests.RandomEthAddressWithPrivateKey()
 				newOperator = sdk.AccAddress(from.Bytes())
 
-				err = suite.keeper.AddRegularOperator(suite.ctx, newOperator)
+				err = suite.keeper.AddOperator(suite.ctx, newOperator, types.OperatorType_OT_REGULAR)
 				suite.Require().NoError(err)
 			},
 			malleate: func() *types.MsgRemoveOperator {
@@ -208,7 +208,7 @@ func (suite *KeeperTestSuite) TestRemoveOperator() {
 				from, _ := tests.RandomEthAddressWithPrivateKey()
 				operator = sdk.AccAddress(from.Bytes())
 
-				err := suite.keeper.AddRegularOperator(suite.ctx, operator)
+				err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_REGULAR)
 				suite.Require().NoError(err)
 			},
 			malleate: func() *types.MsgRemoveOperator {
@@ -239,13 +239,13 @@ func (suite *KeeperTestSuite) TestRemoveOperator() {
 				from, _ := tests.RandomEthAddressWithPrivateKey()
 				operator = sdk.AccAddress(from.Bytes())
 
-				err := suite.keeper.AddInitialOperator(suite.ctx, operator)
+				err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_INITIAL)
 				suite.Require().NoError(err)
 
 				from, _ = tests.RandomEthAddressWithPrivateKey()
 				newOperator = sdk.AccAddress(from.Bytes())
 
-				err = suite.keeper.AddInitialOperator(suite.ctx, newOperator)
+				err = suite.keeper.AddOperator(suite.ctx, newOperator, types.OperatorType_OT_INITIAL)
 				suite.Require().NoError(err)
 			},
 			malleate: func() *types.MsgRemoveOperator {
@@ -339,7 +339,7 @@ func (suite *KeeperTestSuite) TestSetVerificationStatus() {
 				from, _ := tests.RandomEthAddressWithPrivateKey()
 				operator = sdk.AccAddress(from.Bytes())
 
-				err := suite.keeper.AddRegularOperator(suite.ctx, operator)
+				err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_REGULAR)
 				suite.Require().NoError(err)
 
 				from, _ = tests.RandomEthAddressWithPrivateKey()
@@ -364,7 +364,7 @@ func (suite *KeeperTestSuite) TestSetVerificationStatus() {
 				from, _ := tests.RandomEthAddressWithPrivateKey()
 				operator = sdk.AccAddress(from.Bytes())
 
-				err := suite.keeper.AddRegularOperator(suite.ctx, operator)
+				err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_REGULAR)
 				suite.Require().NoError(err)
 
 				from, _ = tests.RandomEthAddressWithPrivateKey()
@@ -442,7 +442,7 @@ func (suite *KeeperTestSuite) TestSetIssuerDetails() {
 				from, _ := tests.RandomEthAddressWithPrivateKey()
 				operator = sdk.AccAddress(from.Bytes())
 
-				err := suite.keeper.AddRegularOperator(suite.ctx, operator)
+				err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_REGULAR)
 				suite.Require().NoError(err)
 			},
 			malleate: func() *types.MsgSetIssuerDetails {
@@ -468,7 +468,7 @@ func (suite *KeeperTestSuite) TestSetIssuerDetails() {
 				from, _ := tests.RandomEthAddressWithPrivateKey()
 				operator = sdk.AccAddress(from.Bytes())
 
-				err := suite.keeper.AddRegularOperator(suite.ctx, operator)
+				err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_REGULAR)
 				suite.Require().NoError(err)
 
 				from, _ = tests.RandomEthAddressWithPrivateKey()
@@ -526,7 +526,7 @@ func (suite *KeeperTestSuite) TestSetIssuerDetails() {
 				from, _ = tests.RandomEthAddressWithPrivateKey()
 				operator = sdk.AccAddress(from.Bytes())
 
-				err := suite.keeper.AddRegularOperator(suite.ctx, operator)
+				err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_REGULAR)
 				suite.Require().NoError(err)
 			},
 			malleate: func() *types.MsgSetIssuerDetails {
@@ -628,7 +628,7 @@ func (suite *KeeperTestSuite) TestUpdateIssuerDetails() {
 				from, _ = tests.RandomEthAddressWithPrivateKey()
 				operator = sdk.AccAddress(from.Bytes())
 
-				err := suite.keeper.AddRegularOperator(suite.ctx, operator)
+				err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_REGULAR)
 				suite.Require().NoError(err)
 			},
 			malleate: func() *types.MsgUpdateIssuerDetails {
@@ -654,7 +654,7 @@ func (suite *KeeperTestSuite) TestUpdateIssuerDetails() {
 				from, _ := tests.RandomEthAddressWithPrivateKey()
 				operator = sdk.AccAddress(from.Bytes())
 
-				err := suite.keeper.AddRegularOperator(suite.ctx, operator)
+				err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_REGULAR)
 				suite.Require().NoError(err)
 
 				from, _ = tests.RandomEthAddressWithPrivateKey()
@@ -710,7 +710,7 @@ func (suite *KeeperTestSuite) TestUpdateIssuerDetails() {
 				from, _ := tests.RandomEthAddressWithPrivateKey()
 				operator = sdk.AccAddress(from.Bytes())
 
-				err := suite.keeper.AddRegularOperator(suite.ctx, operator)
+				err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_REGULAR)
 				suite.Require().NoError(err)
 
 				from, _ = tests.RandomEthAddressWithPrivateKey()
@@ -812,7 +812,7 @@ func (suite *KeeperTestSuite) TestRemoveIssuer() {
 				from, _ = tests.RandomEthAddressWithPrivateKey()
 				operator = sdk.AccAddress(from.Bytes())
 
-				err := suite.keeper.AddRegularOperator(suite.ctx, operator)
+				err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_REGULAR)
 				suite.Require().NoError(err)
 			},
 			malleate: func() *types.MsgRemoveIssuer {
@@ -850,7 +850,7 @@ func (suite *KeeperTestSuite) TestRemoveIssuer() {
 				from, _ := tests.RandomEthAddressWithPrivateKey()
 				operator = sdk.AccAddress(from.Bytes())
 
-				err := suite.keeper.AddRegularOperator(suite.ctx, operator)
+				err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_REGULAR)
 				suite.Require().NoError(err)
 
 				from, _ = tests.RandomEthAddressWithPrivateKey()
@@ -889,7 +889,7 @@ func (suite *KeeperTestSuite) TestRemoveIssuer() {
 				from, _ := tests.RandomEthAddressWithPrivateKey()
 				operator = sdk.AccAddress(from.Bytes())
 
-				err := suite.keeper.AddRegularOperator(suite.ctx, operator)
+				err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_REGULAR)
 				suite.Require().NoError(err)
 
 				from, _ = tests.RandomEthAddressWithPrivateKey()

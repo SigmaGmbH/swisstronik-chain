@@ -19,11 +19,11 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 			panic(err)
 		}
 		if operatorData.OperatorType == types.OperatorType_OT_INITIAL {
-			if err := k.AddInitialOperator(ctx, address); err != nil {
+			if err := k.AddOperator(ctx, address, types.OperatorType_OT_INITIAL); err != nil {
 				panic(err)
 			}
 		} else if operatorData.OperatorType == types.OperatorType_OT_REGULAR {
-			if err := k.AddRegularOperator(ctx, address); err != nil {
+			if err := k.AddOperator(ctx, address, types.OperatorType_OT_REGULAR); err != nil {
 				panic(err)
 			}
 		}

@@ -51,7 +51,7 @@ func (k msgServer) HandleAddOperator(goCtx context.Context, msg *types.MsgAddOpe
 		return nil, errors.Wrapf(types.ErrInvalidOperator, "operator already exists")
 	}
 
-	if err := k.AddRegularOperator(ctx, operator); err != nil {
+	if err := k.AddOperator(ctx, operator, types.OperatorType_OT_REGULAR); err != nil {
 
 		return nil, err
 	}

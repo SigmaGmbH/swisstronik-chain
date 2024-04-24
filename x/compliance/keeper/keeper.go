@@ -380,30 +380,14 @@ func (k Keeper) GetOperatorDetails(ctx sdk.Context, operator sdk.AccAddress) (*t
 	return &operatorDetails, nil
 }
 
-// AddInitialOperator adds initial operator. Initial operator can not be removed
-func (k Keeper) AddInitialOperator(ctx sdk.Context, operator sdk.AccAddress) error {
+// AddOperator adds initial/regular operator.
+// Initial operator can not be removed
+func (k Keeper) AddOperator(ctx sdk.Context, operator sdk.AccAddress, operatorType types.OperatorType) error {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixOperatorDetails)
 
 	details := &types.OperatorDetails{
 		Operator:     operator.String(),
-		OperatorType: types.OperatorType_OT_INITIAL,
-	}
-	detailsBytes, err := details.Marshal()
-	if err != nil {
-		return err
-	}
-
-	store.Set(operator.Bytes(), detailsBytes)
-	return nil
-}
-
-// AddRegularOperator adds regular operator.
-func (k Keeper) AddRegularOperator(ctx sdk.Context, operator sdk.AccAddress) error {
-	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixOperatorDetails)
-
-	details := &types.OperatorDetails{
-		Operator:     operator.String(),
-		OperatorType: types.OperatorType_OT_REGULAR,
+		OperatorType: operatorType,
 	}
 	detailsBytes, err := details.Marshal()
 	if err != nil {
