@@ -13,13 +13,19 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 	k.SetParams(ctx, genState.Params)
 
 	// Restore initial operators
-	for _, operator := range genState.Operators {
-		address, err := sdk.AccAddressFromBech32(operator)
+	for _, operatorData := range genState.Operators {
+		address, err := sdk.AccAddressFromBech32(operatorData.Operator)
 		if err != nil {
 			panic(err)
 		}
-		if err := k.AddInitialOperator(ctx, address); err != nil {
-			panic(err)
+		if operatorData.OperatorType == types.OperatorType_OT_INITIAL {
+			if err := k.AddInitialOperator(ctx, address); err != nil {
+				panic(err)
+			}
+		} else if operatorData.OperatorType == types.OperatorType_OT_REGULAR {
+			if err := k.AddRegularOperator(ctx, address); err != nil {
+				panic(err)
+			}
 		}
 	}
 
@@ -93,6 +99,12 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 func ExportGenesis(ctx sdk.Context, k keeper.Keeper) *types.GenesisState {
 	genesis := types.DefaultGenesis()
 	genesis.Params = k.GetParams(ctx)
+
+	operators, err := k.ExportOperators(ctx)
+	if err != nil {
+		panic(err)
+	}
+	genesis.Operators = operators
 
 	issuers, err := k.ExportIssuerAccounts(ctx)
 	if err != nil {

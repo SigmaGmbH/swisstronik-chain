@@ -439,6 +439,19 @@ func (k Keeper) OperatorExists(ctx sdk.Context, operator sdk.AccAddress) (bool, 
 	return len(res.Operator) > 0, nil
 }
 
+func (k Keeper) IterateOperatorDetails(ctx sdk.Context, callback func(address sdk.AccAddress) (continue_ bool)) {
+	latestVersionIterator := sdk.KVStorePrefixIterator(ctx.KVStore(k.storeKey), types.KeyPrefixOperatorDetails)
+	defer closeIteratorOrPanic(latestVersionIterator)
+
+	for ; latestVersionIterator.Valid(); latestVersionIterator.Next() {
+		key := latestVersionIterator.Key()
+		address := types.AccAddressFromKey(key)
+		if !callback(address) {
+			break
+		}
+	}
+}
+
 func (k Keeper) IterateVerificationDetails(ctx sdk.Context, callback func(id []byte) (continue_ bool)) {
 	latestVersionIterator := sdk.KVStorePrefixIterator(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationDetails)
 	defer closeIteratorOrPanic(latestVersionIterator)
@@ -478,19 +491,43 @@ func (k Keeper) IterateIssuerDetails(ctx sdk.Context, callback func(address sdk.
 	}
 }
 
+func (k Keeper) ExportOperators(ctx sdk.Context) ([]*types.OperatorDetails, error) {
+	var (
+		allDetails []*types.OperatorDetails
+		details    *types.OperatorDetails
+		err        error
+	)
+
+	k.IterateOperatorDetails(ctx, func(address sdk.AccAddress) (continue_ bool) {
+		details, err = k.GetOperatorDetails(ctx, address)
+		if err != nil {
+			return false
+		}
+		allDetails = append(allDetails, details)
+		return true
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return allDetails, nil
+}
+
 func (k Keeper) ExportVerificationDetails(ctx sdk.Context) ([]*types.GenesisVerificationDetails, error) {
-	var allVerificationDetails []*types.GenesisVerificationDetails
-	var err error
+	var (
+		allVerificationDetails []*types.GenesisVerificationDetails
+		details                *types.VerificationDetails
+		err                    error
+	)
 
 	k.IterateVerificationDetails(ctx, func(id []byte) bool {
-		details, err := k.GetVerificationDetails(ctx, id)
+		details, err = k.GetVerificationDetails(ctx, id)
 		if err != nil {
 			return false
 		}
 		allVerificationDetails = append(allVerificationDetails, &types.GenesisVerificationDetails{Id: id, Details: details})
 		return true
 	})
-
 	if err != nil {
 		return nil, err
 	}
@@ -499,18 +536,20 @@ func (k Keeper) ExportVerificationDetails(ctx sdk.Context) ([]*types.GenesisVeri
 }
 
 func (k Keeper) ExportAddressDetails(ctx sdk.Context) ([]*types.GenesisAddressDetails, error) {
-	var allAddressDetails []*types.GenesisAddressDetails
-	var err error
+	var (
+		allAddressDetails []*types.GenesisAddressDetails
+		details           *types.AddressDetails
+		err               error
+	)
 
 	k.IterateAddressDetails(ctx, func(address sdk.Address) bool {
-		details, err := k.GetAddressDetails(ctx, address)
+		details, err = k.GetAddressDetails(ctx, address)
 		if err != nil {
 			return false
 		}
 		allAddressDetails = append(allAddressDetails, &types.GenesisAddressDetails{Address: address.String(), Details: details})
 		return true
 	})
-
 	if err != nil {
 		return nil, err
 	}
@@ -519,18 +558,20 @@ func (k Keeper) ExportAddressDetails(ctx sdk.Context) ([]*types.GenesisAddressDe
 }
 
 func (k Keeper) ExportIssuerAccounts(ctx sdk.Context) ([]*types.IssuerGenesisAccount, error) {
-	var issuerAccs []*types.IssuerGenesisAccount
-	var err error
+	var (
+		issuerAccs []*types.IssuerGenesisAccount
+		details    *types.IssuerDetails
+		err        error
+	)
 
 	k.IterateIssuerDetails(ctx, func(address sdk.Address) bool {
-		details, err := k.GetIssuerDetails(ctx, address)
+		details, err = k.GetIssuerDetails(ctx, address)
 		if err != nil {
 			return false
 		}
 		issuerAccs = append(issuerAccs, &types.IssuerGenesisAccount{Address: address.String(), Details: details})
 		return true
 	})
-
 	if err != nil {
 		return nil, err
 	}

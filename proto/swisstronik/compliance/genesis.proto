@@ -13,8 +13,7 @@ message GenesisState {
   repeated IssuerGenesisAccount issuers = 2;
   repeated GenesisAddressDetails addressDetails = 3;
   repeated GenesisVerificationDetails verificationDetails = 4;
-  // List of initial operators
-  repeated string operators = 5;
+  repeated OperatorDetails operators = 5;
 }
 
 message IssuerGenesisAccount {
