@@ -315,8 +315,7 @@ func CmdVerifyIssuerProposal() *cobra.Command {
 
 	cmd.Flags().String(cli.FlagTitle, "", "title of proposal")
 	cmd.Flags().String(cli.FlagDescription, "", "description of proposal")
-	// TODO, should be renamed to `aswtr` when merge into main
-	cmd.Flags().String(cli.FlagDeposit, "1uswtr", "deposit of proposal")
+	cmd.Flags().String(cli.FlagDeposit, "1aswtr", "deposit of proposal")
 	if err := cmd.MarkFlagRequired(cli.FlagTitle); err != nil {
 		panic(err)
 	}
