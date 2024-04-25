@@ -12,17 +12,24 @@ import (
 func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) {
 	k.SetParams(ctx, genState.Params)
 
-	// Restore issuers
-	for _, issuerData := range genState.Issuers {
-		issuerAddress, err := sdk.AccAddressFromBech32(issuerData.Address)
+	// Restore initial operators
+	for _, operatorData := range genState.Operators {
+		address, err := sdk.AccAddressFromBech32(operatorData.Operator)
 		if err != nil {
 			panic(err)
 		}
-		// Operator address must not be empty
-		if len(issuerData.Details.Operator) < 1 {
-			panic(errors.Wrap(types.ErrInvalidParam, "empty operator of issuer"))
+		if err := k.AddOperator(ctx, address, operatorData.OperatorType); err != nil {
+			panic(err)
 		}
-		if err := k.SetIssuerDetails(ctx, issuerAddress, issuerData.Details); err != nil {
+	}
+
+	// Restore issuers
+	for _, issuerData := range genState.Issuers {
+		address, err := sdk.AccAddressFromBech32(issuerData.Address)
+		if err != nil {
+			panic(err)
+		}
+		if err := k.SetIssuerDetails(ctx, address, issuerData.Details); err != nil {
 			panic(err)
 		}
 	}
@@ -30,11 +37,11 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 	// Restore verification data
 	for _, verificationData := range genState.VerificationDetails {
 		// Check if issuer address is valid
-		issuerAddress, err := sdk.AccAddressFromBech32(verificationData.Details.IssuerAddress)
+		address, err := sdk.AccAddressFromBech32(verificationData.Details.IssuerAddress)
 		if err != nil {
 			panic(err)
 		}
-		if exists, err := k.IssuerExists(ctx, issuerAddress); !exists || err != nil {
+		if exists, err := k.IssuerExists(ctx, address); !exists || err != nil {
 			panic(err)
 		}
 		// Check the issuance timestamp and proof
@@ -60,11 +67,11 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 		// If address is verified, verification data must exist and issuer must be valid
 		for _, verificationData := range addressData.Details.Verifications {
 			// Check if issuer is valid
-			issuerAddress, err := sdk.AccAddressFromBech32(verificationData.IssuerAddress)
+			issuer, err := sdk.AccAddressFromBech32(verificationData.IssuerAddress)
 			if err != nil {
 				panic(err)
 			}
-			if exists, err := k.IssuerExists(ctx, issuerAddress); !exists || err != nil {
+			if exists, err := k.IssuerExists(ctx, issuer); !exists || err != nil {
 				panic(err)
 			}
 			// Check if verification data exists
@@ -86,6 +93,12 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 func ExportGenesis(ctx sdk.Context, k keeper.Keeper) *types.GenesisState {
 	genesis := types.DefaultGenesis()
 	genesis.Params = k.GetParams(ctx)
+
+	operators, err := k.ExportOperators(ctx)
+	if err != nil {
+		panic(err)
+	}
+	genesis.Operators = operators
 
 	issuers, err := k.ExportIssuerAccounts(ctx)
 	if err != nil {

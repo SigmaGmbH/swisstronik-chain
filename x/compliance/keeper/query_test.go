@@ -47,7 +47,7 @@ func (suite *QuerierTestSuite) SetupTest() {
 	suite.user = sdk.AccAddress(from.Bytes())
 
 	// Set issuer details
-	issuerDetails := &types.IssuerDetails{Name: "testIssuer", Operator: "testOperator"}
+	issuerDetails := &types.IssuerDetails{Name: "testIssuer"}
 	err := suite.keeper.SetIssuerDetails(suite.ctx, suite.issuer, issuerDetails)
 	suite.Require().NoError(err)
 
@@ -89,7 +89,6 @@ func (suite *QuerierTestSuite) TestSuccess() {
 	issuerDetails, err := suite.querier.IssuerDetails(suite.goCtx, issuerRequest)
 	suite.Require().NoError(err)
 	suite.Require().Equal(issuerDetails.Details.Name, "testIssuer")
-	suite.Require().Equal(issuerDetails.Details.Operator, "testOperator")
 
 	// Query address details
 	addressRequest := &types.QueryAddressDetailsRequest{
