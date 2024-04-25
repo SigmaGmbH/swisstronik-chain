@@ -23,9 +23,11 @@ const (
 	prefixIssuerDetails = iota + 1
 	prefixAddressDetails
 	prefixVerificationDetails
+	prefixOperatorDetails
 )
 
 var (
+	KeyPrefixOperatorDetails     = []byte{prefixOperatorDetails}
 	KeyPrefixIssuerDetails       = []byte{prefixIssuerDetails}
 	KeyPrefixAddressDetails      = []byte{prefixAddressDetails}
 	KeyPrefixVerificationDetails = []byte{prefixVerificationDetails}

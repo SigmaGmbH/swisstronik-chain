@@ -3,34 +3,65 @@ package swisstronik.compliance;
 
 import "gogoproto/gogo.proto";
 import "cosmos/base/v1beta1/coin.proto";
+import "cosmos/msg/v1/msg.proto";
 import "swisstronik/compliance/entities.proto";
 
 option go_package = "swisstronik/x/compliance/types";
 
 // Msg defines the Msg service.
 service Msg {
+  rpc HandleAddOperator(MsgAddOperator) returns (MsgAddOperatorResponse);
+  rpc HandleRemoveOperator(MsgRemoveOperator) returns (MsgRemoveOperatorResponse);
+  rpc HandleSetVerificationStatus(MsgSetVerificationStatus) returns (MsgSetVerificationStatusResponse);
   rpc HandleSetIssuerDetails(MsgSetIssuerDetails) returns (MsgSetIssuerDetailsResponse);
   rpc HandleUpdateIssuerDetails(MsgUpdateIssuerDetails) returns (MsgUpdateIssuerDetailsResponse);
   rpc HandleRemoveIssuer(MsgRemoveIssuer) returns (MsgRemoveIssuerResponse);
 }
 
-message MsgSetIssuerDetails {
+message MsgAddOperator {
+  option (cosmos.msg.v1.signer) = "signer";
   string signer = 1;
-  string issuerAddress = 2;
+  string operator = 2;
+}
+message MsgAddOperatorResponse {}
+
+message MsgRemoveOperator {
+  option (cosmos.msg.v1.signer) = "signer";
+  string signer = 1;
+  string operator = 2;
+}
+message MsgRemoveOperatorResponse {}
+
+message MsgSetVerificationStatus {
+  option (cosmos.msg.v1.signer) = "signer";
+  string signer = 1; // operator
+  // issuer address to set verification status
+  string issuer_address = 2;
+  // true if verified
+  bool is_verified = 3;
+}
+message MsgSetVerificationStatusResponse {}
+
+message MsgSetIssuerDetails {
+  option (cosmos.msg.v1.signer) = "signer";
+  string signer = 1;
+  string issuer = 2;
   IssuerDetails details = 3;
 }
 message MsgSetIssuerDetailsResponse {}
 
 message MsgUpdateIssuerDetails {
+  option (cosmos.msg.v1.signer) = "signer";
   string signer = 1;
-  string issuerAddress = 2;
+  string issuer = 2;
   IssuerDetails details = 3;
 }
 message MsgUpdateIssuerDetailsResponse {}
 
 message MsgRemoveIssuer {
+  option (cosmos.msg.v1.signer) = "signer";
   string signer = 1;
-  string issuerAddress = 2;
+  string issuer = 2;
 }
 message MsgRemoveIssuerResponse {}
 
@@ -41,6 +72,6 @@ message VerifyIssuerProposal {
   string title = 1;
   // description of the proposal
   string description = 2;
-  // issuerAddress is an address of issuer to verify
-  string issuerAddress = 3;
+  // an address of issuer to verify
+  string issuer_address = 3;
 }

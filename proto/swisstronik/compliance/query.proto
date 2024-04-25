@@ -16,6 +16,10 @@ service Query {
     option (google.api.http).get = "/swisstronik/compliance/params";
   }
 
+  rpc OperatorDetails(QueryOperatorDetailsRequest) returns (QueryOperatorDetailsResponse) {
+    option (google.api.http).get = "/swisstronik/compliance/operator/{address}";
+  }
+
   rpc AddressDetails(QueryAddressDetailsRequest) returns (QueryAddressDetailsResponse) {
     option (google.api.http).get = "/swisstronik/compliance/{address}";
   }
@@ -36,6 +40,16 @@ message QueryParamsRequest {}
 message QueryParamsResponse {
   // params holds all the parameters of this module.
   Params params = 1 [ (gogoproto.nullable) = false ];
+}
+
+// QueryOperatorDetailsRequest is request type for Query/OperatorDetails RPC method.
+message QueryOperatorDetailsRequest {
+  string address = 1;
+}
+
+// QueryOperatorDetailsResponse is response type for Query/OperatorDetails RPC method.
+message QueryOperatorDetailsResponse {
+  OperatorDetails details = 1;
 }
 
 // QueryAddressDetailsRequest is request type for the Query/VerificationData RPC method.

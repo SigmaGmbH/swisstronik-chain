@@ -5,6 +5,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	errortypes "github.com/cosmos/cosmos-sdk/types/errors"
 	govv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
+	"strconv"
 
 	"swisstronik/x/compliance/keeper"
 	"swisstronik/x/compliance/types"
@@ -47,6 +48,7 @@ func handleVerifyIssuerProposal(ctx sdk.Context, k *keeper.Keeper, p *types.Veri
 		sdk.NewEvent(
 			types.EventTypeVerifyIssuer,
 			sdk.NewAttribute(types.AttributeKeyIssuer, p.IssuerAddress),
+			sdk.NewAttribute(types.AttributeKeyVerificationStatus, strconv.FormatBool(true)),
 		),
 	)
 	return nil

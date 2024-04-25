@@ -3,6 +3,7 @@ package cli
 import (
 	"errors"
 	"fmt"
+	"strconv"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -27,11 +28,115 @@ func GetTxCmd() *cobra.Command {
 	}
 
 	cmd.AddCommand(
+		CmdAddOperator(),
+		CmdRemoveOperator(),
+		CmdSetIssuerVerificationStatus(),
 		CmdSetIssuerDetails(),
 		CmdUpdateIssuerDetails(),
 		CmdRemoveIssuer(),
 	)
 
+	return cmd
+}
+
+// CmdAddOperator command adds regular operator.
+func CmdAddOperator() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "add-operator [operator-address]",
+		Short: "Add regular operator",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			operator, err := types.ParseAddress(args[0])
+			if err != nil {
+				return err
+			}
+
+			msg := types.NewMsgAddOperator(
+				clientCtx.GetFromAddress().String(),
+				operator.String(),
+			)
+
+			_ = clientCtx.PrintProto(&msg)
+
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), &msg)
+		},
+	}
+
+	flags.AddTxFlagsToCmd(cmd)
+	return cmd
+}
+
+// CmdRemoveOperator command removes regular operator.
+func CmdRemoveOperator() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "remove-operator [operator-address]",
+		Short: "Remove regular operator",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			operator, err := types.ParseAddress(args[0])
+			if err != nil {
+				return err
+			}
+
+			msg := types.NewMsgRemoveOperator(
+				clientCtx.GetFromAddress().String(),
+				operator.String(),
+			)
+
+			_ = clientCtx.PrintProto(&msg)
+
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), &msg)
+		},
+	}
+
+	flags.AddTxFlagsToCmd(cmd)
+	return cmd
+}
+
+// CmdSetIssuerVerificationStatus command set issuer's verification status with given parameter.
+func CmdSetIssuerVerificationStatus() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "set-issuer-verification [issuer-address] [verification-status]",
+		Short: "Set issuer's verification status",
+		Args:  cobra.ExactArgs(2),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			issuer, err := types.ParseAddress(args[0])
+			if err != nil {
+				return err
+			}
+			isVerified, err := strconv.ParseBool(args[1])
+			if err != nil {
+				return err
+			}
+
+			msg := types.NewMsgSetVerificationStatus(
+				clientCtx.GetFromAddress().String(),
+				issuer.String(),
+				isVerified,
+			)
+
+			_ = clientCtx.PrintProto(&msg)
+
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), &msg)
+		},
+	}
+
+	flags.AddTxFlagsToCmd(cmd)
 	return cmd
 }
 
@@ -81,7 +186,7 @@ func CmdSetIssuerDetails() *cobra.Command {
 // CmdUpdateIssuerDetails command updates existing issuer details.
 func CmdUpdateIssuerDetails() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "update-issuer-details [issuer-address] [new-operator] [name] [description] [url] [logo-url] [legalEntity]",
+		Use:   "update-issuer-details [issuer-address] [name] [description] [url] [logo-url] [legalEntity]",
 		Short: "Update issuer details",
 		Args:  cobra.ExactArgs(7),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -95,16 +200,14 @@ func CmdUpdateIssuerDetails() *cobra.Command {
 				return err
 			}
 
-			newOperator := args[1]
-			issuerName := args[2]
-			issuerDescription := args[3]
-			issuerURL := args[4]
-			issuerLogo := args[5]
-			issuerLegalEntity := args[6]
+			issuerName := args[1]
+			issuerDescription := args[2]
+			issuerURL := args[3]
+			issuerLogo := args[4]
+			issuerLegalEntity := args[5]
 
 			msg := types.NewUpdateIssuerDetailsMsg(
 				clientCtx.GetFromAddress().String(),
-				newOperator,
 				issuerAddress.String(),
 				issuerName,
 				issuerDescription,
