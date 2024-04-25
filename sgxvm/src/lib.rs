@@ -1,11 +1,13 @@
 #![no_std]
 #![feature(slice_as_chunks)]
+#![feature(core_intrinsics)]
 
 #[macro_use]
 extern crate sgx_tstd as std;
 extern crate rustls;
 extern crate sgx_tse;
 extern crate sgx_types;
+extern crate alloc;
 
 use sgx_types::*;
 use sgx_tcrypto::*;
@@ -183,7 +185,7 @@ pub unsafe extern "C" fn ecall_dump_dcap_quote(
         Err(status_code) => {
             println!("[Enclave] Cannot generate QE quote. Reason: {:?}", status_code);
             return AllocationWithResult::default();
-        } 
+        }
     };
 
     let _ = ecc_handle.close();
@@ -209,4 +211,17 @@ pub unsafe extern "C" fn ecall_verify_dcap_quote(
             err
         }
     }
+}
+
+// Fix https://github.com/apache/incubator-teaclave-sgx-sdk/issues/373 for debug mode
+#[cfg(debug_assertions)]
+#[no_mangle]
+pub extern "C" fn __assert_fail(
+    __assertion: *const u8,
+    __file: *const u8,
+    __line: u32,
+    __function: *const u8,
+) -> ! {
+    use core::intrinsics::abort;
+    abort()
 }

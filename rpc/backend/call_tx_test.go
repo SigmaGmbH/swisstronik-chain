@@ -5,17 +5,17 @@ import (
 	"fmt"
 	"math/big"
 
-	"swisstronik/rpc/backend/mocks"
-	rpctypes "swisstronik/rpc/types"
-	"swisstronik/tests"
-	"swisstronik/utils"
-	evmtypes "swisstronik/x/evm/types"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/rlp"
 	"google.golang.org/grpc/metadata"
+
+	"swisstronik/rpc/backend/mocks"
+	rpctypes "swisstronik/rpc/types"
+	"swisstronik/tests"
+	"swisstronik/utils"
+	evmtypes "swisstronik/x/evm/types"
 )
 
 func (suite *BackendTestSuite) TestResend() {

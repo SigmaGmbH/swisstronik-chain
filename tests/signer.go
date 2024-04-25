@@ -47,6 +47,12 @@ func RandomEthAddress() common.Address {
 	return addr
 }
 
+// RandomAccAddress generates Cosmos SDK address
+func RandomAccAddress() sdk.AccAddress {
+	addr, _ := RandomEthAddressWithPrivateKey()
+	return sdk.AccAddress(addr.Bytes())
+}
+
 var _ keyring.Signer = &Signer{}
 
 // Signer defines a type that is used on testing for signing MsgEthereumTx

@@ -1,0 +1,85 @@
+syntax = "proto3";
+package swisstronik.compliance;
+
+import "gogoproto/gogo.proto";
+import "swisstronik/compliance/params.proto";
+
+option go_package = "swisstronik/x/compliance/types";
+
+enum VerificationType {
+    VT_KYC = 0; // Know Your Custom
+    VT_KYB = 1; // Know Your Business
+    VT_KYW = 2; // Know Your Wallet
+    VT_HUMANITY = 3; // Check humanity
+    VT_AML = 4; // Anti Money Laundering (check transactions)
+    VT_ADDRESS = 5;
+    VT_CUSTOM = 6;
+    VT_CREDIT_SCORE = 7;
+}
+
+/// V1 ///
+
+enum OperatorType {
+    // Initial Operator, can't be removed from the list of operators.
+    // Both initial (constant) and regular operators can add or remove regular operators.
+    OT_INITIAL = 0;
+    OT_REGULAR = 1;
+}
+
+message OperatorDetails {
+    // Operator address, who can add / update / remove issuers
+    string operator = 1;
+    // Operator type
+    OperatorType operator_type = 2;
+}
+
+message IssuerDetails {
+    // Allows to easily understand
+    // what entity can be associated with issuer address.
+    string name = 1;
+    // Basic issuer description
+    string description = 2;
+    // URL to issuer website
+    string url = 3;
+    // URL to issuer logo
+    string logo = 4;
+    // Legal entity name
+    string legalEntity = 5;
+}
+
+message AddressDetails {
+    // Marks if contract deployed under this address is verified
+    // by community. Only verified contracts will be allowed to write
+    // to x/compliance module.
+    bool is_verified = 1;
+    // Marks if verification for this address was revoked.
+    bool is_revoked = 2;
+    // Verifications passed by this address
+    repeated Verification verifications = 3;
+}
+
+message Verification {
+    // Contains information about verification type (KYC, proof-of-humanity, etc).
+    VerificationType type = 1;
+    // Contains ID of details of passed verification in storage.
+    bytes verification_id = 2;
+    // Issuer of verification
+    string issuer_address = 3;
+}
+
+message VerificationDetails {
+    // Verification issuer address
+    string issuer_address = 1;
+    // From which chain proof was transferred
+    string origin_chain = 2;
+    // Original issuance timestamp
+    uint32 issuance_timestamp = 3;
+    // Original expiration timestamp
+    uint32 expiration_timestamp = 4;
+    // Original proof data (ZK-proof)
+    bytes original_data = 5;
+    // ZK-proof original schema
+    string proof_schema = 6;
+    // Verification id for checking(KYC/KYB/AML etc) from issuer side
+    string issuer_verification_id = 7;
+}

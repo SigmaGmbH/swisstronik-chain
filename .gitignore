@@ -8,4 +8,6 @@ release/
 build/
 .testnets/
 **.uuid
+vendor
 **quote.dat
+sgxvm/Enclave_private.pem

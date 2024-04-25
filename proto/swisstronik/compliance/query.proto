@@ -1,0 +1,80 @@
+syntax = "proto3";
+package swisstronik.compliance;
+
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "swisstronik/compliance/params.proto";
+import "swisstronik/compliance/entities.proto";
+
+option go_package = "swisstronik/x/compliance/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // Parameters queries the parameters of the module.
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/swisstronik/compliance/params";
+  }
+
+  rpc OperatorDetails(QueryOperatorDetailsRequest) returns (QueryOperatorDetailsResponse) {
+    option (google.api.http).get = "/swisstronik/compliance/operator/{address}";
+  }
+
+  rpc AddressDetails(QueryAddressDetailsRequest) returns (QueryAddressDetailsResponse) {
+    option (google.api.http).get = "/swisstronik/compliance/{address}";
+  }
+
+  rpc IssuerDetails(QueryIssuerDetailsRequest) returns (QueryIssuerDetailsResponse) {
+    option (google.api.http).get = "/swisstronik/compliance/issuer/{issuerAddress}";
+  }
+
+  rpc VerificationDetails(QueryVerificationDetailsRequest) returns (QueryVerificationDetailsResponse) {
+    option (google.api.http).get = "/swisstronik/compliance/details/{verificationID}";
+  }
+}
+
+// QueryParamsRequest is request type for the Query/Params RPC method.
+message QueryParamsRequest {}
+
+// QueryParamsResponse is response type for the Query/Params RPC method.
+message QueryParamsResponse {
+  // params holds all the parameters of this module.
+  Params params = 1 [ (gogoproto.nullable) = false ];
+}
+
+// QueryOperatorDetailsRequest is request type for Query/OperatorDetails RPC method.
+message QueryOperatorDetailsRequest {
+  string address = 1;
+}
+
+// QueryOperatorDetailsResponse is response type for Query/OperatorDetails RPC method.
+message QueryOperatorDetailsResponse {
+  OperatorDetails details = 1;
+}
+
+// QueryAddressDetailsRequest is request type for the Query/VerificationData RPC method.
+message QueryAddressDetailsRequest {
+  string address = 1;
+}
+
+// QueryAddressDetailsResponse is response type for the Query/VerificationData RPC method.
+message QueryAddressDetailsResponse {
+  // data holds all the verification data for provided address
+  AddressDetails data = 1;
+}
+
+message QueryIssuerDetailsRequest {
+  string issuerAddress = 1;
+}
+
+message QueryIssuerDetailsResponse {
+  IssuerDetails details = 1;
+}
+
+message QueryVerificationDetailsRequest {
+  string verificationID = 1;
+}
+
+message QueryVerificationDetailsResponse {
+  VerificationDetails details = 1;
+}

@@ -136,6 +136,26 @@ message QueryRemoveStorageResponse {}
 message QueryBlockHash { bytes number = 1; }
 message QueryBlockHashResponse { bytes hash = 1; }
 
+message QueryAddVerificationDetails {
+  bytes userAddress = 1;
+  bytes issuerAddress = 2;
+  uint32 verificationType = 3;
+  uint32 issuanceTimestamp = 4;
+  uint32 expirationTimestamp = 5;
+  bytes proofData = 6;
+}
+message QueryAddVerificationDetailsResponse {}
+
+message QueryHasVerification {
+  bytes userAddress = 1;
+  uint32 verificationType = 2;
+  uint32 expirationTimestamp = 3;
+  repeated bytes allowedIssuers = 4;
+}
+message QueryHasVerificationResponse {
+  bool hasVerification = 1;
+}
+
 message CosmosRequest {
   oneof req {
     QueryGetAccount getAccount = 1;
@@ -149,6 +169,8 @@ message CosmosRequest {
     QueryRemoveStorageCell removeStorageCell = 9;
     QueryRemoveStorage removeStorage = 10;
     QueryBlockHash blockHash = 11;
+    QueryAddVerificationDetails addVerificationDetails = 12;
+    QueryHasVerification hasVerification = 13;
   }
 }
 

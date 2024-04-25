@@ -112,3 +112,8 @@ You can start docker containers with prometheus and grafana using docker-compose
 ```sh
 docker-compose run up -d
 ```
+
+
+## License
+
+GNU GPL v3, except for "x/compliance" module - please see separate included LICENSE file in "x/compliance" folder for details.
