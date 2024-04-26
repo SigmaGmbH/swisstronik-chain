@@ -1,5 +1,5 @@
-//go:build !nosgx
-// +build !nosgx
+//go:build !nosgx && attestationServer
+// +build !nosgx,attestationServer
 
 package api
 
