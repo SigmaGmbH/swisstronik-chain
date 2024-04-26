@@ -1,4 +1,3 @@
-SHELL := /bin/bash
 COMPILER = rustc
 TARGET = $(shell rustc --version --verbose 2> /dev/null | awk "/host:/ { print \$$2 }")
 DEFAULT = help
