@@ -4,7 +4,10 @@ use std::io::{Read, Write};
 use std::vec::Vec;
 use std::string::String;
 
+#[cfg(feature = "attestation_server")]
 use crate::key_manager::{keys::RegistrationKey, UNSEALED_KEY_MANAGER};
+#[cfg(not(feature = "attestation_server"))]
+use crate::key_manager::keys::RegistrationKey;
 
 pub mod helpers;
 pub mod auth;
@@ -60,6 +63,7 @@ pub fn perform_master_key_request(
     Ok(())
 }
 
+#[cfg(feature = "attestation_server")]
 /// Initializes new TLS server to share master key
 pub fn perform_master_key_provisioning(
     socket_fd: c_int,
@@ -117,4 +121,16 @@ pub fn perform_master_key_provisioning(
     })?;
 
     Ok(())
+}
+
+#[cfg(not(feature = "attestation_server"))]
+/// Initializes new TLS server to share master key
+pub fn perform_master_key_provisioning(
+    _socket_fd: c_int,
+    _qe_target_info: Option<&sgx_target_info_t>,
+    _quote_size: Option<u32>,
+    _is_dcap: bool,
+) -> SgxResult<()> {
+    println!("[Enclave] Attestation Server is unaccessible");
+    Err(sgx_status_t::SGX_ERROR_UNEXPECTED)
 }

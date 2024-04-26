@@ -111,6 +111,7 @@ pub unsafe extern "C" fn ecall_request_master_key_dcap(
     }
 }
 
+#[cfg(feature = "attestation_server")]
 #[no_mangle]
 /// Handles incoming request for sharing master key with new node using DCAP attestation
 pub unsafe extern "C" fn ecall_attest_peer_dcap(
@@ -122,6 +123,18 @@ pub unsafe extern "C" fn ecall_attest_peer_dcap(
         Ok(_) => sgx_status_t::SGX_SUCCESS,
         Err(err) => err,
     }
+}
+
+#[cfg(not(feature = "attestation_server"))]
+#[no_mangle]
+/// Handles incoming request for sharing master key with new node using DCAP attestation
+pub unsafe extern "C" fn ecall_attest_peer_dcap(
+    _socket_fd: c_int,
+    _qe_target_info: &sgx_target_info_t,
+    _quote_size: u32,
+) -> sgx_status_t {
+    println!("[Enclave] Cannot attest peer. Attestation Server is unaccessible");
+    sgx_status_t::SGX_ERROR_UNEXPECTED
 }
 
 #[no_mangle]
