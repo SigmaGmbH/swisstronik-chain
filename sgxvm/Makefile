@@ -5,6 +5,7 @@ DEFAULT = help
 CC=clang
 #CXX=clang++
 SGX_MODE ?= HW
+AS_MODE ?= false
 ENCLAVE_HOME ?= $(HOME)/.swisstronik-enclave
 
 Trts_Library_Name = sgx_trts
@@ -22,6 +23,10 @@ else
 	Trts_Library_Name := sgx_trts
 	Service_Library_Name := sgx_tservice
 	Enclave_build_feature := hardware_mode
+endif
+
+ifeq ($(AS_MODE), true)
+	Enclave_build_feature += attestation_server
 endif
 
 # DEFINEs
@@ -52,8 +57,8 @@ define compile_protobuf
 endef
 
 define compile_enclave_rust
-	@echo "Building enclave rust code"
-	@RUSTFLAGS="-C target-cpu=native" cargo build --release --features $(Enclave_build_feature) --no-default-features
+	@echo "Building enclave rust code with features: " $(Enclave_build_feature)
+	@RUSTFLAGS="-C target-cpu=native" cargo build --release --features "$(Enclave_build_feature)" --no-default-features
 endef
 
 define compile_enclave_rust_debug
