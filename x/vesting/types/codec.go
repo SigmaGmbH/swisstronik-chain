@@ -3,15 +3,19 @@ package types
 import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/msgservice"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/vesting/exported"
-	vtypes "github.com/cosmos/cosmos-sdk/x/auth/vesting/types"
+	sdkvesting "github.com/cosmos/cosmos-sdk/x/auth/vesting/types"
 )
 
 var (
 	Amino     = codec.NewLegacyAmino()
 	ModuleCdc = codec.NewProtoCodec(cdctypes.NewInterfaceRegistry())
+)
+
+const (
+	createMonthlyVestingAccount = "vesting/MsgCreateMonthlyVestingAccount"
 )
 
 // NOTE: This is required for the GetSignBytes function
@@ -21,21 +25,27 @@ func init() {
 }
 
 func RegisterCodec(cdc *codec.LegacyAmino) {
-	cdc.RegisterConcrete(&MsgCreateMonthlyVestingAccount{}, "vesting/CreateMonthlyVestingAccount", nil)
-	// this line is used by starport scaffolding # 2
+	cdc.RegisterConcrete(&MsgCreateMonthlyVestingAccount{}, createMonthlyVestingAccount, nil)
 }
 
 func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 	registry.RegisterInterface(
 		"cosmos.vesting.v1beta1.VestingAccount",
 		(*exported.VestingAccount)(nil),
-		&vtypes.PeriodicVestingAccount{},
+		&MonthlyVestingAccount{},
 	)
 
-	registry.RegisterImplementations((*sdk.Msg)(nil),
-		&MsgCreateMonthlyVestingAccount{},
+	registry.RegisterImplementations(
+		(*authtypes.AccountI)(nil),
+		&sdkvesting.BaseVestingAccount{},
+		&MonthlyVestingAccount{},
 	)
-	// this line is used by starport scaffolding # 3
+
+	registry.RegisterImplementations(
+		(*authtypes.GenesisAccount)(nil),
+		&sdkvesting.BaseVestingAccount{},
+		&MonthlyVestingAccount{},
+	)
 
 	msgservice.RegisterMsgServiceDesc(registry, &_Msg_serviceDesc)
 }

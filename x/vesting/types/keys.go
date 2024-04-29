@@ -1,5 +1,7 @@
 package types
 
+import "time"
+
 const (
 	// ModuleName defines the module name
 	ModuleName = "vesting"
@@ -14,9 +16,9 @@ const (
 	MemStoreKey = "mem_vesting"
 )
 
-const (
-	// 30 days
-	SecondsOfMonth = 2592000
+var (
+	SecondsOfDay   = int64((time.Hour * 24).Seconds())      // 1 day
+	SecondsOfMonth = int64((time.Hour * 24 * 30).Seconds()) // 30 days
 )
 
 func KeyPrefix(p string) []byte {

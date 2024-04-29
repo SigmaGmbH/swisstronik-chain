@@ -25,4 +25,3 @@ func RandomEthAddress() common.Address {
 	address, _ := RandomEthAddressWithPrivateKey()
 	return address
 }
-
