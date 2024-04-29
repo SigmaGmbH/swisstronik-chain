@@ -8,11 +8,28 @@ message InitializeMasterKeyRequest { bool shouldReset = 1; }
 message InitializeMasterKeyResponse {}
 
 // Attestation server messages
-message PeerAttestationRequest { 
+message PeerAttestationRequest {
   int32 fd = 1;
   bool isDCAP = 2;
 }
 message PeerAttestationResponse {}
+
+message AddNewEpochRequest {
+  uint64 startingBlock = 1;
+}
+message AddNewEpochResponse {}
+
+message Epoch {
+  uint32 index = 1;
+  uint64 startingBlock = 2;
+}
+message ListEpochsRequest{}
+message ListEpochsResponse {
+  repeated Epoch epoch = 1;
+}
+
+message RemoveLatestEpochRequest {}
+message RemoveLatestEpochResponse {}
 
 // Remote Attestation Request
 message RemoteAttestationRequest {
@@ -47,5 +64,8 @@ message SetupRequest {
     NodeStatusRequest nodeStatus = 5;
     DumpQuoteRequest dumpQuote = 6;
     VerifyQuoteRequest verifyQuote = 7;
+    AddNewEpochRequest addEpoch = 8;
+    ListEpochsRequest listEpochs = 9;
+    RemoveLatestEpochRequest removeEpoch = 10;
   }
 }
