@@ -10,8 +10,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	errortypes "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	atypes "github.com/cosmos/cosmos-sdk/x/auth/vesting/types"
-
 	"swisstronik/x/vesting/types"
 )
 
@@ -52,13 +50,6 @@ func (k msgServer) HandleCreateMonthlyVestingAccount(goCtx context.Context, msg 
 
 	// Calculate amount and period per each month
 	totalCoins := msg.Amount
-	amount := totalCoins.QuoInt(sdk.NewInt(msg.Months))
-
-	var periods []atypes.Period
-	for i := 0; i < int(msg.Months); i++ {
-		period := atypes.Period{Length: types.SecondsOfMonth, Amount: amount}
-		periods = append(periods, period)
-	}
 
 	baseAccount := authtypes.NewBaseAccountWithAddress(to)
 	baseAccount = k.accountKeeper.NewAccount(ctx, baseAccount).(*authtypes.BaseAccount)
