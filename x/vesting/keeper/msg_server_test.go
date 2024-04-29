@@ -37,6 +37,7 @@ type KeeperTestSuite struct {
 	bankKeeper    *testutil.MockBankKeeper
 	keeper        *vestingkeeper.Keeper
 	msgServer     types.MsgServer
+	querier       vestingkeeper.Querier
 }
 
 func init() {
@@ -104,6 +105,7 @@ func (suite *KeeperTestSuite) Setup(t *testing.T) {
 	suite.ctx = ctx
 	suite.goCtx = sdk.WrapSDKContext(suite.ctx)
 	suite.msgServer = vestingkeeper.NewMsgServerImpl(*k)
+	suite.querier = vestingkeeper.Querier{Keeper: *suite.keeper}
 }
 
 func (suite *KeeperTestSuite) TestCreateMonthlyVestingAccount() {

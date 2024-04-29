@@ -7,8 +7,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	errortypes "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/ethereum/go-ethereum/common"
-
-	vestingtypes "swisstronik/x/compliance/types"
 )
 
 const TypeMsgCreateMonthlyVestingAccount = "create_monthly_vesting_account"
@@ -66,15 +64,15 @@ func (msg *MsgCreateMonthlyVestingAccount) ValidateBasic() error {
 	}
 
 	if msg.CliffDays <= 0 {
-		return errorsmod.Wrapf(vestingtypes.ErrInvalidParam, "cliff days cannot be zero or negative")
+		return errorsmod.Wrapf(ErrInvalidParam, "cliff days cannot be zero or negative")
 	}
 
 	if msg.Months <= 1 {
-		return errorsmod.Wrapf(vestingtypes.ErrInvalidParam, "months should be at least one")
+		return errorsmod.Wrapf(ErrInvalidParam, "months should be at least one")
 	}
 
 	if !msg.Amount.IsAllPositive() {
-		return errorsmod.Wrapf(vestingtypes.ErrInvalidParam, "amount should be at least one")
+		return errorsmod.Wrapf(ErrInvalidParam, "amount should be at least one")
 	}
 
 	return nil

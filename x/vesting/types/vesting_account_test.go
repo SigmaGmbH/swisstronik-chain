@@ -1,16 +1,18 @@
 package types_test
 
 import (
+	"testing"
+	"time"
+
 	tmtime "github.com/cometbft/cometbft/types/time"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	sdkvesting "github.com/cosmos/cosmos-sdk/x/auth/vesting/types"
 	"github.com/stretchr/testify/suite"
+
 	"swisstronik/crypto/ethsecp256k1"
 	"swisstronik/tests"
 	"swisstronik/x/vesting/types"
-	"testing"
-	"time"
 )
 
 type VestingAccountTestSuite struct {
