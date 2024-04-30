@@ -14,6 +14,7 @@ use crate::encryption::{decrypt_deoxys, encrypt_deoxys};
 pub mod keys;
 pub mod utils;
 pub mod epoch_manager;
+pub mod consts;
 
 pub const SEED_SIZE: usize = 32;
 pub const SEED_FILENAME: &str = ".swtr_seed";
@@ -58,6 +59,7 @@ pub fn init_master_key_inner(reset_flag: i32) -> sgx_status_t {
 /// KeyManager handles keys sealing/unsealing and derivation.
 pub struct KeyManager {
     epoch_manager: EpochManager,
+    latest_tx_key: TransactionEncryptionKey,
 }
 
 impl KeyManager {
@@ -132,16 +134,21 @@ impl KeyManager {
         }
 
         let epoch_manager = EpochManager::deserialize(&serialized_epoch_manager)?; 
+        let latest_epoch = epoch_manager.get_latest_epoch()?;
+        let latest_tx_key = latest_epoch.get_tx_key();
 
         Ok(Self {
-            epoch_manager
+            epoch_manager,
+            latest_tx_key,
         })
     }
 
     /// Creates new KeyManager with signle random epoch key
     pub fn random() -> SgxResult<Self> {
         let random_epoch_manager = EpochManager::random_with_single_epoch()?;
-        Ok( Self {epoch_manager: random_epoch_manager}) 
+        let latest_epoch = random_epoch_manager.get_latest_epoch()?;
+        let latest_tx_key = latest_epoch.get_tx_key();
+        Ok( Self {epoch_manager: random_epoch_manager, latest_tx_key}) 
     }
 
     #[cfg(feature = "attestation_server")]
@@ -161,18 +168,22 @@ impl KeyManager {
         encrypted_epoch_data: Vec<u8>,
     ) -> SgxResult<Self> {
         let epoch_manager = EpochManager::decrypt(reg_key, public_key, encrypted_epoch_data)?;
+        let latest_epoch = epoch_manager.get_latest_epoch()?;
+        let latest_tx_key = latest_epoch.get_tx_key();
 
         Ok(Self {
             epoch_manager,
+            latest_tx_key,
         })
     }
 
-    /// Return x25519 public key for transaction encryption
-    pub fn get_public_key(&self) -> Vec<u8> {
-        self.tx_key.public_key()
+    /// Return x25519 public key for transaction encryption.
+    pub fn get_public_key(&self, block_number: Option<u64>) -> Vec<u8> {
+        match block_number {
+            Some(block_number) => Vec::default(), // TODO: Implement
+            None => self.latest_tx_key.public_key(),
+        }
     }
-
-
 }
 
 /// Tries to return path to $HOME/.swisstronik-enclave directory.

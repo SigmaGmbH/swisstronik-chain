@@ -3,13 +3,26 @@ use serde::{Deserialize, Serialize};
 use std::vec::Vec;
 use std::string::String;
 
-use crate::key_manager::{utils, keys};
+use crate::key_manager::{utils, keys, consts};
 use crate::encryption;
 
 #[derive(Serialize, Deserialize)]
 pub struct Epoch {
+    epoch_number: u16,
     epoch_key: [u8; 32],
     starting_block: u64
+}
+
+impl Epoch {
+    pub fn get_tx_key(&self) -> keys::TransactionEncryptionKey {
+        let tx_key_bytes = utils::derive_key(&self.epoch_key, consts::TX_KEY_PREFIX);
+        keys::TransactionEncryptionKey::from(tx_key_bytes)
+    }
+
+    pub fn get_state_key(&self) -> keys::StateEncryptionKey {
+        let state_key_bytes = utils::derive_key(&self.epoch_key, consts::STATE_KEY_PREFIX);
+        keys::StateEncryptionKey::from(state_key_bytes)
+    }
 }
 
 #[derive(Serialize, Deserialize)]
@@ -18,6 +31,16 @@ pub struct EpochManager {
 }
 
 impl EpochManager {
+    pub fn get_latest_epoch(&self) -> SgxResult<Epoch> {
+        match self.epochs.into_iter().max_by_key(|epoch| epoch.epoch_key) {
+            Some(epoch) => Ok(epoch),
+            None => {
+                println!("[EpochManager] No epoch data found");
+                Err(sgx_status_t::SGX_ERROR_UNEXPECTED)
+            }
+        }
+    }
+
     pub fn serialize(&self) -> SgxResult<String> {
         let encoded = serde_json::to_string(&self).map_err(|err| {
             println!("[EpochManager] Cannot serialize. Reason: {:?}", err);
@@ -50,9 +73,10 @@ impl EpochManager {
             println!("[KeyManager] Cannot create random epoch key. Reason: {:?}", err);
             err
         })?;
+        let epoch_number = 0u16;
         let starting_block = 0u64;
 
-        let epoch = Epoch {epoch_key, starting_block};
+        let epoch = Epoch {epoch_number, epoch_key, starting_block};
         Ok(Self {
             epochs: vec![epoch],
         })
@@ -99,12 +123,13 @@ impl EpochManager {
         let shared_secret = reg_key.diffie_hellman(public_key);
 
         // Decrypt epoch data
-        let epoch_data = encryption::decrypt_deoxys(shared_secret.as_bytes(), encrypted_epoch_data)?;
+        let epoch_data = encryption::decrypt_deoxys(shared_secret.as_bytes(), encrypted_epoch_data).map_err(|err| {
+            println!("[EpochManager] Cannot decrypt serialized epoch manager. Reason: {:?}", err);
+            sgx_status_t::SGX_ERROR_UNEXPECTED
+        })?;
         let epoch_manager = EpochManager::deserialize_from_slice(&epoch_data)?;
 
         Ok(epoch_manager)
     }
-
-
 }
 
