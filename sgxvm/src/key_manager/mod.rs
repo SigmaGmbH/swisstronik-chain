@@ -4,6 +4,7 @@ use sgx_tstd::{env, sgxfs::SgxFile};
 use sgx_types::{sgx_status_t, SgxResult};
 use std::io::{Read, Write};
 use std::vec::Vec;
+use std::string::String;
 
 use crate::error::Error;
 use crate::key_manager::keys::{StateEncryptionKey, TransactionEncryptionKey};
@@ -121,38 +122,53 @@ impl KeyManager {
         Ok(())
     }
 
-    /// Unseals master key from protected file. If file was not found or unaccessible,
+    /// Unseals key manager from protected file. If file was not found or unaccessible,
     /// will return SGX_ERROR_UNEXPECTED
     pub fn unseal() -> SgxResult<Self> {
         println!(
-            "[KeyManager] Seed location: {}/{}",
+            "[KeyManager] Sealed file location: {}/{}",
             SEED_HOME.to_str().unwrap(),
             SEED_FILENAME
         );
 
-        // Open file with master key
-        let master_key_path = format!("{}/{}", SEED_HOME.to_str().unwrap(), SEED_FILENAME);
-        let mut master_key_file = SgxFile::open(master_key_path).map_err(|err| {
-            println!("[KeyManager] Cannot open file with master key. Reason: {:?}", err);
+        // Unseal file with key manager
+        let sealed_file_path = format!("{}/{}", SEED_HOME.to_str().unwrap(), SEED_FILENAME);
+        let mut sealed_file = SgxFile::open(sealed_file_path).map_err(|err| {
+            println!("[KeyManager] Cannot open file with key manager. Reason: {:?}", err);
             sgx_status_t::SGX_ERROR_UNEXPECTED
         })?;
 
-        // Prepare buffer for seed and read it from file
-        let mut master_key = [0u8; SEED_SIZE];
-        if let Err(err) = master_key_file.read(&mut master_key) {
-            println!("[KeyManager] Cannot read master key file. Reason: {:?}", err);
+        let mut serialized_key_manager = String::new();
+        if let Err(err) = sealed_file.read_to_string(&mut serialized_key_manager) {
+            println!("[KeyManager] Cannot read serialized key manager. Reason: {:?}", err);
             return Err(sgx_status_t::SGX_ERROR_UNEXPECTED)
         }
 
-        // Derive keys for transaction and state encryption
-        let tx_key_bytes = utils::derive_key(&master_key, b"TransactionEncryptionKeyV1");
-        let state_key_bytes = utils::derive_key(&master_key, b"StateEncryptionKeyV1");
+        let key_manager: KeyManager = serde_json::from_str(&serialized_key_manager).map_err(|err| {
+            println!("[KeyManager] Cannot deserialize. Reason: {:?}", err);
+            sgx_status_t::SGX_ERROR_UNEXPECTED
+        })?;
 
-        Ok(Self {
-            master_key,
-            tx_key: TransactionEncryptionKey::from(tx_key_bytes),
-            state_key: StateEncryptionKey::from(state_key_bytes),
-        })
+        Ok(key_manager)
+
+        // Prepare buffer for key manager and read it from file
+        // let mut master_key = [0u8; SEED_SIZE];
+        // if let Err(err) = sealed_file.read(&mut master_key) {
+        //     println!("[KeyManager] Cannot read master key file. Reason: {:?}", err);
+        //     return Err(sgx_status_t::SGX_ERROR_UNEXPECTED)
+        // }
+
+        // TODO: Read and unseal from key manager
+
+        // // Derive keys for transaction and state encryption
+        // let tx_key_bytes = utils::derive_key(&master_key, b"TransactionEncryptionKeyV1");
+        // let state_key_bytes = utils::derive_key(&master_key, b"StateEncryptionKeyV1");
+
+        // Ok(Self {
+        //     master_key,
+        //     tx_key: TransactionEncryptionKey::from(tx_key_bytes),
+        //     state_key: StateEncryptionKey::from(state_key_bytes),
+        // })
     }
 
     /// Creates new KeyManager with random master key
