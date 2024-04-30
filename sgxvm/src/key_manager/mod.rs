@@ -8,12 +8,12 @@ use std::string::String;
 
 use crate::error::Error;
 use crate::key_manager::keys::{StateEncryptionKey, TransactionEncryptionKey};
+use crate::key_manager::epoch_manager::EpochManager;
 use crate::encryption::{decrypt_deoxys, encrypt_deoxys};
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use serde_json::Value;
 
 pub mod keys;
 pub mod utils;
+pub mod epoch_manager;
 
 pub const SEED_SIZE: usize = 32;
 pub const SEED_FILENAME: &str = ".swtr_seed";
@@ -55,17 +55,9 @@ pub fn init_master_key_inner(reset_flag: i32) -> sgx_status_t {
     sgx_status_t::SGX_SUCCESS
 }
 
-#[derive(Serialize, Deserialize)]
-pub struct Epoch {
-    epoch_key: [u8; 32],
-    starting_block: u64
-}
-
-#[derive(Serialize, Deserialize)]
 /// KeyManager handles keys sealing/unsealing and derivation.
-/// * master_key - This key is used to derive keys for transaction and state encryption/decryption
 pub struct KeyManager {
-    epochs: Vec<Epoch>
+    epoch_manager: EpochManager,
 }
 
 impl KeyManager {
@@ -106,16 +98,11 @@ impl KeyManager {
             );
             sgx_status_t::SGX_ERROR_UNEXPECTED
         })?;
-
         println!("[KeyManager] File created");
 
-        // Write serialized key manager to the file
-        let encoded = serde_json::to_string(&self).map_err(|err| {
-            println!("[KeyManager] Cannot encode key manager to JSON. Reason: {:?}", err);
-            sgx_status_t::SGX_ERROR_UNEXPECTED
-        })?;
+        let encoded = self.epoch_manager.serialize()?;
         if let Err(err) = sealed_file.write(encoded.as_bytes()) {
-            println!("[KeyManager] Cannot write serialized key manager. Reason: {:?}", err);
+            println!("[KeyManager] Cannot write serialized epoch manager. Reason: {:?}", err);
             return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
         }
 
@@ -138,126 +125,45 @@ impl KeyManager {
             sgx_status_t::SGX_ERROR_UNEXPECTED
         })?;
 
-        let mut serialized_key_manager = String::new();
-        if let Err(err) = sealed_file.read_to_string(&mut serialized_key_manager) {
-            println!("[KeyManager] Cannot read serialized key manager. Reason: {:?}", err);
+        let mut serialized_epoch_manager = String::new();
+        if let Err(err) = sealed_file.read_to_string(&mut serialized_epoch_manager) {
+            println!("[KeyManager] Cannot read serialized epoch manager. Reason: {:?}", err);
             return Err(sgx_status_t::SGX_ERROR_UNEXPECTED)
         }
 
-        let key_manager: KeyManager = serde_json::from_str(&serialized_key_manager).map_err(|err| {
-            println!("[KeyManager] Cannot deserialize. Reason: {:?}", err);
-            sgx_status_t::SGX_ERROR_UNEXPECTED
-        })?;
+        let epoch_manager = EpochManager::deserialize(&serialized_epoch_manager)?; 
 
-        Ok(key_manager)
-
-        // Prepare buffer for key manager and read it from file
-        // let mut master_key = [0u8; SEED_SIZE];
-        // if let Err(err) = sealed_file.read(&mut master_key) {
-        //     println!("[KeyManager] Cannot read master key file. Reason: {:?}", err);
-        //     return Err(sgx_status_t::SGX_ERROR_UNEXPECTED)
-        // }
-
-        // TODO: Read and unseal from key manager
-
-        // // Derive keys for transaction and state encryption
-        // let tx_key_bytes = utils::derive_key(&master_key, b"TransactionEncryptionKeyV1");
-        // let state_key_bytes = utils::derive_key(&master_key, b"StateEncryptionKeyV1");
-
-        // Ok(Self {
-        //     master_key,
-        //     tx_key: TransactionEncryptionKey::from(tx_key_bytes),
-        //     state_key: StateEncryptionKey::from(state_key_bytes),
-        // })
+        Ok(Self {
+            epoch_manager
+        })
     }
 
     /// Creates new KeyManager with signle random epoch key
     pub fn random() -> SgxResult<Self> {
-        let epoch_key = utils::random_bytes32().map_err(|err| {
-            println!("[KeyManager] Cannot create random epoch key. Reason: {:?}", err);
-            err
-        })?;
-
-        // // Derive keys for transaction and state encryption
-        // let tx_key_bytes = utils::derive_key(&master_key, b"TransactionEncryptionKeyV1");
-        // let state_key_bytes = utils::derive_key(&master_key, b"StateEncryptionKeyV1");
-
-        let epoch = Epoch {
-            epoch_key, 
-            starting_block: 0
-        };
-
-        Ok(Self {
-            epochs: vec![epoch],
-        })
-
-        // Ok(Self {
-        //     master_key,
-        //     tx_key: TransactionEncryptionKey::from(tx_key_bytes),
-        //     state_key: StateEncryptionKey::from(state_key_bytes),
-        // })
+        let random_epoch_manager = EpochManager::random_with_single_epoch()?;
+        Ok( Self {epoch_manager: random_epoch_manager}) 
     }
 
     #[cfg(feature = "attestation_server")]
-    /// Encrypts master key using shared key
-    pub fn to_encrypted_master_key(
+    /// Encrypts epoch data using shared key
+    pub fn encrypt_epoch_data(
         &self,
         reg_key: &keys::RegistrationKey,
         public_key: Vec<u8>,
-    ) -> Result<Vec<u8>, Error> {
-        // Convert public key to appropriate format
-        let public_key: [u8; 32] = match public_key.try_into() {
-            Ok(public_key) => public_key,
-            Err(_) => return Err(Error::decryption_err("Public key has wrong length")),
-        };
-        let public_key = x25519_dalek::PublicKey::from(public_key);
-
-        // Derive shared secret
-        let shared_secret = reg_key.diffie_hellman(public_key);
-
-        // Encrypted master key
-        let encrypted_value = encrypt_deoxys(shared_secret.as_bytes(), self.master_key.to_vec(), None)?;
-
-        // Add public key as prefix
-        let reg_public_key = reg_key.public_key();
-        Ok([reg_public_key.as_bytes(), encrypted_value.as_slice()].concat())
+    ) -> SgxResult<Vec<u8>> {
+        self.epoch_manager.encrypt(reg_key, public_key)
     }
 
-    /// Recovers encrypted master key obtained from seed exchange server
-    pub fn from_encrypted_master_key(
+    /// Recovers encrypted epoch data, obtained from attestation server
+    pub fn decrypt_epoch_data(
         reg_key: &keys::RegistrationKey,
         public_key: Vec<u8>,
-        encrypted_master_key: Vec<u8>,
-    ) -> Result<Self, Error> {
-        // Convert public key to appropriate format
-        let public_key: [u8; 32] = match public_key.try_into() {
-            Ok(public_key) => public_key,
-            Err(_) => return Err(Error::encryption_err("Public key has wrong length")),
-        };
-        let public_key = x25519_dalek::PublicKey::from(public_key);
-
-        // Derive shared secret
-        let shared_secret = reg_key.diffie_hellman(public_key);
-
-        // Decrypt master key
-        let master_key = decrypt_deoxys(shared_secret.as_bytes(), encrypted_master_key)?;
-
-        // Convert master key to appropriate format
-        let master_key: [u8; 32] = match master_key.try_into() {
-            Ok(master_key) => master_key,
-            Err(_) => {
-                return Err(Error::decryption_err("Master key has wrong length"));
-            }
-        };
-
-        // Derive keys for transaction and state encryption
-        let tx_key_bytes = utils::derive_key(&master_key, b"TransactionEncryptionKeyV1");
-        let state_key_bytes = utils::derive_key(&master_key, b"StateEncryptionKeyV1");
+        encrypted_epoch_data: Vec<u8>,
+    ) -> SgxResult<Self> {
+        let epoch_manager = EpochManager::decrypt(reg_key, public_key, encrypted_epoch_data)?;
 
         Ok(Self {
-            master_key,
-            tx_key: TransactionEncryptionKey::from(tx_key_bytes),
-            state_key: StateEncryptionKey::from(state_key_bytes),
+            epoch_manager,
         })
     }
 

@@ -101,20 +101,20 @@ pub fn perform_master_key_provisioning(
     };
 
     // Encrypt master key and send it to the client
-    let encrypted_master_key = key_manager
-        .to_encrypted_master_key(&registration_key, client_public_key.to_vec())
+    let encrypted_epoch_data = key_manager
+        .encrypt_epoch_data(&registration_key, client_public_key.to_vec())
         .map_err(|err| {
             println!(
-                "[Enclave] Cannot encrypt master key to share it. Reason: {:?}",
+                "[Enclave] Cannot encrypt epoch data to share it. Reason: {:?}",
                 err
             );
             sgx_status_t::SGX_ERROR_UNEXPECTED
         })?;
 
     // Send encrypted master key back to client
-    tls.write(&encrypted_master_key).map_err(|err| {
+    tls.write(&encrypted_epoch_data).map_err(|err| {
         println!(
-            "[Enclave] Cannot send encrypted master key to client. Reason: {:?}",
+            "[Enclave] Cannot send encrypted epoch data to client. Reason: {:?}",
             err
         );
         sgx_status_t::SGX_ERROR_UNEXPECTED

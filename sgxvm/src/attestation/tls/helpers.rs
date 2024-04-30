@@ -96,24 +96,24 @@ pub(super) fn decrypt_and_seal_master_key(
     let public_key = &attn_server_response[..PUBLIC_KEY_SIZE];
     let encrypted_master_key = &attn_server_response[PUBLIC_KEY_SIZE..];
 
-    // Construct key manager
-    let km = KeyManager::from_encrypted_master_key(
+    // Construct key manager from encrypted epoch data
+    let km = KeyManager::decrypt_epoch_data(
         reg_key,
         public_key.to_vec(),
         encrypted_master_key.to_vec(),
     )
     .map_err(|err| {
         println!(
-            "[Enclave] Cannot construct from encrypted master key. Reason: {:?}",
+            "[Enclave] Cannot construct from encrypted epoch data. Reason: {:?}",
             err
         );
         sgx_status_t::SGX_ERROR_UNEXPECTED
     })?;
 
     // Seal decrypted master key
-    println!("[Enclave] Attestation Client: sealing master key");
+    println!("[Enclave] Attestation Client: sealing epoch data key");
     km.seal()?;
-    println!("[Enclave] Master key successfully sealed");
+    println!("[Enclave] Epoch data successfully sealed");
 
     Ok(())
 }
