@@ -8,6 +8,8 @@ use std::vec::Vec;
 use crate::error::Error;
 use crate::key_manager::keys::{StateEncryptionKey, TransactionEncryptionKey};
 use crate::encryption::{decrypt_deoxys, encrypt_deoxys};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde_json::Value;
 
 pub mod keys;
 pub mod utils;
@@ -52,16 +54,17 @@ pub fn init_master_key_inner(reset_flag: i32) -> sgx_status_t {
     sgx_status_t::SGX_SUCCESS
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct Epoch {
+    epoch_key: [u8; 32],
+    starting_block: u64
+}
+
+#[derive(Serialize, Deserialize)]
 /// KeyManager handles keys sealing/unsealing and derivation.
 /// * master_key - This key is used to derive keys for transaction and state encryption/decryption
 pub struct KeyManager {
-    // Master key to derive all keys
-    master_key: [u8; 32],
-    // Transaction key is used during encryption / decryption of transaction data
-    pub tx_key: TransactionEncryptionKey,
-    // State key is used for encryption of state fields
-    // state_key: [u8; PRIVATE_KEY_SIZE],
-    pub state_key: StateEncryptionKey,
+    epochs: Vec<Epoch>
 }
 
 impl KeyManager {
@@ -80,11 +83,11 @@ impl KeyManager {
         }
     }
 
-    /// Seals key to protected file, so it will be accessible only for enclave.
+    /// Seals Key Manager to protected file, so it will be accessible only for enclave.
     /// For now, enclaves with same MRSIGNER will be able to recover that file, but
     /// we'll use MRENCLAVE since Upgradeability Protocol will be implemented
     pub fn seal(&self) -> SgxResult<()> {
-        // Prepare file to write master key
+        // Prepare file to write serialized key manager
         let seed_home_path = match SEED_HOME.to_str() {
             Some(path) => path,
             None => {
@@ -93,20 +96,25 @@ impl KeyManager {
             }
         };
 
-        let master_key_path = format!("{}/{}", seed_home_path, SEED_FILENAME);
-        println!("[KeyManager] Creating file for master key. Location: {:?}", master_key_path);
-        let mut master_key_file = SgxFile::create(master_key_path).map_err(|err| {
+        let sealed_file_path = format!("{}/{}", seed_home_path, SEED_FILENAME);
+        println!("[KeyManager] Creating file for key manager. Location: {:?}", sealed_file_path);
+        let mut sealed_file = SgxFile::create(sealed_file_path).map_err(|err| {
             println!(
-                "[KeyManager] Cannot create file for master key. Reason: {:?}",
+                "[KeyManager] Cannot create file for key manager. Reason: {:?}",
                 err
             );
             sgx_status_t::SGX_ERROR_UNEXPECTED
         })?;
 
         println!("[KeyManager] File created");
-        // Write master key to the file
-        if let Err(err) = master_key_file.write(&self.master_key) {
-            println!("[KeyManager] Cannot write master key. Reason: {:?}", err);
+
+        // Write serialized key manager to the file
+        let encoded = serde_json::to_string(&self).map_err(|err| {
+            println!("[KeyManager] Cannot encode key manager to JSON. Reason: {:?}", err);
+            sgx_status_t::SGX_ERROR_UNEXPECTED
+        })?;
+        if let Err(err) = sealed_file.write(encoded.as_bytes()) {
+            println!("[KeyManager] Cannot write serialized key manager. Reason: {:?}", err);
             return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
         }
 
@@ -165,6 +173,7 @@ impl KeyManager {
         })
     }
 
+    #[cfg(feature = "attestation_server")]
     /// Encrypts master key using shared key
     pub fn to_encrypted_master_key(
         &self,
@@ -231,6 +240,8 @@ impl KeyManager {
     pub fn get_public_key(&self) -> Vec<u8> {
         self.tx_key.public_key()
     }
+
+
 }
 
 /// Tries to return path to $HOME/.swisstronik-enclave directory.
