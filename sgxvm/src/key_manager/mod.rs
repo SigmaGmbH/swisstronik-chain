@@ -171,22 +171,31 @@ impl KeyManager {
         // })
     }
 
-    /// Creates new KeyManager with random master key
+    /// Creates new KeyManager with signle random epoch key
     pub fn random() -> SgxResult<Self> {
-        let master_key = utils::random_bytes32().map_err(|err| {
-            println!("[KeyManager] Cannot create random master key. Reason: {:?}", err);
+        let epoch_key = utils::random_bytes32().map_err(|err| {
+            println!("[KeyManager] Cannot create random epoch key. Reason: {:?}", err);
             err
         })?;
 
-        // Derive keys for transaction and state encryption
-        let tx_key_bytes = utils::derive_key(&master_key, b"TransactionEncryptionKeyV1");
-        let state_key_bytes = utils::derive_key(&master_key, b"StateEncryptionKeyV1");
+        // // Derive keys for transaction and state encryption
+        // let tx_key_bytes = utils::derive_key(&master_key, b"TransactionEncryptionKeyV1");
+        // let state_key_bytes = utils::derive_key(&master_key, b"StateEncryptionKeyV1");
+
+        let epoch = Epoch {
+            epoch_key, 
+            starting_block: 0
+        };
 
         Ok(Self {
-            master_key,
-            tx_key: TransactionEncryptionKey::from(tx_key_bytes),
-            state_key: StateEncryptionKey::from(state_key_bytes),
+            epochs: vec![epoch],
         })
+
+        // Ok(Self {
+        //     master_key,
+        //     tx_key: TransactionEncryptionKey::from(tx_key_bytes),
+        //     state_key: StateEncryptionKey::from(state_key_bytes),
+        // })
     }
 
     #[cfg(feature = "attestation_server")]
