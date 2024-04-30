@@ -93,7 +93,7 @@ pub fn handle_public_key_request() -> AllocationWithResult {
         }
     };
 
-    let public_key = key_manager.get_public_key();
+    let public_key = key_manager.get_public_key(None);
 
     let mut response = NodePublicKeyResponse::new();
     response.set_publicKey(public_key);

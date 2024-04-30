@@ -3,18 +3,18 @@ use sgx_tstd::ffi::OsString;
 use sgx_tstd::{env, sgxfs::SgxFile};
 use sgx_types::{sgx_status_t, SgxResult};
 use std::io::{Read, Write};
-use std::vec::Vec;
 use std::string::String;
+use std::vec::Vec;
 
-use crate::error::Error;
-use crate::key_manager::keys::{StateEncryptionKey, TransactionEncryptionKey};
-use crate::key_manager::epoch_manager::EpochManager;
 use crate::encryption::{decrypt_deoxys, encrypt_deoxys};
+use crate::error::Error;
+use crate::key_manager::epoch_manager::EpochManager;
+use crate::key_manager::keys::{StateEncryptionKey, TransactionEncryptionKey};
 
+pub mod consts;
+pub mod epoch_manager;
 pub mod keys;
 pub mod utils;
-pub mod epoch_manager;
-pub mod consts;
 
 pub const SEED_SIZE: usize = 32;
 pub const SEED_FILENAME: &str = ".swtr_seed";
@@ -58,11 +58,19 @@ pub fn init_master_key_inner(reset_flag: i32) -> sgx_status_t {
 
 /// KeyManager handles keys sealing/unsealing and derivation.
 pub struct KeyManager {
+    pub latest_tx_key: TransactionEncryptionKey,
+    pub latest_state_key: StateEncryptionKey,
     epoch_manager: EpochManager,
-    latest_tx_key: TransactionEncryptionKey,
 }
 
 impl KeyManager {
+    pub fn get_state_key(&self, epoch: u16) -> Option<StateEncryptionKey> {
+        match self.epoch_manager.get_epoch(epoch) {
+            Some(epoch) => Some(epoch.get_state_key()),
+            None => None
+        }
+    }
+
     /// Checks if file with sealed master key exists
     pub fn exists() -> SgxResult<bool> {
         match SgxFile::open(format!("{}/{}", SEED_HOME.to_str().unwrap(), SEED_FILENAME)) {
@@ -92,7 +100,10 @@ impl KeyManager {
         };
 
         let sealed_file_path = format!("{}/{}", seed_home_path, SEED_FILENAME);
-        println!("[KeyManager] Creating file for key manager. Location: {:?}", sealed_file_path);
+        println!(
+            "[KeyManager] Creating file for key manager. Location: {:?}",
+            sealed_file_path
+        );
         let mut sealed_file = SgxFile::create(sealed_file_path).map_err(|err| {
             println!(
                 "[KeyManager] Cannot create file for key manager. Reason: {:?}",
@@ -104,7 +115,10 @@ impl KeyManager {
 
         let encoded = self.epoch_manager.serialize()?;
         if let Err(err) = sealed_file.write(encoded.as_bytes()) {
-            println!("[KeyManager] Cannot write serialized epoch manager. Reason: {:?}", err);
+            println!(
+                "[KeyManager] Cannot write serialized epoch manager. Reason: {:?}",
+                err
+            );
             return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
         }
 
@@ -123,23 +137,31 @@ impl KeyManager {
         // Unseal file with key manager
         let sealed_file_path = format!("{}/{}", SEED_HOME.to_str().unwrap(), SEED_FILENAME);
         let mut sealed_file = SgxFile::open(sealed_file_path).map_err(|err| {
-            println!("[KeyManager] Cannot open file with key manager. Reason: {:?}", err);
+            println!(
+                "[KeyManager] Cannot open file with key manager. Reason: {:?}",
+                err
+            );
             sgx_status_t::SGX_ERROR_UNEXPECTED
         })?;
 
         let mut serialized_epoch_manager = String::new();
         if let Err(err) = sealed_file.read_to_string(&mut serialized_epoch_manager) {
-            println!("[KeyManager] Cannot read serialized epoch manager. Reason: {:?}", err);
-            return Err(sgx_status_t::SGX_ERROR_UNEXPECTED)
+            println!(
+                "[KeyManager] Cannot read serialized epoch manager. Reason: {:?}",
+                err
+            );
+            return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
         }
 
-        let epoch_manager = EpochManager::deserialize(&serialized_epoch_manager)?; 
+        let epoch_manager = EpochManager::deserialize(&serialized_epoch_manager)?;
         let latest_epoch = epoch_manager.get_latest_epoch()?;
         let latest_tx_key = latest_epoch.get_tx_key();
+        let latest_state_key = latest_epoch.get_state_key();
 
         Ok(Self {
             epoch_manager,
             latest_tx_key,
+            latest_state_key,
         })
     }
 
@@ -148,7 +170,13 @@ impl KeyManager {
         let random_epoch_manager = EpochManager::random_with_single_epoch()?;
         let latest_epoch = random_epoch_manager.get_latest_epoch()?;
         let latest_tx_key = latest_epoch.get_tx_key();
-        Ok( Self {epoch_manager: random_epoch_manager, latest_tx_key}) 
+        let latest_state_key = latest_epoch.get_state_key();
+
+        Ok(Self {
+            epoch_manager: random_epoch_manager,
+            latest_tx_key,
+            latest_state_key,
+        })
     }
 
     #[cfg(feature = "attestation_server")]
@@ -170,10 +198,12 @@ impl KeyManager {
         let epoch_manager = EpochManager::decrypt(reg_key, public_key, encrypted_epoch_data)?;
         let latest_epoch = epoch_manager.get_latest_epoch()?;
         let latest_tx_key = latest_epoch.get_tx_key();
+        let latest_state_key = latest_epoch.get_state_key();
 
         Ok(Self {
             epoch_manager,
             latest_tx_key,
+            latest_state_key,
         })
     }
 

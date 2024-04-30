@@ -93,6 +93,9 @@ build_d: go.sum
 build_attestation_server: go.sum
 	AS_MODE=true $(MAKE) -C go-sgxvm build_AS
 
+build_attestation_server_d: go.sum
+	AS_MODE=true $(MAKE) -C go-sgxvm build_AS_d
+
 ###############################################################################
 ### 		          Build commands for CLI (without SGX support) 			###
 ###############################################################################

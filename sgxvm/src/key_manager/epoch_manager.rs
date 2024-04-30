@@ -31,14 +31,29 @@ pub struct EpochManager {
 }
 
 impl EpochManager {
-    pub fn get_latest_epoch(&self) -> SgxResult<Epoch> {
-        match self.epochs.into_iter().max_by_key(|epoch| epoch.epoch_key) {
-            Some(epoch) => Ok(epoch),
-            None => {
-                println!("[EpochManager] No epoch data found");
-                Err(sgx_status_t::SGX_ERROR_UNEXPECTED)
+    pub fn get_epoch(&self, epoch_number: u16) -> Option<&Epoch> {
+        for epoch in self.epochs.iter() {
+            if epoch.epoch_number == epoch_number {
+                return Some(epoch)
             }
         }
+        None
+    }
+
+    pub fn get_latest_epoch(&self) -> SgxResult<&Epoch> {
+        if self.epochs.is_empty() {
+            println!("[EpochManager] No epoch data found");
+            return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+        }
+        
+        let mut latest_epoch = &self.epochs[0];
+        for epoch in self.epochs.iter() {
+            if epoch.epoch_number > latest_epoch.epoch_number {
+                latest_epoch = epoch;
+            }
+        }
+
+        Ok(latest_epoch)
     }
 
     pub fn serialize(&self) -> SgxResult<String> {

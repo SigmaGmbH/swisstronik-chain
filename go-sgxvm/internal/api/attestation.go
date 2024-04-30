@@ -102,7 +102,8 @@ func handleIncomingRARequest(connection net.Conn, isDCAP bool) error {
 		return err
 	}
 
-	SendProtobufRequest(reqBytes)
+	_, err = SendProtobufRequest(reqBytes)
+	return err
 }
 
 // SendProtobufRequest sends protobuf-encoded request to Rust side
@@ -112,9 +113,9 @@ func SendProtobufRequest(data []byte) (C.UnmanagedVector, error) {
 	defer runtime.KeepAlive(data)
 
 	errmsg := NewUnmanagedVector(nil)
-	ptr, err = C.handle_initialization_request(d, &errmsg)
+	ptr, err := C.handle_initialization_request(d, &errmsg)
 	if err != nil {
-		return ErrorWithMessage(err, errmsg)
+		return NewUnmanagedVector(nil), ErrorWithMessage(err, errmsg)
 	}
 
 	return ptr, nil

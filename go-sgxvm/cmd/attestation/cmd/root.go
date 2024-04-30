@@ -92,8 +92,8 @@ func RemoveLatestEpoch() *cobra.Command {
 
 func getAllEpochs() error {
 	// Encode request for epochs
-	req := types.SetupRequest{Req: &types.SetupRequest_ListEpochsRequest{
-		ListEpochs: &types.PeerAttestationRequest{},
+	req := types.SetupRequest{Req: &types.SetupRequest_ListEpochs{
+		ListEpochs: &types.ListEpochsRequest{},
 	}}
 	reqBytes, err := proto.Marshal(&req)
 	if err != nil {
@@ -101,7 +101,7 @@ func getAllEpochs() error {
 		return err
 	}
 
-	_, err := api.SendProtobufRequest(reqBytes)
+	_, err = api.SendProtobufRequest(reqBytes)
 	if err != nil {
 		return err
 	}

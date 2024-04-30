@@ -178,6 +178,7 @@ pub unsafe extern "C" fn handle_initialization_request(
                         let response_bytes = response.write_to_bytes()?;
                         Ok(response_bytes)
                     }
+                    _ => Err(Error::protobuf_decode("Unsupported method"))
                 }
             }
             None => Err(Error::protobuf_decode("Request unwrapping failed")),
