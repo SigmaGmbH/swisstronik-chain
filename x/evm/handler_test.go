@@ -176,7 +176,7 @@ func (suite *EvmTestSuite) DoSetupTest(t require.TestingT) {
 	suite.handler = evm.NewHandler(suite.app.EvmKeeper)
 
 	// Initialize enclave
-	err = librustgo.InitializeMasterKey(false)
+	err = librustgo.InitializeEnclave(false)
 	require.NoError(t, err)
 
 	// Obtain node public key

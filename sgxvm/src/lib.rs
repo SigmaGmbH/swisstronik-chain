@@ -83,7 +83,7 @@ pub extern "C" fn handle_request(
 
 #[no_mangle]
 /// Handles incoming request for DCAP Remote Attestation
-pub unsafe extern "C" fn ecall_request_master_key_dcap(
+pub unsafe extern "C" fn ecall_request_epoch_keys_dcap(
     hostname: *const u8,
     data_len: usize,
     socket_fd: c_int,
@@ -155,7 +155,7 @@ pub unsafe extern "C" fn ecall_initialize_enclave(reset_flag: i32) -> sgx_status
 
 #[no_mangle]
 /// Handles incoming request for EPID Remote Attestation
-pub unsafe extern "C" fn ecall_request_master_key_epid(
+pub unsafe extern "C" fn ecall_request_epoch_keys_epid(
     hostname: *const u8,
     data_len: usize,
     socket_fd: c_int,

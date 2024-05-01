@@ -107,8 +107,8 @@ func Create(
 	return executionResult, nil
 }
 
-func InitializeMasterKey(shouldReset bool) error {
-	return api.InitializeMasterKey(shouldReset)
+func InitializeEnclave(shouldReset bool) error {
+	return api.InitializeEnclave(shouldReset)
 }
 
 // StartAttestationServer handles incoming request for starting attestation server
@@ -119,8 +119,8 @@ func StartAttestationServer(epidAddress, dcapAddress string) error {
 
 // RequestSeed handles requesting seed and passing Remote Attestation.
 // Returns error if Remote Attestation was not passed or provided seed server address is not accessible
-func RequestMasterKey(host string, port int, isDCAP bool) error {
-	return api.RequestMasterKey(host, port, isDCAP)
+func RequestEpochKeys(host string, port int, isDCAP bool) error {
+	return api.RequestEpochKeys(host, port, isDCAP)
 }
 
 // GetNodePublicKey handles request for node public key

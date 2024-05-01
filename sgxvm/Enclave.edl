@@ -40,13 +40,13 @@ enclave {
 			uint32_t quote_size
         );
 
-        public sgx_status_t ecall_request_master_key_epid(
+        public sgx_status_t ecall_request_epoch_keys_epid(
             [in, size=len] const uint8_t* hostname,
             size_t len,
             int fd
         );
 
-        public sgx_status_t ecall_request_master_key_dcap(
+        public sgx_status_t ecall_request_epoch_keys_dcap(
             [in, size=len] const uint8_t* hostname,
             size_t len,
             int fd,

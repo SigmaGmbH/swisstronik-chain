@@ -36,7 +36,7 @@ type Connector = types.Connector
 func CheckNodeStatus() error {
 	return nil
 }
-func RequestMasterKey(host string, port int, isDCAP bool) error {
+func RequestEpochKeys(host string, port int, isDCAP bool) error {
 	return nil
 }
 

@@ -23,7 +23,7 @@ impl EnclaveApi {
         }
     }
 
-    pub fn initialize_master_key(eid: sgx_enclave_id_t, reset: bool) -> Result<(), Error> {
+    pub fn initialize_enclave(eid: sgx_enclave_id_t, reset: bool) -> Result<(), Error> {
         let mut ret_val = sgx_status_t::SGX_ERROR_UNEXPECTED;
         let res = unsafe { super::ecall_initialize_enclave(eid, &mut ret_val, reset as i32) };
 
@@ -129,7 +129,7 @@ impl EnclaveApi {
 
         let mut ret_val = sgx_status_t::SGX_ERROR_UNEXPECTED;
         let res = unsafe {
-            super::ecall_request_master_key_epid(
+            super::ecall_request_epoch_keys_epid(
                 eid,
                 &mut ret_val,
                 hostname.as_ptr() as *const u8,
@@ -140,7 +140,7 @@ impl EnclaveApi {
 
         if res != sgx_status_t::SGX_SUCCESS {
             println!(
-                "[Enclave] Call to `ecall_request_master_key_epid` failed. Status code: {:?}",
+                "[Enclave] Call to `ecall_request_epoch_keys_epid` failed. Status code: {:?}",
                 res
             );
             return Err(Error::enclave_error(res));
@@ -148,7 +148,7 @@ impl EnclaveApi {
 
         if ret_val != sgx_status_t::SGX_SUCCESS {
             println!(
-                "[Enclave] `ecall_request_master_key_epid` returned error: {:?}",
+                "[Enclave] `ecall_request_epoch_keys_epid` returned error: {:?}",
                 ret_val
             );
             return Err(Error::enclave_error(ret_val));
@@ -174,7 +174,7 @@ impl EnclaveApi {
 
         let mut retval = sgx_status_t::SGX_ERROR_UNEXPECTED;
         let res = unsafe {
-            super::ecall_request_master_key_dcap(
+            super::ecall_request_epoch_keys_dcap(
                 eid,
                 &mut retval,
                 hostname.as_ptr() as *const u8,
@@ -187,7 +187,7 @@ impl EnclaveApi {
 
         if res != sgx_status_t::SGX_SUCCESS {
             println!(
-                "[Enclave Wrapper] Cannot call `ecall_request_master_key_dcap`. Reason: {:?}",
+                "[Enclave Wrapper] Cannot call `ecall_request_epoch_keys_dcap`. Reason: {:?}",
                 res
             );
             return Err(Error::enclave_error(res));
@@ -195,7 +195,7 @@ impl EnclaveApi {
 
         if retval != sgx_status_t::SGX_SUCCESS {
             println!(
-                "[Enclave Wrapper] `ecall_request_master_key_dcap` failed. Reason: {:?}",
+                "[Enclave Wrapper] `ecall_request_epoch_keys_dcap` failed. Reason: {:?}",
                 retval
             );
             return Err(Error::enclave_error(retval));

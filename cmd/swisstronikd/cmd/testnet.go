@@ -157,7 +157,7 @@ func initializeEnclave() *cobra.Command {
 				return err
 			}
 
-			if err := librustgo.InitializeMasterKey(shouldReset); err != nil {
+			if err := librustgo.InitializeEnclave(shouldReset); err != nil {
 				return err
 			}
 
@@ -167,7 +167,7 @@ func initializeEnclave() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().Bool(flagShouldReset, false, "reset already existing master key. Default: false")
+	cmd.Flags().Bool(flagShouldReset, false, "reset already existing epoch manager. Default: false")
 
 	return cmd
 }

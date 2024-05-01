@@ -58,7 +58,7 @@ extern "C" {
         quote_size: u32,
     ) -> sgx_status_t;
 
-    pub fn ecall_request_master_key_epid(
+    pub fn ecall_request_epoch_keys_epid(
         eid: sgx_enclave_id_t,
         retval: *mut sgx_status_t,
         hostname: *const u8,
@@ -68,7 +68,7 @@ extern "C" {
 
     pub fn ecall_status(eid: sgx_enclave_id_t, retval: *mut sgx_status_t) -> sgx_status_t;
 
-    pub fn ecall_request_master_key_dcap(
+    pub fn ecall_request_epoch_keys_dcap(
         eid: sgx_enclave_id_t,
         retval: *mut sgx_status_t,
         hostname: *const u8,
@@ -141,9 +141,9 @@ pub unsafe extern "C" fn handle_initialization_request(
                         let response_bytes: Vec<u8> = response.write_to_bytes()?;
                         Ok(response_bytes)
                     }
-                    node::SetupRequest_oneof_req::initializeMasterKey(req) => {
-                        enclave_api::EnclaveApi::initialize_master_key(evm_enclave.geteid(), req.shouldReset)?;
-                        let response = node::InitializeMasterKeyResponse::new();
+                    node::SetupRequest_oneof_req::initializeEnclave(req) => {
+                        enclave_api::EnclaveApi::initialize_enclave(evm_enclave.geteid(), req.shouldReset)?;
+                        let response = node::InitializeEnclaveResponse::new();
                         let response_bytes = response.write_to_bytes()?;
                         Ok(response_bytes)
                     }

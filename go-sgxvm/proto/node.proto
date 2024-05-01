@@ -4,8 +4,8 @@ package node.node;
 
 option go_package = "github.com/SigmaGmbH/librustgo/types";
 
-message InitializeMasterKeyRequest { bool shouldReset = 1; }
-message InitializeMasterKeyResponse {}
+message InitializeEnclaveRequest { bool shouldReset = 1; }
+message InitializeEnclaveResponse {}
 
 // Attestation server messages
 message PeerAttestationRequest {
@@ -57,7 +57,7 @@ message VerifyQuoteResponse {}
 
 message SetupRequest {
   oneof req {
-    InitializeMasterKeyRequest initializeMasterKey = 1;
+    InitializeEnclaveRequest initializeEnclave = 1;
     PeerAttestationRequest peerAttestationRequest = 2;
     RemoteAttestationRequest remoteAttestationRequest = 3;
     IsInitializedRequest isInitialized = 4;

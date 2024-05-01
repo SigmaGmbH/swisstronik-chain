@@ -118,7 +118,7 @@ func (suite *KeeperTestSuite) SetupTestWithT(t require.TestingT) {
 func (suite *KeeperTestSuite) SetupApp(checkTx bool) {
 	chainID := utils.TestnetChainID + "-1"
 	// Initialize enclave
-	err := librustgo.InitializeMasterKey(false)
+	err := librustgo.InitializeEnclave(false)
 	require.NoError(suite.T(), err)
 
 	suite.SetupAppWithT(checkTx, suite.T(), chainID)

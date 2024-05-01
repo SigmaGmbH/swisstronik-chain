@@ -102,11 +102,11 @@ func IsNodeInitialized() (bool, error) {
 	return response.IsInitialized, nil
 }
 
-// SetupSeedNode handles initialization of attestation node which will share master key with other nodes
-func InitializeMasterKey(shouldReset bool) error {
+// SetupSeedNode handles initialization of attestation server which will share epoch keys with other nodes
+func InitializeEnclave(shouldReset bool) error {
 	// Create protobuf encoded request
-	req := types.SetupRequest{Req: &types.SetupRequest_InitializeMasterKey{
-		InitializeMasterKey: &types.InitializeMasterKeyRequest{ ShouldReset: shouldReset },
+	req := types.SetupRequest{Req: &types.SetupRequest_InitializeEnclave{
+		InitializeEnclave: &types.InitializeEnclaveRequest{ ShouldReset: shouldReset },
 	}}
 	reqBytes, err := proto.Marshal(&req)
 	if err != nil {
@@ -127,12 +127,12 @@ func InitializeMasterKey(shouldReset bool) error {
 	return nil
 }
 
-// RequestMasterKey handles request of master key from attestation server
-func RequestMasterKey(hostname string, port int, isDCAP bool) error {
+// RequestEpochKeys handles request of master key from attestation server
+func RequestEpochKeys(hostname string, port int, isDCAP bool) error {
 	address := fmt.Sprintf("%s:%d", hostname, port)
 	conn, err := net.Dial("tcp", address)
 	if err != nil {
-		fmt.Println("Cannot establish connection with seed server. Reason: ", err.Error())
+		fmt.Println("Cannot establish connection with attestation server. Reason: ", err.Error())
 		return err
 	}
 
