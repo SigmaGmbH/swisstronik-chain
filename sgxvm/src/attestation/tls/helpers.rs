@@ -92,15 +92,15 @@ pub(super) fn decrypt_and_seal_master_key(
     }
 
     // Extract public key and nonce + ciphertext
-    println!("[Enclave] Attestation Client: decrypting master key");
+    println!("[Enclave] Attestation Client: decrypting epochs data");
     let public_key = &attn_server_response[..PUBLIC_KEY_SIZE];
-    let encrypted_master_key = &attn_server_response[PUBLIC_KEY_SIZE..];
+    let encrypted_epochs_data = &attn_server_response[PUBLIC_KEY_SIZE..];
 
     // Construct key manager from encrypted epoch data
     let km = KeyManager::decrypt_epoch_data(
         reg_key,
         public_key.to_vec(),
-        encrypted_master_key.to_vec(),
+        encrypted_epochs_data.to_vec(),
     )
     .map_err(|err| {
         println!(
