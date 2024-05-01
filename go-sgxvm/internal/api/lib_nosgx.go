@@ -65,7 +65,7 @@ func RequestSeed(hostname string, port int) error {
 }
 
 // GetNodePublicKey handles request for node public key
-func GetNodePublicKey() (*types.NodePublicKeyResponse, error) {
+func GetNodePublicKey(blockNumber uint64) (*types.NodePublicKeyResponse, error) {
 	key := make([]byte, 32)
 	rand.Read(key)
 	return &types.NodePublicKeyResponse{PublicKey: key}, nil

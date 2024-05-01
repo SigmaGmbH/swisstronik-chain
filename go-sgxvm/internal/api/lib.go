@@ -173,12 +173,16 @@ func RequestEpochKeys(hostname string, port int, isDCAP bool) error {
 }
 
 // GetNodePublicKey handles request for node public key
-func GetNodePublicKey() (*types.NodePublicKeyResponse, error) {
+func GetNodePublicKey(blockNumber uint64) (*types.NodePublicKeyResponse, error) {
 	// Construct mocked querier
 	c := buildEmptyConnector()
 
 	// Create protobuf-encoded request
-	req := &types.FFIRequest{ Req: &types.FFIRequest_PublicKeyRequest {} }
+	req := &types.FFIRequest{ Req: &types.FFIRequest_PublicKeyRequest {
+		PublicKeyRequest: &types.NodePublicKeyRequest{
+			BlockNumber: blockNumber,
+		},
+	}}
 	reqBytes, err := proto.Marshal(req)
 	if err != nil {
 		log.Fatalln("Failed to encode req:", err)

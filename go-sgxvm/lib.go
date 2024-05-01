@@ -124,8 +124,8 @@ func RequestEpochKeys(host string, port int, isDCAP bool) error {
 }
 
 // GetNodePublicKey handles request for node public key
-func GetNodePublicKey() (*types.NodePublicKeyResponse, error) {
-	result, err := api.GetNodePublicKey()
+func GetNodePublicKey(blockNumber uint64) (*types.NodePublicKeyResponse, error) {
+	result, err := api.GetNodePublicKey(blockNumber)
 	if err != nil {
 		return &types.NodePublicKeyResponse{}, err
 	}

@@ -9146,7 +9146,7 @@ impl ::protobuf::reflect::ProtobufValue for SGXVMCreateRequest {
 #[derive(PartialEq,Clone,Default)]
 pub struct NodePublicKeyRequest {
     // message fields
-    pub block_number: u64,
+    pub blockNumber: u64,
     // special fields
     pub unknown_fields: ::protobuf::UnknownFields,
     pub cached_size: ::protobuf::CachedSize,
@@ -9163,19 +9163,19 @@ impl NodePublicKeyRequest {
         ::std::default::Default::default()
     }
 
-    // uint64 block_number = 1;
+    // uint64 blockNumber = 1;
 
 
-    pub fn get_block_number(&self) -> u64 {
-        self.block_number
+    pub fn get_blockNumber(&self) -> u64 {
+        self.blockNumber
     }
-    pub fn clear_block_number(&mut self) {
-        self.block_number = 0;
+    pub fn clear_blockNumber(&mut self) {
+        self.blockNumber = 0;
     }
 
     // Param is passed by value, moved
-    pub fn set_block_number(&mut self, v: u64) {
-        self.block_number = v;
+    pub fn set_blockNumber(&mut self, v: u64) {
+        self.blockNumber = v;
     }
 }
 
@@ -9193,7 +9193,7 @@ impl ::protobuf::Message for NodePublicKeyRequest {
                         return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
                     }
                     let tmp = is.read_uint64()?;
-                    self.block_number = tmp;
+                    self.blockNumber = tmp;
                 },
                 _ => {
                     ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
@@ -9207,8 +9207,8 @@ impl ::protobuf::Message for NodePublicKeyRequest {
     #[allow(unused_variables)]
     fn compute_size(&self) -> u32 {
         let mut my_size = 0;
-        if self.block_number != 0 {
-            my_size += ::protobuf::rt::value_size(1, self.block_number, ::protobuf::wire_format::WireTypeVarint);
+        if self.blockNumber != 0 {
+            my_size += ::protobuf::rt::value_size(1, self.blockNumber, ::protobuf::wire_format::WireTypeVarint);
         }
         my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
         self.cached_size.set(my_size);
@@ -9216,8 +9216,8 @@ impl ::protobuf::Message for NodePublicKeyRequest {
     }
 
     fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
-        if self.block_number != 0 {
-            os.write_uint64(1, self.block_number)?;
+        if self.blockNumber != 0 {
+            os.write_uint64(1, self.blockNumber)?;
         }
         os.write_unknown_fields(self.get_unknown_fields())?;
         ::std::result::Result::Ok(())
@@ -9262,9 +9262,9 @@ impl ::protobuf::Message for NodePublicKeyRequest {
             descriptor.get(|| {
                 let mut fields = ::std::vec::Vec::new();
                 fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint64>(
-                    "block_number",
-                    |m: &NodePublicKeyRequest| { &m.block_number },
-                    |m: &mut NodePublicKeyRequest| { &mut m.block_number },
+                    "blockNumber",
+                    |m: &NodePublicKeyRequest| { &m.blockNumber },
+                    |m: &mut NodePublicKeyRequest| { &mut m.blockNumber },
                 ));
                 ::protobuf::reflect::MessageDescriptor::new::<NodePublicKeyRequest>(
                     "NodePublicKeyRequest",
@@ -9288,7 +9288,7 @@ impl ::protobuf::Message for NodePublicKeyRequest {
 
 impl ::protobuf::Clear for NodePublicKeyRequest {
     fn clear(&mut self) {
-        self.block_number = 0;
+        self.blockNumber = 0;
         self.unknown_fields.clear();
     }
 }
@@ -9942,9 +9942,9 @@ static file_descriptor_proto_data: &'static [u8] = b"\
     \x20\x01(\x0b2\x1b.ffi.ffi.TransactionContextR\x07context\"\x7f\n\x12SGX\
     VMCreateRequest\x122\n\x06params\x18\x01\x20\x01(\x0b2\x1a.ffi.ffi.SGXVM\
     CreateParamsR\x06params\x125\n\x07context\x18\x02\x20\x01(\x0b2\x1b.ffi.\
-    ffi.TransactionContextR\x07context\"9\n\x14NodePublicKeyRequest\x12!\n\
-    \x0cblock_number\x18\x01\x20\x01(\x04R\x0bblockNumber\"5\n\x15NodePublic\
-    KeyResponse\x12\x1c\n\tpublicKey\x18\x01\x20\x01(\x0cR\tpublicKey\"\xe4\
+    ffi.TransactionContextR\x07context\"8\n\x14NodePublicKeyRequest\x12\x20\
+    \n\x0bblockNumber\x18\x01\x20\x01(\x04R\x0bblockNumber\"5\n\x15NodePubli\
+    cKeyResponse\x12\x1c\n\tpublicKey\x18\x01\x20\x01(\x0cR\tpublicKey\"\xe4\
     \x01\n\nFFIRequest\x12=\n\x0bcallRequest\x18\x01\x20\x01(\x0b2\x19.ffi.f\
     fi.SGXVMCallRequestH\0R\x0bcallRequest\x12C\n\rcreateRequest\x18\x02\x20\
     \x01(\x0b2\x1b.ffi.ffi.SGXVMCreateRequestH\0R\rcreateRequest\x12K\n\x10p\
@@ -10277,9 +10277,9 @@ static file_descriptor_proto_data: &'static [u8] = b"\
     \n\r\n\x05\x04%\x02\x01\x03\x12\x04\xd0\x01\x1f\x20\n1\n\x02\x04&\x12\
     \x06\xd4\x01\0\xd6\x01\x01\x1a#\x20Request\x20to\x20obtain\x20node\x20pu\
     blic\x20key\n\n\x0b\n\x03\x04&\x01\x12\x04\xd4\x01\x08\x1c\n\x0c\n\x04\
-    \x04&\x02\0\x12\x04\xd5\x01\x02\x1a\n\r\n\x05\x04&\x02\0\x05\x12\x04\xd5\
-    \x01\x02\x08\n\r\n\x05\x04&\x02\0\x01\x12\x04\xd5\x01\t\x15\n\r\n\x05\
-    \x04&\x02\0\x03\x12\x04\xd5\x01\x18\x19\n+\n\x02\x04'\x12\x04\xd9\x01\06\
+    \x04&\x02\0\x12\x04\xd5\x01\x02\x19\n\r\n\x05\x04&\x02\0\x05\x12\x04\xd5\
+    \x01\x02\x08\n\r\n\x05\x04&\x02\0\x01\x12\x04\xd5\x01\t\x14\n\r\n\x05\
+    \x04&\x02\0\x03\x12\x04\xd5\x01\x17\x18\n+\n\x02\x04'\x12\x04\xd9\x01\06\
     \x1a\x1f\x20Response\x20with\x20node\x20public\x20key\n\n\x0b\n\x03\x04'\
     \x01\x12\x04\xd9\x01\x08\x1d\n\x0c\n\x04\x04'\x02\0\x12\x04\xd9\x01\x204\
     \n\r\n\x05\x04'\x02\0\x05\x12\x04\xd9\x01\x20%\n\r\n\x05\x04'\x02\0\x01\

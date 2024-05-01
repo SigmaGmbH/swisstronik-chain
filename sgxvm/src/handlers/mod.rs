@@ -42,7 +42,7 @@ pub fn handle_protobuf_request_inner(
                     handle_evm_create_request(querier, data)
                 },
                 FFIRequest_oneof_req::publicKeyRequest(data) => {
-                    handle_public_key_request(data.block_number)
+                    handle_public_key_request(data.blockNumber)
                 }
             }
         }
