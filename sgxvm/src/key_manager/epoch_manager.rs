@@ -97,6 +97,18 @@ impl EpochManager {
         })
     }
 
+    pub fn from_seed(input: [u8; 32]) -> Self {
+        let epoch = Epoch {
+            epoch_number: 0u16,
+            starting_block: 0u64,
+            epoch_key: input,
+        };
+
+        Self {
+            epochs: vec![epoch],
+        }
+    }
+
     #[cfg(feature = "attestation_server")]
     pub fn encrypt(
         &self,

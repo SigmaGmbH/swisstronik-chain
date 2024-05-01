@@ -144,16 +144,41 @@ impl KeyManager {
             sgx_status_t::SGX_ERROR_UNEXPECTED
         })?;
 
-        let mut serialized_epoch_manager = String::new();
-        if let Err(err) = sealed_file.read_to_string(&mut serialized_epoch_manager) {
-            println!(
-                "[KeyManager] Cannot read serialized epoch manager. Reason: {:?}",
-                err
-            );
+        let mut sealed_file_content: Vec<u8> = Vec::default();
+        let sealed_file_content_len = sealed_file.read_to_end(&mut sealed_file_content)
+            .map_err(|err| {
+                println!("[KeyManager] Cannot read sealed file. Reason: {:?}", err);
+                sgx_status_t::SGX_ERROR_UNEXPECTED
+            })?;
+
+        if sealed_file_content_len < SEED_SIZE {
+            println!("[KeyManager] Corrupted sealed file. Invalid len. Expected >= 32, Got: {:?}", sealed_file_content_len);
             return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
         }
 
-        let epoch_manager = EpochManager::deserialize(&serialized_epoch_manager)?;
+        let epoch_manager = match sealed_file_content_len {
+            SEED_SIZE => {
+                // Read from plain seed
+                let legacy_seed: [u8; SEED_SIZE] = sealed_file_content.try_into().map_err(|err| {
+                    println!("[KeyManager] Cannot convert legacy seed to appropriate format. Reason: {:?}", err);
+                    sgx_status_t::SGX_ERROR_UNEXPECTED
+                })?;
+                EpochManager::from_seed(legacy_seed)
+            },
+            _ => {
+                // Deserialize epoch manager
+                let mut serialized_epoch_manager = String::new();
+                sealed_file.read_to_string(&mut serialized_epoch_manager).map_err(|err| {
+                    println!(
+                        "[KeyManager] Cannot read serialized epoch manager. Reason: {:?}",
+                        err
+                    );
+                    sgx_status_t::SGX_ERROR_UNEXPECTED
+                })?;
+                EpochManager::deserialize(&serialized_epoch_manager)?
+            }
+        };
+
         let latest_epoch = epoch_manager.get_latest_epoch()?;
         let latest_tx_key = latest_epoch.get_tx_key();
         let latest_state_key = latest_epoch.get_state_key();
