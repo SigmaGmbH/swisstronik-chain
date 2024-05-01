@@ -40,20 +40,19 @@ impl EpochManager {
         None
     }
 
-    pub fn get_latest_epoch(&self) -> SgxResult<&Epoch> {
+    pub fn get_current_epoch(&self, block_number: u64) -> Option<&Epoch> {
         if self.epochs.is_empty() {
-            println!("[EpochManager] No epoch data found");
-            return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+            return None
         }
         
-        let mut latest_epoch = &self.epochs[0];
+        let mut current_epoch = &self.epochs[0];
         for epoch in self.epochs.iter() {
-            if epoch.epoch_number > latest_epoch.epoch_number {
-                latest_epoch = epoch;
+            if epoch.starting_block > current_epoch.starting_block && epoch.starting_block <= block_number {
+                current_epoch = epoch;
             }
         }
 
-        Ok(latest_epoch)
+        Some(current_epoch)
     }
 
     pub fn serialize(&self) -> SgxResult<String> {

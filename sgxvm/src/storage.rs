@@ -15,6 +15,7 @@ use crate::{
 pub struct FFIStorage {
     pub querier: *mut querier::GoQuerier,
     pub context_timestamp: u64,
+    pub context_block_number: u64,
 }
 
 impl Storage for FFIStorage {
@@ -141,6 +142,7 @@ impl Storage for FFIStorage {
         // Encrypt value
         let encrypted_value = match encryption::encrypt_storage_cell(
             key.as_bytes().to_vec(), 
+            self.context_block_number,
             self.context_timestamp.to_be_bytes().to_vec(),
             value.as_bytes().to_vec()
         ) {
@@ -194,7 +196,7 @@ impl Storage for FFIStorage {
 }
 
 impl FFIStorage {
-    pub fn new(querier: *mut querier::GoQuerier, context_timestamp: u64) -> Self {
-        Self { querier, context_timestamp }
+    pub fn new(querier: *mut querier::GoQuerier, context_timestamp: u64, context_block_number: u64) -> Self {
+        Self { querier, context_timestamp, context_block_number }
     }
 }

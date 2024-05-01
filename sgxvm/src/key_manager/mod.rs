@@ -1,4 +1,5 @@
 use lazy_static::lazy_static;
+use rand_chacha::rand_core::block;
 use sgx_tstd::ffi::OsString;
 use sgx_tstd::{env, sgxfs::SgxFile};
 use sgx_types::{sgx_status_t, SgxResult};
@@ -59,15 +60,34 @@ pub fn init_enclave_inner(reset_flag: i32) -> sgx_status_t {
 
 /// KeyManager handles keys sealing/unsealing and derivation.
 pub struct KeyManager {
-    pub latest_tx_key: TransactionEncryptionKey,
-    pub latest_state_key: StateEncryptionKey,
     epoch_manager: EpochManager,
 }
 
 impl KeyManager {
-    pub fn get_state_key(&self, epoch: u16) -> Option<StateEncryptionKey> {
+    pub fn get_state_key_by_epoch(&self, epoch: u16) -> Option<StateEncryptionKey> {
         match self.epoch_manager.get_epoch(epoch) {
             Some(epoch) => Some(epoch.get_state_key()),
+            None => None
+        }
+    }
+
+    pub fn get_state_key_by_block(&self, block_number: u64) -> Option<StateEncryptionKey> {
+        match self.epoch_manager.get_current_epoch(block_number) {
+            Some(epoch) => Some(epoch.get_state_key()),
+            None => None
+        }
+    }
+
+    pub fn get_tx_key_by_epoch(&self, epoch: u16) -> Option<TransactionEncryptionKey> {
+        match self.epoch_manager.get_epoch(epoch) {
+            Some(epoch) => Some(epoch.get_tx_key()),
+            None => None
+        }
+    }
+
+    pub fn get_tx_key_by_block(&self, block_number: u64) -> Option<TransactionEncryptionKey> {
+        match self.epoch_manager.get_current_epoch(block_number) {
+            Some(epoch) => Some(epoch.get_tx_key()),
             None => None
         }
     }
@@ -179,28 +199,17 @@ impl KeyManager {
             }
         };
 
-        let latest_epoch = epoch_manager.get_latest_epoch()?;
-        let latest_tx_key = latest_epoch.get_tx_key();
-        let latest_state_key = latest_epoch.get_state_key();
-
         Ok(Self {
             epoch_manager,
-            latest_tx_key,
-            latest_state_key,
         })
     }
 
     /// Creates new KeyManager with signle random epoch key
     pub fn random() -> SgxResult<Self> {
         let random_epoch_manager = EpochManager::random_with_single_epoch()?;
-        let latest_epoch = random_epoch_manager.get_latest_epoch()?;
-        let latest_tx_key = latest_epoch.get_tx_key();
-        let latest_state_key = latest_epoch.get_state_key();
 
         Ok(Self {
             epoch_manager: random_epoch_manager,
-            latest_tx_key,
-            latest_state_key,
         })
     }
 
@@ -221,22 +230,20 @@ impl KeyManager {
         encrypted_epoch_data: Vec<u8>,
     ) -> SgxResult<Self> {
         let epoch_manager = EpochManager::decrypt(reg_key, public_key, encrypted_epoch_data)?;
-        let latest_epoch = epoch_manager.get_latest_epoch()?;
-        let latest_tx_key = latest_epoch.get_tx_key();
-        let latest_state_key = latest_epoch.get_state_key();
 
         Ok(Self {
             epoch_manager,
-            latest_tx_key,
-            latest_state_key,
         })
     }
 
-    /// Return x25519 public key for transaction encryption.
-    pub fn get_public_key(&self, block_number: Option<u64>) -> Vec<u8> {
-        match block_number {
-            Some(block_number) => Vec::default(), // TODO: Implement
-            None => self.latest_tx_key.public_key(),
+    /// Return x25519 public key for transaction encryption. Public key is based on block number
+    pub fn get_public_key(&self, block_number: u64) -> SgxResult<Vec<u8>> {
+        match self.epoch_manager.get_current_epoch(block_number) {
+            Some(epoch) => Ok(epoch.get_tx_key().public_key()),
+            None => {
+                println!("[KeyManager] Cannot obtain tx encryption key");
+                Err(sgx_status_t::SGX_ERROR_UNEXPECTED)
+            }
         }
     }
 }

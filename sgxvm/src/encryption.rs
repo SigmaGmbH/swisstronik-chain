@@ -21,14 +21,16 @@ pub const DEFAULT_STORAGE_VALUE: [u8; 32] = [0u8; 32];
 /// * value - Raw storage value to encrypt
 pub fn encrypt_storage_cell(
     contract_address: Vec<u8>,
+    block_number: u64,
     encryption_salt: Vec<u8>,
     value: Vec<u8>,
 ) -> Result<Vec<u8>, Error> {
     match &*UNSEALED_KEY_MANAGER {
         Some(key_manager) => {
-            key_manager
-                .latest_state_key
-                .encrypt(contract_address, encryption_salt, value)
+            match key_manager.get_state_key_by_block(block_number) {
+                Some(state_key) => state_key.encrypt(contract_address, encryption_salt, value),
+                None => Err(Error::encryption_err("There no keys stored in Epoch Manager")),
+            }
         }
         None => Err(Error::encryption_err("Cannot unseal master key")),
     }
@@ -64,7 +66,7 @@ pub fn decrypt_storage_cell(
     };
 
     let state_key = match &*UNSEALED_KEY_MANAGER {
-        Some(key_manager) => key_manager.get_state_key(epoch),
+        Some(key_manager) => key_manager.get_state_key_by_epoch(epoch),
         None => {
             return Err(Error::encryption_err("Cannot get access to key manager"));
         }
@@ -110,11 +112,15 @@ pub fn extract_public_key_and_data(tx_data: Vec<u8>) -> Result<(Vec<u8>, Vec<u8>
 pub fn decrypt_transaction_data(
     encrypted_data: Vec<u8>,
     public_key: Vec<u8>,
+    block_number: u64,
 ) -> Result<Vec<u8>, Error> {
     match &*UNSEALED_KEY_MANAGER {
-        Some(key_manager) => key_manager
-            .latest_tx_key
-            .decrypt(public_key, encrypted_data),
+        Some(key_manager) => {
+            match key_manager.get_tx_key_by_block(block_number) {
+                Some(tx_key) => tx_key.decrypt(public_key, encrypted_data),
+                None => Err(Error::encryption_err("There no keys stored in Epoch Manager")),
+            }
+        }
         None => Err(Error::encryption_err("Cannot unseal master key")),
     }
 }
@@ -126,6 +132,7 @@ pub fn encrypt_transaction_data(
     data: Vec<u8>,
     user_public_key: Vec<u8>,
     nonce: Vec<u8>,
+    block_number: u64,
 ) -> Result<Vec<u8>, Error> {
     if user_public_key.len() != PUBLIC_KEY_SIZE {
         return Err(Error::ecdh_err("Wrong public key size"));
@@ -137,7 +144,7 @@ pub fn encrypt_transaction_data(
 
     match &*UNSEALED_KEY_MANAGER {
         Some(key_manager) => key_manager
-            .latest_tx_key
+            .get_tx_key_by_block(block_number)
             .encrypt(user_public_key, data, nonce),
         None => Err(Error::encryption_err("Cannot unseal master key")),
     }
