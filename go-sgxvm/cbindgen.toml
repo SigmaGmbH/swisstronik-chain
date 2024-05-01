@@ -61,7 +61,7 @@ exclude = [
     "handle_request",
     "ecall_allocate",
     "ecall_status",
-    "ecall_init_master_key",
+    "ecall_initialize_enclave",
     "ecall_attest_peer_epid",
     "ecall_attest_peer_dcap",
     "ecall_is_initialized",

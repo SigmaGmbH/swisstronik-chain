@@ -28,7 +28,7 @@ enclave {
     };
 
     trusted {
-        public sgx_status_t ecall_init_master_key(int reset);
+        public sgx_status_t ecall_initialize_enclave(int reset);
 
         public int ecall_is_initialized();
 

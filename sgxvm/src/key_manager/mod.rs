@@ -27,26 +27,27 @@ lazy_static! {
         env::var_os("SEED_HOME").unwrap_or_else(get_default_seed_home);
 }
 
-/// Handles initialization of a new seed node by creating and sealing master key to seed file
+/// Handles initialization of first node in network. This node works as 
+/// attestation server, which will share epoch keys with other nodes.
 /// If `reset_flag` was set to `true`, it will rewrite existing seed file
-pub fn init_master_key_inner(reset_flag: i32) -> sgx_status_t {
+pub fn init_enclave_inner(reset_flag: i32) -> sgx_status_t {
     // Check if master key exists
-    let master_key_exists = match KeyManager::exists() {
+    let sealed_file_exists = match KeyManager::exists() {
         Ok(exists) => exists,
         Err(err) => {
             return err;
         }
     };
 
-    // If master key does not exist or reset flag was set, generate random master key and seal it
-    if !master_key_exists || reset_flag != 0 {
+    // If sealed file does not exist or reset flag was set, create key manager with random keys and seal it
+    if !sealed_file_exists || reset_flag != 0 {
         // Generate random master key
         let key_manager = match KeyManager::random() {
             Ok(manager) => manager,
             Err(err) => return err,
         };
 
-        // Seal master key
+        // Seal key manager state
         match key_manager.seal() {
             Ok(_) => return sgx_status_t::SGX_SUCCESS,
             Err(err) => return err,

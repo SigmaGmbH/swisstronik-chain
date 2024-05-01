@@ -149,8 +149,8 @@ pub unsafe extern "C" fn ecall_attest_peer_epid(socket_fd: c_int) -> sgx_status_
 #[no_mangle]
 /// Handles initialization of a new seed node by creating and sealing master key to seed file
 /// If `reset_flag` was set to `true`, it will rewrite existing seed file
-pub unsafe extern "C" fn ecall_init_master_key(reset_flag: i32) -> sgx_status_t {
-    key_manager::init_master_key_inner(reset_flag)
+pub unsafe extern "C" fn ecall_initialize_enclave(reset_flag: i32) -> sgx_status_t {
+    key_manager::init_enclave_inner(reset_flag)
 }
 
 #[no_mangle]

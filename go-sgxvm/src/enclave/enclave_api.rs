@@ -25,7 +25,7 @@ impl EnclaveApi {
 
     pub fn initialize_master_key(eid: sgx_enclave_id_t, reset: bool) -> Result<(), Error> {
         let mut ret_val = sgx_status_t::SGX_ERROR_UNEXPECTED;
-        let res = unsafe { super::ecall_init_master_key(eid, &mut ret_val, reset as i32) };
+        let res = unsafe { super::ecall_initialize_enclave(eid, &mut ret_val, reset as i32) };
 
         match (res, ret_val) {
             (sgx_status_t::SGX_SUCCESS, sgx_status_t::SGX_SUCCESS) => Ok(()),

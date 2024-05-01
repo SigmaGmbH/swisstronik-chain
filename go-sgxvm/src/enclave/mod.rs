@@ -36,7 +36,7 @@ extern "C" {
         len: usize,
     ) -> sgx_status_t;
 
-    pub fn ecall_init_master_key(
+    pub fn ecall_initialize_enclave(
         eid: sgx_enclave_id_t,
         retval: *mut sgx_status_t,
         reset_flag: i32,
