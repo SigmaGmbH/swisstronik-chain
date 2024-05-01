@@ -143,9 +143,12 @@ pub fn encrypt_transaction_data(
     }
 
     match &*UNSEALED_KEY_MANAGER {
-        Some(key_manager) => key_manager
-            .get_tx_key_by_block(block_number)
-            .encrypt(user_public_key, data, nonce),
+        Some(key_manager) => {
+            match key_manager.get_tx_key_by_block(block_number) {
+                Some(tx_key) => tx_key.encrypt(user_public_key, data, nonce),
+                None => Err(Error::encryption_err("There no keys stored in Epoch Manager")),
+            }
+        }
         None => Err(Error::encryption_err("Cannot unseal master key")),
     }
 }

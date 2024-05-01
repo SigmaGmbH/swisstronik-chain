@@ -210,7 +210,9 @@ message SGXVMCreateRequest {
 }
 
 // Request to obtain node public key
-message NodePublicKeyRequest {}
+message NodePublicKeyRequest {
+  uint64 block_number = 1;
+}
 
 // Response with node public key
 message NodePublicKeyResponse { bytes publicKey = 1; }
