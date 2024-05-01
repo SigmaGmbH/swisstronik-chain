@@ -92,24 +92,23 @@ pub fn perform_epoch_keys_provisioning(
     let registration_key = RegistrationKey::random()?;
 
     // Unseal key manager to get access to master key
-    let key_manager = match &*UNSEALED_KEY_MANAGER {
-        Some(key_manager) => key_manager,
+    let encrypted_epoch_data = match &*UNSEALED_KEY_MANAGER {
+        Some(key_manager) => {
+            key_manager
+                .encrypt_epoch_data(&registration_key, client_public_key.to_vec())
+                .map_err(|err| {
+                    println!(
+                        "[Enclave] Cannot encrypt epoch data to share it. Reason: {:?}",
+                        err
+                    );
+                    sgx_status_t::SGX_ERROR_UNEXPECTED
+                })?
+        },
         None => {
-            println!("[Enclave] Cannot unseal master key");
+            println!("[Enclave] Cannot unseal key manager data");
             return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
         }
     };
-
-    // Encrypt epoch data
-    let encrypted_epoch_data = key_manager
-        .encrypt_epoch_data(&registration_key, client_public_key.to_vec())
-        .map_err(|err| {
-            println!(
-                "[Enclave] Cannot encrypt epoch data to share it. Reason: {:?}",
-                err
-            );
-            sgx_status_t::SGX_ERROR_UNEXPECTED
-        })?;
 
     // Send encrypted epoch data to client
     tls.write(&encrypted_epoch_data).map_err(|err| {

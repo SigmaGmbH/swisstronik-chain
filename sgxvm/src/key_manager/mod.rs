@@ -168,8 +168,7 @@ impl KeyManager {
             },
             _ => {
                 // Deserialize epoch manager
-                let mut serialized_epoch_manager = String::new();
-                sealed_file.read_to_string(&mut serialized_epoch_manager).map_err(|err| {
+                let serialized_epoch_manager = String::from_utf8(sealed_file_content).map_err(|err| {
                     println!(
                         "[KeyManager] Cannot read serialized epoch manager. Reason: {:?}",
                         err
