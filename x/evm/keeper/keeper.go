@@ -36,8 +36,6 @@ import (
 
 	evmcommontypes "swisstronik/types"
 	"swisstronik/x/evm/types"
-
-	"github.com/SigmaGmbH/librustgo"
 )
 
 // Keeper grants access to the EVM module state and implements the go-ethereum StateDB interface.
@@ -75,9 +73,6 @@ type Keeper struct {
 
 	// Legacy subspace
 	ss paramstypes.Subspace
-
-	// Cached node public key
-	nodePublicKey common.Hash
 }
 
 // NewKeeper generates new evm module keeper
@@ -102,13 +97,6 @@ func NewKeeper(
 		panic(err)
 	}
 
-	// obtain node public key from SGX enclave
-	response, err := librustgo.GetNodePublicKey()
-	if err != nil {
-		panic(err)
-	}
-	nodePublicKey := common.BytesToHash(response.PublicKey)
-
 	// NOTE: we pass in the parameter space to the CommitStateDB in order to use custom denominations for the EVM operations
 	return &Keeper{
 		cdc:              cdc,
@@ -121,7 +109,6 @@ func NewKeeper(
 		storeKey:         storeKey,
 		transientKey:     transientKey,
 		ss:               ss,
-		nodePublicKey:    nodePublicKey,
 	}
 }
 

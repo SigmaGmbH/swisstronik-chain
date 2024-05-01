@@ -316,7 +316,9 @@ message QueryBaseFeeResponse {
 }
 
 // QueryNodePublicKey defines the request type for querying node public key
-message QueryNodePublicKey {}
+message QueryNodePublicKey {
+  uint64 block_number = 1;
+}
 
 message QueryNodePublicKeyResponse {
   // node_public_key is x25519 public key in hex format

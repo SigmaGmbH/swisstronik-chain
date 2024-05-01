@@ -63,7 +63,7 @@ func (suite *KeeperTestSuite) SetupSGXVMApp(checkTx bool) {
 // SetupApp setup test environment, it uses`require.TestingT` to support both `testing.T` and `testing.B`.
 func (suite *KeeperTestSuite) SetupSGXVMAppWithT(checkTx bool, t require.TestingT) {
 	// obtain node public key
-	res, err := librustgo.GetNodePublicKey()
+	res, err := librustgo.GetNodePublicKey(0)
 	require.NoError(t, err)
 	suite.nodePublicKey = res.PublicKey
 

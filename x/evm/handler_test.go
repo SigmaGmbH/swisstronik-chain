@@ -180,7 +180,7 @@ func (suite *EvmTestSuite) DoSetupTest(t require.TestingT) {
 	require.NoError(t, err)
 
 	// Obtain node public key
-	res, err := librustgo.GetNodePublicKey()
+	res, err := librustgo.GetNodePublicKey(0)
 	require.NoError(t, err)
 	suite.nodePublicKey = res.PublicKey
 }

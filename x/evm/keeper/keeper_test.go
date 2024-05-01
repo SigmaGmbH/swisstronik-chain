@@ -127,7 +127,7 @@ func (suite *KeeperTestSuite) SetupApp(checkTx bool) {
 // SetupApp setup test environment, it uses`require.TestingT` to support both `testing.T` and `testing.B`.
 func (suite *KeeperTestSuite) SetupAppWithT(checkTx bool, t require.TestingT, chainID string) {
 	// obtain node public key
-	res, err := librustgo.GetNodePublicKey()
+	res, err := librustgo.GetNodePublicKey(0)
 	suite.Require().NoError(err)
 	suite.nodePublicKey = res.PublicKey
 
