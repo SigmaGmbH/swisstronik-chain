@@ -92,7 +92,7 @@ pub fn dump_dcap_quote(eid: sgx_enclave_id_t, filepath: &str) -> Result<(), Erro
 pub fn verify_dcap_quote(eid: sgx_enclave_id_t, filepath: &str) -> Result<(), Error> {
     let mut file = std::fs::File::open(filepath).expect("Cannot open quote file");
     let mut quote_buf = Vec::new();
-    let bytes_read = file.read_to_end(&mut quote_buf)
+    let _ = file.read_to_end(&mut quote_buf)
         .expect("Cannot read quote file");
 
     let mut retval = sgx_status_t::SGX_ERROR_UNEXPECTED;
