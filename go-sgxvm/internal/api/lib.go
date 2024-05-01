@@ -67,7 +67,7 @@ func CheckNodeStatus() error {
 	return nil
 }
 
-// IsNodeInitialized checks if node was initialized and master key was sealed
+// IsNodeInitialized checks if node was initialized and key manager state was sealed
 func IsNodeInitialized() (bool, error) {
 	// Create protobuf encoded request
 	req := types.SetupRequest{Req: &types.SetupRequest_IsInitialized{
@@ -127,7 +127,7 @@ func InitializeEnclave(shouldReset bool) error {
 	return nil
 }
 
-// RequestEpochKeys handles request of master key from attestation server
+// RequestEpochKeys handles request of epoch keys from attestation server
 func RequestEpochKeys(hostname string, port int, isDCAP bool) error {
 	address := fmt.Sprintf("%s:%d", hostname, port)
 	conn, err := net.Dial("tcp", address)

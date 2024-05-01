@@ -65,7 +65,7 @@ pub fn perform_master_key_request(
 
 #[cfg(feature = "attestation_server")]
 /// Initializes new TLS server to share master key
-pub fn perform_master_key_provisioning(
+pub fn perform_epoch_keys_provisioning(
     socket_fd: c_int,
     qe_target_info: Option<&sgx_target_info_t>,
     quote_size: Option<u32>,
@@ -100,7 +100,7 @@ pub fn perform_master_key_provisioning(
         }
     };
 
-    // Encrypt master key and send it to the client
+    // Encrypt epoch data
     let encrypted_epoch_data = key_manager
         .encrypt_epoch_data(&registration_key, client_public_key.to_vec())
         .map_err(|err| {
@@ -111,7 +111,7 @@ pub fn perform_master_key_provisioning(
             sgx_status_t::SGX_ERROR_UNEXPECTED
         })?;
 
-    // Send encrypted master key back to client
+    // Send encrypted epoch data to client
     tls.write(&encrypted_epoch_data).map_err(|err| {
         println!(
             "[Enclave] Cannot send encrypted epoch data to client. Reason: {:?}",
@@ -125,7 +125,7 @@ pub fn perform_master_key_provisioning(
 
 #[cfg(not(feature = "attestation_server"))]
 /// Initializes new TLS server to share master key
-pub fn perform_master_key_provisioning(
+pub fn perform_epoch_keys_provisioning(
     _socket_fd: c_int,
     _qe_target_info: Option<&sgx_target_info_t>,
     _quote_size: Option<u32>,

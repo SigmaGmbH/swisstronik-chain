@@ -68,7 +68,7 @@ func CheckNodeStatus() error {
 	return api.CheckNodeStatus()
 }
 
-// IsNodeInitialized checks if node was properly initialized and master key was sealed
+// IsNodeInitialized checks if node was properly initialized and key manager state was sealed
 func IsNodeInitialized() (bool, error) {
 	return api.IsNodeInitialized()
 }
@@ -112,7 +112,7 @@ func InitializeEnclave(shouldReset bool) error {
 }
 
 // StartAttestationServer handles incoming request for starting attestation server
-// to share master key with new nodes who passed Remote Attestation.
+// to share epoch keys with new nodes which passed Remote Attestation.
 func StartAttestationServer(epidAddress, dcapAddress string) error {
 	return api.StartAttestationServer(epidAddress, dcapAddress)
 }

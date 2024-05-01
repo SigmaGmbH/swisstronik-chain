@@ -66,7 +66,7 @@ func EPIDRemoteAttestationCmd() *cobra.Command {
 	return cmd
 }
 
-// DCAPRemoteAttestationCmd returns request-master-key-dcap cobra Command.
+// DCAPRemoteAttestationCmd returns request-epochs-keys-dcap cobra Command.
 func DCAPRemoteAttestationCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "request-epochs-keys-dcap [attestation-server-address]",
