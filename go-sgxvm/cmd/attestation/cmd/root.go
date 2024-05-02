@@ -1,11 +1,9 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/SigmaGmbH/librustgo/internal/api"
-	"github.com/SigmaGmbH/librustgo/types"
 	"github.com/spf13/cobra"
-	"google.golang.org/protobuf/proto"
+	"strconv"
 )
 
 func RootCmd() *cobra.Command {
@@ -50,10 +48,14 @@ func AddNewEpoch() *cobra.Command {
 		Long:  "Creates new epoch inside Intel SGX Enclave",
 		Args:  cobra.ExactArgs(1),
 		Run: func(_ *cobra.Command, args []string) {
-			// TODO: Get all epochs
-			// TODO: Check max starting block
-			// TODO: Add check provided_starting_block > max_existing_starting_block
-			// TODO: ECALL
+			startingBlock, err := strconv.ParseUint(args[0], 10, 64)
+			if err != nil {
+				panic(err)
+			}
+
+			if err := api.AddEpoch(startingBlock); err != nil {
+				panic(err)
+			}
 		},
 	}
 
@@ -67,7 +69,9 @@ func ListEpochs() *cobra.Command {
 		Short: "Lists all stored epochs",
 		Long:  "Lists all stored epochs with their starting blocks",
 		Run: func(_ *cobra.Command, args []string) {
-			// TODO: Implement GetAllEpochs
+			if err := api.ListEpochs(); err != nil {
+				panic(err)
+			}
 		},
 	}
 
@@ -81,30 +85,11 @@ func RemoveLatestEpoch() *cobra.Command {
 		Short: "Removes latest epoch ",
 		Long:  "Allows to remove latest epoch, for example in case, if epoch starting block was set incorrectly",
 		Run: func(_ *cobra.Command, args []string) {
-			// TODO: Get all epochs
-			// TODO: Check len(epochs) > 1
-			// TODO: ECALL remove
+			if err := api.RemoveLatestEpoch(); err != nil {
+				panic(err)
+			}
 		},
 	}
 
 	return cmd
-}
-
-func getAllEpochs() error {
-	// Encode request for epochs
-	req := types.SetupRequest{Req: &types.SetupRequest_ListEpochs{
-		ListEpochs: &types.ListEpochsRequest{},
-	}}
-	reqBytes, err := proto.Marshal(&req)
-	if err != nil {
-		fmt.Println("[Attestation Server] Failed to encode req:", err)
-		return err
-	}
-
-	_, err = api.SendProtobufRequest(reqBytes)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }

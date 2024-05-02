@@ -19,14 +19,8 @@ message AddNewEpochRequest {
 }
 message AddNewEpochResponse {}
 
-message Epoch {
-  uint32 index = 1;
-  uint64 startingBlock = 2;
-}
 message ListEpochsRequest{}
-message ListEpochsResponse {
-  repeated Epoch epoch = 1;
-}
+message ListEpochsResponse {}
 
 message RemoveLatestEpochRequest {}
 message RemoveLatestEpochResponse {}

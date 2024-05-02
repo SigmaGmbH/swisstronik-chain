@@ -106,7 +106,7 @@ func IsNodeInitialized() (bool, error) {
 func InitializeEnclave(shouldReset bool) error {
 	// Create protobuf encoded request
 	req := types.SetupRequest{Req: &types.SetupRequest_InitializeEnclave{
-		InitializeEnclave: &types.InitializeEnclaveRequest{ ShouldReset: shouldReset },
+		InitializeEnclave: &types.InitializeEnclaveRequest{ShouldReset: shouldReset},
 	}}
 	reqBytes, err := proto.Marshal(&req)
 	if err != nil {
@@ -146,9 +146,9 @@ func RequestEpochKeys(hostname string, port int, isDCAP bool) error {
 	// Create protobuf encoded request
 	req := types.SetupRequest{Req: &types.SetupRequest_RemoteAttestationRequest{
 		RemoteAttestationRequest: &types.RemoteAttestationRequest{
-			Fd: int32(file.Fd()),
+			Fd:       int32(file.Fd()),
 			Hostname: hostname,
-			IsDCAP: isDCAP,
+			IsDCAP:   isDCAP,
 		},
 	}}
 	reqBytes, err := proto.Marshal(&req)
@@ -178,7 +178,7 @@ func GetNodePublicKey(blockNumber uint64) (*types.NodePublicKeyResponse, error) 
 	c := buildEmptyConnector()
 
 	// Create protobuf-encoded request
-	req := &types.FFIRequest{ Req: &types.FFIRequest_PublicKeyRequest {
+	req := &types.FFIRequest{Req: &types.FFIRequest_PublicKeyRequest{
 		PublicKeyRequest: &types.NodePublicKeyRequest{
 			BlockNumber: blockNumber,
 		},
@@ -214,7 +214,7 @@ func GetNodePublicKey(blockNumber uint64) (*types.NodePublicKeyResponse, error) 
 func DumpDCAPQuote(filepath string) error {
 	// Create protobuf encoded request
 	req := types.SetupRequest{Req: &types.SetupRequest_DumpQuote{
-		DumpQuote: &types.DumpQuoteRequest{ Filepath: filepath },
+		DumpQuote: &types.DumpQuoteRequest{Filepath: filepath},
 	}}
 	reqBytes, err := proto.Marshal(&req)
 	if err != nil {
@@ -239,7 +239,7 @@ func DumpDCAPQuote(filepath string) error {
 func VerifyDCAPQuote(filepath string) error {
 	// Create protobuf encoded request
 	req := types.SetupRequest{Req: &types.SetupRequest_VerifyQuote{
-		VerifyQuote: &types.VerifyQuoteRequest{ Filepath: filepath },
+		VerifyQuote: &types.VerifyQuoteRequest{Filepath: filepath},
 	}}
 	reqBytes, err := proto.Marshal(&req)
 	if err != nil {
@@ -281,7 +281,7 @@ func Call(
 		Value:      value,
 		AccessList: convertAccessList(accessList),
 		Commit:     commit,
-		Nonce:		nonce,
+		Nonce:      nonce,
 	}
 
 	// Create protobuf encoded request
@@ -338,7 +338,7 @@ func Create(
 		Value:      value,
 		AccessList: convertAccessList(accessList),
 		Commit:     commit,
-		Nonce: 		nonce,
+		Nonce:      nonce,
 	}
 
 	// Create protobuf encoded request
@@ -373,6 +373,78 @@ func Create(
 	}
 
 	return &response, nil
+}
+
+func AddEpoch(startingBlock uint64) error {
+	// Create protobuf encoded request
+	req := types.SetupRequest{Req: &types.SetupRequest_AddEpoch{
+		AddEpoch: &types.AddNewEpochRequest{StartingBlock: startingBlock},
+	}}
+	reqBytes, err := proto.Marshal(&req)
+	if err != nil {
+		log.Fatalln("Failed to encode req:", err)
+		return err
+	}
+
+	// Pass request to Rust
+	d := MakeView(reqBytes)
+	defer runtime.KeepAlive(reqBytes)
+
+	errmsg := NewUnmanagedVector(nil)
+	_, err = C.handle_initialization_request(d, &errmsg)
+	if err != nil {
+		return ErrorWithMessage(err, errmsg)
+	}
+
+	return nil
+}
+
+func RemoveLatestEpoch() error {
+	// Create protobuf encoded request
+	req := types.SetupRequest{Req: &types.SetupRequest_RemoveEpoch{
+		RemoveEpoch: &types.RemoveLatestEpochRequest{},
+	}}
+	reqBytes, err := proto.Marshal(&req)
+	if err != nil {
+		log.Fatalln("Failed to encode req:", err)
+		return err
+	}
+
+	// Pass request to Rust
+	d := MakeView(reqBytes)
+	defer runtime.KeepAlive(reqBytes)
+
+	errmsg := NewUnmanagedVector(nil)
+	_, err = C.handle_initialization_request(d, &errmsg)
+	if err != nil {
+		return ErrorWithMessage(err, errmsg)
+	}
+
+	return nil
+}
+
+func ListEpochs() error {
+	// Create protobuf encoded request
+	req := types.SetupRequest{Req: &types.SetupRequest_ListEpochs{
+		ListEpochs: &types.ListEpochsRequest{},
+	}}
+	reqBytes, err := proto.Marshal(&req)
+	if err != nil {
+		log.Fatalln("Failed to encode req:", err)
+		return err
+	}
+
+	// Pass request to Rust
+	d := MakeView(reqBytes)
+	defer runtime.KeepAlive(reqBytes)
+
+	errmsg := NewUnmanagedVector(nil)
+	_, err = C.handle_initialization_request(d, &errmsg)
+	if err != nil {
+		return ErrorWithMessage(err, errmsg)
+	}
+
+	return nil
 }
 
 // Converts AccessList type from ethtypes to protobuf-compatible type

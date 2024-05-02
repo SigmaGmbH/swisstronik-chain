@@ -226,6 +226,72 @@ pub unsafe extern "C" fn ecall_verify_dcap_quote(
     }
 }
 
+#[no_mangle]
+pub unsafe extern "C" fn ecall_add_epoch(
+    _starting_block: u32,
+) -> sgx_status_t {
+    // Unseal old key manager
+    let key_manager = match key_manager::KeyManager::unseal() {
+        Ok(km) => km,
+        Err(err) => {
+            return err;
+        }
+    };
+
+    // TODO: Call add_epoch method
+
+    // Seal updated key manager
+    match key_manager.seal() {
+        Ok(_) => {
+            println!("Added new epoch");
+            sgx_status_t::SGX_SUCCESS
+        },
+        Err(err) => {
+            println!("Cannot add new epoch. Reason: {:?}", err);
+            err
+        }
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn ecall_remove_latest_epoch() -> sgx_status_t {
+    // Unseal old key manager
+    let key_manager = match key_manager::KeyManager::unseal() {
+        Ok(km) => km,
+        Err(err) => {
+            return err;
+        }
+    };
+
+    // TODO: Call remove_latest_epoch method
+
+    // Seal updated key manager
+    match key_manager.seal() {
+        Ok(_) => {
+            println!("Removed latest epoch");
+            sgx_status_t::SGX_SUCCESS
+        },
+        Err(err) => {
+            println!("Cannot add new epoch. Reason: {:?}", err);
+            err
+        }
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn ecall_list_epochs() -> sgx_status_t {
+    let key_manager = match key_manager::KeyManager::unseal() {
+        Ok(km) => km,
+        Err(err) => {
+            return err;
+        }
+    };
+
+    key_manager.list_epochs();
+
+    sgx_status_t::SGX_SUCCESS
+}
+
 // Fix https://github.com/apache/incubator-teaclave-sgx-sdk/issues/373 for debug mode
 #[cfg(debug_assertions)]
 #[no_mangle]

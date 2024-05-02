@@ -105,6 +105,22 @@ extern "C" {
         quote_ptr: *const u8,
         quote_len: u32,
     ) -> sgx_status_t;
+
+    pub fn ecall_add_epoch(
+        eid: sgx_enclave_id_t,
+        retval: *mut sgx_status_t,
+        starting_block: u64,
+    ) -> sgx_status_t;
+
+    pub fn ecall_remove_latest_epoch(
+        eid: sgx_enclave_id_t,
+        retval: *mut sgx_status_t,
+    ) -> sgx_status_t;
+
+    pub fn ecall_list_epochs(
+        eid: sgx_enclave_id_t,
+        retval: *mut sgx_status_t,
+    ) -> sgx_status_t;
 }
 
 #[no_mangle]
@@ -178,7 +194,24 @@ pub unsafe extern "C" fn handle_initialization_request(
                         let response_bytes = response.write_to_bytes()?;
                         Ok(response_bytes)
                     }
-                    _ => Err(Error::protobuf_decode("Unsupported method"))
+                    node::SetupRequest_oneof_req::addEpoch(req) => {
+                        enclave_api::EnclaveApi::add_epoch(evm_enclave.geteid(), req.startingBlock)?;
+                        let response = node::AddNewEpochResponse::new();
+                        let response_bytes = response.write_to_bytes()?;
+                        Ok(response_bytes)
+                    }
+                    node::SetupRequest_oneof_req::listEpochs(_) => {
+                        enclave_api::EnclaveApi::list_epochs(evm_enclave.geteid(), )?;
+                        let response = node::ListEpochsResponse::new();
+                        let response_bytes = response.write_to_bytes()?;
+                        Ok(response_bytes)
+                    }
+                    node::SetupRequest_oneof_req::removeEpoch(_) => {
+                        enclave_api::EnclaveApi::remove_latest_epoch(evm_enclave.geteid(), )?;
+                        let response = node::RemoveLatestEpochResponse::new();
+                        let response_bytes = response.write_to_bytes()?;
+                        Ok(response_bytes)
+                    }
                 }
             }
             None => Err(Error::protobuf_decode("Request unwrapping failed")),

@@ -31,6 +31,13 @@ pub struct EpochManager {
 }
 
 impl EpochManager {
+    pub fn list_epochs(&self) {
+        println!("[Epoch Manager] Stored epochs");
+        for epoch in self.epochs.iter() {
+            println!("Epoch #{:?} Starting block: {:?}", epoch.epoch_number, epoch.starting_block);
+        }
+    }
+
     pub fn get_epoch(&self, epoch_number: u16) -> Option<&Epoch> {
         for epoch in self.epochs.iter() {
             if epoch.epoch_number == epoch_number {

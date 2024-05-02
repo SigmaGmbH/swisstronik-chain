@@ -64,6 +64,10 @@ pub struct KeyManager {
 }
 
 impl KeyManager {
+    pub fn list_epochs(&self) {
+        self.epoch_manager.list_epochs()
+    }
+
     pub fn get_state_key_by_epoch(&self, epoch: u16) -> Option<StateEncryptionKey> {
         match self.epoch_manager.get_epoch(epoch) {
             Some(epoch) => Some(epoch.get_state_key()),

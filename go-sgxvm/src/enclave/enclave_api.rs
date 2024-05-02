@@ -214,6 +214,75 @@ impl EnclaveApi {
         }
     }
 
+    pub fn add_epoch(eid: sgx_enclave_id_t, starting_block: u64) -> Result<(), Error> {
+        let mut retval = sgx_status_t::SGX_ERROR_UNEXPECTED;
+        let res = unsafe { super::ecall_add_epoch(eid, &mut retval, starting_block) };
+
+        if res != sgx_status_t::SGX_SUCCESS {
+            println!(
+                "[Enclave Wrapper] Cannot call `ecall_add_epoch`. Reason: {:?}",
+                res
+            );
+            return Err(Error::enclave_error(res));
+        }
+
+        if retval != sgx_status_t::SGX_SUCCESS {
+            println!(
+                "[Enclave Wrapper] `ecall_add_epoch` failed. Reason: {:?}",
+                retval
+            );
+            return Err(Error::enclave_error(retval));
+        }
+
+        Ok(())
+    }
+
+    pub fn list_epochs(eid: sgx_enclave_id_t) -> Result<(), Error> {
+        let mut retval = sgx_status_t::SGX_ERROR_UNEXPECTED;
+        let res = unsafe { super::ecall_list_epochs(eid, &mut retval) };
+
+        if res != sgx_status_t::SGX_SUCCESS {
+            println!(
+                "[Enclave Wrapper] Cannot call `ecall_list_epochs`. Reason: {:?}",
+                res
+            );
+            return Err(Error::enclave_error(res));
+        }
+
+        if retval != sgx_status_t::SGX_SUCCESS {
+            println!(
+                "[Enclave Wrapper] `ecall_list_epochs` failed. Reason: {:?}",
+                retval
+            );
+            return Err(Error::enclave_error(retval));
+        }
+
+        Ok(())
+    }
+
+    pub fn remove_latest_epoch(eid: sgx_enclave_id_t) -> Result<(), Error> {
+        let mut retval = sgx_status_t::SGX_ERROR_UNEXPECTED;
+        let res = unsafe { super::ecall_remove_latest_epoch(eid, &mut retval) };
+
+        if res != sgx_status_t::SGX_SUCCESS {
+            println!(
+                "[Enclave Wrapper] Cannot call `ecall_remove_latest_epoch`. Reason: {:?}",
+                res
+            );
+            return Err(Error::enclave_error(res));
+        }
+
+        if retval != sgx_status_t::SGX_SUCCESS {
+            println!(
+                "[Enclave Wrapper] `ecall_remove_latest_epoch` failed. Reason: {:?}",
+                retval
+            );
+            return Err(Error::enclave_error(retval));
+        }
+
+        Ok(())
+    }
+
     pub fn handle_evm_request(
         eid: sgx_enclave_id_t,
         request_bytes: &[u8],

@@ -99,3 +99,15 @@ func Create(
 func StartAttestationServer(epidAddress, dcapAddress string) error {
 	return nil
 }
+
+func AddEpoch(startingBlock uint64) error {
+	return nil
+}
+
+func RemoveLatestEpoch() error {
+	return nil
+}
+
+func ListEpochs() error {
+	return nil
+}
