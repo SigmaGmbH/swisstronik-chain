@@ -182,18 +182,6 @@ var _ = Describe("Monthly Vesting Account", Ordered, func() {
 		Expect(err).To(BeNil())
 		Expect(mva).ToNot(BeNil())
 
-		//baseAcc := authtypes.NewBaseAccountWithAddress(va)
-		//
-		//// Cliff days = 30, Months = 12
-		//mva = types.NewMonthlyVestingAccount(baseAcc, initialVesting, now.Unix(), cliffDays, months)
-		//acc := s.app.AccountKeeper.NewAccount(s.ctx, mva)
-		//s.app.AccountKeeper.SetAccount(s.ctx, acc)
-		//
-		//err = testutil.FundAccount(s.ctx, s.app.BankKeeper, mva.GetAddress(), initialVesting)
-		//Expect(err).To(BeNil())
-		//err = s.Commit()
-		//Expect(err).To(BeNil())
-
 		// Fund again as spendable coins for gas consuming
 		extraCoins = sdk.NewCoins(sdk.NewCoin(utils.BaseDenom, math.NewInt(1e6)))
 		err = testutil.FundAccount(s.ctx, s.app.BankKeeper, mva.GetAddress(), extraCoins)
