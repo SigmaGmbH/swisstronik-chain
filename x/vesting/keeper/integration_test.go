@@ -285,12 +285,6 @@ var _ = Describe("Monthly Vesting Account", Ordered, func() {
 			err = testutil.FundAccount(s.ctx, s.app.BankKeeper, mva.GetAddress(), extraCoins)
 			Expect(err).To(BeNil())
 		})
-		It("can perform tx with spendable tokens", func() {
-			// todo
-		})
-		It("cannot perform tx with unvested tokens", func() {
-			// todo
-		})
 	})
 
 	Context("after first vesting period", func() {
