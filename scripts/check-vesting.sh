@@ -5,6 +5,12 @@ KEYRING=test
 
 set -e
 
+function wait_for_tx () {
+    echo ""
+    echo "Waiting for sync tx"
+    sleep 3 # wait 3 seconds
+}
+
 # Step1
 # Add funder account into keyring
 echo "cable flee torch mimic roof humble phone harsh wrist blade prevent cook weasel head south task toe artwork thunder gap siren disease scrap easily" | swisstronikd keys add funder --keyring-backend $KEYRING --home $HOMEDIR --recover
@@ -21,9 +27,7 @@ echo "vesting account(va)=$VA"
 echo "funding tokens to funder 1000swtr for gas consuming & vesting..."
 swisstronikd tx bank send bob $FUNDER 1000swtr -y --gas-prices 1000000000aswtr
 
-echo ""
-echo "waiting for sync tx..."
-sleep 3 # wait for sync
+wait_for_tx
 
 echo "initial funder balance"
 swisstronikd query bank balances $FUNDER --output json | jq '.balances[0].amount'
@@ -45,9 +49,7 @@ swisstronikd tx vesting create-monthly-vesting-account $VA $CLIFF $MONTHS $OV --
 # Send some funds for delegation tx cost
 swisstronikd tx bank send bob $VA 1swtr -y --gas-prices 1000000000aswtr
 
-echo ""
-echo "waiting for sync tx..."
-sleep 3 # wait for sync
+wait_for_tx
 
 echo ""
 # Check if vesting account was created
@@ -84,9 +86,7 @@ echo "Trying to delegate locked coins"
 VALIDATOR=$(swisstronikd q staking validators --output json | jq -r '.validators[0].operator_address')
 echo $VALIDATOR
 swisstronikd tx staking delegate $VALIDATOR 3swtr --gas-prices 1000000000aswtr --from vesting_account -y --gas 250000
-echo ""
-echo "waiting for sync tx..."
-sleep 3 # wait for sync
+wait_for_tx
 echo "Check delegations"
 swisstronikd q staking delegations $VA
 
