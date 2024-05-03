@@ -31,6 +31,33 @@ pub struct EpochManager {
 }
 
 impl EpochManager {
+
+    pub fn create_new_epoch(&mut self, starting_block: u64) -> SgxResult<()> {
+        // Get number of latest epoch
+        let latest_epoch_number = match self.epochs.iter().max_by_key(|epoch| epoch.epoch_number) {
+            Some(epoch) => epoch.epoch_number,
+            None => {
+                println!("[EpochManager] There are no epochs");
+                return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+            }
+        };
+
+        let epoch_key = utils::random_bytes32().map_err(|err| {
+            println!("[EpochManager] Cannot create random epoch key. Reason: {:?}", err);
+            err
+        })?;
+
+        let epoch = Epoch {
+            epoch_key, 
+            starting_block,
+            epoch_number: latest_epoch_number + 1,
+        };
+
+        self.epochs.push(epoch);
+
+        Ok(())
+    }
+
     pub fn list_epochs(&self) {
         println!("[Epoch Manager] Stored epochs");
         for epoch in self.epochs.iter() {
@@ -91,7 +118,7 @@ impl EpochManager {
 
     pub fn random_with_single_epoch() -> SgxResult<Self> {
         let epoch_key = utils::random_bytes32().map_err(|err| {
-            println!("[KeyManager] Cannot create random epoch key. Reason: {:?}", err);
+            println!("[EpochManager] Cannot create random epoch key. Reason: {:?}", err);
             err
         })?;
         let epoch_number = 0u16;

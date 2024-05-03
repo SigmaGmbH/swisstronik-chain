@@ -217,6 +217,11 @@ impl KeyManager {
         })
     }
 
+    /// Creates new epoch with provided starting block
+    pub fn create_new_epoch(&self, starting_block: u64) -> SgxResult<()> {
+        self.epoch_manager.create_new_epoch(starting_block)
+    }
+
     #[cfg(feature = "attestation_server")]
     /// Encrypts epoch data using shared key
     pub fn encrypt_epoch_data(
