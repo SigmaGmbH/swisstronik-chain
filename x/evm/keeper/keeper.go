@@ -326,7 +326,7 @@ func (k *Keeper) GetBalance(ctx sdk.Context, addr common.Address) *big.Int {
 	if evmDenom == "" {
 		return big.NewInt(-1)
 	}
-	coin := k.bankKeeper.GetBalance(ctx, cosmosAddr, evmDenom)
+	coin := k.bankKeeper.SpendableCoin(ctx, cosmosAddr, evmDenom)
 	return coin.Amount.BigInt()
 }
 
