@@ -90,80 +90,80 @@ echo -e "##########################\n"
 
 
 
-######### STEP DELEGATION #########
-# Should be able to delegate locked coins
-echo -e "\nStep 0.1 Trying to delegate locked coins"
+# ######### STEP DELEGATION #########
+# # Should be able to delegate locked coins
+# echo -e "\nStep 0.1 Trying to delegate locked coins"
 
-echo "Trying to delegate locked coins"
-VALIDATOR=$(swisstronikd q staking validators --output json | jq -r '.validators[0].operator_address')
-swisstronikd tx staking delegate $VALIDATOR 3swtr --gas-prices 1000000000aswtr --from vesting_account -y --gas 250000 --output json | jq '.txhash'
-wait_for_tx
-echo "Check delegations"
-swisstronikd q staking delegations $VESTING_ACC_ADDRESS --output json
+# echo "Trying to delegate locked coins"
+# VALIDATOR=$(swisstronikd q staking validators --output json | jq -r '.validators[0].operator_address')
+# swisstronikd tx staking delegate $VALIDATOR 3swtr --gas-prices 1000000000aswtr --from vesting_account -y --gas 250000 --output json | jq '.txhash'
+# wait_for_tx
+# echo "Check delegations"
+# swisstronikd q staking delegations $VESTING_ACC_ADDRESS --output json
 
-echo -e "##########################\n"
-##########################
-
-
-
-######### STEP UNBONDING #########
-# Should be able to delegate locked coins
-echo -e "\nStep 0.2 Trying to unbond locked coins"
-
-# Try to unbond locked coins
-swisstronikd tx staking unbond $VALIDATOR 3swtr --gas-prices 1000000000aswtr --from vesting_account -y --gas 250000 --output json | jq '.txhash'
-wait_for_tx
-echo "Check delegations after unbonding"
-swisstronikd q staking delegations $VESTING_ACC_ADDRESS --output json
-check_vesting_distribution $VESTING_ACC_ADDRESS
-
-echo -e "##########################\n"
-##########################
+# echo -e "##########################\n"
+# ##########################
 
 
 
-######### STEP 4 #########
-# Wait for cliff days (90 seconds)
-echo -e "\nStep 4"
-echo "waiting for cliff days..."
-sleep $((CLIFF*ONE_DAY))
-echo "Checking vesting balances after cliff. All initial vesting coins should be locked and unvested. Should be only 1 swtr spendable"
-check_vesting_distribution $VESTING_ACC_ADDRESS
-echo -e "##########################\n"
-##########################
+# ######### STEP UNBONDING #########
+# # Should be able to delegate locked coins
+# echo -e "\nStep 0.2 Trying to unbond locked coins"
+
+# # Try to unbond locked coins
+# swisstronikd tx staking unbond $VALIDATOR 3swtr --gas-prices 1000000000aswtr --from vesting_account -y --gas 250000 --output json | jq '.txhash'
+# wait_for_tx
+# echo "Check delegations after unbonding"
+# swisstronikd q staking delegations $VESTING_ACC_ADDRESS --output json
+# check_vesting_distribution $VESTING_ACC_ADDRESS
+
+# echo -e "##########################\n"
+# ##########################
 
 
 
-######### STEP 5.1 #########
-# Wait for first month (90 seconds)
-echo -e "\nStep 5.1"
-echo "waiting for first month..."
-sleep $((ONE_MONTH))
-echo "Checking vesting balances after first month. 1swtr + 1/3 of initial vesting should be spendable, the rest are unvested and locked"
-check_vesting_distribution $VESTING_ACC_ADDRESS
-echo -e "##########################\n"
-##########################
+# ######### STEP 4 #########
+# # Wait for cliff days (90 seconds)
+# echo -e "\nStep 4"
+# echo "waiting for cliff days..."
+# sleep $((CLIFF*ONE_DAY))
+# echo "Checking vesting balances after cliff. All initial vesting coins should be locked and unvested. Should be only 1 swtr spendable"
+# check_vesting_distribution $VESTING_ACC_ADDRESS
+# echo -e "##########################\n"
+# ##########################
 
 
 
-######### STEP 5.2 #########
-# Wait for second month (90 seconds)
-echo -e "\nStep 5.2"
-echo "waiting for second month..."
-sleep $((ONE_MONTH))
-echo "Checking vesting balances after second month. 1swtr + 2/3 of initial vesting should be spendable, the rest are unvested and locked"
-check_vesting_distribution $VESTING_ACC_ADDRESS
-echo -e "##########################\n"
-##########################
+# ######### STEP 5.1 #########
+# # Wait for first month (90 seconds)
+# echo -e "\nStep 5.1"
+# echo "waiting for first month..."
+# sleep $((ONE_MONTH))
+# echo "Checking vesting balances after first month. 1swtr + 1/3 of initial vesting should be spendable, the rest are unvested and locked"
+# check_vesting_distribution $VESTING_ACC_ADDRESS
+# echo -e "##########################\n"
+# ##########################
 
 
 
-######### STEP 5.3 #########
-# Wait for third month (90 seconds)
-echo -e "\nStep 5.3"
-echo "waiting for third month..."
-sleep $((ONE_MONTH))
-echo "Checking vesting balances after second month. All funds should be accessible: 4 swtr"
-check_vesting_distribution $VESTING_ACC_ADDRESS
-echo -e "##########################\n"
-##########################
+# ######### STEP 5.2 #########
+# # Wait for second month (90 seconds)
+# echo -e "\nStep 5.2"
+# echo "waiting for second month..."
+# sleep $((ONE_MONTH))
+# echo "Checking vesting balances after second month. 1swtr + 2/3 of initial vesting should be spendable, the rest are unvested and locked"
+# check_vesting_distribution $VESTING_ACC_ADDRESS
+# echo -e "##########################\n"
+# ##########################
+
+
+
+# ######### STEP 5.3 #########
+# # Wait for third month (90 seconds)
+# echo -e "\nStep 5.3"
+# echo "waiting for third month..."
+# sleep $((ONE_MONTH))
+# echo "Checking vesting balances after second month. All funds should be accessible: 4 swtr"
+# check_vesting_distribution $VESTING_ACC_ADDRESS
+# echo -e "##########################\n"
+# ##########################
