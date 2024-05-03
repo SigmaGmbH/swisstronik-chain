@@ -6,9 +6,21 @@ KEYRING=test
 set -e
 
 function wait_for_tx () {
-    echo ""
-    echo "Waiting for sync tx"
+    echo -e "\nWaiting for sync tx...\n"
     sleep 3 # wait 3 seconds
+}
+
+function check_vesting_distribution () {
+    # Check vesting balances
+    echo "checking vesting balances..."
+    swisstronikd query vesting balances $1 --output json | jq '{locked:.locked[0].amount, unvested:.unvested[0].amount, vested:.vested[0].amount}'
+
+    # Check spendable coins
+    echo -e "\nchecking spendable coins..."
+    swisstronikd query bank spendable-balances $1 --output json | jq '.balances[0].amount'
+
+    echo "regular bank balances output"
+    swisstronikd query bank balances $1 --output json
 }
 
 ######### STEP 1 #########
@@ -20,7 +32,7 @@ FUNDER_ADDRESS=$(swisstronikd keys show funder -a --keyring-backend $KEYRING --h
 VESTING_ACC_ADDRESS=$(swisstronikd keys show vesting_account -a --keyring-backend $KEYRING --home $HOMEDIR)
 echo "Funder address: " $FUNDER_ADDRESS
 echo "Vesting account address: " $VESTING_ACC_ADDRESS
-echo "##########################"
+echo -e "##########################\n"
 ##########################
 
 
@@ -31,13 +43,14 @@ echo -e "\nFunding tokens to funder 4swtr for gas consuming & vesting..."
 swisstronikd tx bank send bob $FUNDER_ADDRESS 4swtr -y --gas-prices 1000000000aswtr --output json | jq '.txhash'
 wait_for_tx
 echo "initial funder balance:" $(swisstronikd query bank balances $FUNDER_ADDRESS --output json | jq -r '.balances[0].amount')
-echo "##########################"
+echo -e "##########################\n"
 ##########################
 
 
 ######### STEP 3 #########
 # Create monthly vesting account of cliff days + 3 months
 # As an example for demo, `swisstronikd` was built with 1 day as 3 seconds, 1 month as 90 seconds
+echo -e "\nStep 3"
 ONE_DAY=3
 ONE_MONTH=$((ONE_DAY*30))
 CLIFF=30 # 90 seconds
@@ -53,8 +66,8 @@ wait_for_tx
 echo "querying account $VESTING_ACC_ADDRESS"
 swisstronikd query account $VESTING_ACC_ADDRESS
 # Check balances of accounts
-# It should immediately move `OV` from `FUNDER` to `VA`.
-# Balance of `FUNDER` should be reduced by `OV`.
+# It should immediately move `ORIGINAL_VESTING_AMOUNT` from `FUNDER_ADDRESS` to `VESTING_ACC_ADDRESS`.
+# Balance of `FUNDER_ADDRESS` should be reduced by `ORIGINAL_VESTING_AMOUNT`.
 echo -e "\nchecking balances of accounts..."
 echo "balances of funder should be reduced by $ORIGINAL_VESTING_AMOUNT and gas fees"
 swisstronikd query bank balances $FUNDER_ADDRESS --output json | jq -r '.balances[0].amount'
@@ -72,6 +85,48 @@ swisstronikd query vesting balances $VESTING_ACC_ADDRESS --output json | jq '{lo
 echo -e "\nChecking spendable coins of vesting account before cliff days..."
 echo "Should be 1 swtr as spendable balance"
 swisstronikd query bank spendable-balances $VESTING_ACC_ADDRESS --output json | jq '.balances[0].amount'
+echo -e "##########################\n"
+##########################
+
+######### STEP 4 #########
+# Wait for cliff days (90 seconds)
+echo -e "\nStep 4"
+echo "waiting for cliff days..."
+sleep $((CLIFF*ONE_DAY))
+echo "Checking vesting balances after cliff. All initial vesting coins should be locked and unvested. Should be only 1 swtr spendable"
+check_vesting_distribution $VESTING_ACC_ADDRESS
+echo -e "##########################\n"
+##########################
+
+######### STEP 5.1 #########
+# Wait for first month (90 seconds)
+echo -e "\nStep 5.1"
+echo "waiting for first month..."
+sleep $((ONE_MONTH))
+echo "Checking vesting balances after first month. 1swtr + 1/3 of initial vesting should be spendable, the rest are unvested and locked"
+check_vesting_distribution $VESTING_ACC_ADDRESS
+echo -e "##########################\n"
+##########################
+
+######### STEP 5.2 #########
+# Wait for second month (90 seconds)
+echo -e "\nStep 5.2"
+echo "waiting for second month..."
+sleep $((ONE_MONTH))
+echo "Checking vesting balances after second month. 1swtr + 2/3 of initial vesting should be spendable, the rest are unvested and locked"
+check_vesting_distribution $VESTING_ACC_ADDRESS
+echo -e "##########################\n"
+##########################
+
+######### STEP 5.3 #########
+# Wait for third month (90 seconds)
+echo -e "\nStep 5.3"
+echo "waiting for third month..."
+sleep $((ONE_MONTH))
+echo "Checking vesting balances after second month. All funds should be accessible: 4 swtr"
+check_vesting_distribution $VESTING_ACC_ADDRESS
+echo -e "##########################\n"
+##########################
 
 # # Should be able to delegate locked coins
 # echo ""
@@ -85,93 +140,3 @@ swisstronikd query bank spendable-balances $VESTING_ACC_ADDRESS --output json | 
 
 # # Try to unbond locked coins
 # swisstronikd tx staking unbond $VALIDATOR 3swtr --gas-prices 1000000000aswtr --from vesting_account -y --gas 250000
-
-# echo ""
-# # Step4
-# # Wait for cliff days (30 seconds)
-# echo "waiting for cliff days..."
-# sleep $((CLIFF*ONE_DAY))
-
-# echo ""
-# # Check vesting balances
-# echo "checking vesting balances of va after cliff days..."
-# echo "all the initial vesting should be locked and unvested, nothing vested"
-# swisstronikd query vesting balances $VA --output json | jq '{locked:.locked[0].amount, unvested:.unvested[0].amount, vested:.vested[0].amount}'
-
-# echo ""
-# # Check spendable coinds of `VA`
-# echo "checking spendable coins of va after cliff days..."
-# echo "should be no spendable coins after cliff days"
-# swisstronikd query bank spendable-balances $VA --output json | jq '.balances[0].amount'
-
-# echo "regular q bank balances output"
-# swisstronikd query bank balances $VA --output json
-
-# echo ""
-# # Step5.1
-# # Wait for first month
-# echo "waiting for first vesting period..."
-# sleep $((ONE_MONTH))
-
-# echo ""
-# # Check vesting balances
-# echo "checking vesting balances of va after first month..."
-# echo "1/3 of initial vesting should be vested, the rest are unvested and locked"
-# swisstronikd query vesting balances $VA --output json | jq '{locked:.locked[0].amount, unvested:.unvested[0].amount, vested:.vested[0].amount}'
-
-# echo ""
-# # Check spendable coinds of `VA`
-# echo "checking spendable coins of va after first vesting period..."
-# echo "vested coins should be spendable"
-# swisstronikd query bank spendable-balances $VA --output json | jq '.balances[0].amount'
-
-# echo ""
-# # Step5.2
-# # Wait for second month
-# echo "waiting for second vesting period..."
-# sleep $((ONE_MONTH))
-
-# echo ""
-# # Check vesting balances
-# echo "checking vesting balances of va after second month..."
-# echo "2/3 of initial vesting should be vested, the rest are unvested and locked"
-# swisstronikd query vesting balances $VA --output json | jq '{locked:.locked[0].amount, unvested:.unvested[0].amount, vested:.vested[0].amount}'
-
-# echo ""
-# # Check spendable coinds of `VA`
-# echo "checking spendable coins of va after second vesting period..."
-# echo "vested coins should be spendable"
-# swisstronikd query bank spendable-balances $VA --output json | jq '.balances[0].amount'
-
-
-# echo ""
-# # Step5.3
-# # Wait for third month
-# echo "waiting for third vesting period..."
-# sleep $((ONE_MONTH))
-
-# echo ""
-# # Check vesting balances
-# echo "checking vesting balances of va after third month..."
-# echo "full initial vesting should be vested"
-# swisstronikd query vesting balances $VA --output json | jq '{locked:.locked[0].amount, unvested:.unvested[0].amount, vested:.vested[0].amount}'
-
-# echo ""
-# # Check spendable coinds of `VA`
-# echo "checking spendable coins of va after first vesting period..."
-# echo "vested coins should be spendable"
-# swisstronikd query bank spendable-balances $VA --output json | jq '.balances[0].amount'
-
-
-# echo ""
-# # Check vesting balances
-# echo "checking vesting balances of va at the end of vesting period..."
-# echo "all the initial vesting should be vested, nothing is unvested and locked"
-# swisstronikd query vesting balances $VA --output json | jq '{locked:.locked[0].amount, unvested:.unvested[0].amount, vested:.vested[0].amount}'
-
-# echo ""
-# # Check spendable coinds of `VA`
-# echo "checking spendable coins of va at the end of vesting period..."
-# echo "all the inital vesting coins should be spendable"
-# swisstronikd query bank spendable-balances $VA --output json | jq '.balances[0].amount'
-
