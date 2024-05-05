@@ -43,6 +43,7 @@ type QueryAddVerificationDetails = types.QueryAddVerificationDetails
 type QueryAddVerificationDetailsResponse = types.QueryAddVerificationDetailsResponse
 type QueryHasVerification = types.QueryHasVerification
 type QueryHasVerificationResponse = types.QueryHasVerificationResponse
+type QueryGetVerificationData = types.QueryGetVerificationData
 
 // Storage requests
 type CosmosRequest_GetAccount = types.CosmosRequest_GetAccount
@@ -56,6 +57,7 @@ type CosmosRequest_Remove = types.CosmosRequest_Remove
 type CosmosRequest_RemoveStorageCell = types.CosmosRequest_RemoveStorageCell
 type CosmosRequest_AddVerificationDetails = types.CosmosRequest_AddVerificationDetails
 type CosmosRequest_HasVerification = types.CosmosRequest_HasVerification
+type CosmosRequest_GetVerificationData = types.CosmosRequest_GetVerificationData
 
 // Backend requests
 type CosmosRequest_BlockHash = types.CosmosRequest_BlockHash

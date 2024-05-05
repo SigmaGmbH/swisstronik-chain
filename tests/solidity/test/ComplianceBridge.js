@@ -33,7 +33,7 @@ describe('ComplianceBridge', () => {
         expect(result.isVerified).to.be.true
     })
 
-    it('Should be albe to check for specific issuer of verification', async () => {
+    it('Should be able to check for specific issuer of verification', async () => {
         const [signer] = await ethers.getSigners()
 
         const allowedIssuers = [contract.address]
@@ -44,5 +44,17 @@ describe('ComplianceBridge', () => {
         );
         const result = contract.interface.decodeFunctionResult("isUserVerifiedBy", isVerifiedResponse)
         expect(result.isVerified).to.be.true
+    })
+
+    it('Should be able to get verification data', async () => {
+        const [signer] = await ethers.getSigners()
+
+        const verificationData = await sendShieldedQuery(
+            signer.provider,
+            contract.address,
+            contract.interface.encodeFunctionData("getVerificationData", [signer.address, contract.address])
+        );
+        const result = contract.interface.decodeFunctionResult("getVerificationData", verificationData)
+        expect(result.issuerAddress).to.be.equal(contract.address);
     })
 })

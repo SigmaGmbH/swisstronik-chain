@@ -2,12 +2,13 @@ package keeper
 
 import (
 	"errors"
+	"math/big"
+
 	"github.com/SigmaGmbH/librustgo"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/golang/protobuf/proto"
-	"math/big"
 
 	compliancetypes "swisstronik/x/compliance/types"
 )
@@ -65,6 +66,8 @@ func (q Connector) Query(req []byte) ([]byte, error) {
 		return q.AddVerificationDetails(request)
 	case *librustgo.CosmosRequest_HasVerification:
 		return q.HasVerification(request)
+	case *librustgo.CosmosRequest_GetVerificationData:
+		return q.GetVerificationData(request)
 	}
 
 	return nil, errors.New("wrong query received")
@@ -239,5 +242,19 @@ func (q Connector) HasVerification(req *librustgo.CosmosRequest_HasVerification)
 
 	return proto.Marshal(&librustgo.QueryHasVerificationResponse{
 		HasVerification: hasVerification,
+	})
+}
+
+func (q Connector) GetVerificationData(req *librustgo.CosmosRequest_GetVerificationData) ([]byte, error) {
+	userAddress := sdk.AccAddress(req.GetVerificationData.UserAddress)
+	issuerAddress := sdk.AccAddress(req.GetVerificationData.IssuerAddress)
+
+	data, err := q.EVMKeeper.ComplianceKeeper.GetVerificationDetailsByIssuer(q.Context, userAddress, issuerAddress)
+	if err != nil {
+		return nil, err
+	}
+
+	return proto.Marshal(&librustgo.QueryGetVerificationDataResponse{
+		Data: data,
 	})
 }

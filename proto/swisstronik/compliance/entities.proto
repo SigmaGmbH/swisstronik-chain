@@ -79,7 +79,9 @@ message VerificationDetails {
     // Original proof data (ZK-proof)
     bytes original_data = 5;
     // ZK-proof original schema
-    string proof_schema = 6;
+    string schema = 6;
     // Verification id for checking(KYC/KYB/AML etc) from issuer side
     string issuer_verification_id = 7;
+    // Version
+    uint32 version = 8;
 }

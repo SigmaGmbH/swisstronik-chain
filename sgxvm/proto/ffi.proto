@@ -156,6 +156,32 @@ message QueryHasVerificationResponse {
   bool hasVerification = 1;
 }
 
+message QueryGetVerificationData {
+  bytes userAddress = 1;
+  bytes issuerAddress = 2;
+}
+message VerificationDetails {
+  // Verification issuer address
+  bytes issuerAddress = 1;
+  // From which chain proof was transferred
+  bytes originChain = 2;
+  // Original issuance timestamp
+  uint32 issuanceTimestamp = 3;
+  // Original expiration timestamp
+  uint32 expirationTimestamp = 4;
+  // Original proof data (ZK-proof)
+  bytes originalData = 5;
+  // ZK-proof original schema
+  bytes schema = 6;
+  // Verification id for checking(KYC/KYB/AML etc) from issuer side
+  bytes issuerVerificationId = 7;
+  // Version
+  uint32 version = 8;
+}
+message QueryGetVerificationDataResponse {
+  repeated VerificationDetails data = 1;
+}
+
 message CosmosRequest {
   oneof req {
     QueryGetAccount getAccount = 1;
@@ -171,6 +197,7 @@ message CosmosRequest {
     QueryBlockHash blockHash = 11;
     QueryAddVerificationDetails addVerificationDetails = 12;
     QueryHasVerification hasVerification = 13;
+    QueryGetVerificationData getVerificationData = 14;
   }
 }
 

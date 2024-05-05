@@ -140,3 +140,17 @@ pub fn encode_has_verification_request(
     cosmos_request.set_hasVerification(request);
     cosmos_request.write_to_bytes().unwrap()
 }
+
+pub fn encode_get_verification_data(
+    user_address: Address,
+    issuer_address: Address,
+) -> Vec<u8> {
+    let mut cosmos_request = ffi::CosmosRequest::new();
+    let mut request = ffi::QueryGetVerificationData::new();
+
+    request.set_userAddress(user_address.as_bytes().to_vec());
+    request.set_issuerAddress(issuer_address.as_bytes().to_vec());
+
+    cosmos_request.set_getVerificationData(request);
+    cosmos_request.write_to_bytes().unwrap()
+}
