@@ -64,6 +64,7 @@ pub struct KeyManager {
 }
 
 impl KeyManager {
+    #[cfg(feature = "attestation_server")]
     pub fn list_epochs(&self) {
         self.epoch_manager.list_epochs()
     }
@@ -115,28 +116,7 @@ impl KeyManager {
     /// For now, enclaves with same MRSIGNER will be able to recover that file, but
     /// we'll use MRENCLAVE since Upgradeability Protocol will be implemented
     pub fn seal(&self) -> SgxResult<()> {
-        // Prepare file to write serialized key manager
-        let seed_home_path = match SEED_HOME.to_str() {
-            Some(path) => path,
-            None => {
-                println!("[KeyManager] Cannot get SEED_HOME env");
-                return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
-            }
-        };
-
-        let sealed_file_path = format!("{}/{}", seed_home_path, SEED_FILENAME);
-        println!(
-            "[KeyManager] Creating file for key manager. Location: {:?}",
-            sealed_file_path
-        );
-        let mut sealed_file = SgxFile::create(sealed_file_path).map_err(|err| {
-            println!(
-                "[KeyManager] Cannot create file for key manager. Reason: {:?}",
-                err
-            );
-            sgx_status_t::SGX_ERROR_UNEXPECTED
-        })?;
-        println!("[KeyManager] File created");
+        let mut sealed_file = KeyManager::create_sealed_file()?;
 
         let encoded = self.epoch_manager.serialize()?;
         if let Err(err) = sealed_file.write(encoded.as_bytes()) {
@@ -217,9 +197,41 @@ impl KeyManager {
         })
     }
 
+    #[cfg(feature = "attestation_server")]
     /// Creates new epoch with provided starting block
     pub fn create_new_epoch(&self, starting_block: u64) -> SgxResult<()> {
-        self.epoch_manager.create_new_epoch(starting_block)
+        let updated_epoch_manager = self.epoch_manager.add_new_epoch(starting_block)?;
+        let serialized_epoch_manager = updated_epoch_manager.serialize()?;
+
+        let mut sealed_file = KeyManager::create_sealed_file()?;
+
+        if let Err(err) = sealed_file.write(serialized_epoch_manager.as_bytes()) {
+            println!(
+                "[KeyManager] Cannot write serialized epoch manager. Reason: {:?}",
+                err
+            );
+            return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+        }
+
+        Ok(())
+    }
+
+    #[cfg(feature = "attestation_server")]
+    pub fn remove_latest_epoch(&self) -> SgxResult<()> {
+        let updated_epoch_manager = self.epoch_manager.remove_latest_epoch()?;
+        let serialized_epoch_manager = updated_epoch_manager.serialize()?;
+
+        let mut sealed_file = KeyManager::create_sealed_file()?;
+
+        if let Err(err) = sealed_file.write(serialized_epoch_manager.as_bytes()) {
+            println!(
+                "[KeyManager] Cannot write serialized epoch manager. Reason: {:?}",
+                err
+            );
+            return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+        }
+
+        Ok(())
     }
 
     #[cfg(feature = "attestation_server")]
@@ -254,6 +266,32 @@ impl KeyManager {
                 Err(sgx_status_t::SGX_ERROR_UNEXPECTED)
             }
         }
+    }
+
+    fn create_sealed_file() -> SgxResult<SgxFile> {
+        let seed_home_path = match SEED_HOME.to_str() {
+            Some(path) => path,
+            None => {
+                println!("[KeyManager] Cannot get SEED_HOME env");
+                return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+            }
+        };
+
+        let sealed_file_path = format!("{}/{}", seed_home_path, SEED_FILENAME);
+        println!(
+            "[KeyManager] Creating file for key manager. Location: {:?}",
+            sealed_file_path
+        );
+        let mut sealed_file = SgxFile::create(sealed_file_path).map_err(|err| {
+            println!(
+                "[KeyManager] Cannot create file for key manager. Reason: {:?}",
+                err
+            );
+            sgx_status_t::SGX_ERROR_UNEXPECTED
+        })?;
+        println!("[KeyManager] File created");
+
+        Ok(sealed_file)
     }
 }
 

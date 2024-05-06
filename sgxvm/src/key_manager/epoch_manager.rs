@@ -6,7 +6,7 @@ use std::string::String;
 use crate::key_manager::{utils, keys, consts};
 use crate::encryption;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Epoch {
     epoch_number: u16,
     epoch_key: [u8; 32],
@@ -25,16 +25,28 @@ impl Epoch {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct EpochManager {
     epochs: Vec<Epoch>
 }
 
 impl EpochManager {
 
-    pub fn create_new_epoch(&mut self, starting_block: u64) -> SgxResult<()> {
+    /// Generates new epoch with random epoch key, which starts from provided
+    /// `starting_block` param. Returns new instance of EpochManager with added epoch.
+    pub fn add_new_epoch(&self, starting_block: u64) -> SgxResult<EpochManager> {
+        let mut updated_epoch_manager = self.clone();
+
+        // Check starting block value. It should be greater than existing epochs starting blocks
+        for epoch in &updated_epoch_manager.epochs {
+            if epoch.starting_block >= starting_block {
+                println!("[EpochManager] There is already existing epoch with greater starting block. Existing: {:?}, Provided: {:?}", epoch.starting_block, starting_block);
+                return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+            }
+        }
+
         // Get number of latest epoch
-        let latest_epoch_number = match self.epochs.iter().max_by_key(|epoch| epoch.epoch_number) {
+        let latest_epoch_number = match updated_epoch_manager.epochs.iter().max_by_key(|epoch| epoch.epoch_number) {
             Some(epoch) => epoch.epoch_number,
             None => {
                 println!("[EpochManager] There are no epochs");
@@ -53,9 +65,46 @@ impl EpochManager {
             epoch_number: latest_epoch_number + 1,
         };
 
-        self.epochs.push(epoch);
+        updated_epoch_manager.epochs.push(epoch);
 
-        Ok(())
+        Ok(updated_epoch_manager)
+    }
+
+    /// Removes latest epoch. 
+    /// Returns error if there only one epoch or epoch manager was not properly initialized.
+    /// Returns updated epoch manager without latest epoch.
+    pub fn remove_latest_epoch(&self) -> SgxResult<EpochManager> {
+        if self.epochs.len() <= 1 {
+            println!("[EpochManager] Cannot remove last epoch");
+            return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+        }
+
+        let mut updated_epochs = self.epochs.clone();
+
+        // Get number of latest epoch
+        let latest_epoch_number = match updated_epochs.iter().max_by_key(|epoch| epoch.epoch_number) {
+            Some(epoch) => epoch.epoch_number,
+            None => {
+                println!("[EpochManager] There are no epochs");
+                return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+            }
+        };
+
+        // Remove latest epoch
+        let latest_epoch_position = match updated_epochs.iter().position(|epoch| epoch.epoch_number == latest_epoch_number) {
+            Some(pos) => pos,
+            None => {
+                println!("[EpochManager] Cannot find latest epoch. Looks like a bug");
+                return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+            }
+        };
+        updated_epochs.remove(latest_epoch_position);
+
+        let updated_epoch_manager = EpochManager {
+            epochs: updated_epochs
+        };
+
+        Ok(updated_epoch_manager)
     }
 
     pub fn list_epochs(&self) {
