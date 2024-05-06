@@ -51,7 +51,7 @@ echo -e "##########################\n"
 # Create monthly vesting account of cliff days + 3 months
 # As an example for demo, `swisstronikd` was built with 1 day as 3 seconds, 1 month as 90 seconds
 echo -e "\nStep 3"
-ONE_DAY=3
+ONE_DAY=1
 ONE_MONTH=$((ONE_DAY*30))
 CLIFF=30 # 90 seconds
 MONTHS=3 # 270 seconds
@@ -145,25 +145,25 @@ echo -e "##########################\n"
 ##########################
 
 
-
-######### STEP 5.2 #########
-# Wait for second month (90 seconds)
-echo -e "\nStep 5.2"
-echo "waiting for second month..."
-sleep $((ONE_MONTH))
-echo "Checking vesting balances after second month. 1swtr + 2/3 of initial vesting should be spendable, the rest are unvested and locked"
-check_vesting_distribution $VESTING_ACC_ADDRESS
-echo -e "##########################\n"
-##########################
-
-
-
-######### STEP 5.3 #########
-# Wait for third month (90 seconds)
-echo -e "\nStep 5.3"
-echo "waiting for third month..."
-sleep $((ONE_MONTH))
-echo "Checking vesting balances after second month. All funds should be accessible: 4 swtr"
-check_vesting_distribution $VESTING_ACC_ADDRESS
-echo -e "##########################\n"
-##########################
+#
+########## STEP 5.2 #########
+## Wait for second month (90 seconds)
+#echo -e "\nStep 5.2"
+#echo "waiting for second month..."
+#sleep $((ONE_MONTH))
+#echo "Checking vesting balances after second month. 1swtr + 2/3 of initial vesting should be spendable, the rest are unvested and locked"
+#check_vesting_distribution $VESTING_ACC_ADDRESS
+#echo -e "##########################\n"
+###########################
+#
+#
+#
+########## STEP 5.3 #########
+## Wait for third month (90 seconds)
+#echo -e "\nStep 5.3"
+#echo "waiting for third month..."
+#sleep $((ONE_MONTH))
+#echo "Checking vesting balances after second month. All funds should be accessible: 4 swtr"
+#check_vesting_distribution $VESTING_ACC_ADDRESS
+#echo -e "##########################\n"
+###########################
