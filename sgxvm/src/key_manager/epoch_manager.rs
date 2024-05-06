@@ -110,11 +110,15 @@ impl EpochManager {
         Ok(updated_epoch_manager)
     }
 
-    pub fn list_epochs(&self) {
-        println!("[Epoch Manager] Stored epochs");
+    // Returns epoch number and starting block for each stored epoch
+    pub fn list_epochs(&self) -> Vec<(u16, u64)> {
+        let mut output = Vec::new();
+
         for epoch in self.epochs.iter() {
-            println!("Epoch #{:?} Starting block: {:?}", epoch.epoch_number, epoch.starting_block);
+            output.push((epoch.epoch_number, epoch.starting_block));
         }
+
+        output
     }
 
     pub fn get_epoch(&self, epoch_number: u16) -> Option<&Epoch> {

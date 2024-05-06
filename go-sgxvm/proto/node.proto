@@ -19,9 +19,6 @@ message AddNewEpochRequest {
 }
 message AddNewEpochResponse {}
 
-message ListEpochsRequest{}
-message ListEpochsResponse {}
-
 message RemoveLatestEpochRequest {}
 message RemoveLatestEpochResponse {}
 
@@ -48,6 +45,8 @@ message VerifyQuoteRequest {
   string filepath = 1;
 }
 message VerifyQuoteResponse {}
+
+message ListEpochsRequest{}
 
 message SetupRequest {
   oneof req {

@@ -14,10 +14,15 @@ use sgx_types::*;
 
 use std::slice;
 use std::string::String;
+use std::vec::Vec;
 
 use crate::attestation::dcap::get_qe_quote;
 use crate::querier::GoQuerier;
 use crate::types::{Allocation, AllocationWithResult};
+use crate::protobuf_generated::ffi::{
+    ListEpochsResponse, EpochData
+};
+use protobuf::Message;
 
 mod attestation;
 mod backend;
@@ -291,17 +296,36 @@ pub unsafe extern "C" fn ecall_remove_latest_epoch() -> sgx_status_t {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn ecall_list_epochs() -> sgx_status_t {
+pub unsafe extern "C" fn ecall_list_epochs() -> AllocationWithResult {
     let key_manager = match key_manager::KeyManager::unseal() {
         Ok(km) => km,
         Err(err) => {
-            return err;
+            println!("Cannot unseal key manager. Reason: {:?}", err);
+            return AllocationWithResult::default();
         }
     };
 
-    key_manager.list_epochs();
+    let stored_epochs = key_manager.list_epochs();
+    
+    let mut epochs_response = ListEpochsResponse::new();
+    let mut epochs: Vec<EpochData> = Vec::new();
+    for (epoch_number, starting_block) in stored_epochs {
+        let mut epoch = EpochData::new();
+        epoch.set_epochNumber(epoch_number.into());
+        epoch.set_startingBlock(starting_block);
+        
+        epochs.push(epoch)
+    }
+    epochs_response.set_epochs(epochs.into());
+    let encoded_response = match epochs_response.write_to_bytes() {
+        Ok(res) => res,
+        Err(err) => {
+            println!("Cannot encode protobuf result. Reason: {:?}", err);
+            return AllocationWithResult::default();
+        }
+    };
 
-    sgx_status_t::SGX_SUCCESS
+    handlers::allocate_inner(encoded_response)
 }
 
 // Fix https://github.com/apache/incubator-teaclave-sgx-sdk/issues/373 for debug mode

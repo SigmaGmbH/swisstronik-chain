@@ -43,6 +43,7 @@ type QueryAddVerificationDetails = types.QueryAddVerificationDetails
 type QueryAddVerificationDetailsResponse = types.QueryAddVerificationDetailsResponse
 type QueryHasVerification = types.QueryHasVerification
 type QueryHasVerificationResponse = types.QueryHasVerificationResponse
+
 // Storage requests
 type CosmosRequest_GetAccount = types.CosmosRequest_GetAccount
 type CosmosRequest_InsertAccount = types.CosmosRequest_InsertAccount
@@ -137,4 +138,16 @@ func GetNodePublicKey(blockNumber uint64) (*types.NodePublicKeyResponse, error) 
 // matches the expected version.
 func Libsgx_wrapperVersion() (string, error) {
 	return api.Libsgx_wrapperVersion()
+}
+
+func AddEpoch(startingBlock uint64) error {
+	return api.AddEpoch(startingBlock)
+}
+
+func RemoveLatestEpoch() error {
+	return api.RemoveLatestEpoch()
+}
+
+func ListEpochs() ([]*types.EpochData, error) {
+	return api.ListEpochs()
 }

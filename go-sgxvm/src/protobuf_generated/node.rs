@@ -926,258 +926,6 @@ impl ::protobuf::reflect::ProtobufValue for AddNewEpochResponse {
 }
 
 #[derive(PartialEq,Clone,Default)]
-pub struct ListEpochsRequest {
-    // special fields
-    pub unknown_fields: ::protobuf::UnknownFields,
-    pub cached_size: ::protobuf::CachedSize,
-}
-
-impl<'a> ::std::default::Default for &'a ListEpochsRequest {
-    fn default() -> &'a ListEpochsRequest {
-        <ListEpochsRequest as ::protobuf::Message>::default_instance()
-    }
-}
-
-impl ListEpochsRequest {
-    pub fn new() -> ListEpochsRequest {
-        ::std::default::Default::default()
-    }
-}
-
-impl ::protobuf::Message for ListEpochsRequest {
-    fn is_initialized(&self) -> bool {
-        true
-    }
-
-    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream<'_>) -> ::protobuf::ProtobufResult<()> {
-        while !is.eof()? {
-            let (field_number, wire_type) = is.read_tag_unpack()?;
-            match field_number {
-                _ => {
-                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
-                },
-            };
-        }
-        ::std::result::Result::Ok(())
-    }
-
-    // Compute sizes of nested messages
-    #[allow(unused_variables)]
-    fn compute_size(&self) -> u32 {
-        let mut my_size = 0;
-        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
-        self.cached_size.set(my_size);
-        my_size
-    }
-
-    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
-        os.write_unknown_fields(self.get_unknown_fields())?;
-        ::std::result::Result::Ok(())
-    }
-
-    fn get_cached_size(&self) -> u32 {
-        self.cached_size.get()
-    }
-
-    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
-        &self.unknown_fields
-    }
-
-    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
-        &mut self.unknown_fields
-    }
-
-    fn as_any(&self) -> &dyn (::std::any::Any) {
-        self as &dyn (::std::any::Any)
-    }
-    fn as_any_mut(&mut self) -> &mut dyn (::std::any::Any) {
-        self as &mut dyn (::std::any::Any)
-    }
-    fn into_any(self: Box<Self>) -> ::std::boxed::Box<dyn (::std::any::Any)> {
-        self
-    }
-
-    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
-        Self::descriptor_static()
-    }
-
-    fn new() -> ListEpochsRequest {
-        ListEpochsRequest::new()
-    }
-
-    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
-        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
-            lock: ::protobuf::lazy::ONCE_INIT,
-            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
-        };
-        unsafe {
-            descriptor.get(|| {
-                let fields = ::std::vec::Vec::new();
-                ::protobuf::reflect::MessageDescriptor::new::<ListEpochsRequest>(
-                    "ListEpochsRequest",
-                    fields,
-                    file_descriptor_proto()
-                )
-            })
-        }
-    }
-
-    fn default_instance() -> &'static ListEpochsRequest {
-        static mut instance: ::protobuf::lazy::Lazy<ListEpochsRequest> = ::protobuf::lazy::Lazy {
-            lock: ::protobuf::lazy::ONCE_INIT,
-            ptr: 0 as *const ListEpochsRequest,
-        };
-        unsafe {
-            instance.get(ListEpochsRequest::new)
-        }
-    }
-}
-
-impl ::protobuf::Clear for ListEpochsRequest {
-    fn clear(&mut self) {
-        self.unknown_fields.clear();
-    }
-}
-
-impl ::std::fmt::Debug for ListEpochsRequest {
-    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
-        ::protobuf::text_format::fmt(self, f)
-    }
-}
-
-impl ::protobuf::reflect::ProtobufValue for ListEpochsRequest {
-    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
-        ::protobuf::reflect::ProtobufValueRef::Message(self)
-    }
-}
-
-#[derive(PartialEq,Clone,Default)]
-pub struct ListEpochsResponse {
-    // special fields
-    pub unknown_fields: ::protobuf::UnknownFields,
-    pub cached_size: ::protobuf::CachedSize,
-}
-
-impl<'a> ::std::default::Default for &'a ListEpochsResponse {
-    fn default() -> &'a ListEpochsResponse {
-        <ListEpochsResponse as ::protobuf::Message>::default_instance()
-    }
-}
-
-impl ListEpochsResponse {
-    pub fn new() -> ListEpochsResponse {
-        ::std::default::Default::default()
-    }
-}
-
-impl ::protobuf::Message for ListEpochsResponse {
-    fn is_initialized(&self) -> bool {
-        true
-    }
-
-    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream<'_>) -> ::protobuf::ProtobufResult<()> {
-        while !is.eof()? {
-            let (field_number, wire_type) = is.read_tag_unpack()?;
-            match field_number {
-                _ => {
-                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
-                },
-            };
-        }
-        ::std::result::Result::Ok(())
-    }
-
-    // Compute sizes of nested messages
-    #[allow(unused_variables)]
-    fn compute_size(&self) -> u32 {
-        let mut my_size = 0;
-        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
-        self.cached_size.set(my_size);
-        my_size
-    }
-
-    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
-        os.write_unknown_fields(self.get_unknown_fields())?;
-        ::std::result::Result::Ok(())
-    }
-
-    fn get_cached_size(&self) -> u32 {
-        self.cached_size.get()
-    }
-
-    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
-        &self.unknown_fields
-    }
-
-    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
-        &mut self.unknown_fields
-    }
-
-    fn as_any(&self) -> &dyn (::std::any::Any) {
-        self as &dyn (::std::any::Any)
-    }
-    fn as_any_mut(&mut self) -> &mut dyn (::std::any::Any) {
-        self as &mut dyn (::std::any::Any)
-    }
-    fn into_any(self: Box<Self>) -> ::std::boxed::Box<dyn (::std::any::Any)> {
-        self
-    }
-
-    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
-        Self::descriptor_static()
-    }
-
-    fn new() -> ListEpochsResponse {
-        ListEpochsResponse::new()
-    }
-
-    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
-        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
-            lock: ::protobuf::lazy::ONCE_INIT,
-            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
-        };
-        unsafe {
-            descriptor.get(|| {
-                let fields = ::std::vec::Vec::new();
-                ::protobuf::reflect::MessageDescriptor::new::<ListEpochsResponse>(
-                    "ListEpochsResponse",
-                    fields,
-                    file_descriptor_proto()
-                )
-            })
-        }
-    }
-
-    fn default_instance() -> &'static ListEpochsResponse {
-        static mut instance: ::protobuf::lazy::Lazy<ListEpochsResponse> = ::protobuf::lazy::Lazy {
-            lock: ::protobuf::lazy::ONCE_INIT,
-            ptr: 0 as *const ListEpochsResponse,
-        };
-        unsafe {
-            instance.get(ListEpochsResponse::new)
-        }
-    }
-}
-
-impl ::protobuf::Clear for ListEpochsResponse {
-    fn clear(&mut self) {
-        self.unknown_fields.clear();
-    }
-}
-
-impl ::std::fmt::Debug for ListEpochsResponse {
-    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
-        ::protobuf::text_format::fmt(self, f)
-    }
-}
-
-impl ::protobuf::reflect::ProtobufValue for ListEpochsResponse {
-    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
-        ::protobuf::reflect::ProtobufValueRef::Message(self)
-    }
-}
-
-#[derive(PartialEq,Clone,Default)]
 pub struct RemoveLatestEpochRequest {
     // special fields
     pub unknown_fields: ::protobuf::UnknownFields,
@@ -2925,6 +2673,132 @@ impl ::protobuf::reflect::ProtobufValue for VerifyQuoteResponse {
 }
 
 #[derive(PartialEq,Clone,Default)]
+pub struct ListEpochsRequest {
+    // special fields
+    pub unknown_fields: ::protobuf::UnknownFields,
+    pub cached_size: ::protobuf::CachedSize,
+}
+
+impl<'a> ::std::default::Default for &'a ListEpochsRequest {
+    fn default() -> &'a ListEpochsRequest {
+        <ListEpochsRequest as ::protobuf::Message>::default_instance()
+    }
+}
+
+impl ListEpochsRequest {
+    pub fn new() -> ListEpochsRequest {
+        ::std::default::Default::default()
+    }
+}
+
+impl ::protobuf::Message for ListEpochsRequest {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &dyn (::std::any::Any) {
+        self as &dyn (::std::any::Any)
+    }
+    fn as_any_mut(&mut self) -> &mut dyn (::std::any::Any) {
+        self as &mut dyn (::std::any::Any)
+    }
+    fn into_any(self: Box<Self>) -> ::std::boxed::Box<dyn (::std::any::Any)> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> ListEpochsRequest {
+        ListEpochsRequest::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
+        };
+        unsafe {
+            descriptor.get(|| {
+                let fields = ::std::vec::Vec::new();
+                ::protobuf::reflect::MessageDescriptor::new::<ListEpochsRequest>(
+                    "ListEpochsRequest",
+                    fields,
+                    file_descriptor_proto()
+                )
+            })
+        }
+    }
+
+    fn default_instance() -> &'static ListEpochsRequest {
+        static mut instance: ::protobuf::lazy::Lazy<ListEpochsRequest> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ListEpochsRequest,
+        };
+        unsafe {
+            instance.get(ListEpochsRequest::new)
+        }
+    }
+}
+
+impl ::protobuf::Clear for ListEpochsRequest {
+    fn clear(&mut self) {
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for ListEpochsRequest {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for ListEpochsRequest {
+    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
+        ::protobuf::reflect::ProtobufValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
 pub struct SetupRequest {
     // message oneof groups
     pub req: ::std::option::Option<SetupRequest_oneof_req>,
@@ -3831,111 +3705,109 @@ static file_descriptor_proto_data: &'static [u8] = b"\
     \x02fd\x18\x01\x20\x01(\x05R\x02fd\x12\x16\n\x06isDCAP\x18\x02\x20\x01(\
     \x08R\x06isDCAP\"\x19\n\x17PeerAttestationResponse\":\n\x12AddNewEpochRe\
     quest\x12$\n\rstartingBlock\x18\x01\x20\x01(\x04R\rstartingBlock\"\x15\n\
-    \x13AddNewEpochResponse\"\x13\n\x11ListEpochsRequest\"\x14\n\x12ListEpoc\
-    hsResponse\"\x1a\n\x18RemoveLatestEpochRequest\"\x1b\n\x19RemoveLatestEp\
-    ochResponse\"^\n\x18RemoteAttestationRequest\x12\x0e\n\x02fd\x18\x01\x20\
-    \x01(\x05R\x02fd\x12\x1a\n\x08hostname\x18\x02\x20\x01(\tR\x08hostname\
-    \x12\x16\n\x06isDCAP\x18\x03\x20\x01(\x08R\x06isDCAP\"\x1b\n\x19RemoteAt\
-    testationResponse\"\x16\n\x14IsInitializedRequest\"=\n\x15IsInitializedR\
-    esponse\x12$\n\risInitialized\x18\x01\x20\x01(\x08R\risInitialized\"\x13\
-    \n\x11NodeStatusRequest\"\x14\n\x12NodeStatusResponse\".\n\x10DumpQuoteR\
-    equest\x12\x1a\n\x08filepath\x18\x01\x20\x01(\tR\x08filepath\"\x13\n\x11\
-    DumpQuoteResponse\"0\n\x12VerifyQuoteRequest\x12\x1a\n\x08filepath\x18\
-    \x01\x20\x01(\tR\x08filepath\"\x15\n\x13VerifyQuoteResponse\"\xf9\x05\n\
-    \x0cSetupRequest\x12S\n\x11initializeEnclave\x18\x01\x20\x01(\x0b2#.node\
-    .node.InitializeEnclaveRequestH\0R\x11initializeEnclave\x12[\n\x16peerAt\
-    testationRequest\x18\x02\x20\x01(\x0b2!.node.node.PeerAttestationRequest\
-    H\0R\x16peerAttestationRequest\x12a\n\x18remoteAttestationRequest\x18\
-    \x03\x20\x01(\x0b2#.node.node.RemoteAttestationRequestH\0R\x18remoteAtte\
-    stationRequest\x12G\n\risInitialized\x18\x04\x20\x01(\x0b2\x1f.node.node\
-    .IsInitializedRequestH\0R\risInitialized\x12>\n\nnodeStatus\x18\x05\x20\
-    \x01(\x0b2\x1c.node.node.NodeStatusRequestH\0R\nnodeStatus\x12;\n\tdumpQ\
-    uote\x18\x06\x20\x01(\x0b2\x1b.node.node.DumpQuoteRequestH\0R\tdumpQuote\
-    \x12A\n\x0bverifyQuote\x18\x07\x20\x01(\x0b2\x1d.node.node.VerifyQuoteRe\
-    questH\0R\x0bverifyQuote\x12;\n\x08addEpoch\x18\x08\x20\x01(\x0b2\x1d.no\
-    de.node.AddNewEpochRequestH\0R\x08addEpoch\x12>\n\nlistEpochs\x18\t\x20\
-    \x01(\x0b2\x1c.node.node.ListEpochsRequestH\0R\nlistEpochs\x12G\n\x0brem\
-    oveEpoch\x18\n\x20\x01(\x0b2#.node.node.RemoveLatestEpochRequestH\0R\x0b\
-    removeEpochB\x05\n\x03reqB&Z$github.com/SigmaGmbH/librustgo/typesJ\xbf\r\
-    \n\x06\x12\x04\0\0@\x01\n\x08\n\x01\x0c\x12\x03\0\0\x12\n\x08\n\x01\x02\
-    \x12\x03\x02\0\x12\n\x08\n\x01\x08\x12\x03\x04\0;\n\t\n\x02\x08\x0b\x12\
-    \x03\x04\0;\n\t\n\x02\x04\0\x12\x03\x06\0:\n\n\n\x03\x04\0\x01\x12\x03\
-    \x06\x08\x20\n\x0b\n\x04\x04\0\x02\0\x12\x03\x06#8\n\x0c\n\x05\x04\0\x02\
-    \0\x05\x12\x03\x06#'\n\x0c\n\x05\x04\0\x02\0\x01\x12\x03\x06(3\n\x0c\n\
-    \x05\x04\0\x02\0\x03\x12\x03\x0667\n\t\n\x02\x04\x01\x12\x03\x07\0$\n\n\
-    \n\x03\x04\x01\x01\x12\x03\x07\x08!\n)\n\x02\x04\x02\x12\x04\n\0\r\x01\
-    \x1a\x1d\x20Attestation\x20server\x20messages\n\n\n\n\x03\x04\x02\x01\
-    \x12\x03\n\x08\x1e\n\x0b\n\x04\x04\x02\x02\0\x12\x03\x0b\x02\x0f\n\x0c\n\
-    \x05\x04\x02\x02\0\x05\x12\x03\x0b\x02\x07\n\x0c\n\x05\x04\x02\x02\0\x01\
-    \x12\x03\x0b\x08\n\n\x0c\n\x05\x04\x02\x02\0\x03\x12\x03\x0b\r\x0e\n\x0b\
-    \n\x04\x04\x02\x02\x01\x12\x03\x0c\x02\x12\n\x0c\n\x05\x04\x02\x02\x01\
-    \x05\x12\x03\x0c\x02\x06\n\x0c\n\x05\x04\x02\x02\x01\x01\x12\x03\x0c\x07\
-    \r\n\x0c\n\x05\x04\x02\x02\x01\x03\x12\x03\x0c\x10\x11\n\t\n\x02\x04\x03\
-    \x12\x03\x0e\0\"\n\n\n\x03\x04\x03\x01\x12\x03\x0e\x08\x1f\n\n\n\x02\x04\
-    \x04\x12\x04\x10\0\x12\x01\n\n\n\x03\x04\x04\x01\x12\x03\x10\x08\x1a\n\
-    \x0b\n\x04\x04\x04\x02\0\x12\x03\x11\x02\x1b\n\x0c\n\x05\x04\x04\x02\0\
-    \x05\x12\x03\x11\x02\x08\n\x0c\n\x05\x04\x04\x02\0\x01\x12\x03\x11\t\x16\
-    \n\x0c\n\x05\x04\x04\x02\0\x03\x12\x03\x11\x19\x1a\n\t\n\x02\x04\x05\x12\
-    \x03\x13\0\x1e\n\n\n\x03\x04\x05\x01\x12\x03\x13\x08\x1b\n\t\n\x02\x04\
-    \x06\x12\x03\x15\0\x1b\n\n\n\x03\x04\x06\x01\x12\x03\x15\x08\x19\n\t\n\
-    \x02\x04\x07\x12\x03\x16\0\x1d\n\n\n\x03\x04\x07\x01\x12\x03\x16\x08\x1a\
-    \n\t\n\x02\x04\x08\x12\x03\x18\0#\n\n\n\x03\x04\x08\x01\x12\x03\x18\x08\
-    \x20\n\t\n\x02\x04\t\x12\x03\x19\0$\n\n\n\x03\x04\t\x01\x12\x03\x19\x08!\
-    \n(\n\x02\x04\n\x12\x04\x1c\0\x20\x01\x1a\x1c\x20Remote\x20Attestation\
-    \x20Request\n\n\n\n\x03\x04\n\x01\x12\x03\x1c\x08\x20\n\x0b\n\x04\x04\n\
-    \x02\0\x12\x03\x1d\x02\x0f\n\x0c\n\x05\x04\n\x02\0\x05\x12\x03\x1d\x02\
-    \x07\n\x0c\n\x05\x04\n\x02\0\x01\x12\x03\x1d\x08\n\n\x0c\n\x05\x04\n\x02\
-    \0\x03\x12\x03\x1d\r\x0e\n\x0b\n\x04\x04\n\x02\x01\x12\x03\x1e\x02\x16\n\
-    \x0c\n\x05\x04\n\x02\x01\x05\x12\x03\x1e\x02\x08\n\x0c\n\x05\x04\n\x02\
-    \x01\x01\x12\x03\x1e\t\x11\n\x0c\n\x05\x04\n\x02\x01\x03\x12\x03\x1e\x14\
-    \x15\n\x0b\n\x04\x04\n\x02\x02\x12\x03\x1f\x02\x12\n\x0c\n\x05\x04\n\x02\
-    \x02\x05\x12\x03\x1f\x02\x06\n\x0c\n\x05\x04\n\x02\x02\x01\x12\x03\x1f\
-    \x07\r\n\x0c\n\x05\x04\n\x02\x02\x03\x12\x03\x1f\x10\x11\n\t\n\x02\x04\
-    \x0b\x12\x03!\0$\n\n\n\x03\x04\x0b\x01\x12\x03!\x08!\n\t\n\x02\x04\x0c\
-    \x12\x03#\0\x1f\n\n\n\x03\x04\x0c\x01\x12\x03#\x08\x1c\n\t\n\x02\x04\r\
-    \x12\x03$\09\n\n\n\x03\x04\r\x01\x12\x03$\x08\x1d\n\x0b\n\x04\x04\r\x02\
-    \0\x12\x03$\x207\n\x0c\n\x05\x04\r\x02\0\x05\x12\x03$\x20$\n\x0c\n\x05\
-    \x04\r\x02\0\x01\x12\x03$%2\n\x0c\n\x05\x04\r\x02\0\x03\x12\x03$56\n\t\n\
-    \x02\x04\x0e\x12\x03&\0\x1c\n\n\n\x03\x04\x0e\x01\x12\x03&\x08\x19\n\t\n\
-    \x02\x04\x0f\x12\x03'\0\x1d\n\n\n\x03\x04\x0f\x01\x12\x03'\x08\x1a\n\n\n\
-    \x02\x04\x10\x12\x04)\0+\x01\n\n\n\x03\x04\x10\x01\x12\x03)\x08\x18\n\
-    \x0b\n\x04\x04\x10\x02\0\x12\x03*\x02\x16\n\x0c\n\x05\x04\x10\x02\0\x05\
-    \x12\x03*\x02\x08\n\x0c\n\x05\x04\x10\x02\0\x01\x12\x03*\t\x11\n\x0c\n\
-    \x05\x04\x10\x02\0\x03\x12\x03*\x14\x15\n\t\n\x02\x04\x11\x12\x03,\0\x1c\
-    \n\n\n\x03\x04\x11\x01\x12\x03,\x08\x19\n\n\n\x02\x04\x12\x12\x04.\00\
-    \x01\n\n\n\x03\x04\x12\x01\x12\x03.\x08\x1a\n\x0b\n\x04\x04\x12\x02\0\
-    \x12\x03/\x02\x16\n\x0c\n\x05\x04\x12\x02\0\x05\x12\x03/\x02\x08\n\x0c\n\
-    \x05\x04\x12\x02\0\x01\x12\x03/\t\x11\n\x0c\n\x05\x04\x12\x02\0\x03\x12\
-    \x03/\x14\x15\n\t\n\x02\x04\x13\x12\x031\0\x1e\n\n\n\x03\x04\x13\x01\x12\
-    \x031\x08\x1b\n\n\n\x02\x04\x14\x12\x043\0@\x01\n\n\n\x03\x04\x14\x01\
-    \x12\x033\x08\x14\n\x0c\n\x04\x04\x14\x08\0\x12\x044\x02?\x03\n\x0c\n\
-    \x05\x04\x14\x08\0\x01\x12\x034\x08\x0b\n\x0b\n\x04\x04\x14\x02\0\x12\
-    \x035\x043\n\x0c\n\x05\x04\x14\x02\0\x06\x12\x035\x04\x1c\n\x0c\n\x05\
-    \x04\x14\x02\0\x01\x12\x035\x1d.\n\x0c\n\x05\x04\x14\x02\0\x03\x12\x0351\
-    2\n\x0b\n\x04\x04\x14\x02\x01\x12\x036\x046\n\x0c\n\x05\x04\x14\x02\x01\
-    \x06\x12\x036\x04\x1a\n\x0c\n\x05\x04\x14\x02\x01\x01\x12\x036\x1b1\n\
-    \x0c\n\x05\x04\x14\x02\x01\x03\x12\x03645\n\x0b\n\x04\x04\x14\x02\x02\
-    \x12\x037\x04:\n\x0c\n\x05\x04\x14\x02\x02\x06\x12\x037\x04\x1c\n\x0c\n\
-    \x05\x04\x14\x02\x02\x01\x12\x037\x1d5\n\x0c\n\x05\x04\x14\x02\x02\x03\
-    \x12\x03789\n\x0b\n\x04\x04\x14\x02\x03\x12\x038\x04+\n\x0c\n\x05\x04\
-    \x14\x02\x03\x06\x12\x038\x04\x18\n\x0c\n\x05\x04\x14\x02\x03\x01\x12\
-    \x038\x19&\n\x0c\n\x05\x04\x14\x02\x03\x03\x12\x038)*\n\x0b\n\x04\x04\
-    \x14\x02\x04\x12\x039\x04%\n\x0c\n\x05\x04\x14\x02\x04\x06\x12\x039\x04\
-    \x15\n\x0c\n\x05\x04\x14\x02\x04\x01\x12\x039\x16\x20\n\x0c\n\x05\x04\
-    \x14\x02\x04\x03\x12\x039#$\n\x0b\n\x04\x04\x14\x02\x05\x12\x03:\x04#\n\
-    \x0c\n\x05\x04\x14\x02\x05\x06\x12\x03:\x04\x14\n\x0c\n\x05\x04\x14\x02\
-    \x05\x01\x12\x03:\x15\x1e\n\x0c\n\x05\x04\x14\x02\x05\x03\x12\x03:!\"\n\
-    \x0b\n\x04\x04\x14\x02\x06\x12\x03;\x04'\n\x0c\n\x05\x04\x14\x02\x06\x06\
-    \x12\x03;\x04\x16\n\x0c\n\x05\x04\x14\x02\x06\x01\x12\x03;\x17\"\n\x0c\n\
-    \x05\x04\x14\x02\x06\x03\x12\x03;%&\n\x0b\n\x04\x04\x14\x02\x07\x12\x03<\
-    \x04$\n\x0c\n\x05\x04\x14\x02\x07\x06\x12\x03<\x04\x16\n\x0c\n\x05\x04\
-    \x14\x02\x07\x01\x12\x03<\x17\x1f\n\x0c\n\x05\x04\x14\x02\x07\x03\x12\
-    \x03<\"#\n\x0b\n\x04\x04\x14\x02\x08\x12\x03=\x04%\n\x0c\n\x05\x04\x14\
-    \x02\x08\x06\x12\x03=\x04\x15\n\x0c\n\x05\x04\x14\x02\x08\x01\x12\x03=\
-    \x16\x20\n\x0c\n\x05\x04\x14\x02\x08\x03\x12\x03=#$\n\x0b\n\x04\x04\x14\
-    \x02\t\x12\x03>\x04.\n\x0c\n\x05\x04\x14\x02\t\x06\x12\x03>\x04\x1c\n\
-    \x0c\n\x05\x04\x14\x02\t\x01\x12\x03>\x1d(\n\x0c\n\x05\x04\x14\x02\t\x03\
-    \x12\x03>+-b\x06proto3\
+    \x13AddNewEpochResponse\"\x1a\n\x18RemoveLatestEpochRequest\"\x1b\n\x19R\
+    emoveLatestEpochResponse\"^\n\x18RemoteAttestationRequest\x12\x0e\n\x02f\
+    d\x18\x01\x20\x01(\x05R\x02fd\x12\x1a\n\x08hostname\x18\x02\x20\x01(\tR\
+    \x08hostname\x12\x16\n\x06isDCAP\x18\x03\x20\x01(\x08R\x06isDCAP\"\x1b\n\
+    \x19RemoteAttestationResponse\"\x16\n\x14IsInitializedRequest\"=\n\x15Is\
+    InitializedResponse\x12$\n\risInitialized\x18\x01\x20\x01(\x08R\risIniti\
+    alized\"\x13\n\x11NodeStatusRequest\"\x14\n\x12NodeStatusResponse\".\n\
+    \x10DumpQuoteRequest\x12\x1a\n\x08filepath\x18\x01\x20\x01(\tR\x08filepa\
+    th\"\x13\n\x11DumpQuoteResponse\"0\n\x12VerifyQuoteRequest\x12\x1a\n\x08\
+    filepath\x18\x01\x20\x01(\tR\x08filepath\"\x15\n\x13VerifyQuoteResponse\
+    \"\x13\n\x11ListEpochsRequest\"\xf9\x05\n\x0cSetupRequest\x12S\n\x11init\
+    ializeEnclave\x18\x01\x20\x01(\x0b2#.node.node.InitializeEnclaveRequestH\
+    \0R\x11initializeEnclave\x12[\n\x16peerAttestationRequest\x18\x02\x20\
+    \x01(\x0b2!.node.node.PeerAttestationRequestH\0R\x16peerAttestationReque\
+    st\x12a\n\x18remoteAttestationRequest\x18\x03\x20\x01(\x0b2#.node.node.R\
+    emoteAttestationRequestH\0R\x18remoteAttestationRequest\x12G\n\risInitia\
+    lized\x18\x04\x20\x01(\x0b2\x1f.node.node.IsInitializedRequestH\0R\risIn\
+    itialized\x12>\n\nnodeStatus\x18\x05\x20\x01(\x0b2\x1c.node.node.NodeSta\
+    tusRequestH\0R\nnodeStatus\x12;\n\tdumpQuote\x18\x06\x20\x01(\x0b2\x1b.n\
+    ode.node.DumpQuoteRequestH\0R\tdumpQuote\x12A\n\x0bverifyQuote\x18\x07\
+    \x20\x01(\x0b2\x1d.node.node.VerifyQuoteRequestH\0R\x0bverifyQuote\x12;\
+    \n\x08addEpoch\x18\x08\x20\x01(\x0b2\x1d.node.node.AddNewEpochRequestH\0\
+    R\x08addEpoch\x12>\n\nlistEpochs\x18\t\x20\x01(\x0b2\x1c.node.node.ListE\
+    pochsRequestH\0R\nlistEpochs\x12G\n\x0bremoveEpoch\x18\n\x20\x01(\x0b2#.\
+    node.node.RemoveLatestEpochRequestH\0R\x0bremoveEpochB\x05\n\x03reqB&Z$g\
+    ithub.com/SigmaGmbH/librustgo/typesJ\xa8\r\n\x06\x12\x04\0\0?\x01\n\x08\
+    \n\x01\x0c\x12\x03\0\0\x12\n\x08\n\x01\x02\x12\x03\x02\0\x12\n\x08\n\x01\
+    \x08\x12\x03\x04\0;\n\t\n\x02\x08\x0b\x12\x03\x04\0;\n\t\n\x02\x04\0\x12\
+    \x03\x06\0:\n\n\n\x03\x04\0\x01\x12\x03\x06\x08\x20\n\x0b\n\x04\x04\0\
+    \x02\0\x12\x03\x06#8\n\x0c\n\x05\x04\0\x02\0\x05\x12\x03\x06#'\n\x0c\n\
+    \x05\x04\0\x02\0\x01\x12\x03\x06(3\n\x0c\n\x05\x04\0\x02\0\x03\x12\x03\
+    \x0667\n\t\n\x02\x04\x01\x12\x03\x07\0$\n\n\n\x03\x04\x01\x01\x12\x03\
+    \x07\x08!\n)\n\x02\x04\x02\x12\x04\n\0\r\x01\x1a\x1d\x20Attestation\x20s\
+    erver\x20messages\n\n\n\n\x03\x04\x02\x01\x12\x03\n\x08\x1e\n\x0b\n\x04\
+    \x04\x02\x02\0\x12\x03\x0b\x02\x0f\n\x0c\n\x05\x04\x02\x02\0\x05\x12\x03\
+    \x0b\x02\x07\n\x0c\n\x05\x04\x02\x02\0\x01\x12\x03\x0b\x08\n\n\x0c\n\x05\
+    \x04\x02\x02\0\x03\x12\x03\x0b\r\x0e\n\x0b\n\x04\x04\x02\x02\x01\x12\x03\
+    \x0c\x02\x12\n\x0c\n\x05\x04\x02\x02\x01\x05\x12\x03\x0c\x02\x06\n\x0c\n\
+    \x05\x04\x02\x02\x01\x01\x12\x03\x0c\x07\r\n\x0c\n\x05\x04\x02\x02\x01\
+    \x03\x12\x03\x0c\x10\x11\n\t\n\x02\x04\x03\x12\x03\x0e\0\"\n\n\n\x03\x04\
+    \x03\x01\x12\x03\x0e\x08\x1f\n\n\n\x02\x04\x04\x12\x04\x10\0\x12\x01\n\n\
+    \n\x03\x04\x04\x01\x12\x03\x10\x08\x1a\n\x0b\n\x04\x04\x04\x02\0\x12\x03\
+    \x11\x02\x1b\n\x0c\n\x05\x04\x04\x02\0\x05\x12\x03\x11\x02\x08\n\x0c\n\
+    \x05\x04\x04\x02\0\x01\x12\x03\x11\t\x16\n\x0c\n\x05\x04\x04\x02\0\x03\
+    \x12\x03\x11\x19\x1a\n\t\n\x02\x04\x05\x12\x03\x13\0\x1e\n\n\n\x03\x04\
+    \x05\x01\x12\x03\x13\x08\x1b\n\t\n\x02\x04\x06\x12\x03\x15\0#\n\n\n\x03\
+    \x04\x06\x01\x12\x03\x15\x08\x20\n\t\n\x02\x04\x07\x12\x03\x16\0$\n\n\n\
+    \x03\x04\x07\x01\x12\x03\x16\x08!\n(\n\x02\x04\x08\x12\x04\x19\0\x1d\x01\
+    \x1a\x1c\x20Remote\x20Attestation\x20Request\n\n\n\n\x03\x04\x08\x01\x12\
+    \x03\x19\x08\x20\n\x0b\n\x04\x04\x08\x02\0\x12\x03\x1a\x02\x0f\n\x0c\n\
+    \x05\x04\x08\x02\0\x05\x12\x03\x1a\x02\x07\n\x0c\n\x05\x04\x08\x02\0\x01\
+    \x12\x03\x1a\x08\n\n\x0c\n\x05\x04\x08\x02\0\x03\x12\x03\x1a\r\x0e\n\x0b\
+    \n\x04\x04\x08\x02\x01\x12\x03\x1b\x02\x16\n\x0c\n\x05\x04\x08\x02\x01\
+    \x05\x12\x03\x1b\x02\x08\n\x0c\n\x05\x04\x08\x02\x01\x01\x12\x03\x1b\t\
+    \x11\n\x0c\n\x05\x04\x08\x02\x01\x03\x12\x03\x1b\x14\x15\n\x0b\n\x04\x04\
+    \x08\x02\x02\x12\x03\x1c\x02\x12\n\x0c\n\x05\x04\x08\x02\x02\x05\x12\x03\
+    \x1c\x02\x06\n\x0c\n\x05\x04\x08\x02\x02\x01\x12\x03\x1c\x07\r\n\x0c\n\
+    \x05\x04\x08\x02\x02\x03\x12\x03\x1c\x10\x11\n\t\n\x02\x04\t\x12\x03\x1e\
+    \0$\n\n\n\x03\x04\t\x01\x12\x03\x1e\x08!\n\t\n\x02\x04\n\x12\x03\x20\0\
+    \x1f\n\n\n\x03\x04\n\x01\x12\x03\x20\x08\x1c\n\t\n\x02\x04\x0b\x12\x03!\
+    \09\n\n\n\x03\x04\x0b\x01\x12\x03!\x08\x1d\n\x0b\n\x04\x04\x0b\x02\0\x12\
+    \x03!\x207\n\x0c\n\x05\x04\x0b\x02\0\x05\x12\x03!\x20$\n\x0c\n\x05\x04\
+    \x0b\x02\0\x01\x12\x03!%2\n\x0c\n\x05\x04\x0b\x02\0\x03\x12\x03!56\n\t\n\
+    \x02\x04\x0c\x12\x03#\0\x1c\n\n\n\x03\x04\x0c\x01\x12\x03#\x08\x19\n\t\n\
+    \x02\x04\r\x12\x03$\0\x1d\n\n\n\x03\x04\r\x01\x12\x03$\x08\x1a\n\n\n\x02\
+    \x04\x0e\x12\x04&\0(\x01\n\n\n\x03\x04\x0e\x01\x12\x03&\x08\x18\n\x0b\n\
+    \x04\x04\x0e\x02\0\x12\x03'\x02\x16\n\x0c\n\x05\x04\x0e\x02\0\x05\x12\
+    \x03'\x02\x08\n\x0c\n\x05\x04\x0e\x02\0\x01\x12\x03'\t\x11\n\x0c\n\x05\
+    \x04\x0e\x02\0\x03\x12\x03'\x14\x15\n\t\n\x02\x04\x0f\x12\x03)\0\x1c\n\n\
+    \n\x03\x04\x0f\x01\x12\x03)\x08\x19\n\n\n\x02\x04\x10\x12\x04+\0-\x01\n\
+    \n\n\x03\x04\x10\x01\x12\x03+\x08\x1a\n\x0b\n\x04\x04\x10\x02\0\x12\x03,\
+    \x02\x16\n\x0c\n\x05\x04\x10\x02\0\x05\x12\x03,\x02\x08\n\x0c\n\x05\x04\
+    \x10\x02\0\x01\x12\x03,\t\x11\n\x0c\n\x05\x04\x10\x02\0\x03\x12\x03,\x14\
+    \x15\n\t\n\x02\x04\x11\x12\x03.\0\x1e\n\n\n\x03\x04\x11\x01\x12\x03.\x08\
+    \x1b\n\t\n\x02\x04\x12\x12\x030\0\x1b\n\n\n\x03\x04\x12\x01\x12\x030\x08\
+    \x19\n\n\n\x02\x04\x13\x12\x042\0?\x01\n\n\n\x03\x04\x13\x01\x12\x032\
+    \x08\x14\n\x0c\n\x04\x04\x13\x08\0\x12\x043\x02>\x03\n\x0c\n\x05\x04\x13\
+    \x08\0\x01\x12\x033\x08\x0b\n\x0b\n\x04\x04\x13\x02\0\x12\x034\x043\n\
+    \x0c\n\x05\x04\x13\x02\0\x06\x12\x034\x04\x1c\n\x0c\n\x05\x04\x13\x02\0\
+    \x01\x12\x034\x1d.\n\x0c\n\x05\x04\x13\x02\0\x03\x12\x03412\n\x0b\n\x04\
+    \x04\x13\x02\x01\x12\x035\x046\n\x0c\n\x05\x04\x13\x02\x01\x06\x12\x035\
+    \x04\x1a\n\x0c\n\x05\x04\x13\x02\x01\x01\x12\x035\x1b1\n\x0c\n\x05\x04\
+    \x13\x02\x01\x03\x12\x03545\n\x0b\n\x04\x04\x13\x02\x02\x12\x036\x04:\n\
+    \x0c\n\x05\x04\x13\x02\x02\x06\x12\x036\x04\x1c\n\x0c\n\x05\x04\x13\x02\
+    \x02\x01\x12\x036\x1d5\n\x0c\n\x05\x04\x13\x02\x02\x03\x12\x03689\n\x0b\
+    \n\x04\x04\x13\x02\x03\x12\x037\x04+\n\x0c\n\x05\x04\x13\x02\x03\x06\x12\
+    \x037\x04\x18\n\x0c\n\x05\x04\x13\x02\x03\x01\x12\x037\x19&\n\x0c\n\x05\
+    \x04\x13\x02\x03\x03\x12\x037)*\n\x0b\n\x04\x04\x13\x02\x04\x12\x038\x04\
+    %\n\x0c\n\x05\x04\x13\x02\x04\x06\x12\x038\x04\x15\n\x0c\n\x05\x04\x13\
+    \x02\x04\x01\x12\x038\x16\x20\n\x0c\n\x05\x04\x13\x02\x04\x03\x12\x038#$\
+    \n\x0b\n\x04\x04\x13\x02\x05\x12\x039\x04#\n\x0c\n\x05\x04\x13\x02\x05\
+    \x06\x12\x039\x04\x14\n\x0c\n\x05\x04\x13\x02\x05\x01\x12\x039\x15\x1e\n\
+    \x0c\n\x05\x04\x13\x02\x05\x03\x12\x039!\"\n\x0b\n\x04\x04\x13\x02\x06\
+    \x12\x03:\x04'\n\x0c\n\x05\x04\x13\x02\x06\x06\x12\x03:\x04\x16\n\x0c\n\
+    \x05\x04\x13\x02\x06\x01\x12\x03:\x17\"\n\x0c\n\x05\x04\x13\x02\x06\x03\
+    \x12\x03:%&\n\x0b\n\x04\x04\x13\x02\x07\x12\x03;\x04$\n\x0c\n\x05\x04\
+    \x13\x02\x07\x06\x12\x03;\x04\x16\n\x0c\n\x05\x04\x13\x02\x07\x01\x12\
+    \x03;\x17\x1f\n\x0c\n\x05\x04\x13\x02\x07\x03\x12\x03;\"#\n\x0b\n\x04\
+    \x04\x13\x02\x08\x12\x03<\x04%\n\x0c\n\x05\x04\x13\x02\x08\x06\x12\x03<\
+    \x04\x15\n\x0c\n\x05\x04\x13\x02\x08\x01\x12\x03<\x16\x20\n\x0c\n\x05\
+    \x04\x13\x02\x08\x03\x12\x03<#$\n\x0b\n\x04\x04\x13\x02\t\x12\x03=\x04.\
+    \n\x0c\n\x05\x04\x13\x02\t\x06\x12\x03=\x04\x1c\n\x0c\n\x05\x04\x13\x02\
+    \t\x01\x12\x03=\x1d(\n\x0c\n\x05\x04\x13\x02\t\x03\x12\x03=+-b\x06proto3\
 ";
 
 static mut file_descriptor_proto_lazy: ::protobuf::lazy::Lazy<::protobuf::descriptor::FileDescriptorProto> = ::protobuf::lazy::Lazy {

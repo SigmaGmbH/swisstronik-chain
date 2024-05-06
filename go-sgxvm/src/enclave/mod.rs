@@ -119,7 +119,7 @@ extern "C" {
 
     pub fn ecall_list_epochs(
         eid: sgx_enclave_id_t,
-        retval: *mut sgx_status_t,
+        retval: *mut AllocationWithResult,
     ) -> sgx_status_t;
 }
 
@@ -201,9 +201,7 @@ pub unsafe extern "C" fn handle_initialization_request(
                         Ok(response_bytes)
                     }
                     node::SetupRequest_oneof_req::listEpochs(_) => {
-                        enclave_api::EnclaveApi::list_epochs(evm_enclave.geteid(), )?;
-                        let response = node::ListEpochsResponse::new();
-                        let response_bytes = response.write_to_bytes()?;
+                        let response_bytes = enclave_api::EnclaveApi::list_epochs(evm_enclave.geteid())?;
                         Ok(response_bytes)
                     }
                     node::SetupRequest_oneof_req::removeEpoch(_) => {

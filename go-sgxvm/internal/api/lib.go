@@ -423,7 +423,7 @@ func RemoveLatestEpoch() error {
 	return nil
 }
 
-func ListEpochs() error {
+func ListEpochs() ([]*types.EpochData, error) {
 	// Create protobuf encoded request
 	req := types.SetupRequest{Req: &types.SetupRequest_ListEpochs{
 		ListEpochs: &types.ListEpochsRequest{},
@@ -431,7 +431,7 @@ func ListEpochs() error {
 	reqBytes, err := proto.Marshal(&req)
 	if err != nil {
 		log.Fatalln("Failed to encode req:", err)
-		return err
+		return nil, err
 	}
 
 	// Pass request to Rust
@@ -439,12 +439,20 @@ func ListEpochs() error {
 	defer runtime.KeepAlive(reqBytes)
 
 	errmsg := NewUnmanagedVector(nil)
-	_, err = C.handle_initialization_request(d, &errmsg)
+	ptr, err := C.handle_initialization_request(d, &errmsg)
 	if err != nil {
-		return ErrorWithMessage(err, errmsg)
+		return nil, ErrorWithMessage(err, errmsg)
 	}
 
-	return nil
+	// Recover returned value
+	executionResult := CopyAndDestroyUnmanagedVector(ptr)
+	response := types.ListEpochsResponse{}
+	if err := proto.Unmarshal(executionResult, &response); err != nil {
+		log.Fatalln("Failed to decode execution result:", err)
+		return nil, err
+	}
+
+	return response.Epochs, nil
 }
 
 // Converts AccessList type from ethtypes to protobuf-compatible type

@@ -237,9 +237,9 @@ impl EnclaveApi {
         Ok(())
     }
 
-    pub fn list_epochs(eid: sgx_enclave_id_t) -> Result<(), Error> {
-        let mut retval = sgx_status_t::SGX_ERROR_UNEXPECTED;
-        let res = unsafe { super::ecall_list_epochs(eid, &mut retval) };
+    pub fn list_epochs(eid: sgx_enclave_id_t) -> Result<Vec<u8>, Error> {
+        let mut ret_val = std::mem::MaybeUninit::<AllocationWithResult>::uninit();
+        let res = unsafe { super::ecall_list_epochs(eid, ret_val.as_mut_ptr()) };
 
         if res != sgx_status_t::SGX_SUCCESS {
             println!(
@@ -249,15 +249,20 @@ impl EnclaveApi {
             return Err(Error::enclave_error(res));
         }
 
-        if retval != sgx_status_t::SGX_SUCCESS {
-            println!(
-                "[Enclave Wrapper] `ecall_list_epochs` failed. Reason: {:?}",
-                retval
-            );
-            return Err(Error::enclave_error(retval));
+        let request_result = unsafe { ret_val.assume_init() };
+        // Parse execution result
+        match request_result.status {
+            sgx_status_t::SGX_SUCCESS => {
+                let data = unsafe {
+                    Vec::from_raw_parts(request_result.result_ptr, request_result.result_size, request_result.result_size)
+                };
+                Ok(data)
+            }
+            err => {
+                println!("[Enclave Wrapper] `ecall_list_epochs` failed. Reason: {:?}", err);
+                Err(Error::vm_err(err))
+            }
         }
-
-        Ok(())
     }
 
     pub fn remove_latest_epoch(eid: sgx_enclave_id_t) -> Result<(), Error> {

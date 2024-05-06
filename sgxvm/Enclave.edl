@@ -83,7 +83,7 @@ enclave {
 
         public sgx_status_t ecall_remove_latest_epoch();
 
-        public sgx_status_t ecall_list_epochs();
+        public ResultWithAllocation ecall_list_epochs();
     };
 
     untrusted {

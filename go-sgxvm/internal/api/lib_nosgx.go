@@ -108,6 +108,6 @@ func RemoveLatestEpoch() error {
 	return nil
 }
 
-func ListEpochs() error {
-	return nil
+func ListEpochs() ([]*types.EpochData, error) {
+	return nil, nil
 }

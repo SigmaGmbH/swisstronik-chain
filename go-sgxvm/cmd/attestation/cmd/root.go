@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/SigmaGmbH/librustgo/internal/api"
 	"github.com/spf13/cobra"
 	"strconv"
@@ -69,8 +70,14 @@ func ListEpochs() *cobra.Command {
 		Short: "Lists all stored epochs",
 		Long:  "Lists all stored epochs with their starting blocks",
 		Run: func(_ *cobra.Command, args []string) {
-			if err := api.ListEpochs(); err != nil {
+			res, err := api.ListEpochs()
+
+			if err != nil {
 				panic(err)
+			}
+
+			for _, epoch := range res {
+				fmt.Println("Epoch #", epoch.EpochNumber, "Starting block: ", epoch.StartingBlock)
 			}
 		},
 	}
