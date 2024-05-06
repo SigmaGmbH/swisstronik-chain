@@ -64,7 +64,6 @@ pub struct KeyManager {
 }
 
 impl KeyManager {
-    #[cfg(feature = "attestation_server")]
     pub fn list_epochs(&self) {
         self.epoch_manager.list_epochs()
     }
@@ -199,7 +198,7 @@ impl KeyManager {
 
     #[cfg(feature = "attestation_server")]
     /// Creates new epoch with provided starting block
-    pub fn create_new_epoch(&self, starting_block: u64) -> SgxResult<()> {
+    pub fn add_new_epoch(&self, starting_block: u64) -> SgxResult<()> {
         let updated_epoch_manager = self.epoch_manager.add_new_epoch(starting_block)?;
         let serialized_epoch_manager = updated_epoch_manager.serialize()?;
 
@@ -282,7 +281,7 @@ impl KeyManager {
             "[KeyManager] Creating file for key manager. Location: {:?}",
             sealed_file_path
         );
-        let mut sealed_file = SgxFile::create(sealed_file_path).map_err(|err| {
+        let sealed_file = SgxFile::create(sealed_file_path).map_err(|err| {
             println!(
                 "[KeyManager] Cannot create file for key manager. Reason: {:?}",
                 err

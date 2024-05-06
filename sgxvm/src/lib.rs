@@ -4,20 +4,20 @@
 
 #[macro_use]
 extern crate sgx_tstd as std;
+extern crate alloc;
 extern crate rustls;
 extern crate sgx_tse;
 extern crate sgx_types;
-extern crate alloc;
 
-use sgx_types::*;
 use sgx_tcrypto::*;
+use sgx_types::*;
 
 use std::slice;
 use std::string::String;
 
+use crate::attestation::dcap::get_qe_quote;
 use crate::querier::GoQuerier;
 use crate::types::{Allocation, AllocationWithResult};
-use crate::attestation::dcap::get_qe_quote;
 
 mod attestation;
 mod backend;
@@ -119,7 +119,12 @@ pub unsafe extern "C" fn ecall_attest_peer_dcap(
     qe_target_info: &sgx_target_info_t,
     quote_size: u32,
 ) -> sgx_status_t {
-    match attestation::tls::perform_epoch_keys_provisioning(socket_fd, Some(qe_target_info), Some(quote_size), true) {
+    match attestation::tls::perform_epoch_keys_provisioning(
+        socket_fd,
+        Some(qe_target_info),
+        Some(quote_size),
+        true,
+    ) {
         Ok(_) => sgx_status_t::SGX_SUCCESS,
         Err(err) => err,
     }
@@ -188,7 +193,10 @@ pub unsafe extern "C" fn ecall_dump_dcap_quote(
     let (_, pub_k) = match ecc_handle.create_key_pair() {
         Ok(res) => res,
         Err(status_code) => {
-            println!("[Enclave] Cannot create key pair using SgxEccHandle. Reason: {:?}", status_code);
+            println!(
+                "[Enclave] Cannot create key pair using SgxEccHandle. Reason: {:?}",
+                status_code
+            );
             return AllocationWithResult::default();
         }
     };
@@ -196,7 +204,10 @@ pub unsafe extern "C" fn ecall_dump_dcap_quote(
     let qe_quote = match get_qe_quote(&pub_k, qe_target_info, quote_size) {
         Ok(quote) => quote,
         Err(status_code) => {
-            println!("[Enclave] Cannot generate QE quote. Reason: {:?}", status_code);
+            println!(
+                "[Enclave] Cannot generate QE quote. Reason: {:?}",
+                status_code
+            );
             return AllocationWithResult::default();
         }
     };
@@ -218,63 +229,64 @@ pub unsafe extern "C" fn ecall_verify_dcap_quote(
         Ok(_) => {
             println!("[Enclave] Quote verified");
             sgx_status_t::SGX_SUCCESS
-        },
+        }
         Err(err) => {
-            println!("[Enlcave] Quote verification failed. Status code: {:?}", err);
+            println!(
+                "[Enlcave] Quote verification failed. Status code: {:?}",
+                err
+            );
             err
         }
     }
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn ecall_add_epoch(
-    _starting_block: u32,
-) -> sgx_status_t {
-    // Unseal old key manager
-    let key_manager = match key_manager::KeyManager::unseal() {
-        Ok(km) => km,
-        Err(err) => {
-            return err;
-        }
-    };
+pub unsafe extern "C" fn ecall_add_epoch(starting_block: u64) -> sgx_status_t {
+    #[cfg(feature = "attestation_server")]
+    {
+        // Unseal old key manager
+        let key_manager = match key_manager::KeyManager::unseal() {
+            Ok(km) => km,
+            Err(err) => {
+                return err;
+            }
+        };
 
-    // TODO: Call add_epoch method
-
-    // Seal updated key manager
-    match key_manager.seal() {
-        Ok(_) => {
-            println!("Added new epoch");
-            sgx_status_t::SGX_SUCCESS
-        },
-        Err(err) => {
-            println!("Cannot add new epoch. Reason: {:?}", err);
-            err
+        match key_manager.add_new_epoch(starting_block) {
+            Ok(_) => sgx_status_t::SGX_SUCCESS,
+            Err(err) => err
         }
+    }
+
+    #[cfg(not(feature = "attestation_server"))]
+    {
+        println!("[Enclave] Not enabled");
+        sgx_status_t::SGX_ERROR_UNEXPECTED
     }
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn ecall_remove_latest_epoch() -> sgx_status_t {
-    // Unseal old key manager
-    let key_manager = match key_manager::KeyManager::unseal() {
-        Ok(km) => km,
-        Err(err) => {
-            return err;
-        }
-    };
+    #[cfg(feature = "attestation_server")]
+    {
+        // Unseal old key manager
+        let key_manager = match key_manager::KeyManager::unseal() {
+            Ok(km) => km,
+            Err(err) => {
+                return err;
+            }
+        };
 
-    // TODO: Call remove_latest_epoch method
-
-    // Seal updated key manager
-    match key_manager.seal() {
-        Ok(_) => {
-            println!("Removed latest epoch");
-            sgx_status_t::SGX_SUCCESS
-        },
-        Err(err) => {
-            println!("Cannot add new epoch. Reason: {:?}", err);
-            err
+        match key_manager.remove_latest_epoch() {
+            Ok(_) => sgx_status_t::SGX_SUCCESS,
+            Err(err) => err
         }
+    }
+
+    #[cfg(not(feature = "attestation_server"))]
+    {
+        println!("[Enclave] Not enabled");
+        sgx_status_t::SGX_ERROR_UNEXPECTED
     }
 }
 

@@ -205,7 +205,6 @@ fn as_u32_le(array: &[u8; 4]) -> u32 {
         + ((array[3] as u32) << 24)
 }
 
-#[allow(const_err)]
 pub fn create_attestation_report(
     pub_k: &sgx_ec256_public_t,
     sign_type: sgx_quote_sign_type_t,

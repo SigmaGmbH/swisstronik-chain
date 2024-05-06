@@ -32,6 +32,7 @@ pub struct EpochManager {
 
 impl EpochManager {
 
+    #[cfg(feature = "attestation_server")]
     /// Generates new epoch with random epoch key, which starts from provided
     /// `starting_block` param. Returns new instance of EpochManager with added epoch.
     pub fn add_new_epoch(&self, starting_block: u64) -> SgxResult<EpochManager> {
@@ -70,6 +71,8 @@ impl EpochManager {
         Ok(updated_epoch_manager)
     }
 
+
+    #[cfg(feature = "attestation_server")]
     /// Removes latest epoch. 
     /// Returns error if there only one epoch or epoch manager was not properly initialized.
     /// Returns updated epoch manager without latest epoch.
