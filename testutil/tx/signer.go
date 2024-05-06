@@ -1,4 +1,4 @@
-package testutil
+package tx
 
 import (
 	"fmt"
@@ -8,14 +8,14 @@ import (
 )
 
 type TestSigner struct {
-	privateKey 	cryptotypes.PrivKey
-	address 	sdk.Address
+	privateKey cryptotypes.PrivKey
+	address    sdk.Address
 }
 
 func NewTestSigner(privateKey cryptotypes.PrivKey) keyring.Signer {
 	return TestSigner{
 		privateKey: privateKey,
-		address: sdk.AccAddress(privateKey.PubKey().Address()),
+		address:    sdk.AccAddress(privateKey.PubKey().Address()),
 	}
 }
 

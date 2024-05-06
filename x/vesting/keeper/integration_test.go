@@ -2,6 +2,7 @@ package keeper_test
 
 import (
 	"context"
+	"math/big"
 	"testing"
 	"time"
 
@@ -19,6 +20,7 @@ import (
 	"swisstronik/crypto/ethsecp256k1"
 	"swisstronik/tests"
 	"swisstronik/testutil"
+	utiltx "swisstronik/testutil/tx"
 	"swisstronik/utils"
 	feemarkettypes "swisstronik/x/feemarket/types"
 	"swisstronik/x/vesting/keeper"
@@ -421,6 +423,29 @@ var _ = Describe("Monthly Vesting Account", Ordered, func() {
 		It("cannot transfer unvested tokens", func() {
 			err := s.app.BankKeeper.SendCoins(s.ctx, mva.GetAddress(), user, unvested)
 			Expect(err).ToNot(BeNil())
+		})
+		It("can perform ethereum tx with vested coins", func() {
+			mvaEthAddr := common.BytesToAddress(mva.GetAddress().Bytes())
+
+			evmBalanceBefore := s.app.EvmKeeper.GetBalance(s.ctx, mvaEthAddr)
+			Expect(evmBalanceBefore.Cmp(big.NewInt(0))).Should(BeNumerically(">", 0))
+			srcBalanceBefore := s.app.BankKeeper.GetBalance(s.ctx, mva.GetAddress(), utils.BaseDenom)
+			destBalanceBefore := s.app.BankKeeper.GetBalance(s.ctx, user, utils.BaseDenom)
+
+			amount := vested.AmountOf(utils.BaseDenom)
+			msg, err := utiltx.CreateEthTx(s.ctx, s.app, vaPrivKey, mva.GetAddress(), user, amount.BigInt(), 0)
+			Expect(err).To(BeNil())
+
+			_, err = testutil.DeliverEthTx(s.app, vaPrivKey, msg)
+			Expect(err).To(BeNil())
+
+			evmBalanceAfter := s.app.EvmKeeper.GetBalance(s.ctx, mvaEthAddr)
+			srcBalanceAfter := s.app.BankKeeper.GetBalance(s.ctx, mva.GetAddress(), utils.BaseDenom)
+			destBalanceAfter := s.app.BankKeeper.GetBalance(s.ctx, user, utils.BaseDenom)
+			Expect(destBalanceBefore.AddAmount(amount).Amount.Uint64()).Should(BeNumerically("==", destBalanceAfter.Amount.Uint64()))
+			// Reduced balance should be greater or equal to amount, because gas fee is non-recoverable
+			Expect(srcBalanceBefore.SubAmount(amount).Amount.Uint64()).Should(BeNumerically(">=", srcBalanceAfter.Amount.Uint64()))
+			Expect(new(big.Int).Sub(evmBalanceBefore, evmBalanceAfter).Cmp(big.NewInt(0))).Should(BeNumerically(">=", 0))
 		})
 	})
 

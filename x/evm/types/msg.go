@@ -50,6 +50,23 @@ func NewTx(
 	return newMsgHandleTx(chainID, nonce, to, amount, gasLimit, gasPrice, gasFeeCap, gasTipCap, input, accesses, privateKey, nodePublicKey)
 }
 
+func NewTxFromArgs(txArgs *EvmTxArgs, privateKey, nodePublicKey []byte) *MsgHandleTx {
+	return newMsgHandleTx(
+		txArgs.ChainID,
+		txArgs.Nonce,
+		txArgs.To,
+		txArgs.Amount,
+		txArgs.GasLimit,
+		txArgs.GasPrice,
+		txArgs.GasFeeCap,
+		txArgs.GasTipCap,
+		txArgs.Input,
+		txArgs.Accesses,
+		privateKey,
+		nodePublicKey,
+	)
+}
+
 // NewTxContract returns a reference to a new Ethereum transaction
 // message designated for contract creation.
 func NewTxContract(
