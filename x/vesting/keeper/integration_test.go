@@ -18,6 +18,7 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"swisstronik/app"
+	"swisstronik/app/ante"
 	"swisstronik/crypto/ethsecp256k1"
 	"swisstronik/tests"
 	"swisstronik/testutil"
@@ -59,10 +60,22 @@ func (suite *VestingTestSuite) CommitAfter(t time.Duration) error {
 	return err
 }
 
+func (suite *VestingTestSuite) validateEthVestingTransactionDecorator(msgs ...sdk.Msg) error {
+	dec := ante.NewEthVestingTransactionDecorator(suite.app.AccountKeeper, suite.app.BankKeeper, suite.app.EvmKeeper)
+	return testutil.ValidateAnteForMsgs(suite.ctx, dec, msgs...)
+}
+
 func (suite *VestingTestSuite) assertFailEthNative(fromPrivKey cryptotypes.PrivKey, msgs ...sdk.Msg) {
-	_, err := testutil.DeliverEthTx(suite.app, fromPrivKey, msgs...)
-	Expect(err).To(BeNil())
-	Expect(strings.Contains(err.Error(), "insufficient"))
+	const insufficient = "insufficient"
+
+	// Validate ante handler
+	err := suite.validateEthVestingTransactionDecorator(msgs...)
+	Expect(err).ToNot(BeNil())
+	Expect(strings.Contains(err.Error(), insufficient))
+
+	_, err = testutil.DeliverEthTx(suite.app, fromPrivKey, msgs...)
+	Expect(err).ToNot(BeNil())
+	Expect(strings.Contains(err.Error(), insufficient))
 }
 
 func (suite *VestingTestSuite) assertSuccessEthNative(src, dest sdk.AccAddress, amount math.Int, denom string, fromPrivKey cryptotypes.PrivKey, msgs ...sdk.Msg) {
@@ -75,7 +88,11 @@ func (suite *VestingTestSuite) assertSuccessEthNative(src, dest sdk.AccAddress, 
 	srcBalanceBefore := suite.app.BankKeeper.GetBalance(suite.ctx, src, denom)
 	destBalanceBefore := suite.app.BankKeeper.GetBalance(suite.ctx, dest, denom)
 
-	_, err := testutil.DeliverEthTx(suite.app, fromPrivKey, msgs...)
+	// Validate ante handler
+	err := suite.validateEthVestingTransactionDecorator(msgs...)
+	Expect(err).To(BeNil())
+
+	_, err = testutil.DeliverEthTx(suite.app, fromPrivKey, msgs...)
 	Expect(err).To(BeNil())
 
 	srcEvmBalanceAfter := suite.app.EvmKeeper.GetBalance(suite.ctx, srcEthAddr)
@@ -91,8 +108,8 @@ func (suite *VestingTestSuite) assertSuccessEthNative(src, dest sdk.AccAddress, 
 
 func (suite *VestingTestSuite) SetupTest() error {
 	chainID := utils.TestnetChainID + "-1"
-	app, _ := app.SetupSwissApp(false, nil, chainID)
-	suite.app = app
+	appS, _ := app.SetupSwissApp(false, nil, chainID)
+	suite.app = appS
 
 	address := tests.RandomAccAddress()
 
@@ -105,23 +122,23 @@ func (suite *VestingTestSuite) SetupTest() error {
 	header := testutil.NewHeader(
 		1, time.Now().UTC(), chainID, consAddress, nil, nil,
 	)
-	suite.ctx = app.BaseApp.NewContext(false, header)
+	suite.ctx = appS.BaseApp.NewContext(false, header)
 	suite.goCtx = sdk.WrapSDKContext(suite.ctx)
 
-	stakingParams := app.StakingKeeper.GetParams(suite.ctx)
+	stakingParams := appS.StakingKeeper.GetParams(suite.ctx)
 	stakingParams.BondDenom = utils.BaseDenom
-	err = app.StakingKeeper.SetParams(suite.ctx, stakingParams)
+	err = appS.StakingKeeper.SetParams(suite.ctx, stakingParams)
 	if err != nil {
 		return err
 	}
 
 	feeParams := feemarkettypes.DefaultParams()
 	feeParams.MinGasPrice = sdk.NewDec(1)
-	err = app.FeeMarketKeeper.SetParams(suite.ctx, feeParams)
+	err = appS.FeeMarketKeeper.SetParams(suite.ctx, feeParams)
 	if err != nil {
 		return err
 	}
-	app.FeeMarketKeeper.SetBaseFee(suite.ctx, sdk.ZeroInt().BigInt())
+	appS.FeeMarketKeeper.SetBaseFee(suite.ctx, sdk.ZeroInt().BigInt())
 
 	// Set Validator
 	valAddr := sdk.ValAddress(address.Bytes())
@@ -129,21 +146,21 @@ func (suite *VestingTestSuite) SetupTest() error {
 	if err != nil {
 		return err
 	}
-	validator = stakingkeeper.TestingUpdateValidator(&app.StakingKeeper, suite.ctx, validator, true)
-	err = app.StakingKeeper.Hooks().AfterValidatorCreated(suite.ctx, validator.GetOperator())
+	validator = stakingkeeper.TestingUpdateValidator(&appS.StakingKeeper, suite.ctx, validator, true)
+	err = appS.StakingKeeper.Hooks().AfterValidatorCreated(suite.ctx, validator.GetOperator())
 	if err != nil {
 		return err
 	}
-	err = app.StakingKeeper.SetValidatorByConsAddr(suite.ctx, validator)
+	err = appS.StakingKeeper.SetValidatorByConsAddr(suite.ctx, validator)
 	if err != nil {
 		return err
 	}
 
-	suite.querier = keeper.Querier{Keeper: app.VestingKeeper}
-	suite.msgServer = keeper.NewMsgServerImpl(app.VestingKeeper)
-	suite.stkQuerier = stakingkeeper.Querier{Keeper: &app.StakingKeeper}
+	suite.querier = keeper.Querier{Keeper: appS.VestingKeeper}
+	suite.msgServer = keeper.NewMsgServerImpl(appS.VestingKeeper)
+	suite.stkQuerier = stakingkeeper.Querier{Keeper: &appS.StakingKeeper}
 
-	validators := app.StakingKeeper.GetValidators(suite.ctx, 2)
+	validators := appS.StakingKeeper.GetValidators(suite.ctx, 2)
 	// Set a bonded validator that takes part in consensus
 	if validators[0].Status == stakingtypes.Bonded {
 		suite.validator = validators[0]
