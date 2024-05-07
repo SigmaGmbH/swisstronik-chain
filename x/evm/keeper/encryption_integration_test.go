@@ -2,6 +2,39 @@ package keeper_test
 
 import "github.com/SigmaGmbH/librustgo"
 
+func (suite *KeeperTestSuite) TestGetNodePublicKey() {
+	var v1EpochStartingBlock uint64 = 2
+	var v2EpochStartingBlock uint64 = 5
+
+	suite.SetupSGXVMTest()
+
+	// Initialize empty key manager with genesis epoch key
+	err := librustgo.InitializeEnclave(true)
+	suite.Require().NoError(err)
+
+	// Add 2 epochs
+	err = librustgo.AddEpoch(v1EpochStartingBlock)
+	suite.Require().NoError(err)
+
+	err = librustgo.AddEpoch(v2EpochStartingBlock)
+	suite.Require().NoError(err)
+
+	updatedEpochs, err := librustgo.ListEpochs()
+	suite.Require().NoError(err)
+	suite.Require().Equal(len(updatedEpochs), 3, "Should be 3 epochs")
+
+	// Request node public key
+	nodePublicKey, err := suite.app.EvmKeeper.GetNodePublicKey(0)
+	suite.Require().NoError(err)
+	nodePublicKeyV1, err := suite.app.EvmKeeper.GetNodePublicKey(v1EpochStartingBlock)
+	suite.Require().NoError(err)
+	nodePublicKeyV2, err := suite.app.EvmKeeper.GetNodePublicKey(v2EpochStartingBlock)
+	suite.Require().NoError(err)
+
+	suite.Require().NotEqual(nodePublicKey, nodePublicKeyV1)
+	suite.Require().NotEqual(nodePublicKeyV1, nodePublicKeyV2)
+}
+
 func (suite *KeeperTestSuite) TestAddEpoch() {
 	var v1EpochStartingBlock uint64 = 2
 
