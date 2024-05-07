@@ -3,6 +3,7 @@ package keeper_test
 import (
 	"context"
 	"math/big"
+	"strings"
 	"testing"
 	"time"
 
@@ -56,6 +57,36 @@ func (suite *VestingTestSuite) CommitAfter(t time.Duration) error {
 	suite.ctx, err = testutil.CommitAndCreateNewCtx(suite.ctx, suite.app, t)
 	suite.goCtx = sdk.WrapSDKContext(suite.ctx)
 	return err
+}
+
+func (suite *VestingTestSuite) assertFailEthNative(fromPrivKey cryptotypes.PrivKey, msgs ...sdk.Msg) {
+	_, err := testutil.DeliverEthTx(suite.app, fromPrivKey, msgs...)
+	Expect(err).To(BeNil())
+	Expect(strings.Contains(err.Error(), "insufficient"))
+}
+
+func (suite *VestingTestSuite) assertSuccessEthNative(src, dest sdk.AccAddress, amount math.Int, denom string, fromPrivKey cryptotypes.PrivKey, msgs ...sdk.Msg) {
+	srcEthAddr := common.BytesToAddress(src.Bytes())
+	destEthAddr := common.BytesToAddress(dest.Bytes())
+
+	srcEvmBalanceBefore := suite.app.EvmKeeper.GetBalance(suite.ctx, srcEthAddr)
+	Expect(srcEvmBalanceBefore.Cmp(big.NewInt(0))).Should(BeNumerically(">", 0))
+	destEvmBalanceBefore := suite.app.EvmKeeper.GetBalance(suite.ctx, destEthAddr)
+	srcBalanceBefore := suite.app.BankKeeper.GetBalance(suite.ctx, src, denom)
+	destBalanceBefore := suite.app.BankKeeper.GetBalance(suite.ctx, dest, denom)
+
+	_, err := testutil.DeliverEthTx(suite.app, fromPrivKey, msgs...)
+	Expect(err).To(BeNil())
+
+	srcEvmBalanceAfter := suite.app.EvmKeeper.GetBalance(suite.ctx, srcEthAddr)
+	dstEvmBalanceAfter := suite.app.EvmKeeper.GetBalance(suite.ctx, destEthAddr)
+	srcBalanceAfter := suite.app.BankKeeper.GetBalance(suite.ctx, src, denom)
+	destBalanceAfter := suite.app.BankKeeper.GetBalance(suite.ctx, dest, denom)
+	Expect(new(big.Int).Sub(dstEvmBalanceAfter, destEvmBalanceBefore).Uint64()).Should(BeNumerically("==", amount.Uint64()))
+	Expect(destBalanceBefore.AddAmount(amount).Amount.Uint64()).Should(BeNumerically("==", destBalanceAfter.Amount.Uint64()))
+	// Reduced balance should be greater or equal to amount, because gas fee is non-recoverable
+	Expect(new(big.Int).Sub(srcEvmBalanceBefore, srcEvmBalanceAfter).Uint64()).Should(BeNumerically(">=", amount.Uint64()))
+	Expect(srcBalanceBefore.SubAmount(amount).Amount.Uint64()).Should(BeNumerically(">=", srcBalanceAfter.Amount.Uint64()))
 }
 
 func (suite *VestingTestSuite) SetupTest() error {
@@ -211,7 +242,7 @@ var _ = Describe("Monthly Vesting Account", Ordered, func() {
 			Expect(unvested).To(Equal(initialVesting))
 			Expect(vested.IsZero()).To(BeTrue())
 		})
-		It("can transfer spendable tokens", func() {
+		It("can transfer spendable coins", func() {
 			err := testutil.FundAccount(s.ctx, s.app.BankKeeper, mva.GetAddress(), unvested)
 			Expect(err).To(BeNil())
 			err = s.app.BankKeeper.SendCoins(s.ctx, mva.GetAddress(), user, unvested)
@@ -220,7 +251,7 @@ var _ = Describe("Monthly Vesting Account", Ordered, func() {
 			spendable := s.app.BankKeeper.SpendableCoins(s.ctx, mva.GetAddress())
 			Expect(spendable).To(Equal(extraCoins))
 		})
-		It("cannot transfer unvested tokens", func() {
+		It("cannot transfer unvested coins", func() {
 			err := s.app.BankKeeper.SendCoins(s.ctx, va, user, unvested)
 			Expect(err).ToNot(BeNil())
 		})
@@ -240,20 +271,21 @@ var _ = Describe("Monthly Vesting Account", Ordered, func() {
 			Expect(unvested).To(Equal(initialVesting))
 			Expect(vested.IsZero()).To(BeTrue())
 		})
-		It("can transfer spendable tokens", func() {
-			err := testutil.FundAccount(s.ctx, s.app.BankKeeper, mva.GetAddress(), unvested)
+		It("can transfer spendable coins", func() {
+			coins := sdk.NewCoins(sdk.NewCoin(utils.BaseDenom, math.NewInt(1e18)))
+			err := testutil.FundAccount(s.ctx, s.app.BankKeeper, mva.GetAddress(), coins)
 			Expect(err).To(BeNil())
-			err = s.app.BankKeeper.SendCoins(s.ctx, mva.GetAddress(), user, unvested)
+			err = s.app.BankKeeper.SendCoins(s.ctx, mva.GetAddress(), user, coins)
 			Expect(err).To(BeNil())
 
 			spendable := s.app.BankKeeper.SpendableCoins(s.ctx, mva.GetAddress())
 			Expect(spendable).To(Equal(extraCoins))
 		})
-		It("cannot transfer unvested tokens", func() {
+		It("cannot transfer unvested coins", func() {
 			err := s.app.BankKeeper.SendCoins(s.ctx, va, user, unvested)
 			Expect(err).ToNot(BeNil())
 		})
-		It("can delegate unvested tokens", func() {
+		It("can delegate unvested coins", func() {
 			// Delegate unvested tokens
 			res, err := testutil.Delegate(
 				s.ctx,
@@ -286,6 +318,22 @@ var _ = Describe("Monthly Vesting Account", Ordered, func() {
 			// Fund more tokens for gas consuming
 			err = testutil.FundAccount(s.ctx, s.app.BankKeeper, mva.GetAddress(), extraCoins)
 			Expect(err).To(BeNil())
+		})
+		It("can perform ethereum tx with spendable coins", func() {
+			coins := sdk.NewCoins(sdk.NewCoin(utils.BaseDenom, math.NewInt(1e18)))
+			err := testutil.FundAccount(s.ctx, s.app.BankKeeper, mva.GetAddress(), coins)
+			Expect(err).To(BeNil())
+
+			amount := coins.AmountOf(utils.BaseDenom)
+			msg, err := utiltx.CreateEthTx(s.ctx, s.app, vaPrivKey, mva.GetAddress(), user, amount.BigInt(), 0)
+			Expect(err).To(BeNil())
+			s.assertSuccessEthNative(mva.GetAddress(), user, amount, utils.BaseDenom, vaPrivKey, msg)
+		})
+		It("cannot perform ethereum tx with unvested coins", func() {
+			amount := unvested.AmountOf(utils.BaseDenom)
+			msg, err := utiltx.CreateEthTx(s.ctx, s.app, vaPrivKey, mva.GetAddress(), user, amount.BigInt(), 0)
+			Expect(err).To(BeNil())
+			s.assertFailEthNative(vaPrivKey, msg)
 		})
 	})
 
@@ -425,27 +473,16 @@ var _ = Describe("Monthly Vesting Account", Ordered, func() {
 			Expect(err).ToNot(BeNil())
 		})
 		It("can perform ethereum tx with vested coins", func() {
-			mvaEthAddr := common.BytesToAddress(mva.GetAddress().Bytes())
-
-			evmBalanceBefore := s.app.EvmKeeper.GetBalance(s.ctx, mvaEthAddr)
-			Expect(evmBalanceBefore.Cmp(big.NewInt(0))).Should(BeNumerically(">", 0))
-			srcBalanceBefore := s.app.BankKeeper.GetBalance(s.ctx, mva.GetAddress(), utils.BaseDenom)
-			destBalanceBefore := s.app.BankKeeper.GetBalance(s.ctx, user, utils.BaseDenom)
-
 			amount := vested.AmountOf(utils.BaseDenom)
 			msg, err := utiltx.CreateEthTx(s.ctx, s.app, vaPrivKey, mva.GetAddress(), user, amount.BigInt(), 0)
 			Expect(err).To(BeNil())
-
-			_, err = testutil.DeliverEthTx(s.app, vaPrivKey, msg)
+			s.assertSuccessEthNative(mva.GetAddress(), user, amount, utils.BaseDenom, vaPrivKey, msg)
+		})
+		It("cannot perform ethereum tx with unvested coins", func() {
+			amount := unvested.AmountOf(utils.BaseDenom)
+			msg, err := utiltx.CreateEthTx(s.ctx, s.app, vaPrivKey, mva.GetAddress(), user, amount.BigInt(), 0)
 			Expect(err).To(BeNil())
-
-			evmBalanceAfter := s.app.EvmKeeper.GetBalance(s.ctx, mvaEthAddr)
-			srcBalanceAfter := s.app.BankKeeper.GetBalance(s.ctx, mva.GetAddress(), utils.BaseDenom)
-			destBalanceAfter := s.app.BankKeeper.GetBalance(s.ctx, user, utils.BaseDenom)
-			Expect(destBalanceBefore.AddAmount(amount).Amount.Uint64()).Should(BeNumerically("==", destBalanceAfter.Amount.Uint64()))
-			// Reduced balance should be greater or equal to amount, because gas fee is non-recoverable
-			Expect(srcBalanceBefore.SubAmount(amount).Amount.Uint64()).Should(BeNumerically(">=", srcBalanceAfter.Amount.Uint64()))
-			Expect(new(big.Int).Sub(evmBalanceBefore, evmBalanceAfter).Cmp(big.NewInt(0))).Should(BeNumerically(">=", 0))
+			s.assertFailEthNative(vaPrivKey, msg)
 		})
 	})
 
@@ -517,6 +554,12 @@ var _ = Describe("Monthly Vesting Account", Ordered, func() {
 			Expect(mva).ToNot(BeNil())
 			Expect(mva.DelegatedFree).To(Equal(initialVesting))
 			Expect(mva.DelegatedVesting).To(BeNil())
+		})
+		It("can perform ethereum tx with initial vesting coins", func() {
+			amount := initialVesting.AmountOf(utils.BaseDenom)
+			msg, err := utiltx.CreateEthTx(s.ctx, s.app, vaPrivKey, mva.GetAddress(), user, amount.BigInt(), 0)
+			Expect(err).To(BeNil())
+			s.assertSuccessEthNative(mva.GetAddress(), user, amount, utils.BaseDenom, vaPrivKey, msg)
 		})
 	})
 })
