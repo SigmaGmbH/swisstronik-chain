@@ -229,7 +229,7 @@ func request_Query_VerificationDetails_0(ctx context.Context, marshaler runtime.
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "verificationID")
 	}
 
-	protoReq.VerificationID, err = runtime.Bytes(val)
+	protoReq.VerificationID, err = runtime.String(val)
 
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "verificationID", err)
@@ -256,7 +256,7 @@ func local_request_Query_VerificationDetails_0(ctx context.Context, marshaler ru
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "verificationID")
 	}
 
-	protoReq.VerificationID, err = runtime.Bytes(val)
+	protoReq.VerificationID, err = runtime.String(val)
 
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "verificationID", err)

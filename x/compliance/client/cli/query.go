@@ -2,11 +2,12 @@ package cli
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/spf13/cobra"
+	
 	"swisstronik/x/compliance/types"
 )
 
@@ -136,13 +137,8 @@ func CmdGetVerificationDetails() *cobra.Command {
 			clientCtx := client.GetClientContextFromCmd(cmd)
 			queryClient := types.NewQueryClient(clientCtx)
 
-			id, err := base64.StdEncoding.DecodeString(args[0])
-			if err != nil {
-				return err
-			}
-
 			req := &types.QueryVerificationDetailsRequest{
-				VerificationID: id,
+				VerificationID: args[0],
 			}
 
 			resp, err := queryClient.VerificationDetails(context.Background(), req)
