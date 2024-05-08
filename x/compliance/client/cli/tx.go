@@ -143,7 +143,7 @@ func CmdSetIssuerVerificationStatus() *cobra.Command {
 // CmdSetIssuerDetails command sets provided issuer details.
 func CmdSetIssuerDetails() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "set-issuer-details [issuer-address] [name] [description] [url] [logo-url] [legalEntity]",
+		Use:   "set-issuer-details [issuer-address] [name] [description] [url] [logo-url] [legal-entity]",
 		Short: "Sets issuer details",
 		Args:  cobra.ExactArgs(6),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -186,7 +186,7 @@ func CmdSetIssuerDetails() *cobra.Command {
 // CmdUpdateIssuerDetails command updates existing issuer details.
 func CmdUpdateIssuerDetails() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "update-issuer-details [issuer-address] [name] [description] [url] [logo-url] [legalEntity]",
+		Use:   "update-issuer-details [issuer-address] [name] [description] [url] [logo-url] [legal-entity]",
 		Short: "Update issuer details",
 		Args:  cobra.ExactArgs(7),
 		RunE: func(cmd *cobra.Command, args []string) error {
