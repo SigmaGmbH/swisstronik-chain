@@ -185,6 +185,9 @@ func (suite *KeeperTestSuite) TestCrossEpochInteraction() {
 	suite.Require().Equal(new(big.Int), contractAcc.Balance)
 	suite.Require().True(contractAcc.IsContract())
 
+	nodePublicKeyRes, err := librustgo.GetNodePublicKey(uint64(suite.ctx.BlockHeader().Height))
+	suite.Require().NoError(err)
+
 	// write some data to contract
 	setStorageArgs, err := types.SimpleStorageContract.ABI.Pack("store", big.NewInt(1234567890))
 	suite.Require().NoError(err)
@@ -200,7 +203,7 @@ func (suite *KeeperTestSuite) TestCrossEpochInteraction() {
 		setStorageArgs,
 		&ethtypes.AccessList{}, // accesses
 		suite.privateKey,
-		suite.nodePublicKey,
+		nodePublicKeyRes.PublicKey,
 	)
 
 	setStorageTx.From = suite.address.Hex()
@@ -208,5 +211,5 @@ func (suite *KeeperTestSuite) TestCrossEpochInteraction() {
 	suite.Require().NoError(err)
 	rsp, err = suite.app.EvmKeeper.HandleTx(ctx, setStorageTx)
 	suite.Require().NoError(err)
-	suite.Require().Empty(rsp.VmError) // FIXME: Cannot decrypt value. Reason: InvalidTag
+	suite.Require().Empty(rsp.VmError)
 }
