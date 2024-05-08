@@ -217,17 +217,16 @@ func (suite *KeeperTestSuite) TestCrossEpochInteraction() {
 	suite.Require().NoError(err)
 	suite.Require().Empty(rsp.VmError)
 
-	// TODO: Change block number
 	// try to read data from contract
-	//updatedBlockHeight := 100
-	//nodePublicKeyV1Res, err := librustgo.GetNodePublicKey(uint64(updatedBlockHeight))
-	//suite.Require().NoError(err)
-	//nodePublicKeyV1 := nodePublicKeyV1Res.PublicKey
-	//suite.Require().NotEqual(nodePublicKeyRes.PublicKey, nodePublicKeyV1, "should be different encryption key")
+	updatedCtx := suite.ctx.WithBlockHeight(1000)
+	nodePublicKeyResponse, err := librustgo.GetNodePublicKey(uint64(updatedCtx.BlockHeight()))
+	suite.Require().NoError(err)
+	updatedNodePublicKey := nodePublicKeyResponse.PublicKey
+	suite.Require().NotEqual(nodePublicKeyRes.PublicKey, updatedNodePublicKey, "should be different encryption key")
 
 	getStorageData, err := types.SimpleStorageContract.ABI.Pack("get")
 	suite.Require().NoError(err)
-	encryptedData, err := deoxys.EncryptECDH(suite.privateKey, nodePublicKeyRes.PublicKey, getStorageData)
+	encryptedData, err := deoxys.EncryptECDH(suite.privateKey, updatedNodePublicKey, getStorageData)
 	suite.Require().NoError(err)
 
 	getStorageArgs, err := json.Marshal(&types.TransactionArgs{
@@ -236,7 +235,7 @@ func (suite *KeeperTestSuite) TestCrossEpochInteraction() {
 		Data: (*hexutil.Bytes)(&encryptedData),
 	})
 
-	res, err := suite.queryClient.EthCall(suite.ctx, &types.EthCallRequest{
+	res, err := suite.app.EvmKeeper.EthCall(updatedCtx, &types.EthCallRequest{
 		Args:   getStorageArgs,
 		GasCap: uint64(config.DefaultGasCap),
 	})
@@ -244,7 +243,7 @@ func (suite *KeeperTestSuite) TestCrossEpochInteraction() {
 	suite.Require().Empty(res.VmError)
 
 	// Decrypt response
-	decryptedData, err := deoxys.DecryptECDH(suite.privateKey, nodePublicKeyRes.PublicKey, res.Ret)
+	decryptedData, err := deoxys.DecryptECDH(suite.privateKey, updatedNodePublicKey, res.Ret)
 	suite.Require().NoError(err)
 	decodedValue, err := parseIntResponse(decryptedData)
 	suite.Require().NoError(err)
