@@ -8,6 +8,9 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"math/big"
+	"strconv"
+	"strings"
+	"swisstronik/crypto/deoxys"
 	"swisstronik/server/config"
 	"swisstronik/x/evm/types"
 )
@@ -189,7 +192,8 @@ func (suite *KeeperTestSuite) TestCrossEpochInteraction() {
 	suite.Require().NoError(err)
 
 	// write some data to contract
-	setStorageArgs, err := types.SimpleStorageContract.ABI.Pack("store", big.NewInt(1234567890))
+	writtenValue := int64(100)
+	setStorageArgs, err := types.SimpleStorageContract.ABI.Pack("store", big.NewInt(writtenValue))
 	suite.Require().NoError(err)
 	setStorageTx := types.NewSGXVMTx(
 		chainID,
@@ -212,4 +216,48 @@ func (suite *KeeperTestSuite) TestCrossEpochInteraction() {
 	rsp, err = suite.app.EvmKeeper.HandleTx(ctx, setStorageTx)
 	suite.Require().NoError(err)
 	suite.Require().Empty(rsp.VmError)
+
+	// TODO: Change block number
+	// try to read data from contract
+	//updatedBlockHeight := 100
+	//nodePublicKeyV1Res, err := librustgo.GetNodePublicKey(uint64(updatedBlockHeight))
+	//suite.Require().NoError(err)
+	//nodePublicKeyV1 := nodePublicKeyV1Res.PublicKey
+	//suite.Require().NotEqual(nodePublicKeyRes.PublicKey, nodePublicKeyV1, "should be different encryption key")
+
+	getStorageData, err := types.SimpleStorageContract.ABI.Pack("get")
+	suite.Require().NoError(err)
+	encryptedData, err := deoxys.EncryptECDH(suite.privateKey, nodePublicKeyRes.PublicKey, getStorageData)
+	suite.Require().NoError(err)
+
+	getStorageArgs, err := json.Marshal(&types.TransactionArgs{
+		From: &suite.address,
+		To:   &contractAddress,
+		Data: (*hexutil.Bytes)(&encryptedData),
+	})
+
+	res, err := suite.queryClient.EthCall(suite.ctx, &types.EthCallRequest{
+		Args:   getStorageArgs,
+		GasCap: uint64(config.DefaultGasCap),
+	})
+	suite.Require().NoError(err)
+	suite.Require().Empty(res.VmError)
+
+	// Decrypt response
+	decryptedData, err := deoxys.DecryptECDH(suite.privateKey, nodePublicKeyRes.PublicKey, res.Ret)
+	suite.Require().NoError(err)
+	decodedValue, err := parseIntResponse(decryptedData)
+	suite.Require().NoError(err)
+
+	suite.Require().Equal(writtenValue, decodedValue)
+}
+
+func parseIntResponse(data []byte) (int64, error) {
+	hexDecryptedData := hexutil.Encode(data)
+	var dataToParse = hexDecryptedData
+	if strings.HasPrefix(hexDecryptedData, "0x") {
+		dataToParse = strings.TrimPrefix(dataToParse, "0x")
+	}
+
+	return strconv.ParseInt(dataToParse, 16, 64)
 }
