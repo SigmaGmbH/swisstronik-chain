@@ -28,6 +28,9 @@ swisstronikd config chain-id $CHAINID --home "$HOMEDIR"
 
 echo "betray theory cargo way left cricket doll room donkey wire reunion fall left surprise hamster corn village happy bulb token artist twelve whisper expire" | swisstronikd keys add alice --keyring-backend $KEYRING --home $HOMEDIR --recover
 echo "toss sense candy point cost rookie jealous snow ankle electric sauce forward oblige tourist stairs horror grunt tenant afford master violin final genre reason" | swisstronikd keys add bob --keyring-backend $KEYRING --home $HOMEDIR --recover
+echo "offer feel open ancient relax habit field right evoke ball organ beauty" | swisstronikd keys add test1 --recover  --keyring-backend $KEYRING --home "$HOMEDIR"
+echo "olympic such citizen any bind small neutral hidden prefer pupil trash lemon" | swisstronikd keys add test2 --recover  --keyring-backend $KEYRING --home "$HOMEDIR"
+echo "cup hip eyebrow flock slogan filter gas tent angle purpose rose setup" | swisstronikd keys add operator --recover --keyring-backend $KEYRING --home "$HOMEDIR"
 
 swisstronikd init $MONIKER -o --chain-id $CHAINID --home "$HOMEDIR"
 
@@ -37,6 +40,7 @@ jq '.app_state["gov"]["deposit_params"]["min_deposit"][0]["denom"]="aswtr"' "$GE
 jq '.app_state["evm"]["params"]["evm_denom"]="aswtr"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
 jq '.app_state["inflation"]["params"]["mint_denom"]="aswtr"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
 jq '.consensus_params["block"]["max_gas"]="10000000"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
+jq '.app_state["compliance"]["operators"]=[{"operator":"swtr1ml2knanpk8sv94f8h9g8vaf9k3yyfva4fykyn9", "operator_type": 0}]' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
 
 # expose ports
 sed -i 's/127.0.0.1:26657/0.0.0.0:26657/g' "$CONFIG"
@@ -63,6 +67,9 @@ sed -i.bak 's/pruning-interval = "0"/pruning-interval = "10"/g' "$APP_TOML"
 # Allocate genesis accounts
 swisstronikd add-genesis-account alice 10000000000000000000000000aswtr --keyring-backend $KEYRING --home "$HOMEDIR"
 swisstronikd add-genesis-account bob 10000000000000000000000000aswtr --keyring-backend $KEYRING --home "$HOMEDIR"
+swisstronikd add-genesis-account test1 10000000000000000000000000aswtr --keyring-backend $KEYRING --home "$HOMEDIR"
+swisstronikd add-genesis-account test2 10000000000000000000000000aswtr --keyring-backend $KEYRING --home "$HOMEDIR"
+swisstronikd add-genesis-account operator 10000000000000000000000000aswtr --keyring-backend $KEYRING --home "$HOMEDIR"
 
 # Sign genesis transaction
 swisstronikd gentx alice 1000000000000000000000aswtr --keyring-backend $KEYRING --chain-id $CHAINID --home "$HOMEDIR"
