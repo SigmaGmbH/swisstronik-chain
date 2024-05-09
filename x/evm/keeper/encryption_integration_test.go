@@ -249,6 +249,51 @@ func (suite *KeeperTestSuite) TestCrossEpochInteraction() {
 	suite.Require().NoError(err)
 
 	suite.Require().Equal(writtenValue, decodedValue)
+
+	//// Write new value
+	//setStorageTx = types.NewSGXVMTx(
+	//	chainID,
+	//	nonce,
+	//	&contractAddress,
+	//	nil,
+	//	uint64(100_000),
+	//	nil,
+	//	suite.app.FeeMarketKeeper.GetBaseFee(suite.ctx),
+	//	big.NewInt(0),
+	//	setStorageArgs,
+	//	&ethtypes.AccessList{}, // accesses
+	//	suite.privateKey,
+	//	updatedNodePublicKey,
+	//)
+	//
+	//setStorageTx.From = suite.address.Hex()
+	//err = setStorageTx.Sign(ethtypes.LatestSignerForChainID(chainID), suite.signer)
+	//suite.Require().NoError(err)
+	//rsp, err = suite.app.EvmKeeper.HandleTx(updatedCtx, setStorageTx)
+	//suite.Require().NoError(err)
+	//suite.Require().Empty(rsp.VmError)
+	//
+	//// Another attempt
+	//getStorageArgs, err = json.Marshal(&types.TransactionArgs{
+	//	From: &suite.address,
+	//	To:   &contractAddress,
+	//	Data: (*hexutil.Bytes)(&encryptedData),
+	//})
+	//
+	//res, err = suite.app.EvmKeeper.EthCall(updatedCtx, &types.EthCallRequest{
+	//	Args:   getStorageArgs,
+	//	GasCap: uint64(config.DefaultGasCap),
+	//})
+	//suite.Require().NoError(err)
+	//suite.Require().Empty(res.VmError)
+	//
+	//// Decrypt response
+	//decryptedData, err = deoxys.DecryptECDH(suite.privateKey, updatedNodePublicKey, res.Ret)
+	//suite.Require().NoError(err)
+	//decodedValue, err = parseIntResponse(decryptedData)
+	//suite.Require().NoError(err)
+	//
+	//suite.Require().Equal(writtenValue, decodedValue)
 }
 
 func parseIntResponse(data []byte) (int64, error) {
