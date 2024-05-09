@@ -70,6 +70,11 @@ type AnteTestSuite struct {
 
 const TestGasLimit uint64 = 100000
 
+func init() {
+	cfg := sdk.GetConfig()
+	cfg.SetBech32PrefixForAccount("swtr", "swtrpub")
+}
+
 func (suite *AnteTestSuite) SetupTest() {
 	checkTx := false
 	chainID := utils.TestnetChainID + "-1"
