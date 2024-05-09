@@ -1,5 +1,4 @@
 use lazy_static::lazy_static;
-use rand_chacha::rand_core::block;
 use sgx_tstd::ffi::OsString;
 use sgx_tstd::{env, sgxfs::SgxFile};
 use sgx_types::{sgx_status_t, SgxResult};
@@ -7,8 +6,6 @@ use std::io::{Read, Write};
 use std::string::String;
 use std::vec::Vec;
 
-use crate::encryption::{decrypt_deoxys, encrypt_deoxys};
-use crate::error::Error;
 use crate::key_manager::epoch_manager::EpochManager;
 use crate::key_manager::keys::{StateEncryptionKey, TransactionEncryptionKey};
 
@@ -75,9 +72,9 @@ impl KeyManager {
         }
     }
 
-    pub fn get_state_key_by_block(&self, block_number: u64) -> Option<StateEncryptionKey> {
+    pub fn get_state_key_by_block(&self, block_number: u64) -> Option<(u16, StateEncryptionKey)> {
         match self.epoch_manager.get_current_epoch(block_number) {
-            Some(epoch) => Some(epoch.get_state_key()),
+            Some(epoch) => Some((epoch.epoch_number, epoch.get_state_key())),
             None => None
         }
     }
@@ -89,9 +86,9 @@ impl KeyManager {
         }
     }
 
-    pub fn get_tx_key_by_block(&self, block_number: u64) -> Option<TransactionEncryptionKey> {
+    pub fn get_tx_key_by_block(&self, block_number: u64) -> Option<(u16, TransactionEncryptionKey)> {
         match self.epoch_manager.get_current_epoch(block_number) {
-            Some(epoch) => Some(epoch.get_tx_key()),
+            Some(epoch) => Some((epoch.epoch_number, epoch.get_tx_key())),
             None => None
         }
     }

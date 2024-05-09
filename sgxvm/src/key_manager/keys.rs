@@ -81,7 +81,7 @@ impl TransactionEncryptionKey {
             )));
         }
 
-        let public_key: [u8; PUBLIC_KEY_SIZE] = user_public_key.as_slice().try_into().map_err(|err| {
+        let public_key: [u8; PUBLIC_KEY_SIZE] = user_public_key.as_slice().try_into().map_err(|_| {
             Error::encryption_err("[Encryption] Wrong public key size")
         })?;
 

@@ -8,9 +8,9 @@ use crate::encryption;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Epoch {
-    epoch_number: u16,
+    pub epoch_number: u16,
+    pub starting_block: u64,
     epoch_key: [u8; 32],
-    starting_block: u64
 }
 
 impl Epoch {

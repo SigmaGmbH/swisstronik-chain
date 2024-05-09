@@ -28,7 +28,12 @@ pub fn encrypt_storage_cell(
     match &*UNSEALED_KEY_MANAGER {
         Some(key_manager) => {
             match key_manager.get_state_key_by_block(block_number) {
-                Some(state_key) => state_key.encrypt(contract_address, encryption_salt, value),
+                Some((epoch_number, state_key)) => {
+                    let encrypted_value = state_key.encrypt(contract_address, encryption_salt, value)?;
+                    let mut output = epoch_number.to_be_bytes().to_vec();
+                    output.extend(encrypted_value);
+                    Ok(output)
+                },
                 None => Err(Error::encryption_err("There no keys stored in Epoch Manager")),
             }
         }
@@ -49,13 +54,12 @@ pub fn decrypt_storage_cell(
         return Ok(encrypted_value);
     }
 
-    // Find appropriate key in EpochManager
-    let epoch = match encrypted_value.len() {
-        ENCRYPTED_DATA_LEN => 0u16,
+    let (epoch_number, encrypted_data) = match encrypted_value.len() {
+        ENCRYPTED_DATA_LEN => (0u16, encrypted_value),
         PREFIXED_ENCRYPTED_DATA_LEN => {
             let prefix = &encrypted_value[..2];
-            let epoch = ((prefix[0] as u16) << 8) | prefix[1] as u16;
-            epoch
+            let epoch_number: u16 = ((prefix[0] as u16) << 8) | prefix[1] as u16;
+            (epoch_number, encrypted_value[2..].to_vec())
         }
         _ => {
             return Err(Error::encryption_err(format!(
@@ -65,15 +69,16 @@ pub fn decrypt_storage_cell(
         }
     };
 
+    // Find appropriate key in EpochManager
     let state_key = match &*UNSEALED_KEY_MANAGER {
-        Some(key_manager) => key_manager.get_state_key_by_epoch(epoch),
+        Some(key_manager) => key_manager.get_state_key_by_epoch(epoch_number),
         None => {
             return Err(Error::encryption_err("Cannot get access to key manager"));
         }
     };
 
     match state_key {
-        Some(key) => key.decrypt(contract_address, encrypted_value),
+        Some(key) => key.decrypt(contract_address, encrypted_data),
         None => Err(Error::encryption_err("Key for epoch not found")),
     }
 }
@@ -117,7 +122,7 @@ pub fn decrypt_transaction_data(
     match &*UNSEALED_KEY_MANAGER {
         Some(key_manager) => {
             match key_manager.get_tx_key_by_block(block_number) {
-                Some(tx_key) => tx_key.decrypt(public_key, encrypted_data),
+                Some((_, tx_key)) => tx_key.decrypt(public_key, encrypted_data),
                 None => Err(Error::encryption_err("There no keys stored in Epoch Manager")),
             }
         }
@@ -145,7 +150,7 @@ pub fn encrypt_transaction_data(
     match &*UNSEALED_KEY_MANAGER {
         Some(key_manager) => {
             match key_manager.get_tx_key_by_block(block_number) {
-                Some(tx_key) => tx_key.encrypt(user_public_key, data, nonce),
+                Some((_, tx_key)) => tx_key.encrypt(user_public_key, data, nonce),
                 None => Err(Error::encryption_err("There no keys stored in Epoch Manager")),
             }
         }
