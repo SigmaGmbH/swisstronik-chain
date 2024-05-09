@@ -7,7 +7,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/spf13/cobra"
-	
+
 	"swisstronik/x/compliance/types"
 )
 
@@ -23,19 +23,22 @@ func GetQueryCmd() *cobra.Command {
 
 	cmd.AddCommand(
 		CmdQueryParams(),
-		CmdGetOperators(),
+		CmdGetOperator(),
 		CmdGetAddressInfo(),
+		CmdGetAddressesInfo(),
 		CmdGetIssuerDetails(),
+		CmdGetIssuersDetails(),
 		CmdGetVerificationDetails(),
+		CmdGetVerificationsDetails(),
 	)
 
 	return cmd
 }
 
-func CmdGetOperators() *cobra.Command {
+func CmdGetOperator() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get-operator [bech32-or-hex-address]",
-		Short: "Returns OperatorDetails associated with provided address",
+		Short: "Returns operator details associated with provided address",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx := client.GetClientContextFromCmd(cmd)
@@ -47,7 +50,7 @@ func CmdGetOperators() *cobra.Command {
 			}
 
 			req := &types.QueryOperatorDetailsRequest{
-				Address: address.String(),
+				OperatorAddress: address.String(),
 			}
 
 			resp, err := queryClient.OperatorDetails(context.Background(), req)
@@ -67,7 +70,7 @@ func CmdGetOperators() *cobra.Command {
 func CmdGetAddressInfo() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get-address-details [bech32-or-hex-address]",
-		Short: "Returns AddressDetails associated with provided address",
+		Short: "Returns address details associated with provided address",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx := client.GetClientContextFromCmd(cmd)
@@ -96,10 +99,42 @@ func CmdGetAddressInfo() *cobra.Command {
 	return cmd
 }
 
+func CmdGetAddressesInfo() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "get-addresses-details",
+		Short: "Returns all the address details",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx := client.GetClientContextFromCmd(cmd)
+			queryClient := types.NewQueryClient(clientCtx)
+
+			pageReq, err := client.ReadPageRequest(cmd.Flags())
+			if err != nil {
+				return err
+			}
+
+			req := &types.QueryAddressesDetailsRequest{
+				Pagination: pageReq,
+			}
+
+			resp, err := queryClient.AddressesDetails(context.Background(), req)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(resp)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+	flags.AddPaginationFlagsToCmd(cmd, "address details")
+
+	return cmd
+}
+
 func CmdGetIssuerDetails() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get-issuer-details [bech32-or-hex-address]",
-		Short: "Returns details of provided address",
+		Short: "Returns issuer details associated with provided address",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx := client.GetClientContextFromCmd(cmd)
@@ -128,10 +163,42 @@ func CmdGetIssuerDetails() *cobra.Command {
 	return cmd
 }
 
+func CmdGetIssuersDetails() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "get-issuers-details",
+		Short: "Returns all the issuer details",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx := client.GetClientContextFromCmd(cmd)
+			queryClient := types.NewQueryClient(clientCtx)
+
+			pageReq, err := client.ReadPageRequest(cmd.Flags())
+			if err != nil {
+				return err
+			}
+
+			req := &types.QueryIssuersDetailsRequest{
+				Pagination: pageReq,
+			}
+
+			resp, err := queryClient.IssuersDetails(context.Background(), req)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(resp)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+	flags.AddPaginationFlagsToCmd(cmd, "issuer details")
+
+	return cmd
+}
+
 func CmdGetVerificationDetails() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get-verification-details [verification-id]",
-		Short: "Returns details of provided address",
+		Short: "Returns verification details associated with provided address",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx := client.GetClientContextFromCmd(cmd)
@@ -151,6 +218,38 @@ func CmdGetVerificationDetails() *cobra.Command {
 	}
 
 	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+func CmdGetVerificationsDetails() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "get-verifications-details",
+		Short: "Returns all the verification details",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx := client.GetClientContextFromCmd(cmd)
+			queryClient := types.NewQueryClient(clientCtx)
+
+			pageReq, err := client.ReadPageRequest(cmd.Flags())
+			if err != nil {
+				return err
+			}
+
+			req := &types.QueryVerificationsDetailsRequest{
+				Pagination: pageReq,
+			}
+
+			resp, err := queryClient.VerificationsDetails(context.Background(), req)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(resp)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+	flags.AddPaginationFlagsToCmd(cmd, "verification details")
 
 	return cmd
 }
