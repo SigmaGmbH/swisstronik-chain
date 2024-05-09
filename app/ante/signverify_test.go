@@ -3,15 +3,15 @@ package ante_test
 import (
 	"math/big"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	ethtypes "github.com/ethereum/go-ethereum/core/types"
+
 	"swisstronik/app/ante"
 	"swisstronik/tests"
 	evmtypes "swisstronik/x/evm/types"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	ethtypes "github.com/ethereum/go-ethereum/core/types"
 )
 
-func (suite AnteTestSuite) TestEthSigVerificationDecorator() {
+func (suite *AnteTestSuite) TestEthSigVerificationDecorator() {
 	addr, privKey := tests.RandomEthAddressWithPrivateKey()
 
 	signedTx := evmtypes.NewTxContract(suite.app.EvmKeeper.ChainID(), 1, big.NewInt(10), 1000, big.NewInt(1), nil, nil, nil, nil)

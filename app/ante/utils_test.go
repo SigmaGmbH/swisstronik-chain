@@ -9,23 +9,11 @@ import (
 	"time"
 
 	sdkmath "cosmossdk.io/math"
-	"github.com/stretchr/testify/suite"
-
-	"swisstronik/ethereum/eip712"
-	"swisstronik/types"
-	"swisstronik/utils"
-
-	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/x/auth/migrations/legacytx"
-
-	"github.com/ethereum/go-ethereum/common"
-	ethtypes "github.com/ethereum/go-ethereum/core/types"
-
-	"swisstronik/crypto/ethsecp256k1"
-
 	"cosmossdk.io/simapp"
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/tx"
+	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	kmultisig "github.com/cosmos/cosmos-sdk/crypto/keys/multisig"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
@@ -35,20 +23,25 @@ import (
 	txtypes "github.com/cosmos/cosmos-sdk/types/tx"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	sdkante "github.com/cosmos/cosmos-sdk/x/auth/ante"
+	"github.com/cosmos/cosmos-sdk/x/auth/migrations/legacytx"
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
 	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	authz "github.com/cosmos/cosmos-sdk/x/authz"
+	"github.com/ethereum/go-ethereum/common"
+	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	"github.com/stretchr/testify/suite"
 
 	"swisstronik/app"
 	ante "swisstronik/app/ante"
+	"swisstronik/crypto/ethsecp256k1"
 	"swisstronik/encoding"
+	"swisstronik/ethereum/eip712"
 	"swisstronik/tests"
-
+	"swisstronik/types"
+	"swisstronik/utils"
 	evmtypes "swisstronik/x/evm/types"
 	feemarkettypes "swisstronik/x/feemarket/types"
-
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 )
 
 type AnteTestSuite struct {
@@ -158,7 +151,7 @@ func TestAnteTestSuite(t *testing.T) {
 	})
 }
 
-func (s *AnteTestSuite) BuildTestEthTx(
+func (suite *AnteTestSuite) BuildTestEthTx(
 	from common.Address,
 	to common.Address,
 	amount *big.Int,
@@ -170,9 +163,9 @@ func (s *AnteTestSuite) BuildTestEthTx(
 	privateKey []byte,
 	nodePublicKey []byte,
 ) *evmtypes.MsgHandleTx {
-	chainID := s.app.EvmKeeper.ChainID()
-	nonce := s.app.EvmKeeper.GetNonce(
-		s.ctx,
+	chainID := suite.app.EvmKeeper.ChainID()
+	nonce := suite.app.EvmKeeper.GetNonce(
+		suite.ctx,
 		common.BytesToAddress(from.Bytes()),
 	)
 
@@ -397,7 +390,7 @@ func (suite *AnteTestSuite) RegisterAccount(pubKey cryptotypes.PubKey, balance *
 	acc := suite.app.AccountKeeper.NewAccountWithAddress(suite.ctx, sdk.AccAddress(pubKey.Address()))
 	suite.app.AccountKeeper.SetAccount(suite.ctx, acc)
 
-	suite.app.EvmKeeper.SetBalance(suite.ctx, common.BytesToAddress(pubKey.Address()), balance)
+	_ = suite.app.EvmKeeper.SetBalance(suite.ctx, common.BytesToAddress(pubKey.Address()), balance)
 }
 
 // createSignerBytes generates sign doc bytes using the given parameters
@@ -457,7 +450,7 @@ func (suite *AnteTestSuite) CreateTestSignedMultisigTx(privKeys []cryptotypes.Pr
 
 	// Prepare signature field
 	sig := multisig.NewMultisig(len(pubKeys))
-	txBuilder.SetSignatures(signing.SignatureV2{
+	_ = txBuilder.SetSignatures(signing.SignatureV2{
 		PubKey: multiKey,
 		Data:   sig,
 	})
@@ -471,7 +464,7 @@ func (suite *AnteTestSuite) CreateTestSignedMultisigTx(privKeys []cryptotypes.Pr
 		suite.Require().NoError(err)
 	}
 
-	txBuilder.SetSignatures(signing.SignatureV2{
+	_ = txBuilder.SetSignatures(signing.SignatureV2{
 		PubKey: multiKey,
 		Data:   sig,
 	})
