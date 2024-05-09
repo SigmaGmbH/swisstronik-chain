@@ -63,9 +63,8 @@ type EvmTestSuite struct {
 	from      common.Address
 	to        sdk.AccAddress
 
-	dynamicTxFee  bool
-	nodePublicKey []byte
-	privateKey    []byte
+	dynamicTxFee bool
+	privateKey   []byte
 }
 
 // DoSetupTest setup test environment, it uses`require.TestingT` to support both `testing.T` and `testing.B`.
@@ -178,11 +177,6 @@ func (suite *EvmTestSuite) DoSetupTest(t require.TestingT) {
 	// Initialize enclave
 	err = librustgo.InitializeEnclave(false)
 	require.NoError(t, err)
-
-	// Obtain node public key
-	res, err := librustgo.GetNodePublicKey(0)
-	require.NoError(t, err)
-	suite.nodePublicKey = res.PublicKey
 }
 
 func (suite *EvmTestSuite) SetupTest() {
@@ -382,9 +376,13 @@ func (suite *EvmTestSuite) TestDeployAndCallContract() {
 	gasPrice = big.NewInt(100)
 	receiver := crypto.CreateAddress(suite.from, 1)
 
+	nodePublicKeyRes, err := librustgo.GetNodePublicKey(uint64(suite.ctx.BlockHeight()))
+	suite.Require().NoError(err)
+	nodePublicKey := nodePublicKeyRes.PublicKey
+
 	storeAddr := "0xa6f9dae10000000000000000000000006a82e4a67715c8412a9114fbd2cbaefbc8181424"
 	bytecode = common.FromHex(storeAddr)
-	tx = types.NewTx(suite.chainID, 2, &receiver, big.NewInt(0), gasLimit, gasPrice, nil, nil, bytecode, nil, suite.privateKey, suite.nodePublicKey)
+	tx = types.NewTx(suite.chainID, 2, &receiver, big.NewInt(0), gasLimit, gasPrice, nil, nil, bytecode, nil, suite.privateKey, nodePublicKey)
 	suite.SignTx(tx)
 
 	result, err = suite.handler(suite.ctx, tx)
@@ -396,7 +394,7 @@ func (suite *EvmTestSuite) TestDeployAndCallContract() {
 
 	// query - getOwner
 	bytecode = common.FromHex("0x893d20e8")
-	tx = types.NewTx(suite.chainID, 2, &receiver, big.NewInt(0), gasLimit, gasPrice, nil, nil, bytecode, nil, suite.privateKey, suite.nodePublicKey)
+	tx = types.NewTx(suite.chainID, 2, &receiver, big.NewInt(0), gasLimit, gasPrice, nil, nil, bytecode, nil, suite.privateKey, nodePublicKey)
 	suite.SignTx(tx)
 
 	result, err = suite.handler(suite.ctx, tx)
@@ -590,6 +588,10 @@ func (suite *EvmTestSuite) TestERC20TransferReverted() {
 			data, err := types.ERC20Contract.ABI.Pack("transfer", suite.from, big.NewInt(10))
 			suite.Require().NoError(err)
 
+			nodePublicKeyRes, err := librustgo.GetNodePublicKey(uint64(suite.ctx.BlockHeight()))
+			suite.Require().NoError(err)
+			nodePublicKey := nodePublicKeyRes.PublicKey
+
 			gasPrice := big.NewInt(1000000000) // must be bigger than or equal to baseFee
 			nonce := k.GetNonce(suite.ctx, suite.from)
 			tx := types.NewTx(
@@ -604,7 +606,7 @@ func (suite *EvmTestSuite) TestERC20TransferReverted() {
 				data,
 				nil,
 				suite.privateKey,
-				suite.nodePublicKey,
+				nodePublicKey,
 			)
 			suite.SignTx(tx)
 
