@@ -137,48 +137,37 @@ func (suite *KeeperTestSuite) TestCrossEpochInteraction() {
 	err := librustgo.InitializeEnclave(true)
 	suite.Require().NoError(err)
 
-	// Add another epoch
+	// Add another epoch, starting from 20th block
 	var v1EpochStartingBlock uint64 = 20
 	err = librustgo.AddEpoch(v1EpochStartingBlock)
 	suite.Require().NoError(err)
 
-	// deploy contract
+	// deploy Incrementor contract
 	ctx := sdk.WrapSDKContext(suite.ctx)
 	nonce := suite.app.EvmKeeper.GetNonce(suite.ctx, suite.address)
 	chainID := suite.app.EvmKeeper.ChainID()
 
-	ctorArgs, err := types.SimpleStorageContract.ABI.Pack("")
+	constructorArgs, err := types.IncrementorContract.ABI.Pack("")
 	suite.Require().NoError(err)
 
-	data := append(types.SimpleStorageContract.Bin, ctorArgs...)
-	args, err := json.Marshal(&types.TransactionArgs{
-		From: &suite.address,
-		Data: (*hexutil.Bytes)(&data),
-	})
-	suite.Require().NoError(err)
-	gasRes, err := suite.queryClient.EstimateGas(ctx, &types.EthCallRequest{
-		Args:            args,
-		GasCap:          uint64(config.DefaultGasCap),
-		ProposerAddress: suite.ctx.BlockHeader().ProposerAddress,
-	})
-	suite.Require().NoError(err)
+	data := append(types.IncrementorContract.Bin, constructorArgs...)
 
-	storageDeployTx := types.NewSGXVMTxContract(
+	deployTx := types.NewSGXVMTxContract(
 		chainID,
 		nonce,
-		nil,        // amount
-		gasRes.Gas, // gasLimit
-		nil,        // gasPrice
+		nil,     // amount
+		200_000, // gasLimit
+		nil,     // gasPrice
 		nil, nil,
 		data, // input
 		nil,  // accesses
 	)
 
-	storageDeployTx.From = suite.address.Hex()
-	err = storageDeployTx.Sign(ethtypes.LatestSignerForChainID(chainID), suite.signer)
+	deployTx.From = suite.address.Hex()
+	err = deployTx.Sign(ethtypes.LatestSignerForChainID(chainID), suite.signer)
 	suite.Require().NoError(err)
 
-	rsp, err := suite.app.EvmKeeper.HandleTx(ctx, storageDeployTx)
+	rsp, err := suite.app.EvmKeeper.HandleTx(ctx, deployTx)
 	suite.Require().NoError(err)
 	suite.Require().Empty(rsp.VmError)
 
@@ -188,14 +177,16 @@ func (suite *KeeperTestSuite) TestCrossEpochInteraction() {
 	suite.Require().Equal(new(big.Int), contractAcc.Balance)
 	suite.Require().True(contractAcc.IsContract())
 
-	nodePublicKeyRes, err := librustgo.GetNodePublicKey(uint64(suite.ctx.BlockHeader().Height))
+	// Incrementor contract was deployed. Now we're calling `increment` function
+	// to update contract state.
+	nodePublicKeyResponse, err := librustgo.GetNodePublicKey(uint64(suite.ctx.BlockHeight()))
 	suite.Require().NoError(err)
+	initialNodePublicKey := nodePublicKeyResponse.PublicKey
 
-	// write some data to contract
-	writtenValue := int64(100)
-	setStorageArgs, err := types.SimpleStorageContract.ABI.Pack("store", big.NewInt(writtenValue))
+	// increment initial value at the contract
+	incrementArgs, err := types.IncrementorContract.ABI.Pack("increment")
 	suite.Require().NoError(err)
-	setStorageTx := types.NewSGXVMTx(
+	incrementTx := types.NewSGXVMTx(
 		chainID,
 		nonce,
 		&contractAddress,
@@ -204,51 +195,110 @@ func (suite *KeeperTestSuite) TestCrossEpochInteraction() {
 		nil,
 		suite.app.FeeMarketKeeper.GetBaseFee(suite.ctx),
 		big.NewInt(0),
-		setStorageArgs,
+		incrementArgs,
 		&ethtypes.AccessList{}, // accesses
 		suite.privateKey,
-		nodePublicKeyRes.PublicKey,
+		initialNodePublicKey,
 	)
 
-	setStorageTx.From = suite.address.Hex()
-	err = setStorageTx.Sign(ethtypes.LatestSignerForChainID(chainID), suite.signer)
+	incrementTx.From = suite.address.Hex()
+	err = incrementTx.Sign(ethtypes.LatestSignerForChainID(chainID), suite.signer)
 	suite.Require().NoError(err)
-	rsp, err = suite.app.EvmKeeper.HandleTx(ctx, setStorageTx)
+	rsp, err = suite.app.EvmKeeper.HandleTx(ctx, incrementTx)
 	suite.Require().NoError(err)
 	suite.Require().Empty(rsp.VmError)
 
-	// try to read data from contract
-	updatedCtx := suite.ctx.WithBlockHeight(1000)
-	nodePublicKeyResponse, err := librustgo.GetNodePublicKey(uint64(updatedCtx.BlockHeight()))
+	// read contract state at block 1.
+	// Use the same context.
+	getStateData, err := types.IncrementorContract.ABI.Pack("state")
 	suite.Require().NoError(err)
-	updatedNodePublicKey := nodePublicKeyResponse.PublicKey
-	suite.Require().NotEqual(nodePublicKeyRes.PublicKey, updatedNodePublicKey, "should be different encryption key")
-
-	getStorageData, err := types.SimpleStorageContract.ABI.Pack("get")
-	suite.Require().NoError(err)
-	encryptedData, err := deoxys.EncryptECDH(suite.privateKey, updatedNodePublicKey, getStorageData)
+	encryptedGetStateData, err := deoxys.EncryptECDH(suite.privateKey, initialNodePublicKey, getStateData)
 	suite.Require().NoError(err)
 
 	getStorageArgs, err := json.Marshal(&types.TransactionArgs{
 		From: &suite.address,
 		To:   &contractAddress,
-		Data: (*hexutil.Bytes)(&encryptedData),
+		Data: (*hexutil.Bytes)(&encryptedGetStateData),
 	})
 
-	res, err := suite.app.EvmKeeper.EthCall(updatedCtx, &types.EthCallRequest{
+	res, err := suite.app.EvmKeeper.EthCall(ctx, &types.EthCallRequest{
 		Args:   getStorageArgs,
 		GasCap: uint64(config.DefaultGasCap),
 	})
 	suite.Require().NoError(err)
 	suite.Require().Empty(res.VmError)
 
-	// Decrypt response
-	decryptedData, err := deoxys.DecryptECDH(suite.privateKey, updatedNodePublicKey, res.Ret)
+	resultAtBlock1, err := decryptAndParseResponse(suite.privateKey, initialNodePublicKey, res.Ret)
 	suite.Require().NoError(err)
-	decodedValue, err := parseIntResponse(decryptedData)
-	suite.Require().NoError(err)
+	suite.Require().Equal(int64(1), resultAtBlock1)
 
-	suite.Require().Equal(writtenValue, decodedValue)
+	// read contract state at 21st block.
+	// should be able to obtain value and return the same result.
+	// should not accept previous node public key
+	updatedCtx := suite.ctx.WithBlockHeight(21)
+	res, err = suite.app.EvmKeeper.EthCall(updatedCtx, &types.EthCallRequest{
+		Args:   getStorageArgs,
+		GasCap: uint64(config.DefaultGasCap),
+	})
+	suite.Require().NoError(err)
+	suite.Require().NotEmpty(res.VmError)
+	suite.Require().True(strings.Contains(res.VmError, "DecryptionError"))
+
+	// try again with updated node public key
+	nodePublicKeyResponse, err = librustgo.GetNodePublicKey(uint64(updatedCtx.BlockHeight()))
+	suite.Require().NoError(err)
+	updatedNodePublicKey := nodePublicKeyResponse.PublicKey
+	suite.Require().NotEqual(initialNodePublicKey, updatedNodePublicKey) // should use different node public keys
+	encryptedGetStateData, err = deoxys.EncryptECDH(suite.privateKey, updatedNodePublicKey, getStateData)
+	suite.Require().NoError(err)
+	getStorageArgs, err = json.Marshal(&types.TransactionArgs{
+		From: &suite.address,
+		To:   &contractAddress,
+		Data: (*hexutil.Bytes)(&encryptedGetStateData),
+	})
+
+	res, err = suite.app.EvmKeeper.EthCall(updatedCtx, &types.EthCallRequest{
+		Args:   getStorageArgs,
+		GasCap: uint64(config.DefaultGasCap),
+	})
+	suite.Require().NoError(err)
+	suite.Require().Empty(res.VmError)
+	resultAtBlock21, err := decryptAndParseResponse(suite.privateKey, updatedNodePublicKey, res.Ret)
+	suite.Require().NoError(err)
+	suite.Require().Equal(int64(1), resultAtBlock21)
+
+	//// read contract state at block 21st block
+	//updatedCtx := suite.ctx.WithBlockHeight(1000)
+	//nodePublicKeyResponse, err := librustgo.GetNodePublicKey(uint64(updatedCtx.BlockHeight()))
+	//suite.Require().NoError(err)
+	//updatedNodePublicKey := nodePublicKeyResponse.PublicKey
+	//suite.Require().NotEqual(nodePublicKeyRes.PublicKey, updatedNodePublicKey, "should be different encryption key")
+	//
+	//getStorageData, err := types.SimpleStorageContract.ABI.Pack("get")
+	//suite.Require().NoError(err)
+	//encryptedData, err := deoxys.EncryptECDH(suite.privateKey, updatedNodePublicKey, getStorageData)
+	//suite.Require().NoError(err)
+	//
+	//getStorageArgs, err := json.Marshal(&types.TransactionArgs{
+	//	From: &suite.address,
+	//	To:   &contractAddress,
+	//	Data: (*hexutil.Bytes)(&encryptedData),
+	//})
+	//
+	//res, err := suite.app.EvmKeeper.EthCall(updatedCtx, &types.EthCallRequest{
+	//	Args:   getStorageArgs,
+	//	GasCap: uint64(config.DefaultGasCap),
+	//})
+	//suite.Require().NoError(err)
+	//suite.Require().Empty(res.VmError)
+	//
+	//// Decrypt response
+	//decryptedData, err := deoxys.DecryptECDH(suite.privateKey, updatedNodePublicKey, res.Ret)
+	//suite.Require().NoError(err)
+	//decodedValue, err := parseIntResponse(decryptedData)
+	//suite.Require().NoError(err)
+	//
+	//suite.Require().Equal(writtenValue, decodedValue)
 
 	//// Write new value
 	//setStorageTx = types.NewSGXVMTx(
@@ -296,7 +346,12 @@ func (suite *KeeperTestSuite) TestCrossEpochInteraction() {
 	//suite.Require().Equal(writtenValue, decodedValue)
 }
 
-func parseIntResponse(data []byte) (int64, error) {
+func decryptAndParseResponse(userPrivateKey, nodePublicKey, encryptedResponse []byte) (int64, error) {
+	data, err := deoxys.DecryptECDH(userPrivateKey, nodePublicKey, encryptedResponse)
+	if err != nil {
+		return 0, err
+	}
+
 	hexDecryptedData := hexutil.Encode(data)
 	var dataToParse = hexDecryptedData
 	if strings.HasPrefix(hexDecryptedData, "0x") {
