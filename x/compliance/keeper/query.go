@@ -2,7 +2,12 @@ package keeper
 
 import (
 	"context"
+	"encoding/base64"
+
+	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/query"
+	"github.com/cosmos/gogoproto/proto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"swisstronik/x/compliance/types"
@@ -21,7 +26,7 @@ func (k Querier) OperatorDetails(goCtx context.Context, req *types.QueryOperator
 	}
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	address, err := sdk.AccAddressFromBech32(req.Address)
+	address, err := sdk.AccAddressFromBech32(req.OperatorAddress)
 	if err != nil {
 		return nil, err
 	}
@@ -53,6 +58,34 @@ func (k Querier) AddressDetails(goCtx context.Context, req *types.QueryAddressDe
 	return &types.QueryAddressDetailsResponse{Data: details}, nil
 }
 
+func (k Querier) AddressesDetails(goCtx context.Context, req *types.QueryAddressesDetailsRequest) (*types.QueryAddressesDetailsResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	var addresses []types.AddressDetails
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixAddressDetails)
+
+	pageRes, err := query.Paginate(store, req.Pagination, func(_, value []byte) error {
+		var addressDetails types.AddressDetails
+		if err := proto.Unmarshal(value, &addressDetails); err != nil {
+			return err
+		}
+		addresses = append(addresses, addressDetails)
+		// NOTE, DO NOT FILTER VERIFICATIONS BY ISSUERS' EXISTENCE BECAUSE OF QUERY PERFORMANCE
+		return nil
+	})
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &types.QueryAddressesDetailsResponse{
+		Addresses:  addresses,
+		Pagination: pageRes,
+	}, nil
+}
+
 func (k Querier) IssuerDetails(goCtx context.Context, req *types.QueryIssuerDetailsRequest) (*types.QueryIssuerDetailsResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
@@ -72,13 +105,44 @@ func (k Querier) IssuerDetails(goCtx context.Context, req *types.QueryIssuerDeta
 	return &types.QueryIssuerDetailsResponse{Details: issuerDetails}, nil
 }
 
+func (k Querier) IssuersDetails(goCtx context.Context, req *types.QueryIssuersDetailsRequest) (*types.QueryIssuersDetailsResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	var issuers []types.IssuerDetails
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixIssuerDetails)
+
+	pageRes, err := query.Paginate(store, req.Pagination, func(_, value []byte) error {
+		var issuer types.IssuerDetails
+		if err := proto.Unmarshal(value, &issuer); err != nil {
+			return err
+		}
+		issuers = append(issuers, issuer)
+		return nil
+	})
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &types.QueryIssuersDetailsResponse{
+		Issuers:    issuers,
+		Pagination: pageRes,
+	}, nil
+}
+
 func (k Querier) VerificationDetails(goCtx context.Context, req *types.QueryVerificationDetailsRequest) (*types.QueryVerificationDetailsResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	details, err := k.GetVerificationDetails(ctx, []byte(req.VerificationID))
+	id, err := base64.StdEncoding.DecodeString(req.VerificationID)
+	if err != nil {
+		return nil, err
+	}
+	details, err := k.GetVerificationDetails(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -88,4 +152,32 @@ func (k Querier) VerificationDetails(goCtx context.Context, req *types.QueryVeri
 	}
 
 	return &types.QueryVerificationDetailsResponse{Details: details}, nil
+}
+
+func (k Querier) VerificationsDetails(goCtx context.Context, req *types.QueryVerificationsDetailsRequest) (*types.QueryVerificationsDetailsResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	var verifications []types.VerificationDetails
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationDetails)
+
+	pageRes, err := query.Paginate(store, req.Pagination, func(_, value []byte) error {
+		var verification types.VerificationDetails
+		if err := proto.Unmarshal(value, &verification); err != nil {
+			return err
+		}
+		verifications = append(verifications, verification)
+		// NOTE, DO NOT FILTER VERIFICATIONS BY ISSUERS' EXISTENCE BECAUSE OF QUERY PERFORMANCE
+		return nil
+	})
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &types.QueryVerificationsDetailsResponse{
+		Verifications: verifications,
+		Pagination:    pageRes,
+	}, nil
 }

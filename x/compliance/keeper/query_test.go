@@ -2,6 +2,7 @@ package keeper_test
 
 import (
 	"context"
+	"encoding/base64"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -101,9 +102,12 @@ func (suite *QuerierTestSuite) TestSuccess() {
 
 	verification := addressDetails.Data.Verifications[0]
 
+	// Bytes are base64 encoded and passed to querier
+	verificationId := base64.StdEncoding.EncodeToString(verification.VerificationId)
+
 	// Query verification details
 	verificationRequest := &types.QueryVerificationDetailsRequest{
-		VerificationID: string(verification.VerificationId),
+		VerificationID: verificationId,
 	}
 	verificationDetails, err := suite.querier.VerificationDetails(suite.goCtx, verificationRequest)
 	suite.Require().NoError(err)
@@ -147,6 +151,13 @@ func (suite *QuerierTestSuite) TestFailed() {
 		VerificationID: "invalid verification id",
 	}
 	verificationDetails, err := suite.querier.VerificationDetails(suite.goCtx, verificationRequest)
+	suite.Require().Error(err)
+	suite.Require().Contains(err.Error(), "base64")
+
+	verificationRequest = &types.QueryVerificationDetailsRequest{
+		VerificationID: "7xeEYWEV2Krw4ikPFHcJZIdiJNk5AtcbTX7QqNhY7hQ=", // random verification id
+	}
+	verificationDetails, err = suite.querier.VerificationDetails(suite.goCtx, verificationRequest)
 	suite.Require().NoError(err)
 	suite.Require().Equal(verificationDetails.Details, &types.VerificationDetails{})
 }
