@@ -2,6 +2,8 @@ package keeper
 
 import (
 	"context"
+	"encoding/base64"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -78,7 +80,11 @@ func (k Querier) VerificationDetails(goCtx context.Context, req *types.QueryVeri
 	}
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	details, err := k.GetVerificationDetails(ctx, []byte(req.VerificationID))
+	id, err := base64.StdEncoding.DecodeString(req.VerificationID)
+	if err != nil {
+		return nil, err
+	}
+	details, err := k.GetVerificationDetails(ctx, id)
 	if err != nil {
 		return nil, err
 	}

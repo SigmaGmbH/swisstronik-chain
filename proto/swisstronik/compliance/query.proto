@@ -72,7 +72,7 @@ message QueryIssuerDetailsResponse {
 }
 
 message QueryVerificationDetailsRequest {
-  bytes verificationID = 1;
+  string verificationID = 1;
 }
 
 message QueryVerificationDetailsResponse {
