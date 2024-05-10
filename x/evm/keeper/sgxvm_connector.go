@@ -217,7 +217,7 @@ func (q Connector) AddVerificationDetails(req *librustgo.CosmosRequest_AddVerifi
 		ExpirationTimestamp:  req.AddVerificationDetails.ExpirationTimestamp,
 		OriginalData:         req.AddVerificationDetails.ProofData,
 		Schema:               string(req.AddVerificationDetails.Schema),
-		IssuerVerificationId: string(req.AddVerificationDetails.IssuerVerifcationId),
+		IssuerVerificationId: string(req.AddVerificationDetails.IssuerVerificationId),
 		Version:              req.AddVerificationDetails.Version,
 	}
 
