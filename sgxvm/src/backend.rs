@@ -1,14 +1,15 @@
 use ethereum::Log;
-use evm::backend::{Backend as EvmBackend, ApplyBackend as EvmApplyBackend, Basic, Apply};
+use evm::backend::{Apply, ApplyBackend as EvmApplyBackend, Backend as EvmBackend, Basic};
 use primitive_types::{H160, H256, U256};
 use std::vec::Vec;
 
 use crate::{
-    coder, 
-    querier,
+    coder,
+    error::Error,
     protobuf_generated::ffi,
-    types::{Vicinity, Storage, ExtendedBackend},
+    querier,
     storage::FFIStorage,
+    types::{ExtendedBackend, Storage, Vicinity},
 };
 
 /// Contains context of the transaction such as gas price, block hash, block timestamp, etc.
@@ -19,7 +20,7 @@ pub struct TxContext {
     pub timestamp: U256,
     pub block_gas_limit: U256,
     pub block_base_fee_per_gas: U256,
-    pub block_coinbase: H160
+    pub block_coinbase: H160,
 }
 
 impl From<ffi::TransactionContext> for TxContext {
@@ -46,12 +47,82 @@ pub struct FFIBackend<'state> {
     // Emitted events
     pub logs: Vec<Log>,
     // Transaction context
-    pub tx_context: TxContext
+    pub tx_context: TxContext,
 }
 
 impl<'state> ExtendedBackend for FFIBackend<'state> {
     fn get_logs(&self) -> Vec<Log> {
         self.logs.clone()
+    }
+
+    fn apply<A, I, L>(&mut self, values: A, logs: L, _delete_empty: bool) -> Result<(), Error>
+    where
+        A: IntoIterator<Item = Apply<I>>,
+        I: IntoIterator<Item = (H256, H256)>,
+        L: IntoIterator<Item = Log>,
+    {
+        let mut total_supply_add = U256::zero();
+        let mut total_supply_sub = U256::zero();
+
+        for apply in values {
+            match apply {
+                Apply::Modify {
+                    address,
+                    basic,
+                    code,
+                    storage,
+                    ..
+                } => {
+                    // Reset storage is ignored since storage cannot be efficiently reset as this
+                    // would require iterating over storage keys
+
+                    // Update account balance and nonce
+                    let previous_account_data = self.state.get_account(&address);
+
+                    if basic.balance > previous_account_data.balance {
+                        total_supply_add = total_supply_add
+                            .checked_add(basic.balance - previous_account_data.balance)
+                            .unwrap();
+                    } else {
+                        total_supply_sub = total_supply_sub
+                            .checked_add(previous_account_data.balance - basic.balance)
+                            .unwrap();
+                    }
+                    self.state.insert_account(address, basic)?;
+
+                    // Handle contract updates
+                    if let Some(code) = code {
+                        self.state.insert_account_code(address, code)?;
+                    }
+
+                    // Handle storage updates
+                    for (index, value) in storage {
+                        if value == H256::default() {
+                            self.state.remove_storage_cell(&address, &index)?;
+                        } else {
+                            self.state.insert_storage_cell(address, index, value)?;
+                        }
+                    }
+                }
+                // Used by `SELFDESTRUCT` opcode
+                Apply::Delete { address } => {
+                    self.state.remove(&address)?;
+                }
+            }
+        }
+
+        // Used to avoid corrupting state via invariant violation
+        assert_eq!(
+            total_supply_add, total_supply_sub,
+            "evm execution would lead to invariant violation ({} != {})",
+            total_supply_add, total_supply_sub
+        );
+
+        for log in logs {
+            self.logs.push(log);
+        }
+
+        Ok(())
     }
 }
 
@@ -69,7 +140,9 @@ impl<'state> EvmBackend for FFIBackend<'state> {
         match querier::make_request(self.querier, encoded_request) {
             Some(result) => {
                 // Decode protobuf
-                let decoded_result = match protobuf::parse_from_bytes::<ffi::QueryBlockHashResponse>(result.as_slice()) {
+                let decoded_result = match protobuf::parse_from_bytes::<ffi::QueryBlockHashResponse>(
+                    result.as_slice(),
+                ) {
                     Ok(res) => res,
                     Err(err) => {
                         println!("Cannot decode protobuf response: {:?}", err);
@@ -77,7 +150,7 @@ impl<'state> EvmBackend for FFIBackend<'state> {
                     }
                 };
                 H256::from_slice(decoded_result.hash.as_slice())
-            },
+            }
             None => {
                 println!("Get block hash failed. Empty response");
                 H256::default()
@@ -124,7 +197,10 @@ impl<'state> EvmBackend for FFIBackend<'state> {
     fn basic(&self, address: H160) -> Basic {
         if address == self.vicinity.origin {
             let mut account_data = self.state.get_account(&address);
-            let updated_nonce = account_data.nonce.checked_sub(U256::from(1u8)).unwrap_or(U256::zero());
+            let updated_nonce = account_data
+                .nonce
+                .checked_sub(U256::from(1u8))
+                .unwrap_or(U256::zero());
             if updated_nonce > self.vicinity.nonce {
                 account_data.nonce = updated_nonce;
             } else {
@@ -138,16 +214,10 @@ impl<'state> EvmBackend for FFIBackend<'state> {
     }
 
     fn code(&self, address: H160) -> Vec<u8> {
-        self.state
-            .get_account_code(&address)
-            .unwrap_or_default()
+        self.state.get_account_code(&address).unwrap_or_default()
     }
 
-    fn storage(
-        &self,
-        address: H160,
-        index: H256,
-    ) -> H256 {
+    fn storage(&self, address: H160, index: H256) -> H256 {
         self.state
             .get_account_storage_cell(&address, &index)
             .unwrap_or_default()
@@ -162,10 +232,10 @@ impl<'state> EvmBackend for FFIBackend<'state> {
 /// This trait declares write operations for the backend
 impl<'state> EvmApplyBackend for FFIBackend<'state> {
     fn apply<A, I, L>(&mut self, values: A, logs: L, _delete_empty: bool)
-        where
-            A: IntoIterator<Item = Apply<I>>,
-            I: IntoIterator<Item = (H256, H256)>,
-            L: IntoIterator<Item = Log>,
+    where
+        A: IntoIterator<Item = Apply<I>>,
+        I: IntoIterator<Item = (H256, H256)>,
+        L: IntoIterator<Item = Log>,
     {
         let mut total_supply_add = U256::zero();
         let mut total_supply_sub = U256::zero();
@@ -186,11 +256,13 @@ impl<'state> EvmApplyBackend for FFIBackend<'state> {
                     let previous_account_data = self.state.get_account(&address);
 
                     if basic.balance > previous_account_data.balance {
-                        total_supply_add =
-                            total_supply_add.checked_add(basic.balance - previous_account_data.balance).unwrap();
+                        total_supply_add = total_supply_add
+                            .checked_add(basic.balance - previous_account_data.balance)
+                            .unwrap();
                     } else {
-                        total_supply_sub =
-                            total_supply_sub.checked_add(previous_account_data.balance - basic.balance).unwrap();
+                        total_supply_sub = total_supply_sub
+                            .checked_add(previous_account_data.balance - basic.balance)
+                            .unwrap();
                     }
                     self.state.insert_account(address, basic);
 
@@ -207,7 +279,7 @@ impl<'state> EvmApplyBackend for FFIBackend<'state> {
                             self.state.insert_storage_cell(address, index, value);
                         }
                     }
-                },
+                }
                 // Used by `SELFDESTRUCT` opcode
                 Apply::Delete { address } => {
                     self.state.remove(&address);
@@ -217,9 +289,9 @@ impl<'state> EvmApplyBackend for FFIBackend<'state> {
 
         // Used to avoid corrupting state via invariant violation
         assert_eq!(
-            total_supply_add,
-            total_supply_sub,
-            "evm execution would lead to invariant violation ({} != {})", total_supply_add, total_supply_sub
+            total_supply_add, total_supply_sub,
+            "evm execution would lead to invariant violation ({} != {})",
+            total_supply_add, total_supply_sub
         );
 
         for log in logs {
@@ -235,6 +307,12 @@ impl<'state> FFIBackend<'state> {
         vicinity: Vicinity,
         tx_context: TxContext,
     ) -> Self {
-        Self { querier, vicinity, state: storage, logs: vec![], tx_context }
+        Self {
+            querier,
+            vicinity,
+            state: storage,
+            logs: vec![],
+            tx_context,
+        }
     }
 }

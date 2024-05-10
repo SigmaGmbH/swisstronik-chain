@@ -3,11 +3,7 @@ use primitive_types::{H160, H256, U256};
 use std::vec::Vec;
 
 use crate::{
-    protobuf_generated::ffi,
-    querier,
-    coder,
-    encryption,
-    types::Storage,
+    coder, encryption, error::Error, protobuf_generated::ffi, querier, types::Storage
 };
 
 /// This struct allows us to obtain state from keeper
@@ -109,86 +105,79 @@ impl Storage for FFIStorage {
         }
     }
 
-    fn insert_account(&mut self, key: H160, data: Basic) {
+    fn insert_account(&mut self, key: H160, data: Basic) -> Result<(), Error> {
         let encoded_request = coder::encode_insert_account(key, data);
         if let Some(result) = querier::make_request(self.querier, encoded_request) {
             match protobuf::parse_from_bytes::<ffi::QueryInsertAccountResponse>(result.as_slice()) {
-                Err(err) => {
-                    println!("Cannot decode protobuf. Got error: {:?}", err);
-                },
-                _ => {}
+                Err(err) => Err(err.into()),
+                _ => Ok(())
             }
         } else {
-            println!("Insert account failed. Empty response");
+            println!("Insert account failed. Writting error");
+            Err(Error::enclave_err("Insert account failed. Empty response"))
         }
     }
 
-    fn insert_account_code(&mut self, key: H160, code: Vec<u8>) {
+    fn insert_account_code(&mut self, key: H160, code: Vec<u8>) -> Result<(), Error>  {
         let encoded_request = coder::encode_insert_account_code(key, code);
         if let Some(result) = querier::make_request(self.querier, encoded_request) {
             match protobuf::parse_from_bytes::<ffi::QueryInsertAccountCodeResponse>(result.as_slice()) {
                 Err(err) => {
-                    println!("Cannot decode protobuf. Got error: {:?}", err);
+                    Err(err.into())
                 },
-                _ => {}
+                _ => Ok(())
             }
         } else {
-            println!("Insert account code failed. Empty response");
+            Err(Error::enclave_err("Insert account code failed. Empty response"))
         }
     }
 
-    fn insert_storage_cell(&mut self, key: H160, index: H256, value: H256) {
+    fn insert_storage_cell(&mut self, key: H160, index: H256, value: H256) -> Result<(), Error>  {
         // Encrypt value
-        let encrypted_value = match encryption::encrypt_storage_cell(
+        let encrypted_value = encryption::encrypt_storage_cell(
             key.as_bytes().to_vec(), 
             self.context_timestamp.to_be_bytes().to_vec(),
             value.as_bytes().to_vec()
-        ) {
-            Ok(encrypted_value) => encrypted_value,
-            Err(err) => {
-                println!("Cannot encrypt value. Reason: {:?}", err);
-                return;
-            }
-        };
+        )?;
 
         let encoded_request = coder::encode_insert_storage_cell(key, index, encrypted_value);
         if let Some(result) = querier::make_request(self.querier, encoded_request) {
             match protobuf::parse_from_bytes::<ffi::QueryInsertStorageCellResponse>(result.as_slice()) {
                 Err(err) => {
-                    println!("Cannot decode protobuf. Got error: {:?}", err);
+                    Err(err.into())
                 },
-                _ => {}
+                _ => Ok(())
             }
         } else {
-            println!("Insert storage cell failed. Empty response");
+            Err(Error::enclave_err("Insert storage cell failed. Empty response"))
         }
     }
 
-    fn remove(&mut self, key: &H160) {
+    fn remove(&mut self, key: &H160) -> Result<(), Error>  {
         let encoded_request = coder::encode_remove(key);
         if let Some(result) = querier::make_request(self.querier, encoded_request) {
             match protobuf::parse_from_bytes::<ffi::QueryRemoveResponse>(result.as_slice()) {
                 Err(err) => {
-                    println!("Cannot decode protobuf. Got error: {:?}", err);
+                    Err(err.into())
                 },
-                _ => {}
+                _ => Ok(())
             }
         } else {
-            println!("Remove failed. Empty response");
+            Err(Error::enclave_err("Remove failed. Empty response"))
         }
     }
 
-    fn remove_storage_cell(&mut self, key: &H160, index: &H256) {
+    fn remove_storage_cell(&mut self, key: &H160, index: &H256) -> Result<(), Error>  {
         let encoded_request = coder::encode_remove_storage_cell(key, index);
         if let Some(result) = querier::make_request(self.querier, encoded_request) {
             match protobuf::parse_from_bytes::<ffi::QueryRemoveStorageCellResponse>(result.as_slice()) {
                 Err(err) => {
-                    println!("Cannot decode protobuf. Got error: {:?}", err);
+                    Err(err.into())
                 },
-                _ => {}
+                _ => Ok(())
             }
         } else {
-            println!("Remove storage cell failed. Empty response");
+            Err(Error::enclave_err("Remove storage cell failed. Empty response"))
         }
     }
 }
