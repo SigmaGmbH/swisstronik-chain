@@ -25,7 +25,8 @@ interface IComplianceBridge {
         uint32 verificationType,
         uint32 issuanceTimestamp,
         uint32 expirationTimestamp,
-        bytes memory proofData
+        bytes memory proofData,
+        string memory schema
     ) external;
 
     function hasVerification(
@@ -50,6 +51,7 @@ contract ComplianceProxy {
 
     function markUserAsVerified(address userAddress) public {
         bytes memory proofData = new bytes(1);
+        string memory schema;
         bytes memory payload = abi.encodeCall(
             IComplianceBridge.addVerificationDetails,
             (
@@ -57,7 +59,8 @@ contract ComplianceProxy {
                 VERIFICATION_TYPE,
                 uint32(block.timestamp % 2 ** 32),
                 0,
-                proofData
+                proofData,
+                schema
             )
         );
 
@@ -103,7 +106,7 @@ contract ComplianceProxy {
     )
         public
         view
-        returns (IComplianceBridge.VerificationData memory verificationData)
+        returns (IComplianceBridge.VerificationData[] memory verificationData)
     {
         bytes memory payload = abi.encodeCall(
             IComplianceBridge.getVerificationData,
@@ -111,37 +114,10 @@ contract ComplianceProxy {
         );
         (bool success, bytes memory data) = address(1028).staticcall(payload);
         if (success) {
-            (
-                string memory issuerAddress2,
-                string memory originChain,
-                uint32 issuanceTimestamp,
-                uint32 expirationTimestamp,
-                bytes memory originalData,
-                string memory schema,
-                string memory issuerVerificationId,
-                uint32 version
-            ) = abi.decode(
-                    data,
-                    (
-                        string,
-                        string,
-                        uint32,
-                        uint32,
-                        bytes,
-                        string,
-                        string,
-                        uint32
-                    )
-                );
-            verificationData = IComplianceBridge.VerificationData(
-                issuerAddress2,
-                originChain,
-                issuanceTimestamp,
-                expirationTimestamp,
-                originalData,
-                schema,
-                issuerVerificationId,
-                version
+            // Decode the bytes data into an array of structs
+            verificationData = abi.decode(
+                data,
+                (IComplianceBridge.VerificationData[])
             );
         }
     }
