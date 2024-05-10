@@ -83,8 +83,13 @@ message QueryAddressesDetailsRequest {
 
 // QueryAddressesDetailsResponse is response type for the Query/AddressesDetails RPC method.
 message QueryAddressesDetailsResponse {
+  message AddressDetailsWithKey {
+    string address = 1;
+    AddressDetails addressDetails = 2;
+  }
+
   // addresses is a slice of registered addresses for the compliance module
-  repeated AddressDetails addresses = 1 [(gogoproto.nullable) = false];
+  repeated AddressDetailsWithKey addresses = 1 [(gogoproto.nullable) = false];
   // pagination defines the pagination in the response.
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }
@@ -107,8 +112,13 @@ message QueryIssuersDetailsRequest {
 
 // QueryIssuersDetailsResponse is response type for the Query/IssuersDetails RPC method.
 message QueryIssuersDetailsResponse {
+  message IssuerDetailsWithKey {
+    string issuerAddress = 1;
+    IssuerDetails issuerDetails = 2;
+  }
+
   // issuers is a slice of registered issuers for the compliance module
-  repeated IssuerDetails issuers = 1 [(gogoproto.nullable) = false];
+  repeated IssuerDetailsWithKey issuers = 1 [(gogoproto.nullable) = false];
   // pagination defines the pagination in the response.
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }
@@ -131,8 +141,13 @@ message QueryVerificationsDetailsRequest {
 
 // QueryVerificationsDetailsResponse is response type for the Query/VerificationsDetails RPC method.
 message QueryVerificationsDetailsResponse {
+  message VerificationDetailsWithKey {
+    bytes verificationID = 1;
+    VerificationDetails verificationDetails = 2;
+  }
+
   // verifications is a slice of registered verifications for the compliance module
-  repeated VerificationDetails verifications = 1 [(gogoproto.nullable) = false];
+  repeated VerificationDetailsWithKey verifications = 1 [(gogoproto.nullable) = false];
   // pagination defines the pagination in the response.
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }
