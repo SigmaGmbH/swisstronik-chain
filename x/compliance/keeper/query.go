@@ -64,15 +64,18 @@ func (k Querier) AddressesDetails(goCtx context.Context, req *types.QueryAddress
 	}
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	var addresses []types.AddressDetails
+	var addresses []types.QueryAddressesDetailsResponse_AddressDetailsWithKey
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixAddressDetails)
 
-	pageRes, err := query.Paginate(store, req.Pagination, func(_, value []byte) error {
+	pageRes, err := query.Paginate(store, req.Pagination, func(key []byte, value []byte) error {
 		var addressDetails types.AddressDetails
 		if err := proto.Unmarshal(value, &addressDetails); err != nil {
 			return err
 		}
-		addresses = append(addresses, addressDetails)
+		addresses = append(addresses, types.QueryAddressesDetailsResponse_AddressDetailsWithKey{
+			Address:        types.AccAddressFromKey(key).String(),
+			AddressDetails: &addressDetails,
+		})
 		// NOTE, DO NOT FILTER VERIFICATIONS BY ISSUERS' EXISTENCE BECAUSE OF QUERY PERFORMANCE
 		return nil
 	})
@@ -111,15 +114,18 @@ func (k Querier) IssuersDetails(goCtx context.Context, req *types.QueryIssuersDe
 	}
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	var issuers []types.IssuerDetails
+	var issuers []types.QueryIssuersDetailsResponse_IssuerDetailsWithKey
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixIssuerDetails)
 
-	pageRes, err := query.Paginate(store, req.Pagination, func(_, value []byte) error {
-		var issuer types.IssuerDetails
-		if err := proto.Unmarshal(value, &issuer); err != nil {
+	pageRes, err := query.Paginate(store, req.Pagination, func(key []byte, value []byte) error {
+		var issuerDetails types.IssuerDetails
+		if err := proto.Unmarshal(value, &issuerDetails); err != nil {
 			return err
 		}
-		issuers = append(issuers, issuer)
+		issuers = append(issuers, types.QueryIssuersDetailsResponse_IssuerDetailsWithKey{
+			IssuerAddress: types.AccAddressFromKey(key).String(),
+			IssuerDetails: &issuerDetails,
+		})
 		return nil
 	})
 	if err != nil {
@@ -160,15 +166,18 @@ func (k Querier) VerificationsDetails(goCtx context.Context, req *types.QueryVer
 	}
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	var verifications []types.VerificationDetails
+	var verifications []types.QueryVerificationsDetailsResponse_VerificationDetailsWithKey
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationDetails)
 
-	pageRes, err := query.Paginate(store, req.Pagination, func(_, value []byte) error {
-		var verification types.VerificationDetails
-		if err := proto.Unmarshal(value, &verification); err != nil {
+	pageRes, err := query.Paginate(store, req.Pagination, func(key []byte, value []byte) error {
+		var verificationDetails types.VerificationDetails
+		if err := proto.Unmarshal(value, &verificationDetails); err != nil {
 			return err
 		}
-		verifications = append(verifications, verification)
+		verifications = append(verifications, types.QueryVerificationsDetailsResponse_VerificationDetailsWithKey{
+			VerificationID:      types.VerificationIdFromKey(key),
+			VerificationDetails: &verificationDetails,
+		})
 		// NOTE, DO NOT FILTER VERIFICATIONS BY ISSUERS' EXISTENCE BECAUSE OF QUERY PERFORMANCE
 		return nil
 	})

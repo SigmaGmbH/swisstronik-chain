@@ -343,7 +343,7 @@ func (m *QueryAddressesDetailsRequest) GetPagination() *query.PageRequest {
 // QueryAddressesDetailsResponse is response type for the Query/AddressesDetails RPC method.
 type QueryAddressesDetailsResponse struct {
 	// addresses is a slice of registered addresses for the compliance module
-	Addresses []AddressDetails `protobuf:"bytes,1,rep,name=addresses,proto3" json:"addresses"`
+	Addresses []QueryAddressesDetailsResponse_AddressDetailsWithKey `protobuf:"bytes,1,rep,name=addresses,proto3" json:"addresses"`
 	// pagination defines the pagination in the response.
 	Pagination *query.PageResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
 }
@@ -381,7 +381,7 @@ func (m *QueryAddressesDetailsResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryAddressesDetailsResponse proto.InternalMessageInfo
 
-func (m *QueryAddressesDetailsResponse) GetAddresses() []AddressDetails {
+func (m *QueryAddressesDetailsResponse) GetAddresses() []QueryAddressesDetailsResponse_AddressDetailsWithKey {
 	if m != nil {
 		return m.Addresses
 	}
@@ -391,6 +391,62 @@ func (m *QueryAddressesDetailsResponse) GetAddresses() []AddressDetails {
 func (m *QueryAddressesDetailsResponse) GetPagination() *query.PageResponse {
 	if m != nil {
 		return m.Pagination
+	}
+	return nil
+}
+
+type QueryAddressesDetailsResponse_AddressDetailsWithKey struct {
+	Address        string          `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
+	AddressDetails *AddressDetails `protobuf:"bytes,2,opt,name=addressDetails,proto3" json:"addressDetails,omitempty"`
+}
+
+func (m *QueryAddressesDetailsResponse_AddressDetailsWithKey) Reset() {
+	*m = QueryAddressesDetailsResponse_AddressDetailsWithKey{}
+}
+func (m *QueryAddressesDetailsResponse_AddressDetailsWithKey) String() string {
+	return proto.CompactTextString(m)
+}
+func (*QueryAddressesDetailsResponse_AddressDetailsWithKey) ProtoMessage() {}
+func (*QueryAddressesDetailsResponse_AddressDetailsWithKey) Descriptor() ([]byte, []int) {
+	return fileDescriptor_f80d6bdaf4aa1245, []int{7, 0}
+}
+func (m *QueryAddressesDetailsResponse_AddressDetailsWithKey) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryAddressesDetailsResponse_AddressDetailsWithKey) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryAddressesDetailsResponse_AddressDetailsWithKey.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryAddressesDetailsResponse_AddressDetailsWithKey) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryAddressesDetailsResponse_AddressDetailsWithKey.Merge(m, src)
+}
+func (m *QueryAddressesDetailsResponse_AddressDetailsWithKey) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryAddressesDetailsResponse_AddressDetailsWithKey) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryAddressesDetailsResponse_AddressDetailsWithKey.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryAddressesDetailsResponse_AddressDetailsWithKey proto.InternalMessageInfo
+
+func (m *QueryAddressesDetailsResponse_AddressDetailsWithKey) GetAddress() string {
+	if m != nil {
+		return m.Address
+	}
+	return ""
+}
+
+func (m *QueryAddressesDetailsResponse_AddressDetailsWithKey) GetAddressDetails() *AddressDetails {
+	if m != nil {
+		return m.AddressDetails
 	}
 	return nil
 }
@@ -534,7 +590,7 @@ func (m *QueryIssuersDetailsRequest) GetPagination() *query.PageRequest {
 // QueryIssuersDetailsResponse is response type for the Query/IssuersDetails RPC method.
 type QueryIssuersDetailsResponse struct {
 	// issuers is a slice of registered issuers for the compliance module
-	Issuers []IssuerDetails `protobuf:"bytes,1,rep,name=issuers,proto3" json:"issuers"`
+	Issuers []QueryIssuersDetailsResponse_IssuerDetailsWithKey `protobuf:"bytes,1,rep,name=issuers,proto3" json:"issuers"`
 	// pagination defines the pagination in the response.
 	Pagination *query.PageResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
 }
@@ -572,7 +628,7 @@ func (m *QueryIssuersDetailsResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryIssuersDetailsResponse proto.InternalMessageInfo
 
-func (m *QueryIssuersDetailsResponse) GetIssuers() []IssuerDetails {
+func (m *QueryIssuersDetailsResponse) GetIssuers() []QueryIssuersDetailsResponse_IssuerDetailsWithKey {
 	if m != nil {
 		return m.Issuers
 	}
@@ -582,6 +638,62 @@ func (m *QueryIssuersDetailsResponse) GetIssuers() []IssuerDetails {
 func (m *QueryIssuersDetailsResponse) GetPagination() *query.PageResponse {
 	if m != nil {
 		return m.Pagination
+	}
+	return nil
+}
+
+type QueryIssuersDetailsResponse_IssuerDetailsWithKey struct {
+	IssuerAddress string         `protobuf:"bytes,1,opt,name=issuerAddress,proto3" json:"issuerAddress,omitempty"`
+	IssuerDetails *IssuerDetails `protobuf:"bytes,2,opt,name=issuerDetails,proto3" json:"issuerDetails,omitempty"`
+}
+
+func (m *QueryIssuersDetailsResponse_IssuerDetailsWithKey) Reset() {
+	*m = QueryIssuersDetailsResponse_IssuerDetailsWithKey{}
+}
+func (m *QueryIssuersDetailsResponse_IssuerDetailsWithKey) String() string {
+	return proto.CompactTextString(m)
+}
+func (*QueryIssuersDetailsResponse_IssuerDetailsWithKey) ProtoMessage() {}
+func (*QueryIssuersDetailsResponse_IssuerDetailsWithKey) Descriptor() ([]byte, []int) {
+	return fileDescriptor_f80d6bdaf4aa1245, []int{11, 0}
+}
+func (m *QueryIssuersDetailsResponse_IssuerDetailsWithKey) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryIssuersDetailsResponse_IssuerDetailsWithKey) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryIssuersDetailsResponse_IssuerDetailsWithKey.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryIssuersDetailsResponse_IssuerDetailsWithKey) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryIssuersDetailsResponse_IssuerDetailsWithKey.Merge(m, src)
+}
+func (m *QueryIssuersDetailsResponse_IssuerDetailsWithKey) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryIssuersDetailsResponse_IssuerDetailsWithKey) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryIssuersDetailsResponse_IssuerDetailsWithKey.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryIssuersDetailsResponse_IssuerDetailsWithKey proto.InternalMessageInfo
+
+func (m *QueryIssuersDetailsResponse_IssuerDetailsWithKey) GetIssuerAddress() string {
+	if m != nil {
+		return m.IssuerAddress
+	}
+	return ""
+}
+
+func (m *QueryIssuersDetailsResponse_IssuerDetailsWithKey) GetIssuerDetails() *IssuerDetails {
+	if m != nil {
+		return m.IssuerDetails
 	}
 	return nil
 }
@@ -725,7 +837,7 @@ func (m *QueryVerificationsDetailsRequest) GetPagination() *query.PageRequest {
 // QueryVerificationsDetailsResponse is response type for the Query/VerificationsDetails RPC method.
 type QueryVerificationsDetailsResponse struct {
 	// verifications is a slice of registered verifications for the compliance module
-	Verifications []VerificationDetails `protobuf:"bytes,1,rep,name=verifications,proto3" json:"verifications"`
+	Verifications []QueryVerificationsDetailsResponse_VerificationDetailsWithKey `protobuf:"bytes,1,rep,name=verifications,proto3" json:"verifications"`
 	// pagination defines the pagination in the response.
 	Pagination *query.PageResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
 }
@@ -763,7 +875,7 @@ func (m *QueryVerificationsDetailsResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryVerificationsDetailsResponse proto.InternalMessageInfo
 
-func (m *QueryVerificationsDetailsResponse) GetVerifications() []VerificationDetails {
+func (m *QueryVerificationsDetailsResponse) GetVerifications() []QueryVerificationsDetailsResponse_VerificationDetailsWithKey {
 	if m != nil {
 		return m.Verifications
 	}
@@ -777,6 +889,62 @@ func (m *QueryVerificationsDetailsResponse) GetPagination() *query.PageResponse 
 	return nil
 }
 
+type QueryVerificationsDetailsResponse_VerificationDetailsWithKey struct {
+	VerificationID      []byte               `protobuf:"bytes,1,opt,name=verificationID,proto3" json:"verificationID,omitempty"`
+	VerificationDetails *VerificationDetails `protobuf:"bytes,2,opt,name=verificationDetails,proto3" json:"verificationDetails,omitempty"`
+}
+
+func (m *QueryVerificationsDetailsResponse_VerificationDetailsWithKey) Reset() {
+	*m = QueryVerificationsDetailsResponse_VerificationDetailsWithKey{}
+}
+func (m *QueryVerificationsDetailsResponse_VerificationDetailsWithKey) String() string {
+	return proto.CompactTextString(m)
+}
+func (*QueryVerificationsDetailsResponse_VerificationDetailsWithKey) ProtoMessage() {}
+func (*QueryVerificationsDetailsResponse_VerificationDetailsWithKey) Descriptor() ([]byte, []int) {
+	return fileDescriptor_f80d6bdaf4aa1245, []int{15, 0}
+}
+func (m *QueryVerificationsDetailsResponse_VerificationDetailsWithKey) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryVerificationsDetailsResponse_VerificationDetailsWithKey) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryVerificationsDetailsResponse_VerificationDetailsWithKey.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryVerificationsDetailsResponse_VerificationDetailsWithKey) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryVerificationsDetailsResponse_VerificationDetailsWithKey.Merge(m, src)
+}
+func (m *QueryVerificationsDetailsResponse_VerificationDetailsWithKey) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryVerificationsDetailsResponse_VerificationDetailsWithKey) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryVerificationsDetailsResponse_VerificationDetailsWithKey.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryVerificationsDetailsResponse_VerificationDetailsWithKey proto.InternalMessageInfo
+
+func (m *QueryVerificationsDetailsResponse_VerificationDetailsWithKey) GetVerificationID() []byte {
+	if m != nil {
+		return m.VerificationID
+	}
+	return nil
+}
+
+func (m *QueryVerificationsDetailsResponse_VerificationDetailsWithKey) GetVerificationDetails() *VerificationDetails {
+	if m != nil {
+		return m.VerificationDetails
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterType((*QueryParamsRequest)(nil), "swisstronik.compliance.QueryParamsRequest")
 	proto.RegisterType((*QueryParamsResponse)(nil), "swisstronik.compliance.QueryParamsResponse")
@@ -786,14 +954,17 @@ func init() {
 	proto.RegisterType((*QueryAddressDetailsResponse)(nil), "swisstronik.compliance.QueryAddressDetailsResponse")
 	proto.RegisterType((*QueryAddressesDetailsRequest)(nil), "swisstronik.compliance.QueryAddressesDetailsRequest")
 	proto.RegisterType((*QueryAddressesDetailsResponse)(nil), "swisstronik.compliance.QueryAddressesDetailsResponse")
+	proto.RegisterType((*QueryAddressesDetailsResponse_AddressDetailsWithKey)(nil), "swisstronik.compliance.QueryAddressesDetailsResponse.AddressDetailsWithKey")
 	proto.RegisterType((*QueryIssuerDetailsRequest)(nil), "swisstronik.compliance.QueryIssuerDetailsRequest")
 	proto.RegisterType((*QueryIssuerDetailsResponse)(nil), "swisstronik.compliance.QueryIssuerDetailsResponse")
 	proto.RegisterType((*QueryIssuersDetailsRequest)(nil), "swisstronik.compliance.QueryIssuersDetailsRequest")
 	proto.RegisterType((*QueryIssuersDetailsResponse)(nil), "swisstronik.compliance.QueryIssuersDetailsResponse")
+	proto.RegisterType((*QueryIssuersDetailsResponse_IssuerDetailsWithKey)(nil), "swisstronik.compliance.QueryIssuersDetailsResponse.IssuerDetailsWithKey")
 	proto.RegisterType((*QueryVerificationDetailsRequest)(nil), "swisstronik.compliance.QueryVerificationDetailsRequest")
 	proto.RegisterType((*QueryVerificationDetailsResponse)(nil), "swisstronik.compliance.QueryVerificationDetailsResponse")
 	proto.RegisterType((*QueryVerificationsDetailsRequest)(nil), "swisstronik.compliance.QueryVerificationsDetailsRequest")
 	proto.RegisterType((*QueryVerificationsDetailsResponse)(nil), "swisstronik.compliance.QueryVerificationsDetailsResponse")
+	proto.RegisterType((*QueryVerificationsDetailsResponse_VerificationDetailsWithKey)(nil), "swisstronik.compliance.QueryVerificationsDetailsResponse.VerificationDetailsWithKey")
 }
 
 func init() {
@@ -801,61 +972,67 @@ func init() {
 }
 
 var fileDescriptor_f80d6bdaf4aa1245 = []byte{
-	// 855 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x97, 0xcf, 0x4f, 0x14, 0x49,
-	0x14, 0xc7, 0xa7, 0x58, 0x16, 0xc2, 0x23, 0xc0, 0xa6, 0x20, 0x1b, 0xb6, 0x97, 0x6d, 0x86, 0x66,
-	0xf9, 0x9d, 0xed, 0xde, 0x19, 0x7e, 0x2e, 0xd9, 0xcd, 0x06, 0xc2, 0x2e, 0xc1, 0x8b, 0x38, 0x26,
-	0x1a, 0x4d, 0x3c, 0x14, 0x33, 0xc5, 0xa4, 0x15, 0xba, 0x9b, 0xae, 0x06, 0x25, 0x13, 0x2e, 0x5e,
-	0x8c, 0x37, 0x13, 0xff, 0x03, 0x8f, 0x46, 0x3d, 0x79, 0x30, 0xde, 0x8d, 0x1c, 0x49, 0xbc, 0x78,
-	0x32, 0x06, 0xfc, 0x43, 0x0c, 0xd5, 0xaf, 0x99, 0xe9, 0xb2, 0x7b, 0x98, 0x31, 0x70, 0x83, 0xaa,
-	0xf7, 0x7d, 0xdf, 0xcf, 0xeb, 0xf7, 0x52, 0x2f, 0x03, 0x86, 0xb8, 0x6f, 0x0b, 0x11, 0xf8, 0xae,
-	0x63, 0xdf, 0xb3, 0x8a, 0xee, 0xb6, 0xb7, 0x65, 0x33, 0xa7, 0xc8, 0xad, 0x9d, 0x5d, 0xee, 0xef,
-	0x9b, 0x9e, 0xef, 0x06, 0x2e, 0xfd, 0xb9, 0x26, 0xc6, 0xac, 0xc6, 0x68, 0x7d, 0x65, 0xb7, 0xec,
-	0xca, 0x10, 0xeb, 0xf4, 0xaf, 0x30, 0x5a, 0x1b, 0x28, 0xbb, 0x6e, 0x79, 0x8b, 0x5b, 0xcc, 0xb3,
-	0x2d, 0xe6, 0x38, 0x6e, 0xc0, 0x02, 0xdb, 0x75, 0x04, 0xde, 0x4e, 0x16, 0x5d, 0xb1, 0xed, 0x0a,
-	0x6b, 0x83, 0x09, 0x34, 0xb1, 0xf6, 0x72, 0x1b, 0x3c, 0x60, 0x39, 0xcb, 0x63, 0x65, 0xdb, 0x91,
-	0xc1, 0x18, 0x3b, 0x9c, 0xc2, 0xe6, 0x31, 0x9f, 0x6d, 0x47, 0x09, 0x47, 0x52, 0x82, 0xb8, 0x13,
-	0xd8, 0x81, 0xcd, 0x31, 0xcc, 0xe8, 0x03, 0x7a, 0xed, 0xd4, 0x6d, 0x5d, 0x6a, 0x0b, 0x7c, 0x67,
-	0x97, 0x8b, 0xc0, 0xb8, 0x0e, 0xbd, 0xb1, 0x53, 0xe1, 0xb9, 0x8e, 0xe0, 0xf4, 0x6f, 0x68, 0x0b,
-	0x3d, 0xfa, 0x49, 0x96, 0x8c, 0x77, 0xe6, 0x75, 0x33, 0xf9, 0x0b, 0x98, 0xa1, 0x6e, 0xb9, 0xf5,
-	0xf0, 0xd3, 0x60, 0xa6, 0x80, 0x1a, 0x63, 0x15, 0x7e, 0x95, 0x49, 0xaf, 0x7a, 0xdc, 0x67, 0x81,
-	0xeb, 0xaf, 0xf0, 0x80, 0xd9, 0x5b, 0x91, 0x27, 0x1d, 0x87, 0x1e, 0x17, 0x6f, 0x96, 0x4a, 0x25,
-	0x9f, 0x8b, 0xd0, 0xa5, 0xa3, 0xa0, 0x1e, 0x1b, 0x0c, 0x06, 0x92, 0x13, 0x21, 0xe6, 0x12, 0xb4,
-	0x97, 0xc2, 0x23, 0xe4, 0x1c, 0x4b, 0xe3, 0x54, 0x33, 0x44, 0x3a, 0x63, 0x0e, 0x34, 0x69, 0x81,
-	0x96, 0x0a, 0x6a, 0x3f, 0xb4, 0xb3, 0x18, 0x62, 0xf4, 0xaf, 0x71, 0x0b, 0x6b, 0x54, 0x75, 0x48,
-	0xb6, 0x08, 0xad, 0x25, 0x16, 0x30, 0xc4, 0x1a, 0x4d, 0xc3, 0x52, 0xd4, 0x52, 0x63, 0x6c, 0x62,
-	0xd5, 0x78, 0xc9, 0x55, 0xa8, 0xff, 0x01, 0xaa, 0x93, 0x72, 0xe6, 0x10, 0x8e, 0x95, 0x79, 0x3a,
-	0x56, 0x66, 0x38, 0xbb, 0x38, 0x56, 0xe6, 0x3a, 0x2b, 0x73, 0xd4, 0x16, 0x6a, 0x94, 0xc6, 0x6b,
-	0x02, 0xbf, 0xa5, 0x18, 0x61, 0x15, 0x57, 0xa0, 0x83, 0x45, 0x77, 0xfd, 0x24, 0xfb, 0x43, 0xe3,
-	0xa5, 0xe0, 0x44, 0x54, 0xe5, 0x74, 0x35, 0x46, 0xdd, 0x82, 0xed, 0x3a, 0x8f, 0x3a, 0x04, 0x89,
-	0x61, 0x2f, 0xc1, 0x2f, 0x92, 0x7a, 0x4d, 0x88, 0x5d, 0xae, 0xce, 0xd6, 0xef, 0xd0, 0x65, 0xcb,
-	0xf3, 0xf8, 0x64, 0xc5, 0x0f, 0x8d, 0x3b, 0xd8, 0x74, 0x25, 0x05, 0x56, 0xfd, 0xaf, 0x3a, 0x55,
-	0x23, 0x69, 0x35, 0xc7, 0xf5, 0x67, 0x33, 0x55, 0x8a, 0xa5, 0xbf, 0xac, 0xf6, 0xbd, 0x24, 0x38,
-	0x82, 0xaa, 0x0d, 0x96, 0xf1, 0x1f, 0xb4, 0x87, 0x55, 0x47, 0xad, 0x6b, 0xac, 0x0c, 0xec, 0x5c,
-	0xa4, 0xbd, 0xb8, 0xbe, 0xad, 0xc1, 0xa0, 0xc4, 0xbd, 0xc1, 0x7d, 0x7b, 0xd3, 0x2e, 0xca, 0x43,
-	0xe5, 0xd3, 0x8c, 0x42, 0xf7, 0x5e, 0xcd, 0xed, 0xda, 0x0a, 0xb6, 0x4f, 0x39, 0x35, 0x6c, 0xc8,
-	0xa6, 0xa7, 0xaa, 0x96, 0x1f, 0xef, 0xe2, 0x54, 0x5a, 0xf9, 0x49, 0x59, 0xce, 0x7a, 0x79, 0x37,
-	0xc1, 0xea, 0xb2, 0x3a, 0xfa, 0x8e, 0xc0, 0x50, 0x1d, 0x33, 0x2c, 0xec, 0x26, 0x74, 0xd5, 0x7e,
-	0x8e, 0xa8, 0xbb, 0xcd, 0x94, 0x87, 0x3d, 0x8e, 0xe7, 0xb9, 0xb0, 0x4e, 0xe7, 0x1f, 0x75, 0xc2,
-	0x8f, 0xb2, 0x0e, 0xfa, 0x98, 0x40, 0x5b, 0xb8, 0x22, 0xe8, 0x64, 0x1a, 0xdf, 0xb7, 0x5b, 0x49,
-	0x9b, 0x6a, 0x28, 0x36, 0x74, 0x36, 0x46, 0x1f, 0x7e, 0xf8, 0xf2, 0xb4, 0x25, 0x4b, 0x75, 0xab,
-	0xee, 0xb6, 0xa4, 0x6f, 0x08, 0xf4, 0x28, 0x6b, 0x80, 0x4e, 0xd7, 0x35, 0x4a, 0xde, 0x5f, 0xda,
-	0x4c, 0x73, 0x22, 0xc4, 0x5c, 0x94, 0x98, 0x33, 0x34, 0x9f, 0x86, 0x19, 0x2d, 0x3f, 0xab, 0xa2,
-	0xac, 0xc1, 0x03, 0xfa, 0x82, 0x40, 0x77, 0xfc, 0x7d, 0xa5, 0xf9, 0xba, 0x10, 0x89, 0xdb, 0x4c,
-	0x9b, 0x6e, 0x4a, 0x83, 0xdc, 0x39, 0xc9, 0x3d, 0x45, 0x27, 0xd2, 0xb8, 0xf1, 0x89, 0xb7, 0x2a,
-	0x2c, 0xc2, 0x7d, 0x4e, 0xe0, 0x27, 0x75, 0xa7, 0xd0, 0x99, 0x46, 0xcc, 0xd5, 0x5d, 0xa7, 0xcd,
-	0x36, 0xa9, 0x42, 0xe8, 0x09, 0x09, 0x3d, 0x4c, 0x87, 0xce, 0x81, 0xe6, 0x82, 0xbe, 0x22, 0xd0,
-	0x15, 0x7b, 0x00, 0x69, 0xae, 0xae, 0x67, 0xd2, 0xda, 0xd1, 0xf2, 0xcd, 0x48, 0x90, 0x71, 0x4e,
-	0x32, 0xfe, 0x49, 0xcd, 0x34, 0xc6, 0xf0, 0x05, 0xb6, 0x2a, 0xb1, 0xdd, 0x75, 0x40, 0x9f, 0x11,
-	0xe8, 0x8e, 0x3f, 0xf9, 0xb4, 0x11, 0xfb, 0xe6, 0x86, 0x21, 0x79, 0xa7, 0x18, 0x63, 0x92, 0x79,
-	0x88, 0x0e, 0xd6, 0x67, 0x16, 0xf4, 0x3d, 0x81, 0xde, 0x84, 0x87, 0x87, 0xce, 0xd7, 0x75, 0x4d,
-	0x5f, 0x0d, 0xda, 0x42, 0xf3, 0x42, 0x64, 0xfe, 0x47, 0x32, 0xcf, 0xd3, 0xd9, 0x34, 0xe6, 0xda,
-	0x57, 0xd0, 0xaa, 0xc4, 0x57, 0xcd, 0x01, 0x7d, 0x4b, 0xa0, 0x2f, 0xe9, 0x3d, 0xa6, 0x8d, 0x13,
-	0xa9, 0x9f, 0xfe, 0xaf, 0xef, 0x50, 0x62, 0x31, 0x7f, 0xc8, 0x62, 0xc6, 0xe8, 0x48, 0x23, 0xc5,
-	0x88, 0xe5, 0x85, 0xc3, 0x63, 0x9d, 0x1c, 0x1d, 0xeb, 0xe4, 0xf3, 0xb1, 0x4e, 0x9e, 0x9c, 0xe8,
-	0x99, 0xa3, 0x13, 0x3d, 0xf3, 0xf1, 0x44, 0xcf, 0xdc, 0xd6, 0x6b, 0xf5, 0x0f, 0x6a, 0x33, 0x04,
-	0xfb, 0x1e, 0x17, 0x1b, 0x6d, 0xf2, 0x57, 0xc3, 0xf4, 0xd7, 0x00, 0x00, 0x00, 0xff, 0xff, 0x18,
-	0x3f, 0x99, 0x59, 0x1f, 0x0d, 0x00, 0x00,
+	// 956 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x97, 0xdf, 0x4f, 0x1d, 0x45,
+	0x14, 0xc7, 0x19, 0x5a, 0x21, 0x3d, 0x08, 0x35, 0x03, 0x1a, 0xbc, 0xd6, 0x05, 0xa6, 0xf2, 0xa3,
+	0x25, 0xee, 0xca, 0x85, 0xb6, 0xd8, 0x68, 0x0c, 0x4d, 0xb5, 0x12, 0x12, 0xad, 0x68, 0x34, 0x9a,
+	0xf4, 0x61, 0xb8, 0x77, 0x7a, 0xbb, 0x0a, 0x3b, 0xdb, 0x9d, 0x05, 0x25, 0x37, 0x24, 0xea, 0x8b,
+	0xe9, 0x9b, 0x89, 0xf1, 0x1f, 0xd0, 0x37, 0x63, 0x7c, 0x36, 0xfe, 0x03, 0xf6, 0xb1, 0x89, 0x2f,
+	0x3e, 0xa8, 0x31, 0xe0, 0x1f, 0x62, 0x98, 0x3d, 0x0b, 0x3b, 0xd3, 0x9d, 0xed, 0x5e, 0xd2, 0xbe,
+	0xc1, 0xcc, 0xf9, 0xf1, 0x39, 0x33, 0xdf, 0x9d, 0x73, 0x2e, 0x30, 0xf5, 0x79, 0xa8, 0x54, 0x9a,
+	0xc8, 0x28, 0xfc, 0x2c, 0x68, 0xc9, 0xad, 0x78, 0x33, 0xe4, 0x51, 0x4b, 0x04, 0x77, 0xb7, 0x45,
+	0xb2, 0xeb, 0xc7, 0x89, 0x4c, 0x25, 0x7d, 0xae, 0x60, 0xe3, 0x1f, 0xdb, 0x34, 0xc6, 0x3a, 0xb2,
+	0x23, 0xb5, 0x49, 0x70, 0xf8, 0x57, 0x66, 0xdd, 0x38, 0xd7, 0x91, 0xb2, 0xb3, 0x29, 0x02, 0x1e,
+	0x87, 0x01, 0x8f, 0x22, 0x99, 0xf2, 0x34, 0x94, 0x91, 0xc2, 0xdd, 0x8b, 0x2d, 0xa9, 0xb6, 0xa4,
+	0x0a, 0x36, 0xb8, 0xc2, 0x24, 0xc1, 0xce, 0xc2, 0x86, 0x48, 0xf9, 0x42, 0x10, 0xf3, 0x4e, 0x18,
+	0x69, 0x63, 0xb4, 0x3d, 0xef, 0x60, 0x8b, 0x79, 0xc2, 0xb7, 0xf2, 0x80, 0xd3, 0x0e, 0x23, 0x11,
+	0xa5, 0x61, 0x1a, 0x0a, 0x34, 0x63, 0x63, 0x40, 0xdf, 0x3b, 0xcc, 0x76, 0x53, 0xfb, 0xae, 0x8b,
+	0xbb, 0xdb, 0x42, 0xa5, 0xec, 0x7d, 0x18, 0x35, 0x56, 0x55, 0x2c, 0x23, 0x25, 0xe8, 0x6b, 0x30,
+	0x90, 0xe5, 0x18, 0x27, 0x93, 0x64, 0x6e, 0xa8, 0xe9, 0xf9, 0xe5, 0x27, 0xe0, 0x67, 0x7e, 0xd7,
+	0x4e, 0xdf, 0xff, 0x67, 0xa2, 0x6f, 0x1d, 0x7d, 0xd8, 0x0d, 0x78, 0x41, 0x07, 0x7d, 0x37, 0x16,
+	0x09, 0x4f, 0x65, 0x72, 0x5d, 0xa4, 0x3c, 0xdc, 0xcc, 0x73, 0xd2, 0x39, 0x38, 0x2b, 0x71, 0x67,
+	0xa5, 0xdd, 0x4e, 0x84, 0xca, 0xb2, 0x9c, 0x59, 0xb7, 0x97, 0x19, 0x87, 0x73, 0xe5, 0x81, 0x10,
+	0x73, 0x05, 0x06, 0xdb, 0xd9, 0x12, 0x72, 0xce, 0xba, 0x38, 0xed, 0x08, 0xb9, 0x1f, 0xbb, 0x0c,
+	0x0d, 0x9d, 0x02, 0x53, 0x5a, 0xa8, 0xe3, 0x30, 0xc8, 0x0d, 0xc4, 0xfc, 0x5f, 0xf6, 0x31, 0xd6,
+	0x68, 0xfb, 0x21, 0xd9, 0x55, 0x38, 0xdd, 0xe6, 0x29, 0x47, 0xac, 0x19, 0x17, 0x96, 0xe5, 0xad,
+	0x7d, 0xd8, 0x6d, 0xac, 0x1a, 0x37, 0x85, 0x0d, 0xf5, 0x16, 0xc0, 0xb1, 0x52, 0x8e, 0x32, 0x64,
+	0xb2, 0xf2, 0x0f, 0x65, 0xe5, 0x67, 0xda, 0x45, 0x59, 0xf9, 0x37, 0x79, 0x47, 0xa0, 0xef, 0x7a,
+	0xc1, 0x93, 0xfd, 0xdd, 0x0f, 0x2f, 0x3a, 0x12, 0x61, 0x15, 0x12, 0xce, 0xf0, 0x7c, 0x6f, 0x9c,
+	0x4c, 0x9e, 0x9a, 0x1b, 0x6a, 0xae, 0xb9, 0x4a, 0xa9, 0x8c, 0x64, 0x15, 0xfa, 0x51, 0x98, 0xde,
+	0x59, 0x13, 0xbb, 0x28, 0x9b, 0xe3, 0x1c, 0xf4, 0x86, 0x51, 0x5a, 0x3f, 0xde, 0xe9, 0xa3, 0x4a,
+	0xcb, 0x72, 0x14, 0x6b, 0x6b, 0x7c, 0x45, 0xe0, 0xd9, 0xd2, 0x9c, 0xee, 0x2b, 0xa5, 0xef, 0xc0,
+	0x08, 0x37, 0x5c, 0x10, 0xa0, 0xee, 0xed, 0x59, 0xde, 0x6c, 0x05, 0x9e, 0xd7, 0x87, 0xb2, 0xaa,
+	0xd4, 0xb6, 0xb0, 0x3f, 0x82, 0x97, 0x60, 0x38, 0xd4, 0xeb, 0xe6, 0x27, 0x60, 0x2e, 0xb2, 0x5b,
+	0xa8, 0x4e, 0x2b, 0x04, 0x5e, 0xcf, 0x1b, 0xb6, 0xfc, 0xa7, 0x5d, 0xa4, 0xa6, 0xff, 0x91, 0xf8,
+	0xdb, 0x46, 0xf8, 0x27, 0xa5, 0xb3, 0xbf, 0xfa, 0xf1, 0x5b, 0xb1, 0xd3, 0x60, 0x19, 0x77, 0x60,
+	0x30, 0xab, 0x3a, 0xd7, 0xd8, 0xdb, 0x95, 0x1a, 0x2b, 0x8f, 0x62, 0x96, 0x68, 0x0a, 0x2c, 0x0f,
+	0xff, 0xf8, 0xe4, 0x75, 0x8f, 0xc0, 0x58, 0x59, 0xc2, 0x7a, 0xd7, 0x4a, 0xd7, 0x72, 0x2b, 0x53,
+	0x68, 0x35, 0xaf, 0xcf, 0xf4, 0x65, 0xab, 0x30, 0xa1, 0xcf, 0xe5, 0x43, 0x91, 0x84, 0xb7, 0xc3,
+	0x96, 0x06, 0xb4, 0x6e, 0x72, 0x06, 0x46, 0x76, 0x0a, 0xbb, 0xab, 0xd7, 0x11, 0xcb, 0x5a, 0x65,
+	0x21, 0x4c, 0xba, 0x43, 0xe1, 0x6d, 0xbd, 0x69, 0x8b, 0x6e, 0xde, 0x45, 0x5d, 0x16, 0xe5, 0x48,
+	0x7a, 0x9f, 0x96, 0xa4, 0x7a, 0x52, 0x02, 0xfc, 0xfe, 0x14, 0x4c, 0x55, 0x24, 0xc3, 0xc2, 0xbe,
+	0x24, 0x30, 0x5c, 0x3c, 0x8f, 0x5c, 0x8d, 0x1f, 0x54, 0xaa, 0xb1, 0x2a, 0x64, 0xd9, 0x09, 0x98,
+	0xca, 0x34, 0x13, 0x3e, 0x3e, 0x7d, 0xfe, 0x48, 0xa0, 0xe1, 0x4e, 0xee, 0xd0, 0xc3, 0xd3, 0xb6,
+	0x1e, 0xe8, 0x2d, 0x18, 0xdd, 0x79, 0x38, 0x0a, 0x82, 0xf5, 0x74, 0xef, 0x65, 0x71, 0x9a, 0xdf,
+	0x0c, 0xc1, 0x53, 0xfa, 0x10, 0xe9, 0x3d, 0x02, 0x03, 0xd9, 0x28, 0x41, 0x2f, 0x56, 0x1e, 0xb7,
+	0x31, 0xbd, 0x34, 0xe6, 0x6b, 0xd9, 0x66, 0xe7, 0xc3, 0x66, 0xbe, 0xfe, 0xe3, 0xbf, 0xef, 0xfa,
+	0x27, 0xa9, 0x17, 0x54, 0x4e, 0x55, 0xf4, 0x57, 0x02, 0x67, 0xad, 0x71, 0x81, 0x2e, 0x56, 0x26,
+	0x2a, 0x9f, 0x73, 0x1a, 0x4b, 0xbd, 0x39, 0x21, 0xe6, 0x55, 0x8d, 0xb9, 0x44, 0x9b, 0x2e, 0xcc,
+	0x7c, 0x48, 0x0a, 0xba, 0xd6, 0xb8, 0xb4, 0x47, 0x7f, 0x26, 0x30, 0x62, 0x36, 0x25, 0xda, 0xac,
+	0xd3, 0xaf, 0x2d, 0xf0, 0xc5, 0x9e, 0x7c, 0x90, 0x7b, 0x41, 0x73, 0xcf, 0xd3, 0x0b, 0x2e, 0x6e,
+	0xec, 0x8e, 0x41, 0x97, 0xe7, 0xb8, 0x3f, 0x11, 0x78, 0xc6, 0x9e, 0x18, 0xe8, 0x52, 0x8f, 0x03,
+	0x46, 0x86, 0x7c, 0xe9, 0x44, 0x63, 0x09, 0xbb, 0xa0, 0xa1, 0xcf, 0xd3, 0xa9, 0x47, 0x40, 0x0b,
+	0x45, 0x7f, 0x21, 0x30, 0x6c, 0xbc, 0xc3, 0x74, 0xa1, 0x46, 0x9b, 0xb2, 0x30, 0x9b, 0xbd, 0xb8,
+	0x20, 0xe3, 0x65, 0xcd, 0xf8, 0x0a, 0xf5, 0x5d, 0x8c, 0x59, 0x3b, 0x08, 0xba, 0x46, 0x8f, 0xd9,
+	0xa3, 0x3f, 0x10, 0x18, 0x31, 0x7b, 0x25, 0x6d, 0xf6, 0xd4, 0x58, 0xeb, 0x88, 0xa1, 0xbc, 0x19,
+	0xb3, 0x59, 0xcd, 0x3c, 0x45, 0x27, 0xaa, 0x99, 0x15, 0xfd, 0x9d, 0xc0, 0x68, 0xc9, 0x7b, 0x41,
+	0xaf, 0xd4, 0x7e, 0x74, 0x2d, 0xdc, 0xe5, 0xde, 0x1d, 0x91, 0xf9, 0x75, 0xcd, 0x7c, 0x85, 0x5e,
+	0x72, 0x31, 0x17, 0x9f, 0xb0, 0xa0, 0x6b, 0x3e, 0x95, 0x7b, 0xf4, 0x37, 0x02, 0x63, 0x65, 0xcd,
+	0x80, 0x2e, 0x9f, 0xa0, 0x7f, 0x64, 0xb5, 0xbc, 0x7a, 0xe2, 0xce, 0xc3, 0x5e, 0xd6, 0xc5, 0xcc,
+	0xd2, 0xe9, 0x3a, 0xc5, 0xa8, 0x6b, 0xcb, 0xf7, 0xf7, 0x3d, 0xf2, 0x60, 0xdf, 0x23, 0xff, 0xee,
+	0x7b, 0xe4, 0xdb, 0x03, 0xaf, 0xef, 0xc1, 0x81, 0xd7, 0xf7, 0xe7, 0x81, 0xd7, 0xf7, 0x89, 0x57,
+	0xf4, 0xff, 0xa2, 0x18, 0x21, 0xdd, 0x8d, 0x85, 0xda, 0x18, 0xd0, 0xbf, 0x2e, 0x17, 0xff, 0x0f,
+	0x00, 0x00, 0xff, 0xff, 0xca, 0x0b, 0xc6, 0xb6, 0x47, 0x0f, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -1462,6 +1639,48 @@ func (m *QueryAddressesDetailsResponse) MarshalToSizedBuffer(dAtA []byte) (int, 
 	return len(dAtA) - i, nil
 }
 
+func (m *QueryAddressesDetailsResponse_AddressDetailsWithKey) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryAddressesDetailsResponse_AddressDetailsWithKey) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryAddressesDetailsResponse_AddressDetailsWithKey) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.AddressDetails != nil {
+		{
+			size, err := m.AddressDetails.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintQuery(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Address) > 0 {
+		i -= len(m.Address)
+		copy(dAtA[i:], m.Address)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Address)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
 func (m *QueryIssuerDetailsRequest) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -1607,6 +1826,48 @@ func (m *QueryIssuersDetailsResponse) MarshalToSizedBuffer(dAtA []byte) (int, er
 			i--
 			dAtA[i] = 0xa
 		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryIssuersDetailsResponse_IssuerDetailsWithKey) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryIssuersDetailsResponse_IssuerDetailsWithKey) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryIssuersDetailsResponse_IssuerDetailsWithKey) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.IssuerDetails != nil {
+		{
+			size, err := m.IssuerDetails.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintQuery(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.IssuerAddress) > 0 {
+		i -= len(m.IssuerAddress)
+		copy(dAtA[i:], m.IssuerAddress)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.IssuerAddress)))
+		i--
+		dAtA[i] = 0xa
 	}
 	return len(dAtA) - i, nil
 }
@@ -1760,6 +2021,48 @@ func (m *QueryVerificationsDetailsResponse) MarshalToSizedBuffer(dAtA []byte) (i
 	return len(dAtA) - i, nil
 }
 
+func (m *QueryVerificationsDetailsResponse_VerificationDetailsWithKey) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryVerificationsDetailsResponse_VerificationDetailsWithKey) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryVerificationsDetailsResponse_VerificationDetailsWithKey) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.VerificationDetails != nil {
+		{
+			size, err := m.VerificationDetails.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintQuery(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.VerificationID) > 0 {
+		i -= len(m.VerificationID)
+		copy(dAtA[i:], m.VerificationID)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.VerificationID)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintQuery(dAtA []byte, offset int, v uint64) int {
 	offset -= sovQuery(v)
 	base := offset
@@ -1875,6 +2178,23 @@ func (m *QueryAddressesDetailsResponse) Size() (n int) {
 	return n
 }
 
+func (m *QueryAddressesDetailsResponse_AddressDetailsWithKey) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Address)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	if m.AddressDetails != nil {
+		l = m.AddressDetails.Size()
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
 func (m *QueryIssuerDetailsRequest) Size() (n int) {
 	if m == nil {
 		return 0
@@ -1933,6 +2253,23 @@ func (m *QueryIssuersDetailsResponse) Size() (n int) {
 	return n
 }
 
+func (m *QueryIssuersDetailsResponse_IssuerDetailsWithKey) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.IssuerAddress)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	if m.IssuerDetails != nil {
+		l = m.IssuerDetails.Size()
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
 func (m *QueryVerificationDetailsRequest) Size() (n int) {
 	if m == nil {
 		return 0
@@ -1986,6 +2323,23 @@ func (m *QueryVerificationsDetailsResponse) Size() (n int) {
 	}
 	if m.Pagination != nil {
 		l = m.Pagination.Size()
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryVerificationsDetailsResponse_VerificationDetailsWithKey) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.VerificationID)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	if m.VerificationDetails != nil {
+		l = m.VerificationDetails.Size()
 		n += 1 + l + sovQuery(uint64(l))
 	}
 	return n
@@ -2610,7 +2964,7 @@ func (m *QueryAddressesDetailsResponse) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Addresses = append(m.Addresses, AddressDetails{})
+			m.Addresses = append(m.Addresses, QueryAddressesDetailsResponse_AddressDetailsWithKey{})
 			if err := m.Addresses[len(m.Addresses)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
@@ -2648,6 +3002,124 @@ func (m *QueryAddressesDetailsResponse) Unmarshal(dAtA []byte) error {
 				m.Pagination = &query.PageResponse{}
 			}
 			if err := m.Pagination.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryAddressesDetailsResponse_AddressDetailsWithKey) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: AddressDetailsWithKey: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: AddressDetailsWithKey: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Address", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Address = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AddressDetails", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.AddressDetails == nil {
+				m.AddressDetails = &AddressDetails{}
+			}
+			if err := m.AddressDetails.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -2984,7 +3456,7 @@ func (m *QueryIssuersDetailsResponse) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Issuers = append(m.Issuers, IssuerDetails{})
+			m.Issuers = append(m.Issuers, QueryIssuersDetailsResponse_IssuerDetailsWithKey{})
 			if err := m.Issuers[len(m.Issuers)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
@@ -3022,6 +3494,124 @@ func (m *QueryIssuersDetailsResponse) Unmarshal(dAtA []byte) error {
 				m.Pagination = &query.PageResponse{}
 			}
 			if err := m.Pagination.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryIssuersDetailsResponse_IssuerDetailsWithKey) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: IssuerDetailsWithKey: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: IssuerDetailsWithKey: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field IssuerAddress", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.IssuerAddress = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field IssuerDetails", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.IssuerDetails == nil {
+				m.IssuerDetails = &IssuerDetails{}
+			}
+			if err := m.IssuerDetails.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -3358,7 +3948,7 @@ func (m *QueryVerificationsDetailsResponse) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Verifications = append(m.Verifications, VerificationDetails{})
+			m.Verifications = append(m.Verifications, QueryVerificationsDetailsResponse_VerificationDetailsWithKey{})
 			if err := m.Verifications[len(m.Verifications)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
@@ -3396,6 +3986,126 @@ func (m *QueryVerificationsDetailsResponse) Unmarshal(dAtA []byte) error {
 				m.Pagination = &query.PageResponse{}
 			}
 			if err := m.Pagination.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryVerificationsDetailsResponse_VerificationDetailsWithKey) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: VerificationDetailsWithKey: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: VerificationDetailsWithKey: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field VerificationID", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.VerificationID = append(m.VerificationID[:0], dAtA[iNdEx:postIndex]...)
+			if m.VerificationID == nil {
+				m.VerificationID = []byte{}
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field VerificationDetails", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.VerificationDetails == nil {
+				m.VerificationDetails = &VerificationDetails{}
+			}
+			if err := m.VerificationDetails.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
