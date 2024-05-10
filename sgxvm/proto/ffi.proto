@@ -165,6 +165,8 @@ message QueryGetVerificationData {
   bytes userAddress = 1;
   bytes issuerAddress = 2;
 }
+// VerificationDetails must have same members with VerificationDetails in "proto/swisstronik/compliance/entities.proto"
+// But the member types can be different, such as string to bytes
 message VerificationDetails {
   // Verification issuer address
   bytes issuerAddress = 1;

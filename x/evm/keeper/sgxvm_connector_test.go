@@ -5,10 +5,11 @@ import (
 	"math/rand"
 
 	"github.com/SigmaGmbH/librustgo"
+	"github.com/SigmaGmbH/librustgo/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/gogoproto/proto"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/golang/protobuf/proto"
 
 	"swisstronik/tests"
 	compliancetypes "swisstronik/x/compliance/types"
@@ -255,8 +256,8 @@ func requestAddVerificationDetails(
 	issuanceTimestamp uint32,
 	expirationTimestamp uint32,
 	proofData []byte,
-	schema string,
-	issuerVerificationId string,
+	schema []byte,
+	issuerVerificationId []byte,
 	version uint32,
 ) ([]byte, error) {
 	// Encode request
@@ -269,8 +270,8 @@ func requestAddVerificationDetails(
 				IssuanceTimestamp:    issuanceTimestamp,
 				ExpirationTimestamp:  expirationTimestamp,
 				ProofData:            proofData,
-				Schema:               []byte(schema),
-				IssuerVerificationId: []byte(issuerVerificationId),
+				Schema:               schema,
+				IssuerVerificationId: issuerVerificationId,
 				Version:              version,
 			},
 		},
@@ -301,23 +302,38 @@ func (suite *KeeperTestSuite) TestSingleVerificationDetails() {
 	}
 
 	var (
-		userAddress   = tests.RandomEthAddress()
-		userAccount   = sdk.AccAddress(suite.address.Bytes())
+		userAddress   common.Address
+		userAccount   sdk.AccAddress
+		issuerAddress common.Address
+		issuerAccount sdk.AccAddress
+
+		verificationType            = compliancetypes.VerificationType_VT_KYC
+		expectedVerificationDetails *types.VerificationDetails
+	)
+
+	setup := func() {
+		userAddress = tests.RandomEthAddress()
+		userAccount = sdk.AccAddress(userAddress.Bytes())
 		issuerAddress = tests.RandomEthAddress()
 		issuerAccount = sdk.AccAddress(issuerAddress.Bytes())
 
-		verificationType            = compliancetypes.VerificationType_VT_KYC
-		expectedVerificationDetails = &compliancetypes.VerificationDetails{
-			IssuerAddress:        issuerAccount.String(),
-			OriginChain:          "sample chain",
+		// Verify issuer to add verification details which are verified by issuer
+		_ = suite.app.ComplianceKeeper.SetIssuerDetails(suite.ctx, issuerAccount, &compliancetypes.IssuerDetails{
+			Name: "test issuer",
+		})
+		_ = suite.app.ComplianceKeeper.SetAddressVerificationStatus(suite.ctx, issuerAccount, true)
+
+		expectedVerificationDetails = &types.VerificationDetails{
+			IssuerAddress:        issuerAccount.Bytes(),
+			OriginChain:          []byte("samplechain"),
 			IssuanceTimestamp:    uint32(suite.ctx.BlockTime().Unix()),
 			ExpirationTimestamp:  uint32(0),
 			OriginalData:         []byte("Proof Data"),
-			Schema:               "Schema",
-			IssuerVerificationId: "Issuer Verification ID",
+			Schema:               []byte("Schema"),
+			IssuerVerificationId: []byte("Issuer Verification ID"),
 			Version:              uint32(0),
 		}
-	)
+	}
 
 	testCases := []struct {
 		name   string
@@ -327,16 +343,25 @@ func (suite *KeeperTestSuite) TestSingleVerificationDetails() {
 			"success - check verification from compliance keeper",
 			func(verificationID []byte) {
 				// Check if verification details exists in compliance keeper
-				verificationDetails, err := connector.EVMKeeper.ComplianceKeeper.GetVerificationDetails(connector.Context, verificationID)
+				verificationDetails, err := suite.app.ComplianceKeeper.GetVerificationDetails(connector.Context, verificationID)
 				suite.Require().NoError(err)
-				suite.Require().Equal(expectedVerificationDetails, verificationDetails)
+				// Addresses in compliance keeper are Cosmos Addresses
+				// Addresses in Query requests are Ethereum Addresses
+				suite.Require().Equal(issuerAccount.String(), verificationDetails.IssuerAddress)
+				suite.Require().Equal(expectedVerificationDetails.OriginChain, []byte(verificationDetails.OriginChain))
+				suite.Require().Equal(expectedVerificationDetails.IssuanceTimestamp, verificationDetails.IssuanceTimestamp)
+				suite.Require().Equal(expectedVerificationDetails.ExpirationTimestamp, verificationDetails.ExpirationTimestamp)
+				suite.Require().Equal(expectedVerificationDetails.OriginalData, verificationDetails.OriginalData)
+				suite.Require().Equal(expectedVerificationDetails.Schema, []byte(verificationDetails.Schema))
+				suite.Require().Equal(expectedVerificationDetails.IssuerVerificationId, []byte(verificationDetails.IssuerVerificationId))
+				suite.Require().Equal(expectedVerificationDetails.Version, verificationDetails.Version)
 
 				// Check if user has verification
-				addressDetails, err := connector.EVMKeeper.ComplianceKeeper.GetAddressDetails(connector.Context, userAccount)
+				addressDetails, err := suite.app.ComplianceKeeper.GetAddressDetails(connector.Context, userAccount)
 				suite.Require().Equal(1, len(addressDetails.Verifications))
 				suite.Require().Equal(verificationType, addressDetails.Verifications[0].Type)
 				suite.Require().Equal(verificationID, addressDetails.Verifications[0].VerificationId)
-				suite.Require().Equal(issuerAddress, addressDetails.Verifications[0].IssuerAddress)
+				suite.Require().Equal(issuerAccount.String(), addressDetails.Verifications[0].IssuerAddress)
 
 				// Check if `hasVerification` with empty issuers returns true
 				has, err := connector.EVMKeeper.ComplianceKeeper.HasVerificationOfType(connector.Context, userAccount, verificationType, nil)
@@ -353,7 +378,7 @@ func (suite *KeeperTestSuite) TestSingleVerificationDetails() {
 				suite.Require().False(has)
 
 				// Check if `getVerificationData` returns one verification details that added above
-				verificationData, err := connector.EVMKeeper.ComplianceKeeper.GetVerificationDetailsByIssuer(connector.Context, userAccount, issuerAccount)
+				verificationData, err := suite.app.ComplianceKeeper.GetVerificationDetailsByIssuer(connector.Context, userAccount, issuerAccount)
 				suite.Require().NoError(err)
 				suite.Require().Equal(1, len(verificationData))
 				suite.Require().Equal(verificationDetails, verificationData[0])
@@ -440,7 +465,7 @@ func (suite *KeeperTestSuite) TestSingleVerificationDetails() {
 
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
-			suite.SetupTest()
+			setup()
 
 			verificationID, err := requestAddVerificationDetails(
 				&connector,
@@ -470,10 +495,16 @@ func (suite *KeeperTestSuite) TestMultipleVerificationDetails() {
 		issuerAddress = tests.RandomEthAddress()
 		issuerAccount = sdk.AccAddress(issuerAddress.Bytes())
 
-		expected []*compliancetypes.VerificationDetails
+		expected []*types.VerificationDetails
 
 		verificationType = compliancetypes.VerificationType_VT_KYC
 	)
+
+	// Verify issuer to add verification details which are verified by issuer
+	_ = suite.app.ComplianceKeeper.SetIssuerDetails(suite.ctx, issuerAccount, &compliancetypes.IssuerDetails{
+		Name: "test issuer",
+	})
+	_ = suite.app.ComplianceKeeper.SetAddressVerificationStatus(suite.ctx, issuerAccount, true)
 
 	connector := evmkeeper.Connector{
 		Context:   suite.ctx,
@@ -482,14 +513,15 @@ func (suite *KeeperTestSuite) TestMultipleVerificationDetails() {
 
 	numOfRetry := 10
 	for i := 0; i < numOfRetry; i++ {
-		verificationDetails := &compliancetypes.VerificationDetails{
-			IssuerAddress:        issuerAccount.String(),
-			OriginChain:          "sample chain",
+		// Addresses before making Query request should be Ethereum Addresses
+		verificationDetails := &types.VerificationDetails{
+			IssuerAddress:        issuerAddress.Bytes(),
+			OriginChain:          []byte("samplechain"),
 			IssuanceTimestamp:    uint32(suite.ctx.BlockTime().Unix()),
 			ExpirationTimestamp:  uint32(0),
 			OriginalData:         big.NewInt(rand.Int63n(100000)).Bytes(),
-			Schema:               string(big.NewInt(rand.Int63n(200000)).Bytes()),
-			IssuerVerificationId: string(big.NewInt(rand.Int63n(300000)).Bytes()),
+			Schema:               big.NewInt(rand.Int63n(200000)).Bytes(),
+			IssuerVerificationId: big.NewInt(rand.Int63n(300000)).Bytes(),
 			Version:              uint32(0),
 		}
 		expected = append(expected, verificationDetails)
@@ -528,6 +560,13 @@ func (suite *KeeperTestSuite) TestMultipleVerificationDetails() {
 	suite.Require().NoError(decodeErr)
 	suite.Require().Equal(numOfRetry, len(resp.Data))
 	for i, details := range resp.Data {
-		suite.Require().Equal(expected[i], details)
+		suite.Require().Equal(expected[i].IssuerAddress, details.IssuerAddress)
+		suite.Require().Equal(expected[i].OriginChain, details.OriginChain)
+		suite.Require().Equal(expected[i].IssuanceTimestamp, details.IssuanceTimestamp)
+		suite.Require().Equal(expected[i].ExpirationTimestamp, details.ExpirationTimestamp)
+		suite.Require().Equal(expected[i].OriginalData, details.OriginalData)
+		suite.Require().Equal(expected[i].Schema, details.Schema)
+		suite.Require().Equal(expected[i].IssuerVerificationId, details.IssuerVerificationId)
+		suite.Require().Equal(expected[i].Version, details.Version)
 	}
 }

@@ -210,6 +210,7 @@ func (q Connector) AddVerificationDetails(req *librustgo.CosmosRequest_AddVerifi
 	issuerAddress := sdk.AccAddress(req.AddVerificationDetails.IssuerAddress).String()
 	verificationType := compliancetypes.VerificationType(req.AddVerificationDetails.VerificationType)
 
+	// Addresses in keeper are Cosmos Addresses
 	verificationDetails := &compliancetypes.VerificationDetails{
 		IssuerAddress:        issuerAddress,
 		OriginChain:          "samplechain", // TODO: Read chain from proto
@@ -226,7 +227,9 @@ func (q Connector) AddVerificationDetails(req *librustgo.CosmosRequest_AddVerifi
 		return nil, err
 	}
 
-	return verificationID, nil
+	return proto.Marshal(&librustgo.QueryAddVerificationDetailsResponse{
+		VerificationId: verificationID,
+	})
 }
 
 // HasVerification returns if user has verification of provided type from x/compliance module
@@ -264,8 +267,9 @@ func (q Connector) GetVerificationData(req *librustgo.CosmosRequest_GetVerificat
 		if err != nil {
 			return nil, err
 		}
+		// Addresses from Query requests are Ethereum Addresses
 		resData = append(resData, &librustgo.VerificationDetails{
-			IssuerAddress:        issuerAccount.Bytes(),
+			IssuerAddress:        common.Address(issuerAccount.Bytes()).Bytes(),
 			OriginChain:          []byte(details.OriginChain),
 			IssuanceTimestamp:    details.IssuanceTimestamp,
 			ExpirationTimestamp:  details.ExpirationTimestamp,
