@@ -1,12 +1,17 @@
 package keeper_test
 
 import (
-	"github.com/SigmaGmbH/librustgo"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/golang/protobuf/proto"
 	"math/big"
 	"math/rand"
+
+	"github.com/SigmaGmbH/librustgo"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/gogoproto/proto"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
+
+	"swisstronik/tests"
+	compliancetypes "swisstronik/x/compliance/types"
 	evmkeeper "swisstronik/x/evm/keeper"
 )
 
@@ -239,5 +244,290 @@ func (suite *KeeperTestSuite) TestSGXVMConnector() {
 			suite.SetupTest()
 			tc.action()
 		})
+	}
+}
+
+func requestAddVerificationDetails(
+	connector *evmkeeper.Connector,
+	userAddress common.Address,
+	issuerAddress common.Address,
+	verificationType compliancetypes.VerificationType,
+	issuanceTimestamp uint32,
+	expirationTimestamp uint32,
+	proofData []byte,
+	schema string,
+	issuerVerificationId string,
+	version uint32,
+) ([]byte, error) {
+	// Encode request
+	request, encodeErr := proto.Marshal(&librustgo.CosmosRequest{
+		Req: &librustgo.CosmosRequest_AddVerificationDetails{
+			AddVerificationDetails: &librustgo.QueryAddVerificationDetails{
+				UserAddress:          userAddress.Bytes(),
+				IssuerAddress:        issuerAddress.Bytes(),
+				VerificationType:     uint32(verificationType),
+				IssuanceTimestamp:    issuanceTimestamp,
+				ExpirationTimestamp:  expirationTimestamp,
+				ProofData:            proofData,
+				Schema:               []byte(schema),
+				IssuerVerificationId: []byte(issuerVerificationId),
+				Version:              version,
+			},
+		},
+	})
+
+	if encodeErr != nil {
+		return nil, encodeErr
+	}
+
+	respBytes, queryErr := connector.Query(request)
+	if queryErr != nil {
+		return nil, queryErr
+	}
+
+	resp := &librustgo.QueryAddVerificationDetailsResponse{}
+	decodeErr := proto.Unmarshal(respBytes, resp)
+	if decodeErr != nil {
+		return nil, decodeErr
+	}
+
+	return resp.VerificationId, nil
+}
+
+func (suite *KeeperTestSuite) TestSingleVerificationDetails() {
+	connector := evmkeeper.Connector{
+		Context:   suite.ctx,
+		EVMKeeper: suite.app.EvmKeeper,
+	}
+
+	var (
+		userAddress   = tests.RandomEthAddress()
+		userAccount   = sdk.AccAddress(suite.address.Bytes())
+		issuerAddress = tests.RandomEthAddress()
+		issuerAccount = sdk.AccAddress(issuerAddress.Bytes())
+
+		verificationType            = compliancetypes.VerificationType_VT_KYC
+		expectedVerificationDetails = &compliancetypes.VerificationDetails{
+			IssuerAddress:        issuerAccount.String(),
+			OriginChain:          "sample chain",
+			IssuanceTimestamp:    uint32(suite.ctx.BlockTime().Unix()),
+			ExpirationTimestamp:  uint32(0),
+			OriginalData:         []byte("Proof Data"),
+			Schema:               "Schema",
+			IssuerVerificationId: "Issuer Verification ID",
+			Version:              uint32(0),
+		}
+	)
+
+	testCases := []struct {
+		name   string
+		action func(verificationID []byte)
+	}{
+		{
+			"success - check verification from compliance keeper",
+			func(verificationID []byte) {
+				// Check if verification details exists in compliance keeper
+				verificationDetails, err := connector.EVMKeeper.ComplianceKeeper.GetVerificationDetails(connector.Context, verificationID)
+				suite.Require().NoError(err)
+				suite.Require().Equal(expectedVerificationDetails, verificationDetails)
+
+				// Check if user has verification
+				addressDetails, err := connector.EVMKeeper.ComplianceKeeper.GetAddressDetails(connector.Context, userAccount)
+				suite.Require().Equal(1, len(addressDetails.Verifications))
+				suite.Require().Equal(verificationType, addressDetails.Verifications[0].Type)
+				suite.Require().Equal(verificationID, addressDetails.Verifications[0].VerificationId)
+				suite.Require().Equal(issuerAddress, addressDetails.Verifications[0].IssuerAddress)
+
+				// Check if `hasVerification` with empty issuers returns true
+				has, err := connector.EVMKeeper.ComplianceKeeper.HasVerificationOfType(connector.Context, userAccount, verificationType, nil)
+				suite.Require().NoError(err)
+				suite.Require().True(has)
+
+				has, err = connector.EVMKeeper.ComplianceKeeper.HasVerificationOfType(connector.Context, userAccount, verificationType, []sdk.Address{issuerAccount})
+				suite.Require().NoError(err)
+				suite.Require().True(has)
+
+				illegalIssuerAccount := tests.RandomAccAddress()
+				has, err = connector.EVMKeeper.ComplianceKeeper.HasVerificationOfType(connector.Context, userAccount, verificationType, []sdk.Address{illegalIssuerAccount})
+				suite.Require().NoError(err)
+				suite.Require().False(has)
+
+				// Check if `getVerificationData` returns one verification details that added above
+				verificationData, err := connector.EVMKeeper.ComplianceKeeper.GetVerificationDetailsByIssuer(connector.Context, userAccount, issuerAccount)
+				suite.Require().NoError(err)
+				suite.Require().Equal(1, len(verificationData))
+				suite.Require().Equal(verificationDetails, verificationData[0])
+			},
+		},
+		{
+			"success - check verification by HasVerification query",
+			func(verificationID []byte) {
+				// Encode request
+				request, encodeErr := proto.Marshal(&librustgo.CosmosRequest{
+					Req: &librustgo.CosmosRequest_HasVerification{
+						HasVerification: &librustgo.QueryHasVerification{
+							UserAddress:         userAddress.Bytes(),
+							VerificationType:    uint32(verificationType),
+							ExpirationTimestamp: uint32(expectedVerificationDetails.ExpirationTimestamp),
+							AllowedIssuers:      nil,
+						},
+					},
+				})
+				suite.Require().NoError(encodeErr)
+
+				respBytes, queryErr := connector.Query(request)
+				suite.Require().NoError(queryErr)
+
+				resp := &librustgo.QueryHasVerificationResponse{}
+				decodeErr := proto.Unmarshal(respBytes, resp)
+				suite.Require().NoError(decodeErr)
+
+				suite.Require().True(resp.HasVerification)
+			},
+		},
+		{
+			"success - check verification by HasVerification query",
+			func(verificationID []byte) {
+				// Encode request
+				request, encodeErr := proto.Marshal(&librustgo.CosmosRequest{
+					Req: &librustgo.CosmosRequest_HasVerification{
+						HasVerification: &librustgo.QueryHasVerification{
+							UserAddress:         userAddress.Bytes(),
+							VerificationType:    uint32(verificationType),
+							ExpirationTimestamp: uint32(expectedVerificationDetails.ExpirationTimestamp),
+							AllowedIssuers:      [][]byte{issuerAccount.Bytes()},
+						},
+					},
+				})
+				suite.Require().NoError(encodeErr)
+
+				respBytes, queryErr := connector.Query(request)
+				suite.Require().NoError(queryErr)
+
+				resp := &librustgo.QueryHasVerificationResponse{}
+				decodeErr := proto.Unmarshal(respBytes, resp)
+				suite.Require().NoError(decodeErr)
+
+				suite.Require().True(resp.HasVerification)
+			},
+		},
+		{
+			"success - check verification by GetVerificationData query",
+			func(verificationID []byte) {
+				// Encode request
+				request, encodeErr := proto.Marshal(&librustgo.CosmosRequest{
+					Req: &librustgo.CosmosRequest_GetVerificationData{
+						GetVerificationData: &librustgo.QueryGetVerificationData{
+							UserAddress:   userAddress.Bytes(),
+							IssuerAddress: issuerAccount.Bytes(),
+						},
+					},
+				})
+				suite.Require().NoError(encodeErr)
+
+				respBytes, queryErr := connector.Query(request)
+				suite.Require().NoError(queryErr)
+
+				resp := &librustgo.QueryGetVerificationDataResponse{}
+				decodeErr := proto.Unmarshal(respBytes, resp)
+				suite.Require().NoError(decodeErr)
+
+				suite.Require().Equal(1, len(resp.Data))
+				suite.Require().Equal(expectedVerificationDetails, resp.Data[0])
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		suite.Run(tc.name, func() {
+			suite.SetupTest()
+
+			verificationID, err := requestAddVerificationDetails(
+				&connector,
+				userAddress,
+				issuerAddress,
+				verificationType,
+				expectedVerificationDetails.IssuanceTimestamp,
+				expectedVerificationDetails.ExpirationTimestamp,
+				expectedVerificationDetails.OriginalData,
+				expectedVerificationDetails.Schema,
+				expectedVerificationDetails.IssuerVerificationId,
+				0,
+			)
+			suite.Require().NoError(err)
+			suite.Require().NotNil(verificationID)
+
+			tc.action(verificationID)
+		})
+	}
+}
+
+func (suite *KeeperTestSuite) TestMultipleVerificationDetails() {
+	// Add multiple verification details
+
+	var (
+		userAddress   = tests.RandomEthAddress()
+		issuerAddress = tests.RandomEthAddress()
+		issuerAccount = sdk.AccAddress(issuerAddress.Bytes())
+
+		expected []*compliancetypes.VerificationDetails
+
+		verificationType = compliancetypes.VerificationType_VT_KYC
+	)
+
+	connector := evmkeeper.Connector{
+		Context:   suite.ctx,
+		EVMKeeper: suite.app.EvmKeeper,
+	}
+
+	numOfRetry := 10
+	for i := 0; i < numOfRetry; i++ {
+		verificationDetails := &compliancetypes.VerificationDetails{
+			IssuerAddress:        issuerAccount.String(),
+			OriginChain:          "sample chain",
+			IssuanceTimestamp:    uint32(suite.ctx.BlockTime().Unix()),
+			ExpirationTimestamp:  uint32(0),
+			OriginalData:         big.NewInt(rand.Int63n(100000)).Bytes(),
+			Schema:               string(big.NewInt(rand.Int63n(200000)).Bytes()),
+			IssuerVerificationId: string(big.NewInt(rand.Int63n(300000)).Bytes()),
+			Version:              uint32(0),
+		}
+		expected = append(expected, verificationDetails)
+
+		verificationID, err := requestAddVerificationDetails(
+			&connector,
+			userAddress,
+			issuerAddress,
+			verificationType,
+			verificationDetails.IssuanceTimestamp,
+			verificationDetails.ExpirationTimestamp,
+			verificationDetails.OriginalData,
+			verificationDetails.Schema,
+			verificationDetails.IssuerVerificationId,
+			0,
+		)
+		suite.Require().NoError(err)
+		suite.Require().NotNil(verificationID)
+	}
+
+	request, encodeErr := proto.Marshal(&librustgo.CosmosRequest{
+		Req: &librustgo.CosmosRequest_GetVerificationData{
+			GetVerificationData: &librustgo.QueryGetVerificationData{
+				UserAddress:   userAddress.Bytes(),
+				IssuerAddress: issuerAccount.Bytes(),
+			},
+		},
+	})
+	suite.Require().NoError(encodeErr)
+
+	respBytes, queryErr := connector.Query(request)
+	suite.Require().NoError(queryErr)
+
+	resp := &librustgo.QueryGetVerificationDataResponse{}
+	decodeErr := proto.Unmarshal(respBytes, resp)
+	suite.Require().NoError(decodeErr)
+	suite.Require().Equal(numOfRetry, len(resp.Data))
+	for i, details := range resp.Data {
+		suite.Require().Equal(expected[i], details)
 	}
 }

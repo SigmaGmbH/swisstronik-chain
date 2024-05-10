@@ -44,6 +44,8 @@ type QueryAddVerificationDetailsResponse = types.QueryAddVerificationDetailsResp
 type QueryHasVerification = types.QueryHasVerification
 type QueryHasVerificationResponse = types.QueryHasVerificationResponse
 type QueryGetVerificationData = types.QueryGetVerificationData
+type VerificationDetails = types.VerificationDetails
+type QueryGetVerificationDataResponse = types.QueryGetVerificationDataResponse
 
 // Storage requests
 type CosmosRequest_GetAccount = types.CosmosRequest_GetAccount

@@ -211,7 +211,7 @@ fn route(
                             tokens
                         })
                         .flatten()
-                        .collect::<Vec<_>>(); // Flatten the nested vectors and collect them into a single vector
+                        .collect::<Vec<Token>>(); // Flatten the nested vectors and collect them into a single vector
 
                     let encoded_response = encode(&data);
                     return Ok((ExitSucceed::Returned, encoded_response.to_vec()));

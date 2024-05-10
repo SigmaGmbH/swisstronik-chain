@@ -206,23 +206,27 @@ func (q Connector) InsertAccount(req *librustgo.CosmosRequest_InsertAccount) ([]
 
 // AddVerificationDetails writes provided verification details to x/compliance module
 func (q Connector) AddVerificationDetails(req *librustgo.CosmosRequest_AddVerificationDetails) ([]byte, error) {
-	verificationType := compliancetypes.VerificationType(req.AddVerificationDetails.VerificationType)
 	userAddress := sdk.AccAddress(req.AddVerificationDetails.UserAddress)
 	issuerAddress := sdk.AccAddress(req.AddVerificationDetails.IssuerAddress).String()
+	verificationType := compliancetypes.VerificationType(req.AddVerificationDetails.VerificationType)
 
 	verificationDetails := &compliancetypes.VerificationDetails{
-		IssuerAddress:       issuerAddress,
-		OriginChain:         "samplechain", // TODO: Read chain from proto
-		IssuanceTimestamp:   req.AddVerificationDetails.IssuanceTimestamp,
-		ExpirationTimestamp: req.AddVerificationDetails.ExpirationTimestamp,
-		OriginalData:        req.AddVerificationDetails.ProofData,
+		IssuerAddress:        issuerAddress,
+		OriginChain:          "samplechain", // TODO: Read chain from proto
+		IssuanceTimestamp:    req.AddVerificationDetails.IssuanceTimestamp,
+		ExpirationTimestamp:  req.AddVerificationDetails.ExpirationTimestamp,
+		OriginalData:         req.AddVerificationDetails.ProofData,
+		Schema:               string(req.AddVerificationDetails.Schema),
+		IssuerVerificationId: string(req.AddVerificationDetails.IssuerVerifcationId),
+		Version:              req.AddVerificationDetails.Version,
 	}
 
-	if _, err := q.EVMKeeper.ComplianceKeeper.AddVerificationDetails(q.Context, userAddress, verificationType, verificationDetails); err != nil {
+	verificationID, err := q.EVMKeeper.ComplianceKeeper.AddVerificationDetails(q.Context, userAddress, verificationType, verificationDetails)
+	if err != nil {
 		return nil, err
 	}
 
-	return nil, nil
+	return verificationID, nil
 }
 
 // HasVerification returns if user has verification of provided type from x/compliance module
@@ -254,7 +258,24 @@ func (q Connector) GetVerificationData(req *librustgo.CosmosRequest_GetVerificat
 		return nil, err
 	}
 
+	var resData []*librustgo.VerificationDetails
+	for _, details := range data {
+		issuerAccount, err := sdk.AccAddressFromBech32(details.IssuerAddress)
+		if err != nil {
+			return nil, err
+		}
+		resData = append(resData, &librustgo.VerificationDetails{
+			IssuerAddress:        issuerAccount.Bytes(),
+			OriginChain:          []byte(details.OriginChain),
+			IssuanceTimestamp:    details.IssuanceTimestamp,
+			ExpirationTimestamp:  details.ExpirationTimestamp,
+			OriginalData:         details.OriginalData,
+			Schema:               []byte(details.Schema),
+			IssuerVerificationId: []byte(details.IssuerVerificationId),
+			Version:              details.Version,
+		})
+	}
 	return proto.Marshal(&librustgo.QueryGetVerificationDataResponse{
-		Data: data,
+		Data: resData,
 	})
 }

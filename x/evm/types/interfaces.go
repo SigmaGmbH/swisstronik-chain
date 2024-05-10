@@ -70,6 +70,8 @@ type ComplianceKeeper interface {
 	AddVerificationDetails(ctx sdk.Context, userAddress sdk.Address, verificationType compliancetypes.VerificationType, details *compliancetypes.VerificationDetails) ([]byte, error)
 	HasVerificationOfType(ctx sdk.Context, userAddress sdk.Address, expectedType compliancetypes.VerificationType, expectedIssuers []sdk.Address) (bool, error)
 	GetVerificationDetailsByIssuer(ctx sdk.Context, userAddress sdk.Address, issuerAddress sdk.Address) ([]*compliancetypes.VerificationDetails, error)
+	GetVerificationDetails(ctx sdk.Context, verificationId []byte) (*compliancetypes.VerificationDetails, error)
+	GetAddressDetails(ctx sdk.Context, userAddres sdk.Address) (*compliancetypes.AddressDetails, error)
 }
 
 // Event Hooks
