@@ -10,6 +10,7 @@ import (
 	"github.com/cosmos/gogoproto/proto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
 	"swisstronik/x/compliance/types"
 )
 
@@ -73,7 +74,7 @@ func (k Querier) AddressesDetails(goCtx context.Context, req *types.QueryAddress
 			return err
 		}
 		addresses = append(addresses, types.QueryAddressesDetailsResponse_AddressDetailsWithKey{
-			Address:        types.AccAddressFromKey(key).String(),
+			Address:        sdk.AccAddress(key).String(),
 			AddressDetails: &addressDetails,
 		})
 		// NOTE, DO NOT FILTER VERIFICATIONS BY ISSUERS' EXISTENCE BECAUSE OF QUERY PERFORMANCE
@@ -123,7 +124,7 @@ func (k Querier) IssuersDetails(goCtx context.Context, req *types.QueryIssuersDe
 			return err
 		}
 		issuers = append(issuers, types.QueryIssuersDetailsResponse_IssuerDetailsWithKey{
-			IssuerAddress: types.AccAddressFromKey(key).String(),
+			IssuerAddress: sdk.AccAddress(key).String(),
 			IssuerDetails: &issuerDetails,
 		})
 		return nil
@@ -175,7 +176,7 @@ func (k Querier) VerificationsDetails(goCtx context.Context, req *types.QueryVer
 			return err
 		}
 		verifications = append(verifications, types.QueryVerificationsDetailsResponse_VerificationDetailsWithKey{
-			VerificationID:      types.VerificationIdFromKey(key),
+			VerificationID:      key,
 			VerificationDetails: &verificationDetails,
 		})
 		// NOTE, DO NOT FILTER VERIFICATIONS BY ISSUERS' EXISTENCE BECAUSE OF QUERY PERFORMANCE
