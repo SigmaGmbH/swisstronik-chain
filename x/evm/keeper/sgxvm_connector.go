@@ -100,11 +100,6 @@ func (q Connector) InsertAccountCode(req *librustgo.CosmosRequest_InsertAccountC
 		return nil, err
 	}
 
-	updAcc := q.EVMKeeper.GetAccountOrEmpty(q.Context, ethAddress)
-	if !updAcc.IsContract() {
-		return nil, errors.New("contract was not deployed")
-	}
-
 	return proto.Marshal(&librustgo.QueryInsertAccountCodeResponse{})
 }
 
@@ -205,6 +200,7 @@ func (q Connector) InsertAccount(req *librustgo.CosmosRequest_InsertAccount) ([]
 
 	return proto.Marshal(&librustgo.QueryInsertAccountResponse{})
 }
+
 // AddVerificationDetails writes provided verification details to x/compliance module
 func (q Connector) AddVerificationDetails(req *librustgo.CosmosRequest_AddVerificationDetails) ([]byte, error) {
 	verificationType := compliancetypes.VerificationType(req.AddVerificationDetails.VerificationType)
