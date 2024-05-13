@@ -501,6 +501,20 @@ var _ = Describe("Monthly Vesting Account", Ordered, func() {
 			Expect(err).To(BeNil())
 			s.assertFailEthNative(vaPrivKey, msg)
 		})
+		It("cannot perform ethereum tx with vested coins if not sufficient coins for gas consuming", func() {
+			// Send extra coins to another user to empty extra balance
+			err := s.app.BankKeeper.SendCoins(s.ctx, mva.GetAddress(), user, extraCoins)
+			Expect(err).To(BeNil())
+
+			// Try to send vested amount, but should be failed because of gas fee
+			amount := vested.AmountOf(utils.BaseDenom)
+			msg, err := utiltx.CreateEthTx(s.ctx, s.app, vaPrivKey, mva.GetAddress(), user, amount.BigInt(), 0)
+			Expect(err).To(BeNil())
+			err = s.validateEthVestingTransactionDecorator(msg)
+			Expect(err).To(BeNil())
+			_, err = testutil.DeliverEthTx(s.app, vaPrivKey, msg)
+			Expect(err).ToNot(BeNil())
+		})
 	})
 
 	Context("after entire vesting period", func() {
