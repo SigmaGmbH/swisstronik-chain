@@ -62,6 +62,31 @@ func (suite *AnteTestSuite) TestEthVestingDecorator() {
 		suite.app.FeeMarketKeeper.SetBaseFee(suite.ctx, big.NewInt(100))
 	}
 
+	passBlockTime := func(duration time.Duration) {
+		// NOTE, do not commit blocks and deliver transactions since it's only testing ante handler
+		header := suite.ctx.BlockHeader()
+		header.Time = header.Time.Add(duration)
+		suite.ctx = suite.app.NewContext(false, header)
+		suite.ctx = suite.ctx.WithMinGasPrices(sdk.NewDecCoins(sdk.NewDecCoin(evmtypes.DefaultEVMDenom, sdk.OneInt())))
+		suite.ctx = suite.ctx.WithBlockGasMeter(sdk.NewGasMeter(1000000000000000000))
+	}
+
+	transferCoin := func(from common.Address, fromPrivKey cryptotypes.PrivKey, amount *big.Int) sdk.Tx {
+		tx := evmtypes.NewTxFromArgs(
+			&evmtypes.EvmTxArgs{
+				ChainID:   suite.app.EvmKeeper.ChainID(),
+				Nonce:     suite.app.EvmKeeper.GetNonce(suite.ctx, from),
+				Amount:    amount,
+				GasLimit:  100000,
+				GasPrice:  big.NewInt(150),
+				GasFeeCap: big.NewInt(200),
+				To:        &userEth,
+			}, nil, nil,
+		)
+		tx.From = from.Hex()
+		return suite.CreateTestTx(tx, fromPrivKey, 1, false)
+	}
+
 	testCases := []struct {
 		name          string
 		expectedError error
@@ -72,9 +97,9 @@ func (suite *AnteTestSuite) TestEthVestingDecorator() {
 			expectedError: nil,
 			malleate: func() sdk.Tx {
 				_ = suite.app.EvmKeeper.SetBalance(suite.ctx, userEth, big.NewInt(10000000000))
-				signedContractTx := evmtypes.NewTxContract(
+				contractTx := evmtypes.NewTxContract(
 					suite.app.EvmKeeper.ChainID(),
-					1,
+					suite.app.EvmKeeper.GetNonce(suite.ctx, userEth),
 					big.NewInt(10),
 					100000,
 					big.NewInt(150),
@@ -83,8 +108,8 @@ func (suite *AnteTestSuite) TestEthVestingDecorator() {
 					nil,
 					nil,
 				)
-				signedContractTx.From = userEth.Hex()
-				return suite.CreateTestTx(signedContractTx, userPrivKey, 1, false)
+				contractTx.From = userEth.Hex()
+				return suite.CreateTestTx(contractTx, userPrivKey, 1, false)
 			},
 		},
 		{
@@ -93,19 +118,7 @@ func (suite *AnteTestSuite) TestEthVestingDecorator() {
 			malleate: func() sdk.Tx {
 				// still do not fund to keep account with zero balance
 				// should not be able to make any transactions without balance
-				tx := evmtypes.NewTxFromArgs(
-					&evmtypes.EvmTxArgs{
-						ChainID:   suite.app.EvmKeeper.ChainID(),
-						Nonce:     1,
-						Amount:    big.NewInt(10),
-						GasLimit:  100000,
-						GasPrice:  big.NewInt(150),
-						GasFeeCap: big.NewInt(200),
-						To:        &userEth,
-					}, nil, nil,
-				)
-				tx.From = vaEth.Hex()
-				return suite.CreateTestTx(tx, vaPrivKey, 1, false)
+				return transferCoin(vaEth, vaPrivKey, big.NewInt(10))
 			},
 		},
 		{
@@ -118,19 +131,7 @@ func (suite *AnteTestSuite) TestEthVestingDecorator() {
 				// try to transfer native token with locked balance
 				// all the vesting amount were locked, nothing is spendable, should be failed
 				amount := big.NewInt(10000000000)
-				tx := evmtypes.NewTxFromArgs(
-					&evmtypes.EvmTxArgs{
-						ChainID:   suite.app.EvmKeeper.ChainID(),
-						Nonce:     1,
-						Amount:    amount,
-						GasLimit:  100000,
-						GasPrice:  big.NewInt(150),
-						GasFeeCap: big.NewInt(200),
-						To:        &userEth,
-					}, nil, nil,
-				)
-				tx.From = vaEth.Hex()
-				return suite.CreateTestTx(tx, vaPrivKey, 1, false)
+				return transferCoin(vaEth, vaPrivKey, amount)
 			},
 		},
 		{
@@ -143,27 +144,12 @@ func (suite *AnteTestSuite) TestEthVestingDecorator() {
 				// pass block time after the first vesting
 				duration := time.Duration(vestingmoduletypes.SecondsOfDay*cliffDays) * time.Second
 				duration = duration + time.Duration(vestingmoduletypes.SecondsOfMonth)*time.Second
-
-				header := suite.ctx.BlockHeader()
-				header.Time = header.Time.Add(duration)
-				suite.ctx = suite.app.NewContext(false, header)
+				passBlockTime(duration)
 
 				// try to transfer native token with coins more than vested
 				// some of the vesting amount were unlocked, but insufficient to transfer, should be failed
 				amount := initialVesting.QuoInt(sdk.NewInt(months)).MulInt(sdk.NewInt(2))
-				tx := evmtypes.NewTxFromArgs(
-					&evmtypes.EvmTxArgs{
-						ChainID:   suite.app.EvmKeeper.ChainID(),
-						Nonce:     1,
-						Amount:    amount[0].Amount.BigInt(),
-						GasLimit:  100000,
-						GasPrice:  big.NewInt(150),
-						GasFeeCap: big.NewInt(200),
-						To:        &userEth,
-					}, nil, nil,
-				)
-				tx.From = vaEth.Hex()
-				return suite.CreateTestTx(tx, vaPrivKey, 1, false)
+				return transferCoin(vaEth, vaPrivKey, amount[0].Amount.BigInt())
 			},
 		},
 		{
@@ -176,15 +162,11 @@ func (suite *AnteTestSuite) TestEthVestingDecorator() {
 				// pass block time after the first vesting
 				duration := time.Duration(vestingmoduletypes.SecondsOfDay*cliffDays) * time.Second
 				duration = duration + time.Duration(vestingmoduletypes.SecondsOfMonth)*time.Second
-
-				header := suite.ctx.BlockHeader()
-				header.Time = header.Time.Add(duration)
-				suite.ctx = suite.app.NewContext(false, header)
+				passBlockTime(duration)
 
 				// try to transfer native token with vested coins, should be success
 				amount := initialVesting.QuoInt(sdk.NewInt(months))
-				msg := suite.BuildTestEthTx(vaEth, userEth, amount[0].Amount.BigInt(), make([]byte, 0), big.NewInt(0), nil, nil, nil, nil, nil)
-				return suite.CreateTestTx(msg, vaPrivKey, 1, false)
+				return transferCoin(vaEth, vaPrivKey, amount[0].Amount.BigInt())
 			},
 		},
 		{
@@ -197,15 +179,11 @@ func (suite *AnteTestSuite) TestEthVestingDecorator() {
 				// pass block time after the end of vesting period
 				duration := time.Duration(vestingmoduletypes.SecondsOfDay*cliffDays) * time.Second
 				duration = duration + time.Duration(vestingmoduletypes.SecondsOfMonth*months)*time.Second
-
-				header := suite.ctx.BlockHeader()
-				header.Time = header.Time.Add(duration)
-				suite.ctx = suite.app.NewContext(false, header)
+				passBlockTime(duration)
 
 				// try to transfer native token with initial vesting, should be success
 				amount := initialVesting
-				msg := suite.BuildTestEthTx(vaEth, userEth, amount[0].Amount.BigInt(), make([]byte, 0), big.NewInt(0), nil, nil, nil, nil, nil)
-				return suite.CreateTestTx(msg, vaPrivKey, 1, false)
+				return transferCoin(vaEth, vaPrivKey, amount[0].Amount.BigInt())
 			},
 		},
 	}
@@ -220,6 +198,8 @@ func (suite *AnteTestSuite) TestEthVestingDecorator() {
 			if tc.expectedError != nil {
 				suite.Require().Error(err)
 				suite.Require().ErrorIs(err, tc.expectedError)
+			} else {
+				suite.Require().NoError(err)
 			}
 		})
 	}
