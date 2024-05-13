@@ -102,7 +102,7 @@ type EVMBackend interface {
 	GetStorageAt(address common.Address, key string, blockNrOrHash rpctypes.BlockNumberOrHash) (hexutil.Bytes, error)
 	GetProof(address common.Address, storageKeys []string, blockNrOrHash rpctypes.BlockNumberOrHash) (*rpctypes.AccountResult, error)
 	GetTransactionCount(address common.Address, blockNum rpctypes.BlockNumber) (*hexutil.Uint64, error)
-	GetNodePublicKey(blockNrOrHash rpctypes.BlockNumberOrHash) (string, error)
+	GetNodePublicKey(blockNum rpctypes.BlockNumber) (string, error)
 
 	// Chain Info
 	ChainID() (*hexutil.Big, error)
