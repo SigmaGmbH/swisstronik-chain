@@ -69,7 +69,7 @@ func EPIDRemoteAttestationCmd() *cobra.Command {
 // DCAPRemoteAttestationCmd returns request-epochs-keys-dcap cobra Command.
 func DCAPRemoteAttestationCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "request-epochs-keys-dcap [attestation-server-address]",
+		Use:   "request-epoch-keys-dcap [attestation-server-address]",
 		Short: "Requests epoch keys from attestation server using DCAP",
 		Long: `Initializes SGX enclave by passing process of DCAP Remote Attestation agains attestation server. 
 		If remote attestation was successful, attestation server node shares encrypted epoch keys with this node. 
