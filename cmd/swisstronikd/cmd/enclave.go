@@ -22,10 +22,33 @@ func EnclaveCmd() *cobra.Command {
 	}
 
 	cmd.AddCommand(
+		ListEpochs(),
 		EPIDRemoteAttestationCmd(),
 		DCAPRemoteAttestationCmd(),
 		Status(),
 	)
+	return cmd
+}
+
+// ListEpochs returns list-epochs cobra Command.
+func ListEpochs() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "list-epochs",
+		Short: "Outputs stored epochs",
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			epochs, err := librustgo.ListEpochs()
+			if err != nil {
+				return err
+			}
+
+			for _, epoch := range epochs {
+				fmt.Println("Epoch #", epoch.EpochNumber, "Starting block: ", epoch.StartingBlock)
+			}
+
+			return nil
+		},
+	}
+
 	return cmd
 }
 
