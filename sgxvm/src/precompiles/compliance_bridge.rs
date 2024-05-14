@@ -14,7 +14,7 @@ use crate::protobuf_generated::ffi;
 use crate::{coder, querier, GoQuerier};
 
 // Selector of addVerificationDetails function
-const ADD_VERIFICATION_FN_SELECTOR: &str = "455d0d34";
+const ADD_VERIFICATION_FN_SELECTOR: &str = "8812b27d";
 // Selector of hasVerification function
 const HAS_VERIFICATION_FN_SELECTOR: &str = "4887fcd8";
 // Selector of getVerificationData function
@@ -123,6 +123,9 @@ fn route(
                 ParamType::Uint(32),
                 ParamType::Uint(32),
                 ParamType::Bytes,
+                ParamType::String,
+                ParamType::String,
+                ParamType::Uint(32),
             ];
             let decoded_params = decode_input(verification_params, &data[4..])?;
 
@@ -131,6 +134,9 @@ fn route(
             let issuance_timestamp = &decoded_params[2];
             let expiration_timestamp = &decoded_params[3];
             let proof_data = &decoded_params[4];
+            let schema = &decoded_params[5];
+            let issuer_verification_id = &decoded_params[6];
+            let version = &decoded_params[7];
 
             let encoded_request = coder::encode_add_verification_details_request(
                 user_address.clone().into_address().unwrap(),
@@ -139,6 +145,9 @@ fn route(
                 issuance_timestamp.clone().into_uint().unwrap().as_u32(),
                 expiration_timestamp.clone().into_uint().unwrap().as_u32(),
                 proof_data.clone().into_bytes().unwrap(),
+                schema.clone().into_string().unwrap(),
+                issuer_verification_id.clone().into_string().unwrap(),
+                version.clone().into_uint().unwrap().as_u32(),
             );
 
             match querier::make_request(querier, encoded_request) {
@@ -166,15 +175,14 @@ fn route(
             }
         }
         GET_VERIFICATION_DATA_FN_SELECTOR => {
-            let get_verification_data_params = vec![ParamType::Address, ParamType::Address];
+            let get_verification_data_params = vec![ParamType::Address];
             let decoded_params = decode_input(get_verification_data_params, &data[4..])?;
 
             let user_address = &decoded_params[0];
-            let issuer_address = &decoded_params[1];
 
             let encoded_request = coder::encode_get_verification_data(
                 user_address.clone().into_address().unwrap(),
-                issuer_address.clone().into_address().unwrap(),
+                caller,
             );
 
             match querier::make_request(querier, encoded_request) {

@@ -52,7 +52,7 @@ describe('ComplianceBridge', () => {
         const verificationData = await sendShieldedQuery(
             signer.provider,
             contract.address,
-            contract.interface.encodeFunctionData("getVerificationData", [signer.address, contract.address])
+            contract.interface.encodeFunctionData("getVerificationData", [signer.address])
         );
         const result = contract.interface.decodeFunctionResult("getVerificationData", verificationData)
         expect(result.issuerAddress).to.be.equal(contract.address);

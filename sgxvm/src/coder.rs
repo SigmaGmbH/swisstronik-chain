@@ -105,7 +105,10 @@ pub fn encode_add_verification_details_request(
     verification_type: u32,
     issuance_timestamp: u32,
     expiration_timestamp: u32,
-    proof_data: Vec<u8>
+    proof_data: Vec<u8>,
+    schema: String,
+    issuer_verification_id: String,
+    version: u32,
 ) -> Vec<u8> {
     let mut cosmos_request = ffi::CosmosRequest::new();
     let mut request = ffi::QueryAddVerificationDetails::new();
@@ -116,6 +119,9 @@ pub fn encode_add_verification_details_request(
     request.set_issuanceTimestamp(issuance_timestamp);
     request.set_expirationTimestamp(expiration_timestamp);
     request.set_proofData(proof_data);
+    request.set_schema(schema);
+    request.set_issuerVerificationId(issuer_verification_id);
+    request.set_version(version);
 
     cosmos_request.set_addVerificationDetails(request);
     cosmos_request.write_to_bytes().unwrap()
@@ -141,10 +147,7 @@ pub fn encode_has_verification_request(
     cosmos_request.write_to_bytes().unwrap()
 }
 
-pub fn encode_get_verification_data(
-    user_address: Address,
-    issuer_address: Address,
-) -> Vec<u8> {
+pub fn encode_get_verification_data(user_address: Address, issuer_address: H160) -> Vec<u8> {
     let mut cosmos_request = ffi::CosmosRequest::new();
     let mut request = ffi::QueryGetVerificationData::new();
 

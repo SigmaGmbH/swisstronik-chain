@@ -143,8 +143,8 @@ message QueryAddVerificationDetails {
   uint32 issuanceTimestamp = 4;
   uint32 expirationTimestamp = 5;
   bytes proofData = 6;
-  bytes schema = 7;
-  bytes issuerVerificationId = 8;
+  string schema = 7;
+  string issuerVerificationId = 8;
   uint32 version = 9;
 }
 message QueryAddVerificationDetailsResponse {
