@@ -1,6 +1,7 @@
 package testutil
 
 import (
+	"fmt"
 	"time"
 
 	errorsmod "cosmossdk.io/errors"
@@ -8,15 +9,19 @@ import (
 	abci "github.com/cometbft/cometbft/abci/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/tx"
+	"github.com/cosmos/cosmos-sdk/codec"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	errortypes "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
+	"github.com/cosmos/gogoproto/proto"
 
 	"swisstronik/app"
 	"swisstronik/encoding"
+	utiltx "swisstronik/testutil/tx"
 	"swisstronik/utils"
+	evmtypes "swisstronik/x/evm/types"
 )
 
 var (
@@ -195,4 +200,61 @@ func CommitAndCreateNewCtx(ctx sdk.Context, app *app.App, t time.Duration) (sdk.
 	newCtx = newCtx.WithTransientKVGasConfig(ctx.TransientKVGasConfig())
 
 	return newCtx, nil
+}
+
+// DeliverEthTx generates and broadcasts a Cosmos Tx populated with MsgEthereumTx messages.
+// If a private key is provided, it will attempt to sign all messages with the given private key,
+// otherwise, it will assume the messages have already been signed.
+func DeliverEthTx(
+	appS *app.App,
+	priv cryptotypes.PrivKey,
+	msgs ...sdk.Msg,
+) (abci.ResponseDeliverTx, error) {
+	txConfig := encoding.MakeConfig(app.ModuleBasics).TxConfig
+
+	tx, err := utiltx.PrepareEthTx(txConfig, appS, priv, msgs...)
+	if err != nil {
+		return abci.ResponseDeliverTx{}, err
+	}
+	res, err := BroadcastTxBytes(appS, txConfig.TxEncoder(), tx)
+	if err != nil {
+		return abci.ResponseDeliverTx{}, err
+	}
+
+	encodingCodec := encoding.MakeConfig(app.ModuleBasics).Codec
+	if _, err := CheckEthTxResponse(res, encodingCodec); err != nil {
+		return abci.ResponseDeliverTx{}, err
+	}
+	return res, nil
+}
+
+// CheckEthTxResponse checks that the transaction was executed successfully
+func CheckEthTxResponse(r abci.ResponseDeliverTx, cdc codec.Codec) ([]*evmtypes.MsgEthereumTxResponse, error) {
+	if !r.IsOK() {
+		return nil, fmt.Errorf("tx failed. Code: %d, Logs: %s", r.Code, r.Log)
+	}
+
+	var txData sdk.TxMsgData
+	if err := cdc.Unmarshal(r.Data, &txData); err != nil {
+		return nil, err
+	}
+
+	if len(txData.MsgResponses) == 0 {
+		return nil, fmt.Errorf("no message responses found")
+	}
+
+	responses := make([]*evmtypes.MsgEthereumTxResponse, 0, len(txData.MsgResponses))
+	for i := range txData.MsgResponses {
+		var res evmtypes.MsgEthereumTxResponse
+		if err := proto.Unmarshal(txData.MsgResponses[i].Value, &res); err != nil {
+			return nil, err
+		}
+
+		if res.Failed() {
+			return nil, fmt.Errorf("tx failed. VmError: %s", res.VmError)
+		}
+		responses = append(responses, &res)
+	}
+
+	return responses, nil
 }

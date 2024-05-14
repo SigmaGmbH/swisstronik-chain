@@ -1,9 +1,10 @@
 package types
 
 import (
+	"strings"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
-	"strings"
 )
 
 // ParseAddress tries to convert provided bech32 or hex address into sdk.AccAddress

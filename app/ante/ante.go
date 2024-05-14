@@ -19,19 +19,16 @@ import (
 	"fmt"
 	"runtime/debug"
 
-	tmlog "github.com/cometbft/cometbft/libs/log"
-
 	errorsmod "cosmossdk.io/errors"
+	tmlog "github.com/cometbft/cometbft/libs/log"
+	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
 	"github.com/cosmos/cosmos-sdk/crypto/types/multisig"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	errortypes "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authante "github.com/cosmos/cosmos-sdk/x/auth/ante"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-
 	"swisstronik/crypto/ethsecp256k1"
-
-	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
 )
 
 const (

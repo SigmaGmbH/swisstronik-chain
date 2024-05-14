@@ -1,6 +1,6 @@
 use evm::Config;
 use evm::backend::{
-    ApplyBackend as EvmApplyBackend,
+    Apply,
     Backend as EvmBackend,
     Basic,
     Log
@@ -12,6 +12,7 @@ use std::{
 };
 use std::boxed::Box;
 use sgx_types::*;
+use crate::error::Error;
 
 pub static GASOMETER_CONFIG: Config = Config::london();
 
@@ -23,8 +24,15 @@ pub struct Vicinity {
 }
 
 /// Supertrait for our version of EVM Backend
-pub trait ExtendedBackend: EvmBackend + EvmApplyBackend {
+pub trait ExtendedBackend: EvmBackend {
     fn get_logs(&self) -> Vec<Log>;
+
+    /// Apply given values and logs at backend.
+	fn apply<A, I, L>(&mut self, values: A, logs: L, delete_empty: bool) -> Result<(), Error>
+	where
+		A: IntoIterator<Item = Apply<I>>,
+		I: IntoIterator<Item = (H256, H256)>,
+		L: IntoIterator<Item = Log>;
 }
 
 /// A key-value storage trait
@@ -42,19 +50,19 @@ pub trait Storage {
     fn get_account(&self, account: &H160) -> Basic;
 
     /// Updates account balance and nonce
-    fn insert_account(&mut self, key: H160, data: Basic);
+    fn insert_account(&mut self, key: H160, data: Basic) -> Result<(), Error>;
 
     /// Updates contract bytecode
-    fn insert_account_code(&mut self, key: H160, code: Vec<u8>);
+    fn insert_account_code(&mut self, key: H160, code: Vec<u8>) -> Result<(), Error>;
 
     /// Update storage cell value
-    fn insert_storage_cell(&mut self, key: H160, index: H256, value: H256);
+    fn insert_storage_cell(&mut self, key: H160, index: H256, value: H256) -> Result<(), Error>;
 
     /// Removes account (selfdestruct)
-    fn remove(&mut self, key: &H160);
+    fn remove(&mut self, key: &H160) -> Result<(), Error>;
 
     /// Removes storage cell value
-    fn remove_storage_cell(&mut self, key: &H160, index: &H256);
+    fn remove_storage_cell(&mut self, key: &H160, index: &H256) -> Result<(), Error>;
 }
 
 // Struct for allocated buffer outside of SGX Enclave

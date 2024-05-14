@@ -5,14 +5,13 @@ import (
 	"math/big"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	ethtypes "github.com/ethereum/go-ethereum/core/types"
 
 	"swisstronik/app/ante"
 	"swisstronik/server/config"
 	"swisstronik/tests"
 	types "swisstronik/types"
 	evmtypes "swisstronik/x/evm/types"
-
-	ethtypes "github.com/ethereum/go-ethereum/core/types"
 )
 
 func (suite *AnteTestSuite) TestNewEthAccountVerificationDecorator() {
@@ -48,7 +47,7 @@ func (suite *AnteTestSuite) TestNewEthAccountVerificationDecorator() {
 				// set not as an EOA
 				// TODO: Fix
 				// vmdb.SetCode(addr, []byte("1"))
-				suite.app.EvmKeeper.SetAccountCode(suite.ctx, addr, []byte("1"))
+				_ = suite.app.EvmKeeper.SetAccountCode(suite.ctx, addr, []byte("1"))
 			},
 			true,
 			false,
@@ -60,7 +59,7 @@ func (suite *AnteTestSuite) TestNewEthAccountVerificationDecorator() {
 				// reset back to EOA
 				// TODO: Fix
 				// vmdb.SetCode(addr, nil)
-				suite.app.EvmKeeper.SetAccountCode(suite.ctx, addr, nil)
+				_ = suite.app.EvmKeeper.SetAccountCode(suite.ctx, addr, nil)
 			},
 			true,
 			false,
@@ -70,7 +69,7 @@ func (suite *AnteTestSuite) TestNewEthAccountVerificationDecorator() {
 			tx,
 			func() {
 				// vmdb.AddBalance(addr, big.NewInt(1000000))
-				suite.app.EvmKeeper.SetBalance(suite.ctx, addr, big.NewInt(1000000))
+				_ = suite.app.EvmKeeper.SetBalance(suite.ctx, addr, big.NewInt(1000000))
 				// TODO: Set balance
 			},
 			true,
@@ -85,7 +84,7 @@ func (suite *AnteTestSuite) TestNewEthAccountVerificationDecorator() {
 
 				// TODO: Add balance
 				// vmdb.AddBalance(addr, big.NewInt(1000000))
-				suite.app.EvmKeeper.SetBalance(suite.ctx, addr, big.NewInt(1000000))
+				_ = suite.app.EvmKeeper.SetBalance(suite.ctx, addr, big.NewInt(1000000))
 			},
 			true,
 			true,
@@ -272,7 +271,7 @@ func (suite *AnteTestSuite) TestEthGasConsumeDecorator() {
 			func() {
 				// TODO: Fix
 				// vmdb.AddBalance(addr, big.NewInt(1001000000000000))
-				suite.app.EvmKeeper.SetBalance(suite.ctx, addr, big.NewInt(1001000000000000))
+				_ = suite.app.EvmKeeper.SetBalance(suite.ctx, addr, big.NewInt(1001000000000000))
 				suite.ctx = suite.ctx.WithBlockGasMeter(sdk.NewGasMeter(10000000000000000000))
 			},
 			true, false,
@@ -285,7 +284,7 @@ func (suite *AnteTestSuite) TestEthGasConsumeDecorator() {
 			func() {
 				// TODO: Fix
 				// vmdb.AddBalance(addr, big.NewInt(1001000000000000))
-				suite.app.EvmKeeper.SetBalance(suite.ctx, addr, big.NewInt(1001000000000000))
+				_ = suite.app.EvmKeeper.SetBalance(suite.ctx, addr, big.NewInt(1001000000000000))
 				suite.ctx = suite.ctx.WithBlockGasMeter(sdk.NewGasMeter(10000000000000000000))
 			},
 			true, false,
@@ -298,7 +297,7 @@ func (suite *AnteTestSuite) TestEthGasConsumeDecorator() {
 			func() {
 				// TODO: Fix
 				// vmdb.AddBalance(addr, big.NewInt(1001000000000000))
-				suite.app.EvmKeeper.SetBalance(suite.ctx, addr, big.NewInt(1001000000000000))
+				_ = suite.app.EvmKeeper.SetBalance(suite.ctx, addr, big.NewInt(1001000000000000))
 				suite.ctx = suite.ctx.WithIsReCheckTx(true)
 			},
 			true, false,
@@ -391,7 +390,7 @@ func (suite *AnteTestSuite) TestCanTransferDecorator() {
 			func() {
 				acc := suite.app.AccountKeeper.NewAccountWithAddress(suite.ctx, addr.Bytes())
 				suite.app.AccountKeeper.SetAccount(suite.ctx, acc)
-				suite.app.EvmKeeper.SetBalance(suite.ctx, addr, big.NewInt(1000000))
+				_ = suite.app.EvmKeeper.SetBalance(suite.ctx, addr, big.NewInt(1000000))
 
 				// vmdb.AddBalance(addr, big.NewInt(1000000))
 			},

@@ -41,22 +41,24 @@ pub fn make_request(querier: *mut GoQuerier, request: Vec<u8>) -> Option<Vec<u8>
         )
     };
 
-    match result {
-        sgx_status_t::SGX_SUCCESS => {
-            let allocation = unsafe { allocation.assume_init() };
-            let result_vec = unsafe {
-                Vec::from_raw_parts(
-                    allocation.result_ptr,
-                    allocation.result_len,
-                    allocation.result_len,
-                )
-            };
+    if result != sgx_status_t::SGX_SUCCESS {
+        println!("Cannot call make_request: Reason: {:?}", result.as_str());
+        return None;
+    }
 
-            return Some(result_vec);
-        }
-        _ => {
-            println!("make_request failed: Reason: {:?}", result.as_str());
-            return None;
-        }
+    let allocation = unsafe { allocation.assume_init() };
+    if allocation.status != sgx_status_t::SGX_SUCCESS {
+        println!("Error during make_request: Reason: {:?}", allocation.status);
+        return None;
+    }
+
+    let result_vec = unsafe {
+        Vec::from_raw_parts(
+            allocation.result_ptr,
+            allocation.result_len,
+            allocation.result_len,
+        )
     };
+
+    return Some(result_vec);
 }

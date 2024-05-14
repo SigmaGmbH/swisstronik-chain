@@ -8,6 +8,7 @@ import (
 	fmt "fmt"
 	github_com_cosmos_cosmos_sdk_types "github.com/cosmos/cosmos-sdk/types"
 	types "github.com/cosmos/cosmos-sdk/types"
+	_ "github.com/cosmos/cosmos-sdk/types/msgservice"
 	_ "github.com/cosmos/gogoproto/gogoproto"
 	grpc1 "github.com/cosmos/gogoproto/grpc"
 	proto "github.com/cosmos/gogoproto/proto"
@@ -30,12 +31,18 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
+// MsgCreateMonthlyVestingAccount defines a message that enables creating a monthly vesting
+// account with cliff feature.
 type MsgCreateMonthlyVestingAccount struct {
-	Creator   string                                   `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
-	ToAddress string                                   `protobuf:"bytes,2,opt,name=toAddress,proto3" json:"toAddress,omitempty"`
-	StartTime int64                                    `protobuf:"varint,3,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
-	Amount    github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,4,rep,name=amount,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"amount"`
-	Month     int64                                    `protobuf:"varint,5,opt,name=month,proto3" json:"month,omitempty"`
+	// from_address is a signer address that funds tokens
+	FromAddress string `protobuf:"bytes,1,opt,name=from_address,json=fromAddress,proto3" json:"from_address,omitempty"`
+	// to_address defines vesting address that receives funds
+	ToAddress string `protobuf:"bytes,2,opt,name=to_address,json=toAddress,proto3" json:"to_address,omitempty"`
+	// cliff_days defines the days relative to start time
+	CliffDays int64 `protobuf:"varint,3,opt,name=cliff_days,json=cliffDays,proto3" json:"cliff_days,omitempty"`
+	// months defines number of months for linear vesting
+	Months int64                                    `protobuf:"varint,4,opt,name=months,proto3" json:"months,omitempty"`
+	Amount github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,5,rep,name=amount,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"amount"`
 }
 
 func (m *MsgCreateMonthlyVestingAccount) Reset()         { *m = MsgCreateMonthlyVestingAccount{} }
@@ -71,9 +78,9 @@ func (m *MsgCreateMonthlyVestingAccount) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgCreateMonthlyVestingAccount proto.InternalMessageInfo
 
-func (m *MsgCreateMonthlyVestingAccount) GetCreator() string {
+func (m *MsgCreateMonthlyVestingAccount) GetFromAddress() string {
 	if m != nil {
-		return m.Creator
+		return m.FromAddress
 	}
 	return ""
 }
@@ -85,9 +92,16 @@ func (m *MsgCreateMonthlyVestingAccount) GetToAddress() string {
 	return ""
 }
 
-func (m *MsgCreateMonthlyVestingAccount) GetStartTime() int64 {
+func (m *MsgCreateMonthlyVestingAccount) GetCliffDays() int64 {
 	if m != nil {
-		return m.StartTime
+		return m.CliffDays
+	}
+	return 0
+}
+
+func (m *MsgCreateMonthlyVestingAccount) GetMonths() int64 {
+	if m != nil {
+		return m.Months
 	}
 	return 0
 }
@@ -99,13 +113,7 @@ func (m *MsgCreateMonthlyVestingAccount) GetAmount() github_com_cosmos_cosmos_sd
 	return nil
 }
 
-func (m *MsgCreateMonthlyVestingAccount) GetMonth() int64 {
-	if m != nil {
-		return m.Month
-	}
-	return 0
-}
-
+// MsgCreateMonthlyVestingAccountResponse defines MsgCreateMonthlyVestingAccount response type.
 type MsgCreateMonthlyVestingAccountResponse struct {
 }
 
@@ -152,30 +160,32 @@ func init() {
 func init() { proto.RegisterFile("swisstronik/vesting/tx.proto", fileDescriptor_899431b613aba5b5) }
 
 var fileDescriptor_899431b613aba5b5 = []byte{
-	// 362 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x92, 0xbd, 0x6e, 0xe2, 0x40,
-	0x10, 0xc7, 0xbd, 0xe7, 0x83, 0x13, 0x7b, 0x9d, 0x8f, 0xc2, 0x07, 0xdc, 0x82, 0x28, 0x4e, 0x6e,
-	0xb2, 0x1b, 0x40, 0xa9, 0x52, 0x01, 0x35, 0x8d, 0x15, 0xa5, 0x48, 0x13, 0xd9, 0x66, 0x65, 0x56,
-	0xc4, 0x1e, 0xe4, 0x59, 0x08, 0x3c, 0x45, 0xd2, 0xe5, 0x1d, 0xf2, 0x24, 0x94, 0x94, 0xa9, 0x92,
-	0x08, 0xde, 0x20, 0x4f, 0x10, 0xf9, 0x03, 0x41, 0x11, 0x51, 0xa4, 0xb2, 0x67, 0x7e, 0x3b, 0x33,
-	0xff, 0xf9, 0xa0, 0x0d, 0xbc, 0x57, 0x88, 0x3a, 0x81, 0x58, 0x4d, 0xc5, 0x42, 0xa2, 0x56, 0x71,
-	0x28, 0xf4, 0x92, 0xcf, 0x12, 0xd0, 0x60, 0xfd, 0x39, 0xa2, 0xbc, 0xa0, 0xb5, 0x6a, 0x08, 0x21,
-	0x64, 0x5c, 0xa4, 0x7f, 0xf9, 0xd3, 0x1a, 0x0b, 0x00, 0x23, 0x40, 0xe1, 0x7b, 0x28, 0xc5, 0xa2,
-	0xe3, 0x4b, 0xed, 0x75, 0x44, 0x00, 0x2a, 0xce, 0x79, 0xfb, 0x83, 0x50, 0x36, 0xc2, 0x70, 0x98,
-	0x48, 0x4f, 0xcb, 0x11, 0xc4, 0x7a, 0x72, 0xb7, 0xba, 0xce, 0x33, 0xf6, 0x83, 0x00, 0xe6, 0xb1,
-	0xb6, 0x6c, 0xfa, 0x2b, 0x48, 0x31, 0x24, 0x36, 0x69, 0x11, 0xa7, 0xe2, 0xee, 0x4d, 0xab, 0x41,
-	0x2b, 0x1a, 0xfa, 0xe3, 0x71, 0x22, 0x11, 0xed, 0x1f, 0x19, 0x3b, 0x38, 0xac, 0x7f, 0x94, 0xa2,
-	0xf6, 0x12, 0x7d, 0xab, 0x55, 0x24, 0x6d, 0xb3, 0x45, 0x1c, 0xd3, 0xad, 0x64, 0x9e, 0x2b, 0x15,
-	0x49, 0x2b, 0xa0, 0x65, 0x2f, 0x4a, 0x0b, 0xd8, 0x3f, 0x5b, 0xa6, 0xf3, 0xbb, 0xfb, 0x97, 0xe7,
-	0x52, 0x79, 0x2a, 0x95, 0x17, 0x52, 0xf9, 0x10, 0x54, 0x3c, 0x38, 0x5f, 0xbf, 0x36, 0x8d, 0xe7,
-	0xb7, 0xa6, 0x13, 0x2a, 0x3d, 0x99, 0xfb, 0x3c, 0x80, 0x48, 0x14, 0x7d, 0xe5, 0x9f, 0x33, 0x1c,
-	0x4f, 0x85, 0x5e, 0xcd, 0x24, 0x66, 0x01, 0xe8, 0x16, 0xa9, 0xad, 0x2a, 0x2d, 0x45, 0x69, 0x53,
-	0x76, 0x29, 0x2b, 0x9f, 0x1b, 0x6d, 0x87, 0xfe, 0x3f, 0xdd, 0xb3, 0x2b, 0x71, 0x06, 0x31, 0xca,
-	0xee, 0x13, 0xa1, 0xe6, 0x08, 0x43, 0xeb, 0x81, 0xd0, 0xfa, 0xa9, 0x19, 0xf5, 0xf8, 0x17, 0x2b,
-	0xe1, 0xa7, 0x8b, 0xd4, 0x2e, 0xbf, 0x11, 0xb4, 0x57, 0x36, 0xb8, 0x58, 0x6f, 0x19, 0xd9, 0x6c,
-	0x19, 0x79, 0xdf, 0x32, 0xf2, 0xb8, 0x63, 0xc6, 0x66, 0xc7, 0x8c, 0x97, 0x1d, 0x33, 0x6e, 0xea,
-	0xc7, 0xb7, 0xb3, 0x3c, 0x5c, 0x4f, 0x3a, 0x1e, 0xbf, 0x9c, 0xad, 0xbd, 0xf7, 0x19, 0x00, 0x00,
-	0xff, 0xff, 0x50, 0x99, 0x96, 0x74, 0x61, 0x02, 0x00, 0x00,
+	// 400 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x92, 0xbd, 0x8e, 0xd3, 0x40,
+	0x10, 0xc7, 0xbd, 0x67, 0x88, 0x94, 0x3d, 0x1a, 0x0c, 0x02, 0x13, 0x60, 0x2f, 0x97, 0x02, 0x59,
+	0x48, 0xec, 0x92, 0x44, 0x34, 0x50, 0x25, 0xa1, 0xa0, 0x49, 0xe3, 0x82, 0x82, 0x26, 0x5a, 0xdb,
+	0x1b, 0xc7, 0x4a, 0xbc, 0x13, 0x79, 0x36, 0x21, 0x6e, 0x79, 0x02, 0x28, 0x28, 0x79, 0x01, 0x2a,
+	0x1e, 0x23, 0x65, 0x4a, 0x2a, 0x40, 0x49, 0xc1, 0x6b, 0x20, 0x7f, 0x00, 0x41, 0x42, 0x29, 0xae,
+	0x9a, 0xdd, 0xf9, 0xcd, 0xec, 0xcc, 0x7f, 0x76, 0xe8, 0x03, 0x7c, 0x9b, 0x20, 0x9a, 0x0c, 0x74,
+	0x32, 0x17, 0x6b, 0x85, 0x26, 0xd1, 0xb1, 0x30, 0x1b, 0xbe, 0xcc, 0xc0, 0x80, 0x73, 0xeb, 0x88,
+	0xf2, 0x9a, 0xb6, 0x6e, 0xc7, 0x10, 0x43, 0xc9, 0x45, 0x71, 0xaa, 0x42, 0x5b, 0x2c, 0x04, 0x4c,
+	0x01, 0x45, 0x20, 0x51, 0x89, 0x75, 0x37, 0x50, 0x46, 0x76, 0x45, 0x08, 0x89, 0xae, 0xf9, 0xdd,
+	0x9a, 0xa7, 0x18, 0x8b, 0x75, 0xb7, 0x30, 0x15, 0xe8, 0x7c, 0x38, 0xa3, 0x6c, 0x8c, 0xf1, 0x28,
+	0x53, 0xd2, 0xa8, 0x31, 0x68, 0x33, 0x5b, 0xe4, 0xaf, 0xab, 0x52, 0x83, 0x30, 0x84, 0x95, 0x36,
+	0xce, 0x25, 0xbd, 0x31, 0xcd, 0x20, 0x9d, 0xc8, 0x28, 0xca, 0x14, 0xa2, 0x4b, 0xda, 0xc4, 0x6b,
+	0xfa, 0xe7, 0x85, 0x6f, 0x50, 0xb9, 0x9c, 0x87, 0x94, 0x1a, 0xf8, 0x13, 0x70, 0x56, 0x06, 0x34,
+	0x0d, 0x1c, 0xe1, 0x70, 0x91, 0x4c, 0xa7, 0x93, 0x48, 0xe6, 0xe8, 0xda, 0x6d, 0xe2, 0xd9, 0x7e,
+	0xb3, 0xf4, 0xbc, 0x94, 0x39, 0x3a, 0x77, 0x68, 0x23, 0x2d, 0x2a, 0xa3, 0x7b, 0xad, 0x44, 0xf5,
+	0xcd, 0x09, 0x69, 0x43, 0xa6, 0x45, 0x0b, 0xee, 0xf5, 0xb6, 0xed, 0x9d, 0xf7, 0xee, 0xf1, 0x4a,
+	0x05, 0x2f, 0x54, 0xf2, 0x5a, 0x25, 0x1f, 0x41, 0xa2, 0x87, 0x4f, 0xb7, 0xdf, 0x2e, 0xac, 0xcf,
+	0xdf, 0x2f, 0xbc, 0x38, 0x31, 0xb3, 0x55, 0xc0, 0x43, 0x48, 0x45, 0x2d, 0xb9, 0x32, 0x4f, 0x30,
+	0x9a, 0x0b, 0x93, 0x2f, 0x15, 0x96, 0x09, 0xe8, 0xd7, 0x4f, 0x3f, 0xbf, 0xf9, 0xee, 0xe7, 0x97,
+	0xc7, 0xff, 0x08, 0xec, 0x78, 0xf4, 0xd1, 0xe9, 0x91, 0xf8, 0x0a, 0x97, 0xa0, 0x51, 0xf5, 0x3e,
+	0x11, 0x6a, 0x8f, 0x31, 0x76, 0x3e, 0x12, 0x7a, 0xf9, 0x4a, 0xea, 0x68, 0xa1, 0x4e, 0x0d, 0xb2,
+	0xcf, 0xff, 0xf3, 0xa1, 0xfc, 0x74, 0xa9, 0xd6, 0x8b, 0x2b, 0x24, 0xfd, 0xee, 0x6f, 0xf8, 0x6c,
+	0xbb, 0x67, 0x64, 0xb7, 0x67, 0xe4, 0xc7, 0x9e, 0x91, 0xf7, 0x07, 0x66, 0xed, 0x0e, 0xcc, 0xfa,
+	0x7a, 0x60, 0xd6, 0x9b, 0xfb, 0xc7, 0x9b, 0xb7, 0xf9, 0xbb, 0x7b, 0xc5, 0x84, 0x82, 0x46, 0xb9,
+	0x1b, 0xfd, 0x5f, 0x01, 0x00, 0x00, 0xff, 0xff, 0xe0, 0x86, 0x6f, 0xbf, 0x9f, 0x02, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -190,7 +200,9 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type MsgClient interface {
-	CreateMonthlyVestingAccount(ctx context.Context, in *MsgCreateMonthlyVestingAccount, opts ...grpc.CallOption) (*MsgCreateMonthlyVestingAccountResponse, error)
+	// CreateMonthlyVestingAccount defines a method that enables creating a monthly vesting account
+	// with cliff feature.
+	HandleCreateMonthlyVestingAccount(ctx context.Context, in *MsgCreateMonthlyVestingAccount, opts ...grpc.CallOption) (*MsgCreateMonthlyVestingAccountResponse, error)
 }
 
 type msgClient struct {
@@ -201,9 +213,9 @@ func NewMsgClient(cc grpc1.ClientConn) MsgClient {
 	return &msgClient{cc}
 }
 
-func (c *msgClient) CreateMonthlyVestingAccount(ctx context.Context, in *MsgCreateMonthlyVestingAccount, opts ...grpc.CallOption) (*MsgCreateMonthlyVestingAccountResponse, error) {
+func (c *msgClient) HandleCreateMonthlyVestingAccount(ctx context.Context, in *MsgCreateMonthlyVestingAccount, opts ...grpc.CallOption) (*MsgCreateMonthlyVestingAccountResponse, error) {
 	out := new(MsgCreateMonthlyVestingAccountResponse)
-	err := c.cc.Invoke(ctx, "/swisstronik.vesting.Msg/CreateMonthlyVestingAccount", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/swisstronik.vesting.Msg/HandleCreateMonthlyVestingAccount", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -212,35 +224,37 @@ func (c *msgClient) CreateMonthlyVestingAccount(ctx context.Context, in *MsgCrea
 
 // MsgServer is the server API for Msg service.
 type MsgServer interface {
-	CreateMonthlyVestingAccount(context.Context, *MsgCreateMonthlyVestingAccount) (*MsgCreateMonthlyVestingAccountResponse, error)
+	// CreateMonthlyVestingAccount defines a method that enables creating a monthly vesting account
+	// with cliff feature.
+	HandleCreateMonthlyVestingAccount(context.Context, *MsgCreateMonthlyVestingAccount) (*MsgCreateMonthlyVestingAccountResponse, error)
 }
 
 // UnimplementedMsgServer can be embedded to have forward compatible implementations.
 type UnimplementedMsgServer struct {
 }
 
-func (*UnimplementedMsgServer) CreateMonthlyVestingAccount(ctx context.Context, req *MsgCreateMonthlyVestingAccount) (*MsgCreateMonthlyVestingAccountResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateMonthlyVestingAccount not implemented")
+func (*UnimplementedMsgServer) HandleCreateMonthlyVestingAccount(ctx context.Context, req *MsgCreateMonthlyVestingAccount) (*MsgCreateMonthlyVestingAccountResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HandleCreateMonthlyVestingAccount not implemented")
 }
 
 func RegisterMsgServer(s grpc1.Server, srv MsgServer) {
 	s.RegisterService(&_Msg_serviceDesc, srv)
 }
 
-func _Msg_CreateMonthlyVestingAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Msg_HandleCreateMonthlyVestingAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(MsgCreateMonthlyVestingAccount)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MsgServer).CreateMonthlyVestingAccount(ctx, in)
+		return srv.(MsgServer).HandleCreateMonthlyVestingAccount(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/swisstronik.vesting.Msg/CreateMonthlyVestingAccount",
+		FullMethod: "/swisstronik.vesting.Msg/HandleCreateMonthlyVestingAccount",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgServer).CreateMonthlyVestingAccount(ctx, req.(*MsgCreateMonthlyVestingAccount))
+		return srv.(MsgServer).HandleCreateMonthlyVestingAccount(ctx, req.(*MsgCreateMonthlyVestingAccount))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -250,8 +264,8 @@ var _Msg_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*MsgServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "CreateMonthlyVestingAccount",
-			Handler:    _Msg_CreateMonthlyVestingAccount_Handler,
+			MethodName: "HandleCreateMonthlyVestingAccount",
+			Handler:    _Msg_HandleCreateMonthlyVestingAccount_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -278,11 +292,6 @@ func (m *MsgCreateMonthlyVestingAccount) MarshalToSizedBuffer(dAtA []byte) (int,
 	_ = i
 	var l int
 	_ = l
-	if m.Month != 0 {
-		i = encodeVarintTx(dAtA, i, uint64(m.Month))
-		i--
-		dAtA[i] = 0x28
-	}
 	if len(m.Amount) > 0 {
 		for iNdEx := len(m.Amount) - 1; iNdEx >= 0; iNdEx-- {
 			{
@@ -294,11 +303,16 @@ func (m *MsgCreateMonthlyVestingAccount) MarshalToSizedBuffer(dAtA []byte) (int,
 				i = encodeVarintTx(dAtA, i, uint64(size))
 			}
 			i--
-			dAtA[i] = 0x22
+			dAtA[i] = 0x2a
 		}
 	}
-	if m.StartTime != 0 {
-		i = encodeVarintTx(dAtA, i, uint64(m.StartTime))
+	if m.Months != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.Months))
+		i--
+		dAtA[i] = 0x20
+	}
+	if m.CliffDays != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.CliffDays))
 		i--
 		dAtA[i] = 0x18
 	}
@@ -309,10 +323,10 @@ func (m *MsgCreateMonthlyVestingAccount) MarshalToSizedBuffer(dAtA []byte) (int,
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.Creator) > 0 {
-		i -= len(m.Creator)
-		copy(dAtA[i:], m.Creator)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.Creator)))
+	if len(m.FromAddress) > 0 {
+		i -= len(m.FromAddress)
+		copy(dAtA[i:], m.FromAddress)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.FromAddress)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -359,7 +373,7 @@ func (m *MsgCreateMonthlyVestingAccount) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.Creator)
+	l = len(m.FromAddress)
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
@@ -367,17 +381,17 @@ func (m *MsgCreateMonthlyVestingAccount) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
-	if m.StartTime != 0 {
-		n += 1 + sovTx(uint64(m.StartTime))
+	if m.CliffDays != 0 {
+		n += 1 + sovTx(uint64(m.CliffDays))
+	}
+	if m.Months != 0 {
+		n += 1 + sovTx(uint64(m.Months))
 	}
 	if len(m.Amount) > 0 {
 		for _, e := range m.Amount {
 			l = e.Size()
 			n += 1 + l + sovTx(uint64(l))
 		}
-	}
-	if m.Month != 0 {
-		n += 1 + sovTx(uint64(m.Month))
 	}
 	return n
 }
@@ -428,7 +442,7 @@ func (m *MsgCreateMonthlyVestingAccount) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Creator", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field FromAddress", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -456,7 +470,7 @@ func (m *MsgCreateMonthlyVestingAccount) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Creator = string(dAtA[iNdEx:postIndex])
+			m.FromAddress = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
@@ -492,9 +506,9 @@ func (m *MsgCreateMonthlyVestingAccount) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 3:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field StartTime", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field CliffDays", wireType)
 			}
-			m.StartTime = 0
+			m.CliffDays = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTx
@@ -504,12 +518,31 @@ func (m *MsgCreateMonthlyVestingAccount) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.StartTime |= int64(b&0x7F) << shift
+				m.CliffDays |= int64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
 		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Months", wireType)
+			}
+			m.Months = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Months |= int64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 5:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Amount", wireType)
 			}
@@ -543,25 +576,6 @@ func (m *MsgCreateMonthlyVestingAccount) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
-		case 5:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Month", wireType)
-			}
-			m.Month = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTx
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.Month |= int64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTx(dAtA[iNdEx:])

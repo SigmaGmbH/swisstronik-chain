@@ -2,7 +2,7 @@ use std::string::String;
 use std::string::ToString;
 use thiserror_no_std::Error;
 
-#[derive(Error, Debug)]
+#[derive(Error, Debug, Clone)]
 #[allow(dead_code)]
 pub enum RustError {
     #[error("Cannot decode UTF8 bytes into string: {}", msg)]
@@ -15,6 +15,8 @@ pub enum RustError {
     EnclaveError { msg: String },
     #[error("Cannot perform ECDH: {}", msg)]
     ECDHError { msg: String },
+    #[error("Cannot decode protobuf: {}", msg)]
+    ProtobufError { msg: String },
 }
 
 impl RustError {
@@ -47,6 +49,12 @@ impl RustError {
             msg: msg.to_string(),
         }
     }
+
+    pub fn protobuf_error<S: ToString>(msg: S) -> Self {
+        RustError::ProtobufError {
+            msg: msg.to_string(),
+        }
+    }
 }
 
 impl From<std::str::Utf8Error> for RustError {
@@ -58,5 +66,11 @@ impl From<std::str::Utf8Error> for RustError {
 impl From<std::string::FromUtf8Error> for RustError {
     fn from(source: std::string::FromUtf8Error) -> Self {
         RustError::invalid_utf8(source)
+    }
+}
+
+impl From<protobuf::ProtobufError> for RustError {
+    fn from(source: protobuf::ProtobufError) -> Self {
+        RustError::protobuf_error(source)
     }
 }
