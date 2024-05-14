@@ -257,7 +257,9 @@ fn execute_call(
 
     if commit {
         let (vals, logs) = executor.into_state().deconstruct();
-        backend.apply(vals, logs, false);
+        if let Err(err) = backend.apply(vals, logs, false) {
+            return ExecutionResult::from_error(err.to_string(), Vec::default(), None)
+        }
     }
 
     ExecutionResult {
@@ -300,10 +302,12 @@ fn execute_create(
         Ok(data) => data,
         Err((err, data)) => return ExecutionResult::from_error(err, data, Some(gas_used)),
     };
-
+    
     if commit {
         let (vals, logs) = executor.into_state().deconstruct();
-        backend.apply(vals, logs, false);
+        if let Err(err) = backend.apply(vals, logs, false) {
+            return ExecutionResult::from_error(err.to_string(), Vec::default(), None)
+        }
     }
 
     ExecutionResult {

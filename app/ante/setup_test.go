@@ -3,15 +3,16 @@ package ante_test
 import (
 	"math/big"
 
-	"swisstronik/app/ante"
-	evmtypes "swisstronik/x/evm/types"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"swisstronik/app/ante"
+	evmtypes "swisstronik/x/evm/types"
 )
 
 const ChainID string = "swisstronik_1291-1"
 
-func (suite AnteTestSuite) TestEthSetupContextDecorator() {
+func (suite *AnteTestSuite) TestEthSetupContextDecorator() {
 	dec := ante.NewEthSetUpContextDecorator(suite.app.EvmKeeper)
 	tx := evmtypes.NewTxContract(suite.app.EvmKeeper.ChainID(), 1, big.NewInt(10), 1000, big.NewInt(1), nil, nil, nil, nil)
 

@@ -5,23 +5,23 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	"github.com/cosmos/cosmos-sdk/server"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	authvesting "github.com/cosmos/cosmos-sdk/x/auth/vesting/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 	"github.com/spf13/cobra"
+
+	vestingcli "swisstronik/x/vesting/client/cli"
+	vestingtypes "swisstronik/x/vesting/types"
 )
 
 const (
 	flagVestingStart = "vesting-start-time"
-	flagVestingEnd   = "vesting-end-time"
 	flagVestingAmt   = "vesting-amount"
 )
 
@@ -75,48 +75,57 @@ contain valid denominations. Accounts may optionally be supplied with vesting pa
 				}
 			}
 
-			vestingStart, err := cmd.Flags().GetInt64(flagVestingStart)
-			if err != nil {
-				return err
-			}
-			vestingEnd, err := cmd.Flags().GetInt64(flagVestingEnd)
-			if err != nil {
-				return err
-			}
-			vestingAmtStr, err := cmd.Flags().GetString(flagVestingAmt)
-			if err != nil {
-				return err
-			}
-
-			vestingAmt, err := sdk.ParseCoinsNormalized(vestingAmtStr)
-			if err != nil {
-				return fmt.Errorf("failed to parse vesting amount: %w", err)
-			}
-
 			// create concrete account type based on input parameters
 			var genAccount authtypes.GenesisAccount
 
 			balances := banktypes.Balance{Address: addr.String(), Coins: coins.Sort()}
 			baseAccount := authtypes.NewBaseAccount(addr, nil, 0, 0)
 
-			if !vestingAmt.IsZero() {
-				baseVestingAccount := authvesting.NewBaseVestingAccount(baseAccount, vestingAmt.Sort(), vestingEnd)
+			monthlyVesting, err := cmd.Flags().GetBool(vestingcli.FlagMonthlyVesting)
+			if err != nil {
+				return err
+			}
 
-				if (balances.Coins.IsZero() && !baseVestingAccount.OriginalVesting.IsZero()) ||
-					baseVestingAccount.OriginalVesting.IsAnyGT(balances.Coins) {
+			if monthlyVesting {
+				// Monthly vesting requires cliff days and months
+				cliffDays, err := cmd.Flags().GetInt64(vestingcli.FlagCliffDays)
+				if err != nil {
+					return err
+				}
+				months, err := cmd.Flags().GetInt64(vestingcli.FlagVestingPeriods)
+				if err != nil {
+					return err
+				}
+				vestingStart, err := cmd.Flags().GetInt64(flagVestingStart)
+				if err != nil {
+					return err
+				}
+				vestingAmtStr, err := cmd.Flags().GetString(flagVestingAmt)
+				if err != nil {
+					return err
+				}
+				vestingAmt, err := sdk.ParseCoinsNormalized(vestingAmtStr)
+				if err != nil {
+					return fmt.Errorf("failed to parse vesting amount: %w", err)
+				}
+				if vestingAmt.IsZero() {
+					return fmt.Errorf("vesing amount cannot be zero")
+				}
+
+				vestingAccount := vestingtypes.NewMonthlyVestingAccount(
+					baseAccount,
+					vestingAmt.Sort(),
+					vestingStart,
+					cliffDays,
+					months,
+				)
+
+				if (balances.Coins.IsZero() && !vestingAccount.OriginalVesting.IsZero()) ||
+					vestingAccount.OriginalVesting.IsAnyGT(balances.Coins) {
 					return errors.New("vesting amount cannot be greater than total amount")
 				}
+				genAccount = vestingAccount
 
-				switch {
-				case vestingStart != 0 && vestingEnd != 0:
-					genAccount = authvesting.NewContinuousVestingAccountRaw(baseVestingAccount, vestingStart)
-
-				case vestingEnd != 0:
-					genAccount = authvesting.NewDelayedVestingAccountRaw(baseVestingAccount)
-
-				default:
-					return errors.New("invalid vesting parameters; must supply start and end time or end time")
-				}
 			} else {
 				genAccount = baseAccount
 			}
@@ -183,9 +192,11 @@ contain valid denominations. Accounts may optionally be supplied with vesting pa
 
 	cmd.Flags().String(flags.FlagKeyringBackend, flags.DefaultKeyringBackend, "Select keyring's backend (os|file|kwallet|pass|test)")
 	cmd.Flags().String(flags.FlagHome, defaultNodeHome, "The application home directory")
-	cmd.Flags().String(flagVestingAmt, "", "amount of coins for vesting accounts")
+	cmd.Flags().Bool(vestingcli.FlagMonthlyVesting, false, "create monthly vesting account")
+	cmd.Flags().Int64(vestingcli.FlagCliffDays, 30, "cliff days of monthly vesting")
+	cmd.Flags().Int64(vestingcli.FlagVestingPeriods, 12, "months of monthly vesting")
 	cmd.Flags().Int64(flagVestingStart, 0, "schedule start time (unix epoch) for vesting accounts")
-	cmd.Flags().Int64(flagVestingEnd, 0, "schedule end time (unix epoch) for vesting accounts")
+	cmd.Flags().String(flagVestingAmt, "", "amount of coins for vesting accounts")
 	flags.AddQueryFlagsToCmd(cmd)
 
 	return cmd
