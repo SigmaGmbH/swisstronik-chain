@@ -200,28 +200,24 @@ fn route(
                     let data = get_verification_data
                         .data
                         .into_iter()
-                        .map(|log| {
+                        .flat_map(|log| {
                             let issuer_address = Address::from_slice(&log.issuerAddress);
-                            let origin_chain =
-                                String::from_utf8_lossy(&log.originChain).to_string(); // Convert bytes to string if required
-
-                            let tokens = vec![
-                                AbiToken::Address(issuer_address),
-                                AbiToken::String(origin_chain),
+                            let tokens = vec![AbiToken::Tuple(vec![
+                                AbiToken::Address(issuer_address.clone()),
+                                AbiToken::String(log.originChain.clone()),
                                 AbiToken::Uint(log.issuanceTimestamp.into()),
                                 AbiToken::Uint(log.expirationTimestamp.into()),
-                                AbiToken::Bytes(log.originalData),
-                                AbiToken::Bytes(log.schema),
-                                AbiToken::Bytes(log.issuerVerificationId),
+                                AbiToken::Bytes(log.originalData.clone().into()),
+                                AbiToken::String(log.schema.clone()),
+                                AbiToken::String(log.issuerVerificationId.clone()),
                                 AbiToken::Uint(log.version.into()),
-                            ];
+                            ])];
 
-                            tokens
+                            tokens.into_iter()
                         })
-                        .flatten()
-                        .collect::<Vec<Token>>(); // Flatten the nested vectors and collect them into a single vector
+                        .collect::<Vec<AbiToken>>();
 
-                    let encoded_response = encode(&data);
+                    let encoded_response = encode(&[AbiToken::Array(data)]);
                     return Ok((ExitSucceed::Returned, encoded_response.to_vec()));
                 }
                 None => {

@@ -270,12 +270,12 @@ func (q Connector) GetVerificationData(req *librustgo.CosmosRequest_GetVerificat
 		// Addresses from Query requests are Ethereum Addresses
 		resData = append(resData, &librustgo.VerificationDetails{
 			IssuerAddress:        common.Address(issuerAccount.Bytes()).Bytes(),
-			OriginChain:          []byte(details.OriginChain),
+			OriginChain:          details.OriginChain,
 			IssuanceTimestamp:    details.IssuanceTimestamp,
 			ExpirationTimestamp:  details.ExpirationTimestamp,
 			OriginalData:         details.OriginalData,
-			Schema:               []byte(details.Schema),
-			IssuerVerificationId: []byte(details.IssuerVerificationId),
+			Schema:               details.Schema,
+			IssuerVerificationId: details.IssuerVerificationId,
 			Version:              details.Version,
 		})
 	}

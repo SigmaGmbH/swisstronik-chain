@@ -171,7 +171,7 @@ message VerificationDetails {
   // Verification issuer address
   bytes issuerAddress = 1;
   // From which chain proof was transferred
-  bytes originChain = 2;
+  string originChain = 2;
   // Original issuance timestamp
   uint32 issuanceTimestamp = 3;
   // Original expiration timestamp
@@ -179,9 +179,9 @@ message VerificationDetails {
   // Original proof data (ZK-proof)
   bytes originalData = 5;
   // ZK-proof original schema
-  bytes schema = 6;
+  string schema = 6;
   // Verification id for checking(KYC/KYB/AML etc) from issuer side
-  bytes issuerVerificationId = 7;
+  string issuerVerificationId = 7;
   // Version
   uint32 version = 8;
 }

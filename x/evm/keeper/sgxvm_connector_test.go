@@ -256,8 +256,8 @@ func requestAddVerificationDetails(
 	issuanceTimestamp uint32,
 	expirationTimestamp uint32,
 	proofData []byte,
-	schema []byte,
-	issuerVerificationId []byte,
+	schema string,
+	issuerVerificationId string,
 	version uint32,
 ) ([]byte, error) {
 	// Encode request
@@ -325,12 +325,12 @@ func (suite *KeeperTestSuite) TestSingleVerificationDetails() {
 
 		expectedVerificationDetails = &types.VerificationDetails{
 			IssuerAddress:        issuerAccount.Bytes(),
-			OriginChain:          []byte("samplechain"),
+			OriginChain:          "samplechain",
 			IssuanceTimestamp:    uint32(suite.ctx.BlockTime().Unix()),
 			ExpirationTimestamp:  uint32(0),
 			OriginalData:         []byte("Proof Data"),
-			Schema:               []byte("Schema"),
-			IssuerVerificationId: []byte("Issuer Verification ID"),
+			Schema:               "Schema",
+			IssuerVerificationId: "Issuer Verification ID",
 			Version:              uint32(0),
 		}
 	}
@@ -348,12 +348,12 @@ func (suite *KeeperTestSuite) TestSingleVerificationDetails() {
 				// Addresses in compliance keeper are Cosmos Addresses
 				// Addresses in Query requests are Ethereum Addresses
 				suite.Require().Equal(issuerAccount.String(), verificationDetails.IssuerAddress)
-				suite.Require().Equal(expectedVerificationDetails.OriginChain, []byte(verificationDetails.OriginChain))
+				suite.Require().Equal(expectedVerificationDetails.OriginChain, verificationDetails.OriginChain)
 				suite.Require().Equal(expectedVerificationDetails.IssuanceTimestamp, verificationDetails.IssuanceTimestamp)
 				suite.Require().Equal(expectedVerificationDetails.ExpirationTimestamp, verificationDetails.ExpirationTimestamp)
 				suite.Require().Equal(expectedVerificationDetails.OriginalData, verificationDetails.OriginalData)
-				suite.Require().Equal(expectedVerificationDetails.Schema, []byte(verificationDetails.Schema))
-				suite.Require().Equal(expectedVerificationDetails.IssuerVerificationId, []byte(verificationDetails.IssuerVerificationId))
+				suite.Require().Equal(expectedVerificationDetails.Schema, verificationDetails.Schema)
+				suite.Require().Equal(expectedVerificationDetails.IssuerVerificationId, verificationDetails.IssuerVerificationId)
 				suite.Require().Equal(expectedVerificationDetails.Version, verificationDetails.Version)
 
 				// Check if user has verification
@@ -516,12 +516,12 @@ func (suite *KeeperTestSuite) TestMultipleVerificationDetails() {
 		// Addresses before making Query request should be Ethereum Addresses
 		verificationDetails := &types.VerificationDetails{
 			IssuerAddress:        issuerAddress.Bytes(),
-			OriginChain:          []byte("samplechain"),
+			OriginChain:          "samplechain",
 			IssuanceTimestamp:    uint32(suite.ctx.BlockTime().Unix()),
 			ExpirationTimestamp:  uint32(0),
 			OriginalData:         big.NewInt(rand.Int63n(100000)).Bytes(),
-			Schema:               big.NewInt(rand.Int63n(200000)).Bytes(),
-			IssuerVerificationId: big.NewInt(rand.Int63n(300000)).Bytes(),
+			Schema:               "HelloWorld",
+			IssuerVerificationId: "HelloIssuer",
 			Version:              uint32(0),
 		}
 		expected = append(expected, verificationDetails)

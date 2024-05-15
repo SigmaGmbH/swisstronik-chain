@@ -3,7 +3,7 @@ pragma solidity ^0.8;
 interface IComplianceBridge {
     struct VerificationData {
         // Verification issuer address
-        string issuerAddress;
+        address issuerAddress;
         // From which chain proof was transferred
         string originChain;
         // Original issuance timestamp
@@ -77,7 +77,7 @@ contract ComplianceProxy {
 
     function isUserVerified(
         address userAddress
-    ) public view returns (bool isVerified) {
+    ) public view returns (bool) {
         address[] memory allowedIssuers;
         bytes memory payload = abi.encodeCall(
             IComplianceBridge.hasVerification,
@@ -85,7 +85,7 @@ contract ComplianceProxy {
         );
         (bool success, bytes memory data) = address(1028).staticcall(payload);
         if (success) {
-            isVerified = abi.decode(data, (bool));
+            return abi.decode(data, (bool));
         } else {
             return false;
         }
@@ -94,14 +94,14 @@ contract ComplianceProxy {
     function isUserVerifiedBy(
         address userAddress,
         address[] memory allowedIssuers
-    ) public view returns (bool isVerified) {
+    ) public view returns (bool) {
         bytes memory payload = abi.encodeCall(
             IComplianceBridge.hasVerification,
             (userAddress, VERIFICATION_TYPE, 0, allowedIssuers)
         );
         (bool success, bytes memory data) = address(1028).staticcall(payload);
         if (success) {
-            isVerified = abi.decode(data, (bool));
+            return abi.decode(data, (bool));
         } else {
             return false;
         }
