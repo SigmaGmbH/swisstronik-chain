@@ -14,7 +14,7 @@ use crate::protobuf_generated::ffi;
 use crate::{coder, querier, GoQuerier};
 
 // Selector of addVerificationDetails function
-const ADD_VERIFICATION_FN_SELECTOR: &str = "8812b27d";
+const ADD_VERIFICATION_FN_SELECTOR: &str = "e62364ab";
 // Selector of hasVerification function
 const HAS_VERIFICATION_FN_SELECTOR: &str = "4887fcd8";
 // Selector of getVerificationData function
@@ -119,6 +119,7 @@ fn route(
         ADD_VERIFICATION_FN_SELECTOR => {
             let verification_params = vec![
                 ParamType::Address,
+                ParamType::String,
                 ParamType::Uint(32),
                 ParamType::Uint(32),
                 ParamType::Uint(32),
@@ -130,17 +131,19 @@ fn route(
             let decoded_params = decode_input(verification_params, &data[4..])?;
 
             let user_address = &decoded_params[0];
-            let verification_type = &decoded_params[1];
-            let issuance_timestamp = &decoded_params[2];
-            let expiration_timestamp = &decoded_params[3];
-            let proof_data = &decoded_params[4];
-            let schema = &decoded_params[5];
-            let issuer_verification_id = &decoded_params[6];
-            let version = &decoded_params[7];
+            let origin_chain = &decoded_params[1];
+            let verification_type = &decoded_params[2];
+            let issuance_timestamp = &decoded_params[3];
+            let expiration_timestamp = &decoded_params[4];
+            let proof_data = &decoded_params[5];
+            let schema = &decoded_params[6];
+            let issuer_verification_id = &decoded_params[7];
+            let version = &decoded_params[8];
 
             let encoded_request = coder::encode_add_verification_details_request(
                 user_address.clone().into_address().unwrap(),
                 caller,
+                origin_chain.clone().into_string().unwrap(),
                 verification_type.clone().into_uint().unwrap().as_u32(),
                 issuance_timestamp.clone().into_uint().unwrap().as_u32(),
                 expiration_timestamp.clone().into_uint().unwrap().as_u32(),

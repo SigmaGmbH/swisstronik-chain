@@ -66,8 +66,8 @@ describe('ComplianceBridge', () => {
             contract.interface.encodeFunctionData("getVerificationData", [signer.address])
         )
         const result = contract.interface.decodeFunctionResult("getVerificationData", verificationData)
-        expect(result.verificationData.length).to.be.greaterThan(0);
-        for (const details of result.verificationData) {
+        expect(result[0].length).to.be.greaterThan(0);
+        for (const details of result[0]) {
             expect(details.issuerAddress.length).to.be.greaterThan(0)
             expect(details.issuerAddress).to.be.equal(contract.address)
         }

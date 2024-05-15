@@ -213,7 +213,7 @@ func (q Connector) AddVerificationDetails(req *librustgo.CosmosRequest_AddVerifi
 	// Addresses in keeper are Cosmos Addresses
 	verificationDetails := &compliancetypes.VerificationDetails{
 		IssuerAddress:        issuerAddress,
-		OriginChain:          "samplechain", // TODO: Read chain from proto
+		OriginChain:          req.AddVerificationDetails.OriginChain,
 		IssuanceTimestamp:    req.AddVerificationDetails.IssuanceTimestamp,
 		ExpirationTimestamp:  req.AddVerificationDetails.ExpirationTimestamp,
 		OriginalData:         req.AddVerificationDetails.ProofData,

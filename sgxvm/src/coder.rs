@@ -102,6 +102,7 @@ pub fn encode_remove_storage_cell(account_address: &H160, index: &H256) -> Vec<u
 pub fn encode_add_verification_details_request(
     user_address: Address,
     issuer_address: H160,
+    origin_chain: String,
     verification_type: u32,
     issuance_timestamp: u32,
     expiration_timestamp: u32,
@@ -115,6 +116,7 @@ pub fn encode_add_verification_details_request(
 
     request.set_userAddress(user_address.as_bytes().to_vec());
     request.set_issuerAddress(issuer_address.as_bytes().to_vec());
+    request.set_originChain(origin_chain);
     request.set_verificationType(verification_type);
     request.set_issuanceTimestamp(issuance_timestamp);
     request.set_expirationTimestamp(expiration_timestamp);
