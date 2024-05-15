@@ -21,7 +21,6 @@ describe('ComplianceBridge', () => {
         )
         const res = await tx.wait()
         const parsedLog = contract.interface.parseLog(res.logs[0])
-
         expect(parsedLog.args.success).to.be.true
 
         const isVerifiedResponse = await sendShieldedQuery(
@@ -30,7 +29,7 @@ describe('ComplianceBridge', () => {
             contract.interface.encodeFunctionData("isUserVerified", [signer.address])
         );
         const result = contract.interface.decodeFunctionResult("isUserVerified", isVerifiedResponse)
-        expect(result.isVerified).to.be.true
+        expect(result[0]).to.be.true
     })
 
     it('Should be able to check for specific issuer of verification', async () => {
@@ -43,7 +42,19 @@ describe('ComplianceBridge', () => {
             contract.interface.encodeFunctionData("isUserVerifiedBy", [signer.address, allowedIssuers])
         );
         const result = contract.interface.decodeFunctionResult("isUserVerifiedBy", isVerifiedResponse)
-        expect(result.isVerified).to.be.true
+        expect(result[0]).to.be.true
+    })
+
+    it('Should be able to check for verification without issuers', async () => {
+        const [signer] = await ethers.getSigners()
+
+        const isVerifiedResponse = await sendShieldedQuery(
+            signer.provider,
+            contract.address,
+            contract.interface.encodeFunctionData("isUserVerified", [signer.address])
+        );
+        const result = contract.interface.decodeFunctionResult("isUserVerified", isVerifiedResponse)
+        expect(result[0]).to.be.true
     })
 
     it('Should be able to get verification data', async () => {
@@ -55,6 +66,10 @@ describe('ComplianceBridge', () => {
             contract.interface.encodeFunctionData("getVerificationData", [signer.address])
         );
         const result = contract.interface.decodeFunctionResult("getVerificationData", verificationData)
-        expect(result.issuerAddress).to.be.equal(contract.address);
+        expect(result.verificationData.length).to.be.greaterThan(0);
+        for (const details of result.verificationData) {
+            expect(details.issuerAddress.length).to.be.greaterThan(0);
+            expect(details.issuerAddress).to.be.equal(contract.address);
+        }
     })
 })
