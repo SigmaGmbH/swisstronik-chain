@@ -118,7 +118,7 @@ func (suite *KeeperTestSuite) SetupTestWithT(t require.TestingT) {
 func (suite *KeeperTestSuite) SetupApp(checkTx bool) {
 	chainID := utils.TestnetChainID + "-1"
 	// Initialize enclave
-	err := librustgo.InitializeMasterKey(false)
+	err := librustgo.InitializeEnclave(false)
 	require.NoError(suite.T(), err)
 
 	suite.SetupAppWithT(checkTx, suite.T(), chainID)
@@ -127,7 +127,7 @@ func (suite *KeeperTestSuite) SetupApp(checkTx bool) {
 // SetupApp setup test environment, it uses`require.TestingT` to support both `testing.T` and `testing.B`.
 func (suite *KeeperTestSuite) SetupAppWithT(checkTx bool, t require.TestingT, chainID string) {
 	// obtain node public key
-	res, err := librustgo.GetNodePublicKey()
+	res, err := librustgo.GetNodePublicKey(0)
 	suite.Require().NoError(err)
 	suite.nodePublicKey = res.PublicKey
 
@@ -172,7 +172,6 @@ func (suite *KeeperTestSuite) SetupAppWithT(checkTx bool, t require.TestingT, ch
 	})
 
 	if suite.mintFeeCollector {
-		panic("8888888888888888")
 		// mint some coin to fee collector
 		coins := sdk.NewCoins(sdk.NewCoin(evmtypes.DefaultEVMDenom, sdkmath.NewInt(int64(params.TxGas)-1)))
 		genesisState := app.NewTestGenesisState(suite.app.AppCodec())

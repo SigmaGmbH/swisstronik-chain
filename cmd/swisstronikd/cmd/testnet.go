@@ -148,8 +148,8 @@ func initializeEnclave() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "init-testnet-enclave",
 		Short: "Initialize SGX Enclave for local testnet",
-		Long:  `Initializes SGX enclave by creating new master key
-		*** WARNING: Do not use this command to setup master key for validator ***`,
+		Long:  `Initializes SGX enclave with local key manager
+		*** WARNING: Do not use this command to setup validator node ***`,
 		Args:  cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			shouldReset, err := cmd.Flags().GetBool(flagShouldReset)
@@ -157,7 +157,7 @@ func initializeEnclave() *cobra.Command {
 				return err
 			}
 
-			if err := librustgo.InitializeMasterKey(shouldReset); err != nil {
+			if err := librustgo.InitializeEnclave(shouldReset); err != nil {
 				return err
 			}
 
@@ -167,7 +167,7 @@ func initializeEnclave() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().Bool(flagShouldReset, false, "reset already existing master key. Default: false")
+	cmd.Flags().Bool(flagShouldReset, false, "reset already existing epoch manager. Default: false")
 
 	return cmd
 }

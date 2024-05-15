@@ -36,7 +36,7 @@ extern "C" {
         len: usize,
     ) -> sgx_status_t;
 
-    pub fn ecall_init_master_key(
+    pub fn ecall_initialize_enclave(
         eid: sgx_enclave_id_t,
         retval: *mut sgx_status_t,
         reset_flag: i32,
@@ -58,7 +58,7 @@ extern "C" {
         quote_size: u32,
     ) -> sgx_status_t;
 
-    pub fn ecall_request_master_key_epid(
+    pub fn ecall_request_epoch_keys_epid(
         eid: sgx_enclave_id_t,
         retval: *mut sgx_status_t,
         hostname: *const u8,
@@ -68,7 +68,7 @@ extern "C" {
 
     pub fn ecall_status(eid: sgx_enclave_id_t, retval: *mut sgx_status_t) -> sgx_status_t;
 
-    pub fn ecall_request_master_key_dcap(
+    pub fn ecall_request_epoch_keys_dcap(
         eid: sgx_enclave_id_t,
         retval: *mut sgx_status_t,
         hostname: *const u8,
@@ -104,6 +104,22 @@ extern "C" {
         retval: *mut sgx_status_t,
         quote_ptr: *const u8,
         quote_len: u32,
+    ) -> sgx_status_t;
+
+    pub fn ecall_add_epoch(
+        eid: sgx_enclave_id_t,
+        retval: *mut sgx_status_t,
+        starting_block: u64,
+    ) -> sgx_status_t;
+
+    pub fn ecall_remove_latest_epoch(
+        eid: sgx_enclave_id_t,
+        retval: *mut sgx_status_t,
+    ) -> sgx_status_t;
+
+    pub fn ecall_list_epochs(
+        eid: sgx_enclave_id_t,
+        retval: *mut AllocationWithResult,
     ) -> sgx_status_t;
 }
 
@@ -141,9 +157,9 @@ pub unsafe extern "C" fn handle_initialization_request(
                         let response_bytes: Vec<u8> = response.write_to_bytes()?;
                         Ok(response_bytes)
                     }
-                    node::SetupRequest_oneof_req::initializeMasterKey(req) => {
-                        enclave_api::EnclaveApi::initialize_master_key(evm_enclave.geteid(), req.shouldReset)?;
-                        let response = node::InitializeMasterKeyResponse::new();
+                    node::SetupRequest_oneof_req::initializeEnclave(req) => {
+                        enclave_api::EnclaveApi::initialize_enclave(evm_enclave.geteid(), req.shouldReset)?;
+                        let response = node::InitializeEnclaveResponse::new();
                         let response_bytes = response.write_to_bytes()?;
                         Ok(response_bytes)
                     }
@@ -175,6 +191,22 @@ pub unsafe extern "C" fn handle_initialization_request(
                     node::SetupRequest_oneof_req::verifyQuote(req) => {
                         enclave_api::EnclaveApi::verify_dcap_quote(evm_enclave.geteid(), &req.filepath)?;
                         let response = node::VerifyQuoteResponse::new();
+                        let response_bytes = response.write_to_bytes()?;
+                        Ok(response_bytes)
+                    }
+                    node::SetupRequest_oneof_req::addEpoch(req) => {
+                        enclave_api::EnclaveApi::add_epoch(evm_enclave.geteid(), req.startingBlock)?;
+                        let response = node::AddNewEpochResponse::new();
+                        let response_bytes = response.write_to_bytes()?;
+                        Ok(response_bytes)
+                    }
+                    node::SetupRequest_oneof_req::listEpochs(_) => {
+                        let response_bytes = enclave_api::EnclaveApi::list_epochs(evm_enclave.geteid())?;
+                        Ok(response_bytes)
+                    }
+                    node::SetupRequest_oneof_req::removeEpoch(_) => {
+                        enclave_api::EnclaveApi::remove_latest_epoch(evm_enclave.geteid(), )?;
+                        let response = node::RemoveLatestEpochResponse::new();
                         let response_bytes = response.write_to_bytes()?;
                         Ok(response_bytes)
                     }

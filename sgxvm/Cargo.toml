@@ -13,6 +13,7 @@ default = ["hardware_mode"]
 mainnet = []
 hardware_mode = []
 simulation_mode = []
+attestation_server = []
 
 [dependencies]
 derive_more = "0.99"

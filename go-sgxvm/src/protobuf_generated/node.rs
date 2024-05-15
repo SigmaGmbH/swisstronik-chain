@@ -27,7 +27,7 @@ use protobuf::ProtobufEnum as ProtobufEnum_imported_for_functions;
 const _PROTOBUF_VERSION_CHECK: () = ::protobuf::VERSION_2_8_1;
 
 #[derive(PartialEq,Clone,Default)]
-pub struct InitializeMasterKeyRequest {
+pub struct InitializeEnclaveRequest {
     // message fields
     pub shouldReset: bool,
     // special fields
@@ -35,14 +35,14 @@ pub struct InitializeMasterKeyRequest {
     pub cached_size: ::protobuf::CachedSize,
 }
 
-impl<'a> ::std::default::Default for &'a InitializeMasterKeyRequest {
-    fn default() -> &'a InitializeMasterKeyRequest {
-        <InitializeMasterKeyRequest as ::protobuf::Message>::default_instance()
+impl<'a> ::std::default::Default for &'a InitializeEnclaveRequest {
+    fn default() -> &'a InitializeEnclaveRequest {
+        <InitializeEnclaveRequest as ::protobuf::Message>::default_instance()
     }
 }
 
-impl InitializeMasterKeyRequest {
-    pub fn new() -> InitializeMasterKeyRequest {
+impl InitializeEnclaveRequest {
+    pub fn new() -> InitializeEnclaveRequest {
         ::std::default::Default::default()
     }
 
@@ -62,7 +62,7 @@ impl InitializeMasterKeyRequest {
     }
 }
 
-impl ::protobuf::Message for InitializeMasterKeyRequest {
+impl ::protobuf::Message for InitializeEnclaveRequest {
     fn is_initialized(&self) -> bool {
         true
     }
@@ -132,8 +132,8 @@ impl ::protobuf::Message for InitializeMasterKeyRequest {
         Self::descriptor_static()
     }
 
-    fn new() -> InitializeMasterKeyRequest {
-        InitializeMasterKeyRequest::new()
+    fn new() -> InitializeEnclaveRequest {
+        InitializeEnclaveRequest::new()
     }
 
     fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
@@ -146,11 +146,11 @@ impl ::protobuf::Message for InitializeMasterKeyRequest {
                 let mut fields = ::std::vec::Vec::new();
                 fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBool>(
                     "shouldReset",
-                    |m: &InitializeMasterKeyRequest| { &m.shouldReset },
-                    |m: &mut InitializeMasterKeyRequest| { &mut m.shouldReset },
+                    |m: &InitializeEnclaveRequest| { &m.shouldReset },
+                    |m: &mut InitializeEnclaveRequest| { &mut m.shouldReset },
                 ));
-                ::protobuf::reflect::MessageDescriptor::new::<InitializeMasterKeyRequest>(
-                    "InitializeMasterKeyRequest",
+                ::protobuf::reflect::MessageDescriptor::new::<InitializeEnclaveRequest>(
+                    "InitializeEnclaveRequest",
                     fields,
                     file_descriptor_proto()
                 )
@@ -158,56 +158,56 @@ impl ::protobuf::Message for InitializeMasterKeyRequest {
         }
     }
 
-    fn default_instance() -> &'static InitializeMasterKeyRequest {
-        static mut instance: ::protobuf::lazy::Lazy<InitializeMasterKeyRequest> = ::protobuf::lazy::Lazy {
+    fn default_instance() -> &'static InitializeEnclaveRequest {
+        static mut instance: ::protobuf::lazy::Lazy<InitializeEnclaveRequest> = ::protobuf::lazy::Lazy {
             lock: ::protobuf::lazy::ONCE_INIT,
-            ptr: 0 as *const InitializeMasterKeyRequest,
+            ptr: 0 as *const InitializeEnclaveRequest,
         };
         unsafe {
-            instance.get(InitializeMasterKeyRequest::new)
+            instance.get(InitializeEnclaveRequest::new)
         }
     }
 }
 
-impl ::protobuf::Clear for InitializeMasterKeyRequest {
+impl ::protobuf::Clear for InitializeEnclaveRequest {
     fn clear(&mut self) {
         self.shouldReset = false;
         self.unknown_fields.clear();
     }
 }
 
-impl ::std::fmt::Debug for InitializeMasterKeyRequest {
+impl ::std::fmt::Debug for InitializeEnclaveRequest {
     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
         ::protobuf::text_format::fmt(self, f)
     }
 }
 
-impl ::protobuf::reflect::ProtobufValue for InitializeMasterKeyRequest {
+impl ::protobuf::reflect::ProtobufValue for InitializeEnclaveRequest {
     fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
         ::protobuf::reflect::ProtobufValueRef::Message(self)
     }
 }
 
 #[derive(PartialEq,Clone,Default)]
-pub struct InitializeMasterKeyResponse {
+pub struct InitializeEnclaveResponse {
     // special fields
     pub unknown_fields: ::protobuf::UnknownFields,
     pub cached_size: ::protobuf::CachedSize,
 }
 
-impl<'a> ::std::default::Default for &'a InitializeMasterKeyResponse {
-    fn default() -> &'a InitializeMasterKeyResponse {
-        <InitializeMasterKeyResponse as ::protobuf::Message>::default_instance()
+impl<'a> ::std::default::Default for &'a InitializeEnclaveResponse {
+    fn default() -> &'a InitializeEnclaveResponse {
+        <InitializeEnclaveResponse as ::protobuf::Message>::default_instance()
     }
 }
 
-impl InitializeMasterKeyResponse {
-    pub fn new() -> InitializeMasterKeyResponse {
+impl InitializeEnclaveResponse {
+    pub fn new() -> InitializeEnclaveResponse {
         ::std::default::Default::default()
     }
 }
 
-impl ::protobuf::Message for InitializeMasterKeyResponse {
+impl ::protobuf::Message for InitializeEnclaveResponse {
     fn is_initialized(&self) -> bool {
         true
     }
@@ -264,8 +264,8 @@ impl ::protobuf::Message for InitializeMasterKeyResponse {
         Self::descriptor_static()
     }
 
-    fn new() -> InitializeMasterKeyResponse {
-        InitializeMasterKeyResponse::new()
+    fn new() -> InitializeEnclaveResponse {
+        InitializeEnclaveResponse::new()
     }
 
     fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
@@ -276,8 +276,8 @@ impl ::protobuf::Message for InitializeMasterKeyResponse {
         unsafe {
             descriptor.get(|| {
                 let fields = ::std::vec::Vec::new();
-                ::protobuf::reflect::MessageDescriptor::new::<InitializeMasterKeyResponse>(
-                    "InitializeMasterKeyResponse",
+                ::protobuf::reflect::MessageDescriptor::new::<InitializeEnclaveResponse>(
+                    "InitializeEnclaveResponse",
                     fields,
                     file_descriptor_proto()
                 )
@@ -285,30 +285,30 @@ impl ::protobuf::Message for InitializeMasterKeyResponse {
         }
     }
 
-    fn default_instance() -> &'static InitializeMasterKeyResponse {
-        static mut instance: ::protobuf::lazy::Lazy<InitializeMasterKeyResponse> = ::protobuf::lazy::Lazy {
+    fn default_instance() -> &'static InitializeEnclaveResponse {
+        static mut instance: ::protobuf::lazy::Lazy<InitializeEnclaveResponse> = ::protobuf::lazy::Lazy {
             lock: ::protobuf::lazy::ONCE_INIT,
-            ptr: 0 as *const InitializeMasterKeyResponse,
+            ptr: 0 as *const InitializeEnclaveResponse,
         };
         unsafe {
-            instance.get(InitializeMasterKeyResponse::new)
+            instance.get(InitializeEnclaveResponse::new)
         }
     }
 }
 
-impl ::protobuf::Clear for InitializeMasterKeyResponse {
+impl ::protobuf::Clear for InitializeEnclaveResponse {
     fn clear(&mut self) {
         self.unknown_fields.clear();
     }
 }
 
-impl ::std::fmt::Debug for InitializeMasterKeyResponse {
+impl ::std::fmt::Debug for InitializeEnclaveResponse {
     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
         ::protobuf::text_format::fmt(self, f)
     }
 }
 
-impl ::protobuf::reflect::ProtobufValue for InitializeMasterKeyResponse {
+impl ::protobuf::reflect::ProtobufValue for InitializeEnclaveResponse {
     fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
         ::protobuf::reflect::ProtobufValueRef::Message(self)
     }
@@ -632,6 +632,546 @@ impl ::std::fmt::Debug for PeerAttestationResponse {
 }
 
 impl ::protobuf::reflect::ProtobufValue for PeerAttestationResponse {
+    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
+        ::protobuf::reflect::ProtobufValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
+pub struct AddNewEpochRequest {
+    // message fields
+    pub startingBlock: u64,
+    // special fields
+    pub unknown_fields: ::protobuf::UnknownFields,
+    pub cached_size: ::protobuf::CachedSize,
+}
+
+impl<'a> ::std::default::Default for &'a AddNewEpochRequest {
+    fn default() -> &'a AddNewEpochRequest {
+        <AddNewEpochRequest as ::protobuf::Message>::default_instance()
+    }
+}
+
+impl AddNewEpochRequest {
+    pub fn new() -> AddNewEpochRequest {
+        ::std::default::Default::default()
+    }
+
+    // uint64 startingBlock = 1;
+
+
+    pub fn get_startingBlock(&self) -> u64 {
+        self.startingBlock
+    }
+    pub fn clear_startingBlock(&mut self) {
+        self.startingBlock = 0;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_startingBlock(&mut self, v: u64) {
+        self.startingBlock = v;
+    }
+}
+
+impl ::protobuf::Message for AddNewEpochRequest {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                1 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint64()?;
+                    self.startingBlock = tmp;
+                },
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        if self.startingBlock != 0 {
+            my_size += ::protobuf::rt::value_size(1, self.startingBlock, ::protobuf::wire_format::WireTypeVarint);
+        }
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        if self.startingBlock != 0 {
+            os.write_uint64(1, self.startingBlock)?;
+        }
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &dyn (::std::any::Any) {
+        self as &dyn (::std::any::Any)
+    }
+    fn as_any_mut(&mut self) -> &mut dyn (::std::any::Any) {
+        self as &mut dyn (::std::any::Any)
+    }
+    fn into_any(self: Box<Self>) -> ::std::boxed::Box<dyn (::std::any::Any)> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> AddNewEpochRequest {
+        AddNewEpochRequest::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
+        };
+        unsafe {
+            descriptor.get(|| {
+                let mut fields = ::std::vec::Vec::new();
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint64>(
+                    "startingBlock",
+                    |m: &AddNewEpochRequest| { &m.startingBlock },
+                    |m: &mut AddNewEpochRequest| { &mut m.startingBlock },
+                ));
+                ::protobuf::reflect::MessageDescriptor::new::<AddNewEpochRequest>(
+                    "AddNewEpochRequest",
+                    fields,
+                    file_descriptor_proto()
+                )
+            })
+        }
+    }
+
+    fn default_instance() -> &'static AddNewEpochRequest {
+        static mut instance: ::protobuf::lazy::Lazy<AddNewEpochRequest> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const AddNewEpochRequest,
+        };
+        unsafe {
+            instance.get(AddNewEpochRequest::new)
+        }
+    }
+}
+
+impl ::protobuf::Clear for AddNewEpochRequest {
+    fn clear(&mut self) {
+        self.startingBlock = 0;
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for AddNewEpochRequest {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for AddNewEpochRequest {
+    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
+        ::protobuf::reflect::ProtobufValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
+pub struct AddNewEpochResponse {
+    // special fields
+    pub unknown_fields: ::protobuf::UnknownFields,
+    pub cached_size: ::protobuf::CachedSize,
+}
+
+impl<'a> ::std::default::Default for &'a AddNewEpochResponse {
+    fn default() -> &'a AddNewEpochResponse {
+        <AddNewEpochResponse as ::protobuf::Message>::default_instance()
+    }
+}
+
+impl AddNewEpochResponse {
+    pub fn new() -> AddNewEpochResponse {
+        ::std::default::Default::default()
+    }
+}
+
+impl ::protobuf::Message for AddNewEpochResponse {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &dyn (::std::any::Any) {
+        self as &dyn (::std::any::Any)
+    }
+    fn as_any_mut(&mut self) -> &mut dyn (::std::any::Any) {
+        self as &mut dyn (::std::any::Any)
+    }
+    fn into_any(self: Box<Self>) -> ::std::boxed::Box<dyn (::std::any::Any)> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> AddNewEpochResponse {
+        AddNewEpochResponse::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
+        };
+        unsafe {
+            descriptor.get(|| {
+                let fields = ::std::vec::Vec::new();
+                ::protobuf::reflect::MessageDescriptor::new::<AddNewEpochResponse>(
+                    "AddNewEpochResponse",
+                    fields,
+                    file_descriptor_proto()
+                )
+            })
+        }
+    }
+
+    fn default_instance() -> &'static AddNewEpochResponse {
+        static mut instance: ::protobuf::lazy::Lazy<AddNewEpochResponse> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const AddNewEpochResponse,
+        };
+        unsafe {
+            instance.get(AddNewEpochResponse::new)
+        }
+    }
+}
+
+impl ::protobuf::Clear for AddNewEpochResponse {
+    fn clear(&mut self) {
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for AddNewEpochResponse {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for AddNewEpochResponse {
+    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
+        ::protobuf::reflect::ProtobufValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
+pub struct RemoveLatestEpochRequest {
+    // special fields
+    pub unknown_fields: ::protobuf::UnknownFields,
+    pub cached_size: ::protobuf::CachedSize,
+}
+
+impl<'a> ::std::default::Default for &'a RemoveLatestEpochRequest {
+    fn default() -> &'a RemoveLatestEpochRequest {
+        <RemoveLatestEpochRequest as ::protobuf::Message>::default_instance()
+    }
+}
+
+impl RemoveLatestEpochRequest {
+    pub fn new() -> RemoveLatestEpochRequest {
+        ::std::default::Default::default()
+    }
+}
+
+impl ::protobuf::Message for RemoveLatestEpochRequest {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &dyn (::std::any::Any) {
+        self as &dyn (::std::any::Any)
+    }
+    fn as_any_mut(&mut self) -> &mut dyn (::std::any::Any) {
+        self as &mut dyn (::std::any::Any)
+    }
+    fn into_any(self: Box<Self>) -> ::std::boxed::Box<dyn (::std::any::Any)> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> RemoveLatestEpochRequest {
+        RemoveLatestEpochRequest::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
+        };
+        unsafe {
+            descriptor.get(|| {
+                let fields = ::std::vec::Vec::new();
+                ::protobuf::reflect::MessageDescriptor::new::<RemoveLatestEpochRequest>(
+                    "RemoveLatestEpochRequest",
+                    fields,
+                    file_descriptor_proto()
+                )
+            })
+        }
+    }
+
+    fn default_instance() -> &'static RemoveLatestEpochRequest {
+        static mut instance: ::protobuf::lazy::Lazy<RemoveLatestEpochRequest> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const RemoveLatestEpochRequest,
+        };
+        unsafe {
+            instance.get(RemoveLatestEpochRequest::new)
+        }
+    }
+}
+
+impl ::protobuf::Clear for RemoveLatestEpochRequest {
+    fn clear(&mut self) {
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for RemoveLatestEpochRequest {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for RemoveLatestEpochRequest {
+    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
+        ::protobuf::reflect::ProtobufValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
+pub struct RemoveLatestEpochResponse {
+    // special fields
+    pub unknown_fields: ::protobuf::UnknownFields,
+    pub cached_size: ::protobuf::CachedSize,
+}
+
+impl<'a> ::std::default::Default for &'a RemoveLatestEpochResponse {
+    fn default() -> &'a RemoveLatestEpochResponse {
+        <RemoveLatestEpochResponse as ::protobuf::Message>::default_instance()
+    }
+}
+
+impl RemoveLatestEpochResponse {
+    pub fn new() -> RemoveLatestEpochResponse {
+        ::std::default::Default::default()
+    }
+}
+
+impl ::protobuf::Message for RemoveLatestEpochResponse {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &dyn (::std::any::Any) {
+        self as &dyn (::std::any::Any)
+    }
+    fn as_any_mut(&mut self) -> &mut dyn (::std::any::Any) {
+        self as &mut dyn (::std::any::Any)
+    }
+    fn into_any(self: Box<Self>) -> ::std::boxed::Box<dyn (::std::any::Any)> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> RemoveLatestEpochResponse {
+        RemoveLatestEpochResponse::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
+        };
+        unsafe {
+            descriptor.get(|| {
+                let fields = ::std::vec::Vec::new();
+                ::protobuf::reflect::MessageDescriptor::new::<RemoveLatestEpochResponse>(
+                    "RemoveLatestEpochResponse",
+                    fields,
+                    file_descriptor_proto()
+                )
+            })
+        }
+    }
+
+    fn default_instance() -> &'static RemoveLatestEpochResponse {
+        static mut instance: ::protobuf::lazy::Lazy<RemoveLatestEpochResponse> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const RemoveLatestEpochResponse,
+        };
+        unsafe {
+            instance.get(RemoveLatestEpochResponse::new)
+        }
+    }
+}
+
+impl ::protobuf::Clear for RemoveLatestEpochResponse {
+    fn clear(&mut self) {
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for RemoveLatestEpochResponse {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for RemoveLatestEpochResponse {
     fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
         ::protobuf::reflect::ProtobufValueRef::Message(self)
     }
@@ -2133,6 +2673,132 @@ impl ::protobuf::reflect::ProtobufValue for VerifyQuoteResponse {
 }
 
 #[derive(PartialEq,Clone,Default)]
+pub struct ListEpochsRequest {
+    // special fields
+    pub unknown_fields: ::protobuf::UnknownFields,
+    pub cached_size: ::protobuf::CachedSize,
+}
+
+impl<'a> ::std::default::Default for &'a ListEpochsRequest {
+    fn default() -> &'a ListEpochsRequest {
+        <ListEpochsRequest as ::protobuf::Message>::default_instance()
+    }
+}
+
+impl ListEpochsRequest {
+    pub fn new() -> ListEpochsRequest {
+        ::std::default::Default::default()
+    }
+}
+
+impl ::protobuf::Message for ListEpochsRequest {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &dyn (::std::any::Any) {
+        self as &dyn (::std::any::Any)
+    }
+    fn as_any_mut(&mut self) -> &mut dyn (::std::any::Any) {
+        self as &mut dyn (::std::any::Any)
+    }
+    fn into_any(self: Box<Self>) -> ::std::boxed::Box<dyn (::std::any::Any)> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> ListEpochsRequest {
+        ListEpochsRequest::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
+        };
+        unsafe {
+            descriptor.get(|| {
+                let fields = ::std::vec::Vec::new();
+                ::protobuf::reflect::MessageDescriptor::new::<ListEpochsRequest>(
+                    "ListEpochsRequest",
+                    fields,
+                    file_descriptor_proto()
+                )
+            })
+        }
+    }
+
+    fn default_instance() -> &'static ListEpochsRequest {
+        static mut instance: ::protobuf::lazy::Lazy<ListEpochsRequest> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ListEpochsRequest,
+        };
+        unsafe {
+            instance.get(ListEpochsRequest::new)
+        }
+    }
+}
+
+impl ::protobuf::Clear for ListEpochsRequest {
+    fn clear(&mut self) {
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for ListEpochsRequest {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for ListEpochsRequest {
+    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
+        ::protobuf::reflect::ProtobufValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
 pub struct SetupRequest {
     // message oneof groups
     pub req: ::std::option::Option<SetupRequest_oneof_req>,
@@ -2149,13 +2815,16 @@ impl<'a> ::std::default::Default for &'a SetupRequest {
 
 #[derive(Clone,PartialEq,Debug)]
 pub enum SetupRequest_oneof_req {
-    initializeMasterKey(InitializeMasterKeyRequest),
+    initializeEnclave(InitializeEnclaveRequest),
     peerAttestationRequest(PeerAttestationRequest),
     remoteAttestationRequest(RemoteAttestationRequest),
     isInitialized(IsInitializedRequest),
     nodeStatus(NodeStatusRequest),
     dumpQuote(DumpQuoteRequest),
     verifyQuote(VerifyQuoteRequest),
+    addEpoch(AddNewEpochRequest),
+    listEpochs(ListEpochsRequest),
+    removeEpoch(RemoveLatestEpochRequest),
 }
 
 impl SetupRequest {
@@ -2163,52 +2832,52 @@ impl SetupRequest {
         ::std::default::Default::default()
     }
 
-    // .node.node.InitializeMasterKeyRequest initializeMasterKey = 1;
+    // .node.node.InitializeEnclaveRequest initializeEnclave = 1;
 
 
-    pub fn get_initializeMasterKey(&self) -> &InitializeMasterKeyRequest {
+    pub fn get_initializeEnclave(&self) -> &InitializeEnclaveRequest {
         match self.req {
-            ::std::option::Option::Some(SetupRequest_oneof_req::initializeMasterKey(ref v)) => v,
-            _ => InitializeMasterKeyRequest::default_instance(),
+            ::std::option::Option::Some(SetupRequest_oneof_req::initializeEnclave(ref v)) => v,
+            _ => InitializeEnclaveRequest::default_instance(),
         }
     }
-    pub fn clear_initializeMasterKey(&mut self) {
+    pub fn clear_initializeEnclave(&mut self) {
         self.req = ::std::option::Option::None;
     }
 
-    pub fn has_initializeMasterKey(&self) -> bool {
+    pub fn has_initializeEnclave(&self) -> bool {
         match self.req {
-            ::std::option::Option::Some(SetupRequest_oneof_req::initializeMasterKey(..)) => true,
+            ::std::option::Option::Some(SetupRequest_oneof_req::initializeEnclave(..)) => true,
             _ => false,
         }
     }
 
     // Param is passed by value, moved
-    pub fn set_initializeMasterKey(&mut self, v: InitializeMasterKeyRequest) {
-        self.req = ::std::option::Option::Some(SetupRequest_oneof_req::initializeMasterKey(v))
+    pub fn set_initializeEnclave(&mut self, v: InitializeEnclaveRequest) {
+        self.req = ::std::option::Option::Some(SetupRequest_oneof_req::initializeEnclave(v))
     }
 
     // Mutable pointer to the field.
-    pub fn mut_initializeMasterKey(&mut self) -> &mut InitializeMasterKeyRequest {
-        if let ::std::option::Option::Some(SetupRequest_oneof_req::initializeMasterKey(_)) = self.req {
+    pub fn mut_initializeEnclave(&mut self) -> &mut InitializeEnclaveRequest {
+        if let ::std::option::Option::Some(SetupRequest_oneof_req::initializeEnclave(_)) = self.req {
         } else {
-            self.req = ::std::option::Option::Some(SetupRequest_oneof_req::initializeMasterKey(InitializeMasterKeyRequest::new()));
+            self.req = ::std::option::Option::Some(SetupRequest_oneof_req::initializeEnclave(InitializeEnclaveRequest::new()));
         }
         match self.req {
-            ::std::option::Option::Some(SetupRequest_oneof_req::initializeMasterKey(ref mut v)) => v,
+            ::std::option::Option::Some(SetupRequest_oneof_req::initializeEnclave(ref mut v)) => v,
             _ => panic!(),
         }
     }
 
     // Take field
-    pub fn take_initializeMasterKey(&mut self) -> InitializeMasterKeyRequest {
-        if self.has_initializeMasterKey() {
+    pub fn take_initializeEnclave(&mut self) -> InitializeEnclaveRequest {
+        if self.has_initializeEnclave() {
             match self.req.take() {
-                ::std::option::Option::Some(SetupRequest_oneof_req::initializeMasterKey(v)) => v,
+                ::std::option::Option::Some(SetupRequest_oneof_req::initializeEnclave(v)) => v,
                 _ => panic!(),
             }
         } else {
-            InitializeMasterKeyRequest::new()
+            InitializeEnclaveRequest::new()
         }
     }
 
@@ -2505,11 +3174,158 @@ impl SetupRequest {
             VerifyQuoteRequest::new()
         }
     }
+
+    // .node.node.AddNewEpochRequest addEpoch = 8;
+
+
+    pub fn get_addEpoch(&self) -> &AddNewEpochRequest {
+        match self.req {
+            ::std::option::Option::Some(SetupRequest_oneof_req::addEpoch(ref v)) => v,
+            _ => AddNewEpochRequest::default_instance(),
+        }
+    }
+    pub fn clear_addEpoch(&mut self) {
+        self.req = ::std::option::Option::None;
+    }
+
+    pub fn has_addEpoch(&self) -> bool {
+        match self.req {
+            ::std::option::Option::Some(SetupRequest_oneof_req::addEpoch(..)) => true,
+            _ => false,
+        }
+    }
+
+    // Param is passed by value, moved
+    pub fn set_addEpoch(&mut self, v: AddNewEpochRequest) {
+        self.req = ::std::option::Option::Some(SetupRequest_oneof_req::addEpoch(v))
+    }
+
+    // Mutable pointer to the field.
+    pub fn mut_addEpoch(&mut self) -> &mut AddNewEpochRequest {
+        if let ::std::option::Option::Some(SetupRequest_oneof_req::addEpoch(_)) = self.req {
+        } else {
+            self.req = ::std::option::Option::Some(SetupRequest_oneof_req::addEpoch(AddNewEpochRequest::new()));
+        }
+        match self.req {
+            ::std::option::Option::Some(SetupRequest_oneof_req::addEpoch(ref mut v)) => v,
+            _ => panic!(),
+        }
+    }
+
+    // Take field
+    pub fn take_addEpoch(&mut self) -> AddNewEpochRequest {
+        if self.has_addEpoch() {
+            match self.req.take() {
+                ::std::option::Option::Some(SetupRequest_oneof_req::addEpoch(v)) => v,
+                _ => panic!(),
+            }
+        } else {
+            AddNewEpochRequest::new()
+        }
+    }
+
+    // .node.node.ListEpochsRequest listEpochs = 9;
+
+
+    pub fn get_listEpochs(&self) -> &ListEpochsRequest {
+        match self.req {
+            ::std::option::Option::Some(SetupRequest_oneof_req::listEpochs(ref v)) => v,
+            _ => ListEpochsRequest::default_instance(),
+        }
+    }
+    pub fn clear_listEpochs(&mut self) {
+        self.req = ::std::option::Option::None;
+    }
+
+    pub fn has_listEpochs(&self) -> bool {
+        match self.req {
+            ::std::option::Option::Some(SetupRequest_oneof_req::listEpochs(..)) => true,
+            _ => false,
+        }
+    }
+
+    // Param is passed by value, moved
+    pub fn set_listEpochs(&mut self, v: ListEpochsRequest) {
+        self.req = ::std::option::Option::Some(SetupRequest_oneof_req::listEpochs(v))
+    }
+
+    // Mutable pointer to the field.
+    pub fn mut_listEpochs(&mut self) -> &mut ListEpochsRequest {
+        if let ::std::option::Option::Some(SetupRequest_oneof_req::listEpochs(_)) = self.req {
+        } else {
+            self.req = ::std::option::Option::Some(SetupRequest_oneof_req::listEpochs(ListEpochsRequest::new()));
+        }
+        match self.req {
+            ::std::option::Option::Some(SetupRequest_oneof_req::listEpochs(ref mut v)) => v,
+            _ => panic!(),
+        }
+    }
+
+    // Take field
+    pub fn take_listEpochs(&mut self) -> ListEpochsRequest {
+        if self.has_listEpochs() {
+            match self.req.take() {
+                ::std::option::Option::Some(SetupRequest_oneof_req::listEpochs(v)) => v,
+                _ => panic!(),
+            }
+        } else {
+            ListEpochsRequest::new()
+        }
+    }
+
+    // .node.node.RemoveLatestEpochRequest removeEpoch = 10;
+
+
+    pub fn get_removeEpoch(&self) -> &RemoveLatestEpochRequest {
+        match self.req {
+            ::std::option::Option::Some(SetupRequest_oneof_req::removeEpoch(ref v)) => v,
+            _ => RemoveLatestEpochRequest::default_instance(),
+        }
+    }
+    pub fn clear_removeEpoch(&mut self) {
+        self.req = ::std::option::Option::None;
+    }
+
+    pub fn has_removeEpoch(&self) -> bool {
+        match self.req {
+            ::std::option::Option::Some(SetupRequest_oneof_req::removeEpoch(..)) => true,
+            _ => false,
+        }
+    }
+
+    // Param is passed by value, moved
+    pub fn set_removeEpoch(&mut self, v: RemoveLatestEpochRequest) {
+        self.req = ::std::option::Option::Some(SetupRequest_oneof_req::removeEpoch(v))
+    }
+
+    // Mutable pointer to the field.
+    pub fn mut_removeEpoch(&mut self) -> &mut RemoveLatestEpochRequest {
+        if let ::std::option::Option::Some(SetupRequest_oneof_req::removeEpoch(_)) = self.req {
+        } else {
+            self.req = ::std::option::Option::Some(SetupRequest_oneof_req::removeEpoch(RemoveLatestEpochRequest::new()));
+        }
+        match self.req {
+            ::std::option::Option::Some(SetupRequest_oneof_req::removeEpoch(ref mut v)) => v,
+            _ => panic!(),
+        }
+    }
+
+    // Take field
+    pub fn take_removeEpoch(&mut self) -> RemoveLatestEpochRequest {
+        if self.has_removeEpoch() {
+            match self.req.take() {
+                ::std::option::Option::Some(SetupRequest_oneof_req::removeEpoch(v)) => v,
+                _ => panic!(),
+            }
+        } else {
+            RemoveLatestEpochRequest::new()
+        }
+    }
 }
 
 impl ::protobuf::Message for SetupRequest {
     fn is_initialized(&self) -> bool {
-        if let Some(SetupRequest_oneof_req::initializeMasterKey(ref v)) = self.req {
+        if let Some(SetupRequest_oneof_req::initializeEnclave(ref v)) = self.req {
             if !v.is_initialized() {
                 return false;
             }
@@ -2544,6 +3360,21 @@ impl ::protobuf::Message for SetupRequest {
                 return false;
             }
         }
+        if let Some(SetupRequest_oneof_req::addEpoch(ref v)) = self.req {
+            if !v.is_initialized() {
+                return false;
+            }
+        }
+        if let Some(SetupRequest_oneof_req::listEpochs(ref v)) = self.req {
+            if !v.is_initialized() {
+                return false;
+            }
+        }
+        if let Some(SetupRequest_oneof_req::removeEpoch(ref v)) = self.req {
+            if !v.is_initialized() {
+                return false;
+            }
+        }
         true
     }
 
@@ -2555,7 +3386,7 @@ impl ::protobuf::Message for SetupRequest {
                     if wire_type != ::protobuf::wire_format::WireTypeLengthDelimited {
                         return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
                     }
-                    self.req = ::std::option::Option::Some(SetupRequest_oneof_req::initializeMasterKey(is.read_message()?));
+                    self.req = ::std::option::Option::Some(SetupRequest_oneof_req::initializeEnclave(is.read_message()?));
                 },
                 2 => {
                     if wire_type != ::protobuf::wire_format::WireTypeLengthDelimited {
@@ -2593,6 +3424,24 @@ impl ::protobuf::Message for SetupRequest {
                     }
                     self.req = ::std::option::Option::Some(SetupRequest_oneof_req::verifyQuote(is.read_message()?));
                 },
+                8 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeLengthDelimited {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    self.req = ::std::option::Option::Some(SetupRequest_oneof_req::addEpoch(is.read_message()?));
+                },
+                9 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeLengthDelimited {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    self.req = ::std::option::Option::Some(SetupRequest_oneof_req::listEpochs(is.read_message()?));
+                },
+                10 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeLengthDelimited {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    self.req = ::std::option::Option::Some(SetupRequest_oneof_req::removeEpoch(is.read_message()?));
+                },
                 _ => {
                     ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
                 },
@@ -2607,7 +3456,7 @@ impl ::protobuf::Message for SetupRequest {
         let mut my_size = 0;
         if let ::std::option::Option::Some(ref v) = self.req {
             match v {
-                &SetupRequest_oneof_req::initializeMasterKey(ref v) => {
+                &SetupRequest_oneof_req::initializeEnclave(ref v) => {
                     let len = v.compute_size();
                     my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
                 },
@@ -2635,6 +3484,18 @@ impl ::protobuf::Message for SetupRequest {
                     let len = v.compute_size();
                     my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
                 },
+                &SetupRequest_oneof_req::addEpoch(ref v) => {
+                    let len = v.compute_size();
+                    my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
+                },
+                &SetupRequest_oneof_req::listEpochs(ref v) => {
+                    let len = v.compute_size();
+                    my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
+                },
+                &SetupRequest_oneof_req::removeEpoch(ref v) => {
+                    let len = v.compute_size();
+                    my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
+                },
             };
         }
         my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
@@ -2645,7 +3506,7 @@ impl ::protobuf::Message for SetupRequest {
     fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
         if let ::std::option::Option::Some(ref v) = self.req {
             match v {
-                &SetupRequest_oneof_req::initializeMasterKey(ref v) => {
+                &SetupRequest_oneof_req::initializeEnclave(ref v) => {
                     os.write_tag(1, ::protobuf::wire_format::WireTypeLengthDelimited)?;
                     os.write_raw_varint32(v.get_cached_size())?;
                     v.write_to_with_cached_sizes(os)?;
@@ -2677,6 +3538,21 @@ impl ::protobuf::Message for SetupRequest {
                 },
                 &SetupRequest_oneof_req::verifyQuote(ref v) => {
                     os.write_tag(7, ::protobuf::wire_format::WireTypeLengthDelimited)?;
+                    os.write_raw_varint32(v.get_cached_size())?;
+                    v.write_to_with_cached_sizes(os)?;
+                },
+                &SetupRequest_oneof_req::addEpoch(ref v) => {
+                    os.write_tag(8, ::protobuf::wire_format::WireTypeLengthDelimited)?;
+                    os.write_raw_varint32(v.get_cached_size())?;
+                    v.write_to_with_cached_sizes(os)?;
+                },
+                &SetupRequest_oneof_req::listEpochs(ref v) => {
+                    os.write_tag(9, ::protobuf::wire_format::WireTypeLengthDelimited)?;
+                    os.write_raw_varint32(v.get_cached_size())?;
+                    v.write_to_with_cached_sizes(os)?;
+                },
+                &SetupRequest_oneof_req::removeEpoch(ref v) => {
+                    os.write_tag(10, ::protobuf::wire_format::WireTypeLengthDelimited)?;
                     os.write_raw_varint32(v.get_cached_size())?;
                     v.write_to_with_cached_sizes(os)?;
                 },
@@ -2724,10 +3600,10 @@ impl ::protobuf::Message for SetupRequest {
         unsafe {
             descriptor.get(|| {
                 let mut fields = ::std::vec::Vec::new();
-                fields.push(::protobuf::reflect::accessor::make_singular_message_accessor::<_, InitializeMasterKeyRequest>(
-                    "initializeMasterKey",
-                    SetupRequest::has_initializeMasterKey,
-                    SetupRequest::get_initializeMasterKey,
+                fields.push(::protobuf::reflect::accessor::make_singular_message_accessor::<_, InitializeEnclaveRequest>(
+                    "initializeEnclave",
+                    SetupRequest::has_initializeEnclave,
+                    SetupRequest::get_initializeEnclave,
                 ));
                 fields.push(::protobuf::reflect::accessor::make_singular_message_accessor::<_, PeerAttestationRequest>(
                     "peerAttestationRequest",
@@ -2759,6 +3635,21 @@ impl ::protobuf::Message for SetupRequest {
                     SetupRequest::has_verifyQuote,
                     SetupRequest::get_verifyQuote,
                 ));
+                fields.push(::protobuf::reflect::accessor::make_singular_message_accessor::<_, AddNewEpochRequest>(
+                    "addEpoch",
+                    SetupRequest::has_addEpoch,
+                    SetupRequest::get_addEpoch,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_singular_message_accessor::<_, ListEpochsRequest>(
+                    "listEpochs",
+                    SetupRequest::has_listEpochs,
+                    SetupRequest::get_listEpochs,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_singular_message_accessor::<_, RemoveLatestEpochRequest>(
+                    "removeEpoch",
+                    SetupRequest::has_removeEpoch,
+                    SetupRequest::get_removeEpoch,
+                ));
                 ::protobuf::reflect::MessageDescriptor::new::<SetupRequest>(
                     "SetupRequest",
                     fields,
@@ -2788,6 +3679,9 @@ impl ::protobuf::Clear for SetupRequest {
         self.req = ::std::option::Option::None;
         self.req = ::std::option::Option::None;
         self.req = ::std::option::Option::None;
+        self.req = ::std::option::Option::None;
+        self.req = ::std::option::Option::None;
+        self.req = ::std::option::Option::None;
         self.unknown_fields.clear();
     }
 }
@@ -2805,94 +3699,115 @@ impl ::protobuf::reflect::ProtobufValue for SetupRequest {
 }
 
 static file_descriptor_proto_data: &'static [u8] = b"\
-    \n\x10proto/node.proto\x12\tnode.node\">\n\x1aInitializeMasterKeyRequest\
-    \x12\x20\n\x0bshouldReset\x18\x01\x20\x01(\x08R\x0bshouldReset\"\x1d\n\
-    \x1bInitializeMasterKeyResponse\"@\n\x16PeerAttestationRequest\x12\x0e\n\
+    \n\x10proto/node.proto\x12\tnode.node\"<\n\x18InitializeEnclaveRequest\
+    \x12\x20\n\x0bshouldReset\x18\x01\x20\x01(\x08R\x0bshouldReset\"\x1b\n\
+    \x19InitializeEnclaveResponse\"@\n\x16PeerAttestationRequest\x12\x0e\n\
     \x02fd\x18\x01\x20\x01(\x05R\x02fd\x12\x16\n\x06isDCAP\x18\x02\x20\x01(\
-    \x08R\x06isDCAP\"\x19\n\x17PeerAttestationResponse\"^\n\x18RemoteAttesta\
-    tionRequest\x12\x0e\n\x02fd\x18\x01\x20\x01(\x05R\x02fd\x12\x1a\n\x08hos\
-    tname\x18\x02\x20\x01(\tR\x08hostname\x12\x16\n\x06isDCAP\x18\x03\x20\
-    \x01(\x08R\x06isDCAP\"\x1b\n\x19RemoteAttestationResponse\"\x16\n\x14IsI\
-    nitializedRequest\"=\n\x15IsInitializedResponse\x12$\n\risInitialized\
-    \x18\x01\x20\x01(\x08R\risInitialized\"\x13\n\x11NodeStatusRequest\"\x14\
-    \n\x12NodeStatusResponse\".\n\x10DumpQuoteRequest\x12\x1a\n\x08filepath\
-    \x18\x01\x20\x01(\tR\x08filepath\"\x13\n\x11DumpQuoteResponse\"0\n\x12Ve\
-    rifyQuoteRequest\x12\x1a\n\x08filepath\x18\x01\x20\x01(\tR\x08filepath\"\
-    \x15\n\x13VerifyQuoteResponse\"\xb9\x04\n\x0cSetupRequest\x12Y\n\x13init\
-    ializeMasterKey\x18\x01\x20\x01(\x0b2%.node.node.InitializeMasterKeyRequ\
-    estH\0R\x13initializeMasterKey\x12[\n\x16peerAttestationRequest\x18\x02\
-    \x20\x01(\x0b2!.node.node.PeerAttestationRequestH\0R\x16peerAttestationR\
-    equest\x12a\n\x18remoteAttestationRequest\x18\x03\x20\x01(\x0b2#.node.no\
-    de.RemoteAttestationRequestH\0R\x18remoteAttestationRequest\x12G\n\risIn\
-    itialized\x18\x04\x20\x01(\x0b2\x1f.node.node.IsInitializedRequestH\0R\r\
-    isInitialized\x12>\n\nnodeStatus\x18\x05\x20\x01(\x0b2\x1c.node.node.Nod\
-    eStatusRequestH\0R\nnodeStatus\x12;\n\tdumpQuote\x18\x06\x20\x01(\x0b2\
-    \x1b.node.node.DumpQuoteRequestH\0R\tdumpQuote\x12A\n\x0bverifyQuote\x18\
-    \x07\x20\x01(\x0b2\x1d.node.node.VerifyQuoteRequestH\0R\x0bverifyQuoteB\
-    \x05\n\x03reqB&Z$github.com/SigmaGmbH/librustgo/typesJ\xd8\n\n\x06\x12\
-    \x04\0\02\x01\n\x08\n\x01\x0c\x12\x03\0\0\x12\n\x08\n\x01\x02\x12\x03\
-    \x02\0\x12\n\x08\n\x01\x08\x12\x03\x04\0;\n\t\n\x02\x08\x0b\x12\x03\x04\
-    \0;\n\t\n\x02\x04\0\x12\x03\x06\0<\n\n\n\x03\x04\0\x01\x12\x03\x06\x08\"\
-    \n\x0b\n\x04\x04\0\x02\0\x12\x03\x06%:\n\x0c\n\x05\x04\0\x02\0\x05\x12\
-    \x03\x06%)\n\x0c\n\x05\x04\0\x02\0\x01\x12\x03\x06*5\n\x0c\n\x05\x04\0\
-    \x02\0\x03\x12\x03\x0689\n\t\n\x02\x04\x01\x12\x03\x07\0&\n\n\n\x03\x04\
-    \x01\x01\x12\x03\x07\x08#\n)\n\x02\x04\x02\x12\x04\n\0\r\x01\x1a\x1d\x20\
-    Attestation\x20server\x20messages\n\n\n\n\x03\x04\x02\x01\x12\x03\n\x08\
-    \x1e\n\x0b\n\x04\x04\x02\x02\0\x12\x03\x0b\x02\x0f\n\x0c\n\x05\x04\x02\
-    \x02\0\x05\x12\x03\x0b\x02\x07\n\x0c\n\x05\x04\x02\x02\0\x01\x12\x03\x0b\
-    \x08\n\n\x0c\n\x05\x04\x02\x02\0\x03\x12\x03\x0b\r\x0e\n\x0b\n\x04\x04\
-    \x02\x02\x01\x12\x03\x0c\x02\x12\n\x0c\n\x05\x04\x02\x02\x01\x05\x12\x03\
-    \x0c\x02\x06\n\x0c\n\x05\x04\x02\x02\x01\x01\x12\x03\x0c\x07\r\n\x0c\n\
-    \x05\x04\x02\x02\x01\x03\x12\x03\x0c\x10\x11\n\t\n\x02\x04\x03\x12\x03\
-    \x0e\0\"\n\n\n\x03\x04\x03\x01\x12\x03\x0e\x08\x1f\n(\n\x02\x04\x04\x12\
-    \x04\x11\0\x15\x01\x1a\x1c\x20Remote\x20Attestation\x20Request\n\n\n\n\
-    \x03\x04\x04\x01\x12\x03\x11\x08\x20\n\x0b\n\x04\x04\x04\x02\0\x12\x03\
-    \x12\x02\x0f\n\x0c\n\x05\x04\x04\x02\0\x05\x12\x03\x12\x02\x07\n\x0c\n\
-    \x05\x04\x04\x02\0\x01\x12\x03\x12\x08\n\n\x0c\n\x05\x04\x04\x02\0\x03\
-    \x12\x03\x12\r\x0e\n\x0b\n\x04\x04\x04\x02\x01\x12\x03\x13\x02\x16\n\x0c\
-    \n\x05\x04\x04\x02\x01\x05\x12\x03\x13\x02\x08\n\x0c\n\x05\x04\x04\x02\
-    \x01\x01\x12\x03\x13\t\x11\n\x0c\n\x05\x04\x04\x02\x01\x03\x12\x03\x13\
-    \x14\x15\n\x0b\n\x04\x04\x04\x02\x02\x12\x03\x14\x02\x12\n\x0c\n\x05\x04\
-    \x04\x02\x02\x05\x12\x03\x14\x02\x06\n\x0c\n\x05\x04\x04\x02\x02\x01\x12\
-    \x03\x14\x07\r\n\x0c\n\x05\x04\x04\x02\x02\x03\x12\x03\x14\x10\x11\n\t\n\
-    \x02\x04\x05\x12\x03\x16\0$\n\n\n\x03\x04\x05\x01\x12\x03\x16\x08!\n\t\n\
-    \x02\x04\x06\x12\x03\x18\0\x1f\n\n\n\x03\x04\x06\x01\x12\x03\x18\x08\x1c\
-    \n\t\n\x02\x04\x07\x12\x03\x19\09\n\n\n\x03\x04\x07\x01\x12\x03\x19\x08\
-    \x1d\n\x0b\n\x04\x04\x07\x02\0\x12\x03\x19\x207\n\x0c\n\x05\x04\x07\x02\
-    \0\x05\x12\x03\x19\x20$\n\x0c\n\x05\x04\x07\x02\0\x01\x12\x03\x19%2\n\
-    \x0c\n\x05\x04\x07\x02\0\x03\x12\x03\x1956\n\t\n\x02\x04\x08\x12\x03\x1b\
-    \0\x1c\n\n\n\x03\x04\x08\x01\x12\x03\x1b\x08\x19\n\t\n\x02\x04\t\x12\x03\
-    \x1c\0\x1d\n\n\n\x03\x04\t\x01\x12\x03\x1c\x08\x1a\n\n\n\x02\x04\n\x12\
-    \x04\x1e\0\x20\x01\n\n\n\x03\x04\n\x01\x12\x03\x1e\x08\x18\n\x0b\n\x04\
-    \x04\n\x02\0\x12\x03\x1f\x02\x16\n\x0c\n\x05\x04\n\x02\0\x05\x12\x03\x1f\
-    \x02\x08\n\x0c\n\x05\x04\n\x02\0\x01\x12\x03\x1f\t\x11\n\x0c\n\x05\x04\n\
-    \x02\0\x03\x12\x03\x1f\x14\x15\n\t\n\x02\x04\x0b\x12\x03!\0\x1c\n\n\n\
-    \x03\x04\x0b\x01\x12\x03!\x08\x19\n\n\n\x02\x04\x0c\x12\x04#\0%\x01\n\n\
-    \n\x03\x04\x0c\x01\x12\x03#\x08\x1a\n\x0b\n\x04\x04\x0c\x02\0\x12\x03$\
-    \x02\x16\n\x0c\n\x05\x04\x0c\x02\0\x05\x12\x03$\x02\x08\n\x0c\n\x05\x04\
-    \x0c\x02\0\x01\x12\x03$\t\x11\n\x0c\n\x05\x04\x0c\x02\0\x03\x12\x03$\x14\
-    \x15\n\t\n\x02\x04\r\x12\x03&\0\x1e\n\n\n\x03\x04\r\x01\x12\x03&\x08\x1b\
-    \n\n\n\x02\x04\x0e\x12\x04(\02\x01\n\n\n\x03\x04\x0e\x01\x12\x03(\x08\
-    \x14\n\x0c\n\x04\x04\x0e\x08\0\x12\x04)\x021\x03\n\x0c\n\x05\x04\x0e\x08\
-    \0\x01\x12\x03)\x08\x0b\n\x0b\n\x04\x04\x0e\x02\0\x12\x03*\x047\n\x0c\n\
-    \x05\x04\x0e\x02\0\x06\x12\x03*\x04\x1e\n\x0c\n\x05\x04\x0e\x02\0\x01\
-    \x12\x03*\x1f2\n\x0c\n\x05\x04\x0e\x02\0\x03\x12\x03*56\n\x0b\n\x04\x04\
-    \x0e\x02\x01\x12\x03+\x046\n\x0c\n\x05\x04\x0e\x02\x01\x06\x12\x03+\x04\
-    \x1a\n\x0c\n\x05\x04\x0e\x02\x01\x01\x12\x03+\x1b1\n\x0c\n\x05\x04\x0e\
-    \x02\x01\x03\x12\x03+45\n\x0b\n\x04\x04\x0e\x02\x02\x12\x03,\x04:\n\x0c\
-    \n\x05\x04\x0e\x02\x02\x06\x12\x03,\x04\x1c\n\x0c\n\x05\x04\x0e\x02\x02\
-    \x01\x12\x03,\x1d5\n\x0c\n\x05\x04\x0e\x02\x02\x03\x12\x03,89\n\x0b\n\
-    \x04\x04\x0e\x02\x03\x12\x03-\x04+\n\x0c\n\x05\x04\x0e\x02\x03\x06\x12\
-    \x03-\x04\x18\n\x0c\n\x05\x04\x0e\x02\x03\x01\x12\x03-\x19&\n\x0c\n\x05\
-    \x04\x0e\x02\x03\x03\x12\x03-)*\n\x0b\n\x04\x04\x0e\x02\x04\x12\x03.\x04\
-    %\n\x0c\n\x05\x04\x0e\x02\x04\x06\x12\x03.\x04\x15\n\x0c\n\x05\x04\x0e\
-    \x02\x04\x01\x12\x03.\x16\x20\n\x0c\n\x05\x04\x0e\x02\x04\x03\x12\x03.#$\
-    \n\x0b\n\x04\x04\x0e\x02\x05\x12\x03/\x04#\n\x0c\n\x05\x04\x0e\x02\x05\
-    \x06\x12\x03/\x04\x14\n\x0c\n\x05\x04\x0e\x02\x05\x01\x12\x03/\x15\x1e\n\
-    \x0c\n\x05\x04\x0e\x02\x05\x03\x12\x03/!\"\n\x0b\n\x04\x04\x0e\x02\x06\
-    \x12\x030\x04'\n\x0c\n\x05\x04\x0e\x02\x06\x06\x12\x030\x04\x16\n\x0c\n\
-    \x05\x04\x0e\x02\x06\x01\x12\x030\x17\"\n\x0c\n\x05\x04\x0e\x02\x06\x03\
-    \x12\x030%&b\x06proto3\
+    \x08R\x06isDCAP\"\x19\n\x17PeerAttestationResponse\":\n\x12AddNewEpochRe\
+    quest\x12$\n\rstartingBlock\x18\x01\x20\x01(\x04R\rstartingBlock\"\x15\n\
+    \x13AddNewEpochResponse\"\x1a\n\x18RemoveLatestEpochRequest\"\x1b\n\x19R\
+    emoveLatestEpochResponse\"^\n\x18RemoteAttestationRequest\x12\x0e\n\x02f\
+    d\x18\x01\x20\x01(\x05R\x02fd\x12\x1a\n\x08hostname\x18\x02\x20\x01(\tR\
+    \x08hostname\x12\x16\n\x06isDCAP\x18\x03\x20\x01(\x08R\x06isDCAP\"\x1b\n\
+    \x19RemoteAttestationResponse\"\x16\n\x14IsInitializedRequest\"=\n\x15Is\
+    InitializedResponse\x12$\n\risInitialized\x18\x01\x20\x01(\x08R\risIniti\
+    alized\"\x13\n\x11NodeStatusRequest\"\x14\n\x12NodeStatusResponse\".\n\
+    \x10DumpQuoteRequest\x12\x1a\n\x08filepath\x18\x01\x20\x01(\tR\x08filepa\
+    th\"\x13\n\x11DumpQuoteResponse\"0\n\x12VerifyQuoteRequest\x12\x1a\n\x08\
+    filepath\x18\x01\x20\x01(\tR\x08filepath\"\x15\n\x13VerifyQuoteResponse\
+    \"\x13\n\x11ListEpochsRequest\"\xf9\x05\n\x0cSetupRequest\x12S\n\x11init\
+    ializeEnclave\x18\x01\x20\x01(\x0b2#.node.node.InitializeEnclaveRequestH\
+    \0R\x11initializeEnclave\x12[\n\x16peerAttestationRequest\x18\x02\x20\
+    \x01(\x0b2!.node.node.PeerAttestationRequestH\0R\x16peerAttestationReque\
+    st\x12a\n\x18remoteAttestationRequest\x18\x03\x20\x01(\x0b2#.node.node.R\
+    emoteAttestationRequestH\0R\x18remoteAttestationRequest\x12G\n\risInitia\
+    lized\x18\x04\x20\x01(\x0b2\x1f.node.node.IsInitializedRequestH\0R\risIn\
+    itialized\x12>\n\nnodeStatus\x18\x05\x20\x01(\x0b2\x1c.node.node.NodeSta\
+    tusRequestH\0R\nnodeStatus\x12;\n\tdumpQuote\x18\x06\x20\x01(\x0b2\x1b.n\
+    ode.node.DumpQuoteRequestH\0R\tdumpQuote\x12A\n\x0bverifyQuote\x18\x07\
+    \x20\x01(\x0b2\x1d.node.node.VerifyQuoteRequestH\0R\x0bverifyQuote\x12;\
+    \n\x08addEpoch\x18\x08\x20\x01(\x0b2\x1d.node.node.AddNewEpochRequestH\0\
+    R\x08addEpoch\x12>\n\nlistEpochs\x18\t\x20\x01(\x0b2\x1c.node.node.ListE\
+    pochsRequestH\0R\nlistEpochs\x12G\n\x0bremoveEpoch\x18\n\x20\x01(\x0b2#.\
+    node.node.RemoveLatestEpochRequestH\0R\x0bremoveEpochB\x05\n\x03reqB&Z$g\
+    ithub.com/SigmaGmbH/librustgo/typesJ\xa8\r\n\x06\x12\x04\0\0?\x01\n\x08\
+    \n\x01\x0c\x12\x03\0\0\x12\n\x08\n\x01\x02\x12\x03\x02\0\x12\n\x08\n\x01\
+    \x08\x12\x03\x04\0;\n\t\n\x02\x08\x0b\x12\x03\x04\0;\n\t\n\x02\x04\0\x12\
+    \x03\x06\0:\n\n\n\x03\x04\0\x01\x12\x03\x06\x08\x20\n\x0b\n\x04\x04\0\
+    \x02\0\x12\x03\x06#8\n\x0c\n\x05\x04\0\x02\0\x05\x12\x03\x06#'\n\x0c\n\
+    \x05\x04\0\x02\0\x01\x12\x03\x06(3\n\x0c\n\x05\x04\0\x02\0\x03\x12\x03\
+    \x0667\n\t\n\x02\x04\x01\x12\x03\x07\0$\n\n\n\x03\x04\x01\x01\x12\x03\
+    \x07\x08!\n)\n\x02\x04\x02\x12\x04\n\0\r\x01\x1a\x1d\x20Attestation\x20s\
+    erver\x20messages\n\n\n\n\x03\x04\x02\x01\x12\x03\n\x08\x1e\n\x0b\n\x04\
+    \x04\x02\x02\0\x12\x03\x0b\x02\x0f\n\x0c\n\x05\x04\x02\x02\0\x05\x12\x03\
+    \x0b\x02\x07\n\x0c\n\x05\x04\x02\x02\0\x01\x12\x03\x0b\x08\n\n\x0c\n\x05\
+    \x04\x02\x02\0\x03\x12\x03\x0b\r\x0e\n\x0b\n\x04\x04\x02\x02\x01\x12\x03\
+    \x0c\x02\x12\n\x0c\n\x05\x04\x02\x02\x01\x05\x12\x03\x0c\x02\x06\n\x0c\n\
+    \x05\x04\x02\x02\x01\x01\x12\x03\x0c\x07\r\n\x0c\n\x05\x04\x02\x02\x01\
+    \x03\x12\x03\x0c\x10\x11\n\t\n\x02\x04\x03\x12\x03\x0e\0\"\n\n\n\x03\x04\
+    \x03\x01\x12\x03\x0e\x08\x1f\n\n\n\x02\x04\x04\x12\x04\x10\0\x12\x01\n\n\
+    \n\x03\x04\x04\x01\x12\x03\x10\x08\x1a\n\x0b\n\x04\x04\x04\x02\0\x12\x03\
+    \x11\x02\x1b\n\x0c\n\x05\x04\x04\x02\0\x05\x12\x03\x11\x02\x08\n\x0c\n\
+    \x05\x04\x04\x02\0\x01\x12\x03\x11\t\x16\n\x0c\n\x05\x04\x04\x02\0\x03\
+    \x12\x03\x11\x19\x1a\n\t\n\x02\x04\x05\x12\x03\x13\0\x1e\n\n\n\x03\x04\
+    \x05\x01\x12\x03\x13\x08\x1b\n\t\n\x02\x04\x06\x12\x03\x15\0#\n\n\n\x03\
+    \x04\x06\x01\x12\x03\x15\x08\x20\n\t\n\x02\x04\x07\x12\x03\x16\0$\n\n\n\
+    \x03\x04\x07\x01\x12\x03\x16\x08!\n(\n\x02\x04\x08\x12\x04\x19\0\x1d\x01\
+    \x1a\x1c\x20Remote\x20Attestation\x20Request\n\n\n\n\x03\x04\x08\x01\x12\
+    \x03\x19\x08\x20\n\x0b\n\x04\x04\x08\x02\0\x12\x03\x1a\x02\x0f\n\x0c\n\
+    \x05\x04\x08\x02\0\x05\x12\x03\x1a\x02\x07\n\x0c\n\x05\x04\x08\x02\0\x01\
+    \x12\x03\x1a\x08\n\n\x0c\n\x05\x04\x08\x02\0\x03\x12\x03\x1a\r\x0e\n\x0b\
+    \n\x04\x04\x08\x02\x01\x12\x03\x1b\x02\x16\n\x0c\n\x05\x04\x08\x02\x01\
+    \x05\x12\x03\x1b\x02\x08\n\x0c\n\x05\x04\x08\x02\x01\x01\x12\x03\x1b\t\
+    \x11\n\x0c\n\x05\x04\x08\x02\x01\x03\x12\x03\x1b\x14\x15\n\x0b\n\x04\x04\
+    \x08\x02\x02\x12\x03\x1c\x02\x12\n\x0c\n\x05\x04\x08\x02\x02\x05\x12\x03\
+    \x1c\x02\x06\n\x0c\n\x05\x04\x08\x02\x02\x01\x12\x03\x1c\x07\r\n\x0c\n\
+    \x05\x04\x08\x02\x02\x03\x12\x03\x1c\x10\x11\n\t\n\x02\x04\t\x12\x03\x1e\
+    \0$\n\n\n\x03\x04\t\x01\x12\x03\x1e\x08!\n\t\n\x02\x04\n\x12\x03\x20\0\
+    \x1f\n\n\n\x03\x04\n\x01\x12\x03\x20\x08\x1c\n\t\n\x02\x04\x0b\x12\x03!\
+    \09\n\n\n\x03\x04\x0b\x01\x12\x03!\x08\x1d\n\x0b\n\x04\x04\x0b\x02\0\x12\
+    \x03!\x207\n\x0c\n\x05\x04\x0b\x02\0\x05\x12\x03!\x20$\n\x0c\n\x05\x04\
+    \x0b\x02\0\x01\x12\x03!%2\n\x0c\n\x05\x04\x0b\x02\0\x03\x12\x03!56\n\t\n\
+    \x02\x04\x0c\x12\x03#\0\x1c\n\n\n\x03\x04\x0c\x01\x12\x03#\x08\x19\n\t\n\
+    \x02\x04\r\x12\x03$\0\x1d\n\n\n\x03\x04\r\x01\x12\x03$\x08\x1a\n\n\n\x02\
+    \x04\x0e\x12\x04&\0(\x01\n\n\n\x03\x04\x0e\x01\x12\x03&\x08\x18\n\x0b\n\
+    \x04\x04\x0e\x02\0\x12\x03'\x02\x16\n\x0c\n\x05\x04\x0e\x02\0\x05\x12\
+    \x03'\x02\x08\n\x0c\n\x05\x04\x0e\x02\0\x01\x12\x03'\t\x11\n\x0c\n\x05\
+    \x04\x0e\x02\0\x03\x12\x03'\x14\x15\n\t\n\x02\x04\x0f\x12\x03)\0\x1c\n\n\
+    \n\x03\x04\x0f\x01\x12\x03)\x08\x19\n\n\n\x02\x04\x10\x12\x04+\0-\x01\n\
+    \n\n\x03\x04\x10\x01\x12\x03+\x08\x1a\n\x0b\n\x04\x04\x10\x02\0\x12\x03,\
+    \x02\x16\n\x0c\n\x05\x04\x10\x02\0\x05\x12\x03,\x02\x08\n\x0c\n\x05\x04\
+    \x10\x02\0\x01\x12\x03,\t\x11\n\x0c\n\x05\x04\x10\x02\0\x03\x12\x03,\x14\
+    \x15\n\t\n\x02\x04\x11\x12\x03.\0\x1e\n\n\n\x03\x04\x11\x01\x12\x03.\x08\
+    \x1b\n\t\n\x02\x04\x12\x12\x030\0\x1b\n\n\n\x03\x04\x12\x01\x12\x030\x08\
+    \x19\n\n\n\x02\x04\x13\x12\x042\0?\x01\n\n\n\x03\x04\x13\x01\x12\x032\
+    \x08\x14\n\x0c\n\x04\x04\x13\x08\0\x12\x043\x02>\x03\n\x0c\n\x05\x04\x13\
+    \x08\0\x01\x12\x033\x08\x0b\n\x0b\n\x04\x04\x13\x02\0\x12\x034\x043\n\
+    \x0c\n\x05\x04\x13\x02\0\x06\x12\x034\x04\x1c\n\x0c\n\x05\x04\x13\x02\0\
+    \x01\x12\x034\x1d.\n\x0c\n\x05\x04\x13\x02\0\x03\x12\x03412\n\x0b\n\x04\
+    \x04\x13\x02\x01\x12\x035\x046\n\x0c\n\x05\x04\x13\x02\x01\x06\x12\x035\
+    \x04\x1a\n\x0c\n\x05\x04\x13\x02\x01\x01\x12\x035\x1b1\n\x0c\n\x05\x04\
+    \x13\x02\x01\x03\x12\x03545\n\x0b\n\x04\x04\x13\x02\x02\x12\x036\x04:\n\
+    \x0c\n\x05\x04\x13\x02\x02\x06\x12\x036\x04\x1c\n\x0c\n\x05\x04\x13\x02\
+    \x02\x01\x12\x036\x1d5\n\x0c\n\x05\x04\x13\x02\x02\x03\x12\x03689\n\x0b\
+    \n\x04\x04\x13\x02\x03\x12\x037\x04+\n\x0c\n\x05\x04\x13\x02\x03\x06\x12\
+    \x037\x04\x18\n\x0c\n\x05\x04\x13\x02\x03\x01\x12\x037\x19&\n\x0c\n\x05\
+    \x04\x13\x02\x03\x03\x12\x037)*\n\x0b\n\x04\x04\x13\x02\x04\x12\x038\x04\
+    %\n\x0c\n\x05\x04\x13\x02\x04\x06\x12\x038\x04\x15\n\x0c\n\x05\x04\x13\
+    \x02\x04\x01\x12\x038\x16\x20\n\x0c\n\x05\x04\x13\x02\x04\x03\x12\x038#$\
+    \n\x0b\n\x04\x04\x13\x02\x05\x12\x039\x04#\n\x0c\n\x05\x04\x13\x02\x05\
+    \x06\x12\x039\x04\x14\n\x0c\n\x05\x04\x13\x02\x05\x01\x12\x039\x15\x1e\n\
+    \x0c\n\x05\x04\x13\x02\x05\x03\x12\x039!\"\n\x0b\n\x04\x04\x13\x02\x06\
+    \x12\x03:\x04'\n\x0c\n\x05\x04\x13\x02\x06\x06\x12\x03:\x04\x16\n\x0c\n\
+    \x05\x04\x13\x02\x06\x01\x12\x03:\x17\"\n\x0c\n\x05\x04\x13\x02\x06\x03\
+    \x12\x03:%&\n\x0b\n\x04\x04\x13\x02\x07\x12\x03;\x04$\n\x0c\n\x05\x04\
+    \x13\x02\x07\x06\x12\x03;\x04\x16\n\x0c\n\x05\x04\x13\x02\x07\x01\x12\
+    \x03;\x17\x1f\n\x0c\n\x05\x04\x13\x02\x07\x03\x12\x03;\"#\n\x0b\n\x04\
+    \x04\x13\x02\x08\x12\x03<\x04%\n\x0c\n\x05\x04\x13\x02\x08\x06\x12\x03<\
+    \x04\x15\n\x0c\n\x05\x04\x13\x02\x08\x01\x12\x03<\x16\x20\n\x0c\n\x05\
+    \x04\x13\x02\x08\x03\x12\x03<#$\n\x0b\n\x04\x04\x13\x02\t\x12\x03=\x04.\
+    \n\x0c\n\x05\x04\x13\x02\t\x06\x12\x03=\x04\x1c\n\x0c\n\x05\x04\x13\x02\
+    \t\x01\x12\x03=\x1d(\n\x0c\n\x05\x04\x13\x02\t\x03\x12\x03=+-b\x06proto3\
 ";
 
 static mut file_descriptor_proto_lazy: ::protobuf::lazy::Lazy<::protobuf::descriptor::FileDescriptorProto> = ::protobuf::lazy::Lazy {

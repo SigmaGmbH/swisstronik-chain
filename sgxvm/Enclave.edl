@@ -28,7 +28,7 @@ enclave {
     };
 
     trusted {
-        public sgx_status_t ecall_init_master_key(int reset);
+        public sgx_status_t ecall_initialize_enclave(int reset);
 
         public int ecall_is_initialized();
 
@@ -40,13 +40,13 @@ enclave {
 			uint32_t quote_size
         );
 
-        public sgx_status_t ecall_request_master_key_epid(
+        public sgx_status_t ecall_request_epoch_keys_epid(
             [in, size=len] const uint8_t* hostname,
             size_t len,
             int fd
         );
 
-        public sgx_status_t ecall_request_master_key_dcap(
+        public sgx_status_t ecall_request_epoch_keys_dcap(
             [in, size=len] const uint8_t* hostname,
             size_t len,
             int fd,
@@ -76,6 +76,14 @@ enclave {
             [in, size=quote_len] const uint8_t* quote_ptr,
 			uint32_t quote_len
         );
+
+        public sgx_status_t ecall_add_epoch(
+            uint64_t starting_block    
+        );
+
+        public sgx_status_t ecall_remove_latest_epoch();
+
+        public ResultWithAllocation ecall_list_epochs();
     };
 
     untrusted {

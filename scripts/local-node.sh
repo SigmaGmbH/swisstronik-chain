@@ -66,11 +66,11 @@ sed -i.bak 's/pruning-keep-recent = "0"/pruning-keep-recent = "2"/g' "$APP_TOML"
 sed -i.bak 's/pruning-interval = "0"/pruning-interval = "10"/g' "$APP_TOML"
 
 # Allocate genesis accounts
-swisstronikd add-genesis-account alice 10000000000000000000000000aswtr --keyring-backend $KEYRING --home "$HOMEDIR"
-swisstronikd add-genesis-account bob 10000000000000000000000000aswtr --keyring-backend $KEYRING --home "$HOMEDIR"
-swisstronikd add-genesis-account test1 10000000000000000000000000aswtr --keyring-backend $KEYRING --home "$HOMEDIR"
-swisstronikd add-genesis-account test2 10000000000000000000000000aswtr --keyring-backend $KEYRING --home "$HOMEDIR"
-swisstronikd add-genesis-account operator 10000000000000000000000000aswtr --keyring-backend $KEYRING --home "$HOMEDIR"
+swisstronikd add-genesis-account alice 100000000swtr --keyring-backend $KEYRING --home "$HOMEDIR"
+swisstronikd add-genesis-account bob 100000000swtr --keyring-backend $KEYRING --home "$HOMEDIR"
+swisstronikd add-genesis-account test1 100000000swtr --keyring-backend $KEYRING --home "$HOMEDIR"
+swisstronikd add-genesis-account test2 100000000swtr --keyring-backend $KEYRING --home "$HOMEDIR"
+swisstronikd add-genesis-account operator 100000000swtr --keyring-backend $KEYRING --home "$HOMEDIR"
 
 # Sign genesis transaction
 swisstronikd gentx alice 1000000000000000000000aswtr --keyring-backend $KEYRING --chain-id $CHAINID --home "$HOMEDIR"
@@ -81,5 +81,5 @@ swisstronikd collect-gentxs --home "$HOMEDIR"
 # Run this to ensure everything worked and that the genesis file is setup correctly
 swisstronikd validate-genesis --home "$HOMEDIR"
 
-# Initialize master key for local testnet
+# Initialize epoch keys for local testnet
 swisstronikd testnet init-testnet-enclave

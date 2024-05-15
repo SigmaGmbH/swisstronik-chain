@@ -1,5 +1,5 @@
-//go:build !nosgx
-// +build !nosgx
+//go:build !nosgx && attestationServer
+// +build !nosgx,attestationServer
 
 package api
 
@@ -9,10 +9,10 @@ import "C"
 
 import (
 	"fmt"
-	"net"
 	"github.com/SigmaGmbH/librustgo/types"
-	"runtime"
 	"google.golang.org/protobuf/proto"
+	"net"
+	"runtime"
 )
 
 // StartAttestationServer starts attestation server with 2 port (EPID and DCAP attestation)
@@ -92,7 +92,7 @@ func handleIncomingRARequest(connection net.Conn, isDCAP bool) error {
 	// Create protobuf encoded request
 	req := types.SetupRequest{Req: &types.SetupRequest_PeerAttestationRequest{
 		PeerAttestationRequest: &types.PeerAttestationRequest{
-			Fd: int32(file.Fd()),
+			Fd:     int32(file.Fd()),
 			IsDCAP: isDCAP,
 		},
 	}}
@@ -102,15 +102,21 @@ func handleIncomingRARequest(connection net.Conn, isDCAP bool) error {
 		return err
 	}
 
+	_, err = SendProtobufRequest(reqBytes)
+	return err
+}
+
+// SendProtobufRequest sends protobuf-encoded request to Rust side
+func SendProtobufRequest(data []byte) (C.UnmanagedVector, error) {
 	// Pass request to Rust
-	d := MakeView(reqBytes)
-	defer runtime.KeepAlive(reqBytes)
+	d := MakeView(data)
+	defer runtime.KeepAlive(data)
 
 	errmsg := NewUnmanagedVector(nil)
-	_, err = C.handle_initialization_request(d, &errmsg)
+	ptr, err := C.handle_initialization_request(d, &errmsg)
 	if err != nil {
-		return ErrorWithMessage(err, errmsg)
+		return NewUnmanagedVector(nil), ErrorWithMessage(err, errmsg)
 	}
 
-	return nil
+	return ptr, nil
 }

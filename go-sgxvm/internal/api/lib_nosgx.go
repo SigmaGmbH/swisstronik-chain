@@ -36,21 +36,21 @@ type Connector = types.Connector
 func CheckNodeStatus() error {
 	return nil
 }
-func RequestMasterKey(host string, port int, isDCAP bool) error {
+func RequestEpochKeys(host string, port int, isDCAP bool) error {
 	return nil
 }
 
-// IsNodeInitialized checks if node was initialized and master key was sealed
+// IsNodeInitialized checks if node was initialized and key manager state was sealed
 func IsNodeInitialized() (bool, error) {
 	return false, nil
 }
 
-// SetupSeedNode handles initialization of seed node which will share seed with other nodes
-func InitializeMasterKey(shouldReset bool) error {
+// SetupSeedNode handles initialization of attestation server node which will share epoch keys with other nodes
+func InitializeEnclave(shouldReset bool) error {
 	return nil
 }
 
-// StartSeedServer handles initialization of seed server
+// StartSeedServer handles initialization of attestation server
 func StartSeedServer(addr string) error {
 	return nil
 }
@@ -59,13 +59,13 @@ func attestPeer(connection net.Conn) error {
 	return nil
 }
 
-// RequestSeed handles request of seed from seed server
+// RequestSeed handles request of seed from attestation server
 func RequestSeed(hostname string, port int) error {
 	return nil
 }
 
 // GetNodePublicKey handles request for node public key
-func GetNodePublicKey() (*types.NodePublicKeyResponse, error) {
+func GetNodePublicKey(blockNumber uint64) (*types.NodePublicKeyResponse, error) {
 	key := make([]byte, 32)
 	rand.Read(key)
 	return &types.NodePublicKeyResponse{PublicKey: key}, nil
@@ -98,4 +98,16 @@ func Create(
 // StartAttestationServer starts attestation server with 2 port (EPID and DCAP attestation)
 func StartAttestationServer(epidAddress, dcapAddress string) error {
 	return nil
+}
+
+func AddEpoch(startingBlock uint64) error {
+	return nil
+}
+
+func RemoveLatestEpoch() error {
+	return nil
+}
+
+func ListEpochs() ([]*types.EpochData, error) {
+	return nil, nil
 }

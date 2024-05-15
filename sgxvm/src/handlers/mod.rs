@@ -41,8 +41,8 @@ pub fn handle_protobuf_request_inner(
                 FFIRequest_oneof_req::createRequest(data) => {
                     handle_evm_create_request(querier, data)
                 },
-                FFIRequest_oneof_req::publicKeyRequest(_) => {
-                    handle_public_key_request()
+                FFIRequest_oneof_req::publicKeyRequest(data) => {
+                    handle_public_key_request(data.blockNumber)
                 }
             }
         }
@@ -85,15 +85,22 @@ pub fn allocate_inner(data: Vec<u8>) -> AllocationWithResult {
 /// Handles incoming request for node public key, which can be used
 /// to derive shared encryption key to encrypt transaction data or 
 /// decrypt node response
-pub fn handle_public_key_request() -> AllocationWithResult {
+pub fn handle_public_key_request(block_number: u64) -> AllocationWithResult {
     let key_manager = match KeyManager::unseal() {
         Ok(manager) => manager,
         Err(_) => {
+            println!("Cannot unseal key manager");
             return AllocationWithResult::default()
         }
     };
 
-    let public_key = key_manager.get_public_key();
+    let public_key = match key_manager.get_public_key(block_number) {
+        Ok(public_key) => public_key,
+        Err(_) => {
+            println!("Cannot find key in Epoch Manager");
+            return AllocationWithResult::default()
+        }
+    };
 
     let mut response = NodePublicKeyResponse::new();
     response.set_publicKey(public_key);

@@ -90,6 +90,11 @@ build_d: go.sum
 	$(MAKE) -C go-sgxvm build_d
 	go build -mod=mod $(BUILD_FLAGS)  -tags osusergo,netgo -o build/swisstronikd ./cmd/swisstronikd
 
+build_attestation_server: go.sum
+	AS_MODE=true $(MAKE) -C go-sgxvm build_AS
+
+build_attestation_server_d: go.sum
+	AS_MODE=true $(MAKE) -C go-sgxvm build_AS_d
 
 ###############################################################################
 ### 		          Build commands for CLI (without SGX support) 			###

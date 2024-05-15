@@ -13,7 +13,7 @@ import (
 
 const flagShouldReset = "reset"
 
-// Cmd creates a CLI main command
+// EnclaveCmd creates a CLI main command
 func EnclaveCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "enclave",
@@ -22,23 +22,45 @@ func EnclaveCmd() *cobra.Command {
 	}
 
 	cmd.AddCommand(
+		ListEpochs(),
 		EPIDRemoteAttestationCmd(),
 		DCAPRemoteAttestationCmd(),
-		StartAttestationServer(),
 		Status(),
 	)
 	return cmd
 }
 
-// EPIDRemoteAttestationCmd returns request-master-key-epid cobra Command.
+// ListEpochs returns list-epochs cobra Command.
+func ListEpochs() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "list-epochs",
+		Short: "Outputs stored epochs",
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			epochs, err := librustgo.ListEpochs()
+			if err != nil {
+				return err
+			}
+
+			for _, epoch := range epochs {
+				fmt.Println("Epoch #", epoch.EpochNumber, "Starting block: ", epoch.StartingBlock)
+			}
+
+			return nil
+		},
+	}
+
+	return cmd
+}
+
+// EPIDRemoteAttestationCmd returns request-epoch-keys-epid cobra Command.
 func EPIDRemoteAttestationCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "request-master-key-epid [bootstrap-node-address]",
-		Short: "Requests master key from bootstrap node using EPID",
-		Long:  `Initializes SGX enclave by passing process of EPID Remote Attestation agains bootstrap node. 
-		If remote attestation was successful, bootstrap node shares encrypted master key with this node. 
+		Use:   "request-epoch-keys-epid [attestation-server-address]",
+		Short: "Requests epoch keys from attestation server using EPID",
+		Long: `Initializes SGX enclave by passing process of EPID Remote Attestation agains attestation server. 
+		If remote attestation was successful, attestation server shares encrypted epoch keys with this node. 
 		Process of Remote Attestation is performed over pure TCP protocol.`,
-		Args:  cobra.ExactArgs(1),
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx := client.GetClientContextFromCmd(cmd)
 			serverCtx := server.GetServerContextFromCmd(cmd)
@@ -55,7 +77,7 @@ func EPIDRemoteAttestationCmd() *cobra.Command {
 				return err
 			}
 
-			if err := librustgo.RequestMasterKey(host, port, false); err != nil {
+			if err := librustgo.RequestEpochKeys(host, port, false); err != nil {
 				return err
 			}
 
@@ -67,15 +89,15 @@ func EPIDRemoteAttestationCmd() *cobra.Command {
 	return cmd
 }
 
-// DCAPRemoteAttestationCmd returns request-master-key-dcap cobra Command.
+// DCAPRemoteAttestationCmd returns request-epochs-keys-dcap cobra Command.
 func DCAPRemoteAttestationCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "request-master-key-dcap [bootstrap-node-address]",
-		Short: "Requests master key from bootstrap node using DCAP",
-		Long:  `Initializes SGX enclave by passing process of DCAP Remote Attestation agains bootstrap node. 
-		If remote attestation was successful, bootstrap node shares encrypted master key with this node. 
+		Use:   "request-epoch-keys-dcap [attestation-server-address]",
+		Short: "Requests epoch keys from attestation server using DCAP",
+		Long: `Initializes SGX enclave by passing process of DCAP Remote Attestation agains attestation server. 
+		If remote attestation was successful, attestation server node shares encrypted epoch keys with this node. 
 		Process of Remote Attestation is performed over pure TCP protocol.`,
-		Args:  cobra.ExactArgs(1),
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx := client.GetClientContextFromCmd(cmd)
 			serverCtx := server.GetServerContextFromCmd(cmd)
@@ -92,7 +114,7 @@ func DCAPRemoteAttestationCmd() *cobra.Command {
 				return err
 			}
 
-			if err := librustgo.RequestMasterKey(host, port, true); err != nil {
+			if err := librustgo.RequestEpochKeys(host, port, true); err != nil {
 				return err
 			}
 
@@ -104,25 +126,7 @@ func DCAPRemoteAttestationCmd() *cobra.Command {
 	return cmd
 }
 
-// StartAttestationServer returns start-attestation-server cobra Command.
-func StartAttestationServer() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "start-attestation-server [epid-address-with-port] [dcap-address-with-port]",
-		Short: "Starts attestation server",
-		Long:  "Start server for Intel SGX Remote Attestation to share master key with new nodes",
-		Args:  cobra.ExactArgs(2),
-		RunE: func(_ *cobra.Command, args []string) error {
-			if err := librustgo.StartAttestationServer(args[0], args[1]); err != nil {
-				return err
-			}
-			return server.WaitForQuitSignals()
-		},
-	}
-
-	return cmd
-}
-
-// Healthcheck checks if Intel SGX Enclave is accessible and if Intel SGX was properly configured
+// Status checks if Intel SGX Enclave is accessible and if Intel SGX was properly configured
 func Status() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "status",

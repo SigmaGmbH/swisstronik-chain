@@ -4,7 +4,10 @@ use std::io::{Read, Write};
 use std::vec::Vec;
 use std::string::String;
 
+#[cfg(feature = "attestation_server")]
 use crate::key_manager::{keys::RegistrationKey, UNSEALED_KEY_MANAGER};
+#[cfg(not(feature = "attestation_server"))]
+use crate::key_manager::keys::RegistrationKey;
 
 pub mod helpers;
 pub mod auth;
@@ -60,8 +63,9 @@ pub fn perform_master_key_request(
     Ok(())
 }
 
+#[cfg(feature = "attestation_server")]
 /// Initializes new TLS server to share master key
-pub fn perform_master_key_provisioning(
+pub fn perform_epoch_keys_provisioning(
     socket_fd: c_int,
     qe_target_info: Option<&sgx_target_info_t>,
     quote_size: Option<u32>,
@@ -88,33 +92,44 @@ pub fn perform_master_key_provisioning(
     let registration_key = RegistrationKey::random()?;
 
     // Unseal key manager to get access to master key
-    let key_manager = match &*UNSEALED_KEY_MANAGER {
-        Some(key_manager) => key_manager,
+    let encrypted_epoch_data = match &*UNSEALED_KEY_MANAGER {
+        Some(key_manager) => {
+            key_manager
+                .encrypt_epoch_data(&registration_key, client_public_key.to_vec())
+                .map_err(|err| {
+                    println!(
+                        "[Enclave] Cannot encrypt epoch data to share it. Reason: {:?}",
+                        err
+                    );
+                    sgx_status_t::SGX_ERROR_UNEXPECTED
+                })?
+        },
         None => {
-            println!("[Enclave] Cannot unseal master key");
+            println!("[Enclave] Cannot unseal key manager data");
             return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
         }
     };
 
-    // Encrypt master key and send it to the client
-    let encrypted_master_key = key_manager
-        .to_encrypted_master_key(&registration_key, client_public_key.to_vec())
-        .map_err(|err| {
-            println!(
-                "[Enclave] Cannot encrypt master key to share it. Reason: {:?}",
-                err
-            );
-            sgx_status_t::SGX_ERROR_UNEXPECTED
-        })?;
-
-    // Send encrypted master key back to client
-    tls.write(&encrypted_master_key).map_err(|err| {
+    // Send encrypted epoch data to client
+    tls.write(&encrypted_epoch_data).map_err(|err| {
         println!(
-            "[Enclave] Cannot send encrypted master key to client. Reason: {:?}",
+            "[Enclave] Cannot send encrypted epoch data to client. Reason: {:?}",
             err
         );
         sgx_status_t::SGX_ERROR_UNEXPECTED
     })?;
 
     Ok(())
+}
+
+#[cfg(not(feature = "attestation_server"))]
+/// Initializes new TLS server to share master key
+pub fn perform_epoch_keys_provisioning(
+    _socket_fd: c_int,
+    _qe_target_info: Option<&sgx_target_info_t>,
+    _quote_size: Option<u32>,
+    _is_dcap: bool,
+) -> SgxResult<()> {
+    println!("[Enclave] Attestation Server is unaccessible");
+    Err(sgx_status_t::SGX_ERROR_UNEXPECTED)
 }

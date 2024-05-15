@@ -140,14 +140,14 @@ which accepts a path for the resulting pprof file.
 				return err
 			}
 
-			// check if node has sealed master key
+			// check if node has sealed key manager
 			nodeInitialized, err := librustgo.IsNodeInitialized()
 			if err != nil {
 				return err
 			}
 
 			if !nodeInitialized {
-				return errors.New("sealed master key was not found. Request it by using `swisstronikd enclave request-master-key`")
+				return errors.New("sealed key manager was not found. Initialize it by using `swisstronikd enclave request-epoch-keys-epid or request-epoch-keys-dcap`")
 			}
 
 			withTM, _ := cmd.Flags().GetBool(srvflags.WithTendermint)

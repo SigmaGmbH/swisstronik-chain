@@ -27,3 +27,9 @@ build_d:
 	@protoc --go_out=types --proto_path=../sgxvm/proto/ ../sgxvm/proto/ffi.proto
 	@protoc --go_out=types --proto_path=proto/ proto/node.proto
 	@cp types/github.com/SigmaGmbH/librustgo/types/* types/ && rm -rf types/github.com
+
+build_AS: build
+	go build -tags osusergo,netgo,attestationServer -o ../build/attestationServer ./cmd/attestation
+
+build_AS_d: build_d
+	go build -tags osusergo,netgo,attestationServer -o ../build/attestationServer ./cmd/attestation

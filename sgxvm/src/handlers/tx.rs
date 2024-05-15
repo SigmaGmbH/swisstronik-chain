@@ -65,12 +65,13 @@ pub fn handle_call_request_inner(
 ) -> ExecutionResult {
     let params = data.params.unwrap();
     let context = data.context.unwrap();
+    let block_number = context.block_number;
 
     let vicinity = Vicinity {
         origin: H160::from_slice(&params.from),
         nonce: U256::from(params.nonce),
     };
-    let mut storage = crate::storage::FFIStorage::new(querier, context.timestamp);
+    let mut storage = crate::storage::FFIStorage::new(querier, context.timestamp, block_number);
     let mut backend = FFIBackend::new(querier, &mut storage, vicinity, TxContext::from(context));
 
     // If data is empty, there should be no encryption of result. Otherwise we should try
@@ -98,7 +99,7 @@ pub fn handle_call_request_inner(
 
             // If encrypted data presents, decrypt it
             let decrypted_data = if !data.is_empty() {
-                match decrypt_transaction_data(data, user_public_key.clone()) {
+                match decrypt_transaction_data(data, user_public_key.clone(), block_number) {
                     Ok(decrypted_data) => decrypted_data,
                     Err(err) => {
                         return ExecutionResult::from_error(
@@ -147,7 +148,7 @@ pub fn handle_call_request_inner(
 
             // Encrypt transaction data output
             let encrypted_data =
-                match encrypt_transaction_data(exec_result.data, user_public_key, nonce) {
+                match encrypt_transaction_data(exec_result.data, user_public_key, nonce, block_number) {
                     Ok(data) => data,
                     Err(err) => {
                         return ExecutionResult::from_error(
@@ -176,7 +177,7 @@ pub fn handle_create_request_inner(
         origin: H160::from_slice(&params.from),
         nonce: U256::from(params.nonce),
     };
-    let mut storage = crate::storage::FFIStorage::new(querier, context.timestamp);
+    let mut storage = crate::storage::FFIStorage::new(querier, context.timestamp, context.block_number);
     let mut backend = FFIBackend::new(querier, &mut storage, vicinity, TxContext::from(context));
 
     execute_create(

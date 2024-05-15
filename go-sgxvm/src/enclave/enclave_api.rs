@@ -23,9 +23,9 @@ impl EnclaveApi {
         }
     }
 
-    pub fn initialize_master_key(eid: sgx_enclave_id_t, reset: bool) -> Result<(), Error> {
+    pub fn initialize_enclave(eid: sgx_enclave_id_t, reset: bool) -> Result<(), Error> {
         let mut ret_val = sgx_status_t::SGX_ERROR_UNEXPECTED;
-        let res = unsafe { super::ecall_init_master_key(eid, &mut ret_val, reset as i32) };
+        let res = unsafe { super::ecall_initialize_enclave(eid, &mut ret_val, reset as i32) };
 
         match (res, ret_val) {
             (sgx_status_t::SGX_SUCCESS, sgx_status_t::SGX_SUCCESS) => Ok(()),
@@ -129,7 +129,7 @@ impl EnclaveApi {
 
         let mut ret_val = sgx_status_t::SGX_ERROR_UNEXPECTED;
         let res = unsafe {
-            super::ecall_request_master_key_epid(
+            super::ecall_request_epoch_keys_epid(
                 eid,
                 &mut ret_val,
                 hostname.as_ptr() as *const u8,
@@ -140,7 +140,7 @@ impl EnclaveApi {
 
         if res != sgx_status_t::SGX_SUCCESS {
             println!(
-                "[Enclave] Call to `ecall_request_master_key_epid` failed. Status code: {:?}",
+                "[Enclave] Call to `ecall_request_epoch_keys_epid` failed. Status code: {:?}",
                 res
             );
             return Err(Error::enclave_error(res));
@@ -148,7 +148,7 @@ impl EnclaveApi {
 
         if ret_val != sgx_status_t::SGX_SUCCESS {
             println!(
-                "[Enclave] `ecall_request_master_key_epid` returned error: {:?}",
+                "[Enclave] `ecall_request_epoch_keys_epid` returned error: {:?}",
                 ret_val
             );
             return Err(Error::enclave_error(ret_val));
@@ -174,7 +174,7 @@ impl EnclaveApi {
 
         let mut retval = sgx_status_t::SGX_ERROR_UNEXPECTED;
         let res = unsafe {
-            super::ecall_request_master_key_dcap(
+            super::ecall_request_epoch_keys_dcap(
                 eid,
                 &mut retval,
                 hostname.as_ptr() as *const u8,
@@ -187,7 +187,7 @@ impl EnclaveApi {
 
         if res != sgx_status_t::SGX_SUCCESS {
             println!(
-                "[Enclave Wrapper] Cannot call `ecall_request_master_key_dcap`. Reason: {:?}",
+                "[Enclave Wrapper] Cannot call `ecall_request_epoch_keys_dcap`. Reason: {:?}",
                 res
             );
             return Err(Error::enclave_error(res));
@@ -195,7 +195,7 @@ impl EnclaveApi {
 
         if retval != sgx_status_t::SGX_SUCCESS {
             println!(
-                "[Enclave Wrapper] `ecall_request_master_key_dcap` failed. Reason: {:?}",
+                "[Enclave Wrapper] `ecall_request_epoch_keys_dcap` failed. Reason: {:?}",
                 retval
             );
             return Err(Error::enclave_error(retval));
@@ -212,6 +212,80 @@ impl EnclaveApi {
             sgx_status_t::SGX_SUCCESS => Ok(ret_val != 0),
             _ => Err(Error::enclave_error(res.as_str())),
         }
+    }
+
+    pub fn add_epoch(eid: sgx_enclave_id_t, starting_block: u64) -> Result<(), Error> {
+        let mut retval = sgx_status_t::SGX_ERROR_UNEXPECTED;
+        let res = unsafe { super::ecall_add_epoch(eid, &mut retval, starting_block) };
+
+        if res != sgx_status_t::SGX_SUCCESS {
+            println!(
+                "[Enclave Wrapper] Cannot call `ecall_add_epoch`. Reason: {:?}",
+                res
+            );
+            return Err(Error::enclave_error(res));
+        }
+
+        if retval != sgx_status_t::SGX_SUCCESS {
+            println!(
+                "[Enclave Wrapper] `ecall_add_epoch` failed. Reason: {:?}",
+                retval
+            );
+            return Err(Error::enclave_error(retval));
+        }
+
+        Ok(())
+    }
+
+    pub fn list_epochs(eid: sgx_enclave_id_t) -> Result<Vec<u8>, Error> {
+        let mut ret_val = std::mem::MaybeUninit::<AllocationWithResult>::uninit();
+        let res = unsafe { super::ecall_list_epochs(eid, ret_val.as_mut_ptr()) };
+
+        if res != sgx_status_t::SGX_SUCCESS {
+            println!(
+                "[Enclave Wrapper] Cannot call `ecall_list_epochs`. Reason: {:?}",
+                res
+            );
+            return Err(Error::enclave_error(res));
+        }
+
+        let request_result = unsafe { ret_val.assume_init() };
+        // Parse execution result
+        match request_result.status {
+            sgx_status_t::SGX_SUCCESS => {
+                let data = unsafe {
+                    Vec::from_raw_parts(request_result.result_ptr, request_result.result_size, request_result.result_size)
+                };
+                Ok(data)
+            }
+            err => {
+                println!("[Enclave Wrapper] `ecall_list_epochs` failed. Reason: {:?}", err);
+                Err(Error::vm_err(err))
+            }
+        }
+    }
+
+    pub fn remove_latest_epoch(eid: sgx_enclave_id_t) -> Result<(), Error> {
+        let mut retval = sgx_status_t::SGX_ERROR_UNEXPECTED;
+        let res = unsafe { super::ecall_remove_latest_epoch(eid, &mut retval) };
+
+        if res != sgx_status_t::SGX_SUCCESS {
+            println!(
+                "[Enclave Wrapper] Cannot call `ecall_remove_latest_epoch`. Reason: {:?}",
+                res
+            );
+            return Err(Error::enclave_error(res));
+        }
+
+        if retval != sgx_status_t::SGX_SUCCESS {
+            println!(
+                "[Enclave Wrapper] `ecall_remove_latest_epoch` failed. Reason: {:?}",
+                retval
+            );
+            return Err(Error::enclave_error(retval));
+        }
+
+        Ok(())
     }
 
     pub fn handle_evm_request(

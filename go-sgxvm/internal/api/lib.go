@@ -67,7 +67,7 @@ func CheckNodeStatus() error {
 	return nil
 }
 
-// IsNodeInitialized checks if node was initialized and master key was sealed
+// IsNodeInitialized checks if node was initialized and key manager state was sealed
 func IsNodeInitialized() (bool, error) {
 	// Create protobuf encoded request
 	req := types.SetupRequest{Req: &types.SetupRequest_IsInitialized{
@@ -102,11 +102,11 @@ func IsNodeInitialized() (bool, error) {
 	return response.IsInitialized, nil
 }
 
-// SetupSeedNode handles initialization of attestation node which will share master key with other nodes
-func InitializeMasterKey(shouldReset bool) error {
+// SetupSeedNode handles initialization of attestation server which will share epoch keys with other nodes
+func InitializeEnclave(shouldReset bool) error {
 	// Create protobuf encoded request
-	req := types.SetupRequest{Req: &types.SetupRequest_InitializeMasterKey{
-		InitializeMasterKey: &types.InitializeMasterKeyRequest{ ShouldReset: shouldReset },
+	req := types.SetupRequest{Req: &types.SetupRequest_InitializeEnclave{
+		InitializeEnclave: &types.InitializeEnclaveRequest{ShouldReset: shouldReset},
 	}}
 	reqBytes, err := proto.Marshal(&req)
 	if err != nil {
@@ -127,12 +127,12 @@ func InitializeMasterKey(shouldReset bool) error {
 	return nil
 }
 
-// RequestMasterKey handles request of master key from attestation server
-func RequestMasterKey(hostname string, port int, isDCAP bool) error {
+// RequestEpochKeys handles request of epoch keys from attestation server
+func RequestEpochKeys(hostname string, port int, isDCAP bool) error {
 	address := fmt.Sprintf("%s:%d", hostname, port)
 	conn, err := net.Dial("tcp", address)
 	if err != nil {
-		fmt.Println("Cannot establish connection with seed server. Reason: ", err.Error())
+		fmt.Println("Cannot establish connection with attestation server. Reason: ", err.Error())
 		return err
 	}
 
@@ -146,9 +146,9 @@ func RequestMasterKey(hostname string, port int, isDCAP bool) error {
 	// Create protobuf encoded request
 	req := types.SetupRequest{Req: &types.SetupRequest_RemoteAttestationRequest{
 		RemoteAttestationRequest: &types.RemoteAttestationRequest{
-			Fd: int32(file.Fd()),
+			Fd:       int32(file.Fd()),
 			Hostname: hostname,
-			IsDCAP: isDCAP,
+			IsDCAP:   isDCAP,
 		},
 	}}
 	reqBytes, err := proto.Marshal(&req)
@@ -173,12 +173,16 @@ func RequestMasterKey(hostname string, port int, isDCAP bool) error {
 }
 
 // GetNodePublicKey handles request for node public key
-func GetNodePublicKey() (*types.NodePublicKeyResponse, error) {
+func GetNodePublicKey(blockNumber uint64) (*types.NodePublicKeyResponse, error) {
 	// Construct mocked querier
 	c := buildEmptyConnector()
 
 	// Create protobuf-encoded request
-	req := &types.FFIRequest{ Req: &types.FFIRequest_PublicKeyRequest {} }
+	req := &types.FFIRequest{Req: &types.FFIRequest_PublicKeyRequest{
+		PublicKeyRequest: &types.NodePublicKeyRequest{
+			BlockNumber: blockNumber,
+		},
+	}}
 	reqBytes, err := proto.Marshal(req)
 	if err != nil {
 		log.Fatalln("Failed to encode req:", err)
@@ -210,7 +214,7 @@ func GetNodePublicKey() (*types.NodePublicKeyResponse, error) {
 func DumpDCAPQuote(filepath string) error {
 	// Create protobuf encoded request
 	req := types.SetupRequest{Req: &types.SetupRequest_DumpQuote{
-		DumpQuote: &types.DumpQuoteRequest{ Filepath: filepath },
+		DumpQuote: &types.DumpQuoteRequest{Filepath: filepath},
 	}}
 	reqBytes, err := proto.Marshal(&req)
 	if err != nil {
@@ -235,7 +239,7 @@ func DumpDCAPQuote(filepath string) error {
 func VerifyDCAPQuote(filepath string) error {
 	// Create protobuf encoded request
 	req := types.SetupRequest{Req: &types.SetupRequest_VerifyQuote{
-		VerifyQuote: &types.VerifyQuoteRequest{ Filepath: filepath },
+		VerifyQuote: &types.VerifyQuoteRequest{Filepath: filepath},
 	}}
 	reqBytes, err := proto.Marshal(&req)
 	if err != nil {
@@ -277,7 +281,7 @@ func Call(
 		Value:      value,
 		AccessList: convertAccessList(accessList),
 		Commit:     commit,
-		Nonce:		nonce,
+		Nonce:      nonce,
 	}
 
 	// Create protobuf encoded request
@@ -334,7 +338,7 @@ func Create(
 		Value:      value,
 		AccessList: convertAccessList(accessList),
 		Commit:     commit,
-		Nonce: 		nonce,
+		Nonce:      nonce,
 	}
 
 	// Create protobuf encoded request
@@ -369,6 +373,86 @@ func Create(
 	}
 
 	return &response, nil
+}
+
+func AddEpoch(startingBlock uint64) error {
+	// Create protobuf encoded request
+	req := types.SetupRequest{Req: &types.SetupRequest_AddEpoch{
+		AddEpoch: &types.AddNewEpochRequest{StartingBlock: startingBlock},
+	}}
+	reqBytes, err := proto.Marshal(&req)
+	if err != nil {
+		log.Fatalln("Failed to encode req:", err)
+		return err
+	}
+
+	// Pass request to Rust
+	d := MakeView(reqBytes)
+	defer runtime.KeepAlive(reqBytes)
+
+	errmsg := NewUnmanagedVector(nil)
+	_, err = C.handle_initialization_request(d, &errmsg)
+	if err != nil {
+		return ErrorWithMessage(err, errmsg)
+	}
+
+	return nil
+}
+
+func RemoveLatestEpoch() error {
+	// Create protobuf encoded request
+	req := types.SetupRequest{Req: &types.SetupRequest_RemoveEpoch{
+		RemoveEpoch: &types.RemoveLatestEpochRequest{},
+	}}
+	reqBytes, err := proto.Marshal(&req)
+	if err != nil {
+		log.Fatalln("Failed to encode req:", err)
+		return err
+	}
+
+	// Pass request to Rust
+	d := MakeView(reqBytes)
+	defer runtime.KeepAlive(reqBytes)
+
+	errmsg := NewUnmanagedVector(nil)
+	_, err = C.handle_initialization_request(d, &errmsg)
+	if err != nil {
+		return ErrorWithMessage(err, errmsg)
+	}
+
+	return nil
+}
+
+func ListEpochs() ([]*types.EpochData, error) {
+	// Create protobuf encoded request
+	req := types.SetupRequest{Req: &types.SetupRequest_ListEpochs{
+		ListEpochs: &types.ListEpochsRequest{},
+	}}
+	reqBytes, err := proto.Marshal(&req)
+	if err != nil {
+		log.Fatalln("Failed to encode req:", err)
+		return nil, err
+	}
+
+	// Pass request to Rust
+	d := MakeView(reqBytes)
+	defer runtime.KeepAlive(reqBytes)
+
+	errmsg := NewUnmanagedVector(nil)
+	ptr, err := C.handle_initialization_request(d, &errmsg)
+	if err != nil {
+		return nil, ErrorWithMessage(err, errmsg)
+	}
+
+	// Recover returned value
+	executionResult := CopyAndDestroyUnmanagedVector(ptr)
+	response := types.ListEpochsResponse{}
+	if err := proto.Unmarshal(executionResult, &response); err != nil {
+		log.Fatalln("Failed to decode execution result:", err)
+		return nil, err
+	}
+
+	return response.Epochs, nil
 }
 
 // Converts AccessList type from ethtypes to protobuf-compatible type

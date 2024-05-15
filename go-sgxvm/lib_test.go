@@ -128,7 +128,7 @@ func TestCoinTransfer(t *testing.T) {
 }
 
 func TestSeedExchangeEPID(t *testing.T) {
-	if err := api.InitializeMasterKey(true); err != nil {
+	if err := api.InitializeEnclave(true); err != nil {
 		t.Fail()
 	}
 
@@ -142,7 +142,7 @@ func TestSeedExchangeEPID(t *testing.T) {
 	// Test EPID Attestation
 	epidHost := "localhost"
 	epidPort := 8999
-	if err := api.RequestMasterKey(epidHost, epidPort, false); err != nil {
+	if err := api.RequestEpochKeys(epidHost, epidPort, false); err != nil {
 		t.Fail()
 	} else {
 		println("EPID PASSED")
@@ -150,7 +150,7 @@ func TestSeedExchangeEPID(t *testing.T) {
 }
 
 func TestSeedExchangeDCAP(t *testing.T) {
-	if err := api.InitializeMasterKey(true); err != nil {
+	if err := api.InitializeEnclave(true); err != nil {
 		t.Fail()
 	}
 
@@ -164,7 +164,7 @@ func TestSeedExchangeDCAP(t *testing.T) {
 	// Test DCAP Attestation
 	dcapHost := "localhost"
 	dcapPort := 8998
-	if err := api.RequestMasterKey(dcapHost, dcapPort, true); err != nil {
+	if err := api.RequestEpochKeys(dcapHost, dcapPort, true); err != nil {
 		t.Fail()
 	} else {
 		println("DCAP PASSED")

@@ -43,6 +43,7 @@ type QueryAddVerificationDetails = types.QueryAddVerificationDetails
 type QueryAddVerificationDetailsResponse = types.QueryAddVerificationDetailsResponse
 type QueryHasVerification = types.QueryHasVerification
 type QueryHasVerificationResponse = types.QueryHasVerificationResponse
+
 // Storage requests
 type CosmosRequest_GetAccount = types.CosmosRequest_GetAccount
 type CosmosRequest_InsertAccount = types.CosmosRequest_InsertAccount
@@ -68,7 +69,7 @@ func CheckNodeStatus() error {
 	return api.CheckNodeStatus()
 }
 
-// IsNodeInitialized checks if node was properly initialized and master key was sealed
+// IsNodeInitialized checks if node was properly initialized and key manager state was sealed
 func IsNodeInitialized() (bool, error) {
 	return api.IsNodeInitialized()
 }
@@ -107,25 +108,25 @@ func Create(
 	return executionResult, nil
 }
 
-func InitializeMasterKey(shouldReset bool) error {
-	return api.InitializeMasterKey(shouldReset)
+func InitializeEnclave(shouldReset bool) error {
+	return api.InitializeEnclave(shouldReset)
 }
 
 // StartAttestationServer handles incoming request for starting attestation server
-// to share master key with new nodes who passed Remote Attestation.
+// to share epoch keys with new nodes which passed Remote Attestation.
 func StartAttestationServer(epidAddress, dcapAddress string) error {
 	return api.StartAttestationServer(epidAddress, dcapAddress)
 }
 
 // RequestSeed handles requesting seed and passing Remote Attestation.
 // Returns error if Remote Attestation was not passed or provided seed server address is not accessible
-func RequestMasterKey(host string, port int, isDCAP bool) error {
-	return api.RequestMasterKey(host, port, isDCAP)
+func RequestEpochKeys(host string, port int, isDCAP bool) error {
+	return api.RequestEpochKeys(host, port, isDCAP)
 }
 
 // GetNodePublicKey handles request for node public key
-func GetNodePublicKey() (*types.NodePublicKeyResponse, error) {
-	result, err := api.GetNodePublicKey()
+func GetNodePublicKey(blockNumber uint64) (*types.NodePublicKeyResponse, error) {
+	result, err := api.GetNodePublicKey(blockNumber)
 	if err != nil {
 		return &types.NodePublicKeyResponse{}, err
 	}
@@ -137,4 +138,16 @@ func GetNodePublicKey() (*types.NodePublicKeyResponse, error) {
 // matches the expected version.
 func Libsgx_wrapperVersion() (string, error) {
 	return api.Libsgx_wrapperVersion()
+}
+
+func AddEpoch(startingBlock uint64) error {
+	return api.AddEpoch(startingBlock)
+}
+
+func RemoveLatestEpoch() error {
+	return api.RemoveLatestEpoch()
+}
+
+func ListEpochs() ([]*types.EpochData, error) {
+	return api.ListEpochs()
 }

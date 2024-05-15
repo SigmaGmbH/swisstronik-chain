@@ -1,5 +1,5 @@
 use ethereum::Log;
-use evm::backend::{Apply, ApplyBackend as EvmApplyBackend, Backend as EvmBackend, Basic};
+use evm::backend::{Apply, Backend as EvmBackend, Basic};
 use primitive_types::{H160, H256, U256};
 use std::vec::Vec;
 
@@ -225,78 +225,6 @@ impl<'state> EvmBackend for FFIBackend<'state> {
 
     fn original_storage(&self, _address: H160, _index: H256) -> Option<H256> {
         None
-    }
-}
-
-/// Implementation of trait `Apply` provided by evm crate
-/// This trait declares write operations for the backend
-impl<'state> EvmApplyBackend for FFIBackend<'state> {
-    fn apply<A, I, L>(&mut self, values: A, logs: L, _delete_empty: bool)
-    where
-        A: IntoIterator<Item = Apply<I>>,
-        I: IntoIterator<Item = (H256, H256)>,
-        L: IntoIterator<Item = Log>,
-    {
-        let mut total_supply_add = U256::zero();
-        let mut total_supply_sub = U256::zero();
-
-        for apply in values {
-            match apply {
-                Apply::Modify {
-                    address,
-                    basic,
-                    code,
-                    storage,
-                    ..
-                } => {
-                    // Reset storage is ignored since storage cannot be efficiently reset as this
-                    // would require iterating over storage keys
-
-                    // Update account balance and nonce
-                    let previous_account_data = self.state.get_account(&address);
-
-                    if basic.balance > previous_account_data.balance {
-                        total_supply_add = total_supply_add
-                            .checked_add(basic.balance - previous_account_data.balance)
-                            .unwrap();
-                    } else {
-                        total_supply_sub = total_supply_sub
-                            .checked_add(previous_account_data.balance - basic.balance)
-                            .unwrap();
-                    }
-                    self.state.insert_account(address, basic);
-
-                    // Handle contract updates
-                    if let Some(code) = code {
-                        self.state.insert_account_code(address, code);
-                    }
-
-                    // Handle storage updates
-                    for (index, value) in storage {
-                        if value == H256::default() {
-                            self.state.remove_storage_cell(&address, &index);
-                        } else {
-                            self.state.insert_storage_cell(address, index, value);
-                        }
-                    }
-                }
-                // Used by `SELFDESTRUCT` opcode
-                Apply::Delete { address } => {
-                    self.state.remove(&address);
-                }
-            }
-        }
-
-        // Used to avoid corrupting state via invariant violation
-        assert_eq!(
-            total_supply_add, total_supply_sub,
-            "evm execution would lead to invariant violation ({} != {})",
-            total_supply_add, total_supply_sub
-        );
-
-        for log in logs {
-            self.logs.push(log);
-        }
     }
 }
 
