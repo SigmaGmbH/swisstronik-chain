@@ -27,7 +27,7 @@ describe('ComplianceBridge', () => {
             signer.provider,
             contract.address,
             contract.interface.encodeFunctionData("isUserVerified", [signer.address])
-        );
+        )
         const result = contract.interface.decodeFunctionResult("isUserVerified", isVerifiedResponse)
         expect(result[0]).to.be.true
     })
@@ -40,7 +40,7 @@ describe('ComplianceBridge', () => {
             signer.provider,
             contract.address,
             contract.interface.encodeFunctionData("isUserVerifiedBy", [signer.address, allowedIssuers])
-        );
+        )
         const result = contract.interface.decodeFunctionResult("isUserVerifiedBy", isVerifiedResponse)
         expect(result[0]).to.be.true
     })
@@ -52,7 +52,7 @@ describe('ComplianceBridge', () => {
             signer.provider,
             contract.address,
             contract.interface.encodeFunctionData("isUserVerified", [signer.address])
-        );
+        )
         const result = contract.interface.decodeFunctionResult("isUserVerified", isVerifiedResponse)
         expect(result[0]).to.be.true
     })
@@ -64,12 +64,12 @@ describe('ComplianceBridge', () => {
             signer.provider,
             contract.address,
             contract.interface.encodeFunctionData("getVerificationData", [signer.address])
-        );
+        )
         const result = contract.interface.decodeFunctionResult("getVerificationData", verificationData)
         expect(result.verificationData.length).to.be.greaterThan(0);
         for (const details of result.verificationData) {
-            expect(details.issuerAddress.length).to.be.greaterThan(0);
-            expect(details.issuerAddress).to.be.equal(contract.address);
+            expect(details.issuerAddress.length).to.be.greaterThan(0)
+            expect(details.issuerAddress).to.be.equal(contract.address)
         }
     })
 })
