@@ -167,8 +167,8 @@ impl AttestationReport {
 
         let chain: Vec<&[u8]> = vec![&ias_cert];
 
-        // set as 04.11.23(dd.mm.yy) - should be valid for the foreseeable future, and not rely on SystemTime
-        let time_stamp = webpki::Time::from_seconds_since_unix_epoch(1_699_088_856);
+        // set as 16.05.25(dd.mm.yy) - should be valid for the foreseeable future, and not rely on SystemTime
+        let time_stamp = webpki::Time::from_seconds_since_unix_epoch(1747391051);
 
         // note: there's no way to not validate the time, and we don't want to write this code
         // ourselves. We also can't just ignore the error message, since that means that the rest of
