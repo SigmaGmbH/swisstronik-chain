@@ -32,9 +32,9 @@ ifeq ($(AS_MODE), true)
 endif
 
 ifneq ($(PRODUCTION_MODE), true) 
-	Enclave_config_file := Enclave.config.production.xml
-else 
 	Enclave_config_file := Enclave.config.development.xml
+else 
+	Enclave_config_file := Enclave.config.production.xml
 endif
 
 # DEFINEs
@@ -65,6 +65,7 @@ define compile_protobuf
 endef
 
 define compile_enclave_rust
+	@echo "Building enclave in production mode: " $(PRODUCTION_MODE)
 	@echo "Building enclave rust code with features: " $(Enclave_build_feature)
 	@RUSTFLAGS="-C target-cpu=native" cargo build --release --features "$(Enclave_build_feature)" --no-default-features
 endef
