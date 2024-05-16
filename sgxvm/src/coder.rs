@@ -3,7 +3,10 @@ use evm::backend::Basic;
 use primitive_types::{H160, U256, H256};
 use protobuf::Message;
 use crate::protobuf_generated::ffi;
-use std::vec::Vec;
+use std::{
+    vec::Vec,
+    string::String
+};
 
 fn u256_to_vec(value: U256) -> Vec<u8> {
     let mut buffer = [0u8; 32];
