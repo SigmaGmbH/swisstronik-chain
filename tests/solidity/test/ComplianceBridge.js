@@ -6,9 +6,9 @@ describe('ComplianceBridge', () => {
     let contract
 
     before(async () => {
-        const Counter = await ethers.getContractFactory('ComplianceProxy')
-        contract = await Counter.deploy()
-        await contract.deployed()
+        const [signer] = await ethers.getSigners()
+        const ComplianceProxyFactory = await ethers.getContractFactory('ComplianceProxy')
+        contract = new ethers.Contract("0x30252afe8c1683fd184c99a3c44aa5d547d59dd4", ComplianceProxyFactory.interface, signer);
     })
 
     it('Should be able to add verification details', async () => {
@@ -69,7 +69,7 @@ describe('ComplianceBridge', () => {
         expect(result[0].length).to.be.greaterThan(0);
         for (const details of result[0]) {
             expect(details.issuerAddress.length).to.be.greaterThan(0)
-            expect(details.issuerAddress).to.be.equal(contract.address)
+            expect(details.issuerAddress.toLowerCase()).to.be.equal(contract.address.toLowerCase())
         }
     })
 })
