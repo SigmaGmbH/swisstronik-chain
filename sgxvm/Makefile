@@ -35,6 +35,7 @@ ifneq ($(PRODUCTION_MODE), true)
 	Enclave_config_file := Enclave.config.development.xml
 else 
 	Enclave_config_file := Enclave.config.production.xml
+	Enclave_build_feature += production
 endif
 
 # DEFINEs
