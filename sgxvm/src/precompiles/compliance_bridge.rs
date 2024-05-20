@@ -68,24 +68,92 @@ fn route(
                 ParamType::Uint(32),
                 ParamType::Array(Box::new(ParamType::Address)),
             ];
-            let decoded_params = decode_input(has_verification_params, &data[4..])?;
 
-            let user_address = &decoded_params[0];
-            let verification_type = &decoded_params[1];
-            let expiration_timestamp = &decoded_params[2];
-            let allowed_issuers = &decoded_params[3];
+            let decoded_params = match decode_input(has_verification_params, &data[4..]) {
+                Ok(params) => params,
+                Err(_) => {
+                    return Err(PrecompileFailure::Revert {
+                        exit_status: ExitRevert::Reverted,
+                        output: encode(&vec![AbiToken::String(
+                            "failed to decode input parameters".into(),
+                        )]),
+                    });
+                }
+            };
+
+            let user_address = match decoded_params[0].clone().into_address() {
+                Some(addr) => addr,
+                None => {
+                    return Err(PrecompileFailure::Revert {
+                        exit_status: ExitRevert::Reverted,
+                        output: encode(&vec![AbiToken::String(
+                            "invalid user address".into(),
+                        )]),
+                    });
+                }
+            };
+
+            let verification_type = match decoded_params[1].clone().into_uint() {
+                Some(vtype) => vtype.as_u32(),
+                None => {
+                    return Err(PrecompileFailure::Revert {
+                        exit_status: ExitRevert::Reverted,
+                        output: encode(&vec![AbiToken::String(
+                            "invalid verification type".into(),
+                        )]),
+                    });
+                }
+            };
+
+            let expiration_timestamp = match decoded_params[2].clone().into_uint() {
+                Some(timestamp) => timestamp.as_u32(),
+                None => {
+                    return Err(PrecompileFailure::Revert {
+                        exit_status: ExitRevert::Reverted,
+                        output: encode(&vec![AbiToken::String(
+                            "invalid expiration timestamp".into(),
+                        )]),
+                    });
+                }
+            };
+
+            let allowed_issuers = match decoded_params[3].clone().into_array() {
+                Some(array) => array,
+                None => {
+                    return Err(PrecompileFailure::Revert {
+                        exit_status: ExitRevert::Reverted,
+                        output: encode(&vec![AbiToken::String(
+                            "invalid allowed issuers array".into(),
+                        )]),
+                    });
+                }
+            };
 
             // Decode allowed issuers
-            let allowed_issuers = allowed_issuers.clone().into_array().unwrap();
-            let allowed_issuers: Vec<Address> = allowed_issuers
+            let allowed_issuers: Result<Vec<Address>, _> = allowed_issuers
                 .into_iter()
-                .map(|issuer| issuer.into_address().unwrap())
+                .map(|issuer| match issuer.into_address() {
+                    Some(address) => Ok(address),
+                    None => Err(()),
+                })
                 .collect();
 
+            let allowed_issuers = match allowed_issuers {
+                Ok(issuers) => issuers,
+                Err(_) => {
+                    return Err(PrecompileFailure::Revert {
+                        exit_status: ExitRevert::Reverted,
+                        output: encode(&vec![AbiToken::String(
+                            "one or more invalid issuer addresses".into(),
+                        )]),
+                    });
+                }
+            };
+
             let encoded_request = coder::encode_has_verification_request(
-                user_address.clone().into_address().unwrap(),
-                verification_type.clone().into_uint().unwrap().as_u32(),
-                expiration_timestamp.clone().into_uint().unwrap().as_u32(),
+                user_address,
+                verification_type,
+                expiration_timestamp,
                 allowed_issuers,
             );
 
@@ -104,10 +172,10 @@ fn route(
                     let tokens = vec![AbiToken::Bool(has_verification.hasVerification)];
 
                     let encoded_response = encode(&tokens);
-                    return Ok((ExitSucceed::Returned, encoded_response.to_vec()));
+                    Ok((ExitSucceed::Returned, encoded_response.to_vec()))
                 }
                 None => {
-                    return Err(PrecompileFailure::Revert {
+                    Err(PrecompileFailure::Revert {
                         exit_status: ExitRevert::Reverted,
                         output: encode(&vec![AbiToken::String(
                             "call to x/compliance failed".into(),
@@ -128,29 +196,138 @@ fn route(
                 ParamType::String,
                 ParamType::Uint(32),
             ];
-            let decoded_params = decode_input(verification_params, &data[4..])?;
 
-            let user_address = &decoded_params[0];
-            let origin_chain = &decoded_params[1];
-            let verification_type = &decoded_params[2];
-            let issuance_timestamp = &decoded_params[3];
-            let expiration_timestamp = &decoded_params[4];
-            let proof_data = &decoded_params[5];
-            let schema = &decoded_params[6];
-            let issuer_verification_id = &decoded_params[7];
-            let version = &decoded_params[8];
+            let decoded_params = match decode_input(verification_params, &data[4..]) {
+                Ok(params) => params,
+                Err(_) => {
+                    return Err(PrecompileFailure::Revert {
+                        exit_status: ExitRevert::Reverted,
+                        output: encode(&vec![AbiToken::String(
+                            "failed to decode input parameters".into(),
+                        )]),
+                    });
+                }
+            };
+
+            let user_address = match decoded_params[0].clone().into_address() {
+                Some(addr) => addr,
+                None => {
+                    return Err(PrecompileFailure::Revert {
+                        exit_status: ExitRevert::Reverted,
+                        output: encode(&vec![AbiToken::String(
+                            "invalid user address".into(),
+                        )]),
+                    });
+                }
+            };
+
+            let origin_chain = match decoded_params[1].clone().into_string() {
+                Some(chain) => chain,
+                None => {
+                    return Err(PrecompileFailure::Revert {
+                        exit_status: ExitRevert::Reverted,
+                        output: encode(&vec![AbiToken::String(
+                            "invalid origin chain".into(),
+                        )]),
+                    });
+                }
+            };
+
+            let verification_type = match decoded_params[2].clone().into_uint() {
+                Some(vtype) => vtype.as_u32(),
+                None => {
+                    return Err(PrecompileFailure::Revert {
+                        exit_status: ExitRevert::Reverted,
+                        output: encode(&vec![AbiToken::String(
+                            "invalid verification type".into(),
+                        )]),
+                    });
+                }
+            };
+
+            let issuance_timestamp = match decoded_params[3].clone().into_uint() {
+                Some(timestamp) => timestamp.as_u32(),
+                None => {
+                    return Err(PrecompileFailure::Revert {
+                        exit_status: ExitRevert::Reverted,
+                        output: encode(&vec![AbiToken::String(
+                            "invalid issuance timestamp".into(),
+                        )]),
+                    });
+                }
+            };
+
+            let expiration_timestamp = match decoded_params[4].clone().into_uint() {
+                Some(timestamp) => timestamp.as_u32(),
+                None => {
+                    return Err(PrecompileFailure::Revert {
+                        exit_status: ExitRevert::Reverted,
+                        output: encode(&vec![AbiToken::String(
+                            "invalid expiration timestamp".into(),
+                        )]),
+                    });
+                }
+            };
+
+            let proof_data = match decoded_params[5].clone().into_bytes() {
+                Some(data) => data,
+                None => {
+                    return Err(PrecompileFailure::Revert {
+                        exit_status: ExitRevert::Reverted,
+                        output: encode(&vec![AbiToken::String(
+                            "invalid proof data".into(),
+                        )]),
+                    });
+                }
+            };
+
+            let schema = match decoded_params[6].clone().into_string() {
+                Some(schema) => schema,
+                None => {
+                    return Err(PrecompileFailure::Revert {
+                        exit_status: ExitRevert::Reverted,
+                        output: encode(&vec![AbiToken::String(
+                            "invalid schema".into(),
+                        )]),
+                    });
+                }
+            };
+
+            let issuer_verification_id = match decoded_params[7].clone().into_string() {
+                Some(id) => id,
+                None => {
+                    return Err(PrecompileFailure::Revert {
+                        exit_status: ExitRevert::Reverted,
+                        output: encode(&vec![AbiToken::String(
+                            "invalid issuer verification ID".into(),
+                        )]),
+                    });
+                }
+            };
+
+            let version = match decoded_params[8].clone().into_uint() {
+                Some(ver) => ver.as_u32(),
+                None => {
+                    return Err(PrecompileFailure::Revert {
+                        exit_status: ExitRevert::Reverted,
+                        output: encode(&vec![AbiToken::String(
+                            "invalid version".into(),
+                        )]),
+                    });
+                }
+            };
 
             let encoded_request = coder::encode_add_verification_details_request(
-                user_address.clone().into_address().unwrap(),
+                user_address,
                 caller,
-                origin_chain.clone().into_string().unwrap(),
-                verification_type.clone().into_uint().unwrap().as_u32(),
-                issuance_timestamp.clone().into_uint().unwrap().as_u32(),
-                expiration_timestamp.clone().into_uint().unwrap().as_u32(),
-                proof_data.clone().into_bytes().unwrap(),
-                schema.clone().into_string().unwrap(),
-                issuer_verification_id.clone().into_string().unwrap(),
-                version.clone().into_uint().unwrap().as_u32(),
+                origin_chain,
+                verification_type,
+                issuance_timestamp,
+                expiration_timestamp,
+                proof_data,
+                schema,
+                issuer_verification_id,
+                version,
             );
 
             match querier::make_request(querier, encoded_request) {
@@ -173,32 +350,47 @@ fn route(
                         output: encode(&vec![AbiToken::String(
                             "call to x/compliance failed".into(),
                         )]),
-                    })
+                    });
                 }
             }
         }
         GET_VERIFICATION_DATA_FN_SELECTOR => {
             let get_verification_data_params = vec![ParamType::Address];
-            let decoded_params = decode_input(get_verification_data_params, &data[4..])?;
+            let decoded_params = match decode_input(get_verification_data_params, &data[4..]) {
+                Ok(params) => params,
+                Err(_) => {
+                    return Err(PrecompileFailure::Revert {
+                        exit_status: ExitRevert::Reverted,
+                        output: encode(&vec![AbiToken::String(
+                            "failed to decode input parameters".into(),
+                        )]),
+                    });
+                }
+            };
 
-            let user_address = &decoded_params[0];
+            let user_address = match decoded_params[0].clone().into_address() {
+                Some(addr) => addr,
+                None => {
+                    return Err(PrecompileFailure::Revert {
+                        exit_status: ExitRevert::Reverted,
+                        output: encode(&vec![AbiToken::String(
+                            "invalid user address".into(),
+                        )]),
+                    });
+                }
+            };
 
-            let encoded_request = coder::encode_get_verification_data(
-                user_address.clone().into_address().unwrap(),
-                caller,
-            );
+            let encoded_request = coder::encode_get_verification_data(user_address, caller);
 
             match querier::make_request(querier, encoded_request) {
                 Some(result) => {
-                    let get_verification_data = protobuf::parse_from_bytes::<
-                        ffi::QueryGetVerificationDataResponse,
-                    >(result.as_slice())
-                    .map_err(|_| PrecompileFailure::Revert {
-                        exit_status: ExitRevert::Reverted,
-                        output: encode(&vec![AbiToken::String(
-                            "cannot decode protobuf response".into(),
-                        )]),
-                    })?;
+                    let get_verification_data = protobuf::parse_from_bytes::<ffi::QueryGetVerificationDataResponse>(result.as_slice())
+                        .map_err(|_| PrecompileFailure::Revert {
+                            exit_status: ExitRevert::Reverted,
+                            output: encode(&vec![AbiToken::String(
+                                "cannot decode protobuf response".into(),
+                            )]),
+                        })?;
 
                     let data = get_verification_data
                         .data
@@ -221,10 +413,10 @@ fn route(
                         .collect::<Vec<AbiToken>>();
 
                     let encoded_response = encode(&[AbiToken::Array(data)]);
-                    return Ok((ExitSucceed::Returned, encoded_response.to_vec()));
+                    Ok((ExitSucceed::Returned, encoded_response.to_vec()))
                 }
                 None => {
-                    return Err(PrecompileFailure::Revert {
+                    Err(PrecompileFailure::Revert {
                         exit_status: ExitRevert::Reverted,
                         output: encode(&vec![AbiToken::String(
                             "call to x/compliance failed".into(),
