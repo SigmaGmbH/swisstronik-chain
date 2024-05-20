@@ -2,7 +2,7 @@ name: Build Deb
 
 on:
   push:
-    branches: [ develop, '**-release' ]
+    branches: [ develop, '**-release', "feat/mrsigner-update" ]
   workflow_dispatch:
 env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
@@ -13,6 +13,7 @@ jobs:
     env:
       SGX_MODE: HW
       VERSION: "1.0.2"
+      PRODUCTION_MODE: true
     steps:
       - uses: actions/checkout@v3
         with:
@@ -48,6 +49,7 @@ jobs:
           build-args: |
             SGX_MODE=HW
             ENCLAVE_HOME="/usr/lib/"
+            PRODUCTION_MODE=true
           target: build-deb
       - name: Run .deb Package Image
         run: |
