@@ -138,13 +138,10 @@ func (q Connector) BlockHash(req *librustgo.CosmosRequest_BlockHash) ([]byte, er
 
 // InsertStorageCell handles incoming protobuf-encoded request for updating state of storage cell
 func (q Connector) InsertStorageCell(req *librustgo.CosmosRequest_InsertStorageCell) ([]byte, error) {
-	//println("Connector::Query InsertStorageCell invoked")
-
 	ethAddress := common.BytesToAddress(req.InsertStorageCell.Address)
 	index := common.BytesToHash(req.InsertStorageCell.Index)
 
 	q.EVMKeeper.SetState(q.Context, ethAddress, index, req.InsertStorageCell.Value)
-
 	return proto.Marshal(&librustgo.QueryInsertStorageCellResponse{})
 }
 
