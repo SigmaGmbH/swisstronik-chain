@@ -15,6 +15,7 @@ Enclave_build_feature = hardware_mode
 # Enable the security flags
 Enclave_Security_Link_Flags := -Wl,-z,relro,-z,now,-z,noexecstack
 Enclave_config_file = Enclave.config.development.xml
+Enclave_signing_key = Enclave_dev_private.pem
 
 # ENCLAVE SETTINGS
 ifneq ($(SGX_MODE), HW)
@@ -33,8 +34,10 @@ endif
 
 ifneq ($(PRODUCTION_MODE), true) 
 	Enclave_config_file := Enclave.config.development.xml
+	Enclave_signing_key := Enclave_dev_private.pem
 else 
 	Enclave_config_file := Enclave.config.production.xml
+	Enclave_signing_key := Enclave_private.pem
 	Enclave_build_feature += production
 endif
 
@@ -124,7 +127,7 @@ define sign_enclave
 	@echo "Sign enclave using"
 	@/opt/intel/sgxsdk/bin/x64/sgx_sign -version
 	@mkdir -p $(CURDIR)/sgx-artifacts/bin
-	@/opt/intel/sgxsdk/bin/x64/sgx_sign sign -key $(CURDIR)/Enclave_private.pem -enclave $(CURDIR)/enclave.unsigned.so -out $(CURDIR)/sgx-artifacts/bin/enclave.signed.so -config $(CURDIR)/$(Enclave_config_file)
+	@/opt/intel/sgxsdk/bin/x64/sgx_sign sign -key $(CURDIR)/$(Enclave_signing_key) -enclave $(CURDIR)/enclave.unsigned.so -out $(CURDIR)/sgx-artifacts/bin/enclave.signed.so -config $(CURDIR)/$(Enclave_config_file)
 endef
 
 define sgx_build
