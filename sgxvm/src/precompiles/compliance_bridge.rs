@@ -178,7 +178,7 @@ fn route(
                     Err(PrecompileFailure::Revert {
                         exit_status: ExitRevert::Reverted,
                         output: encode(&vec![AbiToken::String(
-                            "call to x/compliance failed".into(),
+                            "call to hasVerification function to x/compliance failed".into(),
                         )]),
                     })
                 }
@@ -353,7 +353,7 @@ fn route(
                     return Err(PrecompileFailure::Revert {
                         exit_status: ExitRevert::Reverted,
                         output: encode(&vec![AbiToken::String(
-                            "call to x/compliance failed".into(),
+                            "call to addVerificationDetails to x/compliance failed".into(),
                         )]),
                     });
                 }
@@ -424,7 +424,7 @@ fn route(
                     Err(PrecompileFailure::Revert {
                         exit_status: ExitRevert::Reverted,
                         output: encode(&vec![AbiToken::String(
-                            "call to x/compliance failed".into(),
+                            "call to getVerificationData to x/compliance failed".into(),
                         )]),
                     })
                 }
