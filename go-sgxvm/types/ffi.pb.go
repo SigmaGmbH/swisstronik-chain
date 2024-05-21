@@ -1897,8 +1897,8 @@ func (x *QueryGetVerificationData) GetIssuerAddress() []byte {
 	return nil
 }
 
-// VerificationDetails must have same members with VerificationDetails in "proto/swisstronik/compliance/entities.proto"
-// But the member types can be different, such as string to bytes
+// VerificationDetails must have same members with VerificationDetails in "sgxvm/proto/ffi.proto"
+// But the member types can be different, such as string(address) to bytes
 type VerificationDetails struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache

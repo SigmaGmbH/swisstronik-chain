@@ -67,6 +67,8 @@ message Verification {
     string issuer_address = 3;
 }
 
+// VerificationDetails must have same members with VerificationDetails in "proto/swisstronik/compliance/entities.proto"
+// But the member types can be different, such as string(address) to bytes
 message VerificationDetails {
     // Verification issuer address
     string issuer_address = 1;

@@ -332,9 +332,9 @@ fn route(
 
             match querier::make_request(querier, encoded_request) {
                 Some(result) => {
-                    let _ = protobuf::parse_from_bytes::<ffi::QueryAddVerificationDetailsResponse>(
-                        result.as_slice(),
-                    )
+                    let added_verification = protobuf::parse_from_bytes::<
+                        ffi::QueryAddVerificationDetailsResponse,
+                    >(result.as_slice())
                     .map_err(|_| PrecompileFailure::Revert {
                         exit_status: ExitRevert::Reverted,
                         output: encode(&vec![AbiToken::String(
@@ -342,7 +342,12 @@ fn route(
                         )]),
                     })?;
 
-                    Ok((ExitSucceed::Returned, Vec::default()))
+                    let token = vec![AbiToken::Bytes(
+                        added_verification.verificationId.clone().into(),
+                    )];
+                    let encoded_response = encode(&token);
+
+                    Ok((ExitSucceed::Returned, encoded_response.to_vec()))
                 }
                 None => {
                     return Err(PrecompileFailure::Revert {

@@ -22,6 +22,7 @@ describe('ComplianceBridge', () => {
         const res = await tx.wait()
         const parsedLog = contract.interface.parseLog(res.logs[0])
         expect(parsedLog.args.success).to.be.true
+        expect(parsedLog.args.data.length).to.be.greaterThan(0);
 
         const isVerifiedResponse = await sendShieldedQuery(
             signer.provider,

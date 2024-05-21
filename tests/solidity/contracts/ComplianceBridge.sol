@@ -30,7 +30,7 @@ interface IComplianceBridge {
         string memory schema,
         string memory issuerVerificationId,
         uint32 version
-    ) external;
+    ) external returns (bytes memory);
 
     function hasVerification(
         address userAddress,
@@ -52,7 +52,9 @@ contract ComplianceProxy {
 
     uint32 public constant VERIFICATION_TYPE = 2;
 
-    function markUserAsVerified(address userAddress) public {
+    function markUserAsVerified(
+        address userAddress
+    ) public returns (bytes memory) {
         // Use empty payload data for proof, schema, issuer's verification id and version for testing
         bytes memory proofData = new bytes(1);
         string memory originChain = "chain_1291-1";
@@ -75,12 +77,12 @@ contract ComplianceProxy {
         );
 
         (bool success, bytes memory data) = address(1028).call(payload);
-        emit VerificationResponse(success, data);
+        bytes memory verificationId = abi.decode(data, (bytes));
+        emit VerificationResponse(success, verificationId);
+        return verificationId;
     }
 
-    function isUserVerified(
-        address userAddress
-    ) public view returns (bool) {
+    function isUserVerified(address userAddress) public view returns (bool) {
         address[] memory allowedIssuers;
         bytes memory payload = abi.encodeCall(
             IComplianceBridge.hasVerification,
@@ -112,11 +114,7 @@ contract ComplianceProxy {
 
     function getVerificationData(
         address userAddress
-    )
-        public
-        view
-        returns (IComplianceBridge.VerificationData[] memory)
-    {
+    ) public view returns (IComplianceBridge.VerificationData[] memory) {
         bytes memory payload = abi.encodeCall(
             IComplianceBridge.getVerificationData,
             (userAddress, address(this))
