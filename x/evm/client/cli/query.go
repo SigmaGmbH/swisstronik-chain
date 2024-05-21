@@ -16,11 +16,9 @@
 package cli
 
 import (
-	rpctypes "swisstronik/rpc/types"
-	"github.com/spf13/cobra"
-
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
+	"github.com/spf13/cobra"
 
 	"swisstronik/x/evm/types"
 )
@@ -70,7 +68,7 @@ func GetStorageCmd() *cobra.Command {
 				Key:     key,
 			}
 
-			res, err := queryClient.Storage(rpctypes.ContextWithHeight(clientCtx.Height), req)
+			res, err := queryClient.Storage(cmd.Context(), req)
 			if err != nil {
 				return err
 			}
@@ -107,7 +105,7 @@ func GetCodeCmd() *cobra.Command {
 				Address: address,
 			}
 
-			res, err := queryClient.Code(rpctypes.ContextWithHeight(clientCtx.Height), req)
+			res, err := queryClient.Code(cmd.Context(), req)
 			if err != nil {
 				return err
 			}

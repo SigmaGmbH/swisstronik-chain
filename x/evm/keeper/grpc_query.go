@@ -178,11 +178,9 @@ func (k Keeper) Storage(c context.Context, req *types.QueryStorageRequest) (*typ
 	key := common.HexToHash(req.Key)
 
 	stateBytes := k.GetState(ctx, address, key)
-	state := common.BytesToHash(stateBytes)
-	stateHex := state.Hex()
 
 	return &types.QueryStorageResponse{
-		Value: stateHex,
+		Value: common.Bytes2Hex(stateBytes),
 	}, nil
 }
 
