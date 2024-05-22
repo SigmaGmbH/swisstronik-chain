@@ -279,6 +279,26 @@ func (k Keeper) GetVerificationDetails(ctx sdk.Context, verificationDetailsId []
 	return &verificationDetails, nil
 }
 
+func (k Keeper) GetVerificationDetailsByIssuer(ctx sdk.Context, userAddress sdk.Address, issuerAddress sdk.Address) ([]*types.VerificationDetails, error) {
+	addressDetails, err := k.GetAddressDetails(ctx, userAddress)
+	if err != nil {
+		return nil, err
+	}
+
+	var filtered []*types.VerificationDetails
+	for _, verification := range addressDetails.Verifications {
+		if verification.IssuerAddress != issuerAddress.String() {
+			continue
+		}
+		verificationDetails, err := k.GetVerificationDetails(ctx, verification.VerificationId)
+		if err != nil {
+			return nil, err
+		}
+		filtered = append(filtered, verificationDetails)
+	}
+	return filtered, nil
+}
+
 // HasVerificationOfType checks if user has verifications of specific type (for example, passed KYC) from provided issuers.
 // If there is no provided expected issuers, this function will check if user has any verification of appropriate type.
 func (k Keeper) HasVerificationOfType(ctx sdk.Context, userAddress sdk.Address, expectedType types.VerificationType, expectedIssuers []sdk.Address) (bool, error) {

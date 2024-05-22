@@ -16,15 +16,15 @@
 package types
 
 import (
-	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"math/big"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-
 	"github.com/ethereum/go-ethereum/core"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+
 	compliancetypes "swisstronik/x/compliance/types"
 	feemarkettypes "swisstronik/x/feemarket/types"
 )
@@ -69,6 +69,7 @@ type FeeMarketKeeper interface {
 type ComplianceKeeper interface {
 	AddVerificationDetails(ctx sdk.Context, userAddress sdk.Address, verificationType compliancetypes.VerificationType, details *compliancetypes.VerificationDetails) ([]byte, error)
 	HasVerificationOfType(ctx sdk.Context, userAddress sdk.Address, expectedType compliancetypes.VerificationType, expectedIssuers []sdk.Address) (bool, error)
+	GetVerificationDetailsByIssuer(ctx sdk.Context, userAddress sdk.Address, issuerAddress sdk.Address) ([]*compliancetypes.VerificationDetails, error)
 }
 
 // Event Hooks
