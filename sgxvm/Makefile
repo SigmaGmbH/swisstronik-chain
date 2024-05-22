@@ -14,8 +14,8 @@ Service_Library_Name = sgx_tservice
 Enclave_build_feature = hardware_mode
 # Enable the security flags
 Enclave_Security_Link_Flags := -Wl,-z,relro,-z,now,-z,noexecstack
-Enclave_config_file = Enclave.config.development.xml
-Enclave_signing_key = Enclave_dev_private.pem
+Enclave_config_file ?= Enclave.config.development.xml
+Enclave_signing_key ?= Enclave_dev_private.pem
 
 # ENCLAVE SETTINGS
 ifneq ($(SGX_MODE), HW)
@@ -112,8 +112,8 @@ define compile_into_enclave_t_o
 endef
 
 define compile_unsigned_enclave
-	@echo "Compile into unsinged enclave"
-	@$(CXX) $(CURDIR)/Enclave_t.o -o $(CURDIR)/enclave.unsigned.so $(Enclave_Security_Link_Flags) -fPIC \
+	@echo "Compile into unsigned enclave"
+	$(CXX) $(CURDIR)/Enclave_t.o -o $(CURDIR)/enclave.unsigned.so $(Enclave_Security_Link_Flags) -fPIC \
 	    -Wl,--no-undefined -nostdlib -nodefaultlibs -nostartfiles -L/opt/intel/sgxsdk/lib64 \
 		-Wl,--whole-archive -l$(Trts_Library_Name) -Wl,--no-whole-archive \
 		-Wl,--start-group -lsgx_tstdc -lsgx_tcxx -lsgx_dcap_tvl -l$(Service_Library_Name) -lsgx_tcrypto -lsgx_tprotected_fs -lsgx_pthread -L$(CURDIR)/sgx-artifacts/lib -lenclave -Wl,--end-group \
@@ -127,7 +127,7 @@ define sign_enclave
 	@echo "Sign enclave using"
 	@/opt/intel/sgxsdk/bin/x64/sgx_sign -version
 	@mkdir -p $(CURDIR)/sgx-artifacts/bin
-	@/opt/intel/sgxsdk/bin/x64/sgx_sign sign -key $(CURDIR)/$(Enclave_signing_key) -enclave $(CURDIR)/enclave.unsigned.so -out $(CURDIR)/sgx-artifacts/bin/enclave.signed.so -config $(CURDIR)/$(Enclave_config_file)
+	/opt/intel/sgxsdk/bin/x64/sgx_sign sign -key $(CURDIR)/$(Enclave_signing_key) -enclave $(CURDIR)/enclave.unsigned.so -out $(CURDIR)/sgx-artifacts/bin/enclave.signed.so -config $(CURDIR)/$(Enclave_config_file)
 endef
 
 define sgx_build
