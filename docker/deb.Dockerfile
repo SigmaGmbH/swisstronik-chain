@@ -32,6 +32,8 @@ RUN apt-get install -y automake autoconf build-essential libtool git
 
 ARG SGX_MODE=HW
 ENV SGX_MODE=${SGX_MODE}
+ARG PRODUCTION_MODE=true
+ENV PRODUCTION_MODE=${PRODUCTION_MODE}
 ENV SGX_SDK="/opt/intel/sgxsdk"
 ENV PATH="${PATH}:${SGX_SDK}/bin:${SGX_SDK}/bin/x64"
 ENV PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${SGX_SDK}/pkgconfig"
