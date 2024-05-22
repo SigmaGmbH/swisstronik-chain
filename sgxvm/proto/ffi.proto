@@ -139,12 +139,18 @@ message QueryBlockHashResponse { bytes hash = 1; }
 message QueryAddVerificationDetails {
   bytes userAddress = 1;
   bytes issuerAddress = 2;
-  uint32 verificationType = 3;
-  uint32 issuanceTimestamp = 4;
-  uint32 expirationTimestamp = 5;
-  bytes proofData = 6;
+  string originChain = 3;
+  uint32 verificationType = 4;
+  uint32 issuanceTimestamp = 5;
+  uint32 expirationTimestamp = 6;
+  bytes proofData = 7;
+  string schema = 8;
+  string issuerVerificationId = 9;
+  uint32 version = 10;
 }
-message QueryAddVerificationDetailsResponse {}
+message QueryAddVerificationDetailsResponse {
+  bytes verificationId = 1;
+}
 
 message QueryHasVerification {
   bytes userAddress = 1;
@@ -154,6 +160,34 @@ message QueryHasVerification {
 }
 message QueryHasVerificationResponse {
   bool hasVerification = 1;
+}
+
+message QueryGetVerificationData {
+  bytes userAddress = 1;
+  bytes issuerAddress = 2;
+}
+// VerificationDetails must have same members with VerificationDetails in "sgxvm/proto/ffi.proto"
+// But the member types can be different, such as string(address) to bytes
+message VerificationDetails {
+  // Verification issuer address
+  bytes issuerAddress = 1;
+  // From which chain proof was transferred
+  string originChain = 2;
+  // Original issuance timestamp
+  uint32 issuanceTimestamp = 3;
+  // Original expiration timestamp
+  uint32 expirationTimestamp = 4;
+  // Original proof data (ZK-proof)
+  bytes originalData = 5;
+  // ZK-proof original schema
+  string schema = 6;
+  // Verification id for checking(KYC/KYB/AML etc) from issuer side
+  string issuerVerificationId = 7;
+  // Version
+  uint32 version = 8;
+}
+message QueryGetVerificationDataResponse {
+  repeated VerificationDetails data = 1;
 }
 
 message CosmosRequest {
@@ -171,6 +205,7 @@ message CosmosRequest {
     QueryBlockHash blockHash = 11;
     QueryAddVerificationDetails addVerificationDetails = 12;
     QueryHasVerification hasVerification = 13;
+    QueryGetVerificationData getVerificationData = 14;
   }
 }
 

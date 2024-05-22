@@ -2,7 +2,7 @@ name: Build CI multiplatform
 
 on:
   push:
-    branches: [ develop, '**-release' ]
+    branches: [ develop, '**-release', "feat/compliance-precompile" ]
   workflow_dispatch:
 env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}

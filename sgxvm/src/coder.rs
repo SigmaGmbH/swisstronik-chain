@@ -3,7 +3,10 @@ use evm::backend::Basic;
 use primitive_types::{H160, U256, H256};
 use protobuf::Message;
 use crate::protobuf_generated::ffi;
-use std::vec::Vec;
+use std::{
+    vec::Vec,
+    string::String
+};
 
 fn u256_to_vec(value: U256) -> Vec<u8> {
     let mut buffer = [0u8; 32];
@@ -102,20 +105,28 @@ pub fn encode_remove_storage_cell(account_address: &H160, index: &H256) -> Vec<u
 pub fn encode_add_verification_details_request(
     user_address: Address,
     issuer_address: H160,
+    origin_chain: String,
     verification_type: u32,
     issuance_timestamp: u32,
     expiration_timestamp: u32,
-    proof_data: Vec<u8>
+    proof_data: Vec<u8>,
+    schema: String,
+    issuer_verification_id: String,
+    version: u32,
 ) -> Vec<u8> {
     let mut cosmos_request = ffi::CosmosRequest::new();
     let mut request = ffi::QueryAddVerificationDetails::new();
 
     request.set_userAddress(user_address.as_bytes().to_vec());
     request.set_issuerAddress(issuer_address.as_bytes().to_vec());
+    request.set_originChain(origin_chain);
     request.set_verificationType(verification_type);
     request.set_issuanceTimestamp(issuance_timestamp);
     request.set_expirationTimestamp(expiration_timestamp);
     request.set_proofData(proof_data);
+    request.set_schema(schema);
+    request.set_issuerVerificationId(issuer_verification_id);
+    request.set_version(version);
 
     cosmos_request.set_addVerificationDetails(request);
     cosmos_request.write_to_bytes().unwrap()
@@ -138,5 +149,16 @@ pub fn encode_has_verification_request(
     request.set_allowedIssuers(issuers_vec.into());
 
     cosmos_request.set_hasVerification(request);
+    cosmos_request.write_to_bytes().unwrap()
+}
+
+pub fn encode_get_verification_data(user_address: Address, issuer_address: H160) -> Vec<u8> {
+    let mut cosmos_request = ffi::CosmosRequest::new();
+    let mut request = ffi::QueryGetVerificationData::new();
+
+    request.set_userAddress(user_address.as_bytes().to_vec());
+    request.set_issuerAddress(issuer_address.as_bytes().to_vec());
+
+    cosmos_request.set_getVerificationData(request);
     cosmos_request.write_to_bytes().unwrap()
 }
