@@ -34,6 +34,15 @@ func TestInitGenesis_Validation(t *testing.T) {
 			expPanic: true,
 		},
 		{
+			name: "invalid operator type",
+			genState: &types.GenesisState{
+				Operators: []*types.OperatorDetails{
+					{Operator: "swtr199wynlfwhj6ytkvujjf6mel5z7fl0mwzqck8l6"},
+				},
+			},
+			expPanic: true,
+		},
+		{
 			name: "invalid issuers",
 			genState: &types.GenesisState{
 				Issuers: []*types.IssuerGenesisAccount{
@@ -198,6 +207,33 @@ func TestInitGenesis_Validation(t *testing.T) {
 				},
 			},
 			expPanic: false,
+		},
+		{
+			name: "invalid verification type",
+			genState: &types.GenesisState{
+				Issuers: []*types.IssuerGenesisAccount{
+					{
+						Address: "swtr199wynlfwhj6ytkvujjf6mel5z7fl0mwzqck8l6",
+						Details: &types.IssuerDetails{
+							Name: "test issuer",
+						},
+					},
+				},
+				AddressDetails: []*types.GenesisAddressDetails{
+					{
+						Address: "swtr1996rrzmj36jjd6hmfenluhxs664pdg3aewe3le",
+						Details: &types.AddressDetails{
+							IsVerified: true,
+							IsRevoked:  false,
+							Verifications: []*types.Verification{{
+								//Type:           types.VerificationType_VT_UNSPECIFIED, // missing verification type
+								VerificationId: hexutils.HexToBytes("1075ee73240c62b820651c22f22f9371dccde1963dec74afffa493902439def2"),
+							}},
+						},
+					},
+				},
+			},
+			expPanic: true,
 		},
 	}
 

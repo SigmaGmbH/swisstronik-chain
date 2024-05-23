@@ -7,23 +7,27 @@ import "swisstronik/compliance/params.proto";
 option go_package = "swisstronik/x/compliance/types";
 
 enum VerificationType {
-    VT_KYC = 0; // Know Your Custom
-    VT_KYB = 1; // Know Your Business
-    VT_KYW = 2; // Know Your Wallet
-    VT_HUMANITY = 3; // Check humanity
-    VT_AML = 4; // Anti Money Laundering (check transactions)
-    VT_ADDRESS = 5;
-    VT_CUSTOM = 6;
-    VT_CREDIT_SCORE = 7;
+    // VT_UNSPECIFIED defines an invalid/undefined verification type.
+    VT_UNSPECIFIED = 0;
+    VT_KYC = 1; // Know Your Custom
+    VT_KYB = 2; // Know Your Business
+    VT_KYW = 3; // Know Your Wallet
+    VT_HUMANITY = 4; // Check humanity
+    VT_AML = 5; // Anti Money Laundering (check transactions)
+    VT_ADDRESS = 6;
+    VT_CUSTOM = 7;
+    VT_CREDIT_SCORE = 8;
 }
 
 /// V1 ///
 
 enum OperatorType {
+    // OT_UNSPECIFIED defines an invalid/undefined operator type.
+    OT_UNSPECIFIED = 0;
     // Initial Operator, can't be removed from the list of operators.
     // Both initial (constant) and regular operators can add or remove regular operators.
-    OT_INITIAL = 0;
-    OT_REGULAR = 1;
+    OT_INITIAL = 1;
+    OT_REGULAR = 2;
 }
 
 message OperatorDetails {
