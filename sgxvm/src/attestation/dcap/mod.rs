@@ -279,7 +279,7 @@ pub fn verify_dcap_quote(quote: Vec<u8>) -> SgxResult<Vec<u8>> {
     }
 
     // Check for debug mode
-    #[cfg(feature = "mainnet")]
+    #[cfg(feature = "production")]
     {
         let is_debug_mode = quote3.report_body.attributes.flags & SGX_FLAGS_DEBUG;
         if (is_debug_mode) != 0 {

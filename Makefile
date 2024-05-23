@@ -1,6 +1,7 @@
 VERSION := v1.0.2
 COMMIT := $(shell git log -1 --format='%H')
 ENCLAVE_HOME ?= $(HOME)/.swisstronik-enclave
+PRODUCTION_MODE ?= false
 
 ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=swisstronik \
 	-X github.com/cosmos/cosmos-sdk/version.ServerName=swisstronikd \

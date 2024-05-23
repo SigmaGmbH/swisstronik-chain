@@ -79,7 +79,7 @@ func InitGenesis(
 		k.SetCode(ctx, codeHash.Bytes(), code)
 
 		for _, storage := range account.Storage {
-			k.SetState(ctx, address, common.HexToHash(storage.Key), common.HexToHash(storage.Value).Bytes())
+			k.SetState(ctx, address, common.HexToHash(storage.Key), common.Hex2Bytes(storage.Value))
 		}
 	}
 
