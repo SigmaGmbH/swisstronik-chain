@@ -15,14 +15,14 @@ pub mod keys;
 pub mod utils;
 
 pub const SEED_SIZE: usize = 32;
-pub const SEED_FILENAME: &str = ".swtr_seed";
+pub const KEYMANAGER_FILENAME: &str = ".keymanager";
 pub const PUBLIC_KEY_SIZE: usize = 32;
 pub const PRIVATE_KEY_SIZE: usize = 32;
 
 lazy_static! {
     pub static ref UNSEALED_KEY_MANAGER: Option<KeyManager> = KeyManager::unseal().ok();
-    pub static ref SEED_HOME: OsString =
-        env::var_os("SEED_HOME").unwrap_or_else(get_default_seed_home);
+    pub static ref KEYMANAGER_HOME: OsString =
+        env::var_os("KEYMANAGER_HOME").unwrap_or_else(get_default_keymanager_home);
 }
 
 /// Handles initialization of first node in network. This node works as 
@@ -95,7 +95,7 @@ impl KeyManager {
 
     /// Checks if file with sealed master key exists
     pub fn exists() -> SgxResult<bool> {
-        match SgxFile::open(format!("{}/{}", SEED_HOME.to_str().unwrap(), SEED_FILENAME)) {
+        match SgxFile::open(format!("{}/{}", KEYMANAGER_HOME.to_str().unwrap(), KEYMANAGER_FILENAME)) {
             Ok(_) => Ok(true),
             Err(ref err) if err.kind() == std::io::ErrorKind::NotFound => Ok(false),
             Err(err) => {
@@ -131,12 +131,12 @@ impl KeyManager {
     pub fn unseal() -> SgxResult<Self> {
         println!(
             "[KeyManager] Sealed file location: {}/{}",
-            SEED_HOME.to_str().unwrap(),
-            SEED_FILENAME
+            KEYMANAGER_HOME.to_str().unwrap(),
+            KEYMANAGER_FILENAME
         );
 
         // Unseal file with key manager
-        let sealed_file_path = format!("{}/{}", SEED_HOME.to_str().unwrap(), SEED_FILENAME);
+        let sealed_file_path = format!("{}/{}", KEYMANAGER_HOME.to_str().unwrap(), KEYMANAGER_FILENAME);
         let mut sealed_file = SgxFile::open(sealed_file_path).map_err(|err| {
             println!(
                 "[KeyManager] Cannot open file with key manager. Reason: {:?}",
@@ -265,15 +265,15 @@ impl KeyManager {
     }
 
     fn create_sealed_file() -> SgxResult<SgxFile> {
-        let seed_home_path = match SEED_HOME.to_str() {
+        let keymanager_home_path = match KEYMANAGER_HOME.to_str() {
             Some(path) => path,
             None => {
-                println!("[KeyManager] Cannot get SEED_HOME env");
+                println!("[KeyManager] Cannot get KEYMANAGER_HOME env");
                 return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
             }
         };
 
-        let sealed_file_path = format!("{}/{}", seed_home_path, SEED_FILENAME);
+        let sealed_file_path = format!("{}/{}", keymanager_home_path, KEYMANAGER_FILENAME);
         println!(
             "[KeyManager] Creating file for key manager. Location: {:?}",
             sealed_file_path
@@ -293,10 +293,10 @@ impl KeyManager {
 
 /// Tries to return path to $HOME/.swisstronik-enclave directory.
 /// If it cannot find home directory, panics with error
-fn get_default_seed_home() -> OsString {
+fn get_default_keymanager_home() -> OsString {
     let home_dir = env::home_dir().expect("[KeyManager] Cannot find home directory");
-    let default_seed_home = home_dir
+    let default_keymanager_home = home_dir
         .to_str()
         .expect("[KeyManager] Cannot decode home directory path");
-    OsString::from(format!("{}/.swisstronik-enclave", default_seed_home))
+    OsString::from(format!("{}/.swisstronik-enclave", default_keymanager_home))
 }

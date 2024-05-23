@@ -17,3 +17,4 @@ target/
 # other stuff
 .DS_Store
 *.swtr_seed
+*.keymanager

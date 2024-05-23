@@ -8,13 +8,14 @@ CXX=clang++
 SGX_MODE ?= HW
 ENCLAVE_HOME ?= $(HOME)/.swisstronik-enclave
 PRODUCTION_MODE ?= false
+VERSION := v1.0.2
 
 build:
 	@ENCLAVE_HOME=$(ENCLAVE_HOME) PRODUCTION_MODE=$(PRODUCTION_MODE) SGX_MODE=$(SGX_MODE) make build -C ../sgxvm/
 	@protoc --rust_out src/protobuf_generated/ proto/node.proto
 	@ENCLAVE_HOME=$(ENCLAVE_HOME) cargo build --release
-	@mkdir -p $(ENCLAVE_HOME) && cp $(CURDIR)/../sgxvm/sgx-artifacts/bin/enclave.signed.so $(ENCLAVE_HOME)/enclave.signed.so
-	@cp $(CURDIR)/target/release/libsgxvm_wrapper.so $(CURDIR)/internal/api/libsgx_wrapper.x86_64.so
+	@mkdir -p $(ENCLAVE_HOME) && cp $(CURDIR)/../sgxvm/sgx-artifacts/bin/enclave.signed.so $(ENCLAVE_HOME)/$(VERSION)_enclave.signed.so
+	@cp $(CURDIR)/target/release/libsgxvm_wrapper.so $(CURDIR)/internal/api/$(VERSION)_libsgx_wrapper.x86_64.so
 	@protoc --go_out=types --proto_path=../sgxvm/proto/ ../sgxvm/proto/ffi.proto
 	@protoc --go_out=types --proto_path=proto/ proto/node.proto
 	@cp types/github.com/SigmaGmbH/librustgo/types/* types/ && rm -rf types/github.com
@@ -23,8 +24,8 @@ build_d:
 	@ENCLAVE_HOME=$(ENCLAVE_HOME) PRODUCTION_MODE=$(PRODUCTION_MODE) SGX_MODE=$(SGX_MODE) make build_d -C ../sgxvm/
 	@protoc --rust_out src/protobuf_generated/ proto/node.proto
 	@ENCLAVE_HOME=$(ENCLAVE_HOME) cargo build --release
-	@mkdir -p $(ENCLAVE_HOME) && cp $(CURDIR)/../sgxvm/sgx-artifacts/bin/enclave.signed.so $(ENCLAVE_HOME)/enclave.signed.so
-	@cp $(CURDIR)/target/release/libsgxvm_wrapper.so $(CURDIR)/internal/api/libsgx_wrapper.x86_64.so
+	@mkdir -p $(ENCLAVE_HOME) && cp $(CURDIR)/../sgxvm/sgx-artifacts/bin/enclave.signed.so $(ENCLAVE_HOME)/$(VERSION)_enclave.signed.so
+	@cp $(CURDIR)/target/release/libsgxvm_wrapper.so $(CURDIR)/internal/api/$(VERSION)_libsgx_wrapper.x86_64.so
 	@protoc --go_out=types --proto_path=../sgxvm/proto/ ../sgxvm/proto/ffi.proto
 	@protoc --go_out=types --proto_path=proto/ proto/node.proto
 	@cp types/github.com/SigmaGmbH/librustgo/types/* types/ && rm -rf types/github.com
