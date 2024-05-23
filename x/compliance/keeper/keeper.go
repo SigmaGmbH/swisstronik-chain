@@ -185,6 +185,10 @@ func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.Address,
 		return nil, errors.Wrap(types.ErrInvalidIssuer, "issuer not verified")
 	}
 
+	if verificationType <= types.VerificationType_VT_UNSPECIFIED || verificationType > types.VerificationType_VT_CREDIT_SCORE {
+		return nil, errors.Wrap(types.ErrInvalidParam, "invalid verification type")
+	}
+
 	detailsBytes, err := details.Marshal()
 	if err != nil {
 		return nil, err
@@ -404,6 +408,10 @@ func (k Keeper) GetOperatorDetails(ctx sdk.Context, operator sdk.AccAddress) (*t
 // Initial operator can not be removed
 func (k Keeper) AddOperator(ctx sdk.Context, operator sdk.AccAddress, operatorType types.OperatorType) error {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixOperatorDetails)
+
+	if operatorType <= types.OperatorType_OT_UNSPECIFIED || operatorType > types.OperatorType_OT_REGULAR {
+		return errors.Wrap(types.ErrInvalidParam, "invalid operator type")
+	}
 
 	details := &types.OperatorDetails{
 		Operator:     operator.String(),

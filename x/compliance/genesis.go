@@ -18,6 +18,9 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 		if err != nil {
 			panic(err)
 		}
+		if operatorData.OperatorType <= types.OperatorType_OT_UNSPECIFIED || operatorData.OperatorType > types.OperatorType_OT_REGULAR {
+			panic(errors.Wrap(types.ErrInvalidParam, "operator type is undefined"))
+		}
 		if err := k.AddOperator(ctx, address, operatorData.OperatorType); err != nil {
 			panic(err)
 		}
@@ -77,6 +80,9 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 			// Check if verification data exists
 			if verificationData.VerificationId == nil {
 				panic(errors.Wrap(types.ErrInvalidParam, "verification id is nil"))
+			}
+			if verificationData.Type <= types.VerificationType_VT_UNSPECIFIED || verificationData.Type > types.VerificationType_VT_CREDIT_SCORE {
+				panic(errors.Wrap(types.ErrInvalidParam, "verification type is undefined"))
 			}
 			if _, err = k.GetVerificationDetails(ctx, verificationData.VerificationId); err != nil {
 				panic(err)

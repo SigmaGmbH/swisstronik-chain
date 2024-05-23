@@ -52,7 +52,6 @@ func (k msgServer) HandleAddOperator(goCtx context.Context, msg *types.MsgAddOpe
 	}
 
 	if err := k.AddOperator(ctx, operator, types.OperatorType_OT_REGULAR); err != nil {
-
 		return nil, err
 	}
 

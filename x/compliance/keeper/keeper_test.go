@@ -253,18 +253,38 @@ func (suite *KeeperTestSuite) TestAddVerificationDetails() {
 	from, _ = tests.RandomEthAddressWithPrivateKey()
 	signer := sdk.AccAddress(from.Bytes())
 
-	// Allow to add verification details verified by active issuer
+	verificationDetails := &types.VerificationDetails{
+		IssuerAddress:       issuer.String(),
+		OriginChain:         "test chain",
+		IssuanceTimestamp:   1712018692,
+		ExpirationTimestamp: 1715018692,
+		OriginalData:        hexutils.HexToBytes("B639DF194671CDE06EFAA368A404F72E3306DF0359117AC7E78EC2BE04B7629D"),
+	}
+	// Try to add verification details without verification type
 	verificationId, err := suite.keeper.AddVerificationDetails(
 		suite.ctx,
 		signer,
+		types.VerificationType_VT_UNSPECIFIED,
+		verificationDetails,
+	)
+	suite.Require().Error(err)
+	suite.Require().Nil(verificationId)
+
+	verificationId, err = suite.keeper.AddVerificationDetails(
+		suite.ctx,
+		signer,
+		types.VerificationType_VT_CREDIT_SCORE+1,
+		verificationDetails,
+	)
+	suite.Require().Error(err)
+	suite.Require().Nil(verificationId)
+
+	// Allow to add verification details verified by active issuer
+	verificationId, err = suite.keeper.AddVerificationDetails(
+		suite.ctx,
+		signer,
 		types.VerificationType_VT_KYC,
-		&types.VerificationDetails{
-			IssuerAddress:       issuer.String(),
-			OriginChain:         "test chain",
-			IssuanceTimestamp:   1712018692,
-			ExpirationTimestamp: 1715018692,
-			OriginalData:        hexutils.HexToBytes("B639DF194671CDE06EFAA368A404F72E3306DF0359117AC7E78EC2BE04B7629D"),
-		},
+		verificationDetails,
 	)
 	suite.Require().NoError(err)
 	suite.Require().NotNil(verificationId)
@@ -378,6 +398,17 @@ func (suite *KeeperTestSuite) TestSetVerificationDetails() {
 	resp, err := suite.keeper.GetVerificationDetails(suite.ctx, verificationId)
 	suite.Require().NoError(err)
 	suite.Require().Equal(verificationDetails, resp)
+}
+
+func (suite *KeeperTestSuite) TestInvalidOperatorType() {
+	from, _ := tests.RandomEthAddressWithPrivateKey()
+	operator := sdk.AccAddress(from.Bytes())
+
+	err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_UNSPECIFIED)
+	suite.Require().Error(err)
+
+	err = suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_REGULAR+1)
+	suite.Require().Error(err)
 }
 
 func (suite *KeeperTestSuite) TestInitialOperator() {
