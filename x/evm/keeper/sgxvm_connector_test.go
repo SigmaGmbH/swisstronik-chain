@@ -253,6 +253,7 @@ func requestAddVerificationDetails(
 	userAddress common.Address,
 	issuerAddress common.Address,
 	verificationType compliancetypes.VerificationType,
+	originChain string,
 	issuanceTimestamp uint32,
 	expirationTimestamp uint32,
 	proofData []byte,
@@ -266,6 +267,7 @@ func requestAddVerificationDetails(
 			AddVerificationDetails: &librustgo.QueryAddVerificationDetails{
 				UserAddress:          userAddress.Bytes(),
 				IssuerAddress:        issuerAddress.Bytes(),
+				OriginChain:          originChain,
 				VerificationType:     uint32(verificationType),
 				IssuanceTimestamp:    issuanceTimestamp,
 				ExpirationTimestamp:  expirationTimestamp,
@@ -302,10 +304,11 @@ func (suite *KeeperTestSuite) TestSingleVerificationDetails() {
 	}
 
 	var (
-		userAddress   common.Address
-		userAccount   sdk.AccAddress
-		issuerAddress common.Address
-		issuerAccount sdk.AccAddress
+		userAddress          common.Address
+		userAccount          sdk.AccAddress
+		issuerAddress        common.Address
+		issuerAccount        sdk.AccAddress
+		illegalIssuerAccount sdk.AccAddress
 
 		verificationType            = compliancetypes.VerificationType_VT_KYC
 		expectedVerificationDetails *types.VerificationDetails
@@ -316,6 +319,7 @@ func (suite *KeeperTestSuite) TestSingleVerificationDetails() {
 		userAccount = sdk.AccAddress(userAddress.Bytes())
 		issuerAddress = tests.RandomEthAddress()
 		issuerAccount = sdk.AccAddress(issuerAddress.Bytes())
+		illegalIssuerAccount = tests.RandomAccAddress()
 
 		// Verify issuer to add verification details which are verified by issuer
 		_ = suite.app.ComplianceKeeper.SetIssuerDetails(suite.ctx, issuerAccount, &compliancetypes.IssuerDetails{
@@ -372,7 +376,6 @@ func (suite *KeeperTestSuite) TestSingleVerificationDetails() {
 				suite.Require().NoError(err)
 				suite.Require().True(has)
 
-				illegalIssuerAccount := tests.RandomAccAddress()
 				has, err = connector.EVMKeeper.ComplianceKeeper.HasVerificationOfType(connector.Context, userAccount, verificationType, []sdk.Address{illegalIssuerAccount})
 				suite.Require().NoError(err)
 				suite.Require().False(has)
@@ -382,6 +385,10 @@ func (suite *KeeperTestSuite) TestSingleVerificationDetails() {
 				suite.Require().NoError(err)
 				suite.Require().Equal(1, len(verificationData))
 				suite.Require().Equal(verificationDetails, verificationData[0])
+
+				verificationData, err = suite.app.ComplianceKeeper.GetVerificationDetailsByIssuer(connector.Context, userAccount, illegalIssuerAccount)
+				suite.Require().NoError(err)
+				suite.Require().Equal(0, len(verificationData))
 			},
 		},
 		{
@@ -459,6 +466,25 @@ func (suite *KeeperTestSuite) TestSingleVerificationDetails() {
 
 				suite.Require().Equal(1, len(resp.Data))
 				suite.Require().Equal(expectedVerificationDetails, resp.Data[0])
+
+				// Should be empty for illegal issuer account
+				request, encodeErr = proto.Marshal(&librustgo.CosmosRequest{
+					Req: &librustgo.CosmosRequest_GetVerificationData{
+						GetVerificationData: &librustgo.QueryGetVerificationData{
+							UserAddress:   userAddress.Bytes(),
+							IssuerAddress: illegalIssuerAccount.Bytes(),
+						},
+					},
+				})
+				suite.Require().NoError(encodeErr)
+				respBytes, queryErr = connector.Query(request)
+				suite.Require().NoError(queryErr)
+
+				resp = &librustgo.QueryGetVerificationDataResponse{}
+				decodeErr = proto.Unmarshal(respBytes, resp)
+				suite.Require().NoError(decodeErr)
+
+				suite.Require().Equal(0, len(resp.Data))
 			},
 		},
 	}
@@ -472,6 +498,7 @@ func (suite *KeeperTestSuite) TestSingleVerificationDetails() {
 				userAddress,
 				issuerAddress,
 				verificationType,
+				expectedVerificationDetails.OriginChain,
 				expectedVerificationDetails.IssuanceTimestamp,
 				expectedVerificationDetails.ExpirationTimestamp,
 				expectedVerificationDetails.OriginalData,
@@ -531,6 +558,7 @@ func (suite *KeeperTestSuite) TestMultipleVerificationDetails() {
 			userAddress,
 			issuerAddress,
 			verificationType,
+			verificationDetails.OriginChain,
 			verificationDetails.IssuanceTimestamp,
 			verificationDetails.ExpirationTimestamp,
 			verificationDetails.OriginalData,
