@@ -838,7 +838,7 @@ func (suite *KeeperTestSuite) TestState() {
 		suite.Run(tc.name, func() {
 			suite.app.EvmKeeper.SetState(suite.ctx, suite.address, tc.key, tc.value.Bytes())
 			value := suite.app.EvmKeeper.GetState(suite.ctx, suite.address, tc.key)
-			suite.Require().Equal(tc.value, common.BytesToHash(value))
+			suite.Require().Equal(tc.value, value)
 		})
 	}
 }

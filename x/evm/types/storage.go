@@ -73,9 +73,9 @@ func (s State) Validate() error {
 }
 
 // NewState creates a new State instance
-func NewState(key common.Hash, value []byte) State {
+func NewState(key common.Hash, value common.Hash) State {
 	return State{
 		Key:   key.String(),
-		Value: common.Bytes2Hex(value),
+		Value: value.String(),
 	}
 }

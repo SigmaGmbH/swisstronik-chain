@@ -227,7 +227,7 @@ func (k Keeper) SetLogSizeTransient(ctx sdk.Context, logSize uint64) {
 func (k Keeper) GetAccountStorage(ctx sdk.Context, address common.Address) types.Storage {
 	storage := types.Storage{}
 
-	k.ForEachStorage(ctx, address, func(key common.Hash, value []byte) bool {
+	k.ForEachStorage(ctx, address, func(key, value common.Hash) bool {
 		storage = append(storage, types.NewState(key, value))
 		return true
 	})
@@ -392,15 +392,15 @@ func (k *Keeper) GetAccount(ctx sdk.Context, addr common.Address) *types.Account
 }
 
 // GetState loads contract state from database, implements `statedb.Keeper` interface.
-func (k *Keeper) GetState(ctx sdk.Context, addr common.Address, key common.Hash) []byte {
+func (k *Keeper) GetState(ctx sdk.Context, addr common.Address, key common.Hash) common.Hash {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.AddressStoragePrefix(addr))
 
 	value := store.Get(key.Bytes())
 	if len(value) == 0 {
-		return nil
+		return common.Hash{}
 	}
 
-	return value
+	return common.BytesToHash(value)
 }
 
 // GetCode loads contract code from database, implements `statedb.Keeper` interface.
@@ -410,7 +410,7 @@ func (k *Keeper) GetCode(ctx sdk.Context, codeHash common.Hash) []byte {
 }
 
 // ForEachStorage iterate contract storage, callback return false to break early
-func (k *Keeper) ForEachStorage(ctx sdk.Context, addr common.Address, cb func(key common.Hash, value []byte) bool) {
+func (k *Keeper) ForEachStorage(ctx sdk.Context, addr common.Address, cb func(key, value common.Hash) bool) {
 	store := ctx.KVStore(k.storeKey)
 	prefix := types.AddressStoragePrefix(addr)
 
@@ -419,9 +419,10 @@ func (k *Keeper) ForEachStorage(ctx sdk.Context, addr common.Address, cb func(ke
 
 	for ; iterator.Valid(); iterator.Next() {
 		key := common.BytesToHash(iterator.Key())
+		value := common.BytesToHash(iterator.Value())
 
 		// check if iteration stops
-		if !cb(key, iterator.Value()) {
+		if !cb(key, value) {
 			return
 		}
 	}
@@ -569,7 +570,7 @@ func (k *Keeper) DeleteAccount(ctx sdk.Context, addr common.Address) error {
 	}
 
 	// clear storage
-	k.ForEachStorage(ctx, addr, func(key common.Hash, _ []byte) bool {
+	k.ForEachStorage(ctx, addr, func(key, _ common.Hash) bool {
 		k.SetState(ctx, addr, key, nil)
 		return true
 	})
