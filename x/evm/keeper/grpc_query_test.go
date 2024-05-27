@@ -253,9 +253,9 @@ func (suite *KeeperTestSuite) TestQueryStorage() {
 			"success",
 			func() {
 				key := common.BytesToHash([]byte("key"))
-				value := common.BytesToHash([]byte("value"))
-				expValue = value.String()
-				suite.app.EvmKeeper.SetState(suite.ctx, suite.address, key, value.Bytes())
+				value := []byte("value")
+				expValue = common.Bytes2Hex(value)
+				suite.app.EvmKeeper.SetState(suite.ctx, suite.address, key, value)
 				req = &types.QueryStorageRequest{
 					Address: suite.address.String(),
 					Key:     key.String(),
