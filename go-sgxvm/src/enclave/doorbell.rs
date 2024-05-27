@@ -5,7 +5,7 @@ use std::env;
 use std::ops::Deref;
 use std::time::Duration;
 
-static ENCLAVE_FILE: &'static str = "enclave.signed.so";
+static ENCLAVE_FILE: &'static str = "v1.0.2_enclave.signed.so";
 const ENCLAVE_LOCK_TIMEOUT: u64 = 6 * 5;
 
 pub struct EnclaveDoorbell {
