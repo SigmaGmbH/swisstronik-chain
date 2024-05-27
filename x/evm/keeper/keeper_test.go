@@ -884,7 +884,7 @@ func (suite *KeeperTestSuite) TestSuicide() {
 
 	// Check state is deleted
 	var storage evmtypes.Storage
-	suite.app.EvmKeeper.ForEachStorage(suite.ctx, suite.address, func(key, value common.Hash) bool {
+	suite.app.EvmKeeper.ForEachStorage(suite.ctx, suite.address, func(key common.Hash, value []byte) bool {
 		storage = append(storage, evmtypes.NewState(key, value))
 		return true
 	})
@@ -974,7 +974,7 @@ func (suite *KeeperTestSuite) TestForEachStorage() {
 	testCase := []struct {
 		name      string
 		malleate  func()
-		callback  func(key, value common.Hash) (stop bool)
+		callback  func(key common.Hash, value []byte) (stop bool)
 		expValues []common.Hash
 	}{
 		{
@@ -984,7 +984,7 @@ func (suite *KeeperTestSuite) TestForEachStorage() {
 					suite.app.EvmKeeper.SetState(suite.ctx, suite.address, common.BytesToHash([]byte(fmt.Sprintf("key%d", i))), []byte(fmt.Sprintf("value%d", i)))
 				}
 			},
-			func(key, value common.Hash) bool {
+			func(key common.Hash, value []byte) bool {
 				storage = append(storage, evmtypes.NewState(key, value))
 				return true
 			},
@@ -1002,8 +1002,8 @@ func (suite *KeeperTestSuite) TestForEachStorage() {
 				suite.app.EvmKeeper.SetState(suite.ctx, suite.address, common.BytesToHash([]byte("key")), []byte("value"))
 				suite.app.EvmKeeper.SetState(suite.ctx, suite.address, common.BytesToHash([]byte("filterkey")), []byte("filtervalue"))
 			},
-			func(key, value common.Hash) bool {
-				if value == common.BytesToHash([]byte("filtervalue")) {
+			func(key common.Hash, value []byte) bool {
+				if common.Bytes2Hex(value) == common.Bytes2Hex([]byte("filtervalue")) {
 					storage = append(storage, evmtypes.NewState(key, value))
 					return false
 				}
