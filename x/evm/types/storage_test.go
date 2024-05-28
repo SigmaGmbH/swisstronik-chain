@@ -16,7 +16,7 @@ func TestStorageValidate(t *testing.T) {
 		{
 			"valid storage",
 			Storage{
-				NewState(common.BytesToHash([]byte{1, 2, 3}), common.BytesToHash([]byte{1, 2, 3})),
+				NewState(common.BytesToHash([]byte{1, 2, 3}), []byte{1, 2, 3}),
 			},
 			true,
 		},
@@ -56,7 +56,7 @@ func TestStorageCopy(t *testing.T) {
 		{
 			"single storage",
 			Storage{
-				NewState(common.BytesToHash([]byte{1, 2, 3}), common.BytesToHash([]byte{1, 2, 3})),
+				NewState(common.BytesToHash([]byte{1, 2, 3}), []byte{1, 2, 3}),
 			},
 		},
 		{
@@ -78,7 +78,7 @@ func TestStorageCopy(t *testing.T) {
 }
 
 func TestStorageString(t *testing.T) {
-	storage := Storage{NewState(common.BytesToHash([]byte("key")), common.BytesToHash([]byte("value")))}
-	str := "key:\"0x00000000000000000000000000000000000000000000000000000000006b6579\" value:\"0x00000000000000000000000000000000000000000000000000000076616c7565\" \n"
+	storage := Storage{NewState(common.BytesToHash([]byte("key")), []byte("value"))}
+	str := "key:\"0x00000000000000000000000000000000000000000000000000000000006b6579\" value:\"76616c7565\" \n"
 	require.Equal(t, str, storage.String())
 }

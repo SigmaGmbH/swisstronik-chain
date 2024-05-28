@@ -59,7 +59,7 @@ ARG ENCLAVE_HOME=${ENCLAVE_HOME}
 WORKDIR /root
 
 # Copy over binaries from the build-env
-COPY --from=compile-chain /root/chain/build/swisstronikd swisstronikd
+COPY --from=compile-chain /root/chain/build/swisstronikd_v1.0.2 swisstronikd_v1.0.2
 COPY --from=compile-chain /root/.swisstronik-enclave /usr/lib/.swisstronik-enclave
 COPY --from=compile-chain /root/chain/go-sgxvm/internal/api/libsgx_wrapper_v1.0.2.x86_64.so /usr/lib/.swisstronik-enclave/libsgx_wrapper_v1.0.2.x86_64.so
 

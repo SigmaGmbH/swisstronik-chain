@@ -14,6 +14,7 @@ type GenesisTestSuite struct {
 
 	address string
 	hash    common.Hash
+	value   []byte
 	code    string
 }
 
@@ -23,6 +24,7 @@ func (suite *GenesisTestSuite) SetupTest() {
 
 	suite.address = common.BytesToAddress(priv.PubKey().Address().Bytes()).String()
 	suite.hash = common.BytesToHash([]byte("hash"))
+	suite.value = []byte("value")
 	suite.code = common.Bytes2Hex([]byte{1, 2, 3})
 }
 
@@ -42,7 +44,7 @@ func (suite *GenesisTestSuite) TestValidateGenesisAccount() {
 				Address: suite.address,
 				Code:    suite.code,
 				Storage: Storage{
-					NewState(suite.hash, suite.hash),
+					NewState(suite.hash, suite.value),
 				},
 			},
 			true,
@@ -53,7 +55,7 @@ func (suite *GenesisTestSuite) TestValidateGenesisAccount() {
 				Address: "",
 				Code:    suite.code,
 				Storage: Storage{
-					NewState(suite.hash, suite.hash),
+					NewState(suite.hash, suite.value),
 				},
 			},
 			false,
@@ -64,7 +66,7 @@ func (suite *GenesisTestSuite) TestValidateGenesisAccount() {
 				Address: suite.address,
 				Code:    "",
 				Storage: Storage{
-					NewState(suite.hash, suite.hash),
+					NewState(suite.hash, suite.value),
 				},
 			},
 			true,
@@ -157,7 +159,7 @@ func (suite *GenesisTestSuite) TestValidateGenesis() {
 
 						Code: suite.code,
 						Storage: Storage{
-							NewState(suite.hash, suite.hash),
+							NewState(suite.hash, suite.value),
 						},
 					},
 					{
@@ -165,7 +167,7 @@ func (suite *GenesisTestSuite) TestValidateGenesis() {
 
 						Code: suite.code,
 						Storage: Storage{
-							NewState(suite.hash, suite.hash),
+							NewState(suite.hash, suite.value),
 						},
 					},
 				},
