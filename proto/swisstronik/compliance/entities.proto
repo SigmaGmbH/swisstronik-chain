@@ -74,20 +74,22 @@ message Verification {
 // VerificationDetails must have same members with VerificationDetails in "proto/swisstronik/compliance/entities.proto"
 // But the member types can be different, such as string(address) to bytes
 message VerificationDetails {
+    // Verification type
+    VerificationType type = 1;
     // Verification issuer address
-    string issuer_address = 1;
+    string issuer_address = 2;
     // From which chain proof was transferred
-    string origin_chain = 2;
+    string origin_chain = 3;
     // Original issuance timestamp
-    uint32 issuance_timestamp = 3;
+    uint32 issuance_timestamp = 4;
     // Original expiration timestamp
-    uint32 expiration_timestamp = 4;
+    uint32 expiration_timestamp = 5;
     // Original proof data (ZK-proof)
-    bytes original_data = 5;
+    bytes original_data = 6;
     // ZK-proof original schema
-    string schema = 6;
+    string schema = 7;
     // Verification id for checking(KYC/KYB/AML etc) from issuer side
-    string issuer_verification_id = 7;
+    string issuer_verification_id = 8;
     // Version
-    uint32 version = 8;
+    uint32 version = 9;
 }

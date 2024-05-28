@@ -175,44 +175,35 @@ func (k Querier) VerificationsDetails(goCtx context.Context, req *types.QueryVer
 	}
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	var verifications []*types.Verification
-	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixAddressDetails)
+	var verifications []types.QueryVerificationsDetailsResponse_MergedVerificationDetails
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationDetails)
 
 	pageRes, err := query.Paginate(store, req.Pagination, func(key []byte, value []byte) error {
-		var addressDetails types.AddressDetails
-		if err := proto.Unmarshal(value, &addressDetails); err != nil {
+		var verificationDetails types.VerificationDetails
+		if err := proto.Unmarshal(value, &verificationDetails); err != nil {
 			return err
 		}
-		verifications = append(verifications, addressDetails.Verifications...)
+		// NOTE: MUST CONTAIN ALL THE MEMBERS OF `VerificationDetails` AND ITERATING KEYS
+		verifications = append(verifications, types.QueryVerificationsDetailsResponse_MergedVerificationDetails{
+			VerificationType:     verificationDetails.Type,
+			VerificationID:       key,
+			IssuerAddress:        verificationDetails.IssuerAddress,
+			OriginChain:          verificationDetails.OriginChain,
+			IssuanceTimestamp:    verificationDetails.IssuanceTimestamp,
+			ExpirationTimestamp:  verificationDetails.ExpirationTimestamp,
+			OriginalData:         verificationDetails.OriginalData,
+			Schema:               verificationDetails.Schema,
+			IssuerVerificationId: verificationDetails.IssuerVerificationId,
+			Version:              verificationDetails.Version,
+		})
 		return nil
 	})
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	var verificationsDetails []types.QueryVerificationsDetailsResponse_MergedVerificationDetails
-	for _, v := range verifications {
-		details, err := k.Keeper.GetVerificationDetails(ctx, v.VerificationId)
-		if err != nil {
-			return nil, status.Error(codes.Internal, err.Error())
-		}
-		// NOTE: MUST CONTAIN ALL THE MEMBERS OF `VerificationDetails` AND ITERATING KEYS
-		verificationsDetails = append(verificationsDetails, types.QueryVerificationsDetailsResponse_MergedVerificationDetails{
-			VerificationType:     v.Type,
-			VerificationID:       v.VerificationId,
-			IssuerAddress:        v.IssuerAddress,
-			OriginChain:          details.OriginChain,
-			IssuanceTimestamp:    details.IssuanceTimestamp,
-			ExpirationTimestamp:  details.ExpirationTimestamp,
-			OriginalData:         details.OriginalData,
-			Schema:               details.Schema,
-			IssuerVerificationId: details.IssuerVerificationId,
-			Version:              details.Version,
-		})
-	}
-
 	return &types.QueryVerificationsDetailsResponse{
-		Verifications: verificationsDetails,
+		Verifications: verifications,
 		Pagination:    pageRes,
 	}, nil
 }

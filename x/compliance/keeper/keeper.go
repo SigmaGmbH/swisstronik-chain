@@ -188,6 +188,7 @@ func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.Address,
 	if verificationType <= types.VerificationType_VT_UNSPECIFIED || verificationType > types.VerificationType_VT_CREDIT_SCORE {
 		return nil, errors.Wrap(types.ErrInvalidParam, "invalid verification type")
 	}
+	details.Type = verificationType
 
 	detailsBytes, err := details.Marshal()
 	if err != nil {

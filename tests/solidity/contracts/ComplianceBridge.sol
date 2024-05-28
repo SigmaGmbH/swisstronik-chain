@@ -2,6 +2,10 @@ pragma solidity ^0.8;
 
 interface IComplianceBridge {
     struct VerificationData {
+        // Verification type
+        uint32 verificationType;
+        // Verification Id
+        bytes verificationId;
         // Verification issuer address
         address issuerAddress;
         // From which chain proof was transferred
