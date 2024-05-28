@@ -360,7 +360,7 @@ fn route(
             }
         }
         GET_VERIFICATION_DATA_FN_SELECTOR => {
-            let get_verification_data_params = vec![ParamType::Address];
+            let get_verification_data_params = vec![ParamType::Address, ParamType::Address];
             let decoded_params = match decode_input(get_verification_data_params, &data[4..]) {
                 Ok(params) => params,
                 Err(_) => {
@@ -385,7 +385,19 @@ fn route(
                 }
             };
 
-            let encoded_request = coder::encode_get_verification_data(user_address, caller);
+            let issuer_address = match decoded_params[1].clone().into_address() {
+                Some(addr) => addr,
+                None => {
+                    return Err(PrecompileFailure::Revert {
+                        exit_status: ExitRevert::Reverted,
+                        output: encode(&vec![AbiToken::String(
+                            "invalid issuer address".into(),
+                        )]),
+                    });
+                }
+            };
+
+            let encoded_request = coder::encode_get_verification_data(user_address, issuer_address);
 
             match querier::make_request(querier, encoded_request) {
                 Some(result) => {
