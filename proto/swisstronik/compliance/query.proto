@@ -83,13 +83,17 @@ message QueryAddressesDetailsRequest {
 
 // QueryAddressesDetailsResponse is response type for the Query/AddressesDetails RPC method.
 message QueryAddressesDetailsResponse {
-  message AddressDetailsWithKey {
+  // MergedAddressDetails is merged structure of iterating key and `AddressDetails` in `entities.proto`.
+  // `address` is an iterating key, and the following items should be same with `AddressDetails`.
+  message MergedAddressDetails {
     string address = 1;
-    AddressDetails addressDetails = 2;
+    bool is_verified = 2;
+    bool is_revoked = 3;
+    repeated Verification verifications = 4;
   }
 
   // addresses is a slice of registered addresses for the compliance module
-  repeated AddressDetailsWithKey addresses = 1 [(gogoproto.nullable) = false];
+  repeated MergedAddressDetails addresses = 1 [(gogoproto.nullable) = false];
   // pagination defines the pagination in the response.
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }
@@ -112,13 +116,19 @@ message QueryIssuersDetailsRequest {
 
 // QueryIssuersDetailsResponse is response type for the Query/IssuersDetails RPC method.
 message QueryIssuersDetailsResponse {
-  message IssuerDetailsWithKey {
+  // MergedIssuerDetails is merged structure of iterating key and `IssuerDetails` in `entities.proto`.
+  // `issuerAddress` is an iterating key, and the following items should be same with `IssuerDetails`.
+  message MergedIssuerDetails {
     string issuerAddress = 1;
-    IssuerDetails issuerDetails = 2;
+    string name = 2;
+    string description = 3;
+    string url = 4;
+    string logo = 5;
+    string legalEntity = 6;
   }
 
   // issuers is a slice of registered issuers for the compliance module
-  repeated IssuerDetailsWithKey issuers = 1 [(gogoproto.nullable) = false];
+  repeated MergedIssuerDetails issuers = 1 [(gogoproto.nullable) = false];
   // pagination defines the pagination in the response.
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }
@@ -141,13 +151,23 @@ message QueryVerificationsDetailsRequest {
 
 // QueryVerificationsDetailsResponse is response type for the Query/VerificationsDetails RPC method.
 message QueryVerificationsDetailsResponse {
-  message VerificationDetailsWithKey {
-    bytes verificationID = 1;
-    VerificationDetails verificationDetails = 2;
+  // MergedVerificationDetails is merged structure of iterating key and `VerificationDetails` in `entities.proto`.
+  // `verification_type` and `verification_id` are iterating keys, and the following items should be same with `VerificationDetails`.
+  message MergedVerificationDetails {
+    VerificationType verificationType = 1;
+    bytes verificationID = 2;
+    string issuer_address = 3;
+    string origin_chain = 4;
+    uint32 issuance_timestamp = 5;
+    uint32 expiration_timestamp = 6;
+    bytes original_data = 7;
+    string schema = 8;
+    string issuer_verification_id = 9;
+    uint32 version = 10;
   }
 
   // verifications is a slice of registered verifications for the compliance module
-  repeated VerificationDetailsWithKey verifications = 1 [(gogoproto.nullable) = false];
+  repeated MergedVerificationDetails verifications = 1 [(gogoproto.nullable) = false];
   // pagination defines the pagination in the response.
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }

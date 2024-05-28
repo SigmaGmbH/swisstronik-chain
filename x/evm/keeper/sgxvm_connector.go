@@ -253,19 +253,24 @@ func (q Connector) GetVerificationData(req *librustgo.CosmosRequest_GetVerificat
 	userAddress := sdk.AccAddress(req.GetVerificationData.UserAddress)
 	issuerAddress := sdk.AccAddress(req.GetVerificationData.IssuerAddress)
 
-	data, err := q.EVMKeeper.ComplianceKeeper.GetVerificationDetailsByIssuer(q.Context, userAddress, issuerAddress)
+	verifications, verificationsDetails, err := q.EVMKeeper.ComplianceKeeper.GetVerificationDetailsByIssuer(q.Context, userAddress, issuerAddress)
 	if err != nil {
 		return nil, err
 	}
+	if len(verifications) != len(verificationsDetails) {
+		return nil, errors.New("invalid verification details")
+	}
 
 	var resData []*librustgo.VerificationDetails
-	for _, details := range data {
-		issuerAccount, err := sdk.AccAddressFromBech32(details.IssuerAddress)
+	for i, v := range verifications {
+		issuerAccount, err := sdk.AccAddressFromBech32(v.IssuerAddress)
 		if err != nil {
 			return nil, err
 		}
 		// Addresses from Query requests are Ethereum Addresses
 		resData = append(resData, &librustgo.VerificationDetails{
+			VerificationType:     v.Type,
+			VerificationID:       v.VerificationId,
 			IssuerAddress:        common.Address(issuerAccount.Bytes()).Bytes(),
 			OriginChain:          details.OriginChain,
 			IssuanceTimestamp:    details.IssuanceTimestamp,

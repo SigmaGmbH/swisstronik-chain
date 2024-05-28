@@ -65,7 +65,7 @@ func (k Querier) AddressesDetails(goCtx context.Context, req *types.QueryAddress
 	}
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	var addresses []types.QueryAddressesDetailsResponse_AddressDetailsWithKey
+	var addresses []types.QueryAddressesDetailsResponse_MergedAddressDetails
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixAddressDetails)
 
 	pageRes, err := query.Paginate(store, req.Pagination, func(key []byte, value []byte) error {
@@ -73,9 +73,12 @@ func (k Querier) AddressesDetails(goCtx context.Context, req *types.QueryAddress
 		if err := proto.Unmarshal(value, &addressDetails); err != nil {
 			return err
 		}
-		addresses = append(addresses, types.QueryAddressesDetailsResponse_AddressDetailsWithKey{
-			Address:        sdk.AccAddress(key).String(),
-			AddressDetails: &addressDetails,
+		// NOTE: MUST CONTAIN ALL THE MEMBERS OF `AddressDetails` AND ITERATING KEY
+		addresses = append(addresses, types.QueryAddressesDetailsResponse_MergedAddressDetails{
+			Address:       sdk.AccAddress(key).String(),
+			IsVerified:    addressDetails.IsVerified,
+			IsRevoked:     addressDetails.IsRevoked,
+			Verifications: addressDetails.Verifications,
 		})
 		// NOTE, DO NOT FILTER VERIFICATIONS BY ISSUERS' EXISTENCE BECAUSE OF QUERY PERFORMANCE
 		return nil
@@ -115,7 +118,7 @@ func (k Querier) IssuersDetails(goCtx context.Context, req *types.QueryIssuersDe
 	}
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	var issuers []types.QueryIssuersDetailsResponse_IssuerDetailsWithKey
+	var issuers []types.QueryIssuersDetailsResponse_MergedIssuerDetails
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixIssuerDetails)
 
 	pageRes, err := query.Paginate(store, req.Pagination, func(key []byte, value []byte) error {
@@ -123,9 +126,14 @@ func (k Querier) IssuersDetails(goCtx context.Context, req *types.QueryIssuersDe
 		if err := proto.Unmarshal(value, &issuerDetails); err != nil {
 			return err
 		}
-		issuers = append(issuers, types.QueryIssuersDetailsResponse_IssuerDetailsWithKey{
+		// NOTE: MUST CONTAIN ALL THE MEMBERS OF `IssuerDetails` AND ITERATING KEY
+		issuers = append(issuers, types.QueryIssuersDetailsResponse_MergedIssuerDetails{
 			IssuerAddress: sdk.AccAddress(key).String(),
-			IssuerDetails: &issuerDetails,
+			Name:          issuerDetails.Name,
+			Description:   issuerDetails.Description,
+			Url:           issuerDetails.Url,
+			Logo:          issuerDetails.Logo,
+			LegalEntity:   issuerDetails.LegalEntity,
 		})
 		return nil
 	})
@@ -167,27 +175,44 @@ func (k Querier) VerificationsDetails(goCtx context.Context, req *types.QueryVer
 	}
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	var verifications []types.QueryVerificationsDetailsResponse_VerificationDetailsWithKey
-	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationDetails)
+	var verifications []*types.Verification
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixAddressDetails)
 
 	pageRes, err := query.Paginate(store, req.Pagination, func(key []byte, value []byte) error {
-		var verificationDetails types.VerificationDetails
-		if err := proto.Unmarshal(value, &verificationDetails); err != nil {
+		var addressDetails types.AddressDetails
+		if err := proto.Unmarshal(value, &addressDetails); err != nil {
 			return err
 		}
-		verifications = append(verifications, types.QueryVerificationsDetailsResponse_VerificationDetailsWithKey{
-			VerificationID:      key,
-			VerificationDetails: &verificationDetails,
-		})
-		// NOTE, DO NOT FILTER VERIFICATIONS BY ISSUERS' EXISTENCE BECAUSE OF QUERY PERFORMANCE
+		verifications = append(verifications, addressDetails.Verifications...)
 		return nil
 	})
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	var verificationsDetails []types.QueryVerificationsDetailsResponse_MergedVerificationDetails
+	for _, v := range verifications {
+		details, err := k.Keeper.GetVerificationDetails(ctx, v.VerificationId)
+		if err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		// NOTE: MUST CONTAIN ALL THE MEMBERS OF `VerificationDetails` AND ITERATING KEYS
+		verificationsDetails = append(verificationsDetails, types.QueryVerificationsDetailsResponse_MergedVerificationDetails{
+			VerificationType:     v.Type,
+			VerificationID:       v.VerificationId,
+			IssuerAddress:        v.IssuerAddress,
+			OriginChain:          details.OriginChain,
+			IssuanceTimestamp:    details.IssuanceTimestamp,
+			ExpirationTimestamp:  details.ExpirationTimestamp,
+			OriginalData:         details.OriginalData,
+			Schema:               details.Schema,
+			IssuerVerificationId: details.IssuerVerificationId,
+			Version:              details.Version,
+		})
+	}
+
 	return &types.QueryVerificationsDetailsResponse{
-		Verifications: verifications,
+		Verifications: verificationsDetails,
 		Pagination:    pageRes,
 	}, nil
 }

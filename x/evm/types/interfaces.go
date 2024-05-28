@@ -69,7 +69,7 @@ type FeeMarketKeeper interface {
 type ComplianceKeeper interface {
 	AddVerificationDetails(ctx sdk.Context, userAddress sdk.Address, verificationType compliancetypes.VerificationType, details *compliancetypes.VerificationDetails) ([]byte, error)
 	HasVerificationOfType(ctx sdk.Context, userAddress sdk.Address, expectedType compliancetypes.VerificationType, expectedIssuers []sdk.Address) (bool, error)
-	GetVerificationDetailsByIssuer(ctx sdk.Context, userAddress sdk.Address, issuerAddress sdk.Address) ([]*compliancetypes.VerificationDetails, error)
+	GetVerificationDetailsByIssuer(ctx sdk.Context, userAddress sdk.Address, issuerAddress sdk.Address) ([]*compliancetypes.Verification, []*compliancetypes.VerificationDetails, error)
 }
 
 // Event Hooks
