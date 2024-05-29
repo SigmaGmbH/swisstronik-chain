@@ -328,6 +328,7 @@ func (suite *KeeperTestSuite) TestSingleVerificationDetails() {
 		_ = suite.app.ComplianceKeeper.SetAddressVerificationStatus(suite.ctx, issuerAccount, true)
 
 		expectedVerificationDetails = &types.VerificationDetails{
+			VerificationType:     uint32(verificationType),
 			IssuerAddress:        issuerAccount.Bytes(),
 			OriginChain:          "samplechain",
 			IssuanceTimestamp:    uint32(suite.ctx.BlockTime().Unix()),
@@ -467,6 +468,7 @@ func (suite *KeeperTestSuite) TestSingleVerificationDetails() {
 				suite.Require().NoError(decodeErr)
 
 				suite.Require().Equal(1, len(resp.Data))
+				expectedVerificationDetails.VerificationID = verificationID
 				suite.Require().Equal(expectedVerificationDetails, resp.Data[0])
 
 				// Should be empty for illegal issuer account
@@ -544,6 +546,7 @@ func (suite *KeeperTestSuite) TestMultipleVerificationDetails() {
 	for i := 0; i < numOfRetry; i++ {
 		// Addresses before making Query request should be Ethereum Addresses
 		verificationDetails := &types.VerificationDetails{
+			VerificationType:     uint32(verificationType),
 			IssuerAddress:        issuerAddress.Bytes(),
 			OriginChain:          "samplechain",
 			IssuanceTimestamp:    uint32(suite.ctx.BlockTime().Unix()),
@@ -553,8 +556,6 @@ func (suite *KeeperTestSuite) TestMultipleVerificationDetails() {
 			IssuerVerificationId: "HelloIssuer",
 			Version:              uint32(0),
 		}
-		expected = append(expected, verificationDetails)
-
 		verificationID, err := requestAddVerificationDetails(
 			&connector,
 			userAddress,
@@ -568,6 +569,8 @@ func (suite *KeeperTestSuite) TestMultipleVerificationDetails() {
 			verificationDetails.IssuerVerificationId,
 			0,
 		)
+		verificationDetails.VerificationID = verificationID
+		expected = append(expected, verificationDetails)
 		suite.Require().NoError(err)
 		suite.Require().NotNil(verificationID)
 	}
@@ -590,6 +593,8 @@ func (suite *KeeperTestSuite) TestMultipleVerificationDetails() {
 	suite.Require().NoError(decodeErr)
 	suite.Require().Equal(numOfRetry, len(resp.Data))
 	for i, details := range resp.Data {
+		suite.Require().Equal(expected[i].VerificationType, details.VerificationType)
+		suite.Require().Equal(expected[i].VerificationID, details.VerificationID)
 		suite.Require().Equal(expected[i].IssuerAddress, details.IssuerAddress)
 		suite.Require().Equal(expected[i].OriginChain, details.OriginChain)
 		suite.Require().Equal(expected[i].IssuanceTimestamp, details.IssuanceTimestamp)
