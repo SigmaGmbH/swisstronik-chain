@@ -167,24 +167,29 @@ message QueryGetVerificationData {
   bytes issuerAddress = 2;
 }
 // VerificationDetails must have same members with VerificationDetails in "sgxvm/proto/ffi.proto"
+// including verification type and verification id as key.
 // But the member types can be different, such as string(address) to bytes
 message VerificationDetails {
+  // Verification type
+  uint32 verificationType = 1;
+  // Verification Id
+  bytes verificationID = 2;
   // Verification issuer address
-  bytes issuerAddress = 1;
+  bytes issuerAddress = 3;
   // From which chain proof was transferred
-  string originChain = 2;
+  string originChain = 4;
   // Original issuance timestamp
-  uint32 issuanceTimestamp = 3;
+  uint32 issuanceTimestamp = 5;
   // Original expiration timestamp
-  uint32 expirationTimestamp = 4;
+  uint32 expirationTimestamp = 6;
   // Original proof data (ZK-proof)
-  bytes originalData = 5;
+  bytes originalData = 7;
   // ZK-proof original schema
-  string schema = 6;
+  string schema = 8;
   // Verification id for checking(KYC/KYB/AML etc) from issuer side
-  string issuerVerificationId = 7;
+  string issuerVerificationId = 9;
   // Version
-  uint32 version = 8;
+  uint32 version = 10;
 }
 message QueryGetVerificationDataResponse {
   repeated VerificationDetails data = 1;

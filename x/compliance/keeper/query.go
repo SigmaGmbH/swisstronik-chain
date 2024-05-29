@@ -65,7 +65,7 @@ func (k Querier) AddressesDetails(goCtx context.Context, req *types.QueryAddress
 	}
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	var addresses []types.QueryAddressesDetailsResponse_AddressDetailsWithKey
+	var addresses []types.QueryAddressesDetailsResponse_MergedAddressDetails
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixAddressDetails)
 
 	pageRes, err := query.Paginate(store, req.Pagination, func(key []byte, value []byte) error {
@@ -73,9 +73,12 @@ func (k Querier) AddressesDetails(goCtx context.Context, req *types.QueryAddress
 		if err := proto.Unmarshal(value, &addressDetails); err != nil {
 			return err
 		}
-		addresses = append(addresses, types.QueryAddressesDetailsResponse_AddressDetailsWithKey{
-			Address:        sdk.AccAddress(key).String(),
-			AddressDetails: &addressDetails,
+		// NOTE: MUST CONTAIN ALL THE MEMBERS OF `AddressDetails` AND ITERATING KEY
+		addresses = append(addresses, types.QueryAddressesDetailsResponse_MergedAddressDetails{
+			Address:       sdk.AccAddress(key).String(),
+			IsVerified:    addressDetails.IsVerified,
+			IsRevoked:     addressDetails.IsRevoked,
+			Verifications: addressDetails.Verifications,
 		})
 		// NOTE, DO NOT FILTER VERIFICATIONS BY ISSUERS' EXISTENCE BECAUSE OF QUERY PERFORMANCE
 		return nil
@@ -115,7 +118,7 @@ func (k Querier) IssuersDetails(goCtx context.Context, req *types.QueryIssuersDe
 	}
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	var issuers []types.QueryIssuersDetailsResponse_IssuerDetailsWithKey
+	var issuers []types.QueryIssuersDetailsResponse_MergedIssuerDetails
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixIssuerDetails)
 
 	pageRes, err := query.Paginate(store, req.Pagination, func(key []byte, value []byte) error {
@@ -123,9 +126,14 @@ func (k Querier) IssuersDetails(goCtx context.Context, req *types.QueryIssuersDe
 		if err := proto.Unmarshal(value, &issuerDetails); err != nil {
 			return err
 		}
-		issuers = append(issuers, types.QueryIssuersDetailsResponse_IssuerDetailsWithKey{
+		// NOTE: MUST CONTAIN ALL THE MEMBERS OF `IssuerDetails` AND ITERATING KEY
+		issuers = append(issuers, types.QueryIssuersDetailsResponse_MergedIssuerDetails{
 			IssuerAddress: sdk.AccAddress(key).String(),
-			IssuerDetails: &issuerDetails,
+			Name:          issuerDetails.Name,
+			Description:   issuerDetails.Description,
+			Url:           issuerDetails.Url,
+			Logo:          issuerDetails.Logo,
+			LegalEntity:   issuerDetails.LegalEntity,
 		})
 		return nil
 	})
@@ -167,7 +175,7 @@ func (k Querier) VerificationsDetails(goCtx context.Context, req *types.QueryVer
 	}
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	var verifications []types.QueryVerificationsDetailsResponse_VerificationDetailsWithKey
+	var verifications []types.QueryVerificationsDetailsResponse_MergedVerificationDetails
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationDetails)
 
 	pageRes, err := query.Paginate(store, req.Pagination, func(key []byte, value []byte) error {
@@ -175,11 +183,19 @@ func (k Querier) VerificationsDetails(goCtx context.Context, req *types.QueryVer
 		if err := proto.Unmarshal(value, &verificationDetails); err != nil {
 			return err
 		}
-		verifications = append(verifications, types.QueryVerificationsDetailsResponse_VerificationDetailsWithKey{
-			VerificationID:      key,
-			VerificationDetails: &verificationDetails,
+		// NOTE: MUST CONTAIN ALL THE MEMBERS OF `VerificationDetails` AND ITERATING KEYS
+		verifications = append(verifications, types.QueryVerificationsDetailsResponse_MergedVerificationDetails{
+			VerificationType:     verificationDetails.Type,
+			VerificationID:       key,
+			IssuerAddress:        verificationDetails.IssuerAddress,
+			OriginChain:          verificationDetails.OriginChain,
+			IssuanceTimestamp:    verificationDetails.IssuanceTimestamp,
+			ExpirationTimestamp:  verificationDetails.ExpirationTimestamp,
+			OriginalData:         verificationDetails.OriginalData,
+			Schema:               verificationDetails.Schema,
+			IssuerVerificationId: verificationDetails.IssuerVerificationId,
+			Version:              verificationDetails.Version,
 		})
-		// NOTE, DO NOT FILTER VERIFICATIONS BY ISSUERS' EXISTENCE BECAUSE OF QUERY PERFORMANCE
 		return nil
 	})
 	if err != nil {

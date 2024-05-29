@@ -415,6 +415,8 @@ fn route(
                         .flat_map(|log| {
                             let issuer_address = Address::from_slice(&log.issuerAddress);
                             let tokens = vec![AbiToken::Tuple(vec![
+                                AbiToken::Uint(log.verificationType.into()),
+                                AbiToken::Bytes(log.verificationID.clone().into()),
                                 AbiToken::Address(issuer_address.clone()),
                                 AbiToken::String(log.originChain.clone()),
                                 AbiToken::Uint(log.issuanceTimestamp.into()),

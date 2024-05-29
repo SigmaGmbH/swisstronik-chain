@@ -381,13 +381,15 @@ func (suite *KeeperTestSuite) TestSingleVerificationDetails() {
 				suite.Require().False(has)
 
 				// Check if `getVerificationData` returns one verification details that added above
-				verificationData, err := suite.app.ComplianceKeeper.GetVerificationDetailsByIssuer(connector.Context, userAccount, issuerAccount)
+				verifications, verificationData, err := suite.app.ComplianceKeeper.GetVerificationDetailsByIssuer(connector.Context, userAccount, issuerAccount)
 				suite.Require().NoError(err)
 				suite.Require().Equal(1, len(verificationData))
+				suite.Require().Equal(1, len(verifications))
 				suite.Require().Equal(verificationDetails, verificationData[0])
 
-				verificationData, err = suite.app.ComplianceKeeper.GetVerificationDetailsByIssuer(connector.Context, userAccount, illegalIssuerAccount)
+				verifications, verificationData, err = suite.app.ComplianceKeeper.GetVerificationDetailsByIssuer(connector.Context, userAccount, illegalIssuerAccount)
 				suite.Require().NoError(err)
+				suite.Require().Equal(0, len(verifications))
 				suite.Require().Equal(0, len(verificationData))
 			},
 		},

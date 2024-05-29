@@ -188,6 +188,7 @@ func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.Address,
 	if verificationType <= types.VerificationType_VT_UNSPECIFIED || verificationType > types.VerificationType_VT_CREDIT_SCORE {
 		return nil, errors.Wrap(types.ErrInvalidParam, "invalid verification type")
 	}
+	details.Type = verificationType
 
 	detailsBytes, err := details.Marshal()
 	if err != nil {
@@ -283,24 +284,28 @@ func (k Keeper) GetVerificationDetails(ctx sdk.Context, verificationDetailsId []
 	return &verificationDetails, nil
 }
 
-func (k Keeper) GetVerificationDetailsByIssuer(ctx sdk.Context, userAddress sdk.Address, issuerAddress sdk.Address) ([]*types.VerificationDetails, error) {
+func (k Keeper) GetVerificationDetailsByIssuer(ctx sdk.Context, userAddress sdk.Address, issuerAddress sdk.Address) ([]*types.Verification, []*types.VerificationDetails, error) {
 	addressDetails, err := k.GetAddressDetails(ctx, userAddress)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	var filtered []*types.VerificationDetails
+	var (
+		filteredVerifications       []*types.Verification
+		filteredVerificationDetails []*types.VerificationDetails
+	)
 	for _, verification := range addressDetails.Verifications {
 		if verification.IssuerAddress != issuerAddress.String() {
 			continue
 		}
 		verificationDetails, err := k.GetVerificationDetails(ctx, verification.VerificationId)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
-		filtered = append(filtered, verificationDetails)
+		filteredVerifications = append(filteredVerifications, verification)
+		filteredVerificationDetails = append(filteredVerificationDetails, verificationDetails)
 	}
-	return filtered, nil
+	return filteredVerifications, filteredVerificationDetails, nil
 }
 
 // HasVerificationOfType checks if user has verifications of specific type (for example, passed KYC) from provided issuers.
