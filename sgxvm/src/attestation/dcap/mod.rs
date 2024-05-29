@@ -230,37 +230,75 @@ pub fn verify_dcap_quote(quote: Vec<u8>) -> SgxResult<Vec<u8>> {
         return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
     }
 
-    // Check verification result
-    match quote_verification_result {
-        sgx_ql_qv_result_t::SGX_QL_QV_RESULT_OK => {
-            if 0u32 == collateral_expiration_status {
-                println!("[Enclave] Quote was verified successfully");
-            } else {
-                println!("[Enclave] Quote was verified, but collateral is out of date");
+    #[cfg(feature = "mainnet")]
+    {
+        // Check verification result
+        match quote_verification_result {
+            sgx_ql_qv_result_t::SGX_QL_QV_RESULT_OK => {
+                if 0u32 == collateral_expiration_status {
+                    println!("[Enclave] Quote was verified successfully");
+                } else {
+                    println!("[Enclave] Quote was verified, but collateral is out of date");
+                    return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+                }
+            }
+            sgx_ql_qv_result_t::SGX_QL_QV_RESULT_CONFIG_NEEDED
+            | sgx_ql_qv_result_t::SGX_QL_QV_RESULT_OUT_OF_DATE
+            | sgx_ql_qv_result_t::SGX_QL_QV_RESULT_OUT_OF_DATE_CONFIG_NEEDED => {
+                println!("[Enclave] Quote was verified, but additional system configuration is required. Reason: {:?}", quote_verification_result);
+                return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+            }
+            sgx_ql_qv_result_t::SGX_QL_QV_RESULT_SW_HARDENING_NEEDED
+            | sgx_ql_qv_result_t::SGX_QL_QV_RESULT_CONFIG_AND_SW_HARDENING_NEEDED => {
+                println!(
+                    "[Enclave] Quote verification finished with non-terminal result: {:?}",
+                    quote_verification_result
+                );
+            }
+            _ => {
+                println!(
+                    "[Enclave] Quote was not verified successfully. Reason: {:?}",
+                    quote_verification_result
+                );
                 return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
             }
         }
-        sgx_ql_qv_result_t::SGX_QL_QV_RESULT_CONFIG_NEEDED
-        | sgx_ql_qv_result_t::SGX_QL_QV_RESULT_OUT_OF_DATE
-        | sgx_ql_qv_result_t::SGX_QL_QV_RESULT_OUT_OF_DATE_CONFIG_NEEDED => {
-            println!("[Enclave] Quote was verified, but additional system configuration is required. Reason: {:?}", quote_verification_result);
-            return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
-        }
-        sgx_ql_qv_result_t::SGX_QL_QV_RESULT_SW_HARDENING_NEEDED
-        | sgx_ql_qv_result_t::SGX_QL_QV_RESULT_CONFIG_AND_SW_HARDENING_NEEDED => {
-            println!(
-                "[Enclave] Quote verification finished with non-terminal result: {:?}",
-                quote_verification_result
-            );
-        }
-        _ => {
-            println!(
-                "[Enclave] Quote was not verified successfully. Reason: {:?}",
-                quote_verification_result
-            );
-            return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+    }
+
+    #[cfg(not(feature = "mainnet"))]
+    {
+        // Check verification result
+        match quote_verification_result {
+            sgx_ql_qv_result_t::SGX_QL_QV_RESULT_OK => {
+                if 0u32 == collateral_expiration_status {
+                    println!("[Enclave] Quote was verified successfully");
+                } else {
+                    println!("[Enclave] Quote was verified, but collateral is out of date");
+                    return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+                }
+            }
+            sgx_ql_qv_result_t::SGX_QL_QV_RESULT_CONFIG_NEEDED
+            | sgx_ql_qv_result_t::SGX_QL_QV_RESULT_OUT_OF_DATE
+            | sgx_ql_qv_result_t::SGX_QL_QV_RESULT_OUT_OF_DATE_CONFIG_NEEDED => {
+                println!("[Enclave] Quote was verified, but additional system configuration is required. Reason: {:?}", quote_verification_result);
+            }
+            sgx_ql_qv_result_t::SGX_QL_QV_RESULT_SW_HARDENING_NEEDED
+            | sgx_ql_qv_result_t::SGX_QL_QV_RESULT_CONFIG_AND_SW_HARDENING_NEEDED => {
+                println!(
+                    "[Enclave] Quote verification finished with non-terminal result: {:?}",
+                    quote_verification_result
+                );
+            }
+            _ => {
+                println!(
+                    "[Enclave] Quote was not verified successfully. Reason: {:?}",
+                    quote_verification_result
+                );
+                return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+            }
         }
     }
+
 
     // Inspect quote
     let p_quote3: *const sgx_quote3_t = quote.as_ptr() as *const sgx_quote3_t;
