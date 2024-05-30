@@ -1,11 +1,11 @@
-Package: swisstronik
+Package: swisstronik_v1.0.2
 Priority: optional
 Architecture: amd64
 Homepage: https://github.com/SigmaGmbH/swisstronik-chain
 Maintainer: https://github.com/SigmaGmbH
-Provides: swisstronik
-Conflicts: swisstronik
-Replaces: swisstronik
+Provides: swisstronik_v1.0.2
+Conflicts: swisstronik_v1.0.2
+Replaces: swisstronik_v1.0.2
 Depends: libsnappy1v5
 Description: Swisstronik is an identity-based hybrid layer-1 blockchain ecosystem.
   It lets Web 3.0 and traditional companies build KYC, AML and DPR compliant applications with enhanced data privacy.
