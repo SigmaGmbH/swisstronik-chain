@@ -100,7 +100,7 @@ pub fn extract_public_key_and_data(tx_data: Vec<u8>) -> Result<(Vec<u8>, Vec<u8>
     // or more bytes (32 public key | 15 nonce | 16 ad | 16+ ciphertext)
     // If it is not, throw an ECDH error
     if tx_data.len() < ENCRYPTED_DATA_LEN {
-        return Err(Error::ecdh_err("Wrong public key size"));
+        return Err(Error::ecdh_err("Wrong public key size. In Swisstronik, if the call has 'to' and 'data' fields, the data should be encrypted. To learn more, visit https://swisstronik.gitbook.io"));
     }
 
     // Extract public key & encrypted data
