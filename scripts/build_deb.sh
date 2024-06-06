@@ -6,8 +6,8 @@ set -e
 rm -rf /tmp/swisstronik-build
 
 mkdir -p /tmp/swisstronik-build/deb/"$DEB_BIN_DIR"
-cp -f ./swisstronikd_v1.0.2 /tmp/swisstronik-build/deb/"$DEB_BIN_DIR"/swisstronikd_v1.0.2
-chmod +x /tmp/swisstronik-build/deb/"$DEB_BIN_DIR"/swisstronikd_v1.0.2
+cp -f ./swisstronikd /tmp/swisstronik-build/deb/"$DEB_BIN_DIR"/swisstronikd
+chmod +x /tmp/swisstronik-build/deb/"$DEB_BIN_DIR"/swisstronikd
 
 mkdir -p /tmp/swisstronik-build/deb/"$DEB_LIB_DIR"
 
