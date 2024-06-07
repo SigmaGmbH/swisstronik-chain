@@ -2,7 +2,7 @@ name: Build CI multiplatform
 
 on:
   push:
-    branches: [ develop, '**-release' ]
+    branches: [ '*' ]
   workflow_dispatch:
 env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
@@ -25,7 +25,7 @@ jobs:
           path: build/swisstronikcli-linux-amd64
 
   macos-amd64:
-    runs-on: macos-latest
+    runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v4
@@ -40,7 +40,7 @@ jobs:
           path: build/swisstronikcli-macos-amd64
 
   macos-arm64:
-    runs-on:  macos-latest-xlarge
+    runs-on:  macos-14
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v4
