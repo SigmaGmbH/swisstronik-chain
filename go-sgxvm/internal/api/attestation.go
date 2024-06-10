@@ -118,5 +118,7 @@ func SendProtobufRequest(data []byte) (C.UnmanagedVector, error) {
 		return NewUnmanagedVector(nil), ErrorWithMessage(err, errmsg)
 	}
 
+	// TODO: Check error 
+
 	return ptr, nil
 }
