@@ -41,6 +41,7 @@ const (
 	prefixCode = iota + 1
 	prefixStorage
 	prefixParams
+	prefixNodePublicKey
 )
 
 // prefix bytes for the EVM transient store
@@ -53,9 +54,10 @@ const (
 
 // KVStore key prefixes
 var (
-	KeyPrefixCode    = []byte{prefixCode}
-	KeyPrefixStorage = []byte{prefixStorage}
-	KeyPrefixParams  = []byte{prefixParams}
+	KeyPrefixCode          = []byte{prefixCode}
+	KeyPrefixStorage       = []byte{prefixStorage}
+	KeyPrefixParams        = []byte{prefixParams}
+	KeyPrefixNodePublicKey = []byte{prefixNodePublicKey}
 )
 
 // Transient Store key prefixes

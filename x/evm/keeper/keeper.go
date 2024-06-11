@@ -19,10 +19,8 @@ import (
 	"fmt"
 	"math/big"
 
-	sdkmath "cosmossdk.io/math"
-	"github.com/ethereum/go-ethereum/crypto"
-
 	errorsmod "cosmossdk.io/errors"
+	sdkmath "cosmossdk.io/math"
 	"github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
@@ -32,7 +30,9 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/params"
+	"github.com/pkg/errors"
 
 	evmcommontypes "swisstronik/types"
 	"swisstronik/x/evm/types"
@@ -47,6 +47,7 @@ type Keeper struct {
 	// - storing account's Code
 	// - storing transaction Logs
 	// - storing Bloom filters by block height. Needed for the Web3 API.
+	// - storing node public key by each block height
 	storeKey storetypes.StoreKey
 
 	// key to access the transient store, which is reset on every block during Commit
@@ -604,4 +605,20 @@ func (k *Keeper) GetAccountCode(ctx sdk.Context, addr common.Address) ([]byte, e
 
 	code := k.GetCode(ctx, common.BytesToHash(account.CodeHash))
 	return code, nil
+}
+
+func (k *Keeper) GetNodePublicKey(ctx sdk.Context, blockNumber uint64) (common.Hash, error) {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixNodePublicKey)
+	heightBz := sdk.Uint64ToBigEndian(blockNumber)
+	bz := store.Get(heightBz)
+	if len(bz) == 0 {
+		return common.Hash{}, errors.Wrapf(types.ErrEmptyNodePublicKey, "node public key not exists at %d", blockNumber)
+	}
+	return common.BytesToHash(bz), nil
+}
+
+func (k *Keeper) SetNodePublicKey(ctx sdk.Context, blockNumber uint64, nodePublicKey common.Hash) {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixNodePublicKey)
+	heightBz := sdk.Uint64ToBigEndian(blockNumber)
+	store.Set(heightBz, nodePublicKey.Bytes())
 }

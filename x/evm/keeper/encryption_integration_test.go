@@ -42,12 +42,15 @@ func (suite *KeeperTestSuite) TestGetNodePublicKey() {
 	suite.Require().Equal(len(updatedEpochs), 3, "Should be 3 epochs")
 
 	// Request node public key
-	nodePublicKey, err := suite.app.EvmKeeper.GetNodePublicKey(0)
+	nodePublicKeyResponse, err := librustgo.GetNodePublicKey(uint64(0))
 	suite.Require().NoError(err)
-	nodePublicKeyV1, err := suite.app.EvmKeeper.GetNodePublicKey(v1EpochStartingBlock)
+	nodePublicKey := nodePublicKeyResponse.PublicKey
+	nodePublicKeyResponse, err = librustgo.GetNodePublicKey(v1EpochStartingBlock)
 	suite.Require().NoError(err)
-	nodePublicKeyV2, err := suite.app.EvmKeeper.GetNodePublicKey(v2EpochStartingBlock)
+	nodePublicKeyV1 := nodePublicKeyResponse.PublicKey
+	nodePublicKeyResponse, err = librustgo.GetNodePublicKey(v2EpochStartingBlock)
 	suite.Require().NoError(err)
+	nodePublicKeyV2 := nodePublicKeyResponse.PublicKey
 
 	suite.Require().NotEqual(nodePublicKey, nodePublicKeyV1)
 	suite.Require().NotEqual(nodePublicKeyV1, nodePublicKeyV2)
