@@ -111,11 +111,11 @@ impl EpochManager {
     }
 
     // Returns epoch number and starting block for each stored epoch
-    pub fn list_epochs(&self) -> Vec<(u16, u64)> {
+    pub fn list_epochs(&self) -> Vec<(u16, u64, Vec<u8>)> {
         let mut output = Vec::new();
 
         for epoch in self.epochs.iter() {
-            output.push((epoch.epoch_number, epoch.starting_block));
+            output.push((epoch.epoch_number, epoch.starting_block, epoch.get_tx_key().public_key()));
         }
 
         output
