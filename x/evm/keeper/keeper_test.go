@@ -1131,17 +1131,3 @@ func (suite *KeeperTestSuite) TestDeleteAccount() {
 		})
 	}
 }
-
-func (suite *KeeperTestSuite) TestNodePublicKey() {
-	blockNumber := uint64(10)
-	expNodePublicKey := common.BytesToHash([]byte("nodepublickey"))
-
-	suite.app.EvmKeeper.SetNodePublicKey(suite.ctx, blockNumber, expNodePublicKey)
-	nodePublicKey, err := suite.app.EvmKeeper.GetNodePublicKey(suite.ctx, blockNumber)
-	suite.Require().NoError(err)
-	suite.Require().Equal(expNodePublicKey, nodePublicKey)
-
-	nodePublicKey, err = suite.app.EvmKeeper.GetNodePublicKey(suite.ctx, blockNumber+1)
-	suite.Require().ErrorIs(err, evmtypes.ErrEmptyNodePublicKey)
-	suite.Require().Equal(common.Hash{}, nodePublicKey)
-}

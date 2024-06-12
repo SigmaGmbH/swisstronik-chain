@@ -21,6 +21,8 @@ import (
 
 	errorsmod "cosmossdk.io/errors"
 	sdkmath "cosmossdk.io/math"
+	"github.com/SigmaGmbH/librustgo"
+	rustgotypes "github.com/SigmaGmbH/librustgo/types"
 	"github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
@@ -32,7 +34,6 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/params"
-	"github.com/pkg/errors"
 
 	evmcommontypes "swisstronik/types"
 	"swisstronik/x/evm/types"
@@ -74,6 +75,9 @@ type Keeper struct {
 
 	// Legacy subspace
 	ss paramstypes.Subspace
+
+	// list of epoch data which includes epoch number, starting block and relevant node public key
+	epochs []*rustgotypes.EpochData
 }
 
 // NewKeeper generates new evm module keeper
@@ -98,6 +102,11 @@ func NewKeeper(
 		panic(err)
 	}
 
+	epochs, err := librustgo.ListEpochs()
+	if err != nil {
+		panic(err)
+	}
+
 	// NOTE: we pass in the parameter space to the CommitStateDB in order to use custom denominations for the EVM operations
 	return &Keeper{
 		cdc:              cdc,
@@ -110,6 +119,7 @@ func NewKeeper(
 		storeKey:         storeKey,
 		transientKey:     transientKey,
 		ss:               ss,
+		epochs:           epochs,
 	}
 }
 
@@ -605,20 +615,4 @@ func (k *Keeper) GetAccountCode(ctx sdk.Context, addr common.Address) ([]byte, e
 
 	code := k.GetCode(ctx, common.BytesToHash(account.CodeHash))
 	return code, nil
-}
-
-func (k *Keeper) GetNodePublicKey(ctx sdk.Context, blockNumber uint64) (common.Hash, error) {
-	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixNodePublicKey)
-	heightBz := sdk.Uint64ToBigEndian(blockNumber)
-	bz := store.Get(heightBz)
-	if len(bz) == 0 {
-		return common.Hash{}, errors.Wrapf(types.ErrEmptyNodePublicKey, "node public key not exists at %d", blockNumber)
-	}
-	return common.BytesToHash(bz), nil
-}
-
-func (k *Keeper) SetNodePublicKey(ctx sdk.Context, blockNumber uint64, nodePublicKey common.Hash) {
-	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixNodePublicKey)
-	heightBz := sdk.Uint64ToBigEndian(blockNumber)
-	store.Set(heightBz, nodePublicKey.Bytes())
 }

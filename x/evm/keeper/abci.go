@@ -18,26 +18,12 @@ package keeper
 import (
 	abci "github.com/cometbft/cometbft/abci/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-
-	"github.com/SigmaGmbH/librustgo"
 )
 
 // BeginBlock sets the sdk Context and EIP155 chain id to the Keeper.
 func (k *Keeper) BeginBlock(ctx sdk.Context, req abci.RequestBeginBlock) {
 	k.WithChainID(ctx)
-
-	header := req.GetHeader()
-	blockNumber := uint64(header.GetHeight())
-
-	// Get nodePublicKey at blockNumber
-	res, err := librustgo.GetNodePublicKey(blockNumber)
-	if err != nil {
-		return
-	}
-	nodePublicKey := common.BytesToHash(res.PublicKey)
-	k.SetNodePublicKey(ctx, blockNumber, nodePublicKey)
 }
 
 // EndBlock also retrieves the bloom filter value from the transient store and commits it to the

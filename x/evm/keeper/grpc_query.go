@@ -651,8 +651,7 @@ func (k Keeper) BaseFee(c context.Context, _ *types.QueryBaseFeeRequest) (*types
 
 // NodePublicKey implements the Query/NodePublicKey gRPC method
 func (k Keeper) NodePublicKey(ctx context.Context, req *types.QueryNodePublicKey) (*types.QueryNodePublicKeyResponse, error) {
-	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	nodePublicKey, err := k.GetNodePublicKey(sdkCtx, req.BlockNumber)
+	nodePublicKey, err := k.GetNodePublicKey(req.BlockNumber)
 	if err != nil {
 		return nil, err
 	}
