@@ -5,14 +5,16 @@ package keeper_test
 
 import (
 	"encoding/json"
+	"math/big"
+	"strconv"
+	"strings"
+
 	"github.com/SigmaGmbH/librustgo"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
-	"math/big"
-	"strconv"
-	"strings"
+
 	"swisstronik/crypto/deoxys"
 	"swisstronik/server/config"
 	"swisstronik/x/evm/types"
@@ -54,6 +56,48 @@ func (suite *KeeperTestSuite) TestGetNodePublicKey() {
 
 	suite.Require().NotEqual(nodePublicKey, nodePublicKeyV1)
 	suite.Require().NotEqual(nodePublicKeyV1, nodePublicKeyV2)
+}
+
+func (suite *KeeperTestSuite) TestKeeperGetNodePublicKey() {
+	suite.T().Skip()
+
+	var v1EpochStartingBlock uint64 = 2
+	var v2EpochStartingBlock uint64 = 5
+
+	suite.SetupSGXVMTest()
+
+	// Initialize empty key manager with genesis epoch key
+	err := librustgo.InitializeEnclave(true)
+	suite.Require().NoError(err)
+
+	// Add 2 epochs
+	err = librustgo.AddEpoch(v1EpochStartingBlock)
+	suite.Require().NoError(err)
+
+	err = librustgo.AddEpoch(v2EpochStartingBlock)
+	suite.Require().NoError(err)
+
+	updatedEpochs, err := librustgo.ListEpochs()
+	suite.Require().NoError(err)
+	suite.Require().Equal(len(updatedEpochs), 3, "Should be 3 epochs")
+
+	nodePublicKey, err := suite.app.EvmKeeper.GetNodePublicKey(suite.ctx, 0)
+	suite.Require().NoError(err)
+
+	for i := uint64(0); i < v1EpochStartingBlock; i++ {
+		suite.Commit()
+	}
+	nodePublicKeyV1, err := suite.app.EvmKeeper.GetNodePublicKey(suite.ctx, v1EpochStartingBlock)
+	suite.Require().NoError(err)
+	for i := v1EpochStartingBlock; i < v2EpochStartingBlock; i++ {
+		suite.Commit()
+	}
+	nodePublicKeyV2, err := suite.app.EvmKeeper.GetNodePublicKey(suite.ctx, v2EpochStartingBlock)
+	suite.Require().NoError(err)
+
+	suite.Require().NotEqual(nodePublicKey, nodePublicKeyV1)
+	suite.Require().NotEqual(nodePublicKeyV1, nodePublicKeyV2)
+
 }
 
 func (suite *KeeperTestSuite) TestAddEpoch() {
