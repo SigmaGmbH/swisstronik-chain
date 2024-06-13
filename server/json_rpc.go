@@ -22,12 +22,12 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 
-	"swisstronik/rpc"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/cosmos/cosmos-sdk/server/types"
 	ethlog "github.com/ethereum/go-ethereum/log"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
+	"swisstronik/rpc"
 
 	"swisstronik/server/config"
 	evmcommontypes "swisstronik/types"
@@ -40,6 +40,7 @@ func StartJSONRPC(ctx *server.Context,
 	tmEndpoint string,
 	config *config.Config,
 	indexer evmcommontypes.EVMTxIndexer,
+	allowUnencryptedTxs bool,
 ) (*http.Server, chan struct{}, error) {
 	tmWsClient := ConnectTmWS(tmRPCAddr, tmEndpoint, ctx.Logger)
 
@@ -61,7 +62,7 @@ func StartJSONRPC(ctx *server.Context,
 	allowUnprotectedTxs := config.JSONRPC.AllowUnprotectedTxs
 	rpcAPIArr := config.JSONRPC.API
 
-	apis := rpc.GetRPCAPIs(ctx, clientCtx, tmWsClient, allowUnprotectedTxs, indexer, rpcAPIArr)
+	apis := rpc.GetRPCAPIs(ctx, clientCtx, tmWsClient, allowUnprotectedTxs, indexer, rpcAPIArr, allowUnencryptedTxs)
 
 	for _, api := range apis {
 		if err := rpcServer.RegisterName(api.Namespace, api.Service); err != nil {
