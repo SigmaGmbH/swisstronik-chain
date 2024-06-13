@@ -73,9 +73,6 @@ impl<'state> ExtendedBackend for FFIBackend<'state> {
                     storage,
                     ..
                 } => {
-                    // Reset storage is ignored since storage cannot be efficiently reset as this
-                    // would require iterating over storage keys
-
                     // Update account balance and nonce
                     let previous_account_data = self.state.get_account(&address);
 
