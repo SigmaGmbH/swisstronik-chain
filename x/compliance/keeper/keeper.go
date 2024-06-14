@@ -348,7 +348,7 @@ func (k Keeper) HasVerificationOfType(ctx sdk.Context, userAddress sdk.Address, 
 				continue
 			}
 			// Check if verification is valid by given expiration timestamp
-			if expirationTimestamp > verificationDetails.ExpirationTimestamp {
+			if verificationDetails.ExpirationTimestamp > 0 && expirationTimestamp > verificationDetails.ExpirationTimestamp {
 				continue
 			}
 			return true, nil
