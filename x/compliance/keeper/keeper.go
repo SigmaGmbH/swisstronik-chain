@@ -3,7 +3,6 @@ package keeper
 import (
 	"fmt"
 	"slices"
-	"time"
 
 	"cosmossdk.io/errors"
 	"github.com/cometbft/cometbft/libs/log"
@@ -324,9 +323,9 @@ func (k Keeper) HasVerificationOfType(ctx sdk.Context, userAddress sdk.Address, 
 		return false, err
 	}
 
-	// Use now as default expiration time if not given
+	// If expiration is 0, it means infinite period
 	if expirationTimestamp < 1 {
-		expirationTimestamp = uint32(time.Now().Unix())
+		expirationTimestamp = ^uint32(0)
 	}
 
 	for _, verification := range userAddressDetails.Verifications {

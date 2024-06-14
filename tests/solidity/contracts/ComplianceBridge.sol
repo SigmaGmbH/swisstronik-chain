@@ -93,7 +93,7 @@ contract ComplianceProxy {
             (
                 userAddress, // user address
                 VERIFICATION_TYPE, // verification type
-                0, // expiration timestamp, 0 for now
+                0, // expiration timestamp, 0 for infinite period
                 allowedIssuers // expected allowed issuers
             )
         );
