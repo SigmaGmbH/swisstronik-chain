@@ -3,6 +3,7 @@ package keeper
 import (
 	"fmt"
 	"slices"
+	"time"
 
 	"cosmossdk.io/errors"
 	"github.com/cometbft/cometbft/libs/log"
@@ -316,34 +317,44 @@ func (k Keeper) GetVerificationDetailsByIssuer(ctx sdk.Context, userAddress sdk.
 
 // HasVerificationOfType checks if user has verifications of specific type (for example, passed KYC) from provided issuers.
 // If there is no provided expected issuers, this function will check if user has any verification of appropriate type.
-func (k Keeper) HasVerificationOfType(ctx sdk.Context, userAddress sdk.Address, expectedType types.VerificationType, expectedIssuers []sdk.Address) (bool, error) {
+func (k Keeper) HasVerificationOfType(ctx sdk.Context, userAddress sdk.Address, expectedType types.VerificationType, expirationTimestamp uint32, expectedIssuers []sdk.Address) (bool, error) {
 	// Obtain user address details
 	userAddressDetails, err := k.GetAddressDetails(ctx, userAddress)
 	if err != nil {
 		return false, err
 	}
 
-	// Filter verifications with expected type
-	var appropriateTypeVerifications []*types.Verification
+	// Use now as default expiration time if not given
+	if expirationTimestamp < 1 {
+		expirationTimestamp = uint32(time.Now().Unix())
+	}
+
 	for _, verification := range userAddressDetails.Verifications {
 		if verification.Type == expectedType {
-			appropriateTypeVerifications = append(appropriateTypeVerifications, verification)
-		}
-	}
-
-	// If there is no provided issuers, check if there are any appropriate verification
-	if len(expectedIssuers) == 0 && len(appropriateTypeVerifications) != 0 {
-		return true, nil
-	}
-
-	// Filter verifications with expected issuers
-	for _, verification := range appropriateTypeVerifications {
-		for _, expectedIssuer := range expectedIssuers {
-			if verification.IssuerAddress == expectedIssuer.String() {
-				return true, nil
+			// If not found matched issuer, do not get details to check expiration
+			found := false
+			for _, expectedIssuer := range expectedIssuers {
+				if verification.IssuerAddress == expectedIssuer.String() {
+					found = true
+					break
+				}
 			}
+			if len(expectedIssuers) > 0 && !found {
+				continue
+			}
+
+			verificationDetails, err := k.GetVerificationDetails(ctx, verification.VerificationId)
+			if err != nil {
+				continue
+			}
+			// Check if verification is valid by given expiration timestamp
+			if expirationTimestamp > verificationDetails.ExpirationTimestamp {
+				continue
+			}
+			return true, nil
 		}
 	}
+
 	return false, nil
 }
 
