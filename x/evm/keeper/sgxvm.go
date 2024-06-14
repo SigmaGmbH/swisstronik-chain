@@ -2,9 +2,12 @@ package keeper
 
 import (
 	"context"
-	errorsmod "cosmossdk.io/errors"
 	"encoding/json"
 	"fmt"
+	"math/big"
+	"strconv"
+
+	errorsmod "cosmossdk.io/errors"
 	"github.com/SigmaGmbH/librustgo"
 	"github.com/armon/go-metrics"
 	tmbytes "github.com/cometbft/cometbft/libs/bytes"
@@ -16,8 +19,8 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/params"
-	"math/big"
-	"strconv"
+	"github.com/pkg/errors"
+
 	evmcommontypes "swisstronik/types"
 	"swisstronik/x/evm/types"
 )
@@ -334,11 +337,17 @@ func (k *Keeper) ApplyMessageWithConfig(
 }
 
 func (k *Keeper) GetNodePublicKey(blockNumber uint64) (common.Hash, error) {
-	res, err := librustgo.GetNodePublicKey(blockNumber)
-	if err != nil {
-		return common.Hash{}, err
+	nodePublicKey := common.Hash{}
+	for _, epoch := range k.epochs {
+		if epoch.GetStartingBlock() > blockNumber {
+			break
+		}
+		nodePublicKey = common.BytesToHash(epoch.GetNodePublicKey())
 	}
-	return common.BytesToHash(res.PublicKey), nil
+	if nodePublicKey == (common.Hash{}) {
+		return common.Hash{}, errors.Wrapf(types.ErrEmptyNodePublicKey, "node public key not exists at %d", blockNumber)
+	}
+	return nodePublicKey, nil
 }
 
 func CreateSGXVMContext(ctx sdk.Context, k *Keeper, tx *ethtypes.Transaction) (*librustgo.TransactionContext, error) {
