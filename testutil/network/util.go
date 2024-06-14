@@ -146,16 +146,27 @@ func startInProcess(cfg Config, val *Validator) error {
 		tmEndpoint := "/websocket"
 		tmRPCAddr := val.RPCAddress
 
+		// Start JSON-RPC server for encrypted transactions
 		val.jsonrpc, val.jsonrpcDone, err = server.StartJSONRPC(val.Ctx, val.ClientCtx, tmRPCAddr, tmEndpoint, val.AppConfig, nil, false)
 		if err != nil {
 			return err
 		}
 
 		address := fmt.Sprintf("http://%s", val.AppConfig.JSONRPC.Address)
-
 		val.JSONRPCClient, err = ethclient.Dial(address)
 		if err != nil {
 			return fmt.Errorf("failed to dial JSON-RPC at %s: %w", val.AppConfig.JSONRPC.Address, err)
+		}
+
+		// Start JSON-RPC server for unencrypted transactions
+		_, _, err = server.StartJSONRPC(val.Ctx, val.ClientCtx, tmRPCAddr, tmEndpoint, val.AppConfig, nil, true)
+		if err != nil {
+			return err
+		}
+		unencryptedAddress := fmt.Sprintf("http://%s", val.AppConfig.JSONRPC.UnencryptedAddress)
+		_, err = ethclient.Dial(unencryptedAddress)
+		if err != nil {
+			return fmt.Errorf("failed to dial unencrypted JSON-RPC at %s: %w", "0.0.0.0:8547", err)
 		}
 	}
 

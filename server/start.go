@@ -564,8 +564,10 @@ func startInProcess(ctx *server.Context, clientCtx client.Context, opts StartOpt
 	}
 
 	var (
-		httpSrv     *http.Server
-		httpSrvDone chan struct{}
+		httpSrv                *http.Server
+		unencryptedHttpSrv     *http.Server
+		httpSrvDone            chan struct{}
+		unencryptedHttpSrvDone chan struct{}
 	)
 
 	if config.JSONRPC.Enable {
@@ -592,6 +594,24 @@ func startInProcess(ctx *server.Context, clientCtx client.Context, opts StartOpt
 				select {
 				case <-time.Tick(5 * time.Second):
 				case <-httpSrvDone:
+				}
+			}
+		}()
+
+		unencryptedHttpSrv, unencryptedHttpSrvDone, err = StartJSONRPC(ctx, clientCtx, tmRPCAddr, tmEndpoint, &config, idxer, true)
+		if err != nil {
+			return err
+		}
+		defer func() {
+			shutdownCtx, cancelFn := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancelFn()
+			if err := unencryptedHttpSrv.Shutdown(shutdownCtx); err != nil {
+				logger.Error("HTTP server shutdown produced a warning", "error", err.Error())
+			} else {
+				logger.Info("HTTP server shut down, waiting 5 sec")
+				select {
+				case <-time.Tick(5 * time.Second):
+				case <-unencryptedHttpSrvDone:
 				}
 			}
 		}()
