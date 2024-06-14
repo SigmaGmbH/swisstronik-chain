@@ -254,12 +254,19 @@ impl EnclaveApi {
         match request_result.status {
             sgx_status_t::SGX_SUCCESS => {
                 let data = unsafe {
-                    Vec::from_raw_parts(request_result.result_ptr, request_result.result_size, request_result.result_size)
+                    Vec::from_raw_parts(
+                        request_result.result_ptr,
+                        request_result.result_size,
+                        request_result.result_size,
+                    )
                 };
                 Ok(data)
             }
             err => {
-                println!("[Enclave Wrapper] `ecall_list_epochs` failed. Reason: {:?}", err);
+                println!(
+                    "[Enclave Wrapper] `ecall_list_epochs` failed. Reason: {:?}",
+                    err
+                );
                 Err(Error::vm_err(err))
             }
         }

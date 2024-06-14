@@ -19,10 +19,10 @@ import (
 	"fmt"
 	"math/big"
 
-	sdkmath "cosmossdk.io/math"
-	"github.com/ethereum/go-ethereum/crypto"
-
 	errorsmod "cosmossdk.io/errors"
+	sdkmath "cosmossdk.io/math"
+	"github.com/SigmaGmbH/librustgo"
+	rustgotypes "github.com/SigmaGmbH/librustgo/types"
 	"github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
@@ -32,6 +32,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/params"
 
 	evmcommontypes "swisstronik/types"
@@ -47,6 +48,7 @@ type Keeper struct {
 	// - storing account's Code
 	// - storing transaction Logs
 	// - storing Bloom filters by block height. Needed for the Web3 API.
+	// - storing node public key by each block height
 	storeKey storetypes.StoreKey
 
 	// key to access the transient store, which is reset on every block during Commit
@@ -73,6 +75,9 @@ type Keeper struct {
 
 	// Legacy subspace
 	ss paramstypes.Subspace
+
+	// list of epoch data which includes epoch number, starting block and relevant node public key
+	epochs []*rustgotypes.EpochData
 }
 
 // NewKeeper generates new evm module keeper
@@ -97,6 +102,11 @@ func NewKeeper(
 		panic(err)
 	}
 
+	epochs, err := librustgo.ListEpochs()
+	if err != nil {
+		panic(err)
+	}
+
 	// NOTE: we pass in the parameter space to the CommitStateDB in order to use custom denominations for the EVM operations
 	return &Keeper{
 		cdc:              cdc,
@@ -109,6 +119,7 @@ func NewKeeper(
 		storeKey:         storeKey,
 		transientKey:     transientKey,
 		ss:               ss,
+		epochs:           epochs,
 	}
 }
 

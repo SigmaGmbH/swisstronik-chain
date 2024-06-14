@@ -8,6 +8,7 @@ import (
 	"github.com/SigmaGmbH/librustgo"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/server"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/spf13/cobra"
 )
 
@@ -42,7 +43,7 @@ func ListEpochs() *cobra.Command {
 			}
 
 			for _, epoch := range epochs {
-				fmt.Println("Epoch #", epoch.EpochNumber, "Starting block: ", epoch.StartingBlock)
+				fmt.Println("Epoch #", epoch.EpochNumber, "Starting block: ", epoch.StartingBlock, "Node PublicKey: ", common.Bytes2Hex(epoch.NodePublicKey))
 			}
 
 			return nil
