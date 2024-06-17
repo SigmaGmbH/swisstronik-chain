@@ -128,7 +128,7 @@ func StartJSONRPC(ctx *server.Context,
 
 	// allocate separate WS connection to Tendermint
 	tmWsClient = ConnectTmWS(tmRPCAddr, tmEndpoint, ctx.Logger)
-	wsSrv := rpc.NewWebsocketsServer(clientCtx, ctx.Logger, tmWsClient, config)
+	wsSrv := rpc.NewWebsocketsServer(clientCtx, ctx.Logger, tmWsClient, config, allowUnencryptedTxs)
 	wsSrv.Start()
 	return httpSrv, httpSrvDone, nil
 }
