@@ -6,9 +6,7 @@
   },
   "scripts": {
     "compile": "hardhat compile",
-    "test": "hardhat test",
-    "test:tronik": "hardhat test --network tronik",
-    "test:local": "hardhat test --network local"
+    "test": "hardhat test --network tronik"
   },
   "dependencies": {
     "@ethersproject/providers": "^5.4.7",
