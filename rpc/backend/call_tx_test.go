@@ -450,6 +450,7 @@ func (suite *BackendTestSuite) TestDoCall() {
 		})
 	}
 }
+
 func (suite *BackendTestSuite) TestGasPrice() {
 	defaultGasPrice := (*hexutil.Big)(big.NewInt(1))
 

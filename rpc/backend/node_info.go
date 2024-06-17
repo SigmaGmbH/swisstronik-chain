@@ -35,6 +35,7 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"swisstronik/crypto/ethsecp256k1"
+
 	rpctypes "swisstronik/rpc/types"
 	"swisstronik/server/config"
 	ethermint "swisstronik/types"
@@ -289,6 +290,10 @@ func (b *Backend) SetGasPrice(gasPrice hexutil.Big) bool {
 	c := sdk.NewDecCoin(unit, sdk.NewIntFromBigInt(gasPrice.ToInt()))
 
 	appConf.SetMinGasPrices(sdk.DecCoins{c})
+	if b.clientCtx.Viper.ConfigFileUsed() == "" {
+		b.logger.Debug("could not write empty config file")
+		return false
+	}
 	sdkconfig.WriteConfigFile(b.clientCtx.Viper.ConfigFileUsed(), appConf)
 	b.logger.Info("Your configuration file was modified. Please RESTART your node.", "gas-price", c.String())
 	return true

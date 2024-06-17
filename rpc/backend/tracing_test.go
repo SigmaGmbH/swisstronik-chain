@@ -3,12 +3,6 @@ package backend
 import (
 	"fmt"
 
-	"swisstronik/crypto/ethsecp256k1"
-	"swisstronik/indexer"
-	"swisstronik/rpc/backend/mocks"
-	"swisstronik/utils"
-	evmtypes "swisstronik/x/evm/types"
-
 	dbm "github.com/cometbft/cometbft-db"
 	abci "github.com/cometbft/cometbft/abci/types"
 	tmlog "github.com/cometbft/cometbft/libs/log"
@@ -18,9 +12,15 @@ import (
 	"github.com/cosmos/cosmos-sdk/crypto"
 	"github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+
+	"swisstronik/crypto/ethsecp256k1"
+	"swisstronik/indexer"
+	"swisstronik/rpc/backend/mocks"
+	"swisstronik/utils"
+	evmtypes "swisstronik/x/evm/types"
 )
 
-func (suite *BackendTestSuite) TestTraceTransaction() {
+func (suite *BackendTestSuite) TestTraceTransaction_CHECK() {
 	msgHandleTx, _ := suite.buildEthereumTx()
 	msgHandleTx2, _ := suite.buildEthereumTx()
 
@@ -108,9 +108,13 @@ func (suite *BackendTestSuite) TestTraceTransaction() {
 		{
 			"pass - transaction found in a block with multiple transactions",
 			func() {
-				queryClient := suite.backend.queryClient.QueryClient.(*mocks.EVMQueryClient)
-				client := suite.backend.clientCtx.Client.(*mocks.Client)
-				RegisterBlockMultipleTxs(client, 1, []types.Tx{txBz, txBz2})
+				var (
+					queryClient       = suite.backend.queryClient.QueryClient.(*mocks.EVMQueryClient)
+					client            = suite.backend.clientCtx.Client.(*mocks.Client)
+					height      int64 = 1
+				)
+				_, err := RegisterBlockMultipleTxs(client, height, []types.Tx{txBz, txBz2})
+				suite.Require().NoError(err)
 				RegisterTraceTransactionWithPredecessors(queryClient, msgHandleTx, []*evmtypes.MsgHandleTx{msgHandleTx})
 			},
 			&types.Block{Header: types.Header{Height: 1, ChainID: ChainID}, Data: types.Data{Txs: []types.Tx{txBz, txBz2}}},
@@ -225,7 +229,9 @@ func (suite *BackendTestSuite) TestTraceBlock() {
 			"fail - cannot unmarshal data",
 			func() {
 				queryClient := suite.backend.queryClient.QueryClient.(*mocks.EVMQueryClient)
+				//client := suite.backend.clientCtx.Client.(*mocks.Client)
 				RegisterTraceBlock(queryClient, []*evmtypes.MsgHandleTx{msgEthTx})
+				//RegisterConsensusParams(client, 1)
 			},
 			[]*evmtypes.TxTraceResult{},
 			&resBlockFilled,

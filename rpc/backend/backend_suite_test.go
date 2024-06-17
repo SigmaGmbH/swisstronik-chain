@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	dbm "github.com/cometbft/cometbft-db"
-
 	tmrpctypes "github.com/cometbft/cometbft/rpc/core/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"

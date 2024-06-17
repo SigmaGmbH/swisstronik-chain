@@ -4,12 +4,6 @@ import (
 	"fmt"
 	"math/big"
 
-	"swisstronik/indexer"
-	"swisstronik/rpc/backend/mocks"
-	rpctypes "swisstronik/rpc/types"
-	ethermint "swisstronik/types"
-	evmtypes "swisstronik/x/evm/types"
-
 	dbm "github.com/cometbft/cometbft-db"
 	abci "github.com/cometbft/cometbft/abci/types"
 	tmlog "github.com/cometbft/cometbft/libs/log"
@@ -19,6 +13,12 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"google.golang.org/grpc/metadata"
+
+	"swisstronik/indexer"
+	"swisstronik/rpc/backend/mocks"
+	rpctypes "swisstronik/rpc/types"
+	ethermint "swisstronik/types"
+	evmtypes "swisstronik/x/evm/types"
 )
 
 func (suite *BackendTestSuite) TestGetTransactionByHash() {

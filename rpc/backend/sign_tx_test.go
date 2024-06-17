@@ -3,12 +3,6 @@ package backend
 import (
 	"fmt"
 
-	"swisstronik/crypto/ethsecp256k1"
-	"swisstronik/rpc/backend/mocks"
-	"swisstronik/tests"
-	"swisstronik/utils"
-	evmtypes "swisstronik/x/evm/types"
-
 	"github.com/cosmos/cosmos-sdk/crypto"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
@@ -17,6 +11,12 @@ import (
 	goethcrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/signer/core/apitypes"
 	"google.golang.org/grpc/metadata"
+
+	"swisstronik/crypto/ethsecp256k1"
+	"swisstronik/rpc/backend/mocks"
+	"swisstronik/tests"
+	"swisstronik/utils"
+	evmtypes "swisstronik/x/evm/types"
 )
 
 func (suite *BackendTestSuite) TestSendTransaction() {
@@ -83,7 +83,6 @@ func (suite *BackendTestSuite) TestSendTransaction() {
 				_, err = RegisterBlockResults(client, 1)
 				suite.Require().NoError(err)
 				RegisterBaseFee(queryClient, baseFee)
-				RegisterParamsWithoutHeader(queryClient, 1)
 			},
 			evmtypes.TransactionArgs{
 				From:     &from,

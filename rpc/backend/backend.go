@@ -20,11 +20,6 @@ import (
 	"math/big"
 	"time"
 
-	rpctypes "swisstronik/rpc/types"
-	"swisstronik/server/config"
-	ethermint "swisstronik/types"
-	evmtypes "swisstronik/x/evm/types"
-
 	"github.com/cometbft/cometbft/libs/log"
 	tmrpctypes "github.com/cometbft/cometbft/rpc/core/types"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -37,6 +32,11 @@ import (
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/ethereum/go-ethereum/signer/core/apitypes"
+
+	rpctypes "swisstronik/rpc/types"
+	"swisstronik/server/config"
+	ethermint "swisstronik/types"
+	evmtypes "swisstronik/x/evm/types"
 )
 
 // BackendI implements the Cosmos and EVM backend.

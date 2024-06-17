@@ -4,18 +4,16 @@ import (
 	"fmt"
 	"math/big"
 
-	rpc "swisstronik/rpc/types"
-	"swisstronik/tests"
-
+	"github.com/cometbft/cometbft/abci/types"
+	tmrpctypes "github.com/cometbft/cometbft/rpc/core/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
 	"google.golang.org/grpc/metadata"
 
-	"github.com/cometbft/cometbft/abci/types"
-	tmrpctypes "github.com/cometbft/cometbft/rpc/core/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-
 	"swisstronik/rpc/backend/mocks"
+	rpc "swisstronik/rpc/types"
+	"swisstronik/tests"
 	evmtypes "swisstronik/x/evm/types"
 	feemarkettypes "swisstronik/x/feemarket/types"
 )
@@ -153,7 +151,7 @@ func (suite *BackendTestSuite) TestBaseFee() {
 }
 
 func (suite *BackendTestSuite) TestChainId() {
-	expChainId := (*hexutil.Big)(big.NewInt(9000))
+	expChainId := (*hexutil.Big)(big.NewInt(1291))
 	testCases := []struct {
 		name         string
 		registerMock func()

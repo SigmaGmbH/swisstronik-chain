@@ -41,7 +41,7 @@ func TestWsSingleRequest(t *testing.T) {
 	msg := jsonUnmarshal(t, mb)
 	result, ok := msg["result"].(string)
 	require.True(t, ok)
-	require.Equal(t, "9000", result)
+	require.Equal(t, "1291", result)
 }
 
 func TestWsBatchRequest(t *testing.T) {
@@ -65,7 +65,7 @@ func TestWsBatchRequest(t *testing.T) {
 	resNetVersion := msg[0]
 	result, ok := resNetVersion["result"].(string)
 	require.True(t, ok)
-	require.Equal(t, "9000", result)
+	require.Equal(t, "1291", result)
 	id, ok := resNetVersion["id"].(float64)
 	require.True(t, ok)
 	require.Equal(t, 1, int(id))
