@@ -51,7 +51,7 @@ func (suite *BackendTestSuite) TestGetLogs() {
 			"fail - error getting block results",
 			func(hash common.Hash) {
 				client := suite.backend.clientCtx.Client.(*mocks.Client)
-				_ = RegisterBlockByHash(client, hash, bz)
+				_, _ = RegisterBlockByHash(client, hash, bz)
 				RegisterBlockResultsError(client, 1)
 			},
 			common.Hash{},
@@ -62,7 +62,7 @@ func (suite *BackendTestSuite) TestGetLogs() {
 			"success - getting logs with block hash",
 			func(hash common.Hash) {
 				client := suite.backend.clientCtx.Client.(*mocks.Client)
-				_ = RegisterBlockByHash(client, hash, bz)
+				_, _ = RegisterBlockByHash(client, hash, bz)
 				_, _ = RegisterBlockResultsWithEventLog(client, ethrpc.BlockNumber(1).Int64())
 			},
 			common.BytesToHash(block.Hash()),
