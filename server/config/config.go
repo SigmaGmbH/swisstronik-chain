@@ -114,11 +114,11 @@ type JSONRPCConfig struct {
 	// Address defines the HTTP server to listen on
 	Address string `mapstructure:"address"`
 	// UnencryptedAddress defined the HTTP server to listen on
-	UnencryptedAddress string `mapstructure:"unencrypted-address"`
+	UnencryptedAddress string `mapstructure:"address-unencrypted"`
 	// WsAddress defines the WebSocket server to listen on
 	WsAddress string `mapstructure:"ws-address"`
 	// UnencryptedWsAddress defines the WebSocket server to listen on
-	UnencryptedWsAddress string `mapstructure:"unencrypted-ws-address"`
+	UnencryptedWsAddress string `mapstructure:"ws-address-unencrypted"`
 	// GasCap is the global gas cap for eth-call variants.
 	GasCap uint64 `mapstructure:"gas-cap"`
 	// EVMTimeout is the global timeout for eth-call.
@@ -353,6 +353,8 @@ func GetConfig(v *viper.Viper) (Config, error) {
 			API:                      v.GetStringSlice("json-rpc.api"),
 			Address:                  v.GetString("json-rpc.address"),
 			WsAddress:                v.GetString("json-rpc.ws-address"),
+			UnencryptedAddress:       v.GetString("json-rpc.address-unencrypted"),
+			UnencryptedWsAddress:     v.GetString("json-rpc.ws-address-unencrypted"),
 			GasCap:                   v.GetUint64("json-rpc.gas-cap"),
 			FilterCap:                v.GetInt32("json-rpc.filter-cap"),
 			FeeHistoryCap:            v.GetInt32("json-rpc.feehistory-cap"),

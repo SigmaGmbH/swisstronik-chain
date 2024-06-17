@@ -54,6 +54,8 @@ const (
 	JSONRPCAPI                 = "json-rpc.api"
 	JSONRPCAddress             = "json-rpc.address"
 	JSONWsAddress              = "json-rpc.ws-address"
+	JSONRPCAddressUnencrypted  = "json-rpc.address-unencrypted"
+	JSONWsAddressUnencrypted   = "json-rpc.ws-address-unencrypted"
 	JSONRPCGasCap              = "json-rpc.gas-cap"
 	JSONRPCEVMTimeout          = "json-rpc.evm-timeout"
 	JSONRPCTxFeeCap            = "json-rpc.txfee-cap"
