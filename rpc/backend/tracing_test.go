@@ -34,18 +34,18 @@ func (suite *BackendTestSuite) TestTraceTransaction_CHECK() {
 	RegisterParamsWithoutHeader(queryClient, 1)
 
 	armor := crypto.EncryptArmorPrivKey(priv, "", "eth_secp256k1")
-	suite.backend.clientCtx.Keyring.ImportPrivKey("test_key", armor, "")
+	_ = suite.backend.clientCtx.Keyring.ImportPrivKey("test_key", armor, "")
 	ethSigner := ethtypes.LatestSigner(suite.backend.ChainConfig())
 
 	txEncoder := suite.backend.clientCtx.TxConfig.TxEncoder()
 
 	msgHandleTx.From = from.String()
-	msgHandleTx.Sign(ethSigner, suite.signer)
+	_ = msgHandleTx.Sign(ethSigner, suite.signer)
 	tx, _ := msgHandleTx.BuildTx(suite.backend.clientCtx.TxConfig.NewTxBuilder(), utils.BaseDenom)
 	txBz, _ := txEncoder(tx)
 
 	msgHandleTx2.From = from.String()
-	msgHandleTx2.Sign(ethSigner, suite.signer)
+	_ = msgHandleTx2.Sign(ethSigner, suite.signer)
 	tx2, _ := msgHandleTx.BuildTx(suite.backend.clientCtx.TxConfig.NewTxBuilder(), utils.BaseDenom)
 	txBz2, _ := txEncoder(tx2)
 
@@ -154,7 +154,7 @@ func (suite *BackendTestSuite) TestTraceTransaction_CHECK() {
 			func() {
 				queryClient := suite.backend.queryClient.QueryClient.(*mocks.EVMQueryClient)
 				client := suite.backend.clientCtx.Client.(*mocks.Client)
-				RegisterBlock(client, 1, txBz)
+				_, _ = RegisterBlock(client, 1, txBz)
 				RegisterTraceTransaction(queryClient, msgHandleTx)
 			},
 			&types.Block{Header: types.Header{Height: 1}, Data: types.Data{Txs: []types.Tx{txBz}}},

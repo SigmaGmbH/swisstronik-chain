@@ -141,7 +141,7 @@ func RegisterBlockNotFound(
 func TestRegisterBlock(t *testing.T) {
 	client := mocks.NewClient(t)
 	height := rpc.BlockNumber(1).Int64()
-	RegisterBlock(client, height, nil)
+	_, _ = RegisterBlock(client, height, nil)
 
 	res, err := client.Block(rpc.ContextWithHeight(height), &height)
 
@@ -218,7 +218,7 @@ func RegisterBlockResultsError(client *mocks.Client, height int64) {
 func TestRegisterBlockResults(t *testing.T) {
 	client := mocks.NewClient(t)
 	height := int64(1)
-	RegisterBlockResults(client, height)
+	_, _ = RegisterBlockResults(client, height)
 
 	res, err := client.BlockResults(rpc.ContextWithHeight(height), &height)
 	expRes := &tmrpctypes.ResultBlockResults{

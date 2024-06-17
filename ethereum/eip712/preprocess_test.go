@@ -167,7 +167,7 @@ func createBasicTestCase(t *testing.T) TestCaseStruct {
 		Sequence: 0,
 	}
 
-	txBuilder.SetSignatures(sigsV2)
+	_ = txBuilder.SetSignatures(sigsV2)
 	return TestCaseStruct{
 		txBuilder:              txBuilder,
 		expectedFeePayer:       feePayer.String(),
@@ -209,7 +209,7 @@ func createPopulatedTestCase(t *testing.T) TestCaseStruct {
 		),
 	}
 
-	txBuilder.SetMsgs(&msgSend)
+	_ = txBuilder.SetMsgs(&msgSend)
 
 	return TestCaseStruct{
 		txBuilder:              txBuilder,

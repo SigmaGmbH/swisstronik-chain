@@ -373,7 +373,7 @@ func (suite *BackendTestSuite) TestFeeHistory() {
 			func(validator sdk.AccAddress) {
 				client := suite.backend.clientCtx.Client.(*mocks.Client)
 				suite.backend.cfg.JSONRPC.FeeHistoryCap = 2
-				RegisterBlock(client, ethrpc.BlockNumber(1).Int64(), nil)
+				_, _ = RegisterBlock(client, ethrpc.BlockNumber(1).Int64(), nil)
 				RegisterBlockResultsError(client, 1)
 			},
 			1,
@@ -389,8 +389,8 @@ func (suite *BackendTestSuite) TestFeeHistory() {
 				queryClient := suite.backend.queryClient.QueryClient.(*mocks.EVMQueryClient)
 				client := suite.backend.clientCtx.Client.(*mocks.Client)
 				suite.backend.cfg.JSONRPC.FeeHistoryCap = 2
-				RegisterBlock(client, ethrpc.BlockNumber(1).Int64(), nil)
-				RegisterBlockResults(client, 1)
+				_ = RegisterBlock(client, ethrpc.BlockNumber(1).Int64(), nil)
+				_, _ = RegisterBlockResults(client, 1)
 				RegisterBaseFeeError(queryClient)
 				RegisterValidatorAccount(queryClient, validator)
 				RegisterConsensusParams(client, 1)
@@ -409,8 +409,8 @@ func (suite *BackendTestSuite) TestFeeHistory() {
 				queryClient := suite.backend.queryClient.QueryClient.(*mocks.EVMQueryClient)
 				client := suite.backend.clientCtx.Client.(*mocks.Client)
 				suite.backend.cfg.JSONRPC.FeeHistoryCap = 2
-				RegisterBlock(client, ethrpc.BlockNumber(1).Int64(), nil)
-				RegisterBlockResults(client, 1)
+				_, _ = RegisterBlock(client, ethrpc.BlockNumber(1).Int64(), nil)
+				_ = RegisterBlockResults(client, 1)
 				RegisterBaseFee(queryClient, baseFee)
 				RegisterValidatorAccount(queryClient, validator)
 				RegisterConsensusParams(client, 1)
