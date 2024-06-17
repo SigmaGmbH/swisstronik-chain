@@ -268,6 +268,7 @@ func Call(
 	gasLimit, nonce uint64,
 	txContext *types.TransactionContext,
 	commit bool,
+	isEncrypted bool,
 ) (*types.HandleTransactionResponse, error) {
 	// Construct mocked querier
 	c := BuildConnector(connector)
@@ -282,6 +283,7 @@ func Call(
 		AccessList: convertAccessList(accessList),
 		Commit:     commit,
 		Nonce:      nonce,
+		Encrypted:  isEncrypted,
 	}
 
 	// Create protobuf encoded request

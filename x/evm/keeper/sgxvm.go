@@ -33,6 +33,7 @@ func (k *Keeper) HandleTx(goCtx context.Context, msg *types.MsgHandleTx) (*types
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	sender := msg.From
+	isEncrypted := msg.Encrypted
 	tx := msg.AsTransaction()
 	txIndex := k.GetTxIndexTransient(ctx)
 
@@ -45,7 +46,7 @@ func (k *Keeper) HandleTx(goCtx context.Context, msg *types.MsgHandleTx) (*types
 		labels = append(labels, telemetry.NewLabel("execution", "call"))
 	}
 
-	response, err := k.ApplySGXVMTransaction(ctx, tx)
+	response, err := k.ApplySGXVMTransaction(ctx, tx, isEncrypted)
 	if err != nil {
 		return nil, errorsmod.Wrap(err, "failed to apply transaction")
 	}
@@ -132,7 +133,11 @@ func (k *Keeper) HandleTx(goCtx context.Context, msg *types.MsgHandleTx) (*types
 	return response, nil
 }
 
-func (k *Keeper) ApplySGXVMTransaction(ctx sdk.Context, tx *ethtypes.Transaction) (*types.MsgEthereumTxResponse, error) {
+func (k *Keeper) ApplySGXVMTransaction(
+	ctx sdk.Context,
+	tx *ethtypes.Transaction,
+	isEncrypted bool,
+) (*types.MsgEthereumTxResponse, error) {
 	var (
 		bloom        *big.Int
 		bloomReceipt ethtypes.Bloom
@@ -167,7 +172,7 @@ func (k *Keeper) ApplySGXVMTransaction(ctx sdk.Context, tx *ethtypes.Transaction
 		tmpCtx, commit = ctx.CacheContext()
 	}
 
-	res, err := k.ApplyMessageWithConfig(tmpCtx, msg, true, cfg, txConfig, txContext)
+	res, err := k.ApplyMessageWithConfig(tmpCtx, msg, true, cfg, txConfig, txContext, isEncrypted)
 	if err != nil {
 		return nil, errorsmod.Wrap(err, "failed to apply ethereum core message")
 	}
@@ -258,6 +263,7 @@ func (k *Keeper) ApplyMessageWithConfig(
 	cfg *types.EVMConfig,
 	txConfig types.TxConfig,
 	txContext *librustgo.TransactionContext,
+	isEncrypted bool,
 ) (*types.MsgEthereumTxResponse, error) {
 	// return error if contract creation or call are disabled through governance
 	if !cfg.Params.EnableCreate && msg.To() == nil {
@@ -310,6 +316,7 @@ func (k *Keeper) ApplyMessageWithConfig(
 			msg.Nonce(),
 			txContext,
 			commit,
+			isEncrypted,
 		)
 	}
 

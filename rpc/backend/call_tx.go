@@ -138,6 +138,12 @@ func (b *Backend) SendRawTransaction(data hexutil.Bytes) (common.Hash, error) {
 		return common.Hash{}, err
 	}
 
+	isEncryptedTx := true
+	if b.allowUnencryptedTxs {
+		isEncryptedTx = false
+	}
+	ethereumTx.Encrypted = isEncryptedTx
+
 	if err := ethereumTx.ValidateBasic(); err != nil {
 		b.logger.Debug("tx failed basic validation", "error", err.Error())
 		return common.Hash{}, err
@@ -324,11 +330,17 @@ func (b *Backend) EstimateGas(args evmtypes.TransactionArgs, blockNrOptional *rp
 		return 0, errors.New("header not found")
 	}
 
+	isEncryptedTx := true
+	if b.allowUnencryptedTxs {
+		isEncryptedTx = false
+	}
+
 	req := evmtypes.EthCallRequest{
 		Args:            bz,
 		GasCap:          b.RPCGasCap(),
 		ProposerAddress: sdk.ConsAddress(header.Block.ProposerAddress),
 		ChainId:         b.chainID.Int64(),
+		Encrypted:       isEncryptedTx,
 	}
 
 	// From ContextWithHeight: if the provided height is 0,
@@ -356,11 +368,17 @@ func (b *Backend) DoCall(
 		return nil, errors.New("header not found")
 	}
 
+	isEncryptedTx := true
+	if b.allowUnencryptedTxs {
+		isEncryptedTx = false
+	}
+
 	req := evmtypes.EthCallRequest{
 		Args:            bz,
 		GasCap:          b.RPCGasCap(),
 		ProposerAddress: sdk.ConsAddress(header.Block.ProposerAddress),
 		ChainId:         b.chainID.Int64(),
+		Encrypted:       isEncryptedTx,
 	}
 
 	// From ContextWithHeight: if the provided height is 0,
