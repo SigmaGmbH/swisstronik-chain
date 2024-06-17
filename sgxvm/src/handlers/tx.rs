@@ -74,10 +74,10 @@ pub fn handle_call_request_inner(
     let mut storage = crate::storage::FFIStorage::new(querier, context.timestamp, block_number);
     let mut backend = FFIBackend::new(querier, &mut storage, vicinity, TxContext::from(context));
 
-    // If data is empty, there should be no encryption of result. Otherwise we should try
-    // to extract user public key and encrypted data
-    match params.data.len() {
-        0 => execute_call(
+    // We do not decrypt transaction if no tx.data provided, or provided explicit flag, that transaction is unencrypted
+    let is_encrypted = params.data.len() != 0 && params.encrypted;
+    match is_encrypted {
+        false => execute_call(
             querier,
             &mut backend,
             params.gasLimit,
@@ -88,7 +88,7 @@ pub fn handle_call_request_inner(
             parse_access_list(params.accessList),
             params.commit,
         ),
-        _ => {
+        true => {
             // Extract user public key and nonce from transaction data
             let (user_public_key, data, nonce) = match extract_public_key_and_data(params.data) {
                 Ok((user_public_key, data, nonce)) => (user_public_key, data, nonce),
