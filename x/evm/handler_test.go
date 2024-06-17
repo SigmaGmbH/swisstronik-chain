@@ -536,7 +536,7 @@ func (suite *EvmTestSuite) deployERC20Contract() common.Address {
 	erc20DeployTx.From = suite.from.Hex()
 	err = erc20DeployTx.Sign(ethtypes.LatestSignerForChainID(chainID), suite.signer)
 	suite.Require().NoError(err)
-	rsp, err := suite.app.EvmKeeper.ApplySGXVMTransaction(suite.ctx, erc20DeployTx.AsTransaction())
+	rsp, err := suite.app.EvmKeeper.ApplySGXVMTransaction(suite.ctx, erc20DeployTx.AsTransaction(), false)
 	suite.Require().NoError(err)
 	suite.Require().False(rsp.Failed())
 	return crypto.CreateAddress(suite.from, nonce)
@@ -624,9 +624,10 @@ func (suite *EvmTestSuite) TestERC20TransferReverted() {
 			suite.Require().NoError(err)
 
 			ethMsgTx := &types.MsgHandleTx{
-				Data: tx.Data,
-				Hash: tx.Hash,
-				From: tx.From,
+				Data:      tx.Data,
+				Hash:      tx.Hash,
+				From:      tx.From,
+				Encrypted: true,
 			}
 			res, err := k.HandleTx(sdk.WrapSDKContext(suite.ctx), ethMsgTx)
 			suite.Require().NoError(err)
@@ -702,9 +703,10 @@ func (suite *EvmTestSuite) TestContractDeploymentRevert() {
 			suite.Require().NoError(err)
 
 			msgEthTx := &types.MsgHandleTx{
-				Data: tx.Data,
-				Hash: tx.Hash,
-				From: tx.From,
+				Data:      tx.Data,
+				Hash:      tx.Hash,
+				From:      tx.From,
+				Encrypted: false,
 			}
 			rsp, err := k.HandleTx(sdk.WrapSDKContext(suite.ctx), msgEthTx)
 			suite.Require().NoError(err)
