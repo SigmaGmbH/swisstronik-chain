@@ -48,7 +48,8 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 			panic(err)
 		}
 		// Check the issuance timestamp and proof
-		if verificationData.Details.IssuanceTimestamp >= verificationData.Details.ExpirationTimestamp {
+		if verificationData.Details.IssuanceTimestamp < 1 ||
+			(verificationData.Details.ExpirationTimestamp > 0 && verificationData.Details.IssuanceTimestamp >= verificationData.Details.ExpirationTimestamp) {
 			panic(errors.Wrap(types.ErrInvalidParam, "invalid issuance timestamp"))
 		}
 		if len(verificationData.Details.OriginalData) < 1 {

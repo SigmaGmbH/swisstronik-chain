@@ -90,7 +90,12 @@ contract ComplianceProxy {
         address[] memory allowedIssuers;
         bytes memory payload = abi.encodeCall(
             IComplianceBridge.hasVerification,
-            (userAddress, VERIFICATION_TYPE, 0, allowedIssuers)
+            (
+                userAddress, // user address
+                VERIFICATION_TYPE, // verification type
+                0, // expiration timestamp, 0 for infinite period
+                allowedIssuers // expected allowed issuers
+            )
         );
         (bool success, bytes memory data) = address(1028).staticcall(payload);
         if (success) {

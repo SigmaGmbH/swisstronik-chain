@@ -233,13 +233,14 @@ func (q Connector) AddVerificationDetails(req *librustgo.CosmosRequest_AddVerifi
 func (q Connector) HasVerification(req *librustgo.CosmosRequest_HasVerification) ([]byte, error) {
 	userAddress := sdk.AccAddress(req.HasVerification.UserAddress)
 	verificationType := compliancetypes.VerificationType(req.HasVerification.VerificationType)
+	expirationTimestamp := req.HasVerification.ExpirationTimestamp
 
 	var allowedIssuers []sdk.Address
 	for _, issuer := range req.HasVerification.AllowedIssuers {
 		allowedIssuers = append(allowedIssuers, sdk.AccAddress(issuer))
 	}
 
-	hasVerification, err := q.EVMKeeper.ComplianceKeeper.HasVerificationOfType(q.Context, userAddress, verificationType, allowedIssuers)
+	hasVerification, err := q.EVMKeeper.ComplianceKeeper.HasVerificationOfType(q.Context, userAddress, verificationType, expirationTimestamp, allowedIssuers)
 	if err != nil {
 		return nil, err
 	}
