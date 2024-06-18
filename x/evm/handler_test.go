@@ -369,7 +369,7 @@ func (suite *EvmTestSuite) TestDeployAndCallContract() {
 
 	err = proto.Unmarshal(result.Data, &res)
 	suite.Require().NoError(err, "failed to decode result data")
-	suite.Require().Equal(res.VmError, "", "failed to handle eth tx msg")
+	suite.Require().Equal("", res.VmError, "failed to handle eth tx msg")
 
 	// store - changeOwner
 	gasLimit = uint64(100000000000)
@@ -390,7 +390,7 @@ func (suite *EvmTestSuite) TestDeployAndCallContract() {
 
 	err = proto.Unmarshal(result.Data, &res)
 	suite.Require().NoError(err, "failed to decode result data")
-	suite.Require().Equal(res.VmError, "", "failed to handle eth tx msg")
+	suite.Require().Equal("", res.VmError, "failed to handle eth tx msg")
 
 	// query - getOwner
 	bytecode = common.FromHex("0x893d20e8")
@@ -402,7 +402,7 @@ func (suite *EvmTestSuite) TestDeployAndCallContract() {
 
 	err = proto.Unmarshal(result.Data, &res)
 	suite.Require().NoError(err, "failed to decode result data")
-	suite.Require().Equal(res.VmError, "", "failed to handle eth tx msg")
+	suite.Require().Equal("", res.VmError, "failed to handle eth tx msg")
 }
 
 func (suite *EvmTestSuite) TestSendTransaction() {

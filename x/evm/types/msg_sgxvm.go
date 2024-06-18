@@ -19,10 +19,10 @@ import (
 
 	"swisstronik/types"
 
-	"swisstronik/crypto/deoxys"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	"swisstronik/crypto/deoxys"
 )
 
 var (
@@ -144,6 +144,7 @@ func newMsgHandleTx(
 
 	msg := MsgHandleTx{Data: dataAny}
 	msg.Hash = msg.AsTransaction().Hash().Hex()
+	msg.Encrypted = true
 	return &msg
 }
 
