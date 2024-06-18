@@ -3,6 +3,7 @@ package keeper_test
 import (
 	"math/big"
 	"math/rand"
+	"time"
 
 	"github.com/SigmaGmbH/librustgo"
 	"github.com/SigmaGmbH/librustgo/types"
@@ -369,15 +370,19 @@ func (suite *KeeperTestSuite) TestSingleVerificationDetails() {
 				suite.Require().Equal(issuerAccount.String(), addressDetails.Verifications[0].IssuerAddress)
 
 				// Check if `hasVerification` with empty issuers returns true
-				has, err := connector.EVMKeeper.ComplianceKeeper.HasVerificationOfType(connector.Context, userAccount, verificationType, nil)
+				has, err := connector.EVMKeeper.ComplianceKeeper.HasVerificationOfType(connector.Context, userAccount, verificationType, 0, nil)
 				suite.Require().NoError(err)
 				suite.Require().True(has)
 
-				has, err = connector.EVMKeeper.ComplianceKeeper.HasVerificationOfType(connector.Context, userAccount, verificationType, []sdk.Address{issuerAccount})
+				has, err = connector.EVMKeeper.ComplianceKeeper.HasVerificationOfType(connector.Context, userAccount, verificationType, 0, []sdk.Address{issuerAccount})
 				suite.Require().NoError(err)
 				suite.Require().True(has)
 
-				has, err = connector.EVMKeeper.ComplianceKeeper.HasVerificationOfType(connector.Context, userAccount, verificationType, []sdk.Address{illegalIssuerAccount})
+				has, err = connector.EVMKeeper.ComplianceKeeper.HasVerificationOfType(connector.Context, userAccount, verificationType, uint32(time.Now().Unix()), []sdk.Address{issuerAccount})
+				suite.Require().NoError(err)
+				suite.Require().True(has)
+
+				has, err = connector.EVMKeeper.ComplianceKeeper.HasVerificationOfType(connector.Context, userAccount, verificationType, 0, []sdk.Address{illegalIssuerAccount})
 				suite.Require().NoError(err)
 				suite.Require().False(has)
 

@@ -170,7 +170,7 @@ func (suite *KeeperTestSuite) TestSuspendedIssuer() {
 	suite.Require().Error(err)
 	suite.Require().Nil(verificationId)
 
-	has, err := suite.keeper.HasVerificationOfType(suite.ctx, signer, types.VerificationType_VT_KYC, []sdk.Address{issuer})
+	has, err := suite.keeper.HasVerificationOfType(suite.ctx, signer, types.VerificationType_VT_KYC, 1715018692, []sdk.Address{issuer})
 	suite.Require().NoError(err)
 	suite.Require().False(has)
 }
@@ -289,14 +289,29 @@ func (suite *KeeperTestSuite) TestAddVerificationDetails() {
 	suite.Require().NoError(err)
 	suite.Require().NotNil(verificationId)
 
-	has, err := suite.keeper.HasVerificationOfType(suite.ctx, signer, types.VerificationType_VT_KYC, []sdk.Address{issuer})
+	has, err := suite.keeper.HasVerificationOfType(suite.ctx, signer, types.VerificationType_VT_KYC, 1715018692, []sdk.Address{issuer})
 	suite.Require().NoError(err)
 	suite.Require().True(has)
 
 	// No provided issuer, but has verification details
-	has, err = suite.keeper.HasVerificationOfType(suite.ctx, signer, types.VerificationType_VT_KYC, nil)
+	has, err = suite.keeper.HasVerificationOfType(suite.ctx, signer, types.VerificationType_VT_KYC, 1715018692, nil)
 	suite.Require().NoError(err)
 	suite.Require().True(has)
+
+	// Check if it has valid verification details
+	has, err = suite.keeper.HasVerificationOfType(suite.ctx, signer, types.VerificationType_VT_KYC, 1715018692-1, nil)
+	suite.Require().NoError(err)
+	suite.Require().True(has)
+	has, err = suite.keeper.HasVerificationOfType(suite.ctx, signer, types.VerificationType_VT_KYC, 1715018692+1, nil)
+	suite.Require().NoError(err)
+	suite.Require().False(has)
+	// Check if it has valid verification details within current time
+	has, err = suite.keeper.HasVerificationOfType(suite.ctx, signer, types.VerificationType_VT_KYC, 0, nil)
+	suite.Require().NoError(err)
+	suite.Require().False(has)
+	has, err = suite.keeper.HasVerificationOfType(suite.ctx, signer, types.VerificationType_VT_KYC, 0, []sdk.Address{issuer})
+	suite.Require().NoError(err)
+	suite.Require().False(has)
 }
 
 func (suite *KeeperTestSuite) TestAddressDetailsCRUD() {
