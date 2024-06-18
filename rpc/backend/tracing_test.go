@@ -20,7 +20,7 @@ import (
 	evmtypes "swisstronik/x/evm/types"
 )
 
-func (suite *BackendTestSuite) TestTraceTransaction_CHECK() {
+func (suite *BackendTestSuite) TestTraceTransaction() {
 	msgHandleTx, _ := suite.buildEthereumTx()
 	msgHandleTx2, _ := suite.buildEthereumTx()
 
