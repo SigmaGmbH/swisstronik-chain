@@ -4,18 +4,16 @@ import (
 	"fmt"
 	"math/big"
 
-	rpc "swisstronik/rpc/types"
-	"swisstronik/tests"
-
+	"github.com/cometbft/cometbft/abci/types"
+	tmrpctypes "github.com/cometbft/cometbft/rpc/core/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
 	"google.golang.org/grpc/metadata"
 
-	"github.com/cometbft/cometbft/abci/types"
-	tmrpctypes "github.com/cometbft/cometbft/rpc/core/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-
 	"swisstronik/rpc/backend/mocks"
+	rpc "swisstronik/rpc/types"
+	"swisstronik/tests"
 	evmtypes "swisstronik/x/evm/types"
 	feemarkettypes "swisstronik/x/feemarket/types"
 )
@@ -153,7 +151,7 @@ func (suite *BackendTestSuite) TestBaseFee() {
 }
 
 func (suite *BackendTestSuite) TestChainId() {
-	expChainId := (*hexutil.Big)(big.NewInt(9000))
+	expChainId := (*hexutil.Big)(big.NewInt(1291))
 	testCases := []struct {
 		name         string
 		registerMock func()
@@ -375,7 +373,7 @@ func (suite *BackendTestSuite) TestFeeHistory() {
 			func(validator sdk.AccAddress) {
 				client := suite.backend.clientCtx.Client.(*mocks.Client)
 				suite.backend.cfg.JSONRPC.FeeHistoryCap = 2
-				RegisterBlock(client, ethrpc.BlockNumber(1).Int64(), nil)
+				_, _ = RegisterBlock(client, ethrpc.BlockNumber(1).Int64(), nil)
 				RegisterBlockResultsError(client, 1)
 			},
 			1,
@@ -391,8 +389,8 @@ func (suite *BackendTestSuite) TestFeeHistory() {
 				queryClient := suite.backend.queryClient.QueryClient.(*mocks.EVMQueryClient)
 				client := suite.backend.clientCtx.Client.(*mocks.Client)
 				suite.backend.cfg.JSONRPC.FeeHistoryCap = 2
-				RegisterBlock(client, ethrpc.BlockNumber(1).Int64(), nil)
-				RegisterBlockResults(client, 1)
+				_, _ = RegisterBlock(client, ethrpc.BlockNumber(1).Int64(), nil)
+				_, _ = RegisterBlockResults(client, 1)
 				RegisterBaseFeeError(queryClient)
 				RegisterValidatorAccount(queryClient, validator)
 				RegisterConsensusParams(client, 1)
@@ -411,8 +409,8 @@ func (suite *BackendTestSuite) TestFeeHistory() {
 				queryClient := suite.backend.queryClient.QueryClient.(*mocks.EVMQueryClient)
 				client := suite.backend.clientCtx.Client.(*mocks.Client)
 				suite.backend.cfg.JSONRPC.FeeHistoryCap = 2
-				RegisterBlock(client, ethrpc.BlockNumber(1).Int64(), nil)
-				RegisterBlockResults(client, 1)
+				_, _ = RegisterBlock(client, ethrpc.BlockNumber(1).Int64(), nil)
+				_, _ = RegisterBlockResults(client, 1)
 				RegisterBaseFee(queryClient, baseFee)
 				RegisterValidatorAccount(queryClient, validator)
 				RegisterConsensusParams(client, 1)

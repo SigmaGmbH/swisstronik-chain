@@ -23,6 +23,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
+
 	rpctypes "swisstronik/rpc/types"
 	evmtypes "swisstronik/x/evm/types"
 )

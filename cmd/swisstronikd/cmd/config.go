@@ -2,12 +2,13 @@ package cmd
 
 import (
 	"fmt"
+
+	"github.com/cosmos/cosmos-sdk/client/flags"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/spf13/cobra"
 
 	"swisstronik/app"
 	evmtypes "swisstronik/types"
-	"github.com/spf13/cobra"
-	"github.com/cosmos/cosmos-sdk/client/flags"
 )
 
 func InitSDKConfig() {
@@ -27,10 +28,11 @@ func InitSDKConfig() {
 
 	// Set global coin type to be used in HD wallets
 	config.SetCoinType(evmtypes.Bip44CoinType)
-	config.SetPurpose(sdk.Purpose)                      
+	config.SetPurpose(sdk.Purpose)
 
 	// Set and seal config
 	config.Seal()
+
 }
 
 // ValidateChainID wraps a cobra command with a RunE function with base 10 integer chain-id verification.
