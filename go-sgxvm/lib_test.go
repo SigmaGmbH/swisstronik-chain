@@ -3,6 +3,7 @@ package librustgo
 import (
 	"fmt"
 	"math/big"
+	"sync"
 	"testing"
 
 	"github.com/SigmaGmbH/librustgo/internal/api"
@@ -147,6 +148,42 @@ func TestSeedExchangeEPID(t *testing.T) {
 	} else {
 		println("EPID PASSED")
 	}
+}
+
+func TestStressSeedExchangeEPID(t *testing.T) {
+	if err := api.InitializeEnclave(true); err != nil {
+		t.Fail()
+	}
+
+	epidAddress := "localhost:8999"
+	dcapAddress := "localhost:8998"
+	err := api.StartAttestationServer(epidAddress, dcapAddress)
+	if err != nil {
+		t.Fail()
+	}
+
+	// Test EPID Attestation
+	epidHost := "localhost"
+	epidPort := 8999
+
+	// Test fun
+	testFn := func(wg *sync.WaitGroup) {
+		defer wg.Done()
+
+		if err := api.RequestEpochKeys(epidHost, epidPort, false); err != nil {
+			t.Fail()
+		} else {
+			println("EPID PASSED")
+		}
+	}
+
+	var wg sync.WaitGroup
+	wg.Add(50)
+	for i := 0; i < 50; i++ {
+		go testFn(&wg)
+	}
+
+	wg.Wait()
 }
 
 func TestSeedExchangeDCAP(t *testing.T) {
