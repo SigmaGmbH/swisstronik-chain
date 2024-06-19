@@ -189,6 +189,12 @@ func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.Address,
 		return nil, errors.Wrap(types.ErrInvalidParam, "invalid verification type")
 	}
 	details.Type = verificationType
+	if details.IssuanceTimestamp < 1 || (details.ExpirationTimestamp > 0 && details.IssuanceTimestamp >= details.ExpirationTimestamp) {
+		return nil, errors.Wrap(types.ErrInvalidParam, "invalid issuance timestamp")
+	}
+	if len(details.OriginalData) < 1 {
+		return nil, errors.Wrap(types.ErrInvalidParam, "empty proof data")
+	}
 
 	detailsBytes, err := details.Marshal()
 	if err != nil {
@@ -310,34 +316,44 @@ func (k Keeper) GetVerificationDetailsByIssuer(ctx sdk.Context, userAddress sdk.
 
 // HasVerificationOfType checks if user has verifications of specific type (for example, passed KYC) from provided issuers.
 // If there is no provided expected issuers, this function will check if user has any verification of appropriate type.
-func (k Keeper) HasVerificationOfType(ctx sdk.Context, userAddress sdk.Address, expectedType types.VerificationType, expectedIssuers []sdk.Address) (bool, error) {
+func (k Keeper) HasVerificationOfType(ctx sdk.Context, userAddress sdk.Address, expectedType types.VerificationType, expirationTimestamp uint32, expectedIssuers []sdk.Address) (bool, error) {
 	// Obtain user address details
 	userAddressDetails, err := k.GetAddressDetails(ctx, userAddress)
 	if err != nil {
 		return false, err
 	}
 
-	// Filter verifications with expected type
-	var appropriateTypeVerifications []*types.Verification
+	// If expiration is 0, it means infinite period
+	if expirationTimestamp < 1 {
+		expirationTimestamp = ^uint32(0)
+	}
+
 	for _, verification := range userAddressDetails.Verifications {
 		if verification.Type == expectedType {
-			appropriateTypeVerifications = append(appropriateTypeVerifications, verification)
-		}
-	}
-
-	// If there is no provided issuers, check if there are any appropriate verification
-	if len(expectedIssuers) == 0 && len(appropriateTypeVerifications) != 0 {
-		return true, nil
-	}
-
-	// Filter verifications with expected issuers
-	for _, verification := range appropriateTypeVerifications {
-		for _, expectedIssuer := range expectedIssuers {
-			if verification.IssuerAddress == expectedIssuer.String() {
-				return true, nil
+			// If not found matched issuer, do not get details to check expiration
+			found := false
+			for _, expectedIssuer := range expectedIssuers {
+				if verification.IssuerAddress == expectedIssuer.String() {
+					found = true
+					break
+				}
 			}
+			if len(expectedIssuers) > 0 && !found {
+				continue
+			}
+
+			verificationDetails, err := k.GetVerificationDetails(ctx, verification.VerificationId)
+			if err != nil {
+				continue
+			}
+			// Check if verification is valid by given expiration timestamp
+			if verificationDetails.ExpirationTimestamp > 0 && expirationTimestamp > verificationDetails.ExpirationTimestamp {
+				continue
+			}
+			return true, nil
 		}
 	}
+
 	return false, nil
 }
 

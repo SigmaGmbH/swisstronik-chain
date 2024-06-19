@@ -188,7 +188,7 @@ func CmdUpdateIssuerDetails() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update-issuer-details [issuer-address] [name] [description] [url] [logo-url] [legal-entity]",
 		Short: "Update issuer details",
-		Args:  cobra.ExactArgs(7),
+		Args:  cobra.ExactArgs(6),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {

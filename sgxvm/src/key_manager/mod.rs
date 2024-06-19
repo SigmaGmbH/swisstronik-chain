@@ -61,7 +61,7 @@ pub struct KeyManager {
 }
 
 impl KeyManager {
-    pub fn list_epochs(&self) -> Vec<(u16, u64)> {
+    pub fn list_epochs(&self) -> Vec<(u16, u64, Vec<u8>)> {
         self.epoch_manager.list_epochs()
     }
 

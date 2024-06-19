@@ -309,10 +309,11 @@ pub unsafe extern "C" fn ecall_list_epochs() -> AllocationWithResult {
     
     let mut epochs_response = ListEpochsResponse::new();
     let mut epochs: Vec<EpochData> = Vec::new();
-    for (epoch_number, starting_block) in stored_epochs {
+    for (epoch_number, starting_block, node_public_key) in stored_epochs {
         let mut epoch = EpochData::new();
         epoch.set_epochNumber(epoch_number.into());
         epoch.set_startingBlock(starting_block);
+        epoch.set_nodePublicKey(node_public_key.clone().into());
         
         epochs.push(epoch)
     }

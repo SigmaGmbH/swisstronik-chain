@@ -6,7 +6,9 @@ const { encryptDataField } = require('@swisstronik/swisstronik.js')
 const provider = new ethers.providers.JsonRpcProvider(process.env.NODE_RPC || 'http://localhost:8545')
 const initialWallet = new ethers.Wallet(process.env.FIRST_PRIVATE_KEY, provider)
 
-const NUM_TESTING_ACCOUNTS = 20
+const INIT_WALLET_SWTR_BALANCE = ethers.utils.parseEther("0.01")
+const INIT_WALLET_TOKEN_BALANCE = 1000000000
+const NUM_TESTING_ACCOUNTS = 50
 
 async function transferERC20Token(sender, receiverAddress, tokenContract, amountToTransfer) {
     try {
@@ -27,7 +29,8 @@ async function deployERC20() {
     const metadata = JSON.parse(fs.readFileSync('contracts/ERC20Token.json'))
     const factory = new ethers.ContractFactory(metadata.abi, metadata.bytecode, initialWallet);
 
-    const contract = await factory.deploy('test token', 'TT', 1000000000);
+    const transferAmount = INIT_WALLET_SWTR_BALANCE.mul(NUM_TESTING_ACCOUNTS);
+    const contract = await factory.deploy({value: transferAmount});
     await contract.deployed()
 
     return contract
@@ -46,8 +49,8 @@ async function sendShieldedTransaction(signer, destination, data, value) {
         to: destination,
         data: encryptedData,
         value,
-        gasLimit: 300_000,
-        gasPrice: 7 // We're using 0 gas price in tests 
+        // gasLimit: 300_000,
+        // gasPrice: 7 // We're using 0 gas price in tests 
     })
 }
 
@@ -68,22 +71,28 @@ async function main() {
     const tokenContract = await deployERC20()
     console.log(`ERC20 deployed with address: ${tokenContract.address}`)
 
-    // prepare NUM_TESTING_ACCOUNTS accounts and prefund it
+    console.log('Initializing wallets')
     const wallets = []
     for (let i = 0; i < NUM_TESTING_ACCOUNTS; i++) {
         const wallet = ethers.Wallet.createRandom().connect(provider)
-
-        const tx = await initialWallet.sendTransaction({
-            to: wallet.address,
-            value: "1000000000"
-        })
-        await tx.wait()
-
-        // Transfer ERC20 token
-        await transferERC20Token(initialWallet, wallet.address, tokenContract, 10000)
-        console.log("Wallet", (i + 1), "is ready among", NUM_TESTING_ACCOUNTS, "wallets. Address:", wallet.address)
         wallets.push(wallet)
     }
+    const walletAddresses = wallets.map((wallet) => wallet.address)
+    const amounts = [...Array(NUM_TESTING_ACCOUNTS)].map(() => INIT_WALLET_SWTR_BALANCE)
+    const swtrTransferTx = await sendShieldedTransaction(
+        initialWallet,
+        tokenContract.address,
+        tokenContract.interface.encodeFunctionData("bulkTransfer", [walletAddresses, amounts])
+    )
+    await swtrTransferTx.wait()
+
+    const tokenAmounts = [...Array(NUM_TESTING_ACCOUNTS)].map(() => INIT_WALLET_TOKEN_BALANCE)
+    const tokenTransferTx = await sendShieldedTransaction(
+        initialWallet,
+        tokenContract.address,
+        tokenContract.interface.encodeFunctionData("bulkMint", [walletAddresses, tokenAmounts])
+    )
+    await tokenTransferTx.wait()
 
     console.log('Wallets are ready')
 

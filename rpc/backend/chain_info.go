@@ -20,11 +20,6 @@ import (
 	"math/big"
 	"strconv"
 
-	rpctypes "swisstronik/rpc/types"
-	ethermint "swisstronik/types"
-	evmtypes "swisstronik/x/evm/types"
-	feemarkettypes "swisstronik/x/feemarket/types"
-
 	tmrpcclient "github.com/cometbft/cometbft/rpc/client"
 	tmrpctypes "github.com/cometbft/cometbft/rpc/core/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -33,6 +28,11 @@ import (
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/pkg/errors"
+
+	rpctypes "swisstronik/rpc/types"
+	ethermint "swisstronik/types"
+	evmtypes "swisstronik/x/evm/types"
+	feemarkettypes "swisstronik/x/feemarket/types"
 )
 
 // ChainID is the EIP-155 replay-protection chain id for the current ethereum chain config.

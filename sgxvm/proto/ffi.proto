@@ -260,6 +260,7 @@ message NodePublicKeyResponse { bytes publicKey = 1; }
 message EpochData {
   uint32 epochNumber = 1;
   uint64 startingBlock = 2;
+  bytes nodePublicKey = 3;
 }
 message ListEpochsResponse {
   repeated EpochData epochs = 1;

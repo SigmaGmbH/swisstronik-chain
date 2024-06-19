@@ -5,14 +5,16 @@ package keeper_test
 
 import (
 	"encoding/json"
+	"math/big"
+	"strconv"
+	"strings"
+
 	"github.com/SigmaGmbH/librustgo"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
-	"math/big"
-	"strconv"
-	"strings"
+
 	"swisstronik/crypto/deoxys"
 	"swisstronik/server/config"
 	"swisstronik/x/evm/types"
@@ -42,12 +44,15 @@ func (suite *KeeperTestSuite) TestGetNodePublicKey() {
 	suite.Require().Equal(len(updatedEpochs), 3, "Should be 3 epochs")
 
 	// Request node public key
-	nodePublicKey, err := suite.app.EvmKeeper.GetNodePublicKey(0)
+	nodePublicKeyResponse, err := librustgo.GetNodePublicKey(uint64(0))
 	suite.Require().NoError(err)
-	nodePublicKeyV1, err := suite.app.EvmKeeper.GetNodePublicKey(v1EpochStartingBlock)
+	nodePublicKey := nodePublicKeyResponse.PublicKey
+	nodePublicKeyResponse, err = librustgo.GetNodePublicKey(v1EpochStartingBlock)
 	suite.Require().NoError(err)
-	nodePublicKeyV2, err := suite.app.EvmKeeper.GetNodePublicKey(v2EpochStartingBlock)
+	nodePublicKeyV1 := nodePublicKeyResponse.PublicKey
+	nodePublicKeyResponse, err = librustgo.GetNodePublicKey(v2EpochStartingBlock)
 	suite.Require().NoError(err)
+	nodePublicKeyV2 := nodePublicKeyResponse.PublicKey
 
 	suite.Require().NotEqual(nodePublicKey, nodePublicKeyV1)
 	suite.Require().NotEqual(nodePublicKeyV1, nodePublicKeyV2)
