@@ -32,7 +32,9 @@ func TestWsSingleRequest(t *testing.T) {
 
 	wc, _, err := websocket.DefaultDialer.Dial(wsUrl, nil)
 	require.NoError(t, err)
-	defer wc.Close()
+	defer func() {
+		_ = wc.Close()
+	}()
 
 	wsWriteMessage(t, wc, `{"jsonrpc":"2.0","method":"net_version","params":[],"id":1}`)
 
@@ -41,7 +43,7 @@ func TestWsSingleRequest(t *testing.T) {
 	msg := jsonUnmarshal(t, mb)
 	result, ok := msg["result"].(string)
 	require.True(t, ok)
-	require.Equal(t, "9000", result)
+	require.Equal(t, "1291", result)
 }
 
 func TestWsBatchRequest(t *testing.T) {
@@ -49,7 +51,9 @@ func TestWsBatchRequest(t *testing.T) {
 
 	wc, _, err := websocket.DefaultDialer.Dial(wsUrl, nil)
 	require.NoError(t, err)
-	defer wc.Close()
+	defer func() {
+		_ = wc.Close()
+	}()
 
 	wsWriteMessage(t, wc, `[{"jsonrpc":"2.0","method":"net_version","params":[],"id":1},{"jsonrpc":"2.0","method":"eth_protocolVersion","params":[],"id":2}]`)
 
@@ -65,7 +69,7 @@ func TestWsBatchRequest(t *testing.T) {
 	resNetVersion := msg[0]
 	result, ok := resNetVersion["result"].(string)
 	require.True(t, ok)
-	require.Equal(t, "9000", result)
+	require.Equal(t, "1291", result)
 	id, ok := resNetVersion["id"].(float64)
 	require.True(t, ok)
 	require.Equal(t, 1, int(id))
@@ -85,7 +89,9 @@ func TestWsEth_subscribe_newHeads(t *testing.T) {
 
 	wc, _, err := websocket.DefaultDialer.Dial(wsUrl, nil)
 	require.NoError(t, err)
-	defer wc.Close()
+	defer func() {
+		_ = wc.Close()
+	}()
 
 	wsWriteMessage(t, wc, `{"id":1,"method":"eth_subscribe","params":["newHeads",{}]}`)
 
@@ -114,7 +120,9 @@ func TestWsEth_subscribe_log(t *testing.T) {
 
 	wc, _, err := websocket.DefaultDialer.Dial(wsUrl, nil)
 	require.NoError(t, err)
-	defer wc.Close()
+	defer func() {
+		_ = wc.Close()
+	}()
 
 	wsWriteMessage(t, wc, fmt.Sprintf(`{"jsonrpc":"2.0","id":1,"method":"eth_subscribe","params":["logs",{"topics":["%s", "%s"]}]}`, helloTopic, worldTopic))
 

@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"math/big"
 
-	"google.golang.org/grpc/metadata"
-
 	tmrpcclient "github.com/cometbft/cometbft/rpc/client"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/spf13/viper"
+	"google.golang.org/grpc/metadata"
+
 	"swisstronik/crypto/ethsecp256k1"
 	"swisstronik/rpc/backend/mocks"
 	ethermint "swisstronik/types"

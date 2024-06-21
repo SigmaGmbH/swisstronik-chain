@@ -1,10 +1,11 @@
 package backend
 
 import (
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
 	"swisstronik/rpc/backend/mocks"
 	rpc "swisstronik/rpc/types"
 	feemarkettypes "swisstronik/x/feemarket/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 var _ feemarkettypes.QueryClient = &mocks.FeeMarketQueryClient{}

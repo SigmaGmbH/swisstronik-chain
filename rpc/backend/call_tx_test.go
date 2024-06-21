@@ -450,6 +450,7 @@ func (suite *BackendTestSuite) TestDoCall() {
 		})
 	}
 }
+
 func (suite *BackendTestSuite) TestGasPrice() {
 	defaultGasPrice := (*hexutil.Big)(big.NewInt(1))
 
@@ -468,8 +469,8 @@ func (suite *BackendTestSuite) TestGasPrice() {
 				feeMarketClient := suite.backend.queryClient.FeeMarket.(*mocks.FeeMarketQueryClient)
 				RegisterFeeMarketParams(feeMarketClient, 1)
 				RegisterParams(queryClient, &header, 1)
-				RegisterBlock(client, 1, nil)
-				RegisterBlockResults(client, 1)
+				_, _ = RegisterBlock(client, 1, nil)
+				_, _ = RegisterBlockResults(client, 1)
 				RegisterBaseFee(queryClient, sdk.NewInt(1))
 			},
 			defaultGasPrice,
@@ -484,8 +485,8 @@ func (suite *BackendTestSuite) TestGasPrice() {
 				feeMarketClient := suite.backend.queryClient.FeeMarket.(*mocks.FeeMarketQueryClient)
 				RegisterFeeMarketParamsError(feeMarketClient, 1)
 				RegisterParams(queryClient, &header, 1)
-				RegisterBlock(client, 1, nil)
-				RegisterBlockResults(client, 1)
+				_, _ = RegisterBlock(client, 1, nil)
+				_, _ = RegisterBlockResults(client, 1)
 				RegisterBaseFee(queryClient, sdk.NewInt(1))
 			},
 			defaultGasPrice,
