@@ -7,10 +7,10 @@ use std::time::Duration;
 
 static ENCLAVE_FILE: &'static str = "v1.0.2_enclave.signed.so";
 
-#[cfg(feature = "attestation_server")]
+#[cfg(not(feature = "attestation_server"))]
 const ENCLAVE_LOCK_TIMEOUT: u64 = 6 * 5;
 
-#[cfg(not(feature = "attestation_server"))]
+#[cfg(feature = "attestation_server")]
 const ENCLAVE_LOCK_TIMEOUT: u64 = 6 * 50;
 
 pub struct EnclaveDoorbell {
