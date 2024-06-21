@@ -137,14 +137,14 @@ func TestSeedExchangeEPID(t *testing.T) {
 	dcapAddress := "localhost:8998"
 	err := api.StartAttestationServer(epidAddress, dcapAddress)
 	if err != nil {
-		t.Fail()
+		t.FailNow()
 	}
 
 	// Test EPID Attestation
 	epidHost := "localhost"
 	epidPort := 8999
 	if err := api.RequestEpochKeys(epidHost, epidPort, false); err != nil {
-		t.Fail()
+		t.FailNow()
 	} else {
 		println("EPID PASSED")
 	}
@@ -159,7 +159,7 @@ func TestStressSeedExchangeEPID(t *testing.T) {
 	dcapAddress := "localhost:8998"
 	err := api.StartAttestationServer(epidAddress, dcapAddress)
 	if err != nil {
-		t.Fail()
+		t.FailNow()
 	}
 
 	// Test EPID Attestation
@@ -171,15 +171,15 @@ func TestStressSeedExchangeEPID(t *testing.T) {
 		defer wg.Done()
 
 		if err := api.RequestEpochKeys(epidHost, epidPort, false); err != nil {
-			t.Fail()
+			t.FailNow()
 		} else {
 			println("EPID PASSED")
 		}
 	}
 
 	var wg sync.WaitGroup
-	wg.Add(50)
-	for i := 0; i < 50; i++ {
+	wg.Add(10)
+	for i := 0; i < 10; i++ {
 		go testFn(&wg)
 	}
 

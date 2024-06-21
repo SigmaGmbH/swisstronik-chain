@@ -25,7 +25,7 @@ func StartAttestationServer(epidAddress, dcapAddress string) error {
 
 	epidListener, err := net.Listen("tcp", epidAddress)
 	if err != nil {
-		fmt.Println("[Attestation Server] Cannot start listener for EPID attestation")
+		fmt.Println("[Attestation Server] Cannot start listener for EPID attestation. Reason: ", err)
 		return err
 	}
 
@@ -118,7 +118,7 @@ func SendProtobufRequest(data []byte) (C.UnmanagedVector, error) {
 		return NewUnmanagedVector(nil), ErrorWithMessage(err, errmsg)
 	}
 
-	// TODO: Check error 
+	// TODO: Check error
 
 	return ptr, nil
 }

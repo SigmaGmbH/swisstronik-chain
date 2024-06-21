@@ -20,7 +20,7 @@ pub fn perform_master_key_request(
     quote_size: Option<u32>,
     is_dcap: bool,
 ) -> SgxResult<()> {
-    let (key_der, cert_der) = helpers::create_tls_cert_and_keys(qe_target_info, quote_size)?;
+    let (key_der, cert_der) = helpers::create_client_tls_cert_and_keys(qe_target_info, quote_size)?;
     let client_config = helpers::construct_client_config(key_der, cert_der, is_dcap);
 
     // Prepare TLS connection
@@ -71,7 +71,7 @@ pub fn perform_epoch_keys_provisioning(
     quote_size: Option<u32>,
     is_dcap: bool,
 ) -> SgxResult<()> {
-    let (key_der, cert_der) = helpers::create_tls_cert_and_keys(qe_target_info, quote_size)?;
+    let (key_der, cert_der) = helpers::create_server_tls_cert_and_keys(qe_target_info, quote_size)?;
     let server_config = helpers::construct_server_config(key_der, cert_der, is_dcap);
 
     // Prepare TLS connection
