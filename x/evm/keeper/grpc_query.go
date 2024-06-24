@@ -161,27 +161,7 @@ func (k Keeper) Balance(c context.Context, req *types.QueryBalanceRequest) (*typ
 
 // Storage implements the Query/Storage gRPC method
 func (k Keeper) Storage(c context.Context, req *types.QueryStorageRequest) (*types.QueryStorageResponse, error) {
-	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "empty request")
-	}
-
-	if err := evmcommontypes.ValidateAddress(req.Address); err != nil {
-		return nil, status.Error(
-			codes.InvalidArgument,
-			types.ErrZeroAddress.Error(),
-		)
-	}
-
-	ctx := sdk.UnwrapSDKContext(c)
-
-	address := common.HexToAddress(req.Address)
-	key := common.HexToHash(req.Key)
-
-	stateBytes := k.GetState(ctx, address, key)
-
-	return &types.QueryStorageResponse{
-		Value: common.Bytes2Hex(stateBytes),
-	}, nil
+	return nil, status.Error(codes.Unavailable, "Storage request was disabled")
 }
 
 // Code implements the Query/Code gRPC method
