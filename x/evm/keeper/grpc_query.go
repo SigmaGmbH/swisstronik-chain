@@ -161,7 +161,7 @@ func (k Keeper) Balance(c context.Context, req *types.QueryBalanceRequest) (*typ
 
 // Storage implements the Query/Storage gRPC method
 func (k Keeper) Storage(c context.Context, req *types.QueryStorageRequest) (*types.QueryStorageResponse, error) {
-	return nil, status.Error(codes.Unavailable, "Storage request was disabled")
+	return nil, status.Error(codes.Unavailable, "Storage request was disabled, since storage is encrypted. Check docs at https://swisstronik.gitbook.io/swisstronik-docs/ for more information")
 }
 
 // Code implements the Query/Code gRPC method
