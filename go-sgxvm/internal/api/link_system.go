@@ -2,5 +2,5 @@
 
 package api
 
-// #cgo LDFLAGS: -lsgx_wrapper_v1.0.2
+// #cgo LDFLAGS: -lsgx_wrapper_v1.0.3
 import "C"

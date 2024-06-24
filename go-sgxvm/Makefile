@@ -8,7 +8,7 @@ CXX=clang++
 SGX_MODE ?= HW
 ENCLAVE_HOME ?= $(HOME)/.swisstronik-enclave
 PRODUCTION_MODE ?= false
-VERSION := v1.0.2
+VERSION := v1.0.3
 
 build:
 	@ENCLAVE_HOME=$(ENCLAVE_HOME) PRODUCTION_MODE=$(PRODUCTION_MODE) SGX_MODE=$(SGX_MODE) make build -C ../sgxvm/

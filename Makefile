@@ -1,4 +1,4 @@
-VERSION := v1.0.2
+VERSION := v1.0.3
 COMMIT := $(shell git log -1 --format='%H')
 ENCLAVE_HOME ?= $(HOME)/.swisstronik-enclave
 PRODUCTION_MODE ?= false
@@ -85,11 +85,11 @@ install: go.sum
 
 build: go.sum
 	$(MAKE) -C go-sgxvm build
-	go build -mod=mod $(BUILD_FLAGS)  -tags osusergo,netgo -o build/swisstronikd ./cmd/swisstronikd
+	go build -mod=mod $(BUILD_FLAGS)  -tags osusergo,netgo -o build/swisstronikd-$(VERSION) ./cmd/swisstronikd
 
 build_d: go.sum
 	$(MAKE) -C go-sgxvm build_d
-	go build -mod=mod $(BUILD_FLAGS)  -tags osusergo,netgo -o build/swisstronikd ./cmd/swisstronikd
+	go build -mod=mod $(BUILD_FLAGS)  -tags osusergo,netgo -o build/swisstronikd-$(VERSION) ./cmd/swisstronikd
 
 build_attestation_server: go.sum
 	AS_MODE=true $(MAKE) -C go-sgxvm build_AS
