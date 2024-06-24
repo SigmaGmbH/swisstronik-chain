@@ -143,7 +143,6 @@ func newMsgHandleTx(
 
 	msg := MsgHandleTx{Data: dataAny}
 	msg.Hash = msg.AsTransaction().Hash().Hex()
-	msg.Encrypted = true
 	return &msg
 }
 

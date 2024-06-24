@@ -624,10 +624,10 @@ func (suite *EvmTestSuite) TestERC20TransferReverted() {
 			suite.Require().NoError(err)
 
 			ethMsgTx := &types.MsgHandleTx{
-				Data:      tx.Data,
-				Hash:      tx.Hash,
-				From:      tx.From,
-				Encrypted: true,
+				Data:        tx.Data,
+				Hash:        tx.Hash,
+				From:        tx.From,
+				Unencrypted: false,
 			}
 			res, err := k.HandleTx(sdk.WrapSDKContext(suite.ctx), ethMsgTx)
 			suite.Require().NoError(err)
@@ -703,10 +703,10 @@ func (suite *EvmTestSuite) TestContractDeploymentRevert() {
 			suite.Require().NoError(err)
 
 			msgEthTx := &types.MsgHandleTx{
-				Data:      tx.Data,
-				Hash:      tx.Hash,
-				From:      tx.From,
-				Encrypted: false,
+				Data:        tx.Data,
+				Hash:        tx.Hash,
+				From:        tx.From,
+				Unencrypted: false,
 			}
 			rsp, err := k.HandleTx(sdk.WrapSDKContext(suite.ctx), msgEthTx)
 			suite.Require().NoError(err)

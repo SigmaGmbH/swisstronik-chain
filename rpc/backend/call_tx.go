@@ -138,11 +138,11 @@ func (b *Backend) SendRawTransaction(data hexutil.Bytes) (common.Hash, error) {
 		return common.Hash{}, err
 	}
 
-	isEncryptedTx := true
 	if b.allowUnencryptedTxs {
-		isEncryptedTx = false
+		// If we received such call on backend with unencrypted transactions, we assume that
+		// tx.data was unencrypted
+		ethereumTx.Unencrypted = true
 	}
-	ethereumTx.Encrypted = isEncryptedTx
 
 	if err := ethereumTx.ValidateBasic(); err != nil {
 		b.logger.Debug("tx failed basic validation", "error", err.Error())
@@ -330,9 +330,9 @@ func (b *Backend) EstimateGas(args evmtypes.TransactionArgs, blockNrOptional *rp
 		return 0, errors.New("header not found")
 	}
 
-	isEncryptedTx := true
+	isUnencryptedTx := false
 	if b.allowUnencryptedTxs {
-		isEncryptedTx = false
+		isUnencryptedTx = true
 	}
 
 	req := evmtypes.EthCallRequest{
@@ -340,7 +340,7 @@ func (b *Backend) EstimateGas(args evmtypes.TransactionArgs, blockNrOptional *rp
 		GasCap:          b.RPCGasCap(),
 		ProposerAddress: sdk.ConsAddress(header.Block.ProposerAddress),
 		ChainId:         b.chainID.Int64(),
-		Encrypted:       isEncryptedTx,
+		Unencrypted:     isUnencryptedTx,
 	}
 
 	// From ContextWithHeight: if the provided height is 0,
@@ -368,9 +368,9 @@ func (b *Backend) DoCall(
 		return nil, errors.New("header not found")
 	}
 
-	isEncryptedTx := true
+	isUnencryptedTx := false
 	if b.allowUnencryptedTxs {
-		isEncryptedTx = false
+		isUnencryptedTx = true
 	}
 
 	req := evmtypes.EthCallRequest{
@@ -378,7 +378,7 @@ func (b *Backend) DoCall(
 		GasCap:          b.RPCGasCap(),
 		ProposerAddress: sdk.ConsAddress(header.Block.ProposerAddress),
 		ChainId:         b.chainID.Int64(),
-		Encrypted:       isEncryptedTx,
+		Unencrypted:     isUnencryptedTx,
 	}
 
 	// From ContextWithHeight: if the provided height is 0,

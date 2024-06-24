@@ -33,7 +33,7 @@ func (k *Keeper) HandleTx(goCtx context.Context, msg *types.MsgHandleTx) (*types
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	sender := msg.From
-	isEncrypted := msg.Encrypted
+	isEncrypted := !msg.Unencrypted
 	tx := msg.AsTransaction()
 	txIndex := k.GetTxIndexTransient(ctx)
 

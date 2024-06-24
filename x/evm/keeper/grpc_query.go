@@ -260,7 +260,7 @@ func (k Keeper) EthCall(c context.Context, req *types.EthCallRequest) (*types.Ms
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	// pass false to not commit StateDB
-	res, err := k.ApplyMessageWithConfig(ctx, msg, false, cfg, txConfig, txContext, req.Encrypted)
+	res, err := k.ApplyMessageWithConfig(ctx, msg, false, cfg, txConfig, txContext, !req.Unencrypted)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -360,7 +360,7 @@ func (k Keeper) EstimateGas(c context.Context, req *types.EthCallRequest) (*type
 		}
 
 		// pass false to not commit StateDB
-		rsp, err = k.ApplyMessageWithConfig(ctx, msg, false, cfg, txConfig, txContext, req.Encrypted)
+		rsp, err = k.ApplyMessageWithConfig(ctx, msg, false, cfg, txConfig, txContext, !req.Unencrypted)
 		if err != nil {
 			if errors.Is(err, core.ErrIntrinsicGas) {
 				return true, nil, nil // Special case, raise gas limit
