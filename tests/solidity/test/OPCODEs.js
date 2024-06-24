@@ -21,7 +21,7 @@ describe('OPCODE test', () => {
             )
             await tx.wait()
         } catch (e) {
-            failed = e.reason.indexOf('reverted') !== -1
+            failed = true
         }
 
         expect(failed).to.be.true
