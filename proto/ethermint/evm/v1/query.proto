@@ -270,7 +270,7 @@ message QueryTraceTxRequest {
             "github.com/cosmos/cosmos-sdk/types.ConsAddress" ];
   // chain_id is the the eip155 chain id parsed from the requested block header
   int64 chain_id = 9;
-  bool encrypted = 10;
+  bool unencrypted = 10;
 }
 
 // QueryTraceTxResponse defines TraceTx response

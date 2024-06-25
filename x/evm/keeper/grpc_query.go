@@ -424,7 +424,7 @@ func (k Keeper) TraceTx(c context.Context, req *types.QueryTraceTxRequest) (*typ
 		if err != nil {
 			continue
 		}
-		rsp, err := k.ApplyMessageWithConfig(ctx, msg, true, cfg, txConfig, txContext, true)
+		rsp, err := k.ApplyMessageWithConfig(ctx, msg, true, cfg, txConfig, txContext, req.Unencrypted)
 		if err != nil {
 			continue
 		}
