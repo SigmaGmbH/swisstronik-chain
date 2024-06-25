@@ -268,22 +268,22 @@ func Call(
 	gasLimit, nonce uint64,
 	txContext *types.TransactionContext,
 	commit bool,
-	isEncrypted bool,
+	isUnencrypted bool,
 ) (*types.HandleTransactionResponse, error) {
 	// Construct mocked querier
 	c := BuildConnector(connector)
 
 	// Create protobuf-encoded transaction data
 	params := &types.SGXVMCallParams{
-		From:       from,
-		To:         to,
-		Data:       data,
-		GasLimit:   gasLimit,
-		Value:      value,
-		AccessList: convertAccessList(accessList),
-		Commit:     commit,
-		Nonce:      nonce,
-		Encrypted:  isEncrypted,
+		From:        from,
+		To:          to,
+		Data:        data,
+		GasLimit:    gasLimit,
+		Value:       value,
+		AccessList:  convertAccessList(accessList),
+		Commit:      commit,
+		Nonce:       nonce,
+		Unencrypted: isUnencrypted,
 	}
 
 	// Create protobuf encoded request

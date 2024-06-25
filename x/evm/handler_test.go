@@ -536,7 +536,7 @@ func (suite *EvmTestSuite) deployERC20Contract() common.Address {
 	erc20DeployTx.From = suite.from.Hex()
 	err = erc20DeployTx.Sign(ethtypes.LatestSignerForChainID(chainID), suite.signer)
 	suite.Require().NoError(err)
-	rsp, err := suite.app.EvmKeeper.ApplySGXVMTransaction(suite.ctx, erc20DeployTx.AsTransaction(), false)
+	rsp, err := suite.app.EvmKeeper.ApplySGXVMTransaction(suite.ctx, erc20DeployTx.AsTransaction(), true)
 	suite.Require().NoError(err)
 	suite.Require().False(rsp.Failed())
 	return crypto.CreateAddress(suite.from, nonce)

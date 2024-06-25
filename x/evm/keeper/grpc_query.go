@@ -240,7 +240,7 @@ func (k Keeper) EthCall(c context.Context, req *types.EthCallRequest) (*types.Ms
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	// pass false to not commit StateDB
-	res, err := k.ApplyMessageWithConfig(ctx, msg, false, cfg, txConfig, txContext, !req.Unencrypted)
+	res, err := k.ApplyMessageWithConfig(ctx, msg, false, cfg, txConfig, txContext, req.Unencrypted)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}

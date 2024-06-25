@@ -330,17 +330,12 @@ func (b *Backend) EstimateGas(args evmtypes.TransactionArgs, blockNrOptional *rp
 		return 0, errors.New("header not found")
 	}
 
-	isUnencryptedTx := false
-	if b.allowUnencryptedTxs {
-		isUnencryptedTx = true
-	}
-
 	req := evmtypes.EthCallRequest{
 		Args:            bz,
 		GasCap:          b.RPCGasCap(),
 		ProposerAddress: sdk.ConsAddress(header.Block.ProposerAddress),
 		ChainId:         b.chainID.Int64(),
-		Unencrypted:     isUnencryptedTx,
+		Unencrypted:     b.allowUnencryptedTxs,
 	}
 
 	// From ContextWithHeight: if the provided height is 0,
@@ -368,17 +363,12 @@ func (b *Backend) DoCall(
 		return nil, errors.New("header not found")
 	}
 
-	isUnencryptedTx := false
-	if b.allowUnencryptedTxs {
-		isUnencryptedTx = true
-	}
-
 	req := evmtypes.EthCallRequest{
 		Args:            bz,
 		GasCap:          b.RPCGasCap(),
 		ProposerAddress: sdk.ConsAddress(header.Block.ProposerAddress),
 		ChainId:         b.chainID.Int64(),
-		Unencrypted:     isUnencryptedTx,
+		Unencrypted:     b.allowUnencryptedTxs,
 	}
 
 	// From ContextWithHeight: if the provided height is 0,

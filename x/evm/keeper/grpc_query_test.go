@@ -687,7 +687,6 @@ func (suite *KeeperTestSuite) TestEstimateGas() {
 				Args:            args,
 				GasCap:          gasCap,
 				ProposerAddress: suite.ctx.BlockHeader().ProposerAddress,
-				Unencrypted:     false,
 			}
 
 			rsp, err := suite.queryClient.EstimateGas(sdk.WrapSDKContext(suite.ctx), &req)
