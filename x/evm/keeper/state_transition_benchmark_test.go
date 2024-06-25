@@ -5,7 +5,6 @@ import (
 	"math/big"
 	"testing"
 
-	evmtypes "swisstronik/x/evm/types"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
@@ -13,6 +12,7 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/stretchr/testify/require"
+	evmtypes "swisstronik/x/evm/types"
 )
 
 var templateAccessListTx = &ethtypes.AccessListTx{
@@ -187,7 +187,7 @@ func BenchmarkApplyTransaction(b *testing.B) {
 		require.NoError(b, err)
 
 		b.StartTimer()
-		resp, err := suite.app.EvmKeeper.ApplySGXVMTransaction(suite.ctx, tx)
+		resp, err := suite.app.EvmKeeper.ApplySGXVMTransaction(suite.ctx, tx, false)
 		b.StopTimer()
 
 		require.NoError(b, err)
@@ -214,7 +214,7 @@ func BenchmarkApplyTransactionWithLegacyTx(b *testing.B) {
 		require.NoError(b, err)
 
 		b.StartTimer()
-		resp, err := suite.app.EvmKeeper.ApplySGXVMTransaction(suite.ctx, tx)
+		resp, err := suite.app.EvmKeeper.ApplySGXVMTransaction(suite.ctx, tx, false)
 		b.StopTimer()
 
 		require.NoError(b, err)
@@ -241,7 +241,7 @@ func BenchmarkApplyTransactionWithDynamicFeeTx(b *testing.B) {
 		require.NoError(b, err)
 
 		b.StartTimer()
-		resp, err := suite.app.EvmKeeper.ApplySGXVMTransaction(suite.ctx, tx)
+		resp, err := suite.app.EvmKeeper.ApplySGXVMTransaction(suite.ctx, tx, false)
 		b.StopTimer()
 
 		require.NoError(b, err)

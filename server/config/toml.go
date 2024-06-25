@@ -46,6 +46,12 @@ address = "{{ .JSONRPC.Address }}"
 # Address defines the EVM WebSocket server address to bind to.
 ws-address = "{{ .JSONRPC.WsAddress }}"
 
+# Address defines the EVM RPC HTTP server address to bind to.
+address-unencrypted = "{{ .JSONRPC.UnencryptedAddress }}"
+
+# Address defines the EVM WebSocket server address to bind to.
+ws-address-unencrypted = "{{ .JSONRPC.UnencryptedWsAddress }}"
+
 # API defines a list of JSON-RPC namespaces that should be enabled
 # Example: "eth,txpool,personal,net,debug,web3"
 api = "{{range $index, $elmt := .JSONRPC.API}}{{if $index}},{{$elmt}}{{else}}{{$elmt}}{{end}}{{end}}"

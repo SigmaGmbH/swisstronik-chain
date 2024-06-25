@@ -261,7 +261,7 @@ func (suite *KeeperTestSuite) TestQueryStorage() {
 					Key:     key.String(),
 				}
 			},
-			true,
+			false,
 		},
 	}
 

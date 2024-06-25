@@ -77,9 +77,10 @@ func (suite *BackendTestSuite) SetupTest() {
 		WithAccountRetriever(client.TestAccountRetriever{Accounts: accounts})
 
 	allowUnprotectedTxs := false
+	allowUnencryptedTxs := false
 	idxer := indexer.NewKVIndexer(dbm.NewMemDB(), ctx.Logger, clientCtx)
 
-	suite.backend = NewBackend(ctx, ctx.Logger, clientCtx, allowUnprotectedTxs, idxer)
+	suite.backend = NewBackend(ctx, ctx.Logger, clientCtx, allowUnprotectedTxs, idxer, allowUnencryptedTxs)
 	suite.backend.queryClient.QueryClient = mocks.NewEVMQueryClient(suite.T())
 	suite.backend.clientCtx.Client = mocks.NewClient(suite.T())
 	suite.backend.queryClient.FeeMarket = mocks.NewFeeMarketQueryClient(suite.T())
@@ -109,6 +110,7 @@ func (suite *BackendTestSuite) buildEthereumTx() (*evmtypes.MsgHandleTx, []byte)
 
 	// A valid msg should have empty `From`
 	msgHandleTx.From = ""
+	msgHandleTx.Unencrypted = false
 
 	txBuilder := suite.backend.clientCtx.TxConfig.NewTxBuilder()
 	err := txBuilder.SetMsgs(msgHandleTx)
