@@ -1080,17 +1080,11 @@ func (app *App) setupUpgradeHandlers() {
 	}
 
 	if upgradeInfo.Name == v1_0_3.UpgradeName {
-		//storeUpgrades := storetypes.StoreUpgrades{
-		//	Added: []string{
-		//		consensusparamtypes.StoreKey,
-		//		crisistypes.ModuleName,
-		//	},
-		//}
-		//// Use upgrade store loader for the initial loading of all stores when app starts,
-		//// it checks if version == upgradeHeight and applies store upgrades before loading the stores,
-		//// so that new stores start with the correct version (the current height of chain),
-		//// instead the default which is the latest version that store last committed i.e 0 for new stores.
-		//app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades))
+		// Use upgrade store loader for the initial loading of all stores when app starts,
+		// it checks if version == upgradeHeight and applies store upgrades before loading the stores,
+		// so that new stores start with the correct version (the current height of chain),
+		// instead the default which is the latest version that store last committed i.e 0 for new stores.
+		app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storetypes.StoreUpgrades{}))
 	}
 }
 
