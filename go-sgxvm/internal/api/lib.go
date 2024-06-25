@@ -273,8 +273,6 @@ func Call(
 	// Construct mocked querier
 	c := BuildConnector(connector)
 
-	println("go-sgxvm:internal::Call isUnencrypted: ", isUnencrypted)
-
 	// Create protobuf-encoded transaction data
 	params := &types.SGXVMCallParams{
 		From:        from,

@@ -76,9 +76,6 @@ pub fn handle_call_request_inner(
 
     // We do not decrypt transaction if no tx.data provided, or provided explicit flag, that transaction is unencrypted
     let is_encrypted = params.data.len() != 0 && !params.unencrypted;
-    println!("handle_call_request_inner: params.unencrypted = {:?}", params.unencrypted);
-    println!("handle_call_request_inner: params.data_len = {:?}", params.data.len());
-    println!("handle_call_request_inner: is_encrypted: {:?}", is_encrypted);
     match is_encrypted {
         false => execute_call(
             querier,
