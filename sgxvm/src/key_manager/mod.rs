@@ -129,11 +129,11 @@ impl KeyManager {
     /// Unseals key manager from protected file. If file was not found or unaccessible,
     /// will return SGX_ERROR_UNEXPECTED
     pub fn unseal() -> SgxResult<Self> {
-        println!(
-            "[KeyManager] Sealed file location: {}/{}",
-            KEYMANAGER_HOME.to_str().unwrap(),
-            KEYMANAGER_FILENAME
-        );
+        // println!(
+        //     "[KeyManager] Sealed file location: {}/{}",
+        //     KEYMANAGER_HOME.to_str().unwrap(),
+        //     KEYMANAGER_FILENAME
+        // );
 
         // Unseal file with key manager
         let sealed_file_path = format!("{}/{}", KEYMANAGER_HOME.to_str().unwrap(), KEYMANAGER_FILENAME);

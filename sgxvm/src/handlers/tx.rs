@@ -75,10 +75,10 @@ pub fn handle_call_request_inner(
     let mut backend = FFIBackend::new(querier, &mut storage, vicinity, TxContext::from(context));
 
     // We do not decrypt transaction if no tx.data provided, or provided explicit flag, that transaction is unencrypted
-    println!("params.unencrypted = {:?}", params.unencrypted);
-    println!("params.data_len = {:?}", params.data.len());
     let is_encrypted = params.data.len() != 0 && !params.unencrypted;
-    println!("is_encrypted: {:?}", is_encrypted);
+    println!("handle_call_request_inner: params.unencrypted = {:?}", params.unencrypted);
+    println!("handle_call_request_inner: params.data_len = {:?}", params.data.len());
+    println!("handle_call_request_inner: is_encrypted: {:?}", is_encrypted);
     match is_encrypted {
         false => execute_call(
             querier,

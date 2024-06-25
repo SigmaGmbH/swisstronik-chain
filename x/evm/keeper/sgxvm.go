@@ -271,6 +271,8 @@ func (k *Keeper) ApplyMessageWithConfig(
 		return nil, errorsmod.Wrap(types.ErrCallDisabled, "failed to call contract")
 	}
 
+	println("sgxvm: ApplyMessageWithConfig: ", isUnencrypted)
+
 	leftoverGas := msg.Gas()
 	contractCreation := msg.To() == nil
 	intrinsicGas, err := k.GetEthIntrinsicGas(ctx, msg, cfg.ChainConfig, contractCreation)
