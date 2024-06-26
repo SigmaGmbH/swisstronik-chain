@@ -16,6 +16,8 @@ Enclave_build_feature = hardware_mode
 Enclave_Security_Link_Flags := -Wl,-z,relro,-z,now,-z,noexecstack
 Enclave_config_file ?= Enclave.config.development.xml
 Enclave_signing_key ?= Enclave_dev_private.pem
+Enclave_signed_file ?= enclave.signed.so
+VERSION ?= v1.0.3
 
 # ENCLAVE SETTINGS
 ifneq ($(SGX_MODE), HW)
@@ -30,6 +32,7 @@ endif
 
 ifeq ($(AS_MODE), true)
 	Enclave_build_feature += attestation_server
+	Enclave_signed_file := attestation_enclave.signed.so
 endif
 
 ifneq ($(PRODUCTION_MODE), true) 
@@ -127,7 +130,8 @@ define sign_enclave
 	@echo "Sign enclave using"
 	@/opt/intel/sgxsdk/bin/x64/sgx_sign -version
 	@mkdir -p $(CURDIR)/sgx-artifacts/bin
-	/opt/intel/sgxsdk/bin/x64/sgx_sign sign -key $(CURDIR)/$(Enclave_signing_key) -enclave $(CURDIR)/enclave.unsigned.so -out $(CURDIR)/sgx-artifacts/bin/enclave.signed.so -config $(CURDIR)/$(Enclave_config_file)
+	/opt/intel/sgxsdk/bin/x64/sgx_sign sign -key $(CURDIR)/$(Enclave_signing_key) -enclave $(CURDIR)/enclave.unsigned.so -out $(CURDIR)/sgx-artifacts/bin/$(Enclave_signed_file) -config $(CURDIR)/$(Enclave_config_file)
+	@mkdir -p $(ENCLAVE_HOME) && cp $(CURDIR)/../sgxvm/sgx-artifacts/bin/$(Enclave_signed_file) $(ENCLAVE_HOME)/$(VERSION)_$(Enclave_signed_file)
 endef
 
 define sgx_build
