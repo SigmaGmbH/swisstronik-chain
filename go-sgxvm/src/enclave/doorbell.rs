@@ -9,7 +9,7 @@ use std::time::Duration;
 static ENCLAVE_FILE: &'static str = "v1.0.3_enclave.signed.so";
 
 #[cfg(feature = "attestation_server")]
-static ENCLAVE_FILE: &'static str = "v1.0.3_attestation.signed.so";
+static ENCLAVE_FILE: &'static str = "v1.0.3_attestation_enclave.signed.so";
 
 #[cfg(feature = "attestation_server")]
 const ENCLAVE_LOCK_TIMEOUT: u64 = 6 * 50;
