@@ -224,6 +224,7 @@ message SGXVMCallParams {
   repeated AccessListItem accessList = 6;
   bool commit = 7;
   uint64 nonce = 8;
+  bool unencrypted = 9;
 }
 
 // Message with data required to execute `create` operation

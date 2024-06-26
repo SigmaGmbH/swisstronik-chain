@@ -135,23 +135,7 @@ func (b *Backend) GetProof(address common.Address, storageKeys []string, blockNr
 
 // GetStorageAt returns the contract storage at the given address, block number, and key.
 func (b *Backend) GetStorageAt(address common.Address, key string, blockNrOrHash rpctypes.BlockNumberOrHash) (hexutil.Bytes, error) {
-	blockNum, err := b.BlockNumberFromTendermint(blockNrOrHash)
-	if err != nil {
-		return nil, err
-	}
-
-	req := &evmtypes.QueryStorageRequest{
-		Address: address.String(),
-		Key:     key,
-	}
-
-	res, err := b.queryClient.Storage(rpctypes.ContextWithHeight(blockNum.Int64()), req)
-	if err != nil {
-		return nil, err
-	}
-
-	value := common.HexToHash(res.Value)
-	return value.Bytes(), nil
+	return nil, errors.New("eth_getStorageAt was disabled, since storage is encrypted. Check docs at https://swisstronik.gitbook.io/swisstronik-docs/ for more information")
 }
 
 // GetBalance returns the provided account's balance up to the provided block number.

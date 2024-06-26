@@ -86,8 +86,9 @@ func Call(
 	gasLimit, nonce uint64,
 	txContext *TransactionContext,
 	commit bool,
+	isUnencrypted bool,
 ) (*types.HandleTransactionResponse, error) {
-	executionResult, err := api.Call(querier, from, to, data, value, accessList, gasLimit, nonce, txContext, commit)
+	executionResult, err := api.Call(querier, from, to, data, value, accessList, gasLimit, nonce, txContext, commit, isUnencrypted)
 	if err != nil {
 		return &types.HandleTransactionResponse{}, err
 	}

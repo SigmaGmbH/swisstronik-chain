@@ -93,6 +93,7 @@ func TestCoinTransfer(t *testing.T) {
 		0,
 		txContext,
 		true,
+		false,
 	)
 	if err != nil {
 		t.Fail()

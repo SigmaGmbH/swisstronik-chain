@@ -4,15 +4,15 @@ import (
 	"encoding/json"
 	"math/big"
 
-	"swisstronik/server/config"
-	"swisstronik/x/evm/keeper"
-	"swisstronik/x/evm/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/params"
+	"swisstronik/server/config"
+	"swisstronik/x/evm/keeper"
+	"swisstronik/x/evm/types"
 )
 
 func (suite *KeeperTestSuite) TestNativeCurrencyTransfer() {
@@ -179,7 +179,7 @@ func (suite *KeeperTestSuite) TestDryRun() {
 			balanceBefore := suite.app.EvmKeeper.GetBalance(suite.ctx, suite.address)
 			receiverBalanceBefore := suite.app.EvmKeeper.GetBalance(suite.ctx, common.Address{})
 
-			res, err := suite.app.EvmKeeper.ApplyMessageWithConfig(suite.ctx, ethMessage, tc.commit, cfg, txConfig, txContext)
+			res, err := suite.app.EvmKeeper.ApplyMessageWithConfig(suite.ctx, ethMessage, tc.commit, cfg, txConfig, txContext, false)
 			suite.Require().NoError(err)
 			suite.Require().Empty(res.VmError)
 
@@ -261,7 +261,7 @@ func (suite *KeeperTestSuite) TestMultipleTransfers() {
 		balanceBefore := suite.app.EvmKeeper.GetBalance(suite.ctx, suite.address)
 		receiverBalanceBefore := suite.app.EvmKeeper.GetBalance(suite.ctx, common.Address{})
 
-		res, err := suite.app.EvmKeeper.ApplyMessageWithConfig(suite.ctx, ethMessage, true, cfg, txConfig, txContext)
+		res, err := suite.app.EvmKeeper.ApplyMessageWithConfig(suite.ctx, ethMessage, true, cfg, txConfig, txContext, false)
 		suite.Require().NoError(err)
 		suite.Require().Empty(res.VmError)
 
@@ -368,11 +368,11 @@ func (suite *KeeperTestSuite) TestEmptyDataWithPublicKey() {
 		nonce,
 		&suite.address,
 		transferAmount, // amount
-		gasRes.Gas, // gasLimit
-		nil,        // gasPrice
+		gasRes.Gas,     // gasLimit
+		nil,            // gasPrice
 		nil, nil,
-		data, // input
-		nil,  // accesses,
+		data,     // input
+		nil,      // accesses,
 		nil, nil, // node private and public key
 	)
 
