@@ -34,7 +34,12 @@ impl rustls::ClientCertVerifier for ClientAuth {
         }
 
         if self.is_dcap {
-            crate::attestation::cert::verify_dcap_cert(&certs[0].0).unwrap();
+            crate::attestation::cert::verify_dcap_cert(&certs[0].0).map_err(|err| {
+                println!("[Attestastion Server] Cannot verify DCAP cert. Reason: {:?}", err);
+                rustls::TLSError::WebPKIError(
+                    webpki::Error::ExtensionValueInvalid,
+                )
+            })?;
             return Ok(rustls::ClientCertVerified::assertion());
         }
 

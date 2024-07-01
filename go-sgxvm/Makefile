@@ -8,24 +8,30 @@ CXX=clang++
 SGX_MODE ?= HW
 ENCLAVE_HOME ?= $(HOME)/.swisstronik-enclave
 PRODUCTION_MODE ?= false
-VERSION := v1.0.2
+AS_MODE ?= false 
+VERSION := v1.0.3
+Wrapper_build_feature := ""
+
+Wrapper_lib := libsgx_wrapper_$(VERSION).x86_64.so
+ifeq ($(AS_MODE), true)
+	Wrapper_lib := libsgx_attestation_wrapper_$(VERSION).x86_64.so
+	Wrapper_build_feature += attestation_server
+endif
 
 build:
-	@ENCLAVE_HOME=$(ENCLAVE_HOME) PRODUCTION_MODE=$(PRODUCTION_MODE) SGX_MODE=$(SGX_MODE) make build -C ../sgxvm/
+	@ENCLAVE_HOME=$(ENCLAVE_HOME) PRODUCTION_MODE=$(PRODUCTION_MODE) SGX_MODE=$(SGX_MODE) AS_MODE=$(AS_MODE) VERSION=$(VERSION) make build -C ../sgxvm/
 	@protoc --rust_out src/protobuf_generated/ proto/node.proto
-	@ENCLAVE_HOME=$(ENCLAVE_HOME) cargo build --release
-	@mkdir -p $(ENCLAVE_HOME) && cp $(CURDIR)/../sgxvm/sgx-artifacts/bin/enclave.signed.so $(ENCLAVE_HOME)/$(VERSION)_enclave.signed.so
-	@cp $(CURDIR)/target/release/libsgxvm_wrapper.so $(CURDIR)/internal/api/libsgx_wrapper_$(VERSION).x86_64.so
+	@ENCLAVE_HOME=$(ENCLAVE_HOME) cargo build --features "$(Wrapper_build_feature)" --release
+	@cp $(CURDIR)/target/release/libsgxvm_wrapper.so $(CURDIR)/internal/api/$(Wrapper_lib)
 	@protoc --go_out=types --proto_path=../sgxvm/proto/ ../sgxvm/proto/ffi.proto
 	@protoc --go_out=types --proto_path=proto/ proto/node.proto
 	@cp types/github.com/SigmaGmbH/librustgo/types/* types/ && rm -rf types/github.com
 
 build_d:
-	@ENCLAVE_HOME=$(ENCLAVE_HOME) PRODUCTION_MODE=$(PRODUCTION_MODE) SGX_MODE=$(SGX_MODE) make build_d -C ../sgxvm/
+	@ENCLAVE_HOME=$(ENCLAVE_HOME) PRODUCTION_MODE=$(PRODUCTION_MODE) SGX_MODE=$(SGX_MODE) AS_MODE=$(AS_MODE) VERSION=$(VERSION) make build_d -C ../sgxvm/
 	@protoc --rust_out src/protobuf_generated/ proto/node.proto
-	@ENCLAVE_HOME=$(ENCLAVE_HOME) cargo build --release
-	@mkdir -p $(ENCLAVE_HOME) && cp $(CURDIR)/../sgxvm/sgx-artifacts/bin/enclave.signed.so $(ENCLAVE_HOME)/$(VERSION)_enclave.signed.so
-	@cp $(CURDIR)/target/release/libsgxvm_wrapper.so $(CURDIR)/internal/api/libsgx_wrapper_$(VERSION).x86_64.so
+	@ENCLAVE_HOME=$(ENCLAVE_HOME) cargo build --features "$(Wrapper_build_feature)" --release
+	@cp $(CURDIR)/target/release/libsgxvm_wrapper.so $(CURDIR)/internal/api/$(Wrapper_lib)
 	@protoc --go_out=types --proto_path=../sgxvm/proto/ ../sgxvm/proto/ffi.proto
 	@protoc --go_out=types --proto_path=proto/ proto/node.proto
 	@cp types/github.com/SigmaGmbH/librustgo/types/* types/ && rm -rf types/github.com

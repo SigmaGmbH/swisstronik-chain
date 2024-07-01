@@ -79,6 +79,7 @@ func Call(
 	gasLimit, nonce uint64,
 	txContext *types.TransactionContext,
 	commit bool,
+	isUnencrypted bool,
 ) (*types.HandleTransactionResponse, error) {
 	return nil, nil
 }

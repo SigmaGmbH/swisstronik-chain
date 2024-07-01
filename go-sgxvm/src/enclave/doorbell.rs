@@ -5,7 +5,16 @@ use std::env;
 use std::ops::Deref;
 use std::time::Duration;
 
-static ENCLAVE_FILE: &'static str = "v1.0.2_enclave.signed.so";
+#[cfg(not(feature = "attestation_server"))]
+static ENCLAVE_FILE: &'static str = "v1.0.3_enclave.signed.so";
+
+#[cfg(feature = "attestation_server")]
+static ENCLAVE_FILE: &'static str = "v1.0.3_attestation_enclave.signed.so";
+
+#[cfg(feature = "attestation_server")]
+const ENCLAVE_LOCK_TIMEOUT: u64 = 6 * 50;
+
+#[cfg(not(feature = "attestation_server"))]
 const ENCLAVE_LOCK_TIMEOUT: u64 = 6 * 5;
 
 pub struct EnclaveDoorbell {
