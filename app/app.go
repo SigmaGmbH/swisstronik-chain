@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"swisstronik/app/upgrades/v1.0.3"
 
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
 	reflectionv1 "cosmossdk.io/api/cosmos/reflection/v1"
@@ -803,7 +804,8 @@ func New(
 	app.setAnteHandler(encodingConfig.TxConfig, maxGasWanted)
 	app.setPostHandler()
 	app.SetEndBlocker(app.EndBlocker)
-	SetupHandlers(app, app.EvmKeeper, app.IBCKeeper.ClientKeeper, app.ParamsKeeper, appCodec)
+	//SetupHandlers(app, app.EvmKeeper, app.IBCKeeper.ClientKeeper, app.ParamsKeeper, appCodec)
+	app.setupUpgradeHandlers()
 
 	if loadLatest {
 		if err := app.LoadLatestVersion(); err != nil {
@@ -818,6 +820,35 @@ func New(
 	// this line is used by starport scaffolding # stargate/app/beforeInitReturn
 
 	return app
+}
+
+func (app *App) setupUpgradeHandlers() {
+	app.UpgradeKeeper.SetUpgradeHandler(
+		v1_0_3.UpgradeName,
+		v1_0_3.CreateUpgradeHandler(
+			app.mm, app.configurator,
+		),
+	)
+
+	// When a planned update height is reached, the old binary will panic
+	// writing on disk the height and name of the update that triggered it
+	// This will read that value, and execute the preparations for the upgrade.
+	upgradeInfo, err := app.UpgradeKeeper.ReadUpgradeInfoFromDisk()
+	if err != nil {
+		panic(fmt.Errorf("failed to read upgrade info from disk: %w", err))
+	}
+
+	if app.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
+		return
+	}
+
+	if upgradeInfo.Name == v1_0_3.UpgradeName {
+		// Use upgrade store loader for the initial loading of all stores when app starts,
+		// it checks if version == upgradeHeight and applies store upgrades before loading the stores,
+		// so that new stores start with the correct version (the current height of chain),
+		// instead the default which is the latest version that store last committed i.e 0 for new stores.
+		app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storetypes.StoreUpgrades{}))
+	}
 }
 
 func (app *App) setAnteHandler(txConfig client.TxConfig, maxGasWanted uint64) {
