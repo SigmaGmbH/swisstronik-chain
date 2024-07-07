@@ -67,7 +67,7 @@ func (msg *MsgCreateMonthlyVestingAccount) ValidateBasic() error {
 		return errorsmod.Wrapf(ErrInvalidParam, "cliff days cannot be zero or negative")
 	}
 
-	if msg.Months <= 1 {
+	if msg.Months < 1 {
 		return errorsmod.Wrapf(ErrInvalidParam, "months should be at least one")
 	}
 
