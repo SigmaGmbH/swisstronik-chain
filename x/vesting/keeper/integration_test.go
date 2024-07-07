@@ -314,7 +314,7 @@ var _ = Describe("Monthly Vesting Account", Ordered, func() {
 		err = s.Commit()
 		Expect(err).To(BeNil())
 
-		// Check if all the tokens are unvested at beginning
+		// Check if all the coins are unvested at beginning
 		unvested := mva.GetVestingCoins(now)
 		vested := mva.GetVestedCoins(now)
 		Expect(unvested).To(Equal(initialVesting))
@@ -327,7 +327,7 @@ var _ = Describe("Monthly Vesting Account", Ordered, func() {
 			err := s.Commit()
 			Expect(err).To(BeNil())
 
-			// Ensure no tokens are vested
+			// Ensure no coins are vested
 			now := s.ctx.BlockTime()
 			unvested = mva.GetVestingCoins(now)
 			vested = mva.GetVestedCoins(now)
@@ -374,7 +374,7 @@ var _ = Describe("Monthly Vesting Account", Ordered, func() {
 			Expect(err).ToNot(BeNil())
 		})
 		It("can delegate unvested coins", func() {
-			// Delegate unvested tokens
+			// Delegate unvested coins
 			delegating := unvested
 			res, err := testutil.Delegate(
 				s.ctx,
@@ -419,7 +419,7 @@ var _ = Describe("Monthly Vesting Account", Ordered, func() {
 			err := s.CommitAfter(duration)
 			Expect(err).To(BeNil())
 
-			// Ensure no tokens are vested
+			// Ensure no coins are vested
 			now := s.ctx.BlockTime()
 			unvested = mva.GetVestingCoins(now)
 			vested = mva.GetVestedCoins(now)
@@ -506,7 +506,6 @@ var _ = Describe("Monthly Vesting Account", Ordered, func() {
 			// todo, undelegate portion
 		})
 		It("can delegate all unvested coins", func() {
-			// todo, check if can delegate unvested[0]+ coins, should be failed
 			// Delegate coins more than unvested, and consume gas
 			res, err := testutil.Delegate(
 				s.ctx,
@@ -523,7 +522,7 @@ var _ = Describe("Monthly Vesting Account", Ordered, func() {
 			err = testutil.FundAccount(s.ctx, s.app.BankKeeper, mva.GetAddress(), extraCoins)
 			Expect(err).To(BeNil())
 
-			// Delegate unvested tokens, consume gas
+			// Delegate unvested coins, consume gas
 			delegating := unvested
 			res, err = testutil.Delegate(
 				s.ctx,
@@ -617,8 +616,7 @@ var _ = Describe("Monthly Vesting Account", Ordered, func() {
 				sdk.NewCoins(),                    // consumed fee
 			)
 		})
-		// todo, delegate portion of vested coins
-		It("can delegate vested coins", func() {
+		It("can delegate portion of vested coins", func() {
 			// Verify that the total spendable coins should include vested amount.
 			spendablePre := s.app.BankKeeper.SpendableCoins(s.ctx, mva.GetAddress())
 			Expect(spendablePre).To(Equal(vested.Add(extraCoins...)))
@@ -635,7 +633,7 @@ var _ = Describe("Monthly Vesting Account", Ordered, func() {
 			Expect(err).To(BeNil())
 
 			// Check spendable coins have not been reduced except gas fee.
-			// Delegate unvested tokens first and then vested tokens.
+			// Delegate unvested coins first and then vested coins.
 			spendablePost := s.app.BankKeeper.SpendableCoins(s.ctx, mva.GetAddress())
 			Expect(spendablePost).To(Equal(spendablePre.Sub(extraCoins...)))
 
@@ -665,7 +663,7 @@ var _ = Describe("Monthly Vesting Account", Ordered, func() {
 
 			// todo, should be success when undelegate all and should fail when undelegate vested+
 		})
-		It("can delegate unvested + vested tokens", func() {
+		It("can delegate unvested + vested coins", func() {
 			// Verify that the total spendable coins should include vested amount.
 			spendablePre := s.app.BankKeeper.SpendableCoins(s.ctx, mva.GetAddress())
 			Expect(spendablePre).To(Equal(vested.Add(extraCoins...)))
@@ -681,8 +679,8 @@ var _ = Describe("Monthly Vesting Account", Ordered, func() {
 			)
 			Expect(err).To(BeNil())
 
-			// Delegate unvested tokens first and then vested tokens.
-			// Check spendable coins have been reduced vested tokens as well.
+			// Delegate unvested coins first and then vested coins.
+			// Check spendable coins have been reduced vested coins as well.
 			spendablePost := s.app.BankKeeper.SpendableCoins(s.ctx, mva.GetAddress())
 			Expect(spendablePost).To(Equal(spendablePre.Sub(extraCoins...).Sub(vested...)))
 
@@ -713,7 +711,7 @@ var _ = Describe("Monthly Vesting Account", Ordered, func() {
 			// todo, should work when undelegate partial, and should work when undelegate all
 			// should fail when undelegate unvested+
 		})
-		It("can delegate tokens from account balance and initial vesting", func() {
+		It("can delegate coins from account balance and initial vesting", func() {
 			// Funds some coins to delegate
 			coinsToDelegate := sdk.NewCoins(sdk.NewCoin(utils.BaseDenom, math.NewInt(1e18)))
 			err := testutil.FundAccount(s.ctx, s.app.BankKeeper, mva.GetAddress(), coinsToDelegate)
@@ -763,7 +761,7 @@ var _ = Describe("Monthly Vesting Account", Ordered, func() {
 				extraCoins,                        // consumed fee
 			)
 		})
-		It("can transfer vested tokens", func() {
+		It("can transfer vested coins", func() {
 			err := s.app.BankKeeper.SendCoins(s.ctx, mva.GetAddress(), user, vested)
 			Expect(err).To(BeNil())
 
@@ -780,7 +778,7 @@ var _ = Describe("Monthly Vesting Account", Ordered, func() {
 				sdk.NewCoins(),                    // consumed fee
 			)
 		})
-		It("cannot transfer unvested tokens", func() {
+		It("cannot transfer unvested coins", func() {
 			err := s.app.BankKeeper.SendCoins(s.ctx, mva.GetAddress(), user, unvested)
 			Expect(err).ToNot(BeNil())
 		})
@@ -821,7 +819,7 @@ var _ = Describe("Monthly Vesting Account", Ordered, func() {
 			err := s.CommitAfter(duration)
 			Expect(err).To(BeNil())
 
-			// Check if all the tokens of initial vesting were vested
+			// Check if all the coins of initial vesting were vested
 			now := s.ctx.BlockTime()
 			vested = mva.GetVestedCoins(now)
 			unvested = mva.GetVestingCoins(now)
@@ -835,7 +833,7 @@ var _ = Describe("Monthly Vesting Account", Ordered, func() {
 			Expect(err).To(BeNil())
 			Expect(balances.Vested).To(Equal(vested))
 			Expect(balances.Unvested).To(Equal(unvested))
-			Expect(balances.Locked).To(Equal(sdk.Coins{})) // no tokens were locked
+			Expect(balances.Locked).To(Equal(sdk.Coins{})) // no coins were locked
 
 			// Check all the balances of vesting account
 			validateVestingAccountBalances(
@@ -850,7 +848,7 @@ var _ = Describe("Monthly Vesting Account", Ordered, func() {
 				sdk.NewCoins(),                    // consumed fee
 			)
 		})
-		It("can send entire initial vesting tokens", func() {
+		It("can send entire initial vesting coins", func() {
 			spendablePre := s.app.BankKeeper.SpendableCoins(s.ctx, mva.GetAddress())
 			Expect(spendablePre).To(Equal(initialVesting.Add(extraCoins...)))
 
@@ -873,14 +871,13 @@ var _ = Describe("Monthly Vesting Account", Ordered, func() {
 				sdk.NewCoins(),                    // consumed fee
 			)
 		})
-		// todo, can delegate portion of vesting tokens
-		It("can delegate initial vesting tokens", func() {
-			// Verify that the total spendable coins should include initial vesting tokens.
+		It("can delegate portion of initial vesting coins", func() {
+			// Verify that the total spendable coins should include initial vesting coins.
 			spendablePre := s.app.BankKeeper.SpendableCoins(s.ctx, mva.GetAddress())
 			Expect(spendablePre).To(Equal(initialVesting.Add(extraCoins...)))
 
-			// Delegate the initial vesting tokens
-			delegating := initialVesting
+			// Delegate the initial vesting coins
+			delegating := initialVesting.QuoInt(sdk.NewInt(3))
 			_, err := testutil.Delegate(
 				s.ctx,
 				s.app,
@@ -891,7 +888,7 @@ var _ = Describe("Monthly Vesting Account", Ordered, func() {
 			Expect(err).To(BeNil())
 
 			spendablePost := s.app.BankKeeper.SpendableCoins(s.ctx, mva.GetAddress())
-			Expect(spendablePost).To(Equal(spendablePre.Sub(extraCoins...).Sub(initialVesting...)))
+			Expect(spendablePost).To(Equal(spendablePre.Sub(extraCoins...).Sub(delegating...)))
 
 			// Check delegation was created successfully
 			delegations, err := s.stkQuerier.DelegatorDelegations(
@@ -904,7 +901,51 @@ var _ = Describe("Monthly Vesting Account", Ordered, func() {
 			Expect(delegations.DelegationResponses).To(HaveLen(1))
 			Expect(delegations.DelegationResponses[0].Balance.Amount).To(Equal(delegating[0].Amount))
 
-			// No vesting tokens after vesting period.
+			// No vesting coins after vesting period.
+			// Check all the balances of vesting account
+			validateVestingAccountBalances(
+				s.ctx,
+				s.app,
+				va,
+				delegating,                        // delegating
+				expVested,                         // vested
+				expUnvested,                       // unvested
+				initialVesting.Add(extraCoins...), // initial balance
+				sdk.NewCoins(),                    // sent amount
+				extraCoins,                        // consumed fee
+			)
+		})
+		It("can delegate initial vesting coins", func() {
+			// Verify that the total spendable coins should include initial vesting coins.
+			spendablePre := s.app.BankKeeper.SpendableCoins(s.ctx, mva.GetAddress())
+			Expect(spendablePre).To(Equal(initialVesting.Add(extraCoins...)))
+
+			// Delegate the initial vesting coins
+			delegating := initialVesting
+			_, err := testutil.Delegate(
+				s.ctx,
+				s.app,
+				vaPrivKey,
+				delegating[0],
+				s.validator,
+			)
+			Expect(err).To(BeNil())
+
+			spendablePost := s.app.BankKeeper.SpendableCoins(s.ctx, mva.GetAddress())
+			Expect(spendablePost).To(Equal(spendablePre.Sub(extraCoins...).Sub(delegating...)))
+
+			// Check delegation was created successfully
+			delegations, err := s.stkQuerier.DelegatorDelegations(
+				s.goCtx,
+				&stakingtypes.QueryDelegatorDelegationsRequest{
+					DelegatorAddr: mva.Address,
+				},
+			)
+			Expect(err).To(BeNil())
+			Expect(delegations.DelegationResponses).To(HaveLen(1))
+			Expect(delegations.DelegationResponses[0].Balance.Amount).To(Equal(delegating[0].Amount))
+
+			// No vesting coins after vesting period.
 			// Check all the balances of vesting account
 			validateVestingAccountBalances(
 				s.ctx,
