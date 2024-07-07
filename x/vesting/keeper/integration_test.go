@@ -466,7 +466,7 @@ var _ = Describe("Monthly Vesting Account", Ordered, func() {
 			err := s.app.BankKeeper.SendCoins(s.ctx, va, user, unvested)
 			Expect(err).ToNot(BeNil())
 		})
-		It("can delegate portion of undelegated coins", func() {
+		It("can delegate portion of unvested coins", func() {
 			// Delegate portion of unvested and consume gas
 			delegating := unvested.Sub(extraCoins...)
 			res, err := testutil.Delegate(
@@ -557,8 +557,6 @@ var _ = Describe("Monthly Vesting Account", Ordered, func() {
 				sdk.NewCoins(),                    // sent amount
 				extraCoins,                        // consumed fee
 			)
-
-			// todo, undelegate portion of unvested
 		})
 		It("can perform ethereum tx with spendable coins", func() {
 			coins := sdk.NewCoins(sdk.NewCoin(utils.BaseDenom, math.NewInt(1e18)))
@@ -660,8 +658,6 @@ var _ = Describe("Monthly Vesting Account", Ordered, func() {
 				sdk.NewCoins(),                    // sent amount
 				extraCoins,                        // consumed fee
 			)
-
-			// todo, should be success when undelegate all and should fail when undelegate vested+
 		})
 		It("can delegate unvested + vested coins", func() {
 			// Verify that the total spendable coins should include vested amount.
