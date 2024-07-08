@@ -60,6 +60,25 @@ func Delegate(
 	return DeliverTx(ctx, app, priv, nil, delegateMsg)
 }
 
+// Undelegate delivers a delegate tx
+func Undelegate(
+	ctx sdk.Context,
+	app *app.App,
+	priv cryptotypes.PrivKey,
+	undelegateAmount sdk.Coin,
+	validator stakingtypes.Validator,
+) (abci.ResponseDeliverTx, error) {
+	accountAddress := sdk.AccAddress(priv.PubKey().Address().Bytes())
+
+	val, err := sdk.ValAddressFromBech32(validator.OperatorAddress)
+	if err != nil {
+		return abci.ResponseDeliverTx{}, err
+	}
+
+	undelegateMsg := stakingtypes.NewMsgUndelegate(accountAddress, val, undelegateAmount)
+	return DeliverTx(ctx, app, priv, nil, undelegateMsg)
+}
+
 // Vote delivers a vote tx with the VoteOption "yes" or "no"
 func Vote(
 	ctx sdk.Context,

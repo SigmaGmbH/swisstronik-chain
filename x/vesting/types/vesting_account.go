@@ -110,6 +110,10 @@ func (m *MonthlyVestingAccount) TrackDelegation(blockTime time.Time, balance, am
 	m.BaseVestingAccount.TrackDelegation(balance, m.GetVestingCoins(blockTime), amount)
 }
 
+func (m *MonthlyVestingAccount) TrackUndelegation(amount sdk.Coins) {
+	m.BaseVestingAccount.TrackUndelegation(amount)
+}
+
 // GetStartTime returns the time when vesting period starts
 func (m MonthlyVestingAccount) GetStartTime() int64 {
 	return m.StartTime
