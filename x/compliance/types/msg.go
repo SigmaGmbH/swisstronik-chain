@@ -108,7 +108,7 @@ func (msg *MsgSetVerificationStatus) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{signer}
 }
 
-func NewSetIssuerDetailsMsg(operatorAddress, issuerAddress, issuerName, issuerDescription, issuerURL, issuerLogo, issuerLegalEntity string) MsgSetIssuerDetails {
+func NewCreateIssuerMsg(operatorAddress, issuerAddress, issuerName, issuerDescription, issuerURL, issuerLogo, issuerLegalEntity string) MsgCreateIssuer {
 	issuerDetails := IssuerDetails{
 		Name:        issuerName,
 		Description: issuerDescription,
@@ -116,19 +116,19 @@ func NewSetIssuerDetailsMsg(operatorAddress, issuerAddress, issuerName, issuerDe
 		Logo:        issuerLogo,
 		LegalEntity: issuerLegalEntity,
 	}
-	return MsgSetIssuerDetails{
+	return MsgCreateIssuer{
 		Signer:  operatorAddress,
 		Issuer:  issuerAddress,
 		Details: &issuerDetails,
 	}
 }
 
-func (msg *MsgSetIssuerDetails) GetSignBytes() []byte {
+func (msg *MsgCreateIssuer) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
 
-func (msg *MsgSetIssuerDetails) ValidateBasic() error {
+func (msg *MsgCreateIssuer) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.Signer)
 	if err != nil {
 		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid signer address (%s)", err)
@@ -142,7 +142,7 @@ func (msg *MsgSetIssuerDetails) ValidateBasic() error {
 	return nil
 }
 
-func (msg *MsgSetIssuerDetails) GetSigners() []sdk.AccAddress {
+func (msg *MsgCreateIssuer) GetSigners() []sdk.AccAddress {
 	signer, err := sdk.AccAddressFromBech32(msg.Signer)
 	if err != nil {
 		panic(err)

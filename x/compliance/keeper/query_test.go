@@ -47,7 +47,7 @@ func (suite *QuerierTestSuite) SetupTest() {
 	from, _ = tests.RandomEthAddressWithPrivateKey()
 	suite.user = sdk.AccAddress(from.Bytes())
 
-	// Set issuer details
+	// Create issuer
 	issuerDetails := &types.IssuerDetails{Name: "testIssuer"}
 	err := suite.keeper.SetIssuerDetails(suite.ctx, suite.issuer, issuerDetails)
 	suite.Require().NoError(err)

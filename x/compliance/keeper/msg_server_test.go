@@ -414,13 +414,13 @@ func (suite *KeeperTestSuite) TestSetIssuerDetails() {
 	testCases := []struct {
 		name     string
 		init     func()
-		malleate func() *types.MsgSetIssuerDetails
-		expected func(resp *types.MsgSetIssuerDetailsResponse, error error)
+		malleate func() *types.MsgCreateIssuer
+		expected func(resp *types.MsgCreateIssuerResponse, error error)
 	}{
 		{
 			name: "invalid fields",
-			malleate: func() *types.MsgSetIssuerDetails {
-				msg := types.NewSetIssuerDetailsMsg(
+			malleate: func() *types.MsgCreateIssuer {
+				msg := types.NewCreateIssuerMsg(
 					"operator address",
 					"issuer address",
 					"issuer name",
@@ -431,7 +431,7 @@ func (suite *KeeperTestSuite) TestSetIssuerDetails() {
 				)
 				return &msg
 			},
-			expected: func(resp *types.MsgSetIssuerDetailsResponse, error error) {
+			expected: func(resp *types.MsgCreateIssuerResponse, error error) {
 				suite.Require().ErrorContains(error, "decoding bech32")
 				suite.Require().Nil(resp)
 			},
@@ -445,8 +445,8 @@ func (suite *KeeperTestSuite) TestSetIssuerDetails() {
 				err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_REGULAR)
 				suite.Require().NoError(err)
 			},
-			malleate: func() *types.MsgSetIssuerDetails {
-				msg := types.NewSetIssuerDetailsMsg(
+			malleate: func() *types.MsgCreateIssuer {
+				msg := types.NewCreateIssuerMsg(
 					operator.String(),
 					"issuer address",
 					"issuer name",
@@ -457,7 +457,7 @@ func (suite *KeeperTestSuite) TestSetIssuerDetails() {
 				)
 				return &msg
 			},
-			expected: func(resp *types.MsgSetIssuerDetailsResponse, error error) {
+			expected: func(resp *types.MsgCreateIssuerResponse, error error) {
 				suite.Require().ErrorContains(error, "decoding bech32")
 				suite.Require().Nil(resp)
 			},
@@ -474,8 +474,8 @@ func (suite *KeeperTestSuite) TestSetIssuerDetails() {
 				from, _ = tests.RandomEthAddressWithPrivateKey()
 				issuer = sdk.AccAddress(from.Bytes())
 			},
-			malleate: func() *types.MsgSetIssuerDetails {
-				msg := types.NewSetIssuerDetailsMsg(
+			malleate: func() *types.MsgCreateIssuer {
+				msg := types.NewCreateIssuerMsg(
 					operator.String(),
 					issuer.String(),
 					"issuer name",
@@ -486,9 +486,9 @@ func (suite *KeeperTestSuite) TestSetIssuerDetails() {
 				)
 				return &msg
 			},
-			expected: func(resp *types.MsgSetIssuerDetailsResponse, error error) {
+			expected: func(resp *types.MsgCreateIssuerResponse, error error) {
 				suite.Require().NoError(error)
-				suite.Require().Equal(resp, &types.MsgSetIssuerDetailsResponse{})
+				suite.Require().Equal(resp, &types.MsgCreateIssuerResponse{})
 
 				// Issuer should exist
 				issuerExists, err := suite.keeper.IssuerExists(suite.ctx, issuer)
@@ -529,8 +529,8 @@ func (suite *KeeperTestSuite) TestSetIssuerDetails() {
 				err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_REGULAR)
 				suite.Require().NoError(err)
 			},
-			malleate: func() *types.MsgSetIssuerDetails {
-				msg := types.NewSetIssuerDetailsMsg(
+			malleate: func() *types.MsgCreateIssuer {
+				msg := types.NewCreateIssuerMsg(
 					operator.String(),
 					issuer.String(),
 					"issuer name",
@@ -541,7 +541,7 @@ func (suite *KeeperTestSuite) TestSetIssuerDetails() {
 				)
 				return &msg
 			},
-			expected: func(resp *types.MsgSetIssuerDetailsResponse, error error) {
+			expected: func(resp *types.MsgCreateIssuerResponse, error error) {
 				suite.Require().ErrorIs(error, types.ErrInvalidIssuer)
 				suite.Require().Nil(resp)
 			},
@@ -555,7 +555,7 @@ func (suite *KeeperTestSuite) TestSetIssuerDetails() {
 				tc.init()
 			}
 			msg := tc.malleate()
-			resp, err := msgServer.HandleSetIssuerDetails(sdk.WrapSDKContext(suite.ctx), msg)
+			resp, err := msgServer.HandleCreateIssuer(sdk.WrapSDKContext(suite.ctx), msg)
 			tc.expected(resp, err)
 		})
 	}

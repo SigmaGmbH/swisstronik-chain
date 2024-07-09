@@ -145,7 +145,7 @@ func (k msgServer) HandleSetVerificationStatus(goCtx context.Context, msg *types
 	return &types.MsgSetVerificationStatusResponse{}, nil
 }
 
-func (k msgServer) HandleSetIssuerDetails(goCtx context.Context, msg *types.MsgSetIssuerDetails) (*types.MsgSetIssuerDetailsResponse, error) {
+func (k msgServer) HandleCreateIssuer(goCtx context.Context, msg *types.MsgCreateIssuer) (*types.MsgCreateIssuerResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	// Check validity of signer address
@@ -186,7 +186,7 @@ func (k msgServer) HandleSetIssuerDetails(goCtx context.Context, msg *types.MsgS
 		),
 	)
 
-	return &types.MsgSetIssuerDetailsResponse{}, nil
+	return &types.MsgCreateIssuerResponse{}, nil
 }
 
 func (k msgServer) HandleUpdateIssuerDetails(goCtx context.Context, msg *types.MsgUpdateIssuerDetails) (*types.MsgUpdateIssuerDetailsResponse, error) {

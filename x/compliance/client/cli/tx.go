@@ -31,7 +31,7 @@ func GetTxCmd() *cobra.Command {
 		CmdAddOperator(),
 		CmdRemoveOperator(),
 		CmdSetIssuerVerificationStatus(),
-		CmdSetIssuerDetails(),
+		CmdCreateIssuer(),
 		CmdUpdateIssuerDetails(),
 		CmdRemoveIssuer(),
 	)
@@ -106,7 +106,7 @@ func CmdRemoveOperator() *cobra.Command {
 // CmdSetIssuerVerificationStatus command set issuer's verification status with given parameter.
 func CmdSetIssuerVerificationStatus() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "set-issuer-verification [issuer-address] [verification-status]",
+		Use:   "set-issuer-status [issuer-address] [verification-status]",
 		Short: "Set issuer's verification status",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -140,11 +140,11 @@ func CmdSetIssuerVerificationStatus() *cobra.Command {
 	return cmd
 }
 
-// CmdSetIssuerDetails command sets provided issuer details.
-func CmdSetIssuerDetails() *cobra.Command {
+// CmdCreateIssuer command creates issuer with provided details.
+func CmdCreateIssuer() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "set-issuer-details [issuer-address] [name] [description] [url] [logo-url] [legal-entity]",
-		Short: "Sets issuer details",
+		Use:   "create-issuer [issuer-address] [name] [description] [url] [logo-url] [legal-entity]",
+		Short: "Create issuer with details",
 		Args:  cobra.ExactArgs(6),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientTxContext(cmd)
@@ -163,7 +163,7 @@ func CmdSetIssuerDetails() *cobra.Command {
 			issuerLogo := args[4]
 			issuerLegalEntity := args[5]
 
-			msg := types.NewSetIssuerDetailsMsg(
+			msg := types.NewCreateIssuerMsg(
 				clientCtx.GetFromAddress().String(),
 				issuerAddress.String(),
 				issuerName,
