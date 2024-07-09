@@ -391,7 +391,12 @@ pub fn verify_quote_status(
         | SgxQuoteStatus::GroupOutOfDate
         | SgxQuoteStatus::SwHardeningNeeded
         | SgxQuoteStatus::ConfigurationAndSwHardeningNeeded => {
-            check_advisories(&report.sgx_quote_status, advisories)?;
+            let check_results = check_advisories(&report.sgx_quote_status, advisories);
+
+            if let Err(results) = check_results {
+                println!("This platform has vulnerabilities that will not be approved on mainnet");
+                return Ok(results)
+            }
 
             Ok(AuthResult::Success)
         }
