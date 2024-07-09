@@ -13,9 +13,9 @@ pub fn get_qe_quote(
     let mut report_data: sgx_report_data_t = sgx_report_data_t::default();
 
     // Copy public key to report data
-    let mut pub_k_gx = pub_k.gx.clone();
+    let mut pub_k_gx = pub_k.gx;
     pub_k_gx.reverse();
-    let mut pub_k_gy = pub_k.gy.clone();
+    let mut pub_k_gy = pub_k.gy;
     pub_k_gy.reverse();
     report_data.d[..32].clone_from_slice(&pub_k_gx);
     report_data.d[32..].clone_from_slice(&pub_k_gy);
@@ -244,7 +244,7 @@ pub fn verify_dcap_quote(quote: Vec<u8>) -> SgxResult<Vec<u8>> {
     }
 
     // Check ISV SVN
-    if (quote3.report_body.isv_svn as u16) < crate::attestation::consts::MIN_REQUIRED_SVN {
+    if quote3.report_body.isv_svn < crate::attestation::consts::MIN_REQUIRED_SVN {
         println!("[Enclave] Quote received from outdated enclave");
         return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
     }

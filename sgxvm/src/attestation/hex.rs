@@ -70,7 +70,7 @@ pub fn encode_hex(bytes: &[u8]) -> String {
 }
 
 pub fn percent_decode(orig: String) -> String {
-    let v: Vec<&str> = orig.split("%").collect();
+    let v: Vec<&str> = orig.split('%').collect();
     let mut ret = String::new();
     ret.push_str(v[0]);
     if v.len() > 1 {

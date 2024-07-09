@@ -239,7 +239,7 @@ impl AttestationReport {
                 println!("Error unpacking enclave quote body");
                 Error::ReportParseError
             })?;
-            let quote_raw = base64::decode(&quote_encoded.as_bytes()).map_err(|_| {
+            let quote_raw = base64::decode(quote_encoded.as_bytes()).map_err(|_| {
                 println!("Error decoding encoded quote body");
                 Error::ReportParseError
             })?;

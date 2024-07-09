@@ -319,7 +319,7 @@ pub unsafe extern "C" fn ecall_list_epochs() -> AllocationWithResult {
         let mut epoch = EpochData::new();
         epoch.set_epochNumber(epoch_number.into());
         epoch.set_startingBlock(starting_block);
-        epoch.set_nodePublicKey(node_public_key.clone().into());
+        epoch.set_nodePublicKey(node_public_key.clone());
         
         epochs.push(epoch)
     }
