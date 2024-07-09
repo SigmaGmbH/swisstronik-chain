@@ -48,7 +48,7 @@ func (suite *KeeperTestSuite) TestAddOperator() {
 				return &msg
 			},
 			expected: func(resp *types.MsgAddOperatorResponse, error error) {
-				suite.Require().ErrorIs(error, types.ErrNotOperator)
+				suite.Require().ErrorIs(error, types.ErrNotOperatorOrIssuerCreator)
 				suite.Require().Nil(resp)
 			},
 		},
@@ -161,7 +161,7 @@ func (suite *KeeperTestSuite) TestRemoveOperator() {
 				return &msg
 			},
 			expected: func(resp *types.MsgRemoveOperatorResponse, error error) {
-				suite.Require().ErrorIs(error, types.ErrNotOperator)
+				suite.Require().ErrorIs(error, types.ErrNotOperatorOrIssuerCreator)
 				suite.Require().Nil(resp)
 			},
 		},
@@ -329,7 +329,7 @@ func (suite *KeeperTestSuite) TestSetVerificationStatus() {
 				return &msg
 			},
 			expected: func(resp *types.MsgSetVerificationStatusResponse, error error) {
-				suite.Require().ErrorIs(error, types.ErrNotOperator)
+				suite.Require().ErrorIs(error, types.ErrNotOperatorOrIssuerCreator)
 				suite.Require().Nil(resp)
 			},
 		},
@@ -615,7 +615,7 @@ func (suite *KeeperTestSuite) TestUpdateIssuerDetails() {
 				return &msg
 			},
 			expected: func(resp *types.MsgUpdateIssuerDetailsResponse, err error) {
-				suite.Require().ErrorIs(err, types.ErrNotOperator)
+				suite.Require().ErrorIs(err, types.ErrNotOperatorOrIssuerCreator)
 				suite.Require().Nil(resp)
 			},
 		},
@@ -840,7 +840,7 @@ func (suite *KeeperTestSuite) TestRemoveIssuer() {
 				return &msg
 			},
 			expected: func(resp *types.MsgRemoveIssuerResponse, err error) {
-				suite.Require().ErrorIs(err, types.ErrNotOperator)
+				suite.Require().ErrorIs(err, types.ErrNotOperatorOrIssuerCreator)
 				suite.Require().Nil(resp)
 			},
 		},

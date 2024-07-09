@@ -33,7 +33,7 @@ func (k msgServer) HandleAddOperator(goCtx context.Context, msg *types.MsgAddOpe
 
 	// Only operator can add regular operator
 	if exists, err := k.OperatorExists(ctx, signer); !exists || err != nil {
-		return nil, types.ErrNotOperator
+		return nil, types.ErrNotOperatorOrIssuerCreator
 	}
 
 	// Check validity of operator addresses
@@ -76,7 +76,7 @@ func (k msgServer) HandleRemoveOperator(goCtx context.Context, msg *types.MsgRem
 
 	// Only operator can remove regular operator
 	if exists, err := k.OperatorExists(ctx, signer); !exists || err != nil {
-		return nil, types.ErrNotOperator
+		return nil, types.ErrNotOperatorOrIssuerCreator
 	}
 
 	// Check validity of operator addresses
@@ -117,7 +117,7 @@ func (k msgServer) HandleSetVerificationStatus(goCtx context.Context, msg *types
 	// Only operator can set issuer's verification status, (todo, for now, in centralized way)
 	// NOTE, for now, use centralized solution, will move to decentralized way later.
 	if exists, err := k.OperatorExists(ctx, signer); !exists || err != nil {
-		return nil, types.ErrNotOperator
+		return nil, types.ErrNotOperatorOrIssuerCreator
 	}
 
 	// Check validity of issuer addresses
@@ -156,7 +156,7 @@ func (k msgServer) HandleCreateIssuer(goCtx context.Context, msg *types.MsgCreat
 
 	// Only operator can add issuer
 	if exists, err := k.OperatorExists(ctx, signer); !exists || err != nil {
-		return nil, types.ErrNotOperator
+		return nil, types.ErrNotOperatorOrIssuerCreator
 	}
 
 	// Make sure that issuer does not exist
@@ -200,7 +200,7 @@ func (k msgServer) HandleUpdateIssuerDetails(goCtx context.Context, msg *types.M
 
 	// Only operator can update issuer
 	if exists, err := k.OperatorExists(ctx, signer); !exists || err != nil {
-		return nil, types.ErrNotOperator
+		return nil, types.ErrNotOperatorOrIssuerCreator
 	}
 
 	// Check if issuer exists
@@ -244,7 +244,7 @@ func (k msgServer) HandleRemoveIssuer(goCtx context.Context, msg *types.MsgRemov
 
 	// Only operator can remove issuer
 	if exists, err := k.OperatorExists(ctx, signer); !exists || err != nil {
-		return nil, types.ErrNotOperator
+		return nil, types.ErrNotOperatorOrIssuerCreator
 	}
 
 	// Make sure that issuer exists
