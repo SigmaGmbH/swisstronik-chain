@@ -199,9 +199,6 @@ func (k msgServer) HandleUpdateIssuerDetails(goCtx context.Context, msg *types.M
 	if err != nil {
 		return nil, err
 	}
-	if exists, err := k.IssuerExists(ctx, issuer); !exists || err != nil {
-		return nil, errors.Wrap(types.ErrInvalidIssuer, "issuer not exists")
-	}
 
 	// Operator or issuer creator can update issuer
 	creator := k.GetIssuerCreator(ctx, issuer)
@@ -209,6 +206,10 @@ func (k msgServer) HandleUpdateIssuerDetails(goCtx context.Context, msg *types.M
 		if exists, err := k.OperatorExists(ctx, signer); !exists || err != nil {
 			return nil, types.ErrNotOperatorOrIssuerCreator
 		}
+	}
+
+	if exists, err := k.IssuerExists(ctx, issuer); !exists || err != nil {
+		return nil, errors.Wrap(types.ErrInvalidIssuer, "issuer not exists")
 	}
 
 	// Revoke verification if address was verified
@@ -246,9 +247,6 @@ func (k msgServer) HandleRemoveIssuer(goCtx context.Context, msg *types.MsgRemov
 	if err != nil {
 		return nil, err
 	}
-	if exists, err := k.IssuerExists(ctx, issuer); !exists || err != nil {
-		return nil, errors.Wrap(types.ErrInvalidIssuer, "issuer not exists")
-	}
 
 	// Operator or issuer creator can update issuer
 	creator := k.GetIssuerCreator(ctx, issuer)
@@ -256,6 +254,10 @@ func (k msgServer) HandleRemoveIssuer(goCtx context.Context, msg *types.MsgRemov
 		if exists, err := k.OperatorExists(ctx, signer); !exists || err != nil {
 			return nil, types.ErrNotOperatorOrIssuerCreator
 		}
+	}
+
+	if exists, err := k.IssuerExists(ctx, issuer); !exists || err != nil {
+		return nil, errors.Wrap(types.ErrInvalidIssuer, "issuer not exists")
 	}
 
 	k.RemoveIssuer(ctx, issuer)
