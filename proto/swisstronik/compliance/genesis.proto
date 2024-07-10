@@ -10,15 +10,16 @@ option go_package = "swisstronik/x/compliance/types";
 // GenesisState defines the compliance module's genesis state.
 message GenesisState {
   Params params = 1 [ (gogoproto.nullable) = false ];
-  repeated IssuerGenesisAccount issuers = 2;
+  repeated GenesisIssuerDetails issuerDetails = 2;
   repeated GenesisAddressDetails addressDetails = 3;
   repeated GenesisVerificationDetails verificationDetails = 4;
   repeated OperatorDetails operators = 5;
 }
 
-message IssuerGenesisAccount {
+message GenesisIssuerDetails {
   string address = 1;
-  IssuerDetails details = 2;
+  string creator = 2;
+  IssuerDetails details = 3;
 }
 
 message GenesisAddressDetails {

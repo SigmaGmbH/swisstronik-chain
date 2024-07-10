@@ -25,8 +25,9 @@ type QuerierTestSuite struct {
 	querier keeper.Querier
 	app     *app.App
 
-	issuer sdk.AccAddress
-	user   sdk.AccAddress
+	issuerCreator sdk.AccAddress
+	issuer        sdk.AccAddress
+	user          sdk.AccAddress
 }
 
 func TestQuerierTestSuite(t *testing.T) {
@@ -41,15 +42,13 @@ func TestQuerierTestSuite(t *testing.T) {
 }
 
 func (suite *QuerierTestSuite) SetupTest() {
-	from, _ := tests.RandomEthAddressWithPrivateKey()
-	suite.issuer = sdk.AccAddress(from.Bytes())
-
-	from, _ = tests.RandomEthAddressWithPrivateKey()
-	suite.user = sdk.AccAddress(from.Bytes())
+	suite.issuerCreator = tests.RandomAccAddress()
+	suite.issuer = tests.RandomAccAddress()
+	suite.user = tests.RandomAccAddress()
 
 	// Create issuer
 	issuerDetails := &types.IssuerDetails{Name: "testIssuer"}
-	err := suite.keeper.SetIssuerDetails(suite.ctx, suite.issuer, issuerDetails)
+	err := suite.keeper.SetIssuerDetails(suite.ctx, suite.issuerCreator, suite.issuer, issuerDetails)
 	suite.Require().NoError(err)
 
 	// Set verification status as true for issuer details
@@ -115,8 +114,7 @@ func (suite *QuerierTestSuite) TestSuccess() {
 }
 
 func (suite *QuerierTestSuite) TestFailed() {
-	from, _ := tests.RandomEthAddressWithPrivateKey()
-	anyUser := sdk.AccAddress(from.Bytes())
+	anyUser := tests.RandomAccAddress()
 
 	// Query invalid issuer details
 	issuerRequest := &types.QueryIssuerDetailsRequest{

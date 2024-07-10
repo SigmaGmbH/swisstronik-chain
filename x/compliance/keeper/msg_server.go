@@ -51,7 +51,7 @@ func (k msgServer) HandleAddOperator(goCtx context.Context, msg *types.MsgAddOpe
 		return nil, errors.Wrapf(types.ErrInvalidOperator, "operator already exists")
 	}
 
-	if err := k.AddOperator(ctx, operator, types.OperatorType_OT_REGULAR); err != nil {
+	if err = k.AddOperator(ctx, operator, types.OperatorType_OT_REGULAR); err != nil {
 		return nil, err
 	}
 
@@ -154,11 +154,6 @@ func (k msgServer) HandleCreateIssuer(goCtx context.Context, msg *types.MsgCreat
 		return nil, err
 	}
 
-	// Only operator can add issuer
-	if exists, err := k.OperatorExists(ctx, signer); !exists || err != nil {
-		return nil, types.ErrNotOperatorOrIssuerCreator
-	}
-
 	// Make sure that issuer does not exist
 	issuer, err := sdk.AccAddressFromBech32(msg.Issuer)
 	if err != nil {
@@ -168,7 +163,8 @@ func (k msgServer) HandleCreateIssuer(goCtx context.Context, msg *types.MsgCreat
 		return nil, errors.Wrap(types.ErrInvalidIssuer, "issuer already exists")
 	}
 
-	if err := k.SetIssuerDetails(ctx, issuer, msg.Details); err != nil {
+	// Store issuer details with creator address
+	if err = k.SetIssuerDetails(ctx, signer, issuer, msg.Details); err != nil {
 		return nil, err
 	}
 
@@ -198,11 +194,6 @@ func (k msgServer) HandleUpdateIssuerDetails(goCtx context.Context, msg *types.M
 		return nil, err
 	}
 
-	// Only operator can update issuer
-	if exists, err := k.OperatorExists(ctx, signer); !exists || err != nil {
-		return nil, types.ErrNotOperatorOrIssuerCreator
-	}
-
 	// Check if issuer exists
 	issuer, err := sdk.AccAddressFromBech32(msg.Issuer)
 	if err != nil {
@@ -212,12 +203,20 @@ func (k msgServer) HandleUpdateIssuerDetails(goCtx context.Context, msg *types.M
 		return nil, errors.Wrap(types.ErrInvalidIssuer, "issuer not exists")
 	}
 
+	// Operator or issuer creator can update issuer
+	creator := k.GetIssuerCreator(ctx, issuer)
+	if !signer.Equals(creator) {
+		if exists, err := k.OperatorExists(ctx, signer); !exists || err != nil {
+			return nil, types.ErrNotOperatorOrIssuerCreator
+		}
+	}
+
 	// Revoke verification if address was verified
-	if err := k.SetAddressVerificationStatus(ctx, issuer, false); err != nil {
+	if err = k.SetAddressVerificationStatus(ctx, issuer, false); err != nil {
 		return nil, err
 	}
 
-	if err := k.SetIssuerDetails(ctx, issuer, msg.Details); err != nil {
+	if err = k.SetIssuerDetails(ctx, creator, issuer, msg.Details); err != nil {
 		return nil, err
 	}
 
@@ -242,11 +241,6 @@ func (k msgServer) HandleRemoveIssuer(goCtx context.Context, msg *types.MsgRemov
 		return nil, err
 	}
 
-	// Only operator can remove issuer
-	if exists, err := k.OperatorExists(ctx, signer); !exists || err != nil {
-		return nil, types.ErrNotOperatorOrIssuerCreator
-	}
-
 	// Make sure that issuer exists
 	issuer, err := sdk.AccAddressFromBech32(msg.Issuer)
 	if err != nil {
@@ -254,6 +248,14 @@ func (k msgServer) HandleRemoveIssuer(goCtx context.Context, msg *types.MsgRemov
 	}
 	if exists, err := k.IssuerExists(ctx, issuer); !exists || err != nil {
 		return nil, errors.Wrap(types.ErrInvalidIssuer, "issuer not exists")
+	}
+
+	// Operator or issuer creator can update issuer
+	creator := k.GetIssuerCreator(ctx, issuer)
+	if !signer.Equals(creator) {
+		if exists, err := k.OperatorExists(ctx, signer); !exists || err != nil {
+			return nil, types.ErrNotOperatorOrIssuerCreator
+		}
 	}
 
 	k.RemoveIssuer(ctx, issuer)

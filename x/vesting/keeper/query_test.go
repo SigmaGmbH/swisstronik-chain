@@ -59,8 +59,7 @@ func (suite *KeeperTestSuite) TestBalances() {
 		{
 			name: "unknown address",
 			init: func() {
-				to, _ := tests.RandomEthAddressWithPrivateKey()
-				toAddress = sdk.AccAddress(to.Bytes())
+				toAddress = tests.RandomAccAddress()
 			},
 			malleate: func() *types.QueryBalancesRequest {
 				return &types.QueryBalancesRequest{
@@ -75,8 +74,7 @@ func (suite *KeeperTestSuite) TestBalances() {
 		{
 			name: "not found vesting account",
 			init: func() {
-				to, _ := tests.RandomEthAddressWithPrivateKey()
-				toAddress = sdk.AccAddress(to.Bytes())
+				toAddress = tests.RandomAccAddress()
 
 				// Set to account
 				baseAccount := authtypes.NewBaseAccountWithAddress(toAddress)
@@ -96,8 +94,7 @@ func (suite *KeeperTestSuite) TestBalances() {
 		{
 			name: "success",
 			init: func() {
-				to, _ := tests.RandomEthAddressWithPrivateKey()
-				toAddress = sdk.AccAddress(to.Bytes())
+				toAddress = tests.RandomAccAddress()
 
 				// Set to account
 				baseAccount := authtypes.NewBaseAccountWithAddress(toAddress)

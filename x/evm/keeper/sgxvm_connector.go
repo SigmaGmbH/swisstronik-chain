@@ -235,7 +235,7 @@ func (q Connector) HasVerification(req *librustgo.CosmosRequest_HasVerification)
 	verificationType := compliancetypes.VerificationType(req.HasVerification.VerificationType)
 	expirationTimestamp := req.HasVerification.ExpirationTimestamp
 
-	var allowedIssuers []sdk.Address
+	var allowedIssuers []sdk.AccAddress
 	for _, issuer := range req.HasVerification.AllowedIssuers {
 		allowedIssuers = append(allowedIssuers, sdk.AccAddress(issuer))
 	}

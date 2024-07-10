@@ -37,8 +37,7 @@ func (suite *KeeperTestSuite) TestAddOperator() {
 		{
 			name: "operator not exist",
 			init: func() {
-				from, _ := tests.RandomEthAddressWithPrivateKey()
-				operator = sdk.AccAddress(from.Bytes())
+				operator = tests.RandomAccAddress()
 			},
 			malleate: func() *types.MsgAddOperator {
 				msg := types.NewMsgAddOperator(
@@ -55,14 +54,12 @@ func (suite *KeeperTestSuite) TestAddOperator() {
 		{
 			name: "success",
 			init: func() {
-				from, _ := tests.RandomEthAddressWithPrivateKey()
-				operator = sdk.AccAddress(from.Bytes())
+				operator = tests.RandomAccAddress()
 
 				err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_REGULAR)
 				suite.Require().NoError(err)
 
-				from, _ = tests.RandomEthAddressWithPrivateKey()
-				newOperator = sdk.AccAddress(from.Bytes())
+				newOperator = tests.RandomAccAddress()
 			},
 			malleate: func() *types.MsgAddOperator {
 				msg := types.NewMsgAddOperator(
@@ -89,8 +86,7 @@ func (suite *KeeperTestSuite) TestAddOperator() {
 		{
 			name: "existing operator",
 			init: func() {
-				from, _ := tests.RandomEthAddressWithPrivateKey()
-				operator = sdk.AccAddress(from.Bytes())
+				operator = tests.RandomAccAddress()
 
 				err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_REGULAR)
 				suite.Require().NoError(err)
@@ -150,8 +146,7 @@ func (suite *KeeperTestSuite) TestRemoveOperator() {
 		{
 			name: "operator not exist",
 			init: func() {
-				from, _ := tests.RandomEthAddressWithPrivateKey()
-				operator = sdk.AccAddress(from.Bytes())
+				operator = tests.RandomAccAddress()
 			},
 			malleate: func() *types.MsgRemoveOperator {
 				msg := types.NewMsgRemoveOperator(
@@ -168,14 +163,12 @@ func (suite *KeeperTestSuite) TestRemoveOperator() {
 		{
 			name: "success",
 			init: func() {
-				from, _ := tests.RandomEthAddressWithPrivateKey()
-				operator = sdk.AccAddress(from.Bytes())
+				operator = tests.RandomAccAddress()
 
 				err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_REGULAR)
 				suite.Require().NoError(err)
 
-				from, _ = tests.RandomEthAddressWithPrivateKey()
-				newOperator = sdk.AccAddress(from.Bytes())
+				newOperator = tests.RandomAccAddress()
 
 				err = suite.keeper.AddOperator(suite.ctx, newOperator, types.OperatorType_OT_REGULAR)
 				suite.Require().NoError(err)
@@ -205,8 +198,7 @@ func (suite *KeeperTestSuite) TestRemoveOperator() {
 		{
 			name: "remove itself",
 			init: func() {
-				from, _ := tests.RandomEthAddressWithPrivateKey()
-				operator = sdk.AccAddress(from.Bytes())
+				operator = tests.RandomAccAddress()
 
 				err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_REGULAR)
 				suite.Require().NoError(err)
@@ -236,14 +228,12 @@ func (suite *KeeperTestSuite) TestRemoveOperator() {
 		{
 			name: "remove initial operator",
 			init: func() {
-				from, _ := tests.RandomEthAddressWithPrivateKey()
-				operator = sdk.AccAddress(from.Bytes())
+				operator = tests.RandomAccAddress()
 
 				err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_INITIAL)
 				suite.Require().NoError(err)
 
-				from, _ = tests.RandomEthAddressWithPrivateKey()
-				newOperator = sdk.AccAddress(from.Bytes())
+				newOperator = tests.RandomAccAddress()
 
 				err = suite.keeper.AddOperator(suite.ctx, newOperator, types.OperatorType_OT_INITIAL)
 				suite.Require().NoError(err)
@@ -288,6 +278,7 @@ func (suite *KeeperTestSuite) TestRemoveOperator() {
 func (suite *KeeperTestSuite) TestSetVerificationStatus() {
 	var (
 		operator sdk.AccAddress
+		creator  sdk.AccAddress
 		issuer   sdk.AccAddress
 	)
 	testCases := []struct {
@@ -314,11 +305,9 @@ func (suite *KeeperTestSuite) TestSetVerificationStatus() {
 		{
 			name: "operator not exist",
 			init: func() {
-				from, _ := tests.RandomEthAddressWithPrivateKey()
-				operator = sdk.AccAddress(from.Bytes())
+				operator = tests.RandomAccAddress()
 
-				from, _ = tests.RandomEthAddressWithPrivateKey()
-				issuer = sdk.AccAddress(from.Bytes())
+				issuer = tests.RandomAccAddress()
 			},
 			malleate: func() *types.MsgSetVerificationStatus {
 				msg := types.NewMsgSetVerificationStatus(
@@ -336,14 +325,12 @@ func (suite *KeeperTestSuite) TestSetVerificationStatus() {
 		{
 			name: "issuer not exist",
 			init: func() {
-				from, _ := tests.RandomEthAddressWithPrivateKey()
-				operator = sdk.AccAddress(from.Bytes())
+				operator = tests.RandomAccAddress()
 
 				err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_REGULAR)
 				suite.Require().NoError(err)
 
-				from, _ = tests.RandomEthAddressWithPrivateKey()
-				issuer = sdk.AccAddress(from.Bytes())
+				issuer = tests.RandomAccAddress()
 			},
 			malleate: func() *types.MsgSetVerificationStatus {
 				msg := types.NewMsgSetVerificationStatus(
@@ -361,17 +348,16 @@ func (suite *KeeperTestSuite) TestSetVerificationStatus() {
 		{
 			name: "success",
 			init: func() {
-				from, _ := tests.RandomEthAddressWithPrivateKey()
-				operator = sdk.AccAddress(from.Bytes())
+				operator = tests.RandomAccAddress()
 
 				err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_REGULAR)
 				suite.Require().NoError(err)
 
-				from, _ = tests.RandomEthAddressWithPrivateKey()
-				issuer = sdk.AccAddress(from.Bytes())
+				creator = tests.RandomAccAddress()
+				issuer = tests.RandomAccAddress()
 
 				details := &types.IssuerDetails{Name: "testIssuer"}
-				err = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
+				err = suite.keeper.SetIssuerDetails(suite.ctx, creator, issuer, details)
 				suite.Require().NoError(err)
 			},
 			malleate: func() *types.MsgSetVerificationStatus {
@@ -409,6 +395,7 @@ func (suite *KeeperTestSuite) TestSetVerificationStatus() {
 func (suite *KeeperTestSuite) TestSetIssuerDetails() {
 	var (
 		operator sdk.AccAddress
+		creator  sdk.AccAddress
 		issuer   sdk.AccAddress
 	)
 	testCases := []struct {
@@ -439,8 +426,7 @@ func (suite *KeeperTestSuite) TestSetIssuerDetails() {
 		{
 			name: "invalid issuer",
 			init: func() {
-				from, _ := tests.RandomEthAddressWithPrivateKey()
-				operator = sdk.AccAddress(from.Bytes())
+				operator = tests.RandomAccAddress()
 
 				err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_REGULAR)
 				suite.Require().NoError(err)
@@ -465,14 +451,12 @@ func (suite *KeeperTestSuite) TestSetIssuerDetails() {
 		{
 			name: "success",
 			init: func() {
-				from, _ := tests.RandomEthAddressWithPrivateKey()
-				operator = sdk.AccAddress(from.Bytes())
+				operator = tests.RandomAccAddress()
 
 				err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_REGULAR)
 				suite.Require().NoError(err)
 
-				from, _ = tests.RandomEthAddressWithPrivateKey()
-				issuer = sdk.AccAddress(from.Bytes())
+				issuer = tests.RandomAccAddress()
 			},
 			malleate: func() *types.MsgCreateIssuer {
 				msg := types.NewCreateIssuerMsg(
@@ -519,12 +503,11 @@ func (suite *KeeperTestSuite) TestSetIssuerDetails() {
 			name: "existing issuer",
 			init: func() {
 				details := &types.IssuerDetails{Name: "test issuer"}
-				from, _ := tests.RandomEthAddressWithPrivateKey()
-				issuer = sdk.AccAddress(from.Bytes())
-				_ = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
+				creator = tests.RandomAccAddress()
+				issuer = tests.RandomAccAddress()
+				_ = suite.keeper.SetIssuerDetails(suite.ctx, creator, issuer, details)
 
-				from, _ = tests.RandomEthAddressWithPrivateKey()
-				operator = sdk.AccAddress(from.Bytes())
+				operator = tests.RandomAccAddress()
 
 				err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_REGULAR)
 				suite.Require().NoError(err)
@@ -563,6 +546,7 @@ func (suite *KeeperTestSuite) TestSetIssuerDetails() {
 
 func (suite *KeeperTestSuite) TestUpdateIssuerDetails() {
 	var (
+		creator  sdk.AccAddress
 		issuer   sdk.AccAddress
 		operator sdk.AccAddress
 		signer   sdk.AccAddress
@@ -596,11 +580,9 @@ func (suite *KeeperTestSuite) TestUpdateIssuerDetails() {
 		{
 			name: "not operator",
 			init: func() {
-				from, _ := tests.RandomEthAddressWithPrivateKey()
-				issuer = sdk.AccAddress(from.Bytes())
+				issuer = tests.RandomAccAddress()
 
-				from, _ = tests.RandomEthAddressWithPrivateKey()
-				operator = sdk.AccAddress(from.Bytes())
+				operator = tests.RandomAccAddress()
 			},
 			malleate: func() *types.MsgUpdateIssuerDetails {
 				msg := types.NewUpdateIssuerDetailsMsg(
@@ -622,11 +604,9 @@ func (suite *KeeperTestSuite) TestUpdateIssuerDetails() {
 		{
 			name: "issuer not exist",
 			init: func() {
-				from, _ := tests.RandomEthAddressWithPrivateKey()
-				issuer = sdk.AccAddress(from.Bytes())
+				issuer = tests.RandomAccAddress()
 
-				from, _ = tests.RandomEthAddressWithPrivateKey()
-				operator = sdk.AccAddress(from.Bytes())
+				operator = tests.RandomAccAddress()
 
 				err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_REGULAR)
 				suite.Require().NoError(err)
@@ -651,16 +631,15 @@ func (suite *KeeperTestSuite) TestUpdateIssuerDetails() {
 		{
 			name: "success",
 			init: func() {
-				from, _ := tests.RandomEthAddressWithPrivateKey()
-				operator = sdk.AccAddress(from.Bytes())
+				operator = tests.RandomAccAddress()
 
 				err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_REGULAR)
 				suite.Require().NoError(err)
 
-				from, _ = tests.RandomEthAddressWithPrivateKey()
-				issuer = sdk.AccAddress(from.Bytes())
+				creator = tests.RandomAccAddress()
+				issuer = tests.RandomAccAddress()
 				details := &types.IssuerDetails{Name: "test issuer"}
-				_ = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
+				_ = suite.keeper.SetIssuerDetails(suite.ctx, creator, issuer, details)
 			},
 			malleate: func() *types.MsgUpdateIssuerDetails {
 				msg := types.NewUpdateIssuerDetailsMsg(
@@ -707,21 +686,19 @@ func (suite *KeeperTestSuite) TestUpdateIssuerDetails() {
 			// Should revoke verification for all the accounts verified by updated issuer
 			name: "past verification data still exists",
 			init: func() {
-				from, _ := tests.RandomEthAddressWithPrivateKey()
-				operator = sdk.AccAddress(from.Bytes())
+				operator = tests.RandomAccAddress()
 
 				err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_REGULAR)
 				suite.Require().NoError(err)
 
-				from, _ = tests.RandomEthAddressWithPrivateKey()
-				issuer = sdk.AccAddress(from.Bytes())
+				creator = tests.RandomAccAddress()
+				issuer = tests.RandomAccAddress()
 				details := &types.IssuerDetails{Name: "test issuer"}
-				_ = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
+				_ = suite.keeper.SetIssuerDetails(suite.ctx, creator, issuer, details)
 
 				_ = suite.keeper.SetAddressVerificationStatus(suite.ctx, issuer, true)
 
-				from, _ = tests.RandomEthAddressWithPrivateKey()
-				signer = sdk.AccAddress(from.Bytes())
+				signer = tests.RandomAccAddress()
 
 				// Add address details with verification details
 				_, _ = suite.keeper.AddVerificationDetails(
@@ -782,6 +759,7 @@ func (suite *KeeperTestSuite) TestUpdateIssuerDetails() {
 
 func (suite *KeeperTestSuite) TestRemoveIssuer() {
 	var (
+		creator  sdk.AccAddress
 		issuer   sdk.AccAddress
 		operator sdk.AccAddress
 		signer   sdk.AccAddress
@@ -806,11 +784,9 @@ func (suite *KeeperTestSuite) TestRemoveIssuer() {
 		{
 			name: "issuer not exist",
 			init: func() {
-				from, _ := tests.RandomEthAddressWithPrivateKey()
-				issuer = sdk.AccAddress(from.Bytes())
+				issuer = tests.RandomAccAddress()
 
-				from, _ = tests.RandomEthAddressWithPrivateKey()
-				operator = sdk.AccAddress(from.Bytes())
+				operator = tests.RandomAccAddress()
 
 				err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_REGULAR)
 				suite.Require().NoError(err)
@@ -828,12 +804,11 @@ func (suite *KeeperTestSuite) TestRemoveIssuer() {
 			name: "not operator",
 			init: func() {
 				details := &types.IssuerDetails{Name: "test issuer"}
-				from, _ := tests.RandomEthAddressWithPrivateKey()
-				issuer = sdk.AccAddress(from.Bytes())
-				_ = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
+				creator = tests.RandomAccAddress()
+				issuer = tests.RandomAccAddress()
+				_ = suite.keeper.SetIssuerDetails(suite.ctx, creator, issuer, details)
 
-				from, _ = tests.RandomEthAddressWithPrivateKey()
-				operator = sdk.AccAddress(from.Bytes())
+				operator = tests.RandomAccAddress()
 			},
 			malleate: func() *types.MsgRemoveIssuer {
 				msg := types.NewRemoveIssuerMsg(operator.String(), issuer.String())
@@ -847,16 +822,15 @@ func (suite *KeeperTestSuite) TestRemoveIssuer() {
 		{
 			name: "success",
 			init: func() {
-				from, _ := tests.RandomEthAddressWithPrivateKey()
-				operator = sdk.AccAddress(from.Bytes())
+				operator = tests.RandomAccAddress()
 
 				err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_REGULAR)
 				suite.Require().NoError(err)
 
-				from, _ = tests.RandomEthAddressWithPrivateKey()
-				issuer = sdk.AccAddress(from.Bytes())
+				creator = tests.RandomAccAddress()
+				issuer = tests.RandomAccAddress()
 				details := &types.IssuerDetails{Name: "test issuer"}
-				_ = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
+				_ = suite.keeper.SetIssuerDetails(suite.ctx, creator, issuer, details)
 			},
 			malleate: func() *types.MsgRemoveIssuer {
 				msg := types.NewRemoveIssuerMsg(operator.String(), issuer.String())
@@ -886,21 +860,19 @@ func (suite *KeeperTestSuite) TestRemoveIssuer() {
 			// Should revoke verification for all the accounts verified by removed issuer
 			name: "account was suspended",
 			init: func() {
-				from, _ := tests.RandomEthAddressWithPrivateKey()
-				operator = sdk.AccAddress(from.Bytes())
+				operator = tests.RandomAccAddress()
 
 				err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_REGULAR)
 				suite.Require().NoError(err)
 
-				from, _ = tests.RandomEthAddressWithPrivateKey()
-				issuer = sdk.AccAddress(from.Bytes())
+				creator = tests.RandomAccAddress()
+				issuer = tests.RandomAccAddress()
 				details := &types.IssuerDetails{Name: "test issuer"}
-				_ = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
+				_ = suite.keeper.SetIssuerDetails(suite.ctx, creator, issuer, details)
 
 				_ = suite.keeper.SetAddressVerificationStatus(suite.ctx, issuer, true)
 
-				from, _ = tests.RandomEthAddressWithPrivateKey()
-				signer = sdk.AccAddress(from.Bytes())
+				signer = tests.RandomAccAddress()
 
 				// Add address details with verification details
 				_, _ = suite.keeper.AddVerificationDetails(

@@ -122,10 +122,8 @@ func (suite *KeeperTestSuite) TestCreateMonthlyVestingAccount() {
 		{
 			name: "create for existing account",
 			init: func() {
-				from, _ := tests.RandomEthAddressWithPrivateKey()
-				fromAddress = sdk.AccAddress(from.Bytes())
-				to, _ := tests.RandomEthAddressWithPrivateKey()
-				toAddress = sdk.AccAddress(to.Bytes())
+				fromAddress = tests.RandomAccAddress()
+				toAddress = tests.RandomAccAddress()
 
 				// Set to account
 				baseAccount := authtypes.NewBaseAccountWithAddress(toAddress)
@@ -144,10 +142,8 @@ func (suite *KeeperTestSuite) TestCreateMonthlyVestingAccount() {
 		{
 			name: "create a valid periodic vesting account",
 			init: func() {
-				from, _ := tests.RandomEthAddressWithPrivateKey()
-				fromAddress = sdk.AccAddress(from.Bytes())
-				to, _ := tests.RandomEthAddressWithPrivateKey()
-				toAddress = sdk.AccAddress(to.Bytes())
+				fromAddress = tests.RandomAccAddress()
+				toAddress = tests.RandomAccAddress()
 
 				coins = sdk.NewCoins(sdk.NewInt64Coin(sdk.DefaultBondDenom, 50))
 				suite.bankKeeper.EXPECT().IsSendEnabledCoins(suite.ctx, coins).Return(nil)
@@ -162,10 +158,8 @@ func (suite *KeeperTestSuite) TestCreateMonthlyVestingAccount() {
 		{
 			name: "blocked account",
 			init: func() {
-				from, _ := tests.RandomEthAddressWithPrivateKey()
-				fromAddress = sdk.AccAddress(from.Bytes())
-				to, _ := tests.RandomEthAddressWithPrivateKey()
-				toAddress = sdk.AccAddress(to.Bytes())
+				fromAddress = tests.RandomAccAddress()
+				toAddress = tests.RandomAccAddress()
 
 				coins = sdk.NewCoins(sdk.NewInt64Coin(sdk.DefaultBondDenom, 50))
 				suite.bankKeeper.EXPECT().IsSendEnabledCoins(suite.ctx, coins).Return(nil)

@@ -24,11 +24,13 @@ const (
 	prefixAddressDetails
 	prefixVerificationDetails
 	prefixOperatorDetails
+	prefixIssuerCreators
 )
 
 var (
 	KeyPrefixOperatorDetails     = []byte{prefixOperatorDetails}
 	KeyPrefixIssuerDetails       = []byte{prefixIssuerDetails}
+	KeyPrefixIssuerCreators      = []byte{prefixIssuerCreators}
 	KeyPrefixAddressDetails      = []byte{prefixAddressDetails}
 	KeyPrefixVerificationDetails = []byte{prefixVerificationDetails}
 )

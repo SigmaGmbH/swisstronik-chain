@@ -45,7 +45,7 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 }
 
 // SetIssuerDetails sets details for provided issuer address
-func (k Keeper) SetIssuerDetails(ctx sdk.Context, issuerAddress sdk.Address, details *types.IssuerDetails) error {
+func (k Keeper) SetIssuerDetails(ctx sdk.Context, issuerCreatorAddress, issuerAddress sdk.AccAddress, details *types.IssuerDetails) error {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixIssuerDetails)
 
 	detailsBytes, err := details.Marshal()
@@ -54,11 +54,13 @@ func (k Keeper) SetIssuerDetails(ctx sdk.Context, issuerAddress sdk.Address, det
 	}
 
 	store.Set(issuerAddress.Bytes(), detailsBytes)
+
+	k.SetIssuerCreator(ctx, issuerAddress, issuerCreatorAddress)
 	return nil
 }
 
 // RemoveIssuer removes provided issuer
-func (k Keeper) RemoveIssuer(ctx sdk.Context, issuerAddress sdk.Address) {
+func (k Keeper) RemoveIssuer(ctx sdk.Context, issuerAddress sdk.AccAddress) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixIssuerDetails)
 	store.Delete(issuerAddress.Bytes())
 	// NOTE, all the verification data verified by removed issuer must be deleted from store
@@ -70,7 +72,7 @@ func (k Keeper) RemoveIssuer(ctx sdk.Context, issuerAddress sdk.Address) {
 }
 
 // GetIssuerDetails returns details of provided issuer address
-func (k Keeper) GetIssuerDetails(ctx sdk.Context, issuerAddress sdk.Address) (*types.IssuerDetails, error) {
+func (k Keeper) GetIssuerDetails(ctx sdk.Context, issuerAddress sdk.AccAddress) (*types.IssuerDetails, error) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixIssuerDetails)
 
 	detailsBytes := store.Get(issuerAddress.Bytes())
@@ -86,8 +88,35 @@ func (k Keeper) GetIssuerDetails(ctx sdk.Context, issuerAddress sdk.Address) (*t
 	return &issuerDetails, nil
 }
 
+// GetIssuerCreator returns issuer creator's address
+func (k Keeper) GetIssuerCreator(ctx sdk.Context, issuerAddress sdk.AccAddress) sdk.AccAddress {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixIssuerCreators)
+
+	detailsBytes := store.Get(issuerAddress.Bytes())
+	if detailsBytes == nil {
+		return nil
+	}
+
+	return detailsBytes
+}
+
+// SetIssuerCreator writes issuer creator's address
+func (k Keeper) SetIssuerCreator(ctx sdk.Context, issuerAddress, issuerCreatorAddress sdk.AccAddress) {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixIssuerCreators)
+	store.Set(issuerAddress.Bytes(), issuerCreatorAddress.Bytes())
+}
+
+// IssuerExists checks if issuer exists by checking operator address
+func (k Keeper) IssuerExists(ctx sdk.Context, issuerAddress sdk.AccAddress) (bool, error) {
+	res, err := k.GetIssuerDetails(ctx, issuerAddress)
+	if err != nil {
+		return false, err
+	}
+	return len(res.Name) > 0, nil
+}
+
 // GetAddressDetails returns address details
-func (k Keeper) GetAddressDetails(ctx sdk.Context, address sdk.Address) (*types.AddressDetails, error) {
+func (k Keeper) GetAddressDetails(ctx sdk.Context, address sdk.AccAddress) (*types.AddressDetails, error) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixAddressDetails)
 
 	addressDetailsBytes := store.Get(address.Bytes())
@@ -121,7 +150,7 @@ func (k Keeper) GetAddressDetails(ctx sdk.Context, address sdk.Address) (*types.
 }
 
 // SetAddressDetails writes address details to the storage
-func (k Keeper) SetAddressDetails(ctx sdk.Context, address sdk.Address, details *types.AddressDetails) error {
+func (k Keeper) SetAddressDetails(ctx sdk.Context, address sdk.AccAddress, details *types.AddressDetails) error {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixAddressDetails)
 	detailsBytes, err := details.Marshal()
 	if err != nil {
@@ -132,13 +161,13 @@ func (k Keeper) SetAddressDetails(ctx sdk.Context, address sdk.Address, details 
 }
 
 // RemoveAddressDetails deletes address details from store
-func (k Keeper) RemoveAddressDetails(ctx sdk.Context, address sdk.Address) {
+func (k Keeper) RemoveAddressDetails(ctx sdk.Context, address sdk.AccAddress) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixAddressDetails)
 	store.Delete(address.Bytes())
 }
 
 // IsAddressVerified returns information if address is verified.
-func (k Keeper) IsAddressVerified(ctx sdk.Context, address sdk.Address) (bool, error) {
+func (k Keeper) IsAddressVerified(ctx sdk.Context, address sdk.AccAddress) (bool, error) {
 	addressDetails, err := k.GetAddressDetails(ctx, address)
 	if err != nil {
 		return false, err
@@ -149,7 +178,7 @@ func (k Keeper) IsAddressVerified(ctx sdk.Context, address sdk.Address) (bool, e
 }
 
 // SetAddressVerificationStatus marks provided address as verified or not verified.
-func (k Keeper) SetAddressVerificationStatus(ctx sdk.Context, address sdk.Address, isVerifiedStatus bool) error {
+func (k Keeper) SetAddressVerificationStatus(ctx sdk.Context, address sdk.AccAddress, isVerifiedStatus bool) error {
 	addressDetails, err := k.GetAddressDetails(ctx, address)
 	if err != nil {
 		return err
@@ -169,7 +198,7 @@ func (k Keeper) SetAddressVerificationStatus(ctx sdk.Context, address sdk.Addres
 }
 
 // AddVerificationDetails writes details of passed verification by provided address.
-func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.Address, verificationType types.VerificationType, details *types.VerificationDetails) ([]byte, error) {
+func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.AccAddress, verificationType types.VerificationType, details *types.VerificationDetails) ([]byte, error) {
 	// Check if issuer is verified and not banned
 	issuerAddress, err := sdk.AccAddressFromBech32(details.IssuerAddress)
 	if err != nil {
@@ -290,7 +319,7 @@ func (k Keeper) GetVerificationDetails(ctx sdk.Context, verificationDetailsId []
 	return &verificationDetails, nil
 }
 
-func (k Keeper) GetVerificationDetailsByIssuer(ctx sdk.Context, userAddress sdk.Address, issuerAddress sdk.Address) ([]*types.Verification, []*types.VerificationDetails, error) {
+func (k Keeper) GetVerificationDetailsByIssuer(ctx sdk.Context, userAddress sdk.AccAddress, issuerAddress sdk.AccAddress) ([]*types.Verification, []*types.VerificationDetails, error) {
 	addressDetails, err := k.GetAddressDetails(ctx, userAddress)
 	if err != nil {
 		return nil, nil, err
@@ -316,7 +345,7 @@ func (k Keeper) GetVerificationDetailsByIssuer(ctx sdk.Context, userAddress sdk.
 
 // HasVerificationOfType checks if user has verifications of specific type (for example, passed KYC) from provided issuers.
 // If there is no provided expected issuers, this function will check if user has any verification of appropriate type.
-func (k Keeper) HasVerificationOfType(ctx sdk.Context, userAddress sdk.Address, expectedType types.VerificationType, expirationTimestamp uint32, expectedIssuers []sdk.Address) (bool, error) {
+func (k Keeper) HasVerificationOfType(ctx sdk.Context, userAddress sdk.AccAddress, expectedType types.VerificationType, expirationTimestamp uint32, expectedIssuers []sdk.AccAddress) (bool, error) {
 	// Obtain user address details
 	userAddressDetails, err := k.GetAddressDetails(ctx, userAddress)
 	if err != nil {
@@ -357,7 +386,7 @@ func (k Keeper) HasVerificationOfType(ctx sdk.Context, userAddress sdk.Address, 
 	return false, nil
 }
 
-func (k Keeper) GetVerificationsOfType(ctx sdk.Context, userAddress sdk.Address, expectedType types.VerificationType, expectedIssuers ...sdk.Address) ([]*types.VerificationDetails, error) {
+func (k Keeper) GetVerificationsOfType(ctx sdk.Context, userAddress sdk.AccAddress, expectedType types.VerificationType, expectedIssuers ...sdk.AccAddress) ([]*types.VerificationDetails, error) {
 	// Obtain user address details
 	userAddressDetails, err := k.GetAddressDetails(ctx, userAddress)
 	if err != nil {
@@ -380,7 +409,7 @@ func (k Keeper) GetVerificationsOfType(ctx sdk.Context, userAddress sdk.Address,
 	var verifications []*types.VerificationDetails
 	for _, verification := range appropriateTypeVerifications {
 		// Filter verifications by expected issuer
-		if expectedIssuers != nil && slices.ContainsFunc(expectedIssuers, func(expectedIssuer sdk.Address) bool {
+		if expectedIssuers != nil && slices.ContainsFunc(expectedIssuers, func(expectedIssuer sdk.AccAddress) bool {
 			if expectedIssuer.String() == verification.IssuerAddress {
 				return true
 			}
@@ -397,15 +426,6 @@ func (k Keeper) GetVerificationsOfType(ctx sdk.Context, userAddress sdk.Address,
 	}
 
 	return verifications, nil
-}
-
-// IssuerExists checks if issuer exists by checking operator address
-func (k Keeper) IssuerExists(ctx sdk.Context, issuerAddress sdk.Address) (bool, error) {
-	res, err := k.GetIssuerDetails(ctx, issuerAddress)
-	if err != nil {
-		return false, err
-	}
-	return len(res.Name) > 0, nil
 }
 
 // GetOperatorDetails returns the operator details
@@ -498,7 +518,7 @@ func (k Keeper) IterateVerificationDetails(ctx sdk.Context, callback func(id []b
 	}
 }
 
-func (k Keeper) IterateAddressDetails(ctx sdk.Context, callback func(address sdk.Address) (continue_ bool)) {
+func (k Keeper) IterateAddressDetails(ctx sdk.Context, callback func(address sdk.AccAddress) (continue_ bool)) {
 	latestVersionIterator := sdk.KVStorePrefixIterator(ctx.KVStore(k.storeKey), types.KeyPrefixAddressDetails)
 	defer closeIteratorOrPanic(latestVersionIterator)
 
@@ -511,7 +531,7 @@ func (k Keeper) IterateAddressDetails(ctx sdk.Context, callback func(address sdk
 	}
 }
 
-func (k Keeper) IterateIssuerDetails(ctx sdk.Context, callback func(address sdk.Address) (continue_ bool)) {
+func (k Keeper) IterateIssuerDetails(ctx sdk.Context, callback func(address sdk.AccAddress) (continue_ bool)) {
 	latestVersionIterator := sdk.KVStorePrefixIterator(ctx.KVStore(k.storeKey), types.KeyPrefixIssuerDetails)
 	defer closeIteratorOrPanic(latestVersionIterator)
 
@@ -575,7 +595,7 @@ func (k Keeper) ExportAddressDetails(ctx sdk.Context) ([]*types.GenesisAddressDe
 		err               error
 	)
 
-	k.IterateAddressDetails(ctx, func(address sdk.Address) bool {
+	k.IterateAddressDetails(ctx, func(address sdk.AccAddress) bool {
 		details, err = k.GetAddressDetails(ctx, address)
 		if err != nil {
 			return false
@@ -590,26 +610,33 @@ func (k Keeper) ExportAddressDetails(ctx sdk.Context) ([]*types.GenesisAddressDe
 	return allAddressDetails, nil
 }
 
-func (k Keeper) ExportIssuerAccounts(ctx sdk.Context) ([]*types.IssuerGenesisAccount, error) {
+func (k Keeper) ExportIssuerDetails(ctx sdk.Context) ([]*types.GenesisIssuerDetails, error) {
 	var (
-		issuerAccs []*types.IssuerGenesisAccount
-		details    *types.IssuerDetails
-		err        error
+		issuerDetails []*types.GenesisIssuerDetails
+		details       *types.IssuerDetails
+		err           error
 	)
 
-	k.IterateIssuerDetails(ctx, func(address sdk.Address) bool {
+	k.IterateIssuerDetails(ctx, func(address sdk.AccAddress) bool {
 		details, err = k.GetIssuerDetails(ctx, address)
 		if err != nil {
 			return false
 		}
-		issuerAccs = append(issuerAccs, &types.IssuerGenesisAccount{Address: address.String(), Details: details})
+		creator := k.GetIssuerCreator(ctx, address)
+		if creator == nil {
+			return false
+		}
+		issuerDetails = append(issuerDetails, &types.GenesisIssuerDetails{
+			Creator: creator.String(),
+			Address: address.String(), Details: details,
+		})
 		return true
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	return issuerAccs, nil
+	return issuerDetails, nil
 }
 
 func closeIteratorOrPanic(iterator sdk.Iterator) {
