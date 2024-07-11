@@ -127,7 +127,8 @@ pub(super) fn create_tls_cert_and_keys(
 
     let payload = match (qe_target_info, quote_size) {
         (Some(qe_target_info), Some(quote_size)) => {
-            let qe_quote = get_qe_quote(&pub_k, qe_target_info, quote_size)?;
+            let (qe_quote, qe_collateral) = get_qe_quote(&pub_k, qe_target_info, quote_size)?;
+            // TODO: Attach collateral to payload
             base64::encode(&qe_quote[..])
         }
         _ => {

@@ -5,11 +5,12 @@ use std::{time::SystemTime, vec::Vec};
 
 use crate::ocall;
 
+/// Returns Quoting Enclave quote with collateral data
 pub fn get_qe_quote(
     pub_k: &sgx_ec256_public_t,
     qe_target_info: &sgx_target_info_t,
     quote_size: u32,
-) -> SgxResult<Vec<u8>> {
+) -> SgxResult<(Vec<u8>, Vec<u8>)> {
     let mut report_data: sgx_report_data_t = sgx_report_data_t::default();
 
     // Copy public key to report data
@@ -69,7 +70,79 @@ pub fn get_qe_quote(
         return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
     }
 
-    Ok(quote_buf)
+    // Obtain collateral data
+    let qe_collateral = get_collateral_data(&quote_buf)?;
+
+    Ok((quote_buf, qe_collateral))
+}
+
+fn get_collateral_data(vec_quote: &Vec<u8>) -> SgxResult<Vec<u8>> {
+    let mut vec_coll: Vec<u8> = vec![0; 0x4000];
+    let mut size_coll: u32 = 0;
+    let mut retval = sgx_status_t::SGX_ERROR_UNEXPECTED;
+
+    let res = unsafe {
+        ocall::ocall_get_quote_ecdsa_collateral(
+            &mut retval as *mut sgx_status_t,
+            vec_quote.as_ptr(),
+            vec_quote.len() as u32,
+            vec_coll.as_mut_ptr(),
+            vec_coll.len() as u32,
+            &mut size_coll,
+        )
+    };
+
+    if res != sgx_status_t::SGX_SUCCESS {
+        println!(
+            "[Enclave] Call to `ocall_get_quote_ecdsa_collateral` failed. Status code: {:?}",
+            res
+        );
+        return Err(res);
+    }
+
+    if retval != sgx_status_t::SGX_SUCCESS {
+        println!(
+            "[Enclave] Error during `ocall_get_quote_ecdsa_collateral`. Status code: {:?}",
+            retval
+        );
+        return Err(retval);
+    }
+
+    println!("Collateral size = {}", size_coll);
+
+    let call_again = size_coll > vec_coll.len() as u32;
+    vec_coll.resize(size_coll as usize, 0);
+
+    if call_again {
+        let res = unsafe {
+            ocall::ocall_get_quote_ecdsa_collateral(
+                &mut retval as *mut sgx_status_t,
+                vec_quote.as_ptr(),
+                vec_quote.len() as u32,
+                vec_coll.as_mut_ptr(),
+                vec_coll.len() as u32,
+                &mut size_coll,
+            )
+        };
+
+        if res != sgx_status_t::SGX_SUCCESS {
+            println!(
+                "[Enclave] Call to `ocall_get_quote_ecdsa_collateral` failed. Status code: {:?}",
+                res
+            );
+            return Err(res);
+        }
+    
+        if retval != sgx_status_t::SGX_SUCCESS {
+            println!(
+                "[Enclave] Error during `ocall_get_quote_ecdsa_collateral`. Status code: {:?}",
+                retval
+            );
+            return Err(retval);
+        }
+    }
+
+    Ok(vec_coll)
 }
 
 fn get_app_enclave_target_info() -> SgxResult<sgx_target_info_t> {

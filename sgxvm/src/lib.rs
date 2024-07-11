@@ -212,7 +212,7 @@ pub unsafe extern "C" fn ecall_dump_dcap_quote(
         }
     };
 
-    let qe_quote = match get_qe_quote(&pub_k, qe_target_info, quote_size) {
+    let (qe_quote, _) = match get_qe_quote(&pub_k, qe_target_info, quote_size) {
         Ok(quote) => quote,
         Err(status_code) => {
             println!(
