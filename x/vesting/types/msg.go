@@ -63,8 +63,8 @@ func (msg *MsgCreateMonthlyVestingAccount) ValidateBasic() error {
 		return errorsmod.Wrapf(errortypes.ErrInvalidAddress, "to address cannot be the zero address")
 	}
 
-	if msg.CliffDays <= 0 {
-		return errorsmod.Wrapf(ErrInvalidParam, "cliff days cannot be zero or negative")
+	if msg.CliffDays < 0 {
+		return errorsmod.Wrapf(ErrInvalidParam, "cliff days cannot be negative")
 	}
 
 	if msg.Months < 1 {
