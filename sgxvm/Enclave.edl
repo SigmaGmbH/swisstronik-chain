@@ -141,5 +141,13 @@ enclave {
         sgx_status_t ocall_get_supplemental_data_size(
             [out] uint32_t *data_size
         );
+
+        sgx_status_t ocall_get_quote_ecdsa_collateral(
+            [in, size=n_quote] const uint8_t* p_quote,
+            uint32_t n_quote,
+            [out, size=n_col] uint8_t* p_col,
+            uint32_t n_col,
+            [out] uint32_t* p_col_out
+        );
     };
 };

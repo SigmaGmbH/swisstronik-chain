@@ -1,4 +1,4 @@
-use crate::enclave::attestation::dcap_utils::get_qe_quote;
+use crate::enclave::attestation::dcap_utils::{get_qe_quote, sgx_ql_qve_collateral_serialize};
 use crate::errors::GoError;
 use crate::memory::{U8SliceView, UnmanagedVector};
 use crate::types::{Allocation, AllocationWithResult, GoQuerier};
@@ -250,14 +250,12 @@ pub unsafe extern "C" fn ocall_get_qve_report(
         return sgx_status_t::SGX_ERROR_INVALID_PARAMETER;
     }
 
-    println!("[Enclave Wrapper] sgx_qv_set_enclave_load_policy");
     let res = unsafe { sgx_qv_set_enclave_load_policy(sgx_ql_request_policy_t::SGX_QL_EPHEMERAL) };
     if res != sgx_quote3_error_t::SGX_QL_SUCCESS {
         println!("[Enclave Wrapper] cannot set qv enclave load policy");
         return sgx_status_t::SGX_ERROR_UNEXPECTED;
     }
 
-    println!("[Enclave Wrapper] sgx_qv_get_quote_supplemental_data_size");
     let mut data_size = 0u32;
     let res = unsafe { sgx_qv_get_quote_supplemental_data_size(&mut data_size) };
     if res != sgx_quote3_error_t::SGX_QL_SUCCESS {
@@ -276,6 +274,8 @@ pub unsafe extern "C" fn ocall_get_qve_report(
         println!("Call to sgx_qv_get_quote_supplemental_data_size failed. Status code: {:?}", ret_val);
         return sgx_status_t::SGX_ERROR_UNEXPECTED;
     }
+
+    // TODO: Add collateral check
 
     let ret_val = unsafe {
         sgx_qv_verify_quote(
@@ -308,6 +308,33 @@ pub unsafe extern "C" fn ocall_get_supplemental_data_size(
         println!("[Enclave Wrapper] ocall_get_supplemental_data_size failed. Status code: {:?}", res);
         return sgx_status_t::SGX_ERROR_UNEXPECTED;
     }
+
+    sgx_status_t::SGX_SUCCESS
+}
+
+#[no_mangle]
+pub extern "C" fn ocall_get_quote_ecdsa_collateral(
+    p_quote: *const u8,
+    n_quote: u32,
+    p_col: *mut u8,
+    n_col: u32,
+    p_col_size: *mut u32,
+) -> sgx_status_t {
+    let mut p_col_my: *mut u8 = 0 as *mut u8;
+    let mut n_col_my: u32 = 0;
+
+    let ret = unsafe { tee_qv_get_collateral(p_quote, n_quote, &mut p_col_my, &mut n_col_my) };
+
+    if ret != sgx_quote3_error_t::SGX_QL_SUCCESS {
+        println!("tee_qv_get_collateral returned {}", ret);
+        return sgx_status_t::SGX_ERROR_UNEXPECTED;
+    }
+
+    unsafe {
+        *p_col_size = sgx_ql_qve_collateral_serialize(p_col_my, n_col_my, p_col, n_col);
+
+        tee_qv_free_collateral(p_col_my);
+    };
 
     sgx_status_t::SGX_SUCCESS
 }
