@@ -127,7 +127,7 @@ func (k msgServer) HandleSetVerificationStatus(goCtx context.Context, msg *types
 	}
 
 	if exists, err := k.IssuerExists(ctx, issuer); !exists || err != nil {
-		return nil, errors.Wrap(types.ErrInvalidIssuer, "issuer not exists")
+		return nil, errors.Wrap(types.ErrInvalidIssuer, "issuer does not exist")
 	}
 
 	if err = k.SetAddressVerificationStatus(ctx, issuer, msg.IsVerified); err != nil {
@@ -209,7 +209,7 @@ func (k msgServer) HandleUpdateIssuerDetails(goCtx context.Context, msg *types.M
 	}
 
 	if exists, err := k.IssuerExists(ctx, issuer); !exists || err != nil {
-		return nil, errors.Wrap(types.ErrInvalidIssuer, "issuer not exists")
+		return nil, errors.Wrap(types.ErrInvalidIssuer, "issuer does not exist")
 	}
 
 	// Revoke verification if address was verified
@@ -257,7 +257,7 @@ func (k msgServer) HandleRemoveIssuer(goCtx context.Context, msg *types.MsgRemov
 	}
 
 	if exists, err := k.IssuerExists(ctx, issuer); !exists || err != nil {
-		return nil, errors.Wrap(types.ErrInvalidIssuer, "issuer not exists")
+		return nil, errors.Wrap(types.ErrInvalidIssuer, "issuer does not exist")
 	}
 
 	k.RemoveIssuer(ctx, issuer)
