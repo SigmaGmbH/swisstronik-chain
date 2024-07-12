@@ -18,7 +18,7 @@ use std::vec::Vec;
 
 use crate::attestation::dcap::{
     get_qe_quote, 
-    utils::encode_quote_with_collateral
+    utils::{encode_quote_with_collateral, decode_quote_with_collateral},
 };
 use crate::querier::GoQuerier;
 use crate::types::{Allocation, AllocationWithResult};
@@ -237,9 +237,9 @@ pub unsafe extern "C" fn ecall_verify_dcap_quote(
     quote_len: u32,
 ) -> sgx_status_t {
     let slice = unsafe { slice::from_raw_parts(quote_ptr, quote_len as usize) };
-    let quote_buf = slice.to_vec();
+    let (quote, collateral) = decode_quote_with_collateral(slice.as_ptr(), slice.len() as u32);
 
-    match attestation::dcap::verify_dcap_quote(quote_buf.to_vec()) {
+    match attestation::dcap::verify_dcap_quote(quote) {
         Ok(_) => {
             println!("[Enclave] Quote verified");
             sgx_status_t::SGX_SUCCESS
