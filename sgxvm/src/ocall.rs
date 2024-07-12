@@ -52,6 +52,8 @@ extern "C" {
 		p_qve_report_info: *mut sgx_ql_qe_report_info_t,
 		p_supplemental_data: *mut u8,
 		supplemental_data_size: u32,
+        p_collateral: *const u8,
+        collateral_len: u32,
     ) -> sgx_status_t;
 
     pub fn ocall_get_supplemental_data_size(

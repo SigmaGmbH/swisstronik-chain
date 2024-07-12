@@ -239,7 +239,7 @@ pub unsafe extern "C" fn ecall_verify_dcap_quote(
     let slice = unsafe { slice::from_raw_parts(quote_ptr, quote_len as usize) };
     let (quote, collateral) = decode_quote_with_collateral(slice.as_ptr(), slice.len() as u32);
 
-    match attestation::dcap::verify_dcap_quote(quote) {
+    match attestation::dcap::verify_dcap_quote(quote, collateral) {
         Ok(_) => {
             println!("[Enclave] Quote verified");
             sgx_status_t::SGX_SUCCESS

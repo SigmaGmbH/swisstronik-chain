@@ -279,7 +279,7 @@ pub fn verify_dcap_cert(cert_der: &[u8]) -> Result<(), crate::attestation::repor
 
     // Verify decoded quote
     let (quote, collateral) = crate::attestation::dcap::utils::decode_quote_with_collateral(decoded_payload.as_ptr(), decoded_payload.len() as u32);
-    let report_pk = crate::attestation::dcap::verify_dcap_quote(quote).map_err(|_| {
+    let report_pk = crate::attestation::dcap::verify_dcap_quote(quote, collateral).map_err(|_| {
         println!("[Enclave] Failed to verify quote");
         crate::attestation::report::Error::ReportValidationError
     })?;

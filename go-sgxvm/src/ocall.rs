@@ -237,6 +237,8 @@ pub unsafe extern "C" fn ocall_get_qve_report(
     p_qve_report_info: *mut sgx_ql_qe_report_info_t,
     p_supplemental_data: *mut u8,
     supplemental_data_size: u32,
+    p_collateral: *const u8,
+    collateral_len: u32,
 ) -> sgx_status_t {
     println!("[Enclave Wrapper] ocall_get_qve_report called");
     if p_quote.is_null()
@@ -275,13 +277,16 @@ pub unsafe extern "C" fn ocall_get_qve_report(
         return sgx_status_t::SGX_ERROR_UNEXPECTED;
     }
 
-    // TODO: Add collateral check
+    let collateral = crate::enclave::attestation::dcap_utils::sgx_ql_qve_collateral_deserialize(
+        p_collateral, 
+        collateral_len
+    );
 
     let ret_val = unsafe {
         sgx_qv_verify_quote(
             quote.as_ptr(),
             quote.len() as u32,
-            std::ptr::null(),
+            &collateral,
             timestamp,
             p_collateral_expiration_status,
             p_quote_verification_result,

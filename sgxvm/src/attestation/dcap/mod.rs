@@ -220,7 +220,7 @@ fn get_timestamp() -> SgxResult<i64> {
     Ok(timestamp_secs)
 }
 
-pub fn verify_dcap_quote(quote: Vec<u8>) -> SgxResult<Vec<u8>> {
+pub fn verify_dcap_quote(quote: Vec<u8>, collateral: Vec<u8>) -> SgxResult<Vec<u8>> {
     // Prepare data for enclave
     let mut qve_report_info = sgx_ql_qe_report_info_t::default();
 
@@ -257,6 +257,8 @@ pub fn verify_dcap_quote(quote: Vec<u8>) -> SgxResult<Vec<u8>> {
             &mut qve_report_info as *mut sgx_ql_qe_report_info_t,
             supplemental_data.as_mut_ptr(),
             supplemental_data_size,
+            collateral.as_ptr(),
+            collateral.len() as u32,
         )
     };
 
