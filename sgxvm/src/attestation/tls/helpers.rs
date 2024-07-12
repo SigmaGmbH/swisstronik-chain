@@ -10,6 +10,7 @@ use crate::attestation::{
     cert::gen_ecc_cert,
     consts::QUOTE_SIGNATURE_TYPE,
     dcap::get_qe_quote,
+    dcap::utils::encode_quote_with_collateral,
     utils::create_attestation_report,
 };
 use crate::attestation::tls::auth::{ClientAuth, ServerAuth};
@@ -128,8 +129,8 @@ pub(super) fn create_tls_cert_and_keys(
     let payload = match (qe_target_info, quote_size) {
         (Some(qe_target_info), Some(quote_size)) => {
             let (qe_quote, qe_collateral) = get_qe_quote(&pub_k, qe_target_info, quote_size)?;
-            // TODO: Attach collateral to payload
-            base64::encode(&qe_quote[..])
+            let encoded_payload = encode_quote_with_collateral(qe_quote, qe_collateral);
+            base64::encode(&encoded_payload[..])
         }
         _ => {
             let signed_report = create_attestation_report(&pub_k, QUOTE_SIGNATURE_TYPE)?;

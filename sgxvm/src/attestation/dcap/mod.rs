@@ -5,6 +5,8 @@ use std::{time::SystemTime, vec::Vec};
 
 use crate::ocall;
 
+pub mod utils;
+
 /// Returns Quoting Enclave quote with collateral data
 pub fn get_qe_quote(
     pub_k: &sgx_ec256_public_t,

@@ -16,7 +16,10 @@ use std::slice;
 use std::string::String;
 use std::vec::Vec;
 
-use crate::attestation::dcap::get_qe_quote;
+use crate::attestation::dcap::{
+    get_qe_quote, 
+    utils::encode_quote_with_collateral
+};
 use crate::querier::GoQuerier;
 use crate::types::{Allocation, AllocationWithResult};
 use crate::protobuf_generated::ffi::{
@@ -212,8 +215,8 @@ pub unsafe extern "C" fn ecall_dump_dcap_quote(
         }
     };
 
-    let (qe_quote, _) = match get_qe_quote(&pub_k, qe_target_info, quote_size) {
-        Ok(quote) => quote,
+    let encoded_quote = match get_qe_quote(&pub_k, qe_target_info, quote_size) {
+        Ok((quote, coll)) => encode_quote_with_collateral(quote, coll),
         Err(status_code) => {
             println!(
                 "[Enclave] Cannot generate QE quote. Reason: {:?}",
@@ -225,7 +228,7 @@ pub unsafe extern "C" fn ecall_dump_dcap_quote(
 
     let _ = ecc_handle.close();
 
-    handlers::allocate_inner(qe_quote)
+    handlers::allocate_inner(encoded_quote)
 }
 
 #[no_mangle]
