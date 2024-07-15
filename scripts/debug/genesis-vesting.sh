@@ -3,7 +3,7 @@
 HOMEDIR="$HOME/.swisstronik"
 
 CSV_FILE="vesting.csv"
-GENESIS=$HOMEDIR/config/genesis.json
+GENESIS_FILE=$HOMEDIR/config/genesis.json
 TEMP_GENESIS=$HOMEDIR/config/tmp_genesis.json
 
 # validate dependencies are installed
@@ -67,18 +67,18 @@ while IFS=, read -r address original_vesting cliff_days months; do
     done
     vesting_periods_json=$(IFS=,; echo "[${vesting_periods[*]}]")
 
-		echo -e "\nAddress: $address"
-		echo "Original_amount: $original_amount"
-		echo "Denom: $denom"
-		echo "Cliff_days: $cliff_days"
-		echo "Months: $months"
-		echo "Cliff_time: $cliff_time"
-		echo "Start_time: $START_TIME"
-		echo "End_time: $end_time"
-		echo "Vesting_amount: $vesting_amount"
+	echo -e "\nAddress: $address"
+	echo "Original_amount: $original_amount"
+    echo "Denom: $denom"
+	echo "Cliff_days: $cliff_days"
+	echo "Months: $months"
+	echo "Cliff_time: $cliff_time"
+	echo "Start_time: $START_TIME"
+	echo "End_time: $end_time"
+	echo "Vesting_amount: $vesting_amount"
 
     # Create MonthlyVestingAccount entry
-    vesting_entry=$(jq -n --arg addr "$address" --arg amount "$original_amount" --arg denom "$denom" --arg start "$START_TIME" --arg cliff "$cliff_time" --arg end "$end_time" --argjson periods "$vesting_periods_json" '{
+    vesting_entry=$(jq -n --arg addr "$address" --arg amount "$original_amount" --arg denom "$denom" --arg start "$START_TIME" --arg cliff "$cliff_time" --arg r_end "$end_time" --argjson periods "$vesting_periods_json" '{
         "@type": "/swisstronik.vesting.MonthlyVestingAccount",
         "base_vesting_account": {
             "base_account": {
@@ -88,7 +88,7 @@ while IFS=, read -r address original_vesting cliff_days months; do
             },
             "delegated_free": [],
             "delegated_vesting": [],
-            "end_time": $end,
+            "end_time": $r_end,
             "original_vesting": [{
                 "amount": $amount,
                 "denom": $denom
@@ -99,10 +99,11 @@ while IFS=, read -r address original_vesting cliff_days months; do
         "vesting_periods": $periods
     }')
 
-		# Check if the address already exists in genesis.json
+	# Check if the address already exists in genesis.json
     address_exists=$(jq --arg addr "$address" '.app_state.auth.accounts[] | select(.base_vesting_account.base_account.address == $addr)' "$GENESIS_FILE")
 
-		if [ -n "$address_exists" ]; then
+
+	if [ -n "$address_exists" ]; then
         # Remove existing entry
         jq --arg addr "$address" 'del(.app_state.auth.accounts[] | select(.base_vesting_account.base_account.address == $addr))' "$GENESIS_FILE" > "$TEMP_GENESIS"
         mv "$TEMP_GENESIS" "$GENESIS_FILE"
