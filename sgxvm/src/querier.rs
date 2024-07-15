@@ -60,5 +60,5 @@ pub fn make_request(querier: *mut GoQuerier, request: Vec<u8>) -> Option<Vec<u8>
         )
     };
 
-    return Some(result_vec);
+    Some(result_vec)
 }

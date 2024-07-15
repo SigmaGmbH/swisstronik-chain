@@ -55,7 +55,7 @@ fn route(
     if data.len() <= 4 {
         return Err(PrecompileFailure::Revert {
             exit_status: ExitRevert::Reverted,
-            output: encode(&vec![AbiToken::String("cannot decode input".into())]),
+            output: encode(&[AbiToken::String("cannot decode input".into())]),
         });
     }
 
@@ -86,7 +86,7 @@ fn route(
                 None => {
                     return Err(PrecompileFailure::Revert {
                         exit_status: ExitRevert::Reverted,
-                        output: encode(&vec![AbiToken::String(
+                        output: encode(&[AbiToken::String(
                             "invalid user address".into(),
                         )]),
                     });
@@ -98,7 +98,7 @@ fn route(
                 None => {
                     return Err(PrecompileFailure::Revert {
                         exit_status: ExitRevert::Reverted,
-                        output: encode(&vec![AbiToken::String(
+                        output: encode(&[AbiToken::String(
                             "invalid verification type".into(),
                         )]),
                     });
@@ -110,7 +110,7 @@ fn route(
                 None => {
                     return Err(PrecompileFailure::Revert {
                         exit_status: ExitRevert::Reverted,
-                        output: encode(&vec![AbiToken::String(
+                        output: encode(&[AbiToken::String(
                             "invalid expiration timestamp".into(),
                         )]),
                     });
@@ -122,7 +122,7 @@ fn route(
                 None => {
                     return Err(PrecompileFailure::Revert {
                         exit_status: ExitRevert::Reverted,
-                        output: encode(&vec![AbiToken::String(
+                        output: encode(&[AbiToken::String(
                             "invalid allowed issuers array".into(),
                         )]),
                     });
@@ -143,7 +143,7 @@ fn route(
                 Err(_) => {
                     return Err(PrecompileFailure::Revert {
                         exit_status: ExitRevert::Reverted,
-                        output: encode(&vec![AbiToken::String(
+                        output: encode(&[AbiToken::String(
                             "one or more invalid issuer addresses".into(),
                         )]),
                     });
@@ -164,7 +164,7 @@ fn route(
                     >(result.as_slice())
                     .map_err(|_| PrecompileFailure::Revert {
                         exit_status: ExitRevert::Reverted,
-                        output: encode(&vec![AbiToken::String(
+                        output: encode(&[AbiToken::String(
                             "cannot decode protobuf response".into(),
                         )]),
                     })?;
@@ -177,7 +177,7 @@ fn route(
                 None => {
                     Err(PrecompileFailure::Revert {
                         exit_status: ExitRevert::Reverted,
-                        output: encode(&vec![AbiToken::String(
+                        output: encode(&[AbiToken::String(
                             "call to hasVerification function to x/compliance failed".into(),
                         )]),
                     })
@@ -202,7 +202,7 @@ fn route(
                 Err(_) => {
                     return Err(PrecompileFailure::Revert {
                         exit_status: ExitRevert::Reverted,
-                        output: encode(&vec![AbiToken::String(
+                        output: encode(&[AbiToken::String(
                             "failed to decode input parameters".into(),
                         )]),
                     });
@@ -214,7 +214,7 @@ fn route(
                 None => {
                     return Err(PrecompileFailure::Revert {
                         exit_status: ExitRevert::Reverted,
-                        output: encode(&vec![AbiToken::String(
+                        output: encode(&[AbiToken::String(
                             "invalid user address".into(),
                         )]),
                     });
@@ -226,7 +226,7 @@ fn route(
                 None => {
                     return Err(PrecompileFailure::Revert {
                         exit_status: ExitRevert::Reverted,
-                        output: encode(&vec![AbiToken::String(
+                        output: encode(&[AbiToken::String(
                             "invalid origin chain".into(),
                         )]),
                     });
@@ -238,7 +238,7 @@ fn route(
                 None => {
                     return Err(PrecompileFailure::Revert {
                         exit_status: ExitRevert::Reverted,
-                        output: encode(&vec![AbiToken::String(
+                        output: encode(&[AbiToken::String(
                             "invalid verification type".into(),
                         )]),
                     });
@@ -250,7 +250,7 @@ fn route(
                 None => {
                     return Err(PrecompileFailure::Revert {
                         exit_status: ExitRevert::Reverted,
-                        output: encode(&vec![AbiToken::String(
+                        output: encode(&[AbiToken::String(
                             "invalid issuance timestamp".into(),
                         )]),
                     });
@@ -262,7 +262,7 @@ fn route(
                 None => {
                     return Err(PrecompileFailure::Revert {
                         exit_status: ExitRevert::Reverted,
-                        output: encode(&vec![AbiToken::String(
+                        output: encode(&[AbiToken::String(
                             "invalid expiration timestamp".into(),
                         )]),
                     });
@@ -274,7 +274,7 @@ fn route(
                 None => {
                     return Err(PrecompileFailure::Revert {
                         exit_status: ExitRevert::Reverted,
-                        output: encode(&vec![AbiToken::String(
+                        output: encode(&[AbiToken::String(
                             "invalid proof data".into(),
                         )]),
                     });
@@ -286,7 +286,7 @@ fn route(
                 None => {
                     return Err(PrecompileFailure::Revert {
                         exit_status: ExitRevert::Reverted,
-                        output: encode(&vec![AbiToken::String(
+                        output: encode(&[AbiToken::String(
                             "invalid schema".into(),
                         )]),
                     });
@@ -298,7 +298,7 @@ fn route(
                 None => {
                     return Err(PrecompileFailure::Revert {
                         exit_status: ExitRevert::Reverted,
-                        output: encode(&vec![AbiToken::String(
+                        output: encode(&[AbiToken::String(
                             "invalid issuer verification ID".into(),
                         )]),
                     });
@@ -310,7 +310,7 @@ fn route(
                 None => {
                     return Err(PrecompileFailure::Revert {
                         exit_status: ExitRevert::Reverted,
-                        output: encode(&vec![AbiToken::String(
+                        output: encode(&[AbiToken::String(
                             "invalid version".into(),
                         )]),
                     });
@@ -337,13 +337,13 @@ fn route(
                     >(result.as_slice())
                     .map_err(|_| PrecompileFailure::Revert {
                         exit_status: ExitRevert::Reverted,
-                        output: encode(&vec![AbiToken::String(
+                        output: encode(&[AbiToken::String(
                             "cannot parse protobuf response".into(),
                         )]),
                     })?;
 
                     let token = vec![AbiToken::Bytes(
-                        added_verification.verificationId.clone().into(),
+                        added_verification.verificationId.into(),
                     )];
                     let encoded_response = encode(&token);
 
@@ -352,7 +352,7 @@ fn route(
                 None => {
                     return Err(PrecompileFailure::Revert {
                         exit_status: ExitRevert::Reverted,
-                        output: encode(&vec![AbiToken::String(
+                        output: encode(&[AbiToken::String(
                             "call to addVerificationDetails to x/compliance failed".into(),
                         )]),
                     });
@@ -366,7 +366,7 @@ fn route(
                 Err(_) => {
                     return Err(PrecompileFailure::Revert {
                         exit_status: ExitRevert::Reverted,
-                        output: encode(&vec![AbiToken::String(
+                        output: encode(&[AbiToken::String(
                             "failed to decode input parameters".into(),
                         )]),
                     });
@@ -378,7 +378,7 @@ fn route(
                 None => {
                     return Err(PrecompileFailure::Revert {
                         exit_status: ExitRevert::Reverted,
-                        output: encode(&vec![AbiToken::String(
+                        output: encode(&[AbiToken::String(
                             "invalid user address".into(),
                         )]),
                     });
@@ -390,7 +390,7 @@ fn route(
                 None => {
                     return Err(PrecompileFailure::Revert {
                         exit_status: ExitRevert::Reverted,
-                        output: encode(&vec![AbiToken::String(
+                        output: encode(&[AbiToken::String(
                             "invalid issuer address".into(),
                         )]),
                     });
@@ -404,7 +404,7 @@ fn route(
                     let get_verification_data = protobuf::parse_from_bytes::<ffi::QueryGetVerificationDataResponse>(result.as_slice())
                         .map_err(|_| PrecompileFailure::Revert {
                             exit_status: ExitRevert::Reverted,
-                            output: encode(&vec![AbiToken::String(
+                            output: encode(&[AbiToken::String(
                                 "cannot decode protobuf response".into(),
                             )]),
                         })?;
@@ -437,7 +437,7 @@ fn route(
                 None => {
                     Err(PrecompileFailure::Revert {
                         exit_status: ExitRevert::Reverted,
-                        output: encode(&vec![AbiToken::String(
+                        output: encode(&[AbiToken::String(
                             "call to getVerificationData to x/compliance failed".into(),
                         )]),
                     })
@@ -458,7 +458,7 @@ fn decode_input(
     let decoded_params =
         ethabi::decode(&param_types, input).map_err(|err| PrecompileFailure::Revert {
             exit_status: ExitRevert::Reverted,
-            output: encode(&vec![AbiToken::String(
+            output: encode(&[AbiToken::String(
                 format!("cannot decode params: {:?}", err).into(),
             )]),
         })?;
@@ -466,7 +466,7 @@ fn decode_input(
     if decoded_params.len() != param_types.len() {
         return Err(PrecompileFailure::Revert {
             exit_status: ExitRevert::Reverted,
-            output: encode(&vec![AbiToken::String(
+            output: encode(&[AbiToken::String(
                 "incorrect decoded params len".into(),
             )]),
         });

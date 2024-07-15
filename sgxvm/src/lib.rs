@@ -16,7 +16,10 @@ use std::slice;
 use std::string::String;
 use std::vec::Vec;
 
-use crate::attestation::dcap::get_qe_quote;
+use crate::attestation::dcap::{
+    get_qe_quote, 
+    utils::{encode_quote_with_collateral, decode_quote_with_collateral},
+};
 use crate::querier::GoQuerier;
 use crate::types::{Allocation, AllocationWithResult};
 use crate::protobuf_generated::ffi::{
@@ -212,8 +215,8 @@ pub unsafe extern "C" fn ecall_dump_dcap_quote(
         }
     };
 
-    let qe_quote = match get_qe_quote(&pub_k, qe_target_info, quote_size) {
-        Ok(quote) => quote,
+    let encoded_quote = match get_qe_quote(&pub_k, qe_target_info, quote_size) {
+        Ok((quote, coll)) => encode_quote_with_collateral(quote, coll),
         Err(status_code) => {
             println!(
                 "[Enclave] Cannot generate QE quote. Reason: {:?}",
@@ -225,7 +228,7 @@ pub unsafe extern "C" fn ecall_dump_dcap_quote(
 
     let _ = ecc_handle.close();
 
-    handlers::allocate_inner(qe_quote)
+    handlers::allocate_inner(encoded_quote)
 }
 
 #[no_mangle]
@@ -234,9 +237,9 @@ pub unsafe extern "C" fn ecall_verify_dcap_quote(
     quote_len: u32,
 ) -> sgx_status_t {
     let slice = unsafe { slice::from_raw_parts(quote_ptr, quote_len as usize) };
-    let quote_buf = slice.to_vec();
+    let (quote, collateral) = decode_quote_with_collateral(slice.as_ptr(), slice.len() as u32);
 
-    match attestation::dcap::verify_dcap_quote(quote_buf.to_vec()) {
+    match attestation::dcap::verify_dcap_quote(quote, collateral) {
         Ok(_) => {
             println!("[Enclave] Quote verified");
             sgx_status_t::SGX_SUCCESS
@@ -319,7 +322,7 @@ pub unsafe extern "C" fn ecall_list_epochs() -> AllocationWithResult {
         let mut epoch = EpochData::new();
         epoch.set_epochNumber(epoch_number.into());
         epoch.set_startingBlock(starting_block);
-        epoch.set_nodePublicKey(node_public_key.clone().into());
+        epoch.set_nodePublicKey(node_public_key.clone());
         
         epochs.push(epoch)
     }

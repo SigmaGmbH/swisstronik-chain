@@ -278,7 +278,8 @@ pub fn verify_dcap_cert(cert_der: &[u8]) -> Result<(), crate::attestation::repor
     })?;
 
     // Verify decoded quote
-    let report_pk = crate::attestation::dcap::verify_dcap_quote(decoded_payload).map_err(|_| {
+    let (quote, collateral) = crate::attestation::dcap::utils::decode_quote_with_collateral(decoded_payload.as_ptr(), decoded_payload.len() as u32);
+    let report_pk = crate::attestation::dcap::verify_dcap_quote(quote, collateral).map_err(|_| {
         println!("[Enclave] Failed to verify quote");
         crate::attestation::report::Error::ReportValidationError
     })?;
@@ -391,7 +392,12 @@ pub fn verify_quote_status(
         | SgxQuoteStatus::GroupOutOfDate
         | SgxQuoteStatus::SwHardeningNeeded
         | SgxQuoteStatus::ConfigurationAndSwHardeningNeeded => {
-            check_advisories(&report.sgx_quote_status, advisories)?;
+            let check_results = check_advisories(&report.sgx_quote_status, advisories);
+
+            if let Err(results) = check_results {
+                println!("This platform has vulnerabilities that will not be approved on mainnet");
+                return Ok(results)
+            }
 
             Ok(AuthResult::Success)
         }

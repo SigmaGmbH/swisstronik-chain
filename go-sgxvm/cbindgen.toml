@@ -82,7 +82,9 @@ exclude = [
     "ocall_get_ecdsa_quote",
     "ocall_get_qve_report",
     "ocall_get_supplemental_data_size",
+    "ocall_get_quote_ecdsa_collateral",
 ]
+
 # prefix = "CAPI_"
 item_types = []
 renaming_overrides_prefixing = false
