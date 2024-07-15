@@ -259,9 +259,9 @@ pub fn create_attestation_report(
     // (2) Generate the report
     // Fill ecc256 public key into report_data
     let mut report_data: sgx_report_data_t = sgx_report_data_t::default();
-    let mut pub_k_gx = pub_k.gx.clone();
+    let mut pub_k_gx = pub_k.gx;
     pub_k_gx.reverse();
-    let mut pub_k_gy = pub_k.gy.clone();
+    let mut pub_k_gy = pub_k.gy;
     pub_k_gy.reverse();
     report_data.d[..32].clone_from_slice(&pub_k_gx);
     report_data.d[32..].clone_from_slice(&pub_k_gy);

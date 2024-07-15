@@ -11,13 +11,15 @@ import (
 	authante "github.com/cosmos/cosmos-sdk/x/auth/ante"
 	"github.com/ethereum/go-ethereum/common"
 
+	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	evmcommontypes "swisstronik/types"
 	"swisstronik/x/evm/types"
-	ethtypes "github.com/ethereum/go-ethereum/core/types"
 )
 
 func SetupContractSGXVM(b *testing.B) (*KeeperTestSuite, common.Address) {
-	suite := KeeperTestSuite{}
+	suite := KeeperTestSuite{
+		enableLondonHF: true,
+	}
 	suite.SetupSGXVMTestWithT(b)
 
 	amt := sdk.Coins{evmcommontypes.NewPhotonCoinInt64(1000000000000000000)}
@@ -33,7 +35,7 @@ func SetupContractSGXVM(b *testing.B) (*KeeperTestSuite, common.Address) {
 }
 
 func SetupSGXVMTestMessageCall(b *testing.B) (*KeeperTestSuite, common.Address) {
-	suite := KeeperTestSuite{}
+	suite := KeeperTestSuite{enableLondonHF: true}
 	suite.SetupSGXVMTestWithT(b)
 
 	amt := sdk.Coins{evmcommontypes.NewPhotonCoinInt64(1000000000000000000)}

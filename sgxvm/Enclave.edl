@@ -135,11 +135,21 @@ enclave {
 			[out] sgx_ql_qv_result_t *quote_verification_result,
 			[in, out] sgx_ql_qe_report_info_t *qve_report_info,
 			[out, size=supplemental_data_size] uint8_t *p_supplemental_data,
-			uint32_t supplemental_data_size
+			uint32_t supplemental_data_size,
+            [in, size=collateral_len] const uint8_t* p_collateral,
+            uint32_t collateral_len
 		);
 
         sgx_status_t ocall_get_supplemental_data_size(
             [out] uint32_t *data_size
+        );
+
+        sgx_status_t ocall_get_quote_ecdsa_collateral(
+            [in, size=n_quote] const uint8_t* p_quote,
+            uint32_t n_quote,
+            [out, size=n_col] uint8_t* p_col,
+            uint32_t n_col,
+            [out] uint32_t* p_col_out
         );
     };
 };

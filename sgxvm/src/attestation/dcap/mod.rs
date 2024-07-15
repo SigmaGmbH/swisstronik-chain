@@ -5,17 +5,20 @@ use std::{time::SystemTime, vec::Vec};
 
 use crate::ocall;
 
+pub mod utils;
+
+/// Returns Quoting Enclave quote with collateral data
 pub fn get_qe_quote(
     pub_k: &sgx_ec256_public_t,
     qe_target_info: &sgx_target_info_t,
     quote_size: u32,
-) -> SgxResult<Vec<u8>> {
+) -> SgxResult<(Vec<u8>, Vec<u8>)> {
     let mut report_data: sgx_report_data_t = sgx_report_data_t::default();
 
     // Copy public key to report data
-    let mut pub_k_gx = pub_k.gx.clone();
+    let mut pub_k_gx = pub_k.gx;
     pub_k_gx.reverse();
-    let mut pub_k_gy = pub_k.gy.clone();
+    let mut pub_k_gy = pub_k.gy;
     pub_k_gy.reverse();
     report_data.d[..32].clone_from_slice(&pub_k_gx);
     report_data.d[32..].clone_from_slice(&pub_k_gy);
@@ -69,7 +72,79 @@ pub fn get_qe_quote(
         return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
     }
 
-    Ok(quote_buf)
+    // Obtain collateral data
+    let qe_collateral = get_collateral_data(&quote_buf)?;
+
+    Ok((quote_buf, qe_collateral))
+}
+
+fn get_collateral_data(vec_quote: &Vec<u8>) -> SgxResult<Vec<u8>> {
+    let mut vec_coll: Vec<u8> = vec![0; 0x4000];
+    let mut size_coll: u32 = 0;
+    let mut retval = sgx_status_t::SGX_ERROR_UNEXPECTED;
+
+    let res = unsafe {
+        ocall::ocall_get_quote_ecdsa_collateral(
+            &mut retval as *mut sgx_status_t,
+            vec_quote.as_ptr(),
+            vec_quote.len() as u32,
+            vec_coll.as_mut_ptr(),
+            vec_coll.len() as u32,
+            &mut size_coll,
+        )
+    };
+
+    if res != sgx_status_t::SGX_SUCCESS {
+        println!(
+            "[Enclave] Call to `ocall_get_quote_ecdsa_collateral` failed. Status code: {:?}",
+            res
+        );
+        return Err(res);
+    }
+
+    if retval != sgx_status_t::SGX_SUCCESS {
+        println!(
+            "[Enclave] Error during `ocall_get_quote_ecdsa_collateral`. Status code: {:?}",
+            retval
+        );
+        return Err(retval);
+    }
+
+    println!("Collateral size = {}", size_coll);
+
+    let call_again = size_coll > vec_coll.len() as u32;
+    vec_coll.resize(size_coll as usize, 0);
+
+    if call_again {
+        let res = unsafe {
+            ocall::ocall_get_quote_ecdsa_collateral(
+                &mut retval as *mut sgx_status_t,
+                vec_quote.as_ptr(),
+                vec_quote.len() as u32,
+                vec_coll.as_mut_ptr(),
+                vec_coll.len() as u32,
+                &mut size_coll,
+            )
+        };
+
+        if res != sgx_status_t::SGX_SUCCESS {
+            println!(
+                "[Enclave] Call to `ocall_get_quote_ecdsa_collateral` failed. Status code: {:?}",
+                res
+            );
+            return Err(res);
+        }
+    
+        if retval != sgx_status_t::SGX_SUCCESS {
+            println!(
+                "[Enclave] Error during `ocall_get_quote_ecdsa_collateral`. Status code: {:?}",
+                retval
+            );
+            return Err(retval);
+        }
+    }
+
+    Ok(vec_coll)
 }
 
 fn get_app_enclave_target_info() -> SgxResult<sgx_target_info_t> {
@@ -145,7 +220,7 @@ fn get_timestamp() -> SgxResult<i64> {
     Ok(timestamp_secs)
 }
 
-pub fn verify_dcap_quote(quote: Vec<u8>) -> SgxResult<Vec<u8>> {
+pub fn verify_dcap_quote(quote: Vec<u8>, collateral: Vec<u8>) -> SgxResult<Vec<u8>> {
     // Prepare data for enclave
     let mut qve_report_info = sgx_ql_qe_report_info_t::default();
 
@@ -182,6 +257,8 @@ pub fn verify_dcap_quote(quote: Vec<u8>) -> SgxResult<Vec<u8>> {
             &mut qve_report_info as *mut sgx_ql_qe_report_info_t,
             supplemental_data.as_mut_ptr(),
             supplemental_data_size,
+            collateral.as_ptr(),
+            collateral.len() as u32,
         )
     };
 
@@ -230,75 +307,8 @@ pub fn verify_dcap_quote(quote: Vec<u8>) -> SgxResult<Vec<u8>> {
         return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
     }
 
-    #[cfg(feature = "mainnet")]
-    {
-        // Check verification result
-        match quote_verification_result {
-            sgx_ql_qv_result_t::SGX_QL_QV_RESULT_OK => {
-                if 0u32 == collateral_expiration_status {
-                    println!("[Enclave] Quote was verified successfully");
-                } else {
-                    println!("[Enclave] Quote was verified, but collateral is out of date");
-                    return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
-                }
-            }
-            sgx_ql_qv_result_t::SGX_QL_QV_RESULT_CONFIG_NEEDED
-            | sgx_ql_qv_result_t::SGX_QL_QV_RESULT_OUT_OF_DATE
-            | sgx_ql_qv_result_t::SGX_QL_QV_RESULT_OUT_OF_DATE_CONFIG_NEEDED => {
-                println!("[Enclave] Quote was verified, but additional system configuration is required. Reason: {:?}", quote_verification_result);
-                return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
-            }
-            sgx_ql_qv_result_t::SGX_QL_QV_RESULT_SW_HARDENING_NEEDED
-            | sgx_ql_qv_result_t::SGX_QL_QV_RESULT_CONFIG_AND_SW_HARDENING_NEEDED => {
-                println!(
-                    "[Enclave] Quote verification finished with non-terminal result: {:?}",
-                    quote_verification_result
-                );
-            }
-            _ => {
-                println!(
-                    "[Enclave] Quote was not verified successfully. Reason: {:?}",
-                    quote_verification_result
-                );
-                return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
-            }
-        }
-    }
-
-    #[cfg(not(feature = "mainnet"))]
-    {
-        // Check verification result
-        match quote_verification_result {
-            sgx_ql_qv_result_t::SGX_QL_QV_RESULT_OK => {
-                if 0u32 == collateral_expiration_status {
-                    println!("[Enclave] Quote was verified successfully");
-                } else {
-                    println!("[Enclave] Quote was verified, but collateral is out of date");
-                    return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
-                }
-            }
-            sgx_ql_qv_result_t::SGX_QL_QV_RESULT_CONFIG_NEEDED
-            | sgx_ql_qv_result_t::SGX_QL_QV_RESULT_OUT_OF_DATE
-            | sgx_ql_qv_result_t::SGX_QL_QV_RESULT_OUT_OF_DATE_CONFIG_NEEDED => {
-                println!("[Enclave] Quote was verified, but additional system configuration is required. Reason: {:?}", quote_verification_result);
-            }
-            sgx_ql_qv_result_t::SGX_QL_QV_RESULT_SW_HARDENING_NEEDED
-            | sgx_ql_qv_result_t::SGX_QL_QV_RESULT_CONFIG_AND_SW_HARDENING_NEEDED => {
-                println!(
-                    "[Enclave] Quote verification finished with non-terminal result: {:?}",
-                    quote_verification_result
-                );
-            }
-            _ => {
-                println!(
-                    "[Enclave] Quote was not verified successfully. Reason: {:?}",
-                    quote_verification_result
-                );
-                return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
-            }
-        }
-    }
-
+    // Check quote verification result
+    check_quote_verification_result(quote_verification_result, collateral_expiration_status)?;
 
     // Inspect quote
     let p_quote3: *const sgx_quote3_t = quote.as_ptr() as *const sgx_quote3_t;
@@ -311,7 +321,7 @@ pub fn verify_dcap_quote(quote: Vec<u8>) -> SgxResult<Vec<u8>> {
     }
 
     // Check ISV SVN
-    if (quote3.report_body.isv_svn as u16) < crate::attestation::consts::MIN_REQUIRED_SVN {
+    if quote3.report_body.isv_svn < crate::attestation::consts::MIN_REQUIRED_SVN {
         println!("[Enclave] Quote received from outdated enclave");
         return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
     }
@@ -328,4 +338,70 @@ pub fn verify_dcap_quote(quote: Vec<u8>) -> SgxResult<Vec<u8>> {
 
     // Return report public key
     Ok(quote3.report_body.report_data.d.to_vec())
+}
+
+#[cfg(not(feature = "mainnet"))]
+fn check_quote_verification_result(
+    quote_verification_result: sgx_ql_qv_result_t,
+    collateral_expiration_status: u32,
+) -> SgxResult<()> {
+    match quote_verification_result {
+        sgx_ql_qv_result_t::SGX_QL_QV_RESULT_OK => {
+            if 0u32 == collateral_expiration_status {
+                println!("[Enclave] Quote was verified successfully");
+                Ok(())
+            } else {
+                println!("[Enclave] Quote was verified, but collateral is out of date");
+                Err(sgx_status_t::SGX_ERROR_UNEXPECTED)
+            }
+        }
+        sgx_ql_qv_result_t::SGX_QL_QV_RESULT_CONFIG_NEEDED
+        | sgx_ql_qv_result_t::SGX_QL_QV_RESULT_OUT_OF_DATE
+        | sgx_ql_qv_result_t::SGX_QL_QV_RESULT_OUT_OF_DATE_CONFIG_NEEDED => {
+            println!("[Enclave] Quote was verified, but additional system configuration is required. Reason: {:?}", quote_verification_result);
+            Ok(())
+        }
+        sgx_ql_qv_result_t::SGX_QL_QV_RESULT_SW_HARDENING_NEEDED
+        | sgx_ql_qv_result_t::SGX_QL_QV_RESULT_CONFIG_AND_SW_HARDENING_NEEDED => {
+            println!(
+                "[Enclave] Quote verification finished with non-terminal result: {:?}",
+                quote_verification_result
+            );
+            Ok(())
+        }
+        _ => {
+            println!(
+                "[Enclave] Quote was not verified successfully. Reason: {:?}",
+                quote_verification_result
+            );
+            Err(sgx_status_t::SGX_ERROR_UNEXPECTED)
+        }
+    }
+}
+
+#[cfg(feature = "mainnet")]
+fn check_quote_verification_result(
+    quote_verification_result: sgx_ql_qv_result_t,
+    collateral_expiration_status: u32,
+) -> SgxResult<()> {
+    // Check verification result
+    match quote_verification_result {
+        sgx_ql_qv_result_t::SGX_QL_QV_RESULT_OK
+        | sgx_ql_qv_result_t::SGX_QL_QV_RESULT_SW_HARDENING_NEEDED => {
+            if 0u32 == collateral_expiration_status {
+                println!("[Enclave] Quote was verified successfully");
+                Ok(())
+            } else {
+                println!("[Enclave] Quote was verified, but collateral is out of date");
+                Err(sgx_status_t::SGX_ERROR_UNEXPECTED)
+            }
+        }
+        _ => {
+            println!(
+                "[Enclave] Quote was not verified successfully. Reason: {:?}",
+                quote_verification_result
+            );
+            Err(sgx_status_t::SGX_ERROR_UNEXPECTED)
+        }
+    }
 }

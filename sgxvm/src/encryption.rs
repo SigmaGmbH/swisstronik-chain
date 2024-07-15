@@ -90,7 +90,7 @@ pub fn decrypt_storage_cell(
 pub fn extract_public_key_and_data(tx_data: Vec<u8>) -> Result<(Vec<u8>, Vec<u8>, Vec<u8>), Error> {
     // Check if provided tx data starts with `ZERO_FUNCTION_SELECTOR`
     // and has length of 36 bytes (4 prefix | 32 public key)
-    if tx_data.len() == PUBLIC_KEY_ONLY_DATA_LEN && &tx_data[..4] == ZERO_FUNCTION_SELECTOR {
+    if tx_data.len() == PUBLIC_KEY_ONLY_DATA_LEN && tx_data[..4] == ZERO_FUNCTION_SELECTOR {
         let public_key = &tx_data[FUNCTION_SELECTOR_LEN..PUBLIC_KEY_ONLY_DATA_LEN];
         // Return extracted public key and empty ciphertext
         return Ok((public_key.to_vec(), Vec::default(), Vec::default()));

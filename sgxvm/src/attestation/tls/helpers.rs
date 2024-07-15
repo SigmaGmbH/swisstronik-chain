@@ -10,6 +10,7 @@ use crate::attestation::{
     cert::gen_ecc_cert,
     consts::QUOTE_SIGNATURE_TYPE,
     dcap::get_qe_quote,
+    dcap::utils::encode_quote_with_collateral,
     utils::create_attestation_report,
 };
 use crate::attestation::tls::auth::{ClientAuth, ServerAuth};
@@ -18,8 +19,7 @@ use crate::key_manager::{KeyManager, keys::RegistrationKey};
 /// Prepares config for client side of TLS connection
 pub(super) fn construct_client_config(key_der: Vec<u8>, cert_der: Vec<u8>, is_dcap: bool) -> ClientConfig {
     let mut cfg = rustls::ClientConfig::new();
-    let mut certs = Vec::new();
-    certs.push(rustls::Certificate(cert_der));
+    let certs = vec![rustls::Certificate(cert_der)];
     let privkey = rustls::PrivateKey(key_der);
 
     cfg.set_single_client_cert(certs, privkey).unwrap();
@@ -33,8 +33,7 @@ pub(super) fn construct_client_config(key_der: Vec<u8>, cert_der: Vec<u8>, is_dc
 /// Prepares config for server side of TLS connection
 pub(super) fn construct_server_config(key_der: Vec<u8>, cert_der: Vec<u8>, is_dcap: bool) -> ServerConfig {
     let mut cfg = rustls::ServerConfig::new(Arc::new(ClientAuth::new(true, is_dcap)));
-    let mut certs = Vec::new();
-    certs.push(rustls::Certificate(cert_der));
+    let certs = vec![rustls::Certificate(cert_der)];
     let privkey = rustls::PrivateKey(key_der);
 
     cfg.set_single_cert_with_ocsp_and_sct(certs, privkey, vec![], vec![])
@@ -129,8 +128,9 @@ pub(super) fn create_tls_cert_and_keys(
 
     let payload = match (qe_target_info, quote_size) {
         (Some(qe_target_info), Some(quote_size)) => {
-            let qe_quote = get_qe_quote(&pub_k, qe_target_info, quote_size)?;
-            base64::encode(&qe_quote[..])
+            let (qe_quote, qe_collateral) = get_qe_quote(&pub_k, qe_target_info, quote_size)?;
+            let encoded_payload = encode_quote_with_collateral(qe_quote, qe_collateral);
+            base64::encode(&encoded_payload[..])
         }
         _ => {
             let signed_report = create_attestation_report(&pub_k, QUOTE_SIGNATURE_TYPE)?;
