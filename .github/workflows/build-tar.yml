@@ -8,7 +8,7 @@ env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
 
 jobs:
-  build-deb:
+  build-tar:
     runs-on: ubuntu-22.04
     env:
       SGX_MODE: HW
@@ -45,7 +45,7 @@ jobs:
           file: ./docker/tar.Dockerfile
           context: .
           load: true
-          tags: deb_build
+          tags: tar_build
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
