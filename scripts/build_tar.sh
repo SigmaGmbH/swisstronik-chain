@@ -12,7 +12,7 @@ chmod +x /tmp/swisstronik-build/swisstronikd
 cp -f /usr/lib/.swisstronik-enclave/* /tmp/swisstronik-build
 chmod +x /tmp/swisstronik-build/*.so
 
-tar -czvf swisstronik_"$VERSION"_amd64.tar.gz tmp/swisstronik-build
+tar -czvf swisstronik_"$VERSION"_amd64.tar.gz /tmp/swisstronik-build
 
 cp ./swisstronik_"$VERSION"_amd64.tar.gz /build/
 
