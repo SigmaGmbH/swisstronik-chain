@@ -3,11 +3,10 @@ package v1_0_3
 import (
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"swisstronik/x/compliance/keeper"
 	"swisstronik/x/compliance/types"
 )
 
-func MigrateStore(ctx sdk.Context, k keeper.Keeper) error {
+func MigrateStore(ctx sdk.Context, k types.ComplianceKeeper) error {
 	var (
 		operators       []*types.OperatorDetails
 		operatorDetails *types.OperatorDetails
