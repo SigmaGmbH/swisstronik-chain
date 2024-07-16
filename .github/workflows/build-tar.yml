@@ -45,7 +45,7 @@ jobs:
           file: ./docker/tar.Dockerfile
           context: .
           load: true
-          tags: tar_build
+          tags: build-tar
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
