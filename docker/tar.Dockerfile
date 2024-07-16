@@ -45,16 +45,10 @@ RUN make build
 
 
 ############ Node binary for deb package
-FROM compile-base as build-deb
+FROM compile-base as build-tar
 
 ARG BUILD_VERSION="v1.0.3"
 ENV VERSION=${BUILD_VERSION}
-ARG DEB_BIN_DIR=/usr/local/bin
-ENV DEB_BIN_DIR=${DEB_BIN_DIR}
-ARG DEB_LIB_DIR=/usr/lib
-ENV DEB_LIB_DIR=${DEB_LIB_DIR}
-ARG ENCLAVE_HOME=${DEB_LIB_DIR}
-ARG ENCLAVE_HOME=${ENCLAVE_HOME}
 
 WORKDIR /root
 
