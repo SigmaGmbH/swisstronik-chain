@@ -1,4 +1,4 @@
-name: Build Deb
+name: Build tar.gz
 
 on:
   push:
@@ -39,10 +39,10 @@ jobs:
         id: get_version
         uses: battila7/get-version-action@v2
 
-      - name: Build .deb Package Image
+      - name: Build .tar.gz Package Image
         uses: docker/build-push-action@v4
         with:
-          file: ./docker/deb.Dockerfile
+          file: ./docker/tar.Dockerfile
           context: .
           load: true
           tags: deb_build
@@ -52,12 +52,12 @@ jobs:
             SGX_MODE=HW
             ENCLAVE_HOME="/usr/lib/"
             PRODUCTION_MODE=true
-          target: build-deb
-      - name: Run .deb Package Image
+          target: build-tar
+      - name: Run .tar.gz Package
         run: |
-          docker run -e VERSION=${{ env.VERSION }} -v $GITHUB_WORKSPACE/build:/build deb_build
-          cp build/swisstronik_${{ env.VERSION }}_amd64.deb swisstronik_${{ env.VERSION }}_amd64.deb
+          docker run -e VERSION=${{ env.VERSION }} -v $GITHUB_WORKSPACE/build:/build build-tar
+          cp build/swisstronik_${{ env.VERSION }}_amd64.tar.gz swisstronik_${{ env.VERSION }}_amd64.tar.gz
       - uses: actions/upload-artifact@v3
         with:
-          name: swisstronik_${{ env.VERSION }}_amd64.deb
-          path: swisstronik_${{ env.VERSION }}_amd64.deb
+          name: swisstronik_${{ env.VERSION }}_amd64.tar.gz
+          path: swisstronik_${{ env.VERSION }}_amd64.tar.gz
