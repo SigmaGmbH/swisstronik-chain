@@ -3,7 +3,7 @@
 # used to exit on first error (any non-zero exit code)
 set -e
 
-rm -rf /tmp/swisstronik-build
+rm -rf /tmp/swisstronik-build || true
 
 mkdir -p /tmp/swisstronik-build
 cp -f ./swisstronikd /tmp/swisstronik-build/swisstronikd
