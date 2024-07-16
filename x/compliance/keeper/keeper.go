@@ -628,7 +628,8 @@ func (k Keeper) ExportIssuerDetails(ctx sdk.Context) ([]*types.GenesisIssuerDeta
 		}
 		issuerDetails = append(issuerDetails, &types.GenesisIssuerDetails{
 			Creator: creator.String(),
-			Address: address.String(), Details: details,
+			Address: address.String(),
+			Details: details,
 		})
 		return true
 	})
