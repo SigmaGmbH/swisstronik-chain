@@ -793,7 +793,6 @@ func New(
 	app.setAnteHandler(encodingConfig.TxConfig, maxGasWanted)
 	app.setPostHandler()
 	app.SetEndBlocker(app.EndBlocker)
-	//SetupHandlers(app, app.EvmKeeper, app.IBCKeeper.ClientKeeper, app.ParamsKeeper, appCodec)
 	app.setupUpgradeHandlers()
 
 	if loadLatest {
