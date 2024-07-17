@@ -45,7 +45,7 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 }
 
 // SetIssuerDetails sets details for provided issuer address
-func (k Keeper) SetIssuerDetails(ctx sdk.Context, issuerCreatorAddress, issuerAddress sdk.AccAddress, details *types.IssuerDetails) error {
+func (k Keeper) SetIssuerDetails(ctx sdk.Context, issuerAddress sdk.AccAddress, details *types.IssuerDetails) error {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixIssuerDetails)
 
 	detailsBytes, err := details.Marshal()
@@ -55,7 +55,6 @@ func (k Keeper) SetIssuerDetails(ctx sdk.Context, issuerCreatorAddress, issuerAd
 
 	store.Set(issuerAddress.Bytes(), detailsBytes)
 
-	k.SetIssuerCreator(ctx, issuerAddress, issuerCreatorAddress)
 	return nil
 }
 
@@ -86,24 +85,6 @@ func (k Keeper) GetIssuerDetails(ctx sdk.Context, issuerAddress sdk.AccAddress) 
 	}
 
 	return &issuerDetails, nil
-}
-
-// GetIssuerCreator returns issuer creator's address
-func (k Keeper) GetIssuerCreator(ctx sdk.Context, issuerAddress sdk.AccAddress) sdk.AccAddress {
-	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixIssuerCreators)
-
-	detailsBytes := store.Get(issuerAddress.Bytes())
-	if detailsBytes == nil {
-		return nil
-	}
-
-	return detailsBytes
-}
-
-// SetIssuerCreator writes issuer creator's address
-func (k Keeper) SetIssuerCreator(ctx sdk.Context, issuerAddress, issuerCreatorAddress sdk.AccAddress) {
-	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixIssuerCreators)
-	store.Set(issuerAddress.Bytes(), issuerCreatorAddress.Bytes())
 }
 
 // IssuerExists checks if issuer exists by checking operator address
@@ -622,13 +603,9 @@ func (k Keeper) ExportIssuerDetails(ctx sdk.Context) ([]*types.GenesisIssuerDeta
 		if err != nil {
 			return false
 		}
-		creator := k.GetIssuerCreator(ctx, address)
-		if creator == nil {
-			return false
-		}
 		issuerDetails = append(issuerDetails, &types.GenesisIssuerDetails{
-			Creator: creator.String(),
-			Address: address.String(), Details: details,
+			Address: address.String(),
+			Details: details,
 		})
 		return true
 	})

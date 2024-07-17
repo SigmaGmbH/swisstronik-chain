@@ -325,8 +325,9 @@ func (suite *KeeperTestSuite) TestSingleVerificationDetails() {
 		illegalIssuerAccount = tests.RandomAccAddress()
 
 		// Verify issuer to add verification details which are verified by issuer
-		_ = suite.app.ComplianceKeeper.SetIssuerDetails(suite.ctx, issuerCreator, issuerAccount, &compliancetypes.IssuerDetails{
-			Name: "test issuer",
+		_ = suite.app.ComplianceKeeper.SetIssuerDetails(suite.ctx, issuerAccount, &compliancetypes.IssuerDetails{
+			Creator: issuerCreator.String(),
+			Name:    "test issuer",
 		})
 		_ = suite.app.ComplianceKeeper.SetAddressVerificationStatus(suite.ctx, issuerAccount, true)
 
@@ -540,8 +541,9 @@ func (suite *KeeperTestSuite) TestMultipleVerificationDetails() {
 	)
 
 	// Verify issuer to add verification details which are verified by issuer
-	_ = suite.app.ComplianceKeeper.SetIssuerDetails(suite.ctx, issuerCreator, issuerAccount, &compliancetypes.IssuerDetails{
-		Name: "test issuer",
+	_ = suite.app.ComplianceKeeper.SetIssuerDetails(suite.ctx, issuerAccount, &compliancetypes.IssuerDetails{
+		Creator: issuerCreator.String(),
+		Name:    "test issuer",
 	})
 	_ = suite.app.ComplianceKeeper.SetAddressVerificationStatus(suite.ctx, issuerAccount, true)
 

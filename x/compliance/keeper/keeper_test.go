@@ -116,10 +116,9 @@ func (suite *KeeperTestSuite) CommitAfter(t time.Duration) {
 }
 
 func (suite *KeeperTestSuite) TestCreateSimpleAndFetchSimpleIssuer() {
-	details := &types.IssuerDetails{Name: "testIssuer"}
-	creator := tests.RandomAccAddress()
+	details := &types.IssuerDetails{Creator: tests.RandomAccAddress().String(), Name: "testIssuer"}
 	issuer := tests.RandomAccAddress()
-	err := suite.keeper.SetIssuerDetails(suite.ctx, creator, issuer, details)
+	err := suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
 	suite.Require().NoError(err)
 	i, err := suite.keeper.GetIssuerDetails(suite.ctx, issuer)
 	suite.Require().Equal(details, i)
@@ -139,10 +138,9 @@ func (suite *KeeperTestSuite) TestNonExistingIssuer() {
 }
 
 func (suite *KeeperTestSuite) TestSuspendedIssuer() {
-	details := &types.IssuerDetails{Name: "testIssuer"}
-	creator := tests.RandomAccAddress()
+	details := &types.IssuerDetails{Creator: tests.RandomAccAddress().String(), Name: "testIssuer"}
 	issuer := tests.RandomAccAddress()
-	err := suite.keeper.SetIssuerDetails(suite.ctx, creator, issuer, details)
+	err := suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
 	suite.Require().NoError(err)
 
 	// Revoke verification status for test issuer
@@ -174,10 +172,9 @@ func (suite *KeeperTestSuite) TestSuspendedIssuer() {
 }
 
 func (suite *KeeperTestSuite) TestRemovedIssuer() {
-	issuerDetails := &types.IssuerDetails{Name: "testIssuer"}
-	creator := tests.RandomAccAddress()
+	issuerDetails := &types.IssuerDetails{Creator: tests.RandomAccAddress().String(), Name: "testIssuer"}
 	issuer := tests.RandomAccAddress()
-	err := suite.keeper.SetIssuerDetails(suite.ctx, creator, issuer, issuerDetails)
+	err := suite.keeper.SetIssuerDetails(suite.ctx, issuer, issuerDetails)
 	suite.Require().NoError(err)
 
 	err = suite.keeper.SetAddressVerificationStatus(suite.ctx, issuer, true)
@@ -238,10 +235,9 @@ func (suite *KeeperTestSuite) TestRemovedIssuer() {
 }
 
 func (suite *KeeperTestSuite) TestAddVerificationDetails() {
-	details := &types.IssuerDetails{Name: "testIssuer"}
-	creator := tests.RandomAccAddress()
+	details := &types.IssuerDetails{Creator: tests.RandomAccAddress().String(), Name: "testIssuer"}
 	issuer := tests.RandomAccAddress()
-	err := suite.keeper.SetIssuerDetails(suite.ctx, creator, issuer, details)
+	err := suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
 	suite.Require().NoError(err)
 
 	err = suite.keeper.SetAddressVerificationStatus(suite.ctx, issuer, true)
@@ -311,10 +307,9 @@ func (suite *KeeperTestSuite) TestAddVerificationDetails() {
 }
 
 func (suite *KeeperTestSuite) TestAddressDetailsCRUD() {
-	issuerDetails := &types.IssuerDetails{Name: "testIssuer"}
-	creator := tests.RandomAccAddress()
+	issuerDetails := &types.IssuerDetails{Creator: tests.RandomAccAddress().String(), Name: "testIssuer"}
 	issuer := tests.RandomAccAddress()
-	err := suite.keeper.SetIssuerDetails(suite.ctx, creator, issuer, issuerDetails)
+	err := suite.keeper.SetIssuerDetails(suite.ctx, issuer, issuerDetails)
 	suite.Require().NoError(err)
 
 	address := tests.RandomAccAddress()
@@ -385,10 +380,9 @@ func (suite *KeeperTestSuite) TestAddressDetailsSetVerificationStatus() {
 }
 
 func (suite *KeeperTestSuite) TestSetVerificationDetails() {
-	creator := tests.RandomAccAddress()
 	issuer := tests.RandomAccAddress()
-	issuerDetails := &types.IssuerDetails{Name: "testIssuer"}
-	err := suite.keeper.SetIssuerDetails(suite.ctx, creator, issuer, issuerDetails)
+	issuerDetails := &types.IssuerDetails{Creator: tests.RandomAccAddress().String(), Name: "testIssuer"}
+	err := suite.keeper.SetIssuerDetails(suite.ctx, issuer, issuerDetails)
 	suite.Require().NoError(err)
 
 	verificationDetails := &types.VerificationDetails{

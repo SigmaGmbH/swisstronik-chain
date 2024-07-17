@@ -163,8 +163,10 @@ func (k msgServer) HandleCreateIssuer(goCtx context.Context, msg *types.MsgCreat
 		return nil, errors.Wrap(types.ErrInvalidIssuer, "issuer already exists")
 	}
 
+	msg.Details.Creator = signer.String()
+
 	// Store issuer details with creator address
-	if err = k.SetIssuerDetails(ctx, signer, issuer, msg.Details); err != nil {
+	if err = k.SetIssuerDetails(ctx, issuer, msg.Details); err != nil {
 		return nil, err
 	}
 
@@ -176,7 +178,7 @@ func (k msgServer) HandleCreateIssuer(goCtx context.Context, msg *types.MsgCreat
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeAddIssuer,
-			sdk.NewAttribute(types.AttributeKeyOperator, msg.Signer),
+			sdk.NewAttribute(types.AttributeKeyIssuerCreator, msg.Signer),
 			sdk.NewAttribute(types.AttributeKeyIssuer, msg.Issuer),
 			sdk.NewAttribute(types.AttributeKeyIssuerDetails, msg.Details.String()),
 		),
@@ -200,16 +202,17 @@ func (k msgServer) HandleUpdateIssuerDetails(goCtx context.Context, msg *types.M
 		return nil, err
 	}
 
-	// Operator or issuer creator can update issuer
-	creator := k.GetIssuerCreator(ctx, issuer)
-	if !signer.Equals(creator) {
-		if exists, err := k.OperatorExists(ctx, signer); !exists || err != nil {
-			return nil, types.ErrNotOperatorOrIssuerCreator
-		}
+	details, err := k.GetIssuerDetails(ctx, issuer)
+	if err != nil || len(details.Name) < 1 {
+		return nil, errors.Wrap(types.ErrInvalidIssuer, "issuer does not exist")
 	}
 
-	if exists, err := k.IssuerExists(ctx, issuer); !exists || err != nil {
-		return nil, errors.Wrap(types.ErrInvalidIssuer, "issuer does not exist")
+	// Operator or issuer creator can update issuer
+	if details.Creator != signer.String() {
+		if exists, err := k.OperatorExists(ctx, signer); !exists || err != nil {
+			// If signer is neither an operator nor issuer creator
+			return nil, errors.Wrap(types.ErrNotOperatorOrIssuerCreator, "issuer creator does not match")
+		}
 	}
 
 	// Revoke verification if address was verified
@@ -217,14 +220,14 @@ func (k msgServer) HandleUpdateIssuerDetails(goCtx context.Context, msg *types.M
 		return nil, err
 	}
 
-	if err = k.SetIssuerDetails(ctx, creator, issuer, msg.Details); err != nil {
+	if err = k.SetIssuerDetails(ctx, issuer, msg.Details); err != nil {
 		return nil, err
 	}
 
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeUpdateIssuer,
-			sdk.NewAttribute(types.AttributeKeyOperator, msg.Signer),
+			sdk.NewAttribute(types.AttributeKeyIssuerCreator, msg.Signer),
 			sdk.NewAttribute(types.AttributeKeyIssuer, msg.Issuer),
 			sdk.NewAttribute(types.AttributeKeyIssuerDetails, msg.Details.String()),
 		),
@@ -248,16 +251,17 @@ func (k msgServer) HandleRemoveIssuer(goCtx context.Context, msg *types.MsgRemov
 		return nil, err
 	}
 
-	// Operator or issuer creator can update issuer
-	creator := k.GetIssuerCreator(ctx, issuer)
-	if !signer.Equals(creator) {
-		if exists, err := k.OperatorExists(ctx, signer); !exists || err != nil {
-			return nil, types.ErrNotOperatorOrIssuerCreator
-		}
+	details, err := k.GetIssuerDetails(ctx, issuer)
+	if err != nil || len(details.Name) < 1 {
+		return nil, errors.Wrap(types.ErrInvalidIssuer, "issuer does not exist")
 	}
 
-	if exists, err := k.IssuerExists(ctx, issuer); !exists || err != nil {
-		return nil, errors.Wrap(types.ErrInvalidIssuer, "issuer does not exist")
+	// Operator or issuer creator can update issuer
+	if details.Creator != signer.String() {
+		if exists, err := k.OperatorExists(ctx, signer); !exists || err != nil {
+			// If signer is neither an operator nor issuer creator
+			return nil, errors.Wrap(types.ErrNotOperatorOrIssuerCreator, "issuer creator does not match")
+		}
 	}
 
 	k.RemoveIssuer(ctx, issuer)
@@ -265,7 +269,7 @@ func (k msgServer) HandleRemoveIssuer(goCtx context.Context, msg *types.MsgRemov
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeRemoveIssuer,
-			sdk.NewAttribute(types.AttributeKeyOperator, msg.Signer),
+			sdk.NewAttribute(types.AttributeKeyIssuerCreator, msg.Signer),
 			sdk.NewAttribute(types.AttributeKeyIssuer, msg.Issuer),
 		),
 	)

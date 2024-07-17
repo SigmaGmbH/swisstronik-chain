@@ -66,9 +66,10 @@ func TestInitGenesis_Validation(t *testing.T) {
 				IssuerDetails: []*types.GenesisIssuerDetails{
 					{
 						Address: "swtr199wynlfwhj6ytkvujjf6mel5z7fl0mwzqck8l6",
-						Creator: "invalid issuer creator", // invalid issuer creator
+						// Creator: "", // missing issuer creator
 						Details: &types.IssuerDetails{
-							Name: "test issuer",
+							Creator: "invalid issuer creator", // invalid issuer creator
+							Name:    "test issuer",
 						},
 					},
 				},
@@ -160,9 +161,9 @@ func TestInitGenesis_Validation(t *testing.T) {
 				IssuerDetails: []*types.GenesisIssuerDetails{
 					{
 						Address: "swtr199wynlfwhj6ytkvujjf6mel5z7fl0mwzqck8l6",
-						Creator: "swtr1734tyvkylw3f7vc9xmwxp6g5n79qvsrvjhsvs4",
 						Details: &types.IssuerDetails{
-							Name: "test issuer",
+							Creator: "swtr1734tyvkylw3f7vc9xmwxp6g5n79qvsrvjhsvs4",
+							Name:    "test issuer",
 						},
 					},
 				},
@@ -190,9 +191,9 @@ func TestInitGenesis_Validation(t *testing.T) {
 				IssuerDetails: []*types.GenesisIssuerDetails{
 					{
 						Address: "swtr199wynlfwhj6ytkvujjf6mel5z7fl0mwzqck8l6",
-						Creator: "swtr1734tyvkylw3f7vc9xmwxp6g5n79qvsrvjhsvs4",
 						Details: &types.IssuerDetails{
-							Name: "test issuer",
+							Creator: "swtr1734tyvkylw3f7vc9xmwxp6g5n79qvsrvjhsvs4",
+							Name:    "test issuer",
 						},
 					},
 				},
@@ -231,9 +232,9 @@ func TestInitGenesis_Validation(t *testing.T) {
 				IssuerDetails: []*types.GenesisIssuerDetails{
 					{
 						Address: "swtr199wynlfwhj6ytkvujjf6mel5z7fl0mwzqck8l6",
-						Creator: "swtr1734tyvkylw3f7vc9xmwxp6g5n79qvsrvjhsvs4",
 						Details: &types.IssuerDetails{
-							Name: "test issuer",
+							Creator: "swtr1734tyvkylw3f7vc9xmwxp6g5n79qvsrvjhsvs4",
+							Name:    "test issuer",
 						},
 					},
 				},
@@ -311,15 +312,15 @@ func TestGenesis_Success(t *testing.T) {
 				IssuerDetails: []*types.GenesisIssuerDetails{
 					{
 						Address: "swtr199wynlfwhj6ytkvujjf6mel5z7fl0mwzqck8l6",
-						Creator: "swtr16vgqffr8v0sh3n5qeqdksfpzdkqf3rtk49thun",
 						Details: &types.IssuerDetails{
-							Name: "test issuer",
+							Creator: "swtr16vgqffr8v0sh3n5qeqdksfpzdkqf3rtk49thun",
+							Name:    "test issuer",
 						},
 					},
 					{
 						Address: "swtr13wl63dpe3xdhzvphp32cm9cv2vs9nvhkpaspwu",
-						Creator: "swtr16vgqffr8v0sh3n5qeqdksfpzdkqf3rtk49thun",
 						Details: &types.IssuerDetails{
+							Creator:     "swtr16vgqffr8v0sh3n5qeqdksfpzdkqf3rtk49thun",
 							Name:        "test issuer2",
 							Description: "test description2",
 						},
@@ -416,11 +417,9 @@ func TestGenesis_Success(t *testing.T) {
 			for _, issuerData := range tc.genState.IssuerDetails {
 				address, err := sdk.AccAddressFromBech32(issuerData.Address)
 				require.NoError(t, err)
-				creator := k.GetIssuerCreator(ctx, address)
 				details, err := k.GetIssuerDetails(ctx, address)
 				require.NoError(t, err)
 				require.NotNil(t, details)
-				require.Equal(t, issuerData.Creator, creator.String())
 				require.Equal(t, issuerData.Details, details)
 			}
 

@@ -18,8 +18,7 @@ message GenesisState {
 
 message GenesisIssuerDetails {
   string address = 1;
-  string creator = 2;
-  IssuerDetails details = 3;
+  IssuerDetails details = 2;
 }
 
 message GenesisAddressDetails {

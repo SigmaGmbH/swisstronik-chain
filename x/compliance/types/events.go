@@ -9,6 +9,7 @@ const (
 	EventTypeVerifyIssuer   = "verify_issuer"
 
 	AttributeKeyOperator           = "operator"
+	AttributeKeyIssuerCreator      = "creator"
 	AttributeKeyIssuer             = "issuer"
 	AttributeKeyIssuerDetails      = "issuer_details"
 	AttributeKeyVerificationStatus = "verification_status"

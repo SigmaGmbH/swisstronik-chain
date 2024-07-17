@@ -9,42 +9,35 @@ import (
 
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
 	reflectionv1 "cosmossdk.io/api/cosmos/reflection/v1"
-	"github.com/cosmos/cosmos-sdk/runtime"
-	runtimeservices "github.com/cosmos/cosmos-sdk/runtime/services"
-
-	"swisstronik/x/evm"
-	"swisstronik/x/feemarket"
-
-	"github.com/cosmos/cosmos-sdk/x/auth/posthandler"
-	"github.com/cosmos/cosmos-sdk/x/group"
-	"github.com/gorilla/mux"
-	"github.com/rakyll/statik/fs"
-
+	simappparams "cosmossdk.io/simapp/params"
+	dbm "github.com/cometbft/cometbft-db"
+	abci "github.com/cometbft/cometbft/abci/types"
+	tmjson "github.com/cometbft/cometbft/libs/json"
+	"github.com/cometbft/cometbft/libs/log"
+	tmos "github.com/cometbft/cometbft/libs/os"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
 	nodeservice "github.com/cosmos/cosmos-sdk/client/grpc/node"
 	"github.com/cosmos/cosmos-sdk/client/grpc/tmservice"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/codec/types"
+	"github.com/cosmos/cosmos-sdk/runtime"
+	runtimeservices "github.com/cosmos/cosmos-sdk/runtime/services"
 	"github.com/cosmos/cosmos-sdk/server/api"
 	"github.com/cosmos/cosmos-sdk/server/config"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 	"github.com/cosmos/cosmos-sdk/store/streaming"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/mempool"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/version"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
+	"github.com/cosmos/cosmos-sdk/x/auth/posthandler"
 	authsims "github.com/cosmos/cosmos-sdk/x/auth/simulation"
 	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-
-	dbm "github.com/cometbft/cometbft-db"
-	abci "github.com/cometbft/cometbft/abci/types"
-	tmjson "github.com/cometbft/cometbft/libs/json"
-	"github.com/cometbft/cometbft/libs/log"
-	tmos "github.com/cometbft/cometbft/libs/os"
 	"github.com/cosmos/cosmos-sdk/x/authz"
 	authzkeeper "github.com/cosmos/cosmos-sdk/x/authz/keeper"
 	authzmodule "github.com/cosmos/cosmos-sdk/x/authz/module"
@@ -54,6 +47,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/capability"
 	capabilitykeeper "github.com/cosmos/cosmos-sdk/x/capability/keeper"
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
+	"github.com/cosmos/cosmos-sdk/x/consensus"
+	consensusparamkeeper "github.com/cosmos/cosmos-sdk/x/consensus/keeper"
+	consensusparamtypes "github.com/cosmos/cosmos-sdk/x/consensus/types"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
 	crisiskeeper "github.com/cosmos/cosmos-sdk/x/crisis/keeper"
 	crisistypes "github.com/cosmos/cosmos-sdk/x/crisis/types"
@@ -74,7 +70,7 @@ import (
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	govv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
-
+	"github.com/cosmos/cosmos-sdk/x/group"
 	"github.com/cosmos/cosmos-sdk/x/mint"
 	mintkeeper "github.com/cosmos/cosmos-sdk/x/mint/keeper"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
@@ -114,36 +110,30 @@ import (
 	ibctm "github.com/cosmos/ibc-go/v7/modules/light-clients/07-tendermint"
 	ibctesting "github.com/cosmos/ibc-go/v7/testing"
 	ibctestingtypes "github.com/cosmos/ibc-go/v7/testing/types"
+	"github.com/gorilla/mux"
+	"github.com/rakyll/statik/fs"
 	"github.com/spf13/cast"
 
-	vestingmodule "swisstronik/x/vesting"
-	vestingmodulekeeper "swisstronik/x/vesting/keeper"
-	vestingmoduletypes "swisstronik/x/vesting/types"
-
+	evmante "swisstronik/app/ante"
+	"swisstronik/app/upgrades/v1_0_3"
+	"swisstronik/docs"
+	"swisstronik/encoding"
+	"swisstronik/ethereum/eip712"
+	srvflags "swisstronik/server/flags"
+	evmcommontypes "swisstronik/types"
 	compliancemodule "swisstronik/x/compliance"
 	compliancemoduleclient "swisstronik/x/compliance/client"
 	compliancemodulekeeper "swisstronik/x/compliance/keeper"
 	compliancemoduletypes "swisstronik/x/compliance/types"
-
-	"swisstronik/docs"
-	"swisstronik/encoding"
-
-	simappparams "cosmossdk.io/simapp/params"
-
-	evmante "swisstronik/app/ante"
-	srvflags "swisstronik/server/flags"
-	evmcommontypes "swisstronik/types"
+	"swisstronik/x/evm"
 	evmkeeper "swisstronik/x/evm/keeper"
 	evmtypes "swisstronik/x/evm/types"
+	"swisstronik/x/feemarket"
 	feemarketkeeper "swisstronik/x/feemarket/keeper"
 	feemarkettypes "swisstronik/x/feemarket/types"
-
-	"swisstronik/ethereum/eip712"
-
-	"github.com/cosmos/cosmos-sdk/types/mempool"
-	"github.com/cosmos/cosmos-sdk/x/consensus"
-	consensusparamkeeper "github.com/cosmos/cosmos-sdk/x/consensus/keeper"
-	consensusparamtypes "github.com/cosmos/cosmos-sdk/x/consensus/types"
+	vestingmodule "swisstronik/x/vesting"
+	vestingmodulekeeper "swisstronik/x/vesting/keeper"
+	vestingmoduletypes "swisstronik/x/vesting/types"
 )
 
 const (
@@ -803,7 +793,7 @@ func New(
 	app.setAnteHandler(encodingConfig.TxConfig, maxGasWanted)
 	app.setPostHandler()
 	app.SetEndBlocker(app.EndBlocker)
-	SetupHandlers(app, app.EvmKeeper, app.IBCKeeper.ClientKeeper, app.ParamsKeeper, appCodec)
+	app.setupUpgradeHandlers()
 
 	if loadLatest {
 		if err := app.LoadLatestVersion(); err != nil {
@@ -1066,6 +1056,35 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 	// this line is used by starport scaffolding # stargate/app/paramSubspace
 
 	return paramsKeeper
+}
+
+func (app *App) setupUpgradeHandlers() {
+	app.UpgradeKeeper.SetUpgradeHandler(
+		v1_0_3.UpgradeName,
+		v1_0_3.CreateUpgradeHandler(
+			app.mm, app.configurator,
+		),
+	)
+
+	// When a planned update height is reached, the old binary will panic
+	// writing on disk the height and name of the update that triggered it
+	// This will read that value, and execute the preparations for the upgrade.
+	upgradeInfo, err := app.UpgradeKeeper.ReadUpgradeInfoFromDisk()
+	if err != nil {
+		panic(fmt.Errorf("failed to read upgrade info from disk: %w", err))
+	}
+
+	if app.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
+		return
+	}
+
+	if upgradeInfo.Name == v1_0_3.UpgradeName {
+		// Use upgrade store loader for the initial loading of all stores when app starts,
+		// it checks if version == upgradeHeight and applies store upgrades before loading the stores,
+		// so that new stores start with the correct version (the current height of chain),
+		// instead the default which is the latest version that store last committed i.e 0 for new stores.
+		app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storetypes.StoreUpgrades{}))
+	}
 }
 
 // SimulationManager implements runtime.AppI

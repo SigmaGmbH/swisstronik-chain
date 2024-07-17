@@ -129,6 +129,7 @@ func (k Querier) IssuersDetails(goCtx context.Context, req *types.QueryIssuersDe
 		// NOTE: MUST CONTAIN ALL THE MEMBERS OF `IssuerDetails` AND ITERATING KEY
 		issuers = append(issuers, types.QueryIssuersDetailsResponse_MergedIssuerDetails{
 			IssuerAddress: sdk.AccAddress(key).String(),
+			Creator:       issuerDetails.Creator,
 			Name:          issuerDetails.Name,
 			Description:   issuerDetails.Description,
 			Url:           issuerDetails.Url,

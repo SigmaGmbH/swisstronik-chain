@@ -47,8 +47,8 @@ func (suite *QuerierTestSuite) SetupTest() {
 	suite.user = tests.RandomAccAddress()
 
 	// Create issuer
-	issuerDetails := &types.IssuerDetails{Name: "testIssuer"}
-	err := suite.keeper.SetIssuerDetails(suite.ctx, suite.issuerCreator, suite.issuer, issuerDetails)
+	issuerDetails := &types.IssuerDetails{Creator: suite.issuerCreator.String(), Name: "testIssuer"}
+	err := suite.keeper.SetIssuerDetails(suite.ctx, suite.issuer, issuerDetails)
 	suite.Require().NoError(err)
 
 	// Set verification status as true for issuer details
