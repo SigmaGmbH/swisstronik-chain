@@ -33,7 +33,7 @@ func (k msgServer) HandleAddOperator(goCtx context.Context, msg *types.MsgAddOpe
 
 	// Only operator can add regular operator
 	if exists, err := k.OperatorExists(ctx, signer); !exists || err != nil {
-		return nil, types.ErrNotOperatorOrIssuerCreator
+		return nil, types.ErrNotOperator
 	}
 
 	// Check validity of operator addresses
@@ -117,7 +117,7 @@ func (k msgServer) HandleSetVerificationStatus(goCtx context.Context, msg *types
 	// Only operator can set issuer's verification status, (todo, for now, in centralized way)
 	// NOTE, for now, use centralized solution, will move to decentralized way later.
 	if exists, err := k.OperatorExists(ctx, signer); !exists || err != nil {
-		return nil, types.ErrNotOperatorOrIssuerCreator
+		return nil, types.ErrNotOperator
 	}
 
 	// Check validity of issuer addresses
@@ -256,7 +256,7 @@ func (k msgServer) HandleRemoveIssuer(goCtx context.Context, msg *types.MsgRemov
 		return nil, errors.Wrap(types.ErrInvalidIssuer, "issuer does not exist")
 	}
 
-	// Operator or issuer creator can update issuer
+	// Operator or issuer creator can remove issuer
 	if details.Creator != signer.String() {
 		if exists, err := k.OperatorExists(ctx, signer); !exists || err != nil {
 			// If signer is neither an operator nor issuer creator

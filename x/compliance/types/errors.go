@@ -13,6 +13,7 @@ const (
 	codeErrNotAuthorized
 	codeErrInvalidOperator
 	codeErrNotOperator
+	codeErrNotOperatorOrIssuer
 	codeErrInvalidIssuer
 )
 
@@ -24,6 +25,7 @@ var (
 	ErrInvalidParam               = sdkerrors.Register(ModuleName, codeErrInvalidParam, "invalid param provided")
 	ErrNotAuthorized              = sdkerrors.Register(ModuleName, codeErrNotAuthorized, "not authorized")
 	ErrInvalidOperator            = sdkerrors.Register(ModuleName, codeErrInvalidOperator, "invalid operator")
-	ErrNotOperatorOrIssuerCreator = sdkerrors.Register(ModuleName, codeErrNotOperator, "signer is not operator or issuer creator")
+	ErrNotOperatorOrIssuerCreator = sdkerrors.Register(ModuleName, codeErrNotOperatorOrIssuer, "signer is not operator or issuer creator")
+	ErrNotOperator                = sdkerrors.Register(ModuleName, codeErrNotOperator, "signer is not operator")
 	ErrInvalidIssuer              = sdkerrors.Register(ModuleName, codeErrInvalidIssuer, "invalid issuer")
 )

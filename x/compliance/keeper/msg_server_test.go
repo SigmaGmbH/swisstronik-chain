@@ -47,7 +47,7 @@ func (suite *KeeperTestSuite) TestAddOperator() {
 				return &msg
 			},
 			expected: func(resp *types.MsgAddOperatorResponse, error error) {
-				suite.Require().ErrorIs(error, types.ErrNotOperatorOrIssuerCreator)
+				suite.Require().ErrorIs(error, types.ErrNotOperator)
 				suite.Require().Nil(resp)
 			},
 		},
@@ -310,7 +310,7 @@ func (suite *KeeperTestSuite) TestSetVerificationStatus() {
 				return &msg
 			},
 			expected: func(resp *types.MsgSetVerificationStatusResponse, error error) {
-				suite.Require().ErrorIs(error, types.ErrNotOperatorOrIssuerCreator)
+				suite.Require().ErrorIs(error, types.ErrNotOperator)
 				suite.Require().Nil(resp)
 			},
 		},
