@@ -34,14 +34,14 @@ func MigrateStore(ctx sdk.Context, k types.ComplianceKeeper) error {
 		if issuerDetails == nil || err != nil {
 			return false
 		}
-		creator := k.GetIssuerCreator(ctx, address)
-		if creator == nil {
+		if len(issuerDetails.Creator) < 1 {
 			// In v1.0.2, only operator can create/update/remove issuer.
 			// The operators who signed the transaction for creating/updating issuer were stored in
 			// EventManager as event log.
 			// There's no guarantee if any node in the network can fetch all the signers from EventManager during upgrade.
 			// So let's initialize issuer's creator with first initial operator by default if issuer is valid
-			k.SetIssuerCreator(ctx, address, defaultIssuerCreator)
+			issuerDetails.Creator = defaultIssuerCreator.String()
+			_ = k.SetIssuerDetails(ctx, address, issuerDetails)
 		}
 		return true
 	})

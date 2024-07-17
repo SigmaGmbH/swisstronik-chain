@@ -272,7 +272,6 @@ func (suite *KeeperTestSuite) TestRemoveOperator() {
 func (suite *KeeperTestSuite) TestSetVerificationStatus() {
 	var (
 		operator sdk.AccAddress
-		creator  sdk.AccAddress
 		issuer   sdk.AccAddress
 	)
 	testCases := []struct {
@@ -344,11 +343,10 @@ func (suite *KeeperTestSuite) TestSetVerificationStatus() {
 				err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_REGULAR)
 				suite.Require().NoError(err)
 
-				creator = tests.RandomAccAddress()
 				issuer = tests.RandomAccAddress()
 
-				details := &types.IssuerDetails{Name: "testIssuer"}
-				err = suite.keeper.SetIssuerDetails(suite.ctx, creator, issuer, details)
+				details := &types.IssuerDetails{Creator: tests.RandomAccAddress().String(), Name: "testIssuer"}
+				err = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
 				suite.Require().NoError(err)
 			},
 			malleate: func() *types.MsgSetVerificationStatus {
@@ -473,13 +471,10 @@ func (suite *KeeperTestSuite) TestCreateIssuer() {
 				suite.Require().NoError(err)
 				suite.Require().Equal(false, addressDetails.IsVerified)
 
-				// Check if creator is operator
-				issuerCreator := suite.keeper.GetIssuerCreator(suite.ctx, issuer)
-				suite.Require().Equal(operator, issuerCreator)
-
 				// Check if issuer details are stored correctly
 				details, err := suite.keeper.GetIssuerDetails(suite.ctx, issuer)
 				suite.Require().NoError(err)
+				suite.Require().Equal(operator.String(), details.Creator)
 				suite.Require().Equal("issuer name", details.Name)
 				suite.Require().Equal("issuer description", details.Description)
 				suite.Require().Equal("issuer url", details.Url)
@@ -524,14 +519,11 @@ func (suite *KeeperTestSuite) TestCreateIssuer() {
 				suite.Require().NoError(err)
 				suite.Require().Equal(false, addressDetails.IsVerified)
 
-				// Check if creator is operator
-				issuerCreator := suite.keeper.GetIssuerCreator(suite.ctx, issuer)
-				suite.Require().NotEqual(operator, issuerCreator)
-				suite.Require().Equal(creator, issuerCreator)
-
 				// Check if issuer details are stored correctly
 				details, err := suite.keeper.GetIssuerDetails(suite.ctx, issuer)
 				suite.Require().NoError(err)
+				suite.Require().NotEqual(operator.String(), details.Creator)
+				suite.Require().Equal(creator.String(), details.Creator)
 				suite.Require().Equal("issuer name", details.Name)
 				suite.Require().Equal("issuer description", details.Description)
 				suite.Require().Equal("issuer url", details.Url)
@@ -547,10 +539,9 @@ func (suite *KeeperTestSuite) TestCreateIssuer() {
 		{
 			name: "existing issuer",
 			init: func() {
-				details := &types.IssuerDetails{Name: "test issuer"}
-				creator = tests.RandomAccAddress()
+				details := &types.IssuerDetails{Creator: tests.RandomAccAddress().String(), Name: "test issuer"}
 				issuer = tests.RandomAccAddress()
-				_ = suite.keeper.SetIssuerDetails(suite.ctx, creator, issuer, details)
+				_ = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
 
 				operator = tests.RandomAccAddress()
 
@@ -623,10 +614,15 @@ func (suite *KeeperTestSuite) TestUpdateIssuerDetails() {
 			},
 		},
 		{
-			name: "not operator",
+			name: "issuer creator does not match",
 			init: func() {
 				issuer = tests.RandomAccAddress()
+				creator = tests.RandomAccAddress()
 				operator = tests.RandomAccAddress()
+
+				issuer = tests.RandomAccAddress()
+				details := &types.IssuerDetails{Creator: creator.String(), Name: "test issuer"}
+				_ = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
 			},
 			malleate: func() *types.MsgUpdateIssuerDetails {
 				msg := types.NewUpdateIssuerDetailsMsg(
@@ -646,7 +642,7 @@ func (suite *KeeperTestSuite) TestUpdateIssuerDetails() {
 			},
 		},
 		{
-			name: "issuer not exist",
+			name: "issuer does not exist",
 			init: func() {
 				issuer = tests.RandomAccAddress()
 				operator = tests.RandomAccAddress()
@@ -678,8 +674,8 @@ func (suite *KeeperTestSuite) TestUpdateIssuerDetails() {
 				suite.Require().NoError(err)
 
 				issuer = tests.RandomAccAddress()
-				details := &types.IssuerDetails{Name: "test issuer"}
-				_ = suite.keeper.SetIssuerDetails(suite.ctx, operator, issuer, details)
+				details := &types.IssuerDetails{Creator: operator.String(), Name: "test issuer"}
+				_ = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
 			},
 			malleate: func() *types.MsgUpdateIssuerDetails {
 				msg := types.NewUpdateIssuerDetailsMsg(
@@ -707,13 +703,10 @@ func (suite *KeeperTestSuite) TestUpdateIssuerDetails() {
 				suite.Require().NoError(err)
 				suite.Require().Equal(false, addressDetails.IsVerified)
 
-				// Check if creator is operator
-				issuerCreator := suite.keeper.GetIssuerCreator(suite.ctx, issuer)
-				suite.Require().Equal(operator, issuerCreator)
-
 				// Check if issuer details are stored correctly
 				details, err := suite.keeper.GetIssuerDetails(suite.ctx, issuer)
 				suite.Require().NoError(err)
+				suite.Require().Equal(operator.String(), details.Creator)
 				suite.Require().Equal("issuer name", details.Name)
 				suite.Require().Equal("issuer description", details.Description)
 				suite.Require().Equal("issuer url", details.Url)
@@ -731,12 +724,13 @@ func (suite *KeeperTestSuite) TestUpdateIssuerDetails() {
 			init: func() {
 				creator = tests.RandomAccAddress()
 				issuer = tests.RandomAccAddress()
-				details := &types.IssuerDetails{Name: "test issuer"}
-				_ = suite.keeper.SetIssuerDetails(suite.ctx, creator, issuer, details)
+
+				details := &types.IssuerDetails{Creator: creator.String(), Name: "test issuer"}
+				_ = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
 			},
 			malleate: func() *types.MsgUpdateIssuerDetails {
 				msg := types.NewUpdateIssuerDetailsMsg(
-					operator.String(),
+					creator.String(),
 					issuer.String(),
 					"issuer name",
 					"issuer description",
@@ -760,14 +754,11 @@ func (suite *KeeperTestSuite) TestUpdateIssuerDetails() {
 				suite.Require().NoError(err)
 				suite.Require().Equal(false, addressDetails.IsVerified)
 
-				// Check if creator is operator
-				issuerCreator := suite.keeper.GetIssuerCreator(suite.ctx, issuer)
-				suite.Require().NotEqual(operator, issuerCreator)
-				suite.Require().Equal(creator, issuerCreator)
-
 				// Check if issuer details are stored correctly
 				details, err := suite.keeper.GetIssuerDetails(suite.ctx, issuer)
 				suite.Require().NoError(err)
+				suite.Require().NotEqual(operator.String(), details.Creator)
+				suite.Require().Equal(creator.String(), details.Creator)
 				suite.Require().Equal("issuer name", details.Name)
 				suite.Require().Equal("issuer description", details.Description)
 				suite.Require().Equal("issuer url", details.Url)
@@ -790,8 +781,8 @@ func (suite *KeeperTestSuite) TestUpdateIssuerDetails() {
 
 				creator = tests.RandomAccAddress()
 				issuer = tests.RandomAccAddress()
-				details := &types.IssuerDetails{Name: "test issuer"}
-				_ = suite.keeper.SetIssuerDetails(suite.ctx, creator, issuer, details)
+				details := &types.IssuerDetails{Creator: creator.String(), Name: "test issuer"}
+				_ = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
 
 				_ = suite.keeper.SetAddressVerificationStatus(suite.ctx, issuer, true)
 
@@ -856,7 +847,6 @@ func (suite *KeeperTestSuite) TestUpdateIssuerDetails() {
 
 func (suite *KeeperTestSuite) TestRemoveIssuer() {
 	var (
-		creator  sdk.AccAddress
 		issuer   sdk.AccAddress
 		operator sdk.AccAddress
 		signer   sdk.AccAddress
@@ -898,10 +888,9 @@ func (suite *KeeperTestSuite) TestRemoveIssuer() {
 		{
 			name: "not operator",
 			init: func() {
-				details := &types.IssuerDetails{Name: "test issuer"}
-				creator = tests.RandomAccAddress()
 				issuer = tests.RandomAccAddress()
-				_ = suite.keeper.SetIssuerDetails(suite.ctx, creator, issuer, details)
+				details := &types.IssuerDetails{Creator: tests.RandomAccAddress().String(), Name: "test issuer"}
+				_ = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
 
 				operator = tests.RandomAccAddress()
 			},
@@ -921,10 +910,9 @@ func (suite *KeeperTestSuite) TestRemoveIssuer() {
 				err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_REGULAR)
 				suite.Require().NoError(err)
 
-				creator = tests.RandomAccAddress()
 				issuer = tests.RandomAccAddress()
-				details := &types.IssuerDetails{Name: "test issuer"}
-				_ = suite.keeper.SetIssuerDetails(suite.ctx, creator, issuer, details)
+				details := &types.IssuerDetails{Creator: tests.RandomAccAddress().String(), Name: "test issuer"}
+				_ = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
 			},
 			malleate: func() *types.MsgRemoveIssuer {
 				msg := types.NewRemoveIssuerMsg(operator.String(), issuer.String())
@@ -958,10 +946,9 @@ func (suite *KeeperTestSuite) TestRemoveIssuer() {
 				err := suite.keeper.AddOperator(suite.ctx, operator, types.OperatorType_OT_REGULAR)
 				suite.Require().NoError(err)
 
-				creator = tests.RandomAccAddress()
 				issuer = tests.RandomAccAddress()
-				details := &types.IssuerDetails{Name: "test issuer"}
-				_ = suite.keeper.SetIssuerDetails(suite.ctx, creator, issuer, details)
+				details := &types.IssuerDetails{Creator: tests.RandomAccAddress().String(), Name: "test issuer"}
+				_ = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
 
 				_ = suite.keeper.SetAddressVerificationStatus(suite.ctx, issuer, true)
 

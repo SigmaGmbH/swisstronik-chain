@@ -125,6 +125,7 @@ message QueryIssuersDetailsResponse {
     string url = 4;
     string logo = 5;
     string legalEntity = 6;
+    string creator = 7;
   }
 
   // issuers is a slice of registered issuers for the compliance module

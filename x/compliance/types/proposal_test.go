@@ -36,8 +36,8 @@ func (suite *ProposalTestSuite) SetupTest() {
 	suite.validIssuer = tests.RandomAccAddress()
 
 	// Set issuer details
-	issuerDetails := &types.IssuerDetails{Name: "testIssuer"}
-	err := suite.keeper.SetIssuerDetails(suite.ctx, suite.issuerCreator, suite.validIssuer, issuerDetails)
+	issuerDetails := &types.IssuerDetails{Creator: suite.issuerCreator.String(), Name: "testIssuer"}
+	err := suite.keeper.SetIssuerDetails(suite.ctx, suite.validIssuer, issuerDetails)
 	suite.Require().NoError(err)
 
 	// Set verification status as true for issuer details

@@ -32,11 +32,11 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 		if err != nil {
 			panic(err)
 		}
-		creator, err := sdk.AccAddressFromBech32(issuerData.Creator)
+		_, err = sdk.AccAddressFromBech32(issuerData.Details.Creator)
 		if err != nil {
 			panic(err)
 		}
-		if err = k.SetIssuerDetails(ctx, creator, address, issuerData.Details); err != nil {
+		if err = k.SetIssuerDetails(ctx, address, issuerData.Details); err != nil {
 			panic(err)
 		}
 	}
