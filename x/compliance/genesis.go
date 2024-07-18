@@ -21,18 +21,22 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 		if operatorData.OperatorType <= types.OperatorType_OT_UNSPECIFIED || operatorData.OperatorType > types.OperatorType_OT_REGULAR {
 			panic(errors.Wrap(types.ErrInvalidParam, "operator type is undefined"))
 		}
-		if err := k.AddOperator(ctx, address, operatorData.OperatorType); err != nil {
+		if err = k.AddOperator(ctx, address, operatorData.OperatorType); err != nil {
 			panic(err)
 		}
 	}
 
 	// Restore issuers
-	for _, issuerData := range genState.Issuers {
+	for _, issuerData := range genState.IssuerDetails {
 		address, err := sdk.AccAddressFromBech32(issuerData.Address)
 		if err != nil {
 			panic(err)
 		}
-		if err := k.SetIssuerDetails(ctx, address, issuerData.Details); err != nil {
+		_, err = sdk.AccAddressFromBech32(issuerData.Details.Creator)
+		if err != nil {
+			panic(err)
+		}
+		if err = k.SetIssuerDetails(ctx, address, issuerData.Details); err != nil {
 			panic(err)
 		}
 	}
@@ -56,7 +60,7 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 			panic(errors.Wrap(types.ErrInvalidParam, "empty proof data"))
 		}
 
-		if err := k.SetVerificationDetails(ctx, verificationData.Id, verificationData.Details); err != nil {
+		if err = k.SetVerificationDetails(ctx, verificationData.Id, verificationData.Details); err != nil {
 			panic(err)
 		}
 	}
@@ -90,7 +94,7 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 			}
 		}
 
-		if err := k.SetAddressDetails(ctx, address, addressData.Details); err != nil {
+		if err = k.SetAddressDetails(ctx, address, addressData.Details); err != nil {
 			panic(err)
 		}
 	}
@@ -107,11 +111,11 @@ func ExportGenesis(ctx sdk.Context, k keeper.Keeper) *types.GenesisState {
 	}
 	genesis.Operators = operators
 
-	issuers, err := k.ExportIssuerAccounts(ctx)
+	issuerDetails, err := k.ExportIssuerDetails(ctx)
 	if err != nil {
 		panic(err)
 	}
-	genesis.Issuers = issuers
+	genesis.IssuerDetails = issuerDetails
 
 	addressDetails, err := k.ExportAddressDetails(ctx)
 	if err != nil {

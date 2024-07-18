@@ -40,10 +40,10 @@ echo "Contract Address: $ISSUER"
 echo -e "\nNew Issuer Address for testing: $ISSUER"
 echo -e "\nStep 3"
 echo "Adding new issuer..."
-swisstronikd tx compliance set-issuer-details $ISSUER issuer-name issuer-description issuer-url issuer-logo issuer-legal-entity -y --from operator --keyring-backend $KEYRING --home $HOMEDIR --gas-prices 100000000aswtr --output json | tail -n 1 | jq -r '.txhash'
+swisstronikd tx compliance create-issuer $ISSUER issuer-name issuer-description issuer-url issuer-logo issuer-legal-entity -y --from operator --keyring-backend $KEYRING --home $HOMEDIR --gas-prices 100000000aswtr --output json | tail -n 1 | jq -r '.txhash'
 wait_for_tx
 echo -e "\nSet verification status for new issuer..."
-swisstronikd tx compliance set-issuer-verification $ISSUER true -y --from operator --keyring-backend $KEYRING --home $HOMEDIR --gas-prices 100000000aswtr --output json | tail -n 1 | jq -r '.txhash'
+swisstronikd tx compliance set-issuer-status $ISSUER true -y --from operator --keyring-backend $KEYRING --home $HOMEDIR --gas-prices 100000000aswtr --output json | tail -n 1 | jq -r '.txhash'
 wait_for_tx
 
 echo -e "\n\n##########################\n"

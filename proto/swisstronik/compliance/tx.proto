@@ -13,7 +13,7 @@ service Msg {
   rpc HandleAddOperator(MsgAddOperator) returns (MsgAddOperatorResponse);
   rpc HandleRemoveOperator(MsgRemoveOperator) returns (MsgRemoveOperatorResponse);
   rpc HandleSetVerificationStatus(MsgSetVerificationStatus) returns (MsgSetVerificationStatusResponse);
-  rpc HandleSetIssuerDetails(MsgSetIssuerDetails) returns (MsgSetIssuerDetailsResponse);
+  rpc HandleCreateIssuer(MsgCreateIssuer) returns (MsgCreateIssuerResponse);
   rpc HandleUpdateIssuerDetails(MsgUpdateIssuerDetails) returns (MsgUpdateIssuerDetailsResponse);
   rpc HandleRemoveIssuer(MsgRemoveIssuer) returns (MsgRemoveIssuerResponse);
 }
@@ -42,13 +42,13 @@ message MsgSetVerificationStatus {
 }
 message MsgSetVerificationStatusResponse {}
 
-message MsgSetIssuerDetails {
+message MsgCreateIssuer {
   option (cosmos.msg.v1.signer) = "signer";
   string signer = 1;
   string issuer = 2;
   IssuerDetails details = 3;
 }
-message MsgSetIssuerDetailsResponse {}
+message MsgCreateIssuerResponse {}
 
 message MsgUpdateIssuerDetails {
   option (cosmos.msg.v1.signer) = "signer";

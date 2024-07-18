@@ -45,7 +45,7 @@ func TestInitGenesis_Validation(t *testing.T) {
 		{
 			name: "invalid issuers",
 			genState: &types.GenesisState{
-				Issuers: []*types.IssuerGenesisAccount{
+				IssuerDetails: []*types.GenesisIssuerDetails{
 					{Address: "wrong address"},
 				},
 			},
@@ -54,8 +54,24 @@ func TestInitGenesis_Validation(t *testing.T) {
 		{
 			name: "invalid issuer details",
 			genState: &types.GenesisState{
-				Issuers: []*types.IssuerGenesisAccount{
+				IssuerDetails: []*types.GenesisIssuerDetails{
 					{Address: "swtr1tpvqt6zfl9yef58gl7jcdpkw88thgrkf38d5zx"},
+				},
+			},
+			expPanic: true,
+		},
+		{
+			name: "missing issuer creator",
+			genState: &types.GenesisState{
+				IssuerDetails: []*types.GenesisIssuerDetails{
+					{
+						Address: "swtr199wynlfwhj6ytkvujjf6mel5z7fl0mwzqck8l6",
+						// Creator: "", // missing issuer creator
+						Details: &types.IssuerDetails{
+							Creator: "invalid issuer creator", // invalid issuer creator
+							Name:    "test issuer",
+						},
+					},
 				},
 			},
 			expPanic: true,
@@ -142,11 +158,12 @@ func TestInitGenesis_Validation(t *testing.T) {
 		{
 			name: "verification id for verified account is nil", // there's no verification data with verification_id
 			genState: &types.GenesisState{
-				Issuers: []*types.IssuerGenesisAccount{
+				IssuerDetails: []*types.GenesisIssuerDetails{
 					{
 						Address: "swtr199wynlfwhj6ytkvujjf6mel5z7fl0mwzqck8l6",
 						Details: &types.IssuerDetails{
-							Name: "test issuer",
+							Creator: "swtr1734tyvkylw3f7vc9xmwxp6g5n79qvsrvjhsvs4",
+							Name:    "test issuer",
 						},
 					},
 				},
@@ -171,11 +188,12 @@ func TestInitGenesis_Validation(t *testing.T) {
 			// There's no verification data with verification_id
 			name: "not found verification data for verified account",
 			genState: &types.GenesisState{
-				Issuers: []*types.IssuerGenesisAccount{
+				IssuerDetails: []*types.GenesisIssuerDetails{
 					{
 						Address: "swtr199wynlfwhj6ytkvujjf6mel5z7fl0mwzqck8l6",
 						Details: &types.IssuerDetails{
-							Name: "test issuer",
+							Creator: "swtr1734tyvkylw3f7vc9xmwxp6g5n79qvsrvjhsvs4",
+							Name:    "test issuer",
 						},
 					},
 				},
@@ -211,11 +229,12 @@ func TestInitGenesis_Validation(t *testing.T) {
 		{
 			name: "invalid verification type",
 			genState: &types.GenesisState{
-				Issuers: []*types.IssuerGenesisAccount{
+				IssuerDetails: []*types.GenesisIssuerDetails{
 					{
 						Address: "swtr199wynlfwhj6ytkvujjf6mel5z7fl0mwzqck8l6",
 						Details: &types.IssuerDetails{
-							Name: "test issuer",
+							Creator: "swtr1734tyvkylw3f7vc9xmwxp6g5n79qvsrvjhsvs4",
+							Name:    "test issuer",
 						},
 					},
 				},
@@ -290,16 +309,18 @@ func TestGenesis_Success(t *testing.T) {
 						OperatorType: types.OperatorType_OT_REGULAR,
 					},
 				},
-				Issuers: []*types.IssuerGenesisAccount{
+				IssuerDetails: []*types.GenesisIssuerDetails{
 					{
 						Address: "swtr199wynlfwhj6ytkvujjf6mel5z7fl0mwzqck8l6",
 						Details: &types.IssuerDetails{
-							Name: "test issuer",
+							Creator: "swtr16vgqffr8v0sh3n5qeqdksfpzdkqf3rtk49thun",
+							Name:    "test issuer",
 						},
 					},
 					{
 						Address: "swtr13wl63dpe3xdhzvphp32cm9cv2vs9nvhkpaspwu",
 						Details: &types.IssuerDetails{
+							Creator:     "swtr16vgqffr8v0sh3n5qeqdksfpzdkqf3rtk49thun",
 							Name:        "test issuer2",
 							Description: "test description2",
 						},
@@ -393,7 +414,7 @@ func TestGenesis_Success(t *testing.T) {
 			}
 
 			// Check if issuers were already initialized
-			for _, issuerData := range tc.genState.Issuers {
+			for _, issuerData := range tc.genState.IssuerDetails {
 				address, err := sdk.AccAddressFromBech32(issuerData.Address)
 				require.NoError(t, err)
 				details, err := k.GetIssuerDetails(ctx, address)
@@ -425,9 +446,11 @@ func TestGenesis_Success(t *testing.T) {
 
 			require.Equal(t, tc.genState.Params, got.Params)
 			// Sort by issuer address to check if two issuers are same
-			sort.Slice(tc.genState.Issuers, func(i, j int) bool { return tc.genState.Issuers[i].Address < tc.genState.Issuers[j].Address })
-			sort.Slice(got.Issuers, func(i, j int) bool { return got.Issuers[i].Address < got.Issuers[j].Address })
-			require.Equal(t, tc.genState.Issuers, got.Issuers)
+			sort.Slice(tc.genState.IssuerDetails, func(i, j int) bool {
+				return tc.genState.IssuerDetails[i].Address < tc.genState.IssuerDetails[j].Address
+			})
+			sort.Slice(got.IssuerDetails, func(i, j int) bool { return got.IssuerDetails[i].Address < got.IssuerDetails[j].Address })
+			require.Equal(t, tc.genState.IssuerDetails, got.IssuerDetails)
 			// Sort by address to check if two address details are same
 			sort.Slice(tc.genState.AddressDetails, func(i, j int) bool {
 				return tc.genState.AddressDetails[i].Address < tc.genState.AddressDetails[j].Address

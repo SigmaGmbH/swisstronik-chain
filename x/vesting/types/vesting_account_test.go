@@ -398,8 +398,7 @@ func (suite *VestingAccountTestSuite) TestTrackUndelegationMonthlyVestingAcc() {
 }
 
 func initBaseAccount(amount int64) (*authtypes.BaseAccount, sdk.Coins) {
-	from, _ := tests.RandomEthAddressWithPrivateKey()
-	addr := sdk.AccAddress(from.Bytes())
+	addr := tests.RandomAccAddress()
 	baseAcc := authtypes.NewBaseAccountWithAddress(addr)
 	initialVesting := sdk.NewCoins(sdk.NewInt64Coin(sdk.DefaultBondDenom, amount))
 	return baseAcc, initialVesting

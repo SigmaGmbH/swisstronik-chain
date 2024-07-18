@@ -18,7 +18,8 @@ type ProposalTestSuite struct {
 	ctx    sdk.Context
 	keeper keeper.Keeper
 
-	validIssuer sdk.AccAddress
+	issuerCreator sdk.AccAddress
+	validIssuer   sdk.AccAddress
 }
 
 func TestProposalTestSuite(t *testing.T) {
@@ -31,11 +32,11 @@ func TestProposalTestSuite(t *testing.T) {
 }
 
 func (suite *ProposalTestSuite) SetupTest() {
-	from, _ := tests.RandomEthAddressWithPrivateKey()
-	suite.validIssuer = sdk.AccAddress(from.Bytes())
+	suite.issuerCreator = tests.RandomAccAddress()
+	suite.validIssuer = tests.RandomAccAddress()
 
 	// Set issuer details
-	issuerDetails := &types.IssuerDetails{Name: "testIssuer"}
+	issuerDetails := &types.IssuerDetails{Creator: suite.issuerCreator.String(), Name: "testIssuer"}
 	err := suite.keeper.SetIssuerDetails(suite.ctx, suite.validIssuer, issuerDetails)
 	suite.Require().NoError(err)
 

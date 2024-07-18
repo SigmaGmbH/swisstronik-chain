@@ -44,7 +44,7 @@ type VestingTestSuite struct {
 func TestVestingTestSuite(t *testing.T) {
 	// Run Ginkgo integration tests
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Compliance Keeper Suite")
+	RunSpecs(t, "Vesting Keeper Suite")
 }
 
 // Commit commits and starts a new block with an updated context.

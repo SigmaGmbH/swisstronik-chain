@@ -18,7 +18,7 @@ import (
 )
 
 var _ = Describe("VerifyIssuer", Ordered, func() {
-	from, _ := tests.RandomEthAddressWithPrivateKey()
+	issuerCreator := tests.RandomAccAddress()
 
 	from, validIssuerPrivKey := tests.RandomEthAddressWithPrivateKey()
 	validIssuer := sdk.AccAddress(from.Bytes())
@@ -64,7 +64,7 @@ var _ = Describe("VerifyIssuer", Ordered, func() {
 		Describe("valid issuer has been verified", func() {
 			BeforeEach(func() {
 				// Set issuer details(not verified)
-				issuerDetails := &types.IssuerDetails{Name: "test issuer"}
+				issuerDetails := &types.IssuerDetails{Creator: issuerCreator.String(), Name: "test issuer"}
 				_ = s.keeper.SetIssuerDetails(s.ctx, validIssuer, issuerDetails)
 
 				// Submit proposal with sufficient deposit
@@ -101,7 +101,7 @@ var _ = Describe("VerifyIssuer", Ordered, func() {
 		Describe("invalid issuer has not been verified", func() {
 			BeforeEach(func() {
 				// Set issuer details(not verified)
-				issuerDetails := &types.IssuerDetails{Name: "test issuer"}
+				issuerDetails := &types.IssuerDetails{Creator: issuerCreator.String(), Name: "test issuer"}
 				_ = s.keeper.SetIssuerDetails(s.ctx, invalidIssuer, issuerDetails)
 
 				// Submit proposal with sufficient deposit
@@ -133,7 +133,7 @@ var _ = Describe("VerifyIssuer", Ordered, func() {
 		Describe("should not create a proposal for verified issuer", func() {
 			BeforeEach(func() {
 				// Set issuer details(verified)
-				issuerDetails := &types.IssuerDetails{Name: "test issuer"}
+				issuerDetails := &types.IssuerDetails{Creator: issuerCreator.String(), Name: "test issuer"}
 				_ = s.keeper.SetIssuerDetails(s.ctx, validIssuer, issuerDetails)
 				_ = s.keeper.SetAddressVerificationStatus(s.ctx, validIssuer, true)
 			})

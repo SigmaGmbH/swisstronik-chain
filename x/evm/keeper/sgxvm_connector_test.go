@@ -307,6 +307,7 @@ func (suite *KeeperTestSuite) TestSingleVerificationDetails() {
 	var (
 		userAddress          common.Address
 		userAccount          sdk.AccAddress
+		issuerCreator        sdk.AccAddress
 		issuerAddress        common.Address
 		issuerAccount        sdk.AccAddress
 		illegalIssuerAccount sdk.AccAddress
@@ -318,13 +319,15 @@ func (suite *KeeperTestSuite) TestSingleVerificationDetails() {
 	setup := func() {
 		userAddress = tests.RandomEthAddress()
 		userAccount = sdk.AccAddress(userAddress.Bytes())
+		issuerCreator = tests.RandomAccAddress()
 		issuerAddress = tests.RandomEthAddress()
 		issuerAccount = sdk.AccAddress(issuerAddress.Bytes())
 		illegalIssuerAccount = tests.RandomAccAddress()
 
 		// Verify issuer to add verification details which are verified by issuer
 		_ = suite.app.ComplianceKeeper.SetIssuerDetails(suite.ctx, issuerAccount, &compliancetypes.IssuerDetails{
-			Name: "test issuer",
+			Creator: issuerCreator.String(),
+			Name:    "test issuer",
 		})
 		_ = suite.app.ComplianceKeeper.SetAddressVerificationStatus(suite.ctx, issuerAccount, true)
 
@@ -374,15 +377,15 @@ func (suite *KeeperTestSuite) TestSingleVerificationDetails() {
 				suite.Require().NoError(err)
 				suite.Require().True(has)
 
-				has, err = connector.EVMKeeper.ComplianceKeeper.HasVerificationOfType(connector.Context, userAccount, verificationType, 0, []sdk.Address{issuerAccount})
+				has, err = connector.EVMKeeper.ComplianceKeeper.HasVerificationOfType(connector.Context, userAccount, verificationType, 0, []sdk.AccAddress{issuerAccount})
 				suite.Require().NoError(err)
 				suite.Require().True(has)
 
-				has, err = connector.EVMKeeper.ComplianceKeeper.HasVerificationOfType(connector.Context, userAccount, verificationType, uint32(time.Now().Unix()), []sdk.Address{issuerAccount})
+				has, err = connector.EVMKeeper.ComplianceKeeper.HasVerificationOfType(connector.Context, userAccount, verificationType, uint32(time.Now().Unix()), []sdk.AccAddress{issuerAccount})
 				suite.Require().NoError(err)
 				suite.Require().True(has)
 
-				has, err = connector.EVMKeeper.ComplianceKeeper.HasVerificationOfType(connector.Context, userAccount, verificationType, 0, []sdk.Address{illegalIssuerAccount})
+				has, err = connector.EVMKeeper.ComplianceKeeper.HasVerificationOfType(connector.Context, userAccount, verificationType, 0, []sdk.AccAddress{illegalIssuerAccount})
 				suite.Require().NoError(err)
 				suite.Require().False(has)
 
@@ -528,6 +531,7 @@ func (suite *KeeperTestSuite) TestMultipleVerificationDetails() {
 
 	var (
 		userAddress   = tests.RandomEthAddress()
+		issuerCreator = tests.RandomAccAddress()
 		issuerAddress = tests.RandomEthAddress()
 		issuerAccount = sdk.AccAddress(issuerAddress.Bytes())
 
@@ -538,7 +542,8 @@ func (suite *KeeperTestSuite) TestMultipleVerificationDetails() {
 
 	// Verify issuer to add verification details which are verified by issuer
 	_ = suite.app.ComplianceKeeper.SetIssuerDetails(suite.ctx, issuerAccount, &compliancetypes.IssuerDetails{
-		Name: "test issuer",
+		Creator: issuerCreator.String(),
+		Name:    "test issuer",
 	})
 	_ = suite.app.ComplianceKeeper.SetAddressVerificationStatus(suite.ctx, issuerAccount, true)
 

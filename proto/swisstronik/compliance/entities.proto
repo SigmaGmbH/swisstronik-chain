@@ -40,6 +40,7 @@ message OperatorDetails {
 message IssuerDetails {
     // Allows to easily understand
     // what entity can be associated with issuer address.
+    // Issuer name
     string name = 1;
     // Basic issuer description
     string description = 2;
@@ -49,6 +50,8 @@ message IssuerDetails {
     string logo = 4;
     // Legal entity name
     string legalEntity = 5;
+    // Issuer creator who created current issuer
+    string creator = 6;
 }
 
 message AddressDetails {
