@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -19,6 +20,11 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/spf13/cobra"
 )
+
+type KeyPair struct {
+	PrivateKeyBase64 string `json:"private_key_base_64"`
+	PublicKeyBase64  string `json:"public_key_base_64"`
+}
 
 type KeyPair struct {
 	PrivateKeyBase64 string `json:"private_key_base_64"`
