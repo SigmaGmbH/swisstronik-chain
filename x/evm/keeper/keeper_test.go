@@ -102,30 +102,28 @@ func TestKeeperTestSuite(t *testing.T) {
 }
 
 func (suite *KeeperTestSuite) SetupTest() {
-	checkTx := false
 	chainID := utils.TestnetChainID + "-1"
-	suite.app, _ = app.SetupSwissApp(checkTx, nil, chainID)
-	suite.SetupApp(checkTx)
+	suite.app, _ = app.SetupSwissApp(nil, chainID)
+	suite.SetupApp()
 }
 
 func (suite *KeeperTestSuite) SetupTestWithT(t require.TestingT) {
-	checkTx := false
 	chainID := utils.TestnetChainID + "-1"
-	suite.app, _ = app.SetupSwissApp(checkTx, nil, chainID)
-	suite.SetupAppWithT(checkTx, t, chainID)
+	suite.app, _ = app.SetupSwissApp(nil, chainID)
+	suite.SetupAppWithT(t, chainID)
 }
 
-func (suite *KeeperTestSuite) SetupApp(checkTx bool) {
+func (suite *KeeperTestSuite) SetupApp() {
 	chainID := utils.TestnetChainID + "-1"
 	// Initialize enclave
 	err := librustgo.InitializeEnclave(false)
 	require.NoError(suite.T(), err)
 
-	suite.SetupAppWithT(checkTx, suite.T(), chainID)
+	suite.SetupAppWithT(suite.T(), chainID)
 }
 
 // SetupApp setup test environment, it uses`require.TestingT` to support both `testing.T` and `testing.B`.
-func (suite *KeeperTestSuite) SetupAppWithT(checkTx bool, t require.TestingT, chainID string) {
+func (suite *KeeperTestSuite) SetupAppWithT(t require.TestingT, chainID string) {
 	// obtain node public key
 	res, err := librustgo.GetNodePublicKey(0)
 	suite.Require().NoError(err)
@@ -147,7 +145,7 @@ func (suite *KeeperTestSuite) SetupAppWithT(checkTx bool, t require.TestingT, ch
 	require.NoError(t, err)
 	suite.consAddress = sdk.ConsAddress(priv.PubKey().Address())
 
-	suite.app = app.Setup(checkTx, func(app *app.App, genesis simapp.GenesisState) simapp.GenesisState {
+	suite.app = app.Setup(func(app *app.App, genesis simapp.GenesisState) simapp.GenesisState {
 		feemarketGenesis := feemarkettypes.DefaultGenesisState()
 		if suite.enableFeemarket {
 			feemarketGenesis.Params.EnableHeight = 1
@@ -227,7 +225,7 @@ func (suite *KeeperTestSuite) SetupAppWithT(checkTx bool, t require.TestingT, ch
 		EvidenceHash:       tmhash.Sum([]byte("evidence")),
 	}
 
-	suite.ctx = suite.app.NewContext(checkTx, header)
+	suite.ctx = suite.app.NewContext(false, header)
 
 	queryHelper := baseapp.NewQueryServerTestHelper(suite.ctx, suite.app.InterfaceRegistry())
 	evmtypes.RegisterQueryServer(queryHelper, suite.app.EvmKeeper)

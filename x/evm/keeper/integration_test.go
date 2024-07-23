@@ -204,7 +204,7 @@ func setupChain(localMinGasPricesStr string) {
 	)
 
 	s.app = newapp
-	s.SetupApp(false)
+	s.SetupApp()
 }
 
 func generateKey() (*ethsecp256k1.PrivKey, sdk.AccAddress) {

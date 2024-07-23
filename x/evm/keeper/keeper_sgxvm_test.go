@@ -45,23 +45,21 @@ import (
 )
 
 func (suite *KeeperTestSuite) SetupSGXVMTest() {
-	checkTx := false
-	suite.app = app.Setup(checkTx, nil)
-	suite.SetupSGXVMApp(checkTx)
+	suite.app = app.Setup(nil)
+	suite.SetupSGXVMApp()
 }
 
 func (suite *KeeperTestSuite) SetupSGXVMTestWithT(t require.TestingT) {
-	checkTx := false
-	suite.app = app.Setup(checkTx, nil)
-	suite.SetupSGXVMAppWithT(checkTx, t)
+	suite.app = app.Setup(nil)
+	suite.SetupSGXVMAppWithT(t)
 }
 
-func (suite *KeeperTestSuite) SetupSGXVMApp(checkTx bool) {
-	suite.SetupSGXVMAppWithT(checkTx, suite.T())
+func (suite *KeeperTestSuite) SetupSGXVMApp() {
+	suite.SetupSGXVMAppWithT(suite.T())
 }
 
 // SetupApp setup test environment, it uses`require.TestingT` to support both `testing.T` and `testing.B`.
-func (suite *KeeperTestSuite) SetupSGXVMAppWithT(checkTx bool, t require.TestingT) {
+func (suite *KeeperTestSuite) SetupSGXVMAppWithT(t require.TestingT) {
 	// obtain node public key
 	res, err := librustgo.GetNodePublicKey(0)
 	require.NoError(t, err)
@@ -82,7 +80,7 @@ func (suite *KeeperTestSuite) SetupSGXVMAppWithT(checkTx bool, t require.Testing
 	require.NoError(t, err)
 	suite.consAddress = sdk.ConsAddress(priv.PubKey().Address())
 
-	suite.app = app.Setup(checkTx, func(app *app.App, genesis simapp.GenesisState) simapp.GenesisState {
+	suite.app = app.Setup(func(app *app.App, genesis simapp.GenesisState) simapp.GenesisState {
 		feemarketGenesis := feemarkettypes.DefaultGenesisState()
 		if suite.enableFeemarket {
 			feemarketGenesis.Params.EnableHeight = 1
@@ -137,7 +135,7 @@ func (suite *KeeperTestSuite) SetupSGXVMAppWithT(checkTx bool, t require.Testing
 		)
 	}
 
-	suite.ctx = suite.app.BaseApp.NewContext(checkTx, tmproto.Header{
+	suite.ctx = suite.app.BaseApp.NewContext(false, tmproto.Header{
 		Height:          1,
 		ChainID:         "swisstronik_1291-1",
 		Time:            time.Now().UTC(),
