@@ -26,11 +26,6 @@ type KeyPair struct {
 	PublicKeyBase64  string `json:"public_key_base_64"`
 }
 
-type KeyPair struct {
-	PrivateKeyBase64 string `json:"private_key_base_64"`
-	PublicKeyBase64  string `json:"public_key_base_64"`
-}
-
 // Cmd creates a CLI main command
 func DebugCmd() *cobra.Command {
 	cmd := &cobra.Command{
