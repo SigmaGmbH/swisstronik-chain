@@ -19,7 +19,6 @@ import (
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	authzkeeper "github.com/cosmos/cosmos-sdk/x/authz/keeper"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
@@ -36,6 +35,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"swisstronik/encoding"
+	"swisstronik/tests"
 )
 
 // SwtrAppChainID hardcoded chainID for simulation
@@ -61,6 +61,7 @@ func fauxMerkleModeOpt(bapp *baseapp.BaseApp) {
 func TestFullAppSimulation(t *testing.T) {
 	config := simcli.NewConfigFromFlags()
 	config.ChainID = SwtrAppChainID
+	config.Commit = true // commit by default
 
 	db, dir, logger, skip, err := simtestutil.SetupSimulation(
 		config,
@@ -100,7 +101,7 @@ func TestFullAppSimulation(t *testing.T) {
 		os.Stdout,
 		app.BaseApp,
 		simtestutil.AppStateFn(app.AppCodec(), app.SimulationManager(), NewDefaultGenesisState()),
-		simtypes.RandomAccounts, // Replace with own random account function if using keys other than secp256k1
+		tests.RandomEthAccounts,
 		simtestutil.SimulationOperations(app, app.AppCodec(), config),
 		app.ModuleAccountAddrs(),
 		config,
@@ -159,7 +160,7 @@ func TestAppImportExport(t *testing.T) {
 		os.Stdout,
 		app.BaseApp,
 		simtestutil.AppStateFn(app.AppCodec(), app.SimulationManager(), NewDefaultGenesisState()),
-		simtypes.RandomAccounts, // Replace with own random account function if using keys other than secp256k1
+		tests.RandomEthAccounts,
 		simtestutil.SimulationOperations(app, app.AppCodec(), config),
 		app.ModuleAccountAddrs(),
 		config,
@@ -312,7 +313,7 @@ func TestAppSimulationAfterImport(t *testing.T) {
 		os.Stdout,
 		app.BaseApp,
 		simtestutil.AppStateFn(app.AppCodec(), app.SimulationManager(), NewDefaultGenesisState()),
-		simtypes.RandomAccounts, // Replace with own random account function if using keys other than secp256k1
+		tests.RandomEthAccounts,
 		simtestutil.SimulationOperations(app, app.AppCodec(), config),
 		app.ModuleAccountAddrs(),
 		config,
@@ -375,7 +376,7 @@ func TestAppSimulationAfterImport(t *testing.T) {
 		os.Stdout,
 		newApp.BaseApp,
 		simtestutil.AppStateFn(app.AppCodec(), app.SimulationManager(), NewDefaultGenesisState()),
-		simtypes.RandomAccounts, // Replace with own random account function if using keys other than secp256k1
+		tests.RandomEthAccounts,
 		simtestutil.SimulationOperations(newApp, newApp.AppCodec(), config),
 		app.ModuleAccountAddrs(),
 		config,
@@ -446,7 +447,7 @@ func TestAppStateDeterminism(t *testing.T) {
 				os.Stdout,
 				app.BaseApp,
 				simtestutil.AppStateFn(app.AppCodec(), app.SimulationManager(), NewDefaultGenesisState()),
-				simtypes.RandomAccounts, // Replace with own random account function if using keys other than secp256k1
+				tests.RandomEthAccounts,
 				simtestutil.SimulationOperations(app, app.AppCodec(), config),
 				app.ModuleAccountAddrs(),
 				config,

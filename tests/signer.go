@@ -17,13 +17,16 @@ package tests
 
 import (
 	"fmt"
+	"math/rand"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
+	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/simulation"
 
 	"swisstronik/crypto/ethsecp256k1"
 )
@@ -51,6 +54,19 @@ func RandomEthAddress() common.Address {
 func RandomAccAddress() sdk.AccAddress {
 	addr, _ := RandomEthAddressWithPrivateKey()
 	return sdk.AccAddress(addr.Bytes())
+}
+
+func RandomEthAccounts(r *rand.Rand, n int) []simulation.Account {
+	accs := make([]simulation.Account, n)
+	for i := 0; i < n; i++ {
+		privKey, _ := ethsecp256k1.GenerateKey()
+		key, _ := privKey.ToECDSA()
+		accs[i].PrivKey = privKey
+		accs[i].PubKey = privKey.PubKey()
+		accs[i].Address = sdk.AccAddress(crypto.PubkeyToAddress(key.PublicKey).Bytes())
+		accs[i].ConsKey = ed25519.GenPrivKey()
+	}
+	return accs
 }
 
 var _ keyring.Signer = &Signer{}

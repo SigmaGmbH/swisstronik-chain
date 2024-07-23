@@ -54,7 +54,7 @@ func NewDynamicFeeChecker(k DynamicFeeEVMKeeper) authante.TxFeeChecker {
 		ethCfg := params.ChainConfig.EthereumConfig(k.ChainID())
 
 		baseFee := k.GetBaseFee(ctx, ethCfg)
-		if baseFee == nil {
+		if baseFee == nil || baseFee.Sign() == 0 {
 			// london hardfork is not enabled: fallback to min-gas-prices logic
 			return checkTxFeeWithValidatorMinGasPrices(ctx, feeTx)
 		}
