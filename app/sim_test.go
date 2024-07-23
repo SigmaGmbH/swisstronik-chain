@@ -36,6 +36,10 @@ import (
 
 	"swisstronik/encoding"
 	"swisstronik/tests"
+	compliancetypes "swisstronik/x/compliance/types"
+	evmtypes "swisstronik/x/evm/types"
+	feemarkettypes "swisstronik/x/feemarket/types"
+	vestingtypes "swisstronik/x/vesting/types"
 )
 
 // SwtrAppChainID hardcoded chainID for simulation
@@ -91,7 +95,7 @@ func TestFullAppSimulation(t *testing.T) {
 		encoding.MakeConfig(ModuleBasics),
 		appOptions,
 		fauxMerkleModeOpt,
-		baseapp.SetChainID(SwtrAppChainID),
+		baseapp.SetChainID(config.ChainID),
 	)
 	require.Equal(t, "swisstronik", app.Name())
 
@@ -121,13 +125,15 @@ func TestFullAppSimulation(t *testing.T) {
 func TestAppImportExport(t *testing.T) {
 	config := simcli.NewConfigFromFlags()
 	config.ChainID = SwtrAppChainID
+	config.Commit = true
+	// config.NumBlocks = 10 # default value is 500
 
 	db, dir, logger, skip, err := simtestutil.SetupSimulation(
 		config,
 		"leveldb-app-sim",
 		"Simulation",
-		simcli.FlagVerboseValue,
-		simcli.FlagEnabledValue,
+		true, // simcli.FlagVerboseValue,
+		true, // simcli.FlagEnabledValue,
 	)
 	if skip {
 		t.Skip("skipping application import/export simulation")
@@ -187,8 +193,8 @@ func TestAppImportExport(t *testing.T) {
 		config,
 		"leveldb-app-sim-2",
 		"Simulation-2",
-		simcli.FlagVerboseValue,
-		simcli.FlagEnabledValue,
+		true, // simcli.FlagVerboseValue,
+		true, // simcli.FlagEnabledValue,
 	)
 	require.NoError(t, err, "simulation setup failed")
 
@@ -199,12 +205,12 @@ func TestAppImportExport(t *testing.T) {
 
 	newApp := New(
 		logger,
-		db, nil, true, map[int64]bool{},
+		newDB, nil, true, map[int64]bool{},
 		DefaultNodeHome, 5,
 		encoding.MakeConfig(ModuleBasics),
 		appOptions,
 		fauxMerkleModeOpt,
-		baseapp.SetChainID(SwtrAppChainID),
+		baseapp.SetChainID(config.ChainID),
 	)
 	require.Equal(t, "swisstronik", app.Name())
 
@@ -223,8 +229,8 @@ func TestAppImportExport(t *testing.T) {
 		}
 	}()
 
-	ctxA := app.NewContext(true, tmproto.Header{Height: app.LastBlockHeight()})
-	ctxB := newApp.NewContext(true, tmproto.Header{Height: app.LastBlockHeight()})
+	ctxA := app.NewContext(true, tmproto.Header{ChainID: config.ChainID, Height: app.LastBlockHeight()})
+	ctxB := newApp.NewContext(true, tmproto.Header{ChainID: config.ChainID, Height: app.LastBlockHeight()})
 	newApp.mm.InitGenesis(ctxB, app.AppCodec(), genesisState)
 	newApp.StoreConsensusParams(ctxB, exported.ConsensusParams)
 
@@ -252,6 +258,12 @@ func TestAppImportExport(t *testing.T) {
 			newApp.GetKey(authzkeeper.StoreKey),
 			[][]byte{authzkeeper.GrantKey, authzkeeper.GrantQueuePrefix},
 		},
+		{app.GetKey(compliancetypes.StoreKey), newApp.GetKey(compliancetypes.StoreKey), [][]byte{
+			compliancetypes.KeyPrefixOperatorDetails, compliancetypes.KeyPrefixIssuerDetails, compliancetypes.KeyPrefixAddressDetails, compliancetypes.KeyPrefixVerificationDetails,
+		}},
+		{app.GetKey(evmtypes.StoreKey), newApp.GetKey(evmtypes.StoreKey), [][]byte{}},
+		{app.GetKey(feemarkettypes.StoreKey), newApp.GetKey(feemarkettypes.StoreKey), [][]byte{}},
+		{app.GetKey(vestingtypes.StoreKey), newApp.GetKey(vestingtypes.StoreKey), [][]byte{}},
 	}
 
 	for _, skp := range storeKeysPrefixes {
@@ -274,13 +286,14 @@ func TestAppImportExport(t *testing.T) {
 func TestAppSimulationAfterImport(t *testing.T) {
 	config := simcli.NewConfigFromFlags()
 	config.ChainID = SwtrAppChainID
+	config.Commit = true
 
 	db, dir, logger, skip, err := simtestutil.SetupSimulation(
 		config,
 		"leveldb-app-sim",
 		"Simulation",
-		simcli.FlagVerboseValue,
-		simcli.FlagEnabledValue,
+		true, // simcli.FlagVerboseValue,
+		true, // simcli.FlagEnabledValue,
 	)
 	if skip {
 		t.Skip("skipping application simulation after import")
@@ -396,6 +409,7 @@ func TestAppStateDeterminism(t *testing.T) {
 	config.OnOperation = false
 	config.AllInvariants = false
 	config.ChainID = SwtrAppChainID
+	config.Commit = true
 
 	numSeeds := 3
 	numTimesToRunPerSeed := 5
