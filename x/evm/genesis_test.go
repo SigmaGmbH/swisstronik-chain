@@ -4,11 +4,11 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"math/big"
 
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"swisstronik/crypto/ethsecp256k1"
 	evmcommontypes "swisstronik/types"
 	"swisstronik/x/evm"
 	"swisstronik/x/evm/types"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 )
 
 func (suite *EvmTestSuite) TestInitGenesis() {
@@ -41,7 +41,7 @@ func (suite *EvmTestSuite) TestInitGenesis() {
 					{
 						Address: address.String(),
 						Storage: types.Storage{
-							{Key: common.BytesToHash([]byte("key")).String(), Value: common.BytesToHash([]byte("value")).String()},
+							{Key: common.BytesToHash([]byte("key")).String(), Value: common.Bytes2Hex([]byte("value"))},
 						},
 					},
 				},

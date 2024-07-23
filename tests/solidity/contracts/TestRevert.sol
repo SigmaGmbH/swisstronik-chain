@@ -1,54 +1,24 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.4;
 
-contract State {
-    uint256 a = 0;
-
-    function set(uint256 input) public { 
-        a = input; 
-        require(a < 10);
-    }
-
-    function force_set(uint256 input) public { 
-        a = input; 
-    }
-
-    function query() public view returns(uint256) {
-        return a;
-    }
-}
+error SampleError(uint256 provided, uint256 required);
 
 contract TestRevert {
-    State state;
-
-    uint256 b = 0;
-    uint256 c = 0;
-
-    constructor() {
-        state = new State();
+    event Passed();
+    
+    function testRevert(uint256 value) public {
+        require(value >= 10, "Expected value >= 10");
+        emit Passed();
     }
 
-    function try_set(uint256 input) public {
-        b = input;
-        try state.set(input) {
-        } catch (bytes memory) {
+    // Format with `error` is not supported yet.
+    function testError(uint256 value) public {
+        if (value < 10) {
+            revert SampleError({
+                provided: value,
+                required: 10
+            });
         }
-        c = input;
-    }
-
-    function set(uint256 input) public {
-        state.force_set(input);
-    }
-
-    function query_a() public view returns(uint256) {
-        return state.query();
-    }
-
-    function query_b() public view returns(uint256) {
-        return b;
-    }
-
-    function query_c() public view returns(uint256) {
-        return c;
+        emit Passed();
     }
 }

@@ -2,16 +2,16 @@ package ante_test
 
 import (
 	"math/big"
-	"swisstronik/types"
-
-	"swisstronik/app/ante"
-	"swisstronik/tests"
-	evmtypes "swisstronik/x/evm/types"
 
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+
+	"swisstronik/app/ante"
+	"swisstronik/tests"
+	"swisstronik/types"
+	evmtypes "swisstronik/x/evm/types"
 )
 
 func (suite *AnteTestSuite) TestGasWantedDecorator() {

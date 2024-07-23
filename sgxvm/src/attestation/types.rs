@@ -1,6 +1,7 @@
 use derive_more::Display;
 
 #[derive(PartialEq, Eq, Debug)]
+#[allow(dead_code)]
 pub enum SigningMethod {
     MRSIGNER,
     MRENCLAVE,
@@ -25,6 +26,7 @@ pub static SUPPORTED_SIG_ALGS: SignatureAlgorithms = &[
 ];
 
 #[derive(Debug, Display, PartialEq, Eq)]
+#[allow(dead_code)]
 pub enum AuthResult {
     #[display(fmt = "Enclave quote is valid")]
     Success,

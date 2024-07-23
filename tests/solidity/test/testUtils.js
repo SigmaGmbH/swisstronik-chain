@@ -13,7 +13,8 @@ module.exports.sendShieldedTransaction = async (signer, destination, data, value
         to: destination,
         data: encryptedData,
         value,
-        gasPrice: 0 // We're using 0 gas price in tests. Comment it, if you're running tests on actual network 
+        // gasLimit: 200_000,
+        // gasPrice: 0 // We're using 0 gas price in tests. Comment it, if you're running tests on actual network
     })
 }
 
@@ -30,6 +31,10 @@ module.exports.sendShieldedQuery = async (provider, destination, data, value) =>
         data: encryptedData,
         value
     })
+
+    if (response.startsWith("0x08c379a0")) {
+        return response
+    }
 
     // Decrypt call result
     return await decryptNodeResponse(provider.connection.url, response, usedEncryptedKey)

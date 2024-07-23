@@ -140,14 +140,14 @@ which accepts a path for the resulting pprof file.
 				return err
 			}
 
-			// check if node has sealed master key
+			// check if node has sealed key manager
 			nodeInitialized, err := librustgo.IsNodeInitialized()
 			if err != nil {
 				return err
 			}
 
 			if !nodeInitialized {
-				return errors.New("sealed master key was not found. Request it by using `swisstronikd enclave request-master-key` or generate a new one by using `swisstronikd enclave create-master-key`")
+				return errors.New("sealed key manager was not found. Initialize it by using `swisstronikd enclave request-epoch-keys-epid or request-epoch-keys-dcap`")
 			}
 
 			withTM, _ := cmd.Flags().GetBool(srvflags.WithTendermint)
@@ -213,6 +213,8 @@ which accepts a path for the resulting pprof file.
 	cmd.Flags().StringSlice(srvflags.JSONRPCAPI, config.GetDefaultAPINamespaces(), "Defines a list of JSON-RPC namespaces that should be enabled")
 	cmd.Flags().String(srvflags.JSONRPCAddress, config.DefaultJSONRPCAddress, "the JSON-RPC server address to listen on")
 	cmd.Flags().String(srvflags.JSONWsAddress, config.DefaultJSONRPCWsAddress, "the JSON-RPC WS server address to listen on")
+	cmd.Flags().String(srvflags.JSONRPCAddressUnencrypted, config.DefaultUnencryptedJSONRPCAddress, "the JSON-RPC server address to listen on")
+	cmd.Flags().String(srvflags.JSONWsAddressUnencrypted, config.DefaultUnencryptedJSONRPCWsAddress, "the JSON-RPC WS server address to listen on")
 	cmd.Flags().Uint64(srvflags.JSONRPCGasCap, config.DefaultGasCap, "Sets a cap on gas that can be used in eth_call/estimateGas unit is aswtr (0=infinite)")       //nolint:lll
 	cmd.Flags().Float64(srvflags.JSONRPCTxFeeCap, config.DefaultTxFeeCap, "Sets a cap on transaction fee that can be sent via the RPC APIs (1 = default 1 photon)") //nolint:lll
 	cmd.Flags().Int32(srvflags.JSONRPCFilterCap, config.DefaultFilterCap, "Sets the global cap for total number of filters that can be created")
@@ -564,8 +566,10 @@ func startInProcess(ctx *server.Context, clientCtx client.Context, opts StartOpt
 	}
 
 	var (
-		httpSrv     *http.Server
-		httpSrvDone chan struct{}
+		httpSrv                *http.Server
+		unencryptedHttpSrv     *http.Server
+		httpSrvDone            chan struct{}
+		unencryptedHttpSrvDone chan struct{}
 	)
 
 	if config.JSONRPC.Enable {
@@ -578,7 +582,7 @@ func startInProcess(ctx *server.Context, clientCtx client.Context, opts StartOpt
 
 		tmEndpoint := "/websocket"
 		tmRPCAddr := cfg.RPC.ListenAddress
-		httpSrv, httpSrvDone, err = StartJSONRPC(ctx, clientCtx, tmRPCAddr, tmEndpoint, &config, idxer)
+		httpSrv, httpSrvDone, err = StartJSONRPC(ctx, clientCtx, tmRPCAddr, tmEndpoint, &config, idxer, false)
 		if err != nil {
 			return err
 		}
@@ -592,6 +596,24 @@ func startInProcess(ctx *server.Context, clientCtx client.Context, opts StartOpt
 				select {
 				case <-time.Tick(5 * time.Second):
 				case <-httpSrvDone:
+				}
+			}
+		}()
+
+		unencryptedHttpSrv, unencryptedHttpSrvDone, err = StartJSONRPC(ctx, clientCtx, tmRPCAddr, tmEndpoint, &config, idxer, true)
+		if err != nil {
+			return err
+		}
+		defer func() {
+			shutdownCtx, cancelFn := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancelFn()
+			if err := unencryptedHttpSrv.Shutdown(shutdownCtx); err != nil {
+				logger.Error("HTTP server shutdown produced a warning", "error", err.Error())
+			} else {
+				logger.Info("HTTP server shut down, waiting 5 sec")
+				select {
+				case <-time.Tick(5 * time.Second):
+				case <-unencryptedHttpSrvDone:
 				}
 			}
 		}()

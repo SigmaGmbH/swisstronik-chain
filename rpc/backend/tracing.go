@@ -23,6 +23,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
+
 	rpctypes "swisstronik/rpc/types"
 	evmtypes "swisstronik/x/evm/types"
 )
@@ -100,6 +101,7 @@ func (b *Backend) TraceTransaction(hash common.Hash, config *evmtypes.TraceConfi
 		BlockHash:       common.Bytes2Hex(blk.BlockID.Hash),
 		ProposerAddress: sdk.ConsAddress(blk.Block.ProposerAddress),
 		ChainId:         b.chainID.Int64(),
+		Unencrypted:     b.allowUnencryptedTxs,
 	}
 
 	if config != nil {

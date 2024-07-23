@@ -15,6 +15,11 @@ fn main () {
 
     println!("cargo:rustc-link-search=native=/opt/intel/sgxsdk/lib64");
     println!("cargo:rustc-link-lib=sgx_uprotected_fs");
+    
+    println!("cargo:rustc-link-lib=dylib=sgx_dcap_ql");
+    println!("cargo:rustc-link-lib=dylib=sgx_dcap_quoteverify");
+	println!("cargo:rustc-link-lib=dylib=dcap_quoteprov");
+
     match is_sim.as_ref() {
         "SW" => {
             println!("cargo:rustc-link-lib=dylib=sgx_urts_sim");

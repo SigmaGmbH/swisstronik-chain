@@ -12,13 +12,14 @@ use crate::GoQuerier;
 mod blake2f;
 mod bn128;
 mod curve25519;
-mod identity;
 mod modexp;
 mod sha3fips;
 mod ec_recover;
 mod sha256;
 mod ripemd160;
 mod datacopy;
+mod compliance_bridge;
+mod secp256r1;
 
 pub type PrecompileResult = Result<PrecompileOutput, PrecompileFailure>;
 
@@ -36,7 +37,7 @@ pub trait LinearCostPrecompile {
     fn raw_execute(
         input: &[u8],
         cost: u64,
-    ) -> core::result::Result<(ExitSucceed, Vec<u8>), PrecompileFailure>;
+    ) -> Result<(ExitSucceed, Vec<u8>), PrecompileFailure>;
 }
 
 /// Precompile with possibility to interact with Cosmos side using GoQuerier
@@ -45,12 +46,6 @@ pub trait LinearCostPrecompileWithQuerier {
     const WORD: u64;
 
     fn execute(querier: *mut GoQuerier, handle: &mut impl PrecompileHandle) -> PrecompileResult;
-
-    fn raw_execute(
-        querier: *mut GoQuerier,
-        input: &[u8],
-        cost: u64,
-    ) -> core::result::Result<(ExitSucceed, Vec<u8>), PrecompileFailure>;
 }
 
 impl<T: LinearCostPrecompile> Precompile for T {
@@ -103,7 +98,7 @@ impl EVMPrecompiles {
     pub fn new(querier: *mut GoQuerier) -> Self {
         Self{ querier }
     }
-    pub fn used_addresses() -> [H160; 10] {
+    pub fn used_addresses() -> [H160; 17] {
         [
             hash(1),
             hash(2),
@@ -114,9 +109,14 @@ impl EVMPrecompiles {
             hash(7),
             hash(8),
             hash(9),
-            // hash(1024),
-            // hash(1025),
+            hash(0x100),
+            hash(1024),
+            hash(1025),
             hash(1027),
+            hash(1028),
+            hash(1029),
+            hash(1030),
+            hash(1031),
         ]
     }
 }
@@ -134,12 +134,15 @@ impl PrecompileSet for EVMPrecompiles {
             a if a == hash(7) => Some(bn128::Bn128Mul::execute(handle)),
             a if a == hash(8) => Some(bn128::Bn128Pairing::execute(handle)),
             a if a == hash(9) => Some(blake2f::Blake2F::execute(handle)),
+            // RIP-7212
+            a if a == hash(0x100) => Some(secp256r1::P256Verify::execute(handle)),
             // Non-Frontier specific nor Ethereum precompiles :
-            // a if a == hash(1024) => Some(Sha3FIPS256::execute(handle)),
-            // a if a == hash(1025) => Some(Sha3FIPS512::execute(handle)),
-            // a if a == hash(1026) => Some(ECRecoverPublicKey::execute(handle)),
-            // Identity precompile
-            a if a == hash(1027) => Some(identity::Identity::execute(self.querier, handle)),
+            a if a == hash(1024) => Some(sha3fips::Sha3FIPS256::execute(handle)),
+            a if a == hash(1025) => Some(sha3fips::Sha3FIPS512::execute(handle)),
+            a if a == hash(1028) => Some(compliance_bridge::ComplianceBridge::execute(self.querier, handle)),
+            a if a == hash(1029) => Some(curve25519::Curve25519Add::execute(handle)),
+            a if a == hash(1030) => Some(curve25519::Curve25519ScalarMul::execute(handle)),
+            a if a == hash(1031) => Some(curve25519::Ed25519Verify::execute(handle)),
             _ => None,
         }
     }

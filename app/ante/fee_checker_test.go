@@ -4,8 +4,6 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/stretchr/testify/require"
-
 	"github.com/cometbft/cometbft/libs/log"
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
@@ -13,6 +11,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/module"
 	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	"github.com/ethereum/go-ethereum/params"
+	"github.com/stretchr/testify/require"
+
 	"swisstronik/encoding"
 	ethermint "swisstronik/types"
 	"swisstronik/utils"
@@ -39,7 +39,7 @@ func (m MockEVMKeeper) GetParams(ctx sdk.Context) evmtypes.Params {
 }
 
 func (m MockEVMKeeper) ChainID() *big.Int {
-	return big.NewInt(9000)
+	return big.NewInt(1291)
 }
 
 func TestSDKTxFeeChecker(t *testing.T) {

@@ -19,10 +19,10 @@ import (
 	"fmt"
 	"math/big"
 
-	sdkmath "cosmossdk.io/math"
-	"github.com/ethereum/go-ethereum/crypto"
-
 	errorsmod "cosmossdk.io/errors"
+	sdkmath "cosmossdk.io/math"
+	"github.com/SigmaGmbH/librustgo"
+	rustgotypes "github.com/SigmaGmbH/librustgo/types"
 	"github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
@@ -32,12 +32,11 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/params"
 
 	evmcommontypes "swisstronik/types"
 	"swisstronik/x/evm/types"
-
-	"github.com/SigmaGmbH/librustgo"
 )
 
 // Keeper grants access to the EVM module state and implements the go-ethereum StateDB interface.
@@ -49,6 +48,7 @@ type Keeper struct {
 	// - storing account's Code
 	// - storing transaction Logs
 	// - storing Bloom filters by block height. Needed for the Web3 API.
+	// - storing node public key by each block height
 	storeKey storetypes.StoreKey
 
 	// key to access the transient store, which is reset on every block during Commit
@@ -64,8 +64,8 @@ type Keeper struct {
 	stakingKeeper types.StakingKeeper
 	// fetch EIP1559 base fee and parameters
 	feeMarketKeeper types.FeeMarketKeeper
-	// access to DID registry
-	DIDKeeper types.DIDKeeper
+	// access to x/compliance module
+	ComplianceKeeper types.ComplianceKeeper
 
 	// chain ID number obtained from the context's chain id
 	eip155ChainID *big.Int
@@ -76,8 +76,8 @@ type Keeper struct {
 	// Legacy subspace
 	ss paramstypes.Subspace
 
-	// Cached node public key
-	nodePublicKey common.Hash
+	// list of epoch data which includes epoch number, starting block and relevant node public key
+	epochs []*rustgotypes.EpochData
 }
 
 // NewKeeper generates new evm module keeper
@@ -89,7 +89,7 @@ func NewKeeper(
 	bankKeeper types.BankKeeper,
 	sk types.StakingKeeper,
 	fmk types.FeeMarketKeeper,
-	dk types.DIDKeeper,
+	ck types.ComplianceKeeper,
 	ss paramstypes.Subspace,
 ) *Keeper {
 	// ensure evm module account is set
@@ -102,26 +102,24 @@ func NewKeeper(
 		panic(err)
 	}
 
-	// obtain node public key from SGX enclave
-	response, err := librustgo.GetNodePublicKey()
+	epochs, err := librustgo.ListEpochs()
 	if err != nil {
 		panic(err)
 	}
-	nodePublicKey := common.BytesToHash(response.PublicKey)
 
 	// NOTE: we pass in the parameter space to the CommitStateDB in order to use custom denominations for the EVM operations
 	return &Keeper{
-		cdc:             cdc,
-		authority:       authority,
-		accountKeeper:   ak,
-		bankKeeper:      bankKeeper,
-		stakingKeeper:   sk,
-		feeMarketKeeper: fmk,
-		DIDKeeper:       dk,
-		storeKey:        storeKey,
-		transientKey:    transientKey,
-		ss:              ss,
-		nodePublicKey:   nodePublicKey,
+		cdc:              cdc,
+		authority:        authority,
+		accountKeeper:    ak,
+		bankKeeper:       bankKeeper,
+		stakingKeeper:    sk,
+		feeMarketKeeper:  fmk,
+		ComplianceKeeper: ck,
+		storeKey:         storeKey,
+		transientKey:     transientKey,
+		ss:               ss,
+		epochs:           epochs,
 	}
 }
 
@@ -240,7 +238,7 @@ func (k Keeper) SetLogSizeTransient(ctx sdk.Context, logSize uint64) {
 func (k Keeper) GetAccountStorage(ctx sdk.Context, address common.Address) types.Storage {
 	storage := types.Storage{}
 
-	k.ForEachStorage(ctx, address, func(key, value common.Hash) bool {
+	k.ForEachStorage(ctx, address, func(key common.Hash, value []byte) bool {
 		storage = append(storage, types.NewState(key, value))
 		return true
 	})
@@ -423,7 +421,7 @@ func (k *Keeper) GetCode(ctx sdk.Context, codeHash common.Hash) []byte {
 }
 
 // ForEachStorage iterate contract storage, callback return false to break early
-func (k *Keeper) ForEachStorage(ctx sdk.Context, addr common.Address, cb func(key, value common.Hash) bool) {
+func (k *Keeper) ForEachStorage(ctx sdk.Context, addr common.Address, cb func(key common.Hash, value []byte) bool) {
 	store := ctx.KVStore(k.storeKey)
 	prefix := types.AddressStoragePrefix(addr)
 
@@ -432,10 +430,9 @@ func (k *Keeper) ForEachStorage(ctx sdk.Context, addr common.Address, cb func(ke
 
 	for ; iterator.Valid(); iterator.Next() {
 		key := common.BytesToHash(iterator.Key())
-		value := common.BytesToHash(iterator.Value())
 
 		// check if iteration stops
-		if !cb(key, value) {
+		if !cb(key, iterator.Value()) {
 			return
 		}
 	}
@@ -583,7 +580,7 @@ func (k *Keeper) DeleteAccount(ctx sdk.Context, addr common.Address) error {
 	}
 
 	// clear storage
-	k.ForEachStorage(ctx, addr, func(key, _ common.Hash) bool {
+	k.ForEachStorage(ctx, addr, func(key common.Hash, _ []byte) bool {
 		k.SetState(ctx, addr, key, nil)
 		return true
 	})

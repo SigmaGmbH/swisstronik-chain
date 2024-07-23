@@ -109,7 +109,7 @@ func RunAddCmd(ctx client.Context, cmd *cobra.Command, args []string, inBuf *buf
 			}
 
 			if !response {
-				return errors.New("aborted")
+				return errors.New("Duplicated account. Aborted")
 			}
 
 			err2 = kb.Delete(name)

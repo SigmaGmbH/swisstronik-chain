@@ -161,29 +161,7 @@ func (k Keeper) Balance(c context.Context, req *types.QueryBalanceRequest) (*typ
 
 // Storage implements the Query/Storage gRPC method
 func (k Keeper) Storage(c context.Context, req *types.QueryStorageRequest) (*types.QueryStorageResponse, error) {
-	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "empty request")
-	}
-
-	if err := evmcommontypes.ValidateAddress(req.Address); err != nil {
-		return nil, status.Error(
-			codes.InvalidArgument,
-			types.ErrZeroAddress.Error(),
-		)
-	}
-
-	ctx := sdk.UnwrapSDKContext(c)
-
-	address := common.HexToAddress(req.Address)
-	key := common.HexToHash(req.Key)
-
-	stateBytes := k.GetState(ctx, address, key)
-	state := common.BytesToHash(stateBytes)
-	stateHex := state.Hex()
-
-	return &types.QueryStorageResponse{
-		Value: stateHex,
-	}, nil
+	return nil, status.Error(codes.Unavailable, "Storage request was disabled, since storage is encrypted. Check docs at https://swisstronik.gitbook.io/swisstronik-docs/ for more information")
 }
 
 // Code implements the Query/Code gRPC method
@@ -262,7 +240,7 @@ func (k Keeper) EthCall(c context.Context, req *types.EthCallRequest) (*types.Ms
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	// pass false to not commit StateDB
-	res, err := k.ApplyMessageWithConfig(ctx, msg, false, cfg, txConfig, txContext)
+	res, err := k.ApplyMessageWithConfig(ctx, msg, false, cfg, txConfig, txContext, req.Unencrypted)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -362,7 +340,7 @@ func (k Keeper) EstimateGas(c context.Context, req *types.EthCallRequest) (*type
 		}
 
 		// pass false to not commit StateDB
-		rsp, err = k.ApplyMessageWithConfig(ctx, msg, false, cfg, txConfig, txContext)
+		rsp, err = k.ApplyMessageWithConfig(ctx, msg, false, cfg, txConfig, txContext, req.Unencrypted)
 		if err != nil {
 			if errors.Is(err, core.ErrIntrinsicGas) {
 				return true, nil, nil // Special case, raise gas limit
@@ -446,7 +424,7 @@ func (k Keeper) TraceTx(c context.Context, req *types.QueryTraceTxRequest) (*typ
 		if err != nil {
 			continue
 		}
-		rsp, err := k.ApplyMessageWithConfig(ctx, msg, true, cfg, txConfig, txContext)
+		rsp, err := k.ApplyMessageWithConfig(ctx, msg, true, cfg, txConfig, txContext, req.Unencrypted)
 		if err != nil {
 			continue
 		}
@@ -465,7 +443,7 @@ func (k Keeper) TraceTx(c context.Context, req *types.QueryTraceTxRequest) (*typ
 		_ = json.Unmarshal([]byte(req.TraceConfig.TracerJsonConfig), &tracerConfig)
 	}
 
-	result, _, err := k.traceTx(ctx, cfg, txConfig, signer, tx, req.TraceConfig, false, tracerConfig)
+	result, _, err := k.traceTx(ctx, cfg, txConfig, signer, tx, req.TraceConfig, false, tracerConfig, req.Unencrypted)
 	if err != nil {
 		// error will be returned with detail status from traceTx
 		return nil, err
@@ -523,7 +501,7 @@ func (k Keeper) TraceBlock(c context.Context, req *types.QueryTraceBlockRequest)
 		ethTx := tx.AsTransaction()
 		txConfig.TxHash = ethTx.Hash()
 		txConfig.TxIndex = uint(i)
-		traceResult, logIndex, err := k.traceTx(ctx, cfg, txConfig, signer, ethTx, req.TraceConfig, true, nil)
+		traceResult, logIndex, err := k.traceTx(ctx, cfg, txConfig, signer, ethTx, req.TraceConfig, true, nil, tx.Unencrypted)
 		if err != nil {
 			result.Error = err.Error()
 		} else {
@@ -553,6 +531,7 @@ func (k *Keeper) traceTx(
 	traceConfig *types.TraceConfig,
 	commitMessage bool,
 	tracerJSONConfig json.RawMessage,
+	isUnencrypted bool,
 ) (*interface{}, uint, error) {
 	// Assemble the structured logger or the JavaScript tracer
 	var (
@@ -620,7 +599,7 @@ func (k *Keeper) traceTx(
 	if err != nil {
 		return nil, 0, status.Error(codes.Internal, err.Error())
 	}
-	res, err := k.ApplyMessageWithConfig(ctx, msg, commitMessage, cfg, txConfig, txContext)
+	res, err := k.ApplyMessageWithConfig(ctx, msg, commitMessage, cfg, txConfig, txContext, isUnencrypted)
 	if err != nil {
 		return nil, 0, status.Error(codes.Internal, err.Error())
 	}
@@ -652,8 +631,8 @@ func (k Keeper) BaseFee(c context.Context, _ *types.QueryBaseFeeRequest) (*types
 }
 
 // NodePublicKey implements the Query/NodePublicKey gRPC method
-func (k Keeper) NodePublicKey(_ context.Context, _ *types.QueryNodePublicKey) (*types.QueryNodePublicKeyResponse, error) {
-	nodePublicKey, err := k.GetNodePublicKey()
+func (k Keeper) NodePublicKey(ctx context.Context, req *types.QueryNodePublicKey) (*types.QueryNodePublicKeyResponse, error) {
+	nodePublicKey, err := k.GetNodePublicKey(req.BlockNumber)
 	if err != nil {
 		return nil, err
 	}

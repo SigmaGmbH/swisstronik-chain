@@ -3,9 +3,11 @@ package keeper
 import (
 	"fmt"
 
+	errorsmod "cosmossdk.io/errors"
 	"github.com/cometbft/cometbft/libs/log"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	errortypes "github.com/cosmos/cosmos-sdk/types/errors"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 
 	"swisstronik/x/vesting/types"
@@ -45,4 +47,18 @@ func NewKeeper(
 
 func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
+}
+
+func (k Keeper) GetMonthlyVestingAccount(ctx sdk.Context, address sdk.AccAddress) (*types.MonthlyVestingAccount, error) {
+	acc := k.accountKeeper.GetAccount(ctx, address)
+	if acc == nil {
+		return nil, errorsmod.Wrapf(errortypes.ErrUnknownAddress, "account at %s does not exist", address.String())
+	}
+
+	vestingAccount, ok := acc.(*types.MonthlyVestingAccount)
+	if !ok {
+		return nil, errorsmod.Wrapf(types.ErrNotFoundVestingAccount, address.String())
+	}
+
+	return vestingAccount, nil
 }

@@ -63,9 +63,8 @@ type EvmTestSuite struct {
 	from      common.Address
 	to        sdk.AccAddress
 
-	dynamicTxFee  bool
-	nodePublicKey []byte
-	privateKey    []byte
+	dynamicTxFee bool
+	privateKey   []byte
 }
 
 // DoSetupTest setup test environment, it uses`require.TestingT` to support both `testing.T` and `testing.B`.
@@ -176,13 +175,8 @@ func (suite *EvmTestSuite) DoSetupTest(t require.TestingT) {
 	suite.handler = evm.NewHandler(suite.app.EvmKeeper)
 
 	// Initialize enclave
-	err = librustgo.InitializeMasterKey(false)
+	err = librustgo.InitializeEnclave(false)
 	require.NoError(t, err)
-
-	// Obtain node public key
-	res, err := librustgo.GetNodePublicKey()
-	require.NoError(t, err)
-	suite.nodePublicKey = res.PublicKey
 }
 
 func (suite *EvmTestSuite) SetupTest() {
@@ -375,16 +369,20 @@ func (suite *EvmTestSuite) TestDeployAndCallContract() {
 
 	err = proto.Unmarshal(result.Data, &res)
 	suite.Require().NoError(err, "failed to decode result data")
-	suite.Require().Equal(res.VmError, "", "failed to handle eth tx msg")
+	suite.Require().Equal("", res.VmError, "failed to handle eth tx msg")
 
 	// store - changeOwner
 	gasLimit = uint64(100000000000)
 	gasPrice = big.NewInt(100)
 	receiver := crypto.CreateAddress(suite.from, 1)
 
+	nodePublicKeyRes, err := librustgo.GetNodePublicKey(uint64(suite.ctx.BlockHeight()))
+	suite.Require().NoError(err)
+	nodePublicKey := nodePublicKeyRes.PublicKey
+
 	storeAddr := "0xa6f9dae10000000000000000000000006a82e4a67715c8412a9114fbd2cbaefbc8181424"
 	bytecode = common.FromHex(storeAddr)
-	tx = types.NewTx(suite.chainID, 2, &receiver, big.NewInt(0), gasLimit, gasPrice, nil, nil, bytecode, nil, suite.privateKey, suite.nodePublicKey)
+	tx = types.NewTx(suite.chainID, 2, &receiver, big.NewInt(0), gasLimit, gasPrice, nil, nil, bytecode, nil, suite.privateKey, nodePublicKey)
 	suite.SignTx(tx)
 
 	result, err = suite.handler(suite.ctx, tx)
@@ -392,11 +390,11 @@ func (suite *EvmTestSuite) TestDeployAndCallContract() {
 
 	err = proto.Unmarshal(result.Data, &res)
 	suite.Require().NoError(err, "failed to decode result data")
-	suite.Require().Equal(res.VmError, "", "failed to handle eth tx msg")
+	suite.Require().Equal("", res.VmError, "failed to handle eth tx msg")
 
 	// query - getOwner
 	bytecode = common.FromHex("0x893d20e8")
-	tx = types.NewTx(suite.chainID, 2, &receiver, big.NewInt(0), gasLimit, gasPrice, nil, nil, bytecode, nil, suite.privateKey, suite.nodePublicKey)
+	tx = types.NewTx(suite.chainID, 2, &receiver, big.NewInt(0), gasLimit, gasPrice, nil, nil, bytecode, nil, suite.privateKey, nodePublicKey)
 	suite.SignTx(tx)
 
 	result, err = suite.handler(suite.ctx, tx)
@@ -404,7 +402,7 @@ func (suite *EvmTestSuite) TestDeployAndCallContract() {
 
 	err = proto.Unmarshal(result.Data, &res)
 	suite.Require().NoError(err, "failed to decode result data")
-	suite.Require().Equal(res.VmError, "", "failed to handle eth tx msg")
+	suite.Require().Equal("", res.VmError, "failed to handle eth tx msg")
 }
 
 func (suite *EvmTestSuite) TestSendTransaction() {
@@ -538,7 +536,7 @@ func (suite *EvmTestSuite) deployERC20Contract() common.Address {
 	erc20DeployTx.From = suite.from.Hex()
 	err = erc20DeployTx.Sign(ethtypes.LatestSignerForChainID(chainID), suite.signer)
 	suite.Require().NoError(err)
-	rsp, err := suite.app.EvmKeeper.ApplySGXVMTransaction(suite.ctx, erc20DeployTx.AsTransaction())
+	rsp, err := suite.app.EvmKeeper.ApplySGXVMTransaction(suite.ctx, erc20DeployTx.AsTransaction(), true)
 	suite.Require().NoError(err)
 	suite.Require().False(rsp.Failed())
 	return crypto.CreateAddress(suite.from, nonce)
@@ -590,6 +588,10 @@ func (suite *EvmTestSuite) TestERC20TransferReverted() {
 			data, err := types.ERC20Contract.ABI.Pack("transfer", suite.from, big.NewInt(10))
 			suite.Require().NoError(err)
 
+			nodePublicKeyRes, err := librustgo.GetNodePublicKey(uint64(suite.ctx.BlockHeight()))
+			suite.Require().NoError(err)
+			nodePublicKey := nodePublicKeyRes.PublicKey
+
 			gasPrice := big.NewInt(1000000000) // must be bigger than or equal to baseFee
 			nonce := k.GetNonce(suite.ctx, suite.from)
 			tx := types.NewTx(
@@ -604,7 +606,7 @@ func (suite *EvmTestSuite) TestERC20TransferReverted() {
 				data,
 				nil,
 				suite.privateKey,
-				suite.nodePublicKey,
+				nodePublicKey,
 			)
 			suite.SignTx(tx)
 
@@ -622,9 +624,10 @@ func (suite *EvmTestSuite) TestERC20TransferReverted() {
 			suite.Require().NoError(err)
 
 			ethMsgTx := &types.MsgHandleTx{
-				Data: tx.Data,
-				Hash: tx.Hash,
-				From: tx.From,
+				Data:        tx.Data,
+				Hash:        tx.Hash,
+				From:        tx.From,
+				Unencrypted: false,
 			}
 			res, err := k.HandleTx(sdk.WrapSDKContext(suite.ctx), ethMsgTx)
 			suite.Require().NoError(err)
@@ -700,9 +703,10 @@ func (suite *EvmTestSuite) TestContractDeploymentRevert() {
 			suite.Require().NoError(err)
 
 			msgEthTx := &types.MsgHandleTx{
-				Data: tx.Data,
-				Hash: tx.Hash,
-				From: tx.From,
+				Data:        tx.Data,
+				Hash:        tx.Hash,
+				From:        tx.From,
+				Unencrypted: false,
 			}
 			rsp, err := k.HandleTx(sdk.WrapSDKContext(suite.ctx), msgEthTx)
 			suite.Require().NoError(err)

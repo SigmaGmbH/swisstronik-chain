@@ -36,6 +36,7 @@ func TestCreate(t *testing.T) {
 		value,
 		nil,
 		gasLimit,
+		0,
 		txContext,
 		true,
 	)
@@ -88,8 +89,10 @@ func TestCoinTransfer(t *testing.T) {
 		value.Bytes(),
 		nil,
 		gasLimit,
+		0,
 		txContext,
 		true,
+		false,
 	)
 	if err != nil {
 		t.Fail()
@@ -125,21 +128,47 @@ func TestCoinTransfer(t *testing.T) {
 	}
 }
 
-func TestSeedExchange(t *testing.T) {
-	if err := api.InitializeMasterKey(true); err != nil {
+func TestSeedExchangeEPID(t *testing.T) {
+	if err := api.InitializeEnclave(true); err != nil {
 		t.Fail()
 	}
 
-	addr := "localhost:8999"
-	err := api.StartSeedServer(addr)
+	epidAddress := "localhost:8999"
+	dcapAddress := "localhost:8998"
+	err := api.StartAttestationServer(epidAddress, dcapAddress)
 	if err != nil {
 		t.Fail()
 	}
 
-	host := "localhost"
-	port := 8999
-	if err := api.RequestSeed(host, port); err != nil {
+	// Test EPID Attestation
+	epidHost := "localhost"
+	epidPort := 8999
+	if err := api.RequestEpochKeys(epidHost, epidPort, false); err != nil {
 		t.Fail()
+	} else {
+		println("EPID PASSED")
+	}
+}
+
+func TestSeedExchangeDCAP(t *testing.T) {
+	if err := api.InitializeEnclave(true); err != nil {
+		t.Fail()
+	}
+
+	epidAddress := "localhost:8999"
+	dcapAddress := "localhost:8998"
+	err := api.StartAttestationServer(epidAddress, dcapAddress)
+	if err != nil {
+		t.Fail()
+	}
+
+	// Test DCAP Attestation
+	dcapHost := "localhost"
+	dcapPort := 8998
+	if err := api.RequestEpochKeys(dcapHost, dcapPort, true); err != nil {
+		t.Fail()
+	} else {
+		println("DCAP PASSED")
 	}
 }
 
@@ -150,4 +179,16 @@ func TestNodeInitialized(t *testing.T) {
 	}
 
 	fmt.Println("node initialized: ", res)
+}
+
+func TestDumpQuote(t *testing.T) {
+	if err := api.DumpDCAPQuote("quote.dat"); err != nil {
+		t.Fail()
+	}
+}
+
+func TestVerifyQuote(t *testing.T) {
+	if err := api.VerifyDCAPQuote("quote.dat"); err != nil {
+		t.Fail()
+	}
 }

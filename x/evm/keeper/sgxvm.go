@@ -2,9 +2,12 @@ package keeper
 
 import (
 	"context"
-	errorsmod "cosmossdk.io/errors"
 	"encoding/json"
 	"fmt"
+	"math/big"
+	"strconv"
+
+	errorsmod "cosmossdk.io/errors"
 	"github.com/SigmaGmbH/librustgo"
 	"github.com/armon/go-metrics"
 	tmbytes "github.com/cometbft/cometbft/libs/bytes"
@@ -16,8 +19,8 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/params"
-	"math/big"
-	"strconv"
+	"github.com/pkg/errors"
+
 	evmcommontypes "swisstronik/types"
 	"swisstronik/x/evm/types"
 )
@@ -42,7 +45,7 @@ func (k *Keeper) HandleTx(goCtx context.Context, msg *types.MsgHandleTx) (*types
 		labels = append(labels, telemetry.NewLabel("execution", "call"))
 	}
 
-	response, err := k.ApplySGXVMTransaction(ctx, tx)
+	response, err := k.ApplySGXVMTransaction(ctx, tx, msg.Unencrypted)
 	if err != nil {
 		return nil, errorsmod.Wrap(err, "failed to apply transaction")
 	}
@@ -129,7 +132,11 @@ func (k *Keeper) HandleTx(goCtx context.Context, msg *types.MsgHandleTx) (*types
 	return response, nil
 }
 
-func (k *Keeper) ApplySGXVMTransaction(ctx sdk.Context, tx *ethtypes.Transaction) (*types.MsgEthereumTxResponse, error) {
+func (k *Keeper) ApplySGXVMTransaction(
+	ctx sdk.Context,
+	tx *ethtypes.Transaction,
+	isUnencrypted bool,
+) (*types.MsgEthereumTxResponse, error) {
 	var (
 		bloom        *big.Int
 		bloomReceipt ethtypes.Bloom
@@ -164,7 +171,7 @@ func (k *Keeper) ApplySGXVMTransaction(ctx sdk.Context, tx *ethtypes.Transaction
 		tmpCtx, commit = ctx.CacheContext()
 	}
 
-	res, err := k.ApplyMessageWithConfig(tmpCtx, msg, true, cfg, txConfig, txContext)
+	res, err := k.ApplyMessageWithConfig(tmpCtx, msg, true, cfg, txConfig, txContext, isUnencrypted)
 	if err != nil {
 		return nil, errorsmod.Wrap(err, "failed to apply ethereum core message")
 	}
@@ -255,6 +262,7 @@ func (k *Keeper) ApplyMessageWithConfig(
 	cfg *types.EVMConfig,
 	txConfig types.TxConfig,
 	txContext *librustgo.TransactionContext,
+	isUnencrypted bool,
 ) (*types.MsgEthereumTxResponse, error) {
 	// return error if contract creation or call are disabled through governance
 	if !cfg.Params.EnableCreate && msg.To() == nil {
@@ -307,6 +315,7 @@ func (k *Keeper) ApplyMessageWithConfig(
 			msg.Nonce(),
 			txContext,
 			commit,
+			isUnencrypted,
 		)
 	}
 
@@ -333,8 +342,18 @@ func (k *Keeper) ApplyMessageWithConfig(
 	}, nil
 }
 
-func (k *Keeper) GetNodePublicKey() (common.Hash, error) {
-	return k.nodePublicKey, nil
+func (k *Keeper) GetNodePublicKey(blockNumber uint64) (common.Hash, error) {
+	nodePublicKey := common.Hash{}
+	for _, epoch := range k.epochs {
+		if epoch.GetStartingBlock() > blockNumber {
+			break
+		}
+		nodePublicKey = common.BytesToHash(epoch.GetNodePublicKey())
+	}
+	if nodePublicKey == (common.Hash{}) {
+		return common.Hash{}, errors.Wrapf(types.ErrEmptyNodePublicKey, "node public key not exists at %d", blockNumber)
+	}
+	return nodePublicKey, nil
 }
 
 func CreateSGXVMContext(ctx sdk.Context, k *Keeper, tx *ethtypes.Transaction) (*librustgo.TransactionContext, error) {

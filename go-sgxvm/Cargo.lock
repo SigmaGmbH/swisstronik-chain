@@ -359,13 +359,13 @@ dependencies = [
 
 [[package]]
 name = "sgx_types"
-version = "1.1.5"
-source = "git+https://github.com/apache/teaclave-sgx-sdk.git?tag=v1.1.5#d2d339cbb005f676bb700059bd51dc689c025f6b"
+version = "1.1.6"
+source = "git+https://github.com/apache/teaclave-sgx-sdk.git?rev=3c903bda#3c903bdac4e503dd27b9b1f761c4abfc55f2464c"
 
 [[package]]
 name = "sgx_urts"
-version = "1.1.5"
-source = "git+https://github.com/apache/teaclave-sgx-sdk.git?tag=v1.1.5#d2d339cbb005f676bb700059bd51dc689c025f6b"
+version = "1.1.6"
+source = "git+https://github.com/apache/teaclave-sgx-sdk.git?rev=3c903bda#3c903bdac4e503dd27b9b1f761c4abfc55f2464c"
 dependencies = [
  "libc",
  "sgx_types",

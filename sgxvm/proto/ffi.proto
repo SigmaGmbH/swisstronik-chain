@@ -136,18 +136,63 @@ message QueryRemoveStorageResponse {}
 message QueryBlockHash { bytes number = 1; }
 message QueryBlockHashResponse { bytes hash = 1; }
 
-// Messages for interaction with x/did module
-message QueryVerificationMethods {
-  string did = 1;
+message QueryAddVerificationDetails {
+  bytes userAddress = 1;
+  bytes issuerAddress = 2;
+  string originChain = 3;
+  uint32 verificationType = 4;
+  uint32 issuanceTimestamp = 5;
+  uint32 expirationTimestamp = 6;
+  bytes proofData = 7;
+  string schema = 8;
+  string issuerVerificationId = 9;
+  uint32 version = 10;
+}
+message QueryAddVerificationDetailsResponse {
+  bytes verificationId = 1;
 }
 
-message VerificationMethod {
-  string verificationMaterial = 1;
-  string verificationMethodType = 2;
+message QueryHasVerification {
+  bytes userAddress = 1;
+  uint32 verificationType = 2;
+  uint32 expirationTimestamp = 3;
+  repeated bytes allowedIssuers = 4;
+}
+message QueryHasVerificationResponse {
+  bool hasVerification = 1;
 }
 
-message QueryVerificationMethodsResponse {
-  repeated VerificationMethod vm = 1;
+message QueryGetVerificationData {
+  bytes userAddress = 1;
+  bytes issuerAddress = 2;
+}
+// VerificationDetails must have same members with VerificationDetails in "sgxvm/proto/ffi.proto"
+// including verification type and verification id as key.
+// But the member types can be different, such as string(address) to bytes
+message VerificationDetails {
+  // Verification type
+  uint32 verificationType = 1;
+  // Verification Id
+  bytes verificationID = 2;
+  // Verification issuer address
+  bytes issuerAddress = 3;
+  // From which chain proof was transferred
+  string originChain = 4;
+  // Original issuance timestamp
+  uint32 issuanceTimestamp = 5;
+  // Original expiration timestamp
+  uint32 expirationTimestamp = 6;
+  // Original proof data (ZK-proof)
+  bytes originalData = 7;
+  // ZK-proof original schema
+  string schema = 8;
+  // Verification id for checking(KYC/KYB/AML etc) from issuer side
+  string issuerVerificationId = 9;
+  // Version
+  uint32 version = 10;
+}
+message QueryGetVerificationDataResponse {
+  repeated VerificationDetails data = 1;
 }
 
 message CosmosRequest {
@@ -163,7 +208,9 @@ message CosmosRequest {
     QueryRemoveStorageCell removeStorageCell = 9;
     QueryRemoveStorage removeStorage = 10;
     QueryBlockHash blockHash = 11;
-    QueryVerificationMethods verificationMethods = 12;
+    QueryAddVerificationDetails addVerificationDetails = 12;
+    QueryHasVerification hasVerification = 13;
+    QueryGetVerificationData getVerificationData = 14;
   }
 }
 
@@ -177,6 +224,7 @@ message SGXVMCallParams {
   repeated AccessListItem accessList = 6;
   bool commit = 7;
   uint64 nonce = 8;
+  bool unencrypted = 9;
 }
 
 // Message with data required to execute `create` operation
@@ -203,10 +251,21 @@ message SGXVMCreateRequest {
 }
 
 // Request to obtain node public key
-message NodePublicKeyRequest {}
+message NodePublicKeyRequest {
+  uint64 blockNumber = 1;
+}
 
 // Response with node public key
 message NodePublicKeyResponse { bytes publicKey = 1; }
+
+message EpochData {
+  uint32 epochNumber = 1;
+  uint64 startingBlock = 2;
+  bytes nodePublicKey = 3;
+}
+message ListEpochsResponse {
+  repeated EpochData epochs = 1;
+}
 
 message FFIRequest {
   oneof req {

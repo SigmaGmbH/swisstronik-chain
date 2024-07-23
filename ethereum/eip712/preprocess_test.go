@@ -25,12 +25,12 @@ import (
 
 // Testing Constants
 var (
-	chainId = "ethermint_9000-1"
+	chainId = "swisstronik_1291-1"
 	ctx     = client.Context{}.WithTxConfig(
 		encoding.MakeConfig(app.ModuleBasics).TxConfig,
 	)
 )
-var feePayerAddress = "ethm17xpfvakm2amg962yls6f84z3kell8c5lthdzgl"
+var feePayerAddress = "swtr1x9djmrsvrf60xze5vj4pv52khjhskyqpzratt8"
 
 type TestCaseStruct struct {
 	txBuilder              client.TxBuilder
@@ -44,7 +44,7 @@ type TestCaseStruct struct {
 
 func TestLedgerPreprocessing(t *testing.T) {
 	// Update bech32 prefix
-	sdk.GetConfig().SetBech32PrefixForAccount("ethm", "")
+	sdk.GetConfig().SetBech32PrefixForAccount("swtr", "")
 
 	testCases := []TestCaseStruct{
 		createBasicTestCase(t),
@@ -67,7 +67,7 @@ func TestLedgerPreprocessing(t *testing.T) {
 		require.True(t, len(hasExtOptsTx.GetExtensionOptions()) == 1)
 
 		expectedExt := types.ExtensionOptionsWeb3Tx{
-			TypedDataChainID: 9000,
+			TypedDataChainID: 1291,
 			FeePayer:         feePayerAddress,
 			FeePayerSig:      tc.expectedSignatureBytes,
 		}
@@ -167,7 +167,7 @@ func createBasicTestCase(t *testing.T) TestCaseStruct {
 		Sequence: 0,
 	}
 
-	txBuilder.SetSignatures(sigsV2)
+	_ = txBuilder.SetSignatures(sigsV2)
 	return TestCaseStruct{
 		txBuilder:              txBuilder,
 		expectedFeePayer:       feePayer.String(),
@@ -209,7 +209,7 @@ func createPopulatedTestCase(t *testing.T) TestCaseStruct {
 		),
 	}
 
-	txBuilder.SetMsgs(&msgSend)
+	_ = txBuilder.SetMsgs(&msgSend)
 
 	return TestCaseStruct{
 		txBuilder:              txBuilder,

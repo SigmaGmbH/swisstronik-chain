@@ -236,6 +236,7 @@ message EthCallRequest {
             "github.com/cosmos/cosmos-sdk/types.ConsAddress" ];
   // chain_id is the eip155 chain id parsed from the requested block header
   int64 chain_id = 4;
+  bool unencrypted = 5;
 }
 
 // EstimateGasResponse defines EstimateGas response
@@ -269,6 +270,7 @@ message QueryTraceTxRequest {
             "github.com/cosmos/cosmos-sdk/types.ConsAddress" ];
   // chain_id is the the eip155 chain id parsed from the requested block header
   int64 chain_id = 9;
+  bool unencrypted = 10;
 }
 
 // QueryTraceTxResponse defines TraceTx response
@@ -316,7 +318,9 @@ message QueryBaseFeeResponse {
 }
 
 // QueryNodePublicKey defines the request type for querying node public key
-message QueryNodePublicKey {}
+message QueryNodePublicKey {
+  uint64 block_number = 1;
+}
 
 message QueryNodePublicKeyResponse {
   // node_public_key is x25519 public key in hex format

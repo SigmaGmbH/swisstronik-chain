@@ -2,13 +2,11 @@ package keeper_test
 
 import (
 	_ "embed"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"math"
 	"math/big"
 	"os"
-	didtypes "swisstronik/x/did/types"
 	"testing"
 	"time"
 
@@ -60,8 +58,6 @@ import (
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	tmversion "github.com/cometbft/cometbft/proto/tendermint/version"
 	"github.com/cometbft/cometbft/version"
-
-	"swisstronik/crypto/deoxys"
 )
 
 type KeeperTestSuite struct {
@@ -122,7 +118,7 @@ func (suite *KeeperTestSuite) SetupTestWithT(t require.TestingT) {
 func (suite *KeeperTestSuite) SetupApp(checkTx bool) {
 	chainID := utils.TestnetChainID + "-1"
 	// Initialize enclave
-	err := librustgo.InitializeMasterKey(false)
+	err := librustgo.InitializeEnclave(false)
 	require.NoError(suite.T(), err)
 
 	suite.SetupAppWithT(checkTx, suite.T(), chainID)
@@ -131,7 +127,7 @@ func (suite *KeeperTestSuite) SetupApp(checkTx bool) {
 // SetupApp setup test environment, it uses`require.TestingT` to support both `testing.T` and `testing.B`.
 func (suite *KeeperTestSuite) SetupAppWithT(checkTx bool, t require.TestingT, chainID string) {
 	// obtain node public key
-	res, err := librustgo.GetNodePublicKey()
+	res, err := librustgo.GetNodePublicKey(0)
 	suite.Require().NoError(err)
 	suite.nodePublicKey = res.PublicKey
 
@@ -176,7 +172,6 @@ func (suite *KeeperTestSuite) SetupAppWithT(checkTx bool, t require.TestingT, ch
 	})
 
 	if suite.mintFeeCollector {
-		panic("8888888888888888")
 		// mint some coin to fee collector
 		coins := sdk.NewCoins(sdk.NewCoin(evmtypes.DefaultEVMDenom, sdkmath.NewInt(int64(params.TxGas)-1)))
 		genesisState := app.NewTestGenesisState(suite.app.AppCodec())
@@ -889,7 +884,7 @@ func (suite *KeeperTestSuite) TestSuicide() {
 
 	// Check state is deleted
 	var storage evmtypes.Storage
-	suite.app.EvmKeeper.ForEachStorage(suite.ctx, suite.address, func(key, value common.Hash) bool {
+	suite.app.EvmKeeper.ForEachStorage(suite.ctx, suite.address, func(key common.Hash, value []byte) bool {
 		storage = append(storage, evmtypes.NewState(key, value))
 		return true
 	})
@@ -979,7 +974,7 @@ func (suite *KeeperTestSuite) TestForEachStorage() {
 	testCase := []struct {
 		name      string
 		malleate  func()
-		callback  func(key, value common.Hash) (stop bool)
+		callback  func(key common.Hash, value []byte) (stop bool)
 		expValues []common.Hash
 	}{
 		{
@@ -989,7 +984,7 @@ func (suite *KeeperTestSuite) TestForEachStorage() {
 					suite.app.EvmKeeper.SetState(suite.ctx, suite.address, common.BytesToHash([]byte(fmt.Sprintf("key%d", i))), []byte(fmt.Sprintf("value%d", i)))
 				}
 			},
-			func(key, value common.Hash) bool {
+			func(key common.Hash, value []byte) bool {
 				storage = append(storage, evmtypes.NewState(key, value))
 				return true
 			},
@@ -1007,8 +1002,8 @@ func (suite *KeeperTestSuite) TestForEachStorage() {
 				suite.app.EvmKeeper.SetState(suite.ctx, suite.address, common.BytesToHash([]byte("key")), []byte("value"))
 				suite.app.EvmKeeper.SetState(suite.ctx, suite.address, common.BytesToHash([]byte("filterkey")), []byte("filtervalue"))
 			},
-			func(key, value common.Hash) bool {
-				if value == common.BytesToHash([]byte("filtervalue")) {
+			func(key common.Hash, value []byte) bool {
+				if common.Bytes2Hex(value) == common.Bytes2Hex([]byte("filtervalue")) {
 					storage = append(storage, evmtypes.NewState(key, value))
 					return false
 				}
@@ -1135,110 +1130,4 @@ func (suite *KeeperTestSuite) TestDeleteAccount() {
 			}
 		})
 	}
-}
-
-func (suite *KeeperTestSuite) TestVerifyCredential() {
-	// Add verifiable credential
-	var err error
-
-	// Create DID Document for issuer
-	metadata := didtypes.Metadata{
-		Created:   time.Now(),
-		VersionId: "123e4567-e89b-12d3-a456-426655440000",
-	}
-	didUrl := "did:swtr:UTFfhc4yMqd9k423t96gHY"
-	verificationMethods := []*didtypes.VerificationMethod{{
-		Id:                     "did:swtr:UTFfhc4yMqd9k423t96gHY#f81cb612dcc707f4884a6c992a783e09b31b4e44000e89ed83d3089fbca37e9b-1",
-		VerificationMethodType: "Ed25519VerificationKey2020",
-		Controller:             didUrl,
-		VerificationMaterial:   "z6Mkw9nYfx1zhF8qhTPLeD8bcALeZBetb6H2XmCejaMhwJRQ",
-	}}
-	document := didtypes.DIDDocument{
-		Id:                 didUrl,
-		Controller:         []string{didUrl},
-		VerificationMethod: verificationMethods,
-		Authentication:     []string{"did:swtr:UTFfhc4yMqd9k423t96gHY#f81cb612dcc707f4884a6c992a783e09b31b4e44000e89ed83d3089fbca37e9b-1"},
-	}
-	didDocument := didtypes.DIDDocumentWithMetadata{
-		Metadata: &metadata,
-		DidDoc:   &document,
-	}
-	err = suite.app.EvmKeeper.DIDKeeper.AddNewDIDDocumentVersion(suite.ctx, &didDocument)
-	suite.Require().NoError(err)
-
-	// Deploy contract VC.sol
-	vcContract := suite.DeployVCContract(suite.T())
-
-	// Send transaction to verify credentials with correct VC
-	correctTxDataHex := "0x738c4cd2000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000001e6b901e365794a68624763694f694a465a45525451534973496e523563434936496b705856434a392e65794a325979493665794a4159323975644756346443493657794a6f64485277637a6f764c336433647935334d793576636d63764d6a41784f43396a636d566b5a57353061574673637939324d534a644c434a306558426c496a7062496c5a6c636d6c6d6157466962475644636d566b5a57353061574673496c3073496d4e795a57526c626e52705957785464574a715a574e30496a7037496d466b5a484a6c63334d694f694a7a643352794d544e7a6247786a5a484e786147706c61335268597a56794e6d67314d475232616e4a306147307765585132656e637a6354527a496e31394c434a7a645749694f694a6b6157513663336430636a705656455a6d61474d30655531785a446c724e44497a64446b325a30685a49697769626d4a6d496a6f784e6a6b344e7a55784d6a6b774c434a7063334d694f694a6b6157513663336430636a705656455a6d61474d30655531785a446c724e44497a64446b325a30685a496e302e6a6858334b3137506c6e6245335069466e6a627575383447706c5a33715433632d31576b737a6276744868575f71684f4473486568744745697556695a5f4e394d5761507a494d7942305733455978354c47704e42410000000000000000000000000000000000000000000000000000"
-	res, err := suite.SendVerifiableCredentialTx(suite.T(), vcContract, correctTxDataHex)
-	suite.Require().NoError(err)
-	suite.Require().Empty(res.VmError)
-
-	// Decrypt result
-	decrypedRes, err := deoxys.DecryptECDH(suite.privateKey, suite.nodePublicKey, res.Ret)
-	suite.Require().NoError(err)
-	// This value is checked using external decoder
-	suite.Require().Equal(hex.EncodeToString(decrypedRes), "0000000000000000000000008c3ffc3600bcb365f7141eaf47b5921aefb7917a0000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000001f6469643a737774723a55544666686334794d7164396b34323374393667485900")
-
-	// Send transaction with VC issued in future
-	notValidTxDataHex := "0x738c4cd2000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000001e6b901e365794a68624763694f694a465a45525451534973496e523563434936496b705856434a392e65794a325979493665794a4159323975644756346443493657794a6f64485277637a6f764c336433647935334d793576636d63764d6a41784f43396a636d566b5a57353061574673637939324d534a644c434a306558426c496a7062496c5a6c636d6c6d6157466962475644636d566b5a57353061574673496c3073496d4e795a57526c626e52705957785464574a715a574e30496a7037496d466b5a484a6c63334d694f694a7a643352794d544e7a6247786a5a484e786147706c61335268597a56794e6d67314d475232616e4a306147307765585132656e637a6354527a496e31394c434a7a645749694f694a6b6157513663336430636a705656455a6d61474d30655531785a446c724e44497a64446b325a30685a49697769626d4a6d496a6f784e7a4d774d7a637a4d7a63344c434a7063334d694f694a6b6157513663336430636a705656455a6d61474d30655531785a446c724e44497a64446b325a30685a496e302e4664376d7233464e7961525331524e3535736e786c6f78357665646e595f412d5f31386d30386b423649335a44734971786e39576578644161354c6d7373354c2d743558795f727654674c363366375a6d47365f42510000000000000000000000000000000000000000000000000000"
-	res, err = suite.SendVerifiableCredentialTx(suite.T(), vcContract, notValidTxDataHex)
-	suite.Require().NoError(err) // It should not fail, but vmError should not be empty
-	suite.Require().NotEmpty(res.VmError)
-}
-
-// Sends sample transaction to verify VC
-func (suite *KeeperTestSuite) SendVerifiableCredentialTx(t require.TestingT, contractAddr common.Address, txDataHex string) (*evmtypes.MsgEthereumTxResponse, error) {
-	ctx := sdk.WrapSDKContext(suite.ctx)
-	chainID := suite.app.EvmKeeper.ChainID()
-
-	txData, err := hexutil.Decode(txDataHex)
-	require.NoError(t, err)
-
-	nonce := suite.app.EvmKeeper.GetNonce(suite.ctx, suite.address)
-
-	var tx *evmtypes.MsgHandleTx
-	if suite.enableFeemarket {
-		tx = evmtypes.NewSGXVMTx(
-			chainID,
-			nonce,
-			&contractAddr,
-			nil,
-			500_000,
-			nil,
-			suite.app.FeeMarketKeeper.GetBaseFee(suite.ctx),
-			big.NewInt(1),
-			txData,
-			&ethtypes.AccessList{},
-			suite.privateKey,
-			suite.nodePublicKey,
-		)
-	} else {
-		tx = evmtypes.NewSGXVMTx(
-			chainID,
-			nonce,
-			&contractAddr,
-			nil,
-			500_000,
-			nil,
-			nil,
-			nil,
-			txData,
-			nil,
-			suite.privateKey,
-			suite.nodePublicKey,
-		)
-	}
-
-	tx.From = suite.address.Hex()
-	err = tx.Sign(ethtypes.LatestSignerForChainID(chainID), suite.signer)
-	require.NoError(t, err)
-
-	ethTx := &evmtypes.MsgHandleTx{
-		Data: tx.Data,
-		Hash: tx.Hash,
-		From: tx.From,
-	}
-	return suite.app.EvmKeeper.HandleTx(ctx, ethTx)
 }

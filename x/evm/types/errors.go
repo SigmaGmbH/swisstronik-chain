@@ -49,6 +49,7 @@ const (
 	codeErrGasOverflow
 	codeErrInvalidAccount
 	codeErrInvalidGasLimit
+	codeErrEmptyNodePublicKey
 )
 
 var ErrPostTxProcessing = errors.New("failed to execute post processing")
@@ -116,6 +117,9 @@ var (
 
 	// ErrInvalidGasLimit returns an error if gas limit value is invalid
 	ErrInvalidGasLimit = errorsmod.Register(ModuleName, codeErrInvalidGasLimit, "invalid gas limit")
+
+	// ErrEmptyNodePublicKey returns an error if stored node public key for specific block is empty
+	ErrEmptyNodePublicKey = errorsmod.Register(ModuleName, codeErrEmptyNodePublicKey, "empty node public key")
 )
 
 // NewExecErrorWithReason unpacks the revert return bytes and returns a wrapped error

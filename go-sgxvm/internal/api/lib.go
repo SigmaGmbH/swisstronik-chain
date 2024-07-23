@@ -10,7 +10,6 @@ import "C"
 import (
 	"fmt"
 	ethcommon "github.com/ethereum/go-ethereum/common"
-	"golang.org/x/net/netutil"
 	"google.golang.org/protobuf/proto"
 	"log"
 	"net"
@@ -39,7 +38,36 @@ type cu8_ptr = *C.uint8_t
 // Connector is our custom connector
 type Connector = types.Connector
 
-// IsNodeInitialized checks if node was initialized and master key was sealed
+func CheckNodeStatus() error {
+	req := types.SetupRequest{Req: &types.SetupRequest_NodeStatus{}}
+	reqBytes, err := proto.Marshal(&req)
+	if err != nil {
+		log.Fatalln("Failed to encode req:", err)
+		return err
+	}
+
+	// Pass request to Rust
+	d := MakeView(reqBytes)
+	defer runtime.KeepAlive(reqBytes)
+
+	errmsg := NewUnmanagedVector(nil)
+	ptr, err := C.handle_initialization_request(d, &errmsg)
+	if err != nil {
+		return ErrorWithMessage(err, errmsg)
+	}
+
+	// Recover returned value
+	executionResult := CopyAndDestroyUnmanagedVector(ptr)
+	response := types.IsInitializedResponse{}
+	if err := proto.Unmarshal(executionResult, &response); err != nil {
+		log.Fatalln("Failed to decode execution result:", err)
+		return err
+	}
+
+	return nil
+}
+
+// IsNodeInitialized checks if node was initialized and key manager state was sealed
 func IsNodeInitialized() (bool, error) {
 	// Create protobuf encoded request
 	req := types.SetupRequest{Req: &types.SetupRequest_IsInitialized{
@@ -74,11 +102,11 @@ func IsNodeInitialized() (bool, error) {
 	return response.IsInitialized, nil
 }
 
-// SetupSeedNode handles initialization of seed node which will share seed with other nodes
-func InitializeMasterKey(shouldReset bool) error {
+// SetupSeedNode handles initialization of attestation server which will share epoch keys with other nodes
+func InitializeEnclave(shouldReset bool) error {
 	// Create protobuf encoded request
-	req := types.SetupRequest{Req: &types.SetupRequest_InitializeMasterKey{
-		InitializeMasterKey: &types.InitializeMasterKeyRequest{ ShouldReset: shouldReset },
+	req := types.SetupRequest{Req: &types.SetupRequest_InitializeEnclave{
+		InitializeEnclave: &types.InitializeEnclaveRequest{ShouldReset: shouldReset},
 	}}
 	reqBytes, err := proto.Marshal(&req)
 	if err != nil {
@@ -99,95 +127,12 @@ func InitializeMasterKey(shouldReset bool) error {
 	return nil
 }
 
-// StartSeedServer handles initialization of seed server
-func StartSeedServer(addr string) error {
-	fmt.Println("[Seed Server] Trying to start seed server")
-	ln, err := net.Listen("tcp", addr)
-	if err != nil {
-		fmt.Println("[Seed Server] Cannot start seed server")
-		return err
-	}
-
-	go func() {
-		for {
-			connection, err := ln.Accept()
-			if err != nil {
-				fmt.Println("[Seed Server] Got error ", err.Error(), ", connection: ", connection.RemoteAddr().String())
-				connection.Close()
-				continue
-			}
-
-			if err := attestPeer(connection); err != nil {
-				fmt.Println("[Seed Server] Attestation failed. Reason: ", err)
-				connection.Close()
-				continue
-			}
-		}
-	}()
-
-	fmt.Println("[Seed Server] Starting seed server. Address: ", addr)
-
-	return nil
-}
-
-func attestPeer(connection net.Conn) error {
-	defer connection.Close()
-	println("[Seed Server] Attesting peer: ", connection.RemoteAddr().String())
-
-	// Extract file descriptor for socket
-	file, err := connection.(*net.TCPConn).File()
-	if err != nil {
-		fmt.Println("[Seed Server] Cannot get access to the connection. Reason: ", err.Error())
-		return err
-	}
-
-	// Create protobuf encoded request
-	req := types.SetupRequest{Req: &types.SetupRequest_StartSeedServer{
-		StartSeedServer: &types.StartSeedServerRequest{
-			Fd: int32(file.Fd()),
-		},
-	}}
-	reqBytes, err := proto.Marshal(&req)
-	if err != nil {
-		fmt.Println("[Seed Server] Failed to encode req:", err)
-		return err
-	}
-
-	// Pass request to Rust
-	d := MakeView(reqBytes)
-	defer runtime.KeepAlive(reqBytes)
-
-	errmsg := NewUnmanagedVector(nil)
-	_, err = C.handle_initialization_request(d, &errmsg)
-	if err != nil {
-		return ErrorWithMessage(err, errmsg)
-	}
-
-	return nil
-}
-
-// Listen starts a net.Listener on the tcp network on the given address.
-// If there is a specified MaxOpenConnections in the config, it will also set the limitListener.
-func Listen(addr string, maxOpenConnections int) (net.Listener, error) {
-	if addr == "" {
-		addr = ":http"
-	}
-	ln, err := net.Listen("tcp", addr)
-	if err != nil {
-		return nil, err
-	}
-	if maxOpenConnections > 0 {
-		ln = netutil.LimitListener(ln, maxOpenConnections)
-	}
-	return ln, err
-}
-
-// RequestSeed handles request of seed from seed server
-func RequestSeed(hostname string, port int) error {
+// RequestEpochKeys handles request of epoch keys from attestation server
+func RequestEpochKeys(hostname string, port int, isDCAP bool) error {
 	address := fmt.Sprintf("%s:%d", hostname, port)
 	conn, err := net.Dial("tcp", address)
 	if err != nil {
-		fmt.Println("Cannot establish connection with seed server. Reason: ", err.Error())
+		fmt.Println("Cannot establish connection with attestation server. Reason: ", err.Error())
 		return err
 	}
 
@@ -199,10 +144,11 @@ func RequestSeed(hostname string, port int) error {
 	}
 
 	// Create protobuf encoded request
-	req := types.SetupRequest{Req: &types.SetupRequest_NodeSeed{
-		NodeSeed: &types.NodeSeedRequest{
-			Fd: int32(file.Fd()),
+	req := types.SetupRequest{Req: &types.SetupRequest_RemoteAttestationRequest{
+		RemoteAttestationRequest: &types.RemoteAttestationRequest{
+			Fd:       int32(file.Fd()),
 			Hostname: hostname,
+			IsDCAP:   isDCAP,
 		},
 	}}
 	reqBytes, err := proto.Marshal(&req)
@@ -227,12 +173,16 @@ func RequestSeed(hostname string, port int) error {
 }
 
 // GetNodePublicKey handles request for node public key
-func GetNodePublicKey() (*types.NodePublicKeyResponse, error) {
+func GetNodePublicKey(blockNumber uint64) (*types.NodePublicKeyResponse, error) {
 	// Construct mocked querier
 	c := buildEmptyConnector()
 
 	// Create protobuf-encoded request
-	req := &types.FFIRequest{ Req: &types.FFIRequest_PublicKeyRequest {} }
+	req := &types.FFIRequest{Req: &types.FFIRequest_PublicKeyRequest{
+		PublicKeyRequest: &types.NodePublicKeyRequest{
+			BlockNumber: blockNumber,
+		},
+	}}
 	reqBytes, err := proto.Marshal(req)
 	if err != nil {
 		log.Fatalln("Failed to encode req:", err)
@@ -260,6 +210,56 @@ func GetNodePublicKey() (*types.NodePublicKeyResponse, error) {
 	return &response, nil
 }
 
+// DumpDCAPQuote generates DCAP quote for the enclave and writes it to the disk
+func DumpDCAPQuote(filepath string) error {
+	// Create protobuf encoded request
+	req := types.SetupRequest{Req: &types.SetupRequest_DumpQuote{
+		DumpQuote: &types.DumpQuoteRequest{Filepath: filepath},
+	}}
+	reqBytes, err := proto.Marshal(&req)
+	if err != nil {
+		log.Fatalln("Failed to encode req:", err)
+		return err
+	}
+
+	// Pass request to Rust
+	d := MakeView(reqBytes)
+	defer runtime.KeepAlive(reqBytes)
+
+	errmsg := NewUnmanagedVector(nil)
+	_, err = C.handle_initialization_request(d, &errmsg)
+	if err != nil {
+		return ErrorWithMessage(err, errmsg)
+	}
+
+	return nil
+}
+
+// VerifyDCAPQuote verifies DCAP quote written to disk
+func VerifyDCAPQuote(filepath string) error {
+	// Create protobuf encoded request
+	req := types.SetupRequest{Req: &types.SetupRequest_VerifyQuote{
+		VerifyQuote: &types.VerifyQuoteRequest{Filepath: filepath},
+	}}
+	reqBytes, err := proto.Marshal(&req)
+	if err != nil {
+		log.Fatalln("Failed to encode req:", err)
+		return err
+	}
+
+	// Pass request to Rust
+	d := MakeView(reqBytes)
+	defer runtime.KeepAlive(reqBytes)
+
+	errmsg := NewUnmanagedVector(nil)
+	_, err = C.handle_initialization_request(d, &errmsg)
+	if err != nil {
+		return ErrorWithMessage(err, errmsg)
+	}
+
+	return nil
+}
+
 // Call handles incoming call to contract or transfer of value
 func Call(
 	connector Connector,
@@ -268,20 +268,22 @@ func Call(
 	gasLimit, nonce uint64,
 	txContext *types.TransactionContext,
 	commit bool,
+	isUnencrypted bool,
 ) (*types.HandleTransactionResponse, error) {
 	// Construct mocked querier
 	c := BuildConnector(connector)
 
 	// Create protobuf-encoded transaction data
 	params := &types.SGXVMCallParams{
-		From:       from,
-		To:         to,
-		Data:       data,
-		GasLimit:   gasLimit,
-		Value:      value,
-		AccessList: convertAccessList(accessList),
-		Commit:     commit,
-		Nonce:		nonce,
+		From:        from,
+		To:          to,
+		Data:        data,
+		GasLimit:    gasLimit,
+		Value:       value,
+		AccessList:  convertAccessList(accessList),
+		Commit:      commit,
+		Nonce:       nonce,
+		Unencrypted: isUnencrypted,
 	}
 
 	// Create protobuf encoded request
@@ -338,7 +340,7 @@ func Create(
 		Value:      value,
 		AccessList: convertAccessList(accessList),
 		Commit:     commit,
-		Nonce: 		nonce,
+		Nonce:      nonce,
 	}
 
 	// Create protobuf encoded request
@@ -373,6 +375,86 @@ func Create(
 	}
 
 	return &response, nil
+}
+
+func AddEpoch(startingBlock uint64) error {
+	// Create protobuf encoded request
+	req := types.SetupRequest{Req: &types.SetupRequest_AddEpoch{
+		AddEpoch: &types.AddNewEpochRequest{StartingBlock: startingBlock},
+	}}
+	reqBytes, err := proto.Marshal(&req)
+	if err != nil {
+		log.Fatalln("Failed to encode req:", err)
+		return err
+	}
+
+	// Pass request to Rust
+	d := MakeView(reqBytes)
+	defer runtime.KeepAlive(reqBytes)
+
+	errmsg := NewUnmanagedVector(nil)
+	_, err = C.handle_initialization_request(d, &errmsg)
+	if err != nil {
+		return ErrorWithMessage(err, errmsg)
+	}
+
+	return nil
+}
+
+func RemoveLatestEpoch() error {
+	// Create protobuf encoded request
+	req := types.SetupRequest{Req: &types.SetupRequest_RemoveEpoch{
+		RemoveEpoch: &types.RemoveLatestEpochRequest{},
+	}}
+	reqBytes, err := proto.Marshal(&req)
+	if err != nil {
+		log.Fatalln("Failed to encode req:", err)
+		return err
+	}
+
+	// Pass request to Rust
+	d := MakeView(reqBytes)
+	defer runtime.KeepAlive(reqBytes)
+
+	errmsg := NewUnmanagedVector(nil)
+	_, err = C.handle_initialization_request(d, &errmsg)
+	if err != nil {
+		return ErrorWithMessage(err, errmsg)
+	}
+
+	return nil
+}
+
+func ListEpochs() ([]*types.EpochData, error) {
+	// Create protobuf encoded request
+	req := types.SetupRequest{Req: &types.SetupRequest_ListEpochs{
+		ListEpochs: &types.ListEpochsRequest{},
+	}}
+	reqBytes, err := proto.Marshal(&req)
+	if err != nil {
+		log.Fatalln("Failed to encode req:", err)
+		return nil, err
+	}
+
+	// Pass request to Rust
+	d := MakeView(reqBytes)
+	defer runtime.KeepAlive(reqBytes)
+
+	errmsg := NewUnmanagedVector(nil)
+	ptr, err := C.handle_initialization_request(d, &errmsg)
+	if err != nil {
+		return nil, ErrorWithMessage(err, errmsg)
+	}
+
+	// Recover returned value
+	executionResult := CopyAndDestroyUnmanagedVector(ptr)
+	response := types.ListEpochsResponse{}
+	if err := proto.Unmarshal(executionResult, &response); err != nil {
+		log.Fatalln("Failed to decode execution result:", err)
+		return nil, err
+	}
+
+	return response.Epochs, nil
 }
 
 // Converts AccessList type from ethtypes to protobuf-compatible type

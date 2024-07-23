@@ -21,16 +21,16 @@ import (
 	"math/big"
 
 	errorsmod "cosmossdk.io/errors"
-
 	sdkmath "cosmossdk.io/math"
-	rpctypes "swisstronik/rpc/types"
-	evmtypes "swisstronik/x/evm/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/pkg/errors"
+
+	rpctypes "swisstronik/rpc/types"
+	evmtypes "swisstronik/x/evm/types"
 )
 
 // GetCode returns the contract code at the given address and block number.
@@ -135,23 +135,7 @@ func (b *Backend) GetProof(address common.Address, storageKeys []string, blockNr
 
 // GetStorageAt returns the contract storage at the given address, block number, and key.
 func (b *Backend) GetStorageAt(address common.Address, key string, blockNrOrHash rpctypes.BlockNumberOrHash) (hexutil.Bytes, error) {
-	blockNum, err := b.BlockNumberFromTendermint(blockNrOrHash)
-	if err != nil {
-		return nil, err
-	}
-
-	req := &evmtypes.QueryStorageRequest{
-		Address: address.String(),
-		Key:     key,
-	}
-
-	res, err := b.queryClient.Storage(rpctypes.ContextWithHeight(blockNum.Int64()), req)
-	if err != nil {
-		return nil, err
-	}
-
-	value := common.HexToHash(res.Value)
-	return value.Bytes(), nil
+	return nil, errors.New("eth_getStorageAt was disabled, since storage is encrypted. Check docs at https://swisstronik.gitbook.io/swisstronik-docs/ for more information")
 }
 
 // GetBalance returns the provided account's balance up to the provided block number.
@@ -227,14 +211,20 @@ func (b *Backend) GetTransactionCount(address common.Address, blockNum rpctypes.
 }
 
 // GetNodePublicKey returns x25519 based public key in hex
-func (b *Backend) GetNodePublicKey(blockNrOrHash rpctypes.BlockNumberOrHash) (string, error) {
-	blockNum, err := b.BlockNumberFromTendermint(blockNrOrHash)
-	if err != nil {
-		return "", err
+func (b *Backend) GetNodePublicKey(blockNum rpctypes.BlockNumber) (string, error) {
+	// If provided latest block num, check exact value
+	var epochBlockNum = blockNum.Int64()
+	if epochBlockNum == rpctypes.EthLatestBlockNumber.Int64() {
+		blockNumberRes, err := b.BlockNumber()
+		if err != nil {
+			return "", err
+		}
+
+		epochBlockNum = int64(blockNumberRes)
 	}
 
-	req := &evmtypes.QueryNodePublicKey{}
-	res, err := b.queryClient.NodePublicKey(rpctypes.ContextWithHeight(blockNum.Int64()), req)
+	req := &evmtypes.QueryNodePublicKey{BlockNumber: uint64(epochBlockNum)}
+	res, err := b.queryClient.NodePublicKey(rpctypes.ContextWithHeight(0), req)
 	if err != nil {
 		return "", err
 	}

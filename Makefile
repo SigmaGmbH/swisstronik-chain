@@ -1,13 +1,21 @@
-VERSION := v1.0.1
+VERSION := v1.0.3
 COMMIT := $(shell git log -1 --format='%H')
 ENCLAVE_HOME ?= $(HOME)/.swisstronik-enclave
+PRODUCTION_MODE ?= false
 
 ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=swisstronik \
 	-X github.com/cosmos/cosmos-sdk/version.ServerName=swisstronikd \
 	-X github.com/cosmos/cosmos-sdk/version.Version=$(VERSION) \
 	-X github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT)
 
+ldflags_static = -X github.com/cosmos/cosmos-sdk/version.Name=swisstronik \
+	-X github.com/cosmos/cosmos-sdk/version.ServerName=swisstronikd \
+	-X github.com/cosmos/cosmos-sdk/version.Version=$(VERSION) \
+	-X github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT) \
+	-w -s -linkmode 'external' -extldflags=-static
+
 BUILD_FLAGS := -ldflags '$(ldflags)'
+BUILD_FLAGS_STATIC := -ldflags "$(ldflags_static)"
 DOCKER := $(shell which docker)
 DOCKER_BUF := $(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace bufbuild/buf
 PROJECT_NAME = $(shell git remote get-url origin | xargs basename -s .git)	
@@ -79,12 +87,25 @@ build: go.sum
 	$(MAKE) -C go-sgxvm build
 	go build -mod=mod $(BUILD_FLAGS)  -tags osusergo,netgo -o build/swisstronikd ./cmd/swisstronikd
 
+build_d: go.sum
+	$(MAKE) -C go-sgxvm build_d
+	go build -mod=mod $(BUILD_FLAGS)  -tags osusergo,netgo -o build/swisstronikd ./cmd/swisstronikd
+
+build_attestation_server: go.sum
+	AS_MODE=true $(MAKE) -C go-sgxvm build_AS
+
+build_attestation_server_d: go.sum
+	AS_MODE=true $(MAKE) -C go-sgxvm build_AS_d
+
 ###############################################################################
 ### 		          Build commands for CLI (without SGX support) 			###
 ###############################################################################
 
 build-cli: go.sum
 	go build -mod=mod $(BUILD_FLAGS) -tags osusergo,netgo,nosgx -o build/$(BINARY_NAME) ./cmd/swisstronikd
+
+build-cli-linux-static: go.sum
+	CGO_ENABLED=1  go build -mod=mod $(BUILD_FLAGS_STATIC) -tags osusergo,netgo,nosgx -o build/$(BINARY_NAME) ./cmd/swisstronikd
 
 build-linux:
 	GOOS=linux GOARCH=$(if $(findstring aarch64,$(shell uname -m)) || $(findstring arm64,$(shell uname -m)),arm64,amd64) $(MAKE) build
@@ -96,10 +117,10 @@ build-macos-cli-arm:
 	BINARY_NAME=swisstronikcli-macos-arm64 GOOS=darwin GOARCH=arm64 $(MAKE) build-cli
 
 build-linux-cli-amd:
-	BINARY_NAME=swisstronikcli-linux-amd64 GOOS=linux GOARCH=amd64 $(MAKE) build-cli
+	BINARY_NAME=swisstronikcli-linux-amd64 GOOS=linux GOARCH=amd64 $(MAKE) build-cli-linux-static
 
 build-linux-cli-arm:
-	BINARY_NAME=swisstronikcli-linux-arm64 GOOS=linux GOARCH=arm64 $(MAKE) build-cli
+	BINARY_NAME=swisstronikcli-linux-arm64 GOOS=linux GOARCH=arm64 $(MAKE) build-cli-linux-static
 
 build-windows-cli:
 	BINARY_NAME=swisstronikcli-windows GOOS=windows GOARCH=amd64 $(MAKE) build-cli

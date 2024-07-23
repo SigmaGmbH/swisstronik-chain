@@ -18,16 +18,15 @@ package types
 import (
 	"math/big"
 
-	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-
-	feemarkettypes "swisstronik/x/feemarket/types"
 	"github.com/ethereum/go-ethereum/core"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	didtypes "swisstronik/x/did/types"
+
+	compliancetypes "swisstronik/x/compliance/types"
+	feemarkettypes "swisstronik/x/feemarket/types"
 )
 
 // AccountKeeper defines the expected account keeper interface
@@ -46,6 +45,7 @@ type AccountKeeper interface {
 // BankKeeper defines the expected interface needed to retrieve account balances.
 type BankKeeper interface {
 	authtypes.BankKeeper
+	SpendableCoin(ctx sdk.Context, addr sdk.AccAddress, denom string) sdk.Coin
 	GetBalance(ctx sdk.Context, addr sdk.AccAddress, denom string) sdk.Coin
 	SendCoinsFromModuleToAccount(ctx sdk.Context, senderModule string, recipientAddr sdk.AccAddress, amt sdk.Coins) error
 	MintCoins(ctx sdk.Context, moduleName string, amt sdk.Coins) error
@@ -65,10 +65,11 @@ type FeeMarketKeeper interface {
 	AddTransientGasWanted(ctx sdk.Context, gasWanted uint64) (uint64, error)
 }
 
-// DIDKeeper
-type DIDKeeper interface {
-	GetLatestDIDDocument(ctx sdk.Context, did string) (didtypes.DIDDocumentWithMetadata, error)
-	AddNewDIDDocumentVersion(ctx sdk.Context, didDoc *didtypes.DIDDocumentWithMetadata) error
+// ComplianceKeeper
+type ComplianceKeeper interface {
+	AddVerificationDetails(ctx sdk.Context, userAddress sdk.AccAddress, verificationType compliancetypes.VerificationType, details *compliancetypes.VerificationDetails) ([]byte, error)
+	HasVerificationOfType(ctx sdk.Context, userAddress sdk.AccAddress, expectedType compliancetypes.VerificationType, expirationTimestamp uint32, expectedIssuers []sdk.AccAddress) (bool, error)
+	GetVerificationDetailsByIssuer(ctx sdk.Context, userAddress, issuerAddress sdk.AccAddress) ([]*compliancetypes.Verification, []*compliancetypes.VerificationDetails, error)
 }
 
 // Event Hooks

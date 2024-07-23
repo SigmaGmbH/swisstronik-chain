@@ -43,6 +43,7 @@ import (
 	"swisstronik/testutil/network"
 
 	tmtypes "github.com/cometbft/cometbft/types"
+	"github.com/SigmaGmbH/librustgo"
 )
 
 var (
@@ -84,7 +85,10 @@ func NewTestnetCmd(mbm module.BasicManager, genBalIterator banktypes.GenesisBala
 		RunE:                       client.ValidateCmd,
 	}
 
-	testnetCmd.AddCommand(testnetInitConfigCmd(mbm, genBalIterator))
+	testnetCmd.AddCommand(
+		initializeEnclave(),
+		testnetInitConfigCmd(mbm, genBalIterator),
+	)
 
 	return testnetCmd
 }
@@ -134,7 +138,36 @@ Example:
 	cmd.Flags().String(flagStartingIPAddress,
 		"192.167.10.1",
 		"Starting IP address (192.167.10.1 results in persistent peers list ID0@192.167.10.1:46656, ID1@192.167.10.1:46656, ...)")
-	cmd.Flags().String(flags.FlagKeyringBackend, flags.DefaultKeyringBackend, "Select keyring's backend (os|file|test)")
+	cmd.Flags().String(flags.FlagKeyringBackend, "test", "Select keyring's backend (os|file|test)")
+
+	return cmd
+}
+
+// initializeEnclave initializes SGX enclave for local testnet
+func initializeEnclave() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "init-testnet-enclave",
+		Short: "Initialize SGX Enclave for local testnet",
+		Long:  `Initializes SGX enclave with local key manager
+		*** WARNING: Do not use this command to setup validator node ***`,
+		Args:  cobra.ExactArgs(0),
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			shouldReset, err := cmd.Flags().GetBool(flagShouldReset)
+			if err != nil {
+				return err
+			}
+
+			if err := librustgo.InitializeEnclave(shouldReset); err != nil {
+				return err
+			}
+
+			fmt.Println("SGX Enclave was initialized")
+
+			return nil
+		},
+	}
+
+	cmd.Flags().Bool(flagShouldReset, false, "reset already existing epoch manager. Default: false")
 
 	return cmd
 }
@@ -349,9 +382,6 @@ func initGenFiles(
 	var govGenState govv1.GenesisState
 	clientCtx.Codec.MustUnmarshalJSON(appGenState[govtypes.ModuleName], &govGenState)
 
-	govGenState.DepositParams.MinDeposit[0].Denom = coinDenom
-	appGenState[govtypes.ModuleName] = clientCtx.Codec.MustMarshalJSON(&govGenState)
-
 	var mintGenState mintypes.GenesisState
 	clientCtx.Codec.MustUnmarshalJSON(appGenState[mintypes.ModuleName], &mintGenState)
 
@@ -423,11 +453,17 @@ func collectGenFiles(
 			// set the canonical application state (they should not differ)
 			appState = nodeAppState
 		}
-
+		
 		genFile := nodeConfig.GenesisFile()
 
 		// overwrite each validator's genesis file to have a canonical genesis time
-		if err := genutil.ExportGenesisFileWithTime(genFile, chainID, nil, appState, genTime); err != nil {
+		genDoc.GenesisTime = genTime
+		genDoc.Validators = nil
+		genDoc.AppState = nodeAppState
+		genDoc.ChainID = chainID
+		genDoc.ConsensusParams.Block.MaxGas = 20_000_000
+
+		if err := genutil.ExportGenesisFile(genDoc, genFile); err != nil {
 			return err
 		}
 	}

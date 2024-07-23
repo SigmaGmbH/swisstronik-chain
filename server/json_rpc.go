@@ -22,12 +22,12 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 
-	"swisstronik/rpc"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/cosmos/cosmos-sdk/server/types"
 	ethlog "github.com/ethereum/go-ethereum/log"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
+	"swisstronik/rpc"
 
 	"swisstronik/server/config"
 	evmcommontypes "swisstronik/types"
@@ -40,6 +40,7 @@ func StartJSONRPC(ctx *server.Context,
 	tmEndpoint string,
 	config *config.Config,
 	indexer evmcommontypes.EVMTxIndexer,
+	allowUnencryptedTxs bool,
 ) (*http.Server, chan struct{}, error) {
 	tmWsClient := ConnectTmWS(tmRPCAddr, tmEndpoint, ctx.Logger)
 
@@ -61,7 +62,7 @@ func StartJSONRPC(ctx *server.Context,
 	allowUnprotectedTxs := config.JSONRPC.AllowUnprotectedTxs
 	rpcAPIArr := config.JSONRPC.API
 
-	apis := rpc.GetRPCAPIs(ctx, clientCtx, tmWsClient, allowUnprotectedTxs, indexer, rpcAPIArr)
+	apis := rpc.GetRPCAPIs(ctx, clientCtx, tmWsClient, allowUnprotectedTxs, indexer, rpcAPIArr, allowUnencryptedTxs)
 
 	for _, api := range apis {
 		if err := rpcServer.RegisterName(api.Namespace, api.Service); err != nil {
@@ -82,8 +83,13 @@ func StartJSONRPC(ctx *server.Context,
 		handlerWithCors = cors.AllowAll()
 	}
 
+	serverAddress := config.JSONRPC.Address
+	if allowUnencryptedTxs {
+		serverAddress = config.JSONRPC.UnencryptedAddress
+	}
+
 	httpSrv := &http.Server{
-		Addr:              config.JSONRPC.Address,
+		Addr:              serverAddress,
 		Handler:           handlerWithCors.Handler(r),
 		ReadHeaderTimeout: config.JSONRPC.HTTPTimeout,
 		ReadTimeout:       config.JSONRPC.HTTPTimeout,
@@ -99,7 +105,7 @@ func StartJSONRPC(ctx *server.Context,
 
 	errCh := make(chan error)
 	go func() {
-		ctx.Logger.Info("Starting JSON-RPC server", "address", config.JSONRPC.Address)
+		ctx.Logger.Info("Starting JSON-RPC server", "address", serverAddress, "unencrypted", allowUnencryptedTxs)
 		if err := httpSrv.Serve(ln); err != nil {
 			if err == http.ErrServerClosed {
 				close(httpSrvDone)
@@ -122,7 +128,7 @@ func StartJSONRPC(ctx *server.Context,
 
 	// allocate separate WS connection to Tendermint
 	tmWsClient = ConnectTmWS(tmRPCAddr, tmEndpoint, ctx.Logger)
-	wsSrv := rpc.NewWebsocketsServer(clientCtx, ctx.Logger, tmWsClient, config)
+	wsSrv := rpc.NewWebsocketsServer(clientCtx, ctx.Logger, tmWsClient, config, allowUnencryptedTxs)
 	wsSrv.Start()
 	return httpSrv, httpSrvDone, nil
 }

@@ -9,6 +9,8 @@ describe('Counter', () => {
         const Counter = await ethers.getContractFactory('Counter')
         counterContract = await Counter.deploy()
         await counterContract.deployed()
+
+        console.log('Counter deployed to: ', counterContract.address)
     })
 
     it('Should add', async () => {

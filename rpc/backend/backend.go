@@ -20,13 +20,6 @@ import (
 	"math/big"
 	"time"
 
-	rpctypes "swisstronik/rpc/types"
-	"swisstronik/server/config"
-	ethermint "swisstronik/types"
-	evmtypes "swisstronik/x/evm/types"
-
-	didtypes "swisstronik/x/did/types"
-
 	"github.com/cometbft/cometbft/libs/log"
 	tmrpctypes "github.com/cometbft/cometbft/rpc/core/types"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -39,13 +32,17 @@ import (
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/ethereum/go-ethereum/signer/core/apitypes"
+
+	rpctypes "swisstronik/rpc/types"
+	"swisstronik/server/config"
+	ethermint "swisstronik/types"
+	evmtypes "swisstronik/x/evm/types"
 )
 
 // BackendI implements the Cosmos and EVM backend.
 type BackendI interface { //nolint: revive
 	CosmosBackend
 	EVMBackend
-	DIDBackend
 }
 
 // CosmosBackend implements the functionality shared within cosmos namespaces
@@ -105,7 +102,7 @@ type EVMBackend interface {
 	GetStorageAt(address common.Address, key string, blockNrOrHash rpctypes.BlockNumberOrHash) (hexutil.Bytes, error)
 	GetProof(address common.Address, storageKeys []string, blockNrOrHash rpctypes.BlockNumberOrHash) (*rpctypes.AccountResult, error)
 	GetTransactionCount(address common.Address, blockNum rpctypes.BlockNumber) (*hexutil.Uint64, error)
-	GetNodePublicKey(blockNrOrHash rpctypes.BlockNumberOrHash) (string, error)
+	GetNodePublicKey(blockNum rpctypes.BlockNumber) (string, error)
 
 	// Chain Info
 	ChainID() (*hexutil.Big, error)
@@ -145,12 +142,6 @@ type EVMBackend interface {
 	TraceBlock(height rpctypes.BlockNumber, config *evmtypes.TraceConfig, block *tmrpctypes.ResultBlock) ([]*evmtypes.TxTraceResult, error)
 }
 
-// DIDBackend implements the functionality shared within did namespaces
-type DIDBackend interface {
-	DIDResolve(blockNrOrHash rpctypes.BlockNumberOrHash, Id string) (*didtypes.DIDDocumentWithMetadata, error)
-	DocumentsControlledBy(blockNrOrHash rpctypes.BlockNumberOrHash, VerificationMethod string) ([]string, error)
-}
-
 var _ BackendI = (*Backend)(nil)
 
 // Backend implements the BackendI interface
@@ -163,6 +154,7 @@ type Backend struct {
 	cfg                 config.Config
 	allowUnprotectedTxs bool
 	indexer             ethermint.EVMTxIndexer
+	allowUnencryptedTxs bool
 }
 
 // NewBackend creates a new Backend instance for cosmos and ethereum namespaces
@@ -172,6 +164,7 @@ func NewBackend(
 	clientCtx client.Context,
 	allowUnprotectedTxs bool,
 	indexer ethermint.EVMTxIndexer,
+	allowUnencryptedTxs bool,
 ) *Backend {
 	chainID, err := ethermint.ParseChainID(clientCtx.ChainID)
 	if err != nil {
@@ -192,5 +185,6 @@ func NewBackend(
 		cfg:                 appConf,
 		allowUnprotectedTxs: allowUnprotectedTxs,
 		indexer:             indexer,
+		allowUnencryptedTxs: allowUnencryptedTxs,
 	}
 }

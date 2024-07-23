@@ -60,17 +60,31 @@ include = [
 exclude = [
     "handle_request",
     "ecall_allocate",
-    "ecall_init_master_key",
-    "ecall_share_seed",
-    "ecall_request_seed",
+    "ecall_status",
+    "ecall_initialize_enclave",
+    "ecall_attest_peer_epid",
+    "ecall_attest_peer_dcap",
     "ecall_is_initialized",
+    "ecall_request_epoch_keys_epid",
+    "ecall_request_epoch_keys_dcap",
+    "sgx_tvl_verify_qve_report_and_identity",
+    "ecall_dump_dcap_quote",
+    "ecall_verify_dcap_quote",
+    "ecall_remove_latest_epoch",
+    "ecall_list_epochs",
+    "ecall_add_epoch",
     "ocall_query_raw",
     "ocall_allocate",
     "ocall_sgx_init_quote",
     "ocall_get_ias_socket",
     "ocall_get_update_info",
     "ocall_get_quote",
+    "ocall_get_ecdsa_quote",
+    "ocall_get_qve_report",
+    "ocall_get_supplemental_data_size",
+    "ocall_get_quote_ecdsa_collateral",
 ]
+
 # prefix = "CAPI_"
 item_types = []
 renaming_overrides_prefixing = false

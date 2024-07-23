@@ -7,3 +7,11 @@ release/
 *swtr_seed
 build/
 .testnets/
+**.uuid
+vendor
+**quote.dat
+sgxvm/Enclave_private.pem
+
+# Dynamic libraries
+**libsgx_wrapper**
+**libsgx_attestation_wrapper**

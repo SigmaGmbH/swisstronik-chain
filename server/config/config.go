@@ -40,6 +40,12 @@ const (
 	// DefaultJSONRPCWsAddress is the default address the JSON-RPC WebSocket server binds to.
 	DefaultJSONRPCWsAddress = "127.0.0.1:8546"
 
+	// DefaultUnencryptedJSONRPCAddress is the default address the JSON-RPC server binds to.
+	DefaultUnencryptedJSONRPCAddress = "127.0.0.1:8547"
+
+	// DefaultUnencryptedJSONRPCWsAddress is the default address the JSON-RPC WebSocket server binds to.
+	DefaultUnencryptedJSONRPCWsAddress = "127.0.0.1:8548"
+
 	// DefaultJsonRPCMetricsAddress is the default address the JSON-RPC Metrics server binds to.
 	DefaultJSONRPCMetricsAddress = "127.0.0.1:6065"
 
@@ -107,8 +113,12 @@ type JSONRPCConfig struct {
 	API []string `mapstructure:"api"`
 	// Address defines the HTTP server to listen on
 	Address string `mapstructure:"address"`
+	// UnencryptedAddress defined the HTTP server to listen on
+	UnencryptedAddress string `mapstructure:"address-unencrypted"`
 	// WsAddress defines the WebSocket server to listen on
 	WsAddress string `mapstructure:"ws-address"`
+	// UnencryptedWsAddress defines the WebSocket server to listen on
+	UnencryptedWsAddress string `mapstructure:"ws-address-unencrypted"`
 	// GasCap is the global gas cap for eth-call variants.
 	GasCap uint64 `mapstructure:"gas-cap"`
 	// EVMTimeout is the global timeout for eth-call.
@@ -215,12 +225,12 @@ func (c EVMConfig) Validate() error {
 
 // GetDefaultAPINamespaces returns the default list of JSON-RPC namespaces that should be enabled
 func GetDefaultAPINamespaces() []string {
-	return []string{"eth", "net", "web3", "utils", "did"}
+	return []string{"eth", "net", "web3", "utils"}
 }
 
 // GetAPINamespaces returns the all the available JSON-RPC API namespaces.
 func GetAPINamespaces() []string {
-	return []string{"web3", "eth", "personal", "net", "txpool", "debug", "miner", "utils", "did"}
+	return []string{"web3", "eth", "personal", "net", "txpool", "debug", "miner", "utils"}
 }
 
 // DefaultJSONRPCConfig returns an EVM config with the JSON-RPC API enabled by default
@@ -230,6 +240,8 @@ func DefaultJSONRPCConfig() *JSONRPCConfig {
 		API:                      GetDefaultAPINamespaces(),
 		Address:                  DefaultJSONRPCAddress,
 		WsAddress:                DefaultJSONRPCWsAddress,
+		UnencryptedAddress:       DefaultUnencryptedJSONRPCAddress,
+		UnencryptedWsAddress:     DefaultUnencryptedJSONRPCWsAddress,
 		GasCap:                   DefaultGasCap,
 		EVMTimeout:               DefaultEVMTimeout,
 		TxFeeCap:                 DefaultTxFeeCap,
@@ -341,6 +353,8 @@ func GetConfig(v *viper.Viper) (Config, error) {
 			API:                      v.GetStringSlice("json-rpc.api"),
 			Address:                  v.GetString("json-rpc.address"),
 			WsAddress:                v.GetString("json-rpc.ws-address"),
+			UnencryptedAddress:       v.GetString("json-rpc.address-unencrypted"),
+			UnencryptedWsAddress:     v.GetString("json-rpc.ws-address-unencrypted"),
 			GasCap:                   v.GetUint64("json-rpc.gas-cap"),
 			FilterCap:                v.GetInt32("json-rpc.filter-cap"),
 			FeeHistoryCap:            v.GetInt32("json-rpc.feehistory-cap"),

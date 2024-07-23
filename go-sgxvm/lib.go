@@ -39,9 +39,13 @@ type QueryRemoveStorageCell = types.QueryRemoveStorageCell
 type QueryRemoveStorageCellResponse = types.QueryRemoveStorageCellResponse
 type QueryBlockHash = types.QueryBlockHash
 type QueryBlockHashResponse = types.QueryBlockHashResponse
-type VerificationMethod = types.VerificationMethod
-type QueryVerificationMethods = types.QueryVerificationMethods
-type QueryVerificationMethodsResponse = types.QueryVerificationMethodsResponse
+type QueryAddVerificationDetails = types.QueryAddVerificationDetails
+type QueryAddVerificationDetailsResponse = types.QueryAddVerificationDetailsResponse
+type QueryHasVerification = types.QueryHasVerification
+type QueryHasVerificationResponse = types.QueryHasVerificationResponse
+type QueryGetVerificationData = types.QueryGetVerificationData
+type VerificationDetails = types.VerificationDetails
+type QueryGetVerificationDataResponse = types.QueryGetVerificationDataResponse
 
 // Storage requests
 type CosmosRequest_GetAccount = types.CosmosRequest_GetAccount
@@ -53,7 +57,9 @@ type CosmosRequest_InsertAccountCode = types.CosmosRequest_InsertAccountCode
 type CosmosRequest_InsertStorageCell = types.CosmosRequest_InsertStorageCell
 type CosmosRequest_Remove = types.CosmosRequest_Remove
 type CosmosRequest_RemoveStorageCell = types.CosmosRequest_RemoveStorageCell
-type CosmosRequest_VerificationMethods = types.CosmosRequest_VerificationMethods
+type CosmosRequest_AddVerificationDetails = types.CosmosRequest_AddVerificationDetails
+type CosmosRequest_HasVerification = types.CosmosRequest_HasVerification
+type CosmosRequest_GetVerificationData = types.CosmosRequest_GetVerificationData
 
 // Backend requests
 type CosmosRequest_BlockHash = types.CosmosRequest_BlockHash
@@ -62,7 +68,12 @@ type HandleTransactionResponse = types.HandleTransactionResponse
 type NodePublicKeyRequest = types.NodePublicKeyRequest
 type NodePublicKeyResponse = types.NodePublicKeyResponse
 
-// IsNodeInitialized checks if node was properly initialized and master key was sealed
+// CheckNodeStatus checks if SGX requirements are met
+func CheckNodeStatus() error {
+	return api.CheckNodeStatus()
+}
+
+// IsNodeInitialized checks if node was properly initialized and key manager state was sealed
 func IsNodeInitialized() (bool, error) {
 	return api.IsNodeInitialized()
 }
@@ -75,8 +86,9 @@ func Call(
 	gasLimit, nonce uint64,
 	txContext *TransactionContext,
 	commit bool,
+	isUnencrypted bool,
 ) (*types.HandleTransactionResponse, error) {
-	executionResult, err := api.Call(querier, from, to, data, value, accessList, gasLimit, nonce, txContext, commit)
+	executionResult, err := api.Call(querier, from, to, data, value, accessList, gasLimit, nonce, txContext, commit, isUnencrypted)
 	if err != nil {
 		return &types.HandleTransactionResponse{}, err
 	}
@@ -101,23 +113,25 @@ func Create(
 	return executionResult, nil
 }
 
-func InitializeMasterKey(shouldReset bool) error {
-	return api.InitializeMasterKey(shouldReset)
+func InitializeEnclave(shouldReset bool) error {
+	return api.InitializeEnclave(shouldReset)
 }
 
-func StartSeedServer(addr string) error {
-	return api.StartSeedServer(addr)
+// StartAttestationServer handles incoming request for starting attestation server
+// to share epoch keys with new nodes which passed Remote Attestation.
+func StartAttestationServer(epidAddress, dcapAddress string) error {
+	return api.StartAttestationServer(epidAddress, dcapAddress)
 }
 
 // RequestSeed handles requesting seed and passing Remote Attestation.
 // Returns error if Remote Attestation was not passed or provided seed server address is not accessible
-func RequestSeed(host string, port int) error {
-	return api.RequestSeed(host, port)
+func RequestEpochKeys(host string, port int, isDCAP bool) error {
+	return api.RequestEpochKeys(host, port, isDCAP)
 }
 
 // GetNodePublicKey handles request for node public key
-func GetNodePublicKey() (*types.NodePublicKeyResponse, error) {
-	result, err := api.GetNodePublicKey()
+func GetNodePublicKey(blockNumber uint64) (*types.NodePublicKeyResponse, error) {
+	result, err := api.GetNodePublicKey(blockNumber)
 	if err != nil {
 		return &types.NodePublicKeyResponse{}, err
 	}
@@ -129,4 +143,16 @@ func GetNodePublicKey() (*types.NodePublicKeyResponse, error) {
 // matches the expected version.
 func Libsgx_wrapperVersion() (string, error) {
 	return api.Libsgx_wrapperVersion()
+}
+
+func AddEpoch(startingBlock uint64) error {
+	return api.AddEpoch(startingBlock)
+}
+
+func RemoveLatestEpoch() error {
+	return api.RemoveLatestEpoch()
+}
+
+func ListEpochs() ([]*types.EpochData, error) {
+	return api.ListEpochs()
 }

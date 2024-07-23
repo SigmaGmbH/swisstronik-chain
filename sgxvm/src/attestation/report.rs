@@ -4,6 +4,7 @@ use std::convert::TryFrom;
 use std::vec::Vec;
 use std::string::{String, ToString};
 
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_json::Value;
 use lazy_static::lazy_static;
@@ -123,15 +124,16 @@ impl AdvisoryIDs {
 /// verified by remote client.
 #[derive(Debug)]
 pub struct AttestationReport {
-    /// The freshness of the report, i.e., elapsed time after acquiring the
-    /// report in seconds.
-    // pub freshness: Duration,
+    /// Report creation timestamp
+    pub timestamp: DateTime<Utc>, 
     /// Quote status
     pub sgx_quote_status: SgxQuoteStatus,
     /// Content of the quote
     pub sgx_quote_body: SgxQuote,
     pub platform_info_blob: Option<Vec<u8>>,
     pub advisory_ids: AdvisoryIDs,
+    // TCB Evaluation Data number
+    pub tcb: u64,
 }
 
 impl AttestationReport {
@@ -165,8 +167,8 @@ impl AttestationReport {
 
         let chain: Vec<&[u8]> = vec![&ias_cert];
 
-        // set as 04.11.23(dd.mm.yy) - should be valid for the foreseeable future, and not rely on SystemTime
-        let time_stamp = webpki::Time::from_seconds_since_unix_epoch(1_699_088_856);
+        // set as 16.05.25(dd.mm.yy) - should be valid for the foreseeable future, and not rely on SystemTime
+        let time_stamp = webpki::Time::from_seconds_since_unix_epoch(1747391051);
 
         // note: there's no way to not validate the time, and we don't want to write this code
         // ourselves. We also can't just ignore the error message, since that means that the rest of
@@ -199,14 +201,14 @@ impl AttestationReport {
 
         // Verify and extract information from attestation report
         let attn_report: Value = serde_json::from_slice(&report.report)?;
-        println!("attn_report: {}", attn_report);
 
         // Verify API version is supported
         let version = attn_report["version"]
             .as_u64()
             .ok_or(Error::ReportParseError)?;
 
-        if version != 4 {
+
+        if version != 5 {
             println!("API version incompatible");
             return Err(Error::ReportParseError);
         };
@@ -237,7 +239,7 @@ impl AttestationReport {
                 println!("Error unpacking enclave quote body");
                 Error::ReportParseError
             })?;
-            let quote_raw = base64::decode(&quote_encoded.as_bytes()).map_err(|_| {
+            let quote_raw = base64::decode(quote_encoded.as_bytes()).map_err(|_| {
                 println!("Error decoding encoded quote body");
                 Error::ReportParseError
             })?;
@@ -253,15 +255,37 @@ impl AttestationReport {
             vec![]
         };
 
+        let tcb = attn_report["tcbEvaluationDataNumber"].as_u64().ok_or_else(|| {
+            println!("Error extracting TCB");
+            Error::ReportParseError
+        })?;
+
+        // Extract timestamp from report
+        let timestamp = attn_report["timestamp"].as_str().ok_or_else(|| {
+            println!("Error extracting timestamp");
+            Error::ReportParseError
+        })?;
+        let timestamp = match DateTime::parse_from_rfc3339(&format!("{}Z", timestamp)) {
+            Ok(res) => {
+                res.with_timezone(&Utc)
+            },
+            Err(err) => {
+                println!("Failed to parse timestamp. Reason: {:?}", err);
+                return Err(Error::ReportParseError);
+            }
+        };
+
         // We don't actually validate the public key, since we use ephemeral certificates,
         // and all we really care about that the report is valid and the key that is saved in the
         // report_data field
 
         Ok(Self {
+            timestamp,
             sgx_quote_status,
             sgx_quote_body,
             platform_info_blob,
             advisory_ids: AdvisoryIDs(advisories),
+            tcb,
         })
     }
 }

@@ -2,9 +2,10 @@ package ante
 
 import (
 	"fmt"
+
 	errorsmod "cosmossdk.io/errors"
-	sdkerror "github.com/cosmos/cosmos-sdk/types/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerror "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/x/authz"
 )
 
@@ -13,11 +14,11 @@ const maxDepth = 5
 
 // RejectNestedMessageDecorator validates if message contains restricted nested message types
 type RejectNestedMessageDecorator struct {
-	// disabledInnerMessages contains list of message types which cannot be nested 
+	// disabledInnerMessages contains list of message types which cannot be nested
 	disabledInnerMessages []string
 }
 
-// NewRejectNestedMessageDecorator returns a decorator to block provided types of messages 
+// NewRejectNestedMessageDecorator returns a decorator to block provided types of messages
 func NewRejectNestedMessageDecorator(disabledInnerMessages ...string) RejectNestedMessageDecorator {
 	return RejectNestedMessageDecorator{
 		disabledInnerMessages: disabledInnerMessages,
@@ -67,7 +68,7 @@ func (rnmd RejectNestedMessageDecorator) checkAuthzMessages(msgs []sdk.Msg, curr
 			msgType := sdk.MsgTypeURL(msg)
 			if isAuthzNestedMessage && rnmd.isAuthzDisabledMessage(msgType) {
 				return fmt.Errorf("message type is disabled: %s", msgType)
-			}	
+			}
 		}
 	}
 

@@ -1,6 +1,6 @@
 use evm::Config;
 use evm::backend::{
-    ApplyBackend as EvmApplyBackend,
+    Apply,
     Backend as EvmBackend,
     Basic,
     Log
@@ -11,6 +11,8 @@ use std::{
     string::String,
 };
 use std::boxed::Box;
+use sgx_types::*;
+use crate::error::Error;
 
 pub static GASOMETER_CONFIG: Config = Config::london();
 
@@ -22,8 +24,15 @@ pub struct Vicinity {
 }
 
 /// Supertrait for our version of EVM Backend
-pub trait ExtendedBackend: EvmBackend + EvmApplyBackend {
+pub trait ExtendedBackend: EvmBackend {
     fn get_logs(&self) -> Vec<Log>;
+
+    /// Apply given values and logs at backend.
+	fn apply<A, I, L>(&mut self, values: A, logs: L, delete_empty: bool) -> Result<(), Error>
+	where
+		A: IntoIterator<Item = Apply<I>>,
+		I: IntoIterator<Item = (H256, H256)>,
+		L: IntoIterator<Item = Log>;
 }
 
 /// A key-value storage trait
@@ -41,28 +50,30 @@ pub trait Storage {
     fn get_account(&self, account: &H160) -> Basic;
 
     /// Updates account balance and nonce
-    fn insert_account(&mut self, key: H160, data: Basic);
+    fn insert_account(&mut self, key: H160, data: Basic) -> Result<(), Error>;
 
     /// Updates contract bytecode
-    fn insert_account_code(&mut self, key: H160, code: Vec<u8>);
+    fn insert_account_code(&mut self, key: H160, code: Vec<u8>) -> Result<(), Error>;
 
     /// Update storage cell value
-    fn insert_storage_cell(&mut self, key: H160, index: H256, value: H256);
+    fn insert_storage_cell(&mut self, key: H160, index: H256, value: H256) -> Result<(), Error>;
 
     /// Removes account (selfdestruct)
-    fn remove(&mut self, key: &H160);
+    fn remove(&mut self, key: &H160) -> Result<(), Error>;
 
     /// Removes storage cell value
-    fn remove_storage_cell(&mut self, key: &H160, index: &H256);
+    fn remove_storage_cell(&mut self, key: &H160, index: &H256) -> Result<(), Error>;
 }
 
 // Struct for allocated buffer outside of SGX Enclave
 #[repr(C)]
+#[allow(dead_code)]
 pub struct AllocatedBuffer {
     pub ptr: *mut u8,
 }
 
 /// Recovers boxed value from pointer
+#[allow(dead_code)]
 pub unsafe fn recover_buffer(buf: AllocatedBuffer) -> Option<Vec<u8>> {
     if buf.ptr.is_null() {
         return None;
@@ -84,9 +95,32 @@ impl ExecutionResult {
     pub fn from_error(reason: String, data: Vec<u8>, gas_used: Option<u64>) -> Self {
         Self {
             logs: Vec::default(),
-            data: data,
             gas_used: gas_used.unwrap_or(21000), // This is minimum gas fee to apply the transaction
-            vm_error: reason
+            vm_error: reason,
+            data,
         }
     }
+}
+
+#[repr(C)]
+pub struct AllocationWithResult {
+    pub result_ptr: *mut u8,
+    pub result_len: usize,
+    pub status: sgx_status_t
+}
+
+impl Default for AllocationWithResult {
+    fn default() -> Self {
+        AllocationWithResult {
+            result_ptr: std::ptr::null_mut(),
+            result_len: 0,
+            status: sgx_status_t::SGX_ERROR_UNEXPECTED,
+        }
+    }
+}
+
+#[repr(C)]
+pub struct Allocation {
+    pub result_ptr: *mut u8,
+    pub result_size: usize,
 }

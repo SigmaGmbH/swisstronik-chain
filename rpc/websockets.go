@@ -89,13 +89,19 @@ type websocketsServer struct {
 	logger   log.Logger
 }
 
-func NewWebsocketsServer(clientCtx client.Context, logger log.Logger, tmWSClient *rpcclient.WSClient, cfg *config.Config) WebsocketsServer {
+func NewWebsocketsServer(clientCtx client.Context, logger log.Logger, tmWSClient *rpcclient.WSClient, cfg *config.Config, allowUnencryptedTxs bool) WebsocketsServer {
 	logger = logger.With("api", "websocket-server")
+
 	_, port, _ := net.SplitHostPort(cfg.JSONRPC.Address)
+	wsAddr := cfg.JSONRPC.WsAddress
+	if allowUnencryptedTxs {
+		_, port, _ = net.SplitHostPort(cfg.JSONRPC.UnencryptedAddress)
+		wsAddr = cfg.JSONRPC.UnencryptedWsAddress
+	}
 
 	return &websocketsServer{
 		rpcAddr:  "localhost:" + port, // FIXME: this shouldn't be hardcoded to localhost
-		wsAddr:   cfg.JSONRPC.WsAddress,
+		wsAddr:   wsAddr,
 		certFile: cfg.TLS.CertificatePath,
 		keyFile:  cfg.TLS.KeyPath,
 		api:      newPubSubAPI(clientCtx, logger, tmWSClient),

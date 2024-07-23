@@ -7,7 +7,7 @@ import (
 	evmtypes "swisstronik/x/evm/types"
 )
 
-func (suite AnteTestSuite) TestSignatures() {
+func (suite *AnteTestSuite) TestSignatures() {
 	suite.enableFeemarket = false
 	suite.SetupTest() // reset
 
@@ -18,7 +18,7 @@ func (suite AnteTestSuite) TestSignatures() {
 	acc.Nonce = 1
 	acc.Balance = big.NewInt(10000000000)
 
-	suite.app.EvmKeeper.SetAccount(suite.ctx, addr, *acc)
+	_ = suite.app.EvmKeeper.SetAccount(suite.ctx, addr, *acc)
 	msgHandleTx := evmtypes.NewTx(suite.app.EvmKeeper.ChainID(), 1, &to, big.NewInt(10), 100000, big.NewInt(1), nil, nil, nil, nil, nil, nil)
 	msgHandleTx.From = addr.Hex()
 

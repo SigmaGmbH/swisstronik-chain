@@ -154,7 +154,7 @@ func setupTest(localMinGasPrices string) (*ethsecp256k1.PrivKey, banktypes.MsgSe
 		Denom:  s.denom,
 		Amount: amount,
 	}}
-	testutil.FundAccount(s.app.BankKeeper, s.ctx, address, initBalance)
+	testutil.FundAccount(s.ctx, s.app.BankKeeper, address, initBalance)
 
 	msg := banktypes.MsgSend{
 		FromAddress: address.String(),

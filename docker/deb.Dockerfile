@@ -1,5 +1,5 @@
 ############ Install Intel SGX SDK & SGX PSW
-FROM ghcr.io/sigmagmbh/sgx:2.19-bionic as base
+FROM ghcr.io/sigmagmbh/sgx:2.23-jammy-554238b as base
 RUN wget -qO - https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | apt-key add -
 RUN apt-get update
 
@@ -18,7 +18,7 @@ RUN curl https://sh.rustup.rs -sSf | bash -s -- -y > /dev/null 2>&1
 RUN cargo install protobuf-codegen --version "2.8.1" -f
  
 # Install golang
-ADD https://go.dev/dl/go1.19.linux-amd64.tar.gz go.linux-amd64.tar.gz
+ADD https://go.dev/dl/go1.22.1.linux-amd64.tar.gz go.linux-amd64.tar.gz
 RUN tar -C /usr/local -xzf go.linux-amd64.tar.gz && rm go.linux-amd64.tar.gz
 RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && \
 	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest > /dev/null 2>&1
@@ -32,6 +32,8 @@ RUN apt-get install -y automake autoconf build-essential libtool git
 
 ARG SGX_MODE=HW
 ENV SGX_MODE=${SGX_MODE}
+ARG PRODUCTION_MODE=true
+ENV PRODUCTION_MODE=${PRODUCTION_MODE}
 ENV SGX_SDK="/opt/intel/sgxsdk"
 ENV PATH="${PATH}:${SGX_SDK}/bin:${SGX_SDK}/bin/x64"
 ENV PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${SGX_SDK}/pkgconfig"
@@ -45,7 +47,7 @@ RUN make build
 ############ Node binary for deb package
 FROM compile-base as build-deb
 
-ARG BUILD_VERSION="v1.0.1"
+ARG BUILD_VERSION="v1.0.3"
 ENV VERSION=${BUILD_VERSION}
 ARG DEB_BIN_DIR=/usr/local/bin
 ENV DEB_BIN_DIR=${DEB_BIN_DIR}
@@ -59,7 +61,7 @@ WORKDIR /root
 # Copy over binaries from the build-env
 COPY --from=compile-chain /root/chain/build/swisstronikd swisstronikd
 COPY --from=compile-chain /root/.swisstronik-enclave /usr/lib/.swisstronik-enclave
-COPY --from=compile-chain /root/chain/go-sgxvm/internal/api/libsgx_wrapper.x86_64.so /usr/lib/.swisstronik-enclave/libsgx_wrapper.x86_64.so
+COPY --from=compile-chain /root/chain/go-sgxvm/internal/api/libsgx_wrapper_v1.0.3.x86_64.so /usr/lib/.swisstronik-enclave/libsgx_wrapper_v1.0.3.x86_64.so
 
 COPY ./deb ./deb
 COPY ./scripts/build_deb.sh .

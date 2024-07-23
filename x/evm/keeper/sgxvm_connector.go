@@ -2,12 +2,15 @@ package keeper
 
 import (
 	"errors"
+	"math/big"
+
 	"github.com/SigmaGmbH/librustgo"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/golang/protobuf/proto"
-	"math/big"
+
+	compliancetypes "swisstronik/x/compliance/types"
 )
 
 // Connector allows our VM interact with existing Cosmos application.
@@ -59,9 +62,12 @@ func (q Connector) Query(req []byte) ([]byte, error) {
 	// Returns block hash
 	case *librustgo.CosmosRequest_BlockHash:
 		return q.BlockHash(request)
-	// Returns verification methods for DID Document
-	case *librustgo.CosmosRequest_VerificationMethods:
-		return q.GetVerificationMethods(request)
+	case *librustgo.CosmosRequest_AddVerificationDetails:
+		return q.AddVerificationDetails(request)
+	case *librustgo.CosmosRequest_HasVerification:
+		return q.HasVerification(request)
+	case *librustgo.CosmosRequest_GetVerificationData:
+		return q.GetVerificationData(request)
 	}
 
 	return nil, errors.New("wrong query received")
@@ -95,11 +101,6 @@ func (q Connector) InsertAccountCode(req *librustgo.CosmosRequest_InsertAccountC
 	ethAddress := common.BytesToAddress(req.InsertAccountCode.Address)
 	if err := q.EVMKeeper.SetAccountCode(q.Context, ethAddress, req.InsertAccountCode.Code); err != nil {
 		return nil, err
-	}
-
-	updAcc := q.EVMKeeper.GetAccountOrEmpty(q.Context, ethAddress)
-	if !updAcc.IsContract() {
-		return nil, errors.New("contract was not deployed")
 	}
 
 	return proto.Marshal(&librustgo.QueryInsertAccountCodeResponse{})
@@ -140,13 +141,10 @@ func (q Connector) BlockHash(req *librustgo.CosmosRequest_BlockHash) ([]byte, er
 
 // InsertStorageCell handles incoming protobuf-encoded request for updating state of storage cell
 func (q Connector) InsertStorageCell(req *librustgo.CosmosRequest_InsertStorageCell) ([]byte, error) {
-	//println("Connector::Query InsertStorageCell invoked")
-
 	ethAddress := common.BytesToAddress(req.InsertStorageCell.Address)
 	index := common.BytesToHash(req.InsertStorageCell.Index)
 
 	q.EVMKeeper.SetState(q.Context, ethAddress, index, req.InsertStorageCell.Value)
-
 	return proto.Marshal(&librustgo.QueryInsertStorageCellResponse{})
 }
 
@@ -203,25 +201,89 @@ func (q Connector) InsertAccount(req *librustgo.CosmosRequest_InsertAccount) ([]
 	return proto.Marshal(&librustgo.QueryInsertAccountResponse{})
 }
 
-// GetVerificationMethods handles incoming protobuf-encoded request for obtaining verification methods
-// for provided DID URL
-func (q Connector) GetVerificationMethods(req *librustgo.CosmosRequest_VerificationMethods) ([]byte, error) {
-	didDocument, err := q.EVMKeeper.DIDKeeper.GetLatestDIDDocument(q.Context, req.VerificationMethods.Did)
+// AddVerificationDetails writes provided verification details to x/compliance module
+func (q Connector) AddVerificationDetails(req *librustgo.CosmosRequest_AddVerificationDetails) ([]byte, error) {
+	userAddress := sdk.AccAddress(req.AddVerificationDetails.UserAddress)
+	issuerAddress := sdk.AccAddress(req.AddVerificationDetails.IssuerAddress).String()
+	verificationType := compliancetypes.VerificationType(req.AddVerificationDetails.VerificationType)
+
+	// Addresses in keeper are Cosmos Addresses
+	verificationDetails := &compliancetypes.VerificationDetails{
+		IssuerAddress:        issuerAddress,
+		OriginChain:          req.AddVerificationDetails.OriginChain,
+		IssuanceTimestamp:    req.AddVerificationDetails.IssuanceTimestamp,
+		ExpirationTimestamp:  req.AddVerificationDetails.ExpirationTimestamp,
+		OriginalData:         req.AddVerificationDetails.ProofData,
+		Schema:               string(req.AddVerificationDetails.Schema),
+		IssuerVerificationId: string(req.AddVerificationDetails.IssuerVerificationId),
+		Version:              req.AddVerificationDetails.Version,
+	}
+
+	verificationID, err := q.EVMKeeper.ComplianceKeeper.AddVerificationDetails(q.Context, userAddress, verificationType, verificationDetails)
 	if err != nil {
 		return nil, err
 	}
 
-	// Extract verification methods
-	result := []*librustgo.VerificationMethod{}
-	for _, method := range didDocument.DidDoc.VerificationMethod {
-		ffiMethod := librustgo.VerificationMethod{
-			VerificationMethodType: method.VerificationMethodType,
-			VerificationMaterial:   method.VerificationMaterial,
-		}
-		result = append(result, &ffiMethod)
+	return proto.Marshal(&librustgo.QueryAddVerificationDetailsResponse{
+		VerificationId: verificationID,
+	})
+}
+
+// HasVerification returns if user has verification of provided type from x/compliance module
+func (q Connector) HasVerification(req *librustgo.CosmosRequest_HasVerification) ([]byte, error) {
+	userAddress := sdk.AccAddress(req.HasVerification.UserAddress)
+	verificationType := compliancetypes.VerificationType(req.HasVerification.VerificationType)
+	expirationTimestamp := req.HasVerification.ExpirationTimestamp
+
+	var allowedIssuers []sdk.AccAddress
+	for _, issuer := range req.HasVerification.AllowedIssuers {
+		allowedIssuers = append(allowedIssuers, sdk.AccAddress(issuer))
 	}
 
-	return proto.Marshal(&librustgo.QueryVerificationMethodsResponse{
-		Vm: result,
+	hasVerification, err := q.EVMKeeper.ComplianceKeeper.HasVerificationOfType(q.Context, userAddress, verificationType, expirationTimestamp, allowedIssuers)
+	if err != nil {
+		return nil, err
+	}
+
+	return proto.Marshal(&librustgo.QueryHasVerificationResponse{
+		HasVerification: hasVerification,
+	})
+}
+
+func (q Connector) GetVerificationData(req *librustgo.CosmosRequest_GetVerificationData) ([]byte, error) {
+	userAddress := sdk.AccAddress(req.GetVerificationData.UserAddress)
+	issuerAddress := sdk.AccAddress(req.GetVerificationData.IssuerAddress)
+
+	verifications, verificationsDetails, err := q.EVMKeeper.ComplianceKeeper.GetVerificationDetailsByIssuer(q.Context, userAddress, issuerAddress)
+	if err != nil {
+		return nil, err
+	}
+	if len(verifications) != len(verificationsDetails) {
+		return nil, errors.New("invalid verification details")
+	}
+
+	var resData []*librustgo.VerificationDetails
+	for i, v := range verifications {
+		issuerAccount, err := sdk.AccAddressFromBech32(v.IssuerAddress)
+		if err != nil {
+			return nil, err
+		}
+		details := verificationsDetails[i]
+		// Addresses from Query requests are Ethereum Addresses
+		resData = append(resData, &librustgo.VerificationDetails{
+			VerificationType:     uint32(v.Type),
+			VerificationID:       v.VerificationId,
+			IssuerAddress:        common.Address(issuerAccount.Bytes()).Bytes(),
+			OriginChain:          details.OriginChain,
+			IssuanceTimestamp:    details.IssuanceTimestamp,
+			ExpirationTimestamp:  details.ExpirationTimestamp,
+			OriginalData:         details.OriginalData,
+			Schema:               details.Schema,
+			IssuerVerificationId: details.IssuerVerificationId,
+			Version:              details.Version,
+		})
+	}
+	return proto.Marshal(&librustgo.QueryGetVerificationDataResponse{
+		Data: resData,
 	})
 }

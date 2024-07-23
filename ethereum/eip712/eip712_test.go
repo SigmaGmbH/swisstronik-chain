@@ -4,33 +4,25 @@ import (
 	"testing"
 
 	"cosmossdk.io/math"
-
-	"swisstronik/ethereum/eip712"
-
 	"cosmossdk.io/simapp/params"
 	"github.com/cosmos/cosmos-sdk/client"
-
-	"github.com/ethereum/go-ethereum/crypto"
-
-	"swisstronik/crypto/ethsecp256k1"
-
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
-	"swisstronik/app"
-	"swisstronik/encoding"
-	"swisstronik/utils"
-
-	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-
 	txtypes "github.com/cosmos/cosmos-sdk/types/tx"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
-
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	distributiontypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/stretchr/testify/suite"
+
+	"swisstronik/app"
+	"swisstronik/crypto/ethsecp256k1"
+	"swisstronik/encoding"
+	"swisstronik/ethereum/eip712"
+	"swisstronik/utils"
 )
 
 // Unit tests for single-signer EIP-712 signature verification. Multi-signer verification tests are included

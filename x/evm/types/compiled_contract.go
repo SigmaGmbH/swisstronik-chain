@@ -100,6 +100,10 @@ var (
 
 	// TestMessageCall is the compiled message call benchmark contract
 	TestMessageCall CompiledContract
+
+	//go:embed Incrementor.json
+	incrementorJSON     []byte
+	IncrementorContract CompiledContract
 )
 
 func init() {
@@ -127,6 +131,14 @@ func init() {
 	}
 
 	if len(TestMessageCall.Bin) == 0 {
+		panic("load contract failed")
+	}
+
+	err = json.Unmarshal(incrementorJSON, &IncrementorContract)
+	if err != nil {
+		panic(err)
+	}
+	if len(IncrementorContract.Bin) == 0 {
 		panic("load contract failed")
 	}
 }
