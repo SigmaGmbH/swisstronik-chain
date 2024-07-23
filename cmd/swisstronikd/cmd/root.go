@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"swisstronik/encoding"
-	"swisstronik/ethereum/eip712"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -69,8 +68,6 @@ func NewRootCmd() (*cobra.Command, simappparams.EncodingConfig) {
 		WithHomeDir(app.DefaultNodeHome).
 		WithViper("").
 		WithLedgerHasProtobuf(true)
-
-	eip712.SetEncodingConfig(encodingConfig)
 
 	rootCmd := &cobra.Command{
 		Use:   app.Name + "d",
