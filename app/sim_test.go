@@ -39,7 +39,7 @@ import (
 )
 
 // SwtrAppChainID hardcoded chainID for simulation
-const SwtrAppChainID = "simulation-app"
+const SwtrAppChainID = "swisstronik_1291-1"
 
 // Get flags every time the simulator is run
 func init() {
