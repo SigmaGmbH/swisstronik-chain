@@ -126,7 +126,7 @@ func TestAppImportExport(t *testing.T) {
 	config := simcli.NewConfigFromFlags()
 	config.ChainID = SwtrAppChainID
 	config.Commit = true
-	// config.NumBlocks = 10 # default value is 500
+	// config.NumBlocks = 10 // default value is 500
 
 	db, dir, logger, skip, err := simtestutil.SetupSimulation(
 		config,
@@ -156,7 +156,7 @@ func TestAppImportExport(t *testing.T) {
 		encoding.MakeConfig(ModuleBasics),
 		appOptions,
 		fauxMerkleModeOpt,
-		baseapp.SetChainID(SwtrAppChainID),
+		baseapp.SetChainID(config.ChainID),
 	)
 	require.Equal(t, "swisstronik", app.Name())
 
@@ -287,6 +287,7 @@ func TestAppSimulationAfterImport(t *testing.T) {
 	config := simcli.NewConfigFromFlags()
 	config.ChainID = SwtrAppChainID
 	config.Commit = true
+	// config.NumBlocks = 10 // default value is 500
 
 	db, dir, logger, skip, err := simtestutil.SetupSimulation(
 		config,
@@ -316,7 +317,7 @@ func TestAppSimulationAfterImport(t *testing.T) {
 		encoding.MakeConfig(ModuleBasics),
 		appOptions,
 		fauxMerkleModeOpt,
-		baseapp.SetChainID(SwtrAppChainID),
+		baseapp.SetChainID(config.ChainID),
 	)
 	require.Equal(t, "swisstronik", app.Name())
 
@@ -358,8 +359,8 @@ func TestAppSimulationAfterImport(t *testing.T) {
 		config,
 		"leveldb-app-sim-2",
 		"Simulation-2",
-		simcli.FlagVerboseValue,
-		simcli.FlagEnabledValue,
+		true, // simcli.FlagVerboseValue,
+		true, // simcli.FlagEnabledValue,
 	)
 	require.NoError(t, err, "simulation setup failed")
 
@@ -370,17 +371,17 @@ func TestAppSimulationAfterImport(t *testing.T) {
 
 	newApp := New(
 		logger,
-		db, nil, true, map[int64]bool{},
+		newDB, nil, true, map[int64]bool{},
 		DefaultNodeHome, 5,
 		encoding.MakeConfig(ModuleBasics),
 		appOptions,
 		fauxMerkleModeOpt,
-		baseapp.SetChainID(SwtrAppChainID),
+		baseapp.SetChainID(config.ChainID),
 	)
 	require.Equal(t, "swisstronik", newApp.Name())
 
 	newApp.InitChain(abci.RequestInitChain{
-		ChainId:       SwtrAppChainID,
+		ChainId:       config.ChainID,
 		AppStateBytes: exported.AppState,
 	})
 
@@ -399,9 +400,9 @@ func TestAppSimulationAfterImport(t *testing.T) {
 }
 
 func TestAppStateDeterminism(t *testing.T) {
-	if !simcli.FlagEnabledValue {
-		t.Skip("skipping application simulation")
-	}
+	//if !simcli.FlagEnabledValue {
+	//	t.Skip("skipping application simulation")
+	//}
 
 	config := simcli.NewConfigFromFlags()
 	config.InitialBlockHeight = 1
@@ -410,6 +411,7 @@ func TestAppStateDeterminism(t *testing.T) {
 	config.AllInvariants = false
 	config.ChainID = SwtrAppChainID
 	config.Commit = true
+	// config.NumBlocks = 10 // default value is 500
 
 	numSeeds := 3
 	numTimesToRunPerSeed := 5
@@ -447,7 +449,7 @@ func TestAppStateDeterminism(t *testing.T) {
 				encoding.MakeConfig(ModuleBasics),
 				appOptions,
 				fauxMerkleModeOpt,
-				baseapp.SetChainID(SwtrAppChainID),
+				baseapp.SetChainID(config.ChainID),
 			)
 			require.Equal(t, "swisstronik", app.Name())
 
