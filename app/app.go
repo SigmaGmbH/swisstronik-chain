@@ -766,7 +766,7 @@ func New(
 	// transactions
 	// create the simulation manager and define the order of the modules for deterministic simulations
 	overrideModules := map[string]module.AppModuleSimulation{
-		authtypes.ModuleName: auth.NewAppModule(app.appCodec, app.AccountKeeper, authsims.RandomGenesisAccounts, app.GetSubspace(authtypes.ModuleName)),
+		//authtypes.ModuleName: auth.NewAppModule(app.appCodec, app.AccountKeeper, authsims.RandomGenesisAccounts, app.GetSubspace(authtypes.ModuleName)),
 	}
 	app.sm = module.NewSimulationManagerFromAppModules(app.mm.Modules, overrideModules)
 
@@ -1093,8 +1093,8 @@ func (app *App) setupUpgradeHandlers() {
 }
 
 // SimulationManager implements runtime.AppI
-func (*App) SimulationManager() *module.SimulationManager {
-	panic("unimplemented")
+func (app *App) SimulationManager() *module.SimulationManager {
+	return app.sm
 }
 
 func RegisterCoinDenominations() {
