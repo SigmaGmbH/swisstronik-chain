@@ -27,7 +27,6 @@ import (
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	errortypes "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/ethereum/go-ethereum/crypto"
-	"swisstronik/ethereum/eip712"
 )
 
 const (
@@ -224,19 +223,7 @@ func (pubKey *PubKey) UnmarshalAminoJSON(bz []byte) error {
 //
 // CONTRACT: The signature should be in [R || S] format.
 func (pubKey PubKey) VerifySignature(msg, sig []byte) bool {
-	return pubKey.verifySignatureECDSA(msg, sig) || pubKey.verifySignatureAsEIP712(msg, sig)
-}
-
-// Verifies the signature as an EIP-712 signature by first converting the message payload
-// to EIP-712 object bytes, then performing ECDSA verification on the hash. This is to support
-// signing a Cosmos payload using EIP-712.
-func (pubKey PubKey) verifySignatureAsEIP712(msg, sig []byte) bool {
-	eip712Bytes, err := eip712.GetEIP712BytesForMsg(msg)
-	if err != nil {
-		return false
-	}
-
-	return pubKey.verifySignatureECDSA(eip712Bytes, sig)
+	return pubKey.verifySignatureECDSA(msg, sig)
 }
 
 // Perform standard ECDSA signature verification for the given raw bytes and signature.
