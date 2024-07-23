@@ -9,7 +9,7 @@ import (
 	"golang.org/x/crypto/curve25519"
 )
 
-// EncryptState encrypts smart contract state using simmetric key derived from master key only for specific contract.
+// EncryptState encrypts smart contract state using symmetric key derived from master key only for specific contract.
 // That allows us to improve cryptographic strength of our encryption scheme.
 //
 // As an output, this function returns vector which contains 15 bytes nonce and ciphertext.
