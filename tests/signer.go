@@ -56,15 +56,21 @@ func RandomAccAddress() sdk.AccAddress {
 	return sdk.AccAddress(addr.Bytes())
 }
 
-func RandomEthAccounts(r *rand.Rand, n int) []simulation.Account {
+func RandomSimulationEthAccount() simulation.Account {
+	privKey, _ := ethsecp256k1.GenerateKey()
+	key, _ := privKey.ToECDSA()
+	return simulation.Account{
+		PrivKey: privKey,
+		PubKey:  privKey.PubKey(),
+		Address: sdk.AccAddress(crypto.PubkeyToAddress(key.PublicKey).Bytes()),
+		ConsKey: ed25519.GenPrivKey(),
+	}
+}
+
+func RandomSimulationEthAccounts(r *rand.Rand, n int) []simulation.Account {
 	accs := make([]simulation.Account, n)
 	for i := 0; i < n; i++ {
-		privKey, _ := ethsecp256k1.GenerateKey()
-		key, _ := privKey.ToECDSA()
-		accs[i].PrivKey = privKey
-		accs[i].PubKey = privKey.PubKey()
-		accs[i].Address = sdk.AccAddress(crypto.PubkeyToAddress(key.PublicKey).Bytes())
-		accs[i].ConsKey = ed25519.GenPrivKey()
+		accs[i] = RandomSimulationEthAccount()
 	}
 	return accs
 }

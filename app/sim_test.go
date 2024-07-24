@@ -65,7 +65,8 @@ func fauxMerkleModeOpt(bapp *baseapp.BaseApp) {
 func TestFullAppSimulation(t *testing.T) {
 	config := simcli.NewConfigFromFlags()
 	config.ChainID = SwtrAppChainID
-	config.Commit = true // commit by default
+	config.Commit = true  // commit by default
+	config.NumBlocks = 10 // default value is 500
 
 	db, dir, logger, skip, err := simtestutil.SetupSimulation(
 		config,
@@ -105,7 +106,7 @@ func TestFullAppSimulation(t *testing.T) {
 		os.Stdout,
 		app.BaseApp,
 		simtestutil.AppStateFn(app.AppCodec(), app.SimulationManager(), NewDefaultGenesisState()),
-		tests.RandomEthAccounts,
+		tests.RandomSimulationEthAccounts,
 		simtestutil.SimulationOperations(app, app.AppCodec(), config),
 		app.ModuleAccountAddrs(),
 		config,
@@ -166,7 +167,7 @@ func TestAppImportExport(t *testing.T) {
 		os.Stdout,
 		app.BaseApp,
 		simtestutil.AppStateFn(app.AppCodec(), app.SimulationManager(), NewDefaultGenesisState()),
-		tests.RandomEthAccounts,
+		tests.RandomSimulationEthAccounts,
 		simtestutil.SimulationOperations(app, app.AppCodec(), config),
 		app.ModuleAccountAddrs(),
 		config,
@@ -327,7 +328,7 @@ func TestAppSimulationAfterImport(t *testing.T) {
 		os.Stdout,
 		app.BaseApp,
 		simtestutil.AppStateFn(app.AppCodec(), app.SimulationManager(), NewDefaultGenesisState()),
-		tests.RandomEthAccounts,
+		tests.RandomSimulationEthAccounts,
 		simtestutil.SimulationOperations(app, app.AppCodec(), config),
 		app.ModuleAccountAddrs(),
 		config,
@@ -390,7 +391,7 @@ func TestAppSimulationAfterImport(t *testing.T) {
 		os.Stdout,
 		newApp.BaseApp,
 		simtestutil.AppStateFn(app.AppCodec(), app.SimulationManager(), NewDefaultGenesisState()),
-		tests.RandomEthAccounts,
+		tests.RandomSimulationEthAccounts,
 		simtestutil.SimulationOperations(newApp, newApp.AppCodec(), config),
 		app.ModuleAccountAddrs(),
 		config,
@@ -459,7 +460,7 @@ func TestAppStateDeterminism(t *testing.T) {
 				os.Stdout,
 				app.BaseApp,
 				simtestutil.AppStateFn(app.AppCodec(), app.SimulationManager(), NewDefaultGenesisState()),
-				tests.RandomEthAccounts,
+				tests.RandomSimulationEthAccounts,
 				simtestutil.SimulationOperations(app, app.AppCodec(), config),
 				app.ModuleAccountAddrs(),
 				config,

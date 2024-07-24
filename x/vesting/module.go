@@ -26,7 +26,7 @@ var (
 	_ module.AppModuleBasic      = AppModuleBasic{}
 	_ module.EndBlockAppModule   = AppModule{}
 	_ module.BeginBlockAppModule = AppModule{}
-	//_ module.AppModuleSimulation = AppModule{}
+	_ module.AppModuleSimulation = AppModule{}
 )
 
 // ----------------------------------------------------------------------------
@@ -146,17 +146,10 @@ func (am AppModule) EndBlock(_ sdk.Context, _ abci.RequestEndBlock) []abci.Valid
 	return []abci.ValidatorUpdate{}
 }
 
-func (AppModule) GenerateGenesisState(simState *module.SimulationState) {
-	//simulation.RandomizedGenState(simState)
-}
+func (AppModule) GenerateGenesisState(simState *module.SimulationState) {}
 
-func (am AppModule) RegisterStoreDecoder(sdr sdk.StoreDecoderRegistry) {
-	//sdr[types.StoreKey] = simulation.NewDecodeStore(am.cdc)
-}
+func (am AppModule) RegisterStoreDecoder(sdr sdk.StoreDecoderRegistry) {}
 
 func (am AppModule) WeightedOperations(simState module.SimulationState) []simtypes.WeightedOperation {
-	//return simulation.WeightedOperations(
-	//	simState.AppParams, simState.Cdc, am.accountKeeper, am.bankKeeper, am.keeper,
-	//)
 	return nil
 }
