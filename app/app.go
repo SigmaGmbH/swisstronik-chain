@@ -118,7 +118,6 @@ import (
 	"swisstronik/app/upgrades/v1_0_3"
 	"swisstronik/docs"
 	"swisstronik/encoding"
-	"swisstronik/ethereum/eip712"
 	srvflags "swisstronik/server/flags"
 	evmcommontypes "swisstronik/types"
 	compliancemodule "swisstronik/x/compliance"
@@ -303,8 +302,6 @@ func New(
 	appCodec := encodingConfig.Codec
 	cdc := encodingConfig.Amino
 	interfaceRegistry := encodingConfig.InterfaceRegistry
-
-	eip712.SetEncodingConfig(encodingConfig)
 
 	// Setup Mempool and Proposal Handlers
 	baseAppOptions = append(baseAppOptions, func(app *baseapp.BaseApp) {

@@ -36,7 +36,6 @@ import (
 	ante "swisstronik/app/ante"
 	"swisstronik/crypto/ethsecp256k1"
 	"swisstronik/encoding"
-	"swisstronik/ethereum/eip712"
 	"swisstronik/tests"
 	"swisstronik/types"
 	"swisstronik/utils"
@@ -56,9 +55,6 @@ type AnteTestSuite struct {
 	enableLondonHF  bool
 	evmParamsOption func(*evmtypes.Params)
 	priv            *ethsecp256k1.PrivKey
-
-	useLegacyEIP712Extension bool
-	useLegacyEIP712TypedData bool
 }
 
 const TestGasLimit uint64 = 100000
@@ -122,7 +118,6 @@ func (suite *AnteTestSuite) SetupTest() {
 	encodingConfig := encoding.MakeConfig(app.ModuleBasics)
 	// We're using TestMsg amino encoding in some tests, so register it here.
 	encodingConfig.Amino.RegisterConcrete(&testdata.TestMsg{}, "testdata.TestMsg", nil)
-	eip712.SetEncodingConfig(encodingConfig)
 
 	suite.clientCtx = client.Context{}.WithTxConfig(encodingConfig.TxConfig)
 	suite.Require().NotNil(suite.app.AppCodec())
@@ -332,17 +327,9 @@ func (suite *AnteTestSuite) GenerateMultipleKeys(n int) ([]cryptotypes.PrivKey, 
 
 // generateSingleSignature signs the given sign doc bytes using the given signType (EIP-712 or Standard)
 func (suite *AnteTestSuite) generateSingleSignature(signMode signing.SignMode, privKey cryptotypes.PrivKey, signDocBytes []byte, signType string) (signature signing.SignatureV2) {
-	var (
-		msg []byte
-		err error
-	)
+	var msg []byte
 
 	msg = signDocBytes
-
-	if signType == "EIP-712" {
-		msg, err = eip712.GetEIP712BytesForMsg(signDocBytes)
-		suite.Require().NoError(err)
-	}
 
 	sigBytes, _ := privKey.Sign(msg)
 	sigData := &signing.SingleSignatureData{
