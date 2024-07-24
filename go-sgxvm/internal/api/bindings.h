@@ -46,7 +46,7 @@ enum GoError {
    */
   GoError_User = 5,
   /**
-   * An error happend during interacting with DataQuerier (failed to apply some changes / failed to create contract / etc. )
+   * An error happened during interacting with DataQuerier (failed to apply some changes / failed to create contract / etc. )
    */
   GoError_QuerierError = 6,
   /**
