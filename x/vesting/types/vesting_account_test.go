@@ -397,6 +397,97 @@ func (suite *VestingAccountTestSuite) TestTrackUndelegationMonthlyVestingAcc() {
 	}
 }
 
+func (suite *VestingAccountTestSuite) TestFieldsMonthlyVestingAcc() {
+	now := tmtime.Now()
+
+	baseAcc, initialVesting := initBaseAccount(60 * 10000)
+
+	testCases := []struct {
+		name string
+		acc  *types.MonthlyVestingAccount
+		exp  func(acc *types.MonthlyVestingAccount)
+	}{
+		{
+			"Create vesting for 1 cliff day and 1 month",
+			types.NewMonthlyVestingAccount(
+				baseAcc,
+				initialVesting,
+				now.Unix(),
+				1,
+				1,
+			),
+			func(acc *types.MonthlyVestingAccount) {
+				startTime := now
+				suite.Require().Equal(acc.StartTime, startTime.Unix())
+
+				cliffTime := startTime.Add(time.Hour * 24 * 1) // after 1 day
+				suite.Require().Equal(acc.CliffTime, cliffTime.Unix())
+
+				endTime := cliffTime.Add(time.Hour * 24 * 30 * 1) // after 1 month
+				suite.Require().Equal(acc.EndTime, endTime.Unix())
+			},
+		},
+		{
+			"Create vesting for 0 days 12 month ",
+			types.NewMonthlyVestingAccount(
+				baseAcc,
+				initialVesting,
+				now.Unix(),
+				0,
+				12,
+			),
+			func(acc *types.MonthlyVestingAccount) {
+				startTime := now
+				cliffTime := now
+
+				suite.Require().Equal(acc.StartTime, startTime.Unix())
+				suite.Require().Equal(acc.CliffTime, cliffTime.Unix())
+
+				endTime := cliffTime.Add(time.Hour * 24 * 30 * 12) // after 12 month
+				suite.Require().Equal(acc.EndTime, endTime.Unix())
+
+				suite.Require().Greater(len(acc.VestingPeriods), 0)
+				for _, period := range acc.VestingPeriods {
+					suite.Require().Equal(acc.VestingPeriods[0].Amount, period.Amount)
+					suite.Require().Equal(acc.VestingPeriods[0].Length, period.Length)
+				}
+			},
+		},
+		{
+			"Create vesting account for 100 days 60 month",
+			types.NewMonthlyVestingAccount(
+				baseAcc,
+				initialVesting,
+				now.Unix(),
+				100,
+				60,
+			),
+			func(acc *types.MonthlyVestingAccount) {
+				startTime := now
+				cliffTime := startTime.Add(time.Hour * 24 * 100) // after 100 days
+
+				suite.Require().Equal(acc.StartTime, startTime.Unix())
+				suite.Require().Equal(acc.CliffTime, cliffTime.Unix())
+
+				endTime := cliffTime.Add(time.Hour * 24 * 30 * 60) // after 1800 days
+				suite.Require().Equal(acc.EndTime, endTime.Unix())
+
+				suite.Require().Greater(len(acc.VestingPeriods), 0)
+				for _, period := range acc.VestingPeriods {
+					suite.Require().Equal(acc.VestingPeriods[0].Amount, period.Amount)
+					suite.Require().Equal(acc.VestingPeriods[0].Length, period.Length)
+				}
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		suite.Run(tc.name, func() {
+			tc.exp(tc.acc)
+		})
+	}
+}
+
 func initBaseAccount(amount int64) (*authtypes.BaseAccount, sdk.Coins) {
 	addr := tests.RandomAccAddress()
 	baseAcc := authtypes.NewBaseAccountWithAddress(addr)
