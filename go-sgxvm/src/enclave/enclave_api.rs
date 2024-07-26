@@ -40,6 +40,7 @@ impl EnclaveApi {
         }
     }
 
+    #[cfg(feature = "hardware_mode")]
     pub fn attest_peer(eid: sgx_enclave_id_t, fd: i32, is_dcap: bool) -> Result<(), Error> {
         match is_dcap {
             true => EnclaveApi::attest_peer_dcap(eid, fd),
@@ -47,14 +48,17 @@ impl EnclaveApi {
         }
     }
 
+    #[cfg(feature = "hardware_mode")]
     pub fn dump_dcap_quote(eid: sgx_enclave_id_t, filepath: &str) -> Result<(), Error> {
         dcap_utils::dump_dcap_quote(eid, filepath)
     }
 
+    #[cfg(feature = "hardware_mode")]
     pub fn verify_dcap_quote(eid: sgx_enclave_id_t, filepath: &str) -> Result<(), Error> {
         dcap_utils::verify_dcap_quote(eid, filepath)
     }
 
+    #[cfg(feature = "hardware_mode")]
     fn attest_peer_dcap(eid: sgx_enclave_id_t, fd: i32) -> Result<(), Error> {
         let qe_target_info = dcap_utils::get_qe_target_info()?;
         let quote_size = dcap_utils::get_quote_size()?;
@@ -83,6 +87,7 @@ impl EnclaveApi {
         Ok(())
     }
 
+    #[cfg(feature = "hardware_mode")]
     fn attest_peer_epid(eid: sgx_enclave_id_t, fd: i32) -> Result<(), Error> {
         let mut retval = sgx_status_t::SGX_ERROR_UNEXPECTED;
         let res = unsafe { super::ecall_attest_peer_epid(eid, &mut retval, fd) };
@@ -106,6 +111,7 @@ impl EnclaveApi {
         Ok(())
     }
 
+    #[cfg(feature = "hardware_mode")]
     pub fn request_remote_attestation(
         eid: sgx_enclave_id_t,
         hostname: String,
@@ -118,6 +124,7 @@ impl EnclaveApi {
         }
     }
 
+    #[cfg(feature = "hardware_mode")]
     pub fn perform_epid_attestation(
         eid: sgx_enclave_id_t,
         hostname: String,
@@ -157,6 +164,7 @@ impl EnclaveApi {
         Ok(())
     }
 
+    #[cfg(feature = "hardware_mode")]
     pub fn perform_dcap_attestation(
         eid: sgx_enclave_id_t,
         hostname: String,

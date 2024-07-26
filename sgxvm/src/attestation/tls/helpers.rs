@@ -17,6 +17,7 @@ use crate::attestation::tls::auth::{ClientAuth, ServerAuth};
 use crate::key_manager::{KeyManager, keys::RegistrationKey};
 
 /// Prepares config for client side of TLS connection
+#[cfg(feature = "hardware_mode")]
 pub(super) fn construct_client_config(key_der: Vec<u8>, cert_der: Vec<u8>, is_dcap: bool) -> ClientConfig {
     let mut cfg = rustls::ClientConfig::new();
     let certs = vec![rustls::Certificate(cert_der)];
@@ -31,6 +32,7 @@ pub(super) fn construct_client_config(key_der: Vec<u8>, cert_der: Vec<u8>, is_dc
 }
 
 /// Prepares config for server side of TLS connection
+#[cfg(feature = "hardware_mode")]
 pub(super) fn construct_server_config(key_der: Vec<u8>, cert_der: Vec<u8>, is_dcap: bool) -> ServerConfig {
     let mut cfg = rustls::ServerConfig::new(Arc::new(ClientAuth::new(true, is_dcap)));
     let certs = vec![rustls::Certificate(cert_der)];
