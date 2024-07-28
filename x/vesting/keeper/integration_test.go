@@ -282,6 +282,47 @@ func validateVestingAccountBalances(
 	}
 }
 
+func validateVestingAccountBalancesWithValues(
+	ctx sdk.Context,
+	app *app.App,
+	address sdk.AccAddress, // address to monthly vesting account
+	expDelegatedVesting, expDelegatedFree, expLocked, expVested, expUnvested, expBalances, expSpendable sdk.Coins) {
+	mva, err := app.VestingKeeper.GetMonthlyVestingAccount(ctx, address)
+	Expect(err).To(BeNil())
+	Expect(mva).ToNot(BeNil())
+
+	now := ctx.BlockTime()
+
+	if mva.DelegatedVesting == nil {
+		Expect(expDelegatedVesting).To(Equal(sdk.NewCoins()))
+	} else {
+		Expect(mva.DelegatedVesting).To(Equal(expDelegatedVesting))
+	}
+	if mva.DelegatedFree == nil {
+		Expect(expDelegatedFree).To(Equal(sdk.NewCoins()))
+	} else {
+		Expect(mva.DelegatedFree).To(Equal(expDelegatedFree))
+	}
+	locked := app.BankKeeper.LockedCoins(ctx, mva.GetAddress())
+	Expect(locked).To(Equal(expLocked))
+	vested := mva.GetVestedCoins(now)
+	if vested == nil {
+		Expect(expVested).To(Equal(sdk.NewCoins()))
+	} else {
+		Expect(vested).To(Equal(expVested))
+	}
+	unvested := mva.GetVestingCoins(now)
+	if unvested == nil {
+		Expect(expUnvested).To(Equal(sdk.NewCoins()))
+	} else {
+		Expect(unvested).To(Equal(expUnvested))
+	}
+	balances := app.BankKeeper.GetAllBalances(ctx, mva.GetAddress())
+	Expect(balances).To(Equal(expBalances))
+	spendable := app.BankKeeper.SpendableCoins(ctx, mva.GetAddress())
+	Expect(spendable).To(Equal(expSpendable))
+}
+
 var _ = Describe("Monthly Vesting Account", Ordered, func() {
 	const (
 		cliffDays = 30
@@ -1366,28 +1407,18 @@ var _ = Describe("Additional tests for Monthly Vesting Account", Ordered, func()
 				gasCoins,                        // consumed fee
 			)
 
-			mva, _ := s.querier.GetMonthlyVestingAccount(s.ctx, va)
-			now := s.ctx.BlockTime()
-
-			// delegated vesting = 500 swtr
-			Expect(mva.DelegatedVesting).To(Equal(delegating))
-			// delegated free = 0 swtr
-			Expect(mva.DelegatedFree).To(BeNil())
-			// locked = 500 swtr
-			locked := s.app.BankKeeper.LockedCoins(s.ctx, mva.GetAddress())
-			Expect(locked).To(Equal(delegating))
-			// vested = 0 swtr
-			vested := mva.GetVestedCoins(now)
-			Expect(vested).To(BeNil())
-			// unvested = 1000 swtr
-			unvested := mva.GetVestingCoins(now)
-			Expect(unvested).To(Equal(initialVesting))
-			// balances = 500 swtr
-			balances := s.app.BankKeeper.GetAllBalances(s.ctx, mva.GetAddress())
-			Expect(balances).To(Equal(subCoins(initialVesting, delegating)))
-			// spendable balances = 0 swtr
-			spendable := s.app.BankKeeper.SpendableCoins(s.ctx, mva.GetAddress())
-			Expect(spendable).To(Equal(sdk.NewCoins()))
+			validateVestingAccountBalancesWithValues(
+				s.ctx,
+				s.app,
+				va,
+				delegating,                           // delegated vesting = 500 swtr
+				sdk.NewCoins(),                       // delegated free = 0 swtr
+				delegating,                           // locked = 500 swtr
+				sdk.NewCoins(),                       // vested = 0 swtr
+				initialVesting,                       // unvested = 1000 swtr
+				subCoins(initialVesting, delegating), // balances = 500 swtr
+				sdk.NewCoins(),                       // spendable balances = 0 swtr
+			)
 		})
 		It("undelegate after cliff", func() {
 			mva, _ := s.querier.GetMonthlyVestingAccount(s.ctx, va)
@@ -1440,27 +1471,18 @@ var _ = Describe("Additional tests for Monthly Vesting Account", Ordered, func()
 				gasCoins,                        // consumed fee
 			)
 
-			now := s.ctx.BlockTime()
-
-			// delegated vesting = 500 swtr
-			Expect(mva.DelegatedVesting).To(Equal(delegating))
-			// delegated free = 0 swtr
-			Expect(mva.DelegatedFree).To(BeNil())
-			// locked = 1000 swtr
-			locked := s.app.BankKeeper.LockedCoins(s.ctx, mva.GetAddress())
-			Expect(locked).To(Equal(initialVesting))
-			// vested = 0 swtr
-			vested := mva.GetVestedCoins(now)
-			Expect(vested).To(BeNil())
-			// unvested = 1000 swtr
-			unvested := mva.GetVestingCoins(now)
-			Expect(unvested).To(Equal(initialVesting))
-			// balances = 1000 swtr
-			balances := s.app.BankKeeper.GetAllBalances(s.ctx, mva.GetAddress())
-			Expect(balances).To(Equal(initialVesting))
-			// spendable balances = 0 swtr
-			spendable := s.app.BankKeeper.SpendableCoins(s.ctx, mva.GetAddress())
-			Expect(spendable).To(Equal(sdk.NewCoins()))
+			validateVestingAccountBalancesWithValues( // todo
+				s.ctx,
+				s.app,
+				va,
+				sdk.NewCoins(), // delegated vesting = 0 swtr
+				sdk.NewCoins(), // delegated free = 0 swtr
+				initialVesting, // locked = 1000 swtr
+				sdk.NewCoins(), // vested = 0 swtr
+				initialVesting, // unvested = 1000 swtr
+				initialVesting, // balances = 1000 swtr
+				sdk.NewCoins(), // spendable balances = 0 swtr
+			)
 		})
 		It("wait until the end of vesting period", func() {
 			mva, _ := s.querier.GetMonthlyVestingAccount(s.ctx, va)
@@ -1489,27 +1511,18 @@ var _ = Describe("Additional tests for Monthly Vesting Account", Ordered, func()
 				gasCoins,                        // consumed fee
 			)
 
-			now := s.ctx.BlockTime()
-
-			// delegated vesting = 500 swtr
-			Expect(mva.DelegatedVesting).To(Equal(delegating))
-			// delegated free = 0 swtr
-			Expect(mva.DelegatedFree).To(BeNil())
-			// locked = 0 swtr
-			locked := s.app.BankKeeper.LockedCoins(s.ctx, mva.GetAddress())
-			Expect(locked).To(Equal(sdk.NewCoins()))
-			// vested = 1000 swtr
-			vested := mva.GetVestedCoins(now)
-			Expect(vested).To(Equal(initialVesting))
-			// unvested = 0 swtr
-			unvested := mva.GetVestingCoins(now)
-			Expect(unvested).To(Equal(sdk.NewCoins()))
-			// balances = 500 swtr
-			balances := s.app.BankKeeper.GetAllBalances(s.ctx, mva.GetAddress())
-			Expect(balances).To(Equal(subCoins(initialVesting, delegating)))
-			// spendable balances = 5000 swtr
-			spendable := s.app.BankKeeper.SpendableCoins(s.ctx, mva.GetAddress())
-			Expect(spendable).To(Equal(subCoins(initialVesting, delegating)))
+			validateVestingAccountBalancesWithValues(
+				s.ctx,
+				s.app,
+				va,
+				delegating,                           // delegated vesting = 500 swtr
+				sdk.NewCoins(),                       // delegated free = 0 swtr
+				sdk.NewCoins(),                       // locked = 0 swtr
+				initialVesting,                       // vested = 1000 swtr
+				sdk.NewCoins(),                       // unvested = 0 swtr
+				subCoins(initialVesting, delegating), // balances = 500 swtr
+				subCoins(initialVesting, delegating), // spendable balances = 500 swtr
+			)
 		})
 		It("receive coins", func() {
 			mva, _ := s.querier.GetMonthlyVestingAccount(s.ctx, va)
@@ -1537,27 +1550,18 @@ var _ = Describe("Additional tests for Monthly Vesting Account", Ordered, func()
 				gasCoins,                        // consumed fee
 			)
 
-			now := s.ctx.BlockTime()
-
-			// delegated vesting = 500 swtr
-			Expect(mva.DelegatedVesting).To(Equal(delegating))
-			// delegated free = 0 swtr
-			Expect(mva.DelegatedFree).To(BeNil())
-			// locked = 500 swtr
-			locked := s.app.BankKeeper.LockedCoins(s.ctx, mva.GetAddress())
-			Expect(locked).To(Equal(delegating))
-			// vested = 0 swtr
-			vested := mva.GetVestedCoins(now)
-			Expect(vested).To(BeNil())
-			// unvested = 1000 swtr
-			unvested := mva.GetVestingCoins(now)
-			Expect(unvested).To(Equal(initialVesting))
-			// balances = 500 swtr + 300 swtr
-			balances := s.app.BankKeeper.GetAllBalances(s.ctx, mva.GetAddress())
-			Expect(balances).To(Equal(addCoins(subCoins(initialVesting, delegating), coins)))
-			// spendable balances = 300 swtr
-			spendable := s.app.BankKeeper.SpendableCoins(s.ctx, mva.GetAddress())
-			Expect(spendable).To(Equal(coins))
+			validateVestingAccountBalancesWithValues(
+				s.ctx,
+				s.app,
+				va,
+				delegating,     // delegated vesting = 500 swtr
+				sdk.NewCoins(), // delegated free = 0 swtr
+				delegating,     // locked = 500 swtr
+				sdk.NewCoins(), // vested = 0 swtr
+				initialVesting, // unvested = 1000 swtr
+				addCoins(subCoins(initialVesting, delegating), coins), // balances = 500 swtr + 300 swtr
+				coins, // spendable balances = 300 swtr
+			)
 		})
 		It("failed in sending coins", func() {
 			mva, _ := s.querier.GetMonthlyVestingAccount(s.ctx, va)
@@ -1629,28 +1633,18 @@ var _ = Describe("Additional tests for Monthly Vesting Account", Ordered, func()
 				gasCoins,                        // consumed fee
 			)
 
-			mva, _ := s.querier.GetMonthlyVestingAccount(s.ctx, va)
-			now := s.ctx.BlockTime()
-
-			// delegated vesting = 500 swtr
-			Expect(mva.DelegatedVesting).To(Equal(delegating))
-			// delegated free = 0 swtr
-			Expect(mva.DelegatedFree).To(BeNil())
-			// locked = 500 swtr
-			locked := s.app.BankKeeper.LockedCoins(s.ctx, mva.GetAddress())
-			Expect(locked).To(Equal(delegating))
-			// vested = 0 swtr
-			vested := mva.GetVestedCoins(now)
-			Expect(vested).To(BeNil())
-			// unvested = 1000 swtr
-			unvested := mva.GetVestingCoins(now)
-			Expect(unvested).To(Equal(initialVesting))
-			// balances = 500 swtr
-			balances := s.app.BankKeeper.GetAllBalances(s.ctx, mva.GetAddress())
-			Expect(balances).To(Equal(subCoins(initialVesting, delegating)))
-			// spendable balances = 0 swtr
-			spendable := s.app.BankKeeper.SpendableCoins(s.ctx, mva.GetAddress())
-			Expect(spendable).To(Equal(sdk.NewCoins()))
+			validateVestingAccountBalancesWithValues(
+				s.ctx,
+				s.app,
+				va,
+				delegating,                           // delegated vesting = 500 swtr
+				sdk.NewCoins(),                       // delegated free = 0 swtr
+				delegating,                           // locked = 500 swtr
+				sdk.NewCoins(),                       // vested = 0 swtr
+				initialVesting,                       // unvested = 1000 swtr
+				subCoins(initialVesting, delegating), // balances = 500 swtr
+				sdk.NewCoins(),                       // spendable balances = 0 swtr
+			)
 		})
 		It("undelegate after cliff", func() {
 			mva, _ := s.querier.GetMonthlyVestingAccount(s.ctx, va)
@@ -1700,27 +1694,18 @@ var _ = Describe("Additional tests for Monthly Vesting Account", Ordered, func()
 				gasCoins,                        // consumed fee
 			)
 
-			now := s.ctx.BlockTime()
-
-			// delegated vesting = 500 swtr
-			Expect(mva.DelegatedVesting).To(Equal(delegating))
-			// delegated free = 0 swtr
-			Expect(mva.DelegatedFree).To(BeNil())
-			// locked = 1000 swtr
-			locked := s.app.BankKeeper.LockedCoins(s.ctx, mva.GetAddress())
-			Expect(locked).To(Equal(initialVesting))
-			// vested = 0 swtr
-			vested := mva.GetVestedCoins(now)
-			Expect(vested).To(BeNil())
-			// unvested = 1000 swtr
-			unvested := mva.GetVestingCoins(now)
-			Expect(unvested).To(Equal(initialVesting))
-			// balances = 1000 swtr
-			balances := s.app.BankKeeper.GetAllBalances(s.ctx, mva.GetAddress())
-			Expect(balances).To(Equal(initialVesting))
-			// spendable balances = 0 swtr
-			spendable := s.app.BankKeeper.SpendableCoins(s.ctx, mva.GetAddress())
-			Expect(spendable).To(Equal(sdk.NewCoins()))
+			validateVestingAccountBalancesWithValues(
+				s.ctx,
+				s.app,
+				va,
+				sdk.NewCoins(), // delegated vesting = 0 swtr
+				sdk.NewCoins(), // delegated free = 0 swtr
+				initialVesting, // locked = 1000 swtr
+				sdk.NewCoins(), // vested = 0 swtr
+				initialVesting, // unvested = 1000 swtr
+				initialVesting, // balances = 1000 swtr
+				sdk.NewCoins(), // spendable balances = 0 swtr
+			)
 		})
 		It("wait until the end of vesting period", func() {
 			mva, _ := s.querier.GetMonthlyVestingAccount(s.ctx, va)
@@ -1750,27 +1735,18 @@ var _ = Describe("Additional tests for Monthly Vesting Account", Ordered, func()
 				gasCoins,                        // consumed fee
 			)
 
-			now := s.ctx.BlockTime()
-
-			// delegated vesting = 500 swtr
-			Expect(mva.DelegatedVesting).To(Equal(delegating))
-			// delegated free = 0 swtr
-			Expect(mva.DelegatedFree).To(BeNil())
-			// locked = 0 swtr
-			locked := s.app.BankKeeper.LockedCoins(s.ctx, mva.GetAddress())
-			Expect(locked).To(Equal(sdk.NewCoins()))
-			// vested = 1000 swtr
-			vested := mva.GetVestedCoins(now)
-			Expect(vested).To(Equal(initialVesting))
-			// unvested = 0 swtr
-			unvested := mva.GetVestingCoins(now)
-			Expect(unvested).To(Equal(sdk.NewCoins()))
-			// balances = 500 swtr
-			balances := s.app.BankKeeper.GetAllBalances(s.ctx, mva.GetAddress())
-			Expect(balances).To(Equal(subCoins(initialVesting, delegating)))
-			// spendable balances = 5000 swtr
-			spendable := s.app.BankKeeper.SpendableCoins(s.ctx, mva.GetAddress())
-			Expect(spendable).To(Equal(subCoins(initialVesting, delegating)))
+			validateVestingAccountBalancesWithValues(
+				s.ctx,
+				s.app,
+				va,
+				delegating,                           // delegated vesting = 500 swtr
+				sdk.NewCoins(),                       // delegated free = 0 swtr
+				sdk.NewCoins(),                       // locked = 0 swtr
+				initialVesting,                       // vested = 1000 swtr
+				sdk.NewCoins(),                       // unvested = 0 swtr
+				subCoins(initialVesting, delegating), // balances = 500 swtr
+				subCoins(initialVesting, delegating), // spendable balances = 500 swtr
+			)
 		})
 		It("receive coins", func() {
 			mva, _ := s.querier.GetMonthlyVestingAccount(s.ctx, va)
@@ -1798,27 +1774,18 @@ var _ = Describe("Additional tests for Monthly Vesting Account", Ordered, func()
 				gasCoins,                        // consumed fee
 			)
 
-			now := s.ctx.BlockTime()
-
-			// delegated vesting = 500 swtr
-			Expect(mva.DelegatedVesting).To(Equal(delegating))
-			// delegated free = 0 swtr
-			Expect(mva.DelegatedFree).To(BeNil())
-			// locked = 500 swtr
-			locked := s.app.BankKeeper.LockedCoins(s.ctx, mva.GetAddress())
-			Expect(locked).To(Equal(delegating))
-			// vested = 0 swtr
-			vested := mva.GetVestedCoins(now)
-			Expect(vested).To(BeNil())
-			// unvested = 1000 swtr
-			unvested := mva.GetVestingCoins(now)
-			Expect(unvested).To(Equal(initialVesting))
-			// balances = 500 swtr + 300 swtr
-			balances := s.app.BankKeeper.GetAllBalances(s.ctx, mva.GetAddress())
-			Expect(balances).To(Equal(addCoins(subCoins(initialVesting, delegating), coins)))
-			// spendable balances = 300 swtr
-			spendable := s.app.BankKeeper.SpendableCoins(s.ctx, mva.GetAddress())
-			Expect(spendable).To(Equal(coins))
+			validateVestingAccountBalancesWithValues(
+				s.ctx,
+				s.app,
+				va,
+				delegating,     // delegated vesting = 500 swtr
+				sdk.NewCoins(), // delegated free = 0 swtr
+				delegating,     // locked = 500 swtr
+				sdk.NewCoins(), // vested = 0 swtr
+				initialVesting, // unvested = 1000 swtr
+				addCoins(subCoins(initialVesting, delegating), coins), // balances = 500 swtr + 300 swtr
+				coins, // spendable balances = 300 swtr
+			)
 		})
 		It("failed in sending coins", func() {
 			mva, _ := s.querier.GetMonthlyVestingAccount(s.ctx, va)
