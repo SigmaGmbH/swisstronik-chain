@@ -22,7 +22,7 @@ jobs:
           go-version: 'stable'
       - name: "Install deps"
         run: |
-          apt-get install -y protobuf-compiler curl
+          sudo apt-get install -y protobuf-compiler curl
           go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
           go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest 
           cargo install protobuf-codegen --version "2.8.1" -f
