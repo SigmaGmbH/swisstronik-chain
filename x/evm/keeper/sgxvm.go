@@ -394,12 +394,12 @@ func CreateSGXVMContextFromMessage(ctx sdk.Context, k *Keeper, msg core.Message)
 func SGXVMLogsToEthereum(logs []*librustgo.Log, txConfig types.TxConfig, blockNumber uint64) []*ethtypes.Log {
 	var ethLogs []*ethtypes.Log
 	for i := range logs {
-		ethLogs = append(ethLogs, SGXVMLogToEthereum(logs[i], txConfig, blockNumber))
+		ethLogs = append(ethLogs, SGXVMLogToEthereum(logs[i], txConfig, blockNumber, uint(i)))
 	}
 	return ethLogs
 }
 
-func SGXVMLogToEthereum(log *librustgo.Log, txConfig types.TxConfig, blockNumber uint64) *ethtypes.Log {
+func SGXVMLogToEthereum(log *librustgo.Log, txConfig types.TxConfig, blockNumber uint64, index uint) *ethtypes.Log {
 	var topics []common.Hash
 	for _, topic := range log.Topics {
 		topics = append(topics, common.BytesToHash(topic.Inner))
@@ -413,7 +413,7 @@ func SGXVMLogToEthereum(log *librustgo.Log, txConfig types.TxConfig, blockNumber
 		TxHash:      txConfig.TxHash,
 		TxIndex:     txConfig.TxIndex,
 		BlockHash:   txConfig.BlockHash,
-		Index:       txConfig.LogIndex,
+		Index:       txConfig.LogIndex + index,
 		Removed:     false,
 	}
 }
