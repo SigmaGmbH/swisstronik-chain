@@ -8,8 +8,8 @@ CXX=clang++
 SGX_MODE ?= HW
 ENCLAVE_HOME ?= $(HOME)/.swisstronik-enclave
 PRODUCTION_MODE ?= false
-AS_MODE ?= false 
-VERSION := v1.0.3
+AS_MODE ?= false
+VERSION := v1.0.4
 Wrapper_build_feature := ""
 
 Wrapper_lib := libsgx_wrapper_$(VERSION).x86_64.so
