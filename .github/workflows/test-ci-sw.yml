@@ -17,6 +17,8 @@ jobs:
       PRODUCTION_MODE: true
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - uses: actions/setup-go@v4
         with:
           go-version: 'stable'
