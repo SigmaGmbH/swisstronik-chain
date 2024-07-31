@@ -23,3 +23,14 @@ attestation_server = []
 
 [build-dependencies]
 cbindgen = "0.24.3"
+
+[profile.release]
+opt-level = 3
+debug = false
+rpath = true
+lto = false
+debug-assertions = false
+codegen-units = 16
+panic = 'unwind'
+incremental = true
+overflow-checks = true
