@@ -42,4 +42,5 @@ ENV LD_LIBRARY_PATH="/opt/intel/sgxsdk/sdk_libs:${LD_LIBRARY_PATH}"
 COPY . /root/chain
 WORKDIR /root/chain
 RUN make build
+RUN ./build/swisstronikd testnet init-testnet-enclave
 RUN make test-all
