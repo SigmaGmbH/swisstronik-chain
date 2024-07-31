@@ -116,6 +116,7 @@ import (
 
 	evmante "swisstronik/app/ante"
 	"swisstronik/app/upgrades/v1_0_3"
+	"swisstronik/app/upgrades/v1_0_4"
 	"swisstronik/docs"
 	"swisstronik/encoding"
 	srvflags "swisstronik/server/flags"
@@ -1059,6 +1060,13 @@ func (app *App) setupUpgradeHandlers() {
 	app.UpgradeKeeper.SetUpgradeHandler(
 		v1_0_3.UpgradeName,
 		v1_0_3.CreateUpgradeHandler(
+			app.mm, app.configurator,
+		),
+	)
+
+	app.UpgradeKeeper.SetUpgradeHandler(
+		v1_0_4.UpgradeName,
+		v1_0_4.CreateUpgradeHandler(
 			app.mm, app.configurator,
 		),
 	)
