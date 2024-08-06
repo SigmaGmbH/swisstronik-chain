@@ -12,7 +12,20 @@ use crate::key_manager::keys::RegistrationKey;
 pub mod helpers;
 pub mod auth;
 
+#[cfg(feature = "simulation_mode")]
+pub fn perform_master_key_request(
+    _: String,
+    _: c_int,
+    _: Option<&sgx_target_info_t>,
+    _: Option<u32>,
+    _: bool
+) -> SgxResult<()> {
+    println!("perform_master_key_request disabled in Software Mode");
+    Err(sgx_status_t::SGX_ERROR_UNEXPECTED)
+}
+
 /// Initializes new TLS client with report of Remote Attestation
+#[cfg(feature = "hardware_mode")]
 pub fn perform_master_key_request(
     hostname: String,
     socket_fd: c_int,

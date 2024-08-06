@@ -17,6 +17,7 @@ pub struct QlQveCollateral {
     pub qe_identity_size: u32,
 }
 
+#[cfg(feature = "hardware_mode")]
 /// Returns target info from Quoting Enclave (QE)
 pub fn get_qe_target_info() -> Result<sgx_target_info_t, Error> {
     let mut qe_target_info = sgx_target_info_t::default();
@@ -32,6 +33,7 @@ pub fn get_qe_target_info() -> Result<sgx_target_info_t, Error> {
     Ok(qe_target_info)
 }
 
+#[cfg(feature = "hardware_mode")]
 /// Returns size of buffer to allocate for the quote
 pub fn get_quote_size() -> Result<u32, Error> {
     let mut quote_size = 0u32;
@@ -47,6 +49,7 @@ pub fn get_quote_size() -> Result<u32, Error> {
     Ok(quote_size)
 }
 
+#[cfg(feature = "hardware_mode")]
 /// Returns DCAP quote from QE
 pub fn get_qe_quote(report: sgx_report_t, quote_size: u32, p_quote: *mut u8) -> SgxResult<()> {
     println!("[Enclave Wrapper]: get_qe_quote");
@@ -59,6 +62,7 @@ pub fn get_qe_quote(report: sgx_report_t, quote_size: u32, p_quote: *mut u8) -> 
     }
 }
 
+#[cfg(feature = "hardware_mode")]
 /// Generates quote inside the enclave and writes it to the file
 /// Since this function will be used only for test and dev purposes,
 /// we can ignore usages of `unwrap` or `expect`.
@@ -101,6 +105,7 @@ pub fn dump_dcap_quote(eid: sgx_enclave_id_t, filepath: &str) -> Result<(), Erro
     Ok(())
 }
 
+#[cfg(feature = "hardware_mode")]
 pub fn verify_dcap_quote(eid: sgx_enclave_id_t, filepath: &str) -> Result<(), Error> {
     let mut file = std::fs::File::open(filepath).expect("Cannot open quote file");
     let mut quote_buf = Vec::new();
@@ -136,6 +141,7 @@ pub fn verify_dcap_quote(eid: sgx_enclave_id_t, filepath: &str) -> Result<(), Er
     Ok(())
 }
 
+#[cfg(feature = "hardware_mode")]
 pub fn sgx_ql_qve_collateral_serialize(
     p_col: *const u8,
     n_col: u32,
@@ -235,6 +241,7 @@ pub fn sgx_ql_qve_collateral_serialize(
     };
 }
 
+#[cfg(feature = "hardware_mode")]
 pub fn sgx_ql_qve_collateral_deserialize(p_ser: *const u8, n_ser: u32) -> sgx_ql_qve_collateral_t {
     let mut res = sgx_ql_qve_collateral_t {
         version: 0,

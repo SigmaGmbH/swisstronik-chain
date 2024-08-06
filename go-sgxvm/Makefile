@@ -18,6 +18,12 @@ ifeq ($(AS_MODE), true)
 	Wrapper_build_feature += attestation_server
 endif
 
+ifeq ($(SGX_MODE), HW) 
+	Wrapper_build_feature += hardware_mode
+else
+	Wrapper_build_feature += simulation_mode
+endif
+
 build:
 	@ENCLAVE_HOME=$(ENCLAVE_HOME) PRODUCTION_MODE=$(PRODUCTION_MODE) SGX_MODE=$(SGX_MODE) AS_MODE=$(AS_MODE) VERSION=$(VERSION) make build -C ../sgxvm/
 	@protoc --rust_out src/protobuf_generated/ proto/node.proto

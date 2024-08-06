@@ -1,3 +1,4 @@
+#[cfg(feature = "hardware_mode")]
 use crate::enclave::attestation::dcap_utils::{get_qe_quote, sgx_ql_qve_collateral_serialize};
 use crate::errors::GoError;
 use crate::memory::{U8SliceView, UnmanagedVector};
@@ -8,6 +9,7 @@ use std::net::{SocketAddr, TcpStream};
 use std::os::unix::io::IntoRawFd;
 use std::slice;
 
+#[cfg(feature = "hardware_mode")]
 #[no_mangle]
 pub extern "C" fn ocall_get_ecdsa_quote(
     p_report: *const sgx_report_t,
@@ -24,6 +26,17 @@ pub extern "C" fn ocall_get_ecdsa_quote(
     }
 }
 
+#[cfg(feature = "simulation_mode")]
+#[no_mangle]
+pub extern "C" fn ocall_get_ecdsa_quote(
+    p_report: *const sgx_report_t,
+    p_quote: *mut u8,
+    quote_size: u32,
+) -> sgx_status_t {
+    sgx_status_t::SGX_ERROR_UNEXPECTED
+}
+
+#[cfg(feature = "hardware_mode")]
 #[no_mangle]
 pub extern "C" fn ocall_get_quote(
     p_sigrl: *const u8,
@@ -72,6 +85,24 @@ pub extern "C" fn ocall_get_quote(
     ret
 }
 
+#[cfg(feature = "simulation_mode")]
+#[no_mangle]
+pub extern "C" fn ocall_get_quote(
+    p_sigrl: *const u8,
+    sigrl_len: u32,
+    p_report: *const sgx_report_t,
+    quote_type: sgx_quote_sign_type_t,
+    p_spid: *const sgx_spid_t,
+    p_nonce: *const sgx_quote_nonce_t,
+    p_qe_report: *mut sgx_report_t,
+    p_quote: *mut u8,
+    _maxlen: u32,
+    p_quote_len: *mut u32,
+) -> sgx_status_t {
+    sgx_status_t::SGX_ERROR_UNEXPECTED
+}
+
+#[cfg(feature = "hardware_mode")]
 #[no_mangle]
 pub extern "C" fn ocall_get_update_info(
     platform_blob: *const sgx_platform_info_t,
@@ -79,6 +110,16 @@ pub extern "C" fn ocall_get_update_info(
     update_info: *mut sgx_update_info_bit_t,
 ) -> sgx_status_t {
     unsafe { sgx_report_attestation_status(platform_blob, enclave_trusted, update_info) }
+}
+
+#[cfg(feature = "simulation_mode")]
+#[no_mangle]
+pub extern "C" fn ocall_get_update_info(
+    platform_blob: *const sgx_platform_info_t,
+    enclave_trusted: i32,
+    update_info: *mut sgx_update_info_bit_t,
+) -> sgx_status_t {
+    sgx_status_t::SGX_ERROR_UNEXPECTED
 }
 
 #[no_mangle]
@@ -96,6 +137,7 @@ pub extern "C" fn ocall_allocate(data: *const u8, len: usize) -> Allocation {
     }
 }
 
+#[cfg(feature = "hardware_mode")]
 #[no_mangle]
 pub extern "C" fn ocall_sgx_init_quote(
     ret_ti: *mut sgx_target_info_t,
@@ -104,6 +146,16 @@ pub extern "C" fn ocall_sgx_init_quote(
     unsafe { sgx_init_quote(ret_ti, ret_gid) }
 }
 
+#[cfg(feature = "simulation_mode")]
+#[no_mangle]
+pub extern "C" fn ocall_sgx_init_quote(
+    ret_ti: *mut sgx_target_info_t,
+    ret_gid: *mut sgx_epid_group_id_t,
+) -> sgx_status_t {
+    sgx_status_t::SGX_ERROR_UNEXPECTED
+}
+
+#[cfg(feature = "hardware_mode")]
 #[no_mangle]
 pub extern "C" fn ocall_get_ias_socket(ret_fd: *mut c_int) -> sgx_status_t {
     let port = 443;
@@ -118,6 +170,13 @@ pub extern "C" fn ocall_get_ias_socket(ret_fd: *mut c_int) -> sgx_status_t {
     sgx_status_t::SGX_SUCCESS
 }
 
+#[cfg(feature = "simulation_mode")]
+#[no_mangle]
+pub extern "C" fn ocall_get_ias_socket(ret_fd: *mut c_int) -> sgx_status_t {
+    sgx_status_t::SGX_ERROR_UNEXPECTED
+}
+
+#[cfg(feature = "hardware_mode")]
 pub fn lookup_ipv4(host: &str, port: u16) -> SocketAddr {
     use std::net::ToSocketAddrs;
 
@@ -227,6 +286,7 @@ pub extern "C" fn ocall_query_raw(
     };
 }
 
+#[cfg(feature = "hardware_mode")]
 #[no_mangle]
 pub unsafe extern "C" fn ocall_get_qve_report(
     p_quote: *const u8,
@@ -303,6 +363,25 @@ pub unsafe extern "C" fn ocall_get_qve_report(
     sgx_status_t::SGX_SUCCESS
 }
 
+#[cfg(feature = "simulation_mode")]
+#[no_mangle]
+pub unsafe extern "C" fn ocall_get_qve_report(
+    p_quote: *const u8,
+    quote_len: u32,
+    timestamp: i64,
+    p_collateral_expiration_status: *mut u32,
+    p_quote_verification_result: *mut sgx_ql_qv_result_t,
+    p_qve_report_info: *mut sgx_ql_qe_report_info_t,
+    p_supplemental_data: *mut u8,
+    supplemental_data_size: u32,
+    p_collateral: *const u8,
+    collateral_len: u32,
+) -> sgx_status_t {
+    sgx_status_t::SGX_ERROR_UNEXPECTED
+}
+
+
+#[cfg(feature = "hardware_mode")]
 #[no_mangle]
 pub unsafe extern "C" fn ocall_get_supplemental_data_size(
     data_size: *mut u32,
@@ -317,6 +396,13 @@ pub unsafe extern "C" fn ocall_get_supplemental_data_size(
     sgx_status_t::SGX_SUCCESS
 }
 
+#[cfg(feature = "simulation_mode")]
+#[no_mangle]
+pub unsafe extern "C" fn ocall_get_supplemental_data_size(_: *mut u32) -> sgx_status_t {
+    sgx_status_t::SGX_ERROR_UNEXPECTED
+}
+
+#[cfg(feature = "hardware_mode")]
 #[no_mangle]
 pub extern "C" fn ocall_get_quote_ecdsa_collateral(
     p_quote: *const u8,
@@ -342,4 +428,17 @@ pub extern "C" fn ocall_get_quote_ecdsa_collateral(
     };
 
     sgx_status_t::SGX_SUCCESS
+}
+
+
+#[cfg(feature = "simulation_mode")]
+#[no_mangle]
+pub extern "C" fn ocall_get_quote_ecdsa_collateral(
+    p_quote: *const u8,
+    n_quote: u32,
+    p_col: *mut u8,
+    n_col: u32,
+    p_col_size: *mut u32,
+) -> sgx_status_t {
+    sgx_status_t::SGX_ERROR_UNEXPECTED
 }

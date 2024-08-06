@@ -163,12 +163,14 @@ pub unsafe extern "C" fn handle_initialization_request(
                         let response_bytes = response.write_to_bytes()?;
                         Ok(response_bytes)
                     }
+                    #[cfg(feature = "hardware_mode")]
                     node::SetupRequest_oneof_req::peerAttestationRequest(req) => {
                         enclave_api::EnclaveApi::attest_peer(evm_enclave.geteid(), req.fd, req.isDCAP)?;
                         let response = node::PeerAttestationResponse::new();
                         let response_bytes = response.write_to_bytes()?;
                         Ok(response_bytes)
                     }
+                    #[cfg(feature = "hardware_mode")]
                     node::SetupRequest_oneof_req::remoteAttestationRequest(req) => {
                         enclave_api::EnclaveApi::request_remote_attestation(evm_enclave.geteid(), req.hostname, req.fd, req.isDCAP)?;
                         let response = node::RemoteAttestationResponse::new();
@@ -182,12 +184,14 @@ pub unsafe extern "C" fn handle_initialization_request(
                         let response_bytes = response.write_to_bytes()?;
                         Ok(response_bytes)
                     }
+                    #[cfg(feature = "hardware_mode")]
                     node::SetupRequest_oneof_req::dumpQuote(req) => {
                         enclave_api::EnclaveApi::dump_dcap_quote(evm_enclave.geteid(), &req.filepath)?;
                         let response = node::DumpQuoteResponse::new();
                         let response_bytes = response.write_to_bytes()?;
                         Ok(response_bytes)
                     }
+                    #[cfg(feature = "hardware_mode")]
                     node::SetupRequest_oneof_req::verifyQuote(req) => {
                         enclave_api::EnclaveApi::verify_dcap_quote(evm_enclave.geteid(), &req.filepath)?;
                         let response = node::VerifyQuoteResponse::new();
@@ -210,6 +214,7 @@ pub unsafe extern "C" fn handle_initialization_request(
                         let response_bytes = response.write_to_bytes()?;
                         Ok(response_bytes)
                     }
+                    _ => Err(Error::protobuf_decode("Unsupported request"))
                 }
             }
             None => Err(Error::protobuf_decode("Request unwrapping failed")),
