@@ -108,7 +108,7 @@ func (suite *VestingTestSuite) assertSuccessEthNative(src, dest sdk.AccAddress, 
 
 func (suite *VestingTestSuite) SetupTest() error {
 	chainID := utils.TestnetChainID + "-1"
-	appS, _ := app.SetupSwissApp(false, nil, chainID)
+	appS, _ := app.SetupSwissApp(nil, chainID)
 	suite.app = appS
 
 	address := tests.RandomAccAddress()

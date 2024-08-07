@@ -38,12 +38,16 @@ func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 	registry.RegisterImplementations(
 		(*authtypes.AccountI)(nil),
 		&sdkvesting.BaseVestingAccount{},
+		&sdkvesting.ContinuousVestingAccount{},
+		&sdkvesting.DelayedVestingAccount{},
 		&MonthlyVestingAccount{},
 	)
 
 	registry.RegisterImplementations(
 		(*authtypes.GenesisAccount)(nil),
 		&sdkvesting.BaseVestingAccount{},
+		&sdkvesting.ContinuousVestingAccount{},
+		&sdkvesting.DelayedVestingAccount{},
 		&MonthlyVestingAccount{},
 	)
 

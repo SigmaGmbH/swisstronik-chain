@@ -54,7 +54,7 @@ func TestKeeperTestSuite(t *testing.T) {
 
 func (suite *KeeperTestSuite) Setup(t *testing.T) {
 	chainID := utils.TestnetChainID + "-1"
-	suite.app, _ = app.SetupSwissApp(false, nil, chainID)
+	suite.app, _ = app.SetupSwissApp(nil, chainID)
 
 	// account key
 	priv, err := ethsecp256k1.GenerateKey()
