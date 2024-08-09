@@ -29,7 +29,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Test Image
+      - name: Build Test Image
         uses: docker/build-push-action@v4
         with:
           file: ./docker/test-sw.Dockerfile
@@ -42,5 +42,7 @@ jobs:
             SGX_MODE=SW
             ENCLAVE_HOME="/usr/lib/"
             PRODUCTION_MODE=false
-            CI=true
           target: compile-chain
+      - name: Run Test Image
+        run: |
+          docker run -e CI=true -v $GITHUB_WORKSPACE/build:/build test-sw
