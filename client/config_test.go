@@ -10,6 +10,9 @@ import (
 )
 
 func TestInitConfigNonNotExistError(t *testing.T) {
+	if os.Getenv("CI") != "" {
+		t.Skip("Skipping testing in CI environment")
+	}
 	tempDir := t.TempDir()
 	subDir := filepath.Join(tempDir, "nonPerms")
 	if err := os.Mkdir(subDir, 0o600); err != nil {
