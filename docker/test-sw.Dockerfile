@@ -32,6 +32,8 @@ RUN apt-get install -y automake autoconf build-essential libtool git
 
 ARG SGX_MODE=SW
 ENV SGX_MODE=${SGX_MODE}
+ARG CI=true
+ENV CI=${CI}
 ARG PRODUCTION_MODE=true
 ENV PRODUCTION_MODE=${PRODUCTION_MODE}
 ENV SGX_SDK="/opt/intel/sgxsdk"
@@ -43,4 +45,4 @@ COPY . /root/chain
 WORKDIR /root/chain
 RUN make build
 RUN ./build/swisstronikd testnet init-testnet-enclave
-CMD make test-all
+RUN make test-all
