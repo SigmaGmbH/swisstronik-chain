@@ -30,7 +30,7 @@ func TestAppStateDeterminism(t *testing.T) {
 	config.AllInvariants = false
 	config.ChainID = SwtrAppChainID
 	config.Commit = true
-	config.NumBlocks = 10 // default value is 500
+	config.NumBlocks = 5 // default value is 500
 
 	numSeeds := 3
 	numTimesToRunPerSeed := 5

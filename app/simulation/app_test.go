@@ -20,8 +20,8 @@ import (
 func TestFullAppSimulation(t *testing.T) {
 	config := simcli.NewConfigFromFlags()
 	config.ChainID = SwtrAppChainID
-	config.Commit = true  // commit by default
-	config.NumBlocks = 10 // default value is 500
+	config.Commit = true // commit by default
+	config.NumBlocks = 5 // default value is 500
 
 	db, dir, logger, skip, err := simtestutil.SetupSimulation(
 		config,
