@@ -45,4 +45,4 @@ jobs:
           target: compile-chain
       - name: Run Test Image
         run: |
-          docker run -v $GITHUB_WORKSPACE/build:/build test-sw
+          docker run -e CI=true -v $GITHUB_WORKSPACE/build:/build test-sw
