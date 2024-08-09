@@ -2,7 +2,7 @@ name: Test CI SW mode
 
 on:
   push:
-    branches: [ develop, '**-release', 'ci/test-sw' ]
+    branches: [ develop, '**-release']
   workflow_dispatch:
 env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
