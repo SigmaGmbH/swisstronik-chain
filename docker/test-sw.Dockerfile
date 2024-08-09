@@ -43,4 +43,4 @@ COPY . /root/chain
 WORKDIR /root/chain
 RUN make build
 RUN ./build/swisstronikd testnet init-testnet-enclave
-RUN make test-all
+CMD make test-all
