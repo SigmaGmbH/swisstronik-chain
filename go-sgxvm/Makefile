@@ -47,3 +47,9 @@ build_AS: build
 
 build_AS_d: build_d
 	go build -tags osusergo,netgo,attestationServer -o ../build/attestationServer ./cmd/attestation
+
+build_test_bin:
+	@ENCLAVE_HOME=$(ENCLAVE_HOME) PRODUCTION_MODE=$(PRODUCTION_MODE) SGX_MODE=$(SGX_MODE) AS_MODE=$(AS_MODE) VERSION=$(VERSION) make build_d -C ../sgxvm/
+	@protoc --rust_out src/protobuf_generated/ proto/node.proto
+	@ENCLAVE_HOME=$(ENCLAVE_HOME) cargo build --features "$(Wrapper_build_feature)" --bin test_bin
+	@cp target/debug/test_bin ../build/test_bin
