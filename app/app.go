@@ -116,6 +116,7 @@ import (
 	evmante "swisstronik/app/ante"
 	"swisstronik/app/upgrades/v1_0_3"
 	"swisstronik/app/upgrades/v1_0_4"
+	"swisstronik/app/upgrades/v1_0_5"
 	"swisstronik/docs"
 	"swisstronik/encoding"
 	srvflags "swisstronik/server/flags"
@@ -1071,6 +1072,15 @@ func (app *App) setupUpgradeHandlers() {
 		),
 	)
 
+	app.UpgradeKeeper.SetUpgradeHandler(
+		v1_0_5.UpgradeName,
+		v1_0_5.CreateUpgradeHandler(
+			app.ModuleManager,
+			app.BankKeeper,
+			app.configurator,
+		),
+	)
+
 	// When a planned update height is reached, the old binary will panic
 	// writing on disk the height and name of the update that triggered it
 	// This will read that value, and execute the preparations for the upgrade.
@@ -1084,6 +1094,22 @@ func (app *App) setupUpgradeHandlers() {
 	}
 
 	if upgradeInfo.Name == v1_0_3.UpgradeName {
+		// Use upgrade store loader for the initial loading of all stores when app starts,
+		// it checks if version == upgradeHeight and applies store upgrades before loading the stores,
+		// so that new stores start with the correct version (the current height of chain),
+		// instead the default which is the latest version that store last committed i.e 0 for new stores.
+		app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storetypes.StoreUpgrades{}))
+	}
+
+	if upgradeInfo.Name == v1_0_4.UpgradeName {
+		// Use upgrade store loader for the initial loading of all stores when app starts,
+		// it checks if version == upgradeHeight and applies store upgrades before loading the stores,
+		// so that new stores start with the correct version (the current height of chain),
+		// instead the default which is the latest version that store last committed i.e 0 for new stores.
+		app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storetypes.StoreUpgrades{}))
+	}
+
+	if upgradeInfo.Name == v1_0_5.UpgradeName {
 		// Use upgrade store loader for the initial loading of all stores when app starts,
 		// it checks if version == upgradeHeight and applies store upgrades before loading the stores,
 		// so that new stores start with the correct version (the current height of chain),
