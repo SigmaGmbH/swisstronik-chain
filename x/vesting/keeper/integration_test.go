@@ -108,7 +108,7 @@ func (suite *VestingTestSuite) assertSuccessEthNative(src, dest sdk.AccAddress, 
 
 func (suite *VestingTestSuite) SetupTest() error {
 	chainID := utils.TestnetChainID + "-1"
-	appS, _ := app.SetupSwissApp(false, nil, chainID)
+	appS, _ := app.SetupSwissApp(nil, chainID)
 	suite.app = appS
 
 	address := tests.RandomAccAddress()
@@ -294,12 +294,12 @@ func validateVestingAccountBalancesWithValues(
 	now := ctx.BlockTime()
 
 	if mva.DelegatedVesting == nil {
-		Expect(sdk.NewCoins()).To(Equal(expDelegatedVesting))
+		Expect(expDelegatedVesting).To(Equal(sdk.NewCoins()))
 	} else {
 		Expect(mva.DelegatedVesting).To(Equal(expDelegatedVesting))
 	}
 	if mva.DelegatedFree == nil {
-		Expect(sdk.NewCoins()).To(Equal(expDelegatedFree))
+		Expect(expDelegatedFree).To(Equal(sdk.NewCoins()))
 	} else {
 		Expect(mva.DelegatedFree).To(Equal(expDelegatedFree))
 	}
@@ -307,13 +307,13 @@ func validateVestingAccountBalancesWithValues(
 	Expect(locked).To(Equal(expLocked))
 	vested := mva.GetVestedCoins(now)
 	if vested == nil {
-		Expect(sdk.NewCoins()).To(Equal(expVested))
+		Expect(expVested).To(Equal(sdk.NewCoins()))
 	} else {
 		Expect(vested).To(Equal(expVested))
 	}
 	unvested := mva.GetVestingCoins(now)
 	if unvested == nil {
-		Expect(sdk.NewCoins()).To(Equal(expUnvested))
+		Expect(expUnvested).To(Equal(sdk.NewCoins()))
 	} else {
 		Expect(unvested).To(Equal(expUnvested))
 	}

@@ -74,12 +74,12 @@ var DefaultConsensusParams = &tmproto.ConsensusParams{
 }
 
 // Setup initializes a new App. A Nop logger is set in App.
-func Setup(isCheckTx bool, patchGenesis func(*App, simapp.GenesisState) simapp.GenesisState) *App {
-	return SetupWithDB(isCheckTx, patchGenesis, dbm.NewMemDB())
+func Setup(patchGenesis func(*App, simapp.GenesisState) simapp.GenesisState) *App {
+	return SetupWithDB(patchGenesis, dbm.NewMemDB())
 }
 
 // SetupWithDB initializes a new App. A Nop logger is set in App.
-func SetupWithDB(isCheckTx bool, patchGenesis func(*App, simapp.GenesisState) simapp.GenesisState, db dbm.DB) *App {
+func SetupWithDB(patchGenesis func(*App, simapp.GenesisState) simapp.GenesisState, db dbm.DB) *App {
 	chainID := TestnetChainID + "-1"
 	app := New(log.NewNopLogger(),
 		db,
@@ -93,28 +93,26 @@ func SetupWithDB(isCheckTx bool, patchGenesis func(*App, simapp.GenesisState) si
 		baseapp.SetChainID(chainID),
 	)
 
-	if !isCheckTx {
-		// init chain must be called to stop deliverState from being nil
-		genesisState := NewTestGenesisState(app.AppCodec())
-		if patchGenesis != nil {
-			genesisState = patchGenesis(app, genesisState)
-		}
-
-		stateBytes, err := json.MarshalIndent(genesisState, "", " ")
-		if err != nil {
-			panic(err)
-		}
-
-		// Initialize the chain
-		app.InitChain(
-			abci.RequestInitChain{
-				ChainId:         chainID,
-				Validators:      []abci.ValidatorUpdate{},
-				ConsensusParams: DefaultConsensusParams,
-				AppStateBytes:   stateBytes,
-			},
-		)
+	// init chain must be called to stop deliverState from being nil
+	genesisState := NewTestGenesisState(app.AppCodec())
+	if patchGenesis != nil {
+		genesisState = patchGenesis(app, genesisState)
 	}
+
+	stateBytes, err := json.MarshalIndent(genesisState, "", " ")
+	if err != nil {
+		panic(err)
+	}
+
+	// Initialize the chain
+	app.InitChain(
+		abci.RequestInitChain{
+			ChainId:         chainID,
+			Validators:      []abci.ValidatorUpdate{},
+			ConsensusParams: DefaultConsensusParams,
+			AppStateBytes:   stateBytes,
+		},
+	)
 
 	return app
 }
@@ -219,11 +217,7 @@ func SetupTestingApp(chainID string) (ibctesting.TestingApp, map[string]json.Raw
 }
 
 // Setup initializes a new Swisstronik. A Nop logger is set in Swisstronik.
-func SetupSwissApp(
-	isCheckTx bool,
-	feemarketGenesis *feemarkettypes.GenesisState,
-	chainID string,
-) (*App, *authtypes.BaseAccount) {
+func SetupSwissApp(feemarketGenesis *feemarkettypes.GenesisState, chainID string) (*App, *authtypes.BaseAccount) {
 	privVal := mock.NewPV()
 	pubKey, _ := privVal.GetPubKey()
 
@@ -248,34 +242,33 @@ func SetupSwissApp(
 		simtestutil.NewAppOptionsWithFlagHome(DefaultNodeHome),
 		baseapp.SetChainID(chainID),
 	)
-	if !isCheckTx {
-		// init chain must be called to stop deliverState from being nil
-		genesisState := NewDefaultGenesisState()
-		genesisState = GenesisStateWithValSet(app, genesisState, valSet, []authtypes.GenesisAccount{acc}, balance)
 
-		// Verify feeMarket genesis
-		if feemarketGenesis != nil {
-			if err := feemarketGenesis.Validate(); err != nil {
-				panic(err)
-			}
-			genesisState[feemarkettypes.ModuleName] = app.AppCodec().MustMarshalJSON(feemarketGenesis)
-		}
+	// init chain must be called to stop deliverState from being nil
+	genesisState := NewDefaultGenesisState()
+	genesisState = GenesisStateWithValSet(app, genesisState, valSet, []authtypes.GenesisAccount{acc}, balance)
 
-		stateBytes, err := json.MarshalIndent(genesisState, "", " ")
-		if err != nil {
+	// Verify feeMarket genesis
+	if feemarketGenesis != nil {
+		if err := feemarketGenesis.Validate(); err != nil {
 			panic(err)
 		}
-
-		// Initialize the chain
-		app.InitChain(
-			abci.RequestInitChain{
-				ChainId:         chainID,
-				Validators:      []abci.ValidatorUpdate{},
-				ConsensusParams: DefaultConsensusParams,
-				AppStateBytes:   stateBytes,
-			},
-		)
+		genesisState[feemarkettypes.ModuleName] = app.AppCodec().MustMarshalJSON(feemarketGenesis)
 	}
+
+	stateBytes, err := json.MarshalIndent(genesisState, "", " ")
+	if err != nil {
+		panic(err)
+	}
+
+	// Initialize the chain
+	app.InitChain(
+		abci.RequestInitChain{
+			ChainId:         chainID,
+			Validators:      []abci.ValidatorUpdate{},
+			ConsensusParams: DefaultConsensusParams,
+			AppStateBytes:   stateBytes,
+		},
+	)
 
 	return app, acc
 }
