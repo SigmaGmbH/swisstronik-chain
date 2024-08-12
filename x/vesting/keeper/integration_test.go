@@ -244,14 +244,14 @@ func validateVestingAccountBalances(
 
 	lockedX := app.BankKeeper.LockedCoins(ctx, address)
 	if lockedX == nil {
-		Expect(expLocked).To(Equal(sdk.NewCoins()))
+		Expect(sdk.NewCoins()).To(Equal(expLocked))
 	} else {
 		Expect(lockedX).To(Equal(expLocked))
 	}
 
 	spendableX := app.BankKeeper.SpendableCoins(ctx, address)
 	if spendableX == nil {
-		Expect(expSpendable).To(Equal(sdk.NewCoins()))
+		Expect(sdk.NewCoins()).To(Equal(expSpendable))
 	} else {
 		Expect(spendableX).To(Equal(expSpendable))
 	}
@@ -259,27 +259,68 @@ func validateVestingAccountBalances(
 	now := ctx.BlockTime()
 	vestedX := mva.GetVestedCoins(now)
 	if vestedX == nil {
-		Expect(expVested).To(Equal(sdk.NewCoins()))
+		Expect(sdk.NewCoins()).To(Equal(expVested))
 	} else {
 		Expect(vestedX).To(Equal(expVested))
 	}
 	unvestedX := mva.GetVestingCoins(now)
 	if unvestedX == nil {
-		Expect(expUnvested).To(Equal(sdk.NewCoins()))
+		Expect(sdk.NewCoins()).To(Equal(expUnvested))
 	} else {
 		Expect(unvestedX).To(Equal(expUnvested))
 	}
 
 	if mva.DelegatedFree == nil {
-		Expect(expDelegatedFree).To(Equal(sdk.NewCoins()))
+		Expect(sdk.NewCoins()).To(Equal(expDelegatedFree))
 	} else {
 		Expect(mva.DelegatedFree).To(Equal(expDelegatedFree))
 	}
 	if mva.DelegatedVesting == nil {
-		Expect(expDelegatedVesting).To(Equal(sdk.NewCoins()))
+		Expect(sdk.NewCoins()).To(Equal(expDelegatedVesting))
 	} else {
 		Expect(mva.DelegatedVesting).To(Equal(expDelegatedVesting))
 	}
+}
+
+func validateVestingAccountBalancesWithValues(
+	ctx sdk.Context,
+	app *app.App,
+	address sdk.AccAddress, // address to monthly vesting account
+	expDelegatedVesting, expDelegatedFree, expLocked, expVested, expUnvested, expBalances, expSpendable sdk.Coins) {
+	mva, err := app.VestingKeeper.GetMonthlyVestingAccount(ctx, address)
+	Expect(err).To(BeNil())
+	Expect(mva).ToNot(BeNil())
+
+	now := ctx.BlockTime()
+
+	if mva.DelegatedVesting == nil {
+		Expect(sdk.NewCoins()).To(Equal(expDelegatedVesting))
+	} else {
+		Expect(mva.DelegatedVesting).To(Equal(expDelegatedVesting))
+	}
+	if mva.DelegatedFree == nil {
+		Expect(sdk.NewCoins()).To(Equal(expDelegatedFree))
+	} else {
+		Expect(mva.DelegatedFree).To(Equal(expDelegatedFree))
+	}
+	locked := app.BankKeeper.LockedCoins(ctx, mva.GetAddress())
+	Expect(locked).To(Equal(expLocked))
+	vested := mva.GetVestedCoins(now)
+	if vested == nil {
+		Expect(sdk.NewCoins()).To(Equal(expVested))
+	} else {
+		Expect(vested).To(Equal(expVested))
+	}
+	unvested := mva.GetVestingCoins(now)
+	if unvested == nil {
+		Expect(sdk.NewCoins()).To(Equal(expUnvested))
+	} else {
+		Expect(unvested).To(Equal(expUnvested))
+	}
+	balances := app.BankKeeper.GetAllBalances(ctx, mva.GetAddress())
+	Expect(balances).To(Equal(expBalances))
+	spendable := app.BankKeeper.SpendableCoins(ctx, mva.GetAddress())
+	Expect(spendable).To(Equal(expSpendable))
 }
 
 func validateVestingAccountBalancesWithValues(
@@ -1527,7 +1568,6 @@ var _ = Describe("Additional tests for Monthly Vesting Account", Ordered, func()
 		It("receive coins", func() {
 			mva, _ := s.querier.GetMonthlyVestingAccount(s.ctx, va)
 
-			// Fund 300 coins to funder to create monthly vesting
 			coins := sdk.NewCoins(sdk.NewCoin(utils.BaseDenom, math.NewIntWithDecimal(300, 18)))
 			err = testutil.FundAccount(s.ctx, s.app.BankKeeper, mva.GetAddress(), coins)
 			Expect(err).To(BeNil())
@@ -1751,7 +1791,6 @@ var _ = Describe("Additional tests for Monthly Vesting Account", Ordered, func()
 		It("receive coins", func() {
 			mva, _ := s.querier.GetMonthlyVestingAccount(s.ctx, va)
 
-			// Fund 300 coins to funder to create monthly vesting
 			coins := sdk.NewCoins(sdk.NewCoin(utils.BaseDenom, math.NewIntWithDecimal(300, 18)))
 			err = testutil.FundAccount(s.ctx, s.app.BankKeeper, mva.GetAddress(), coins)
 			Expect(err).To(BeNil())
