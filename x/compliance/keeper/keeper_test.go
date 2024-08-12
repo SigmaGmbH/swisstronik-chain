@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
@@ -62,9 +63,8 @@ func (suite *KeeperTestSuite) Setup(t *testing.T) {
 	address := common.BytesToAddress(priv.PubKey().Address().Bytes())
 
 	// consensus key
-	privCons, err := ethsecp256k1.GenerateKey()
-	require.NoError(t, err)
-	consAddress := sdk.ConsAddress(privCons.PubKey().Address())
+	pks := simtestutil.CreateTestPubKeys(1)
+	consAddress := sdk.ConsAddress(pks[0].Address())
 
 	header := testutil.NewHeader(
 		1, time.Now().UTC(), chainID, consAddress, nil, nil,
@@ -86,7 +86,7 @@ func (suite *KeeperTestSuite) Setup(t *testing.T) {
 
 	// Set Validator
 	valAddr := sdk.ValAddress(address.Bytes())
-	validator, err := stakingtypes.NewValidator(valAddr, privCons.PubKey(), stakingtypes.Description{})
+	validator, err := stakingtypes.NewValidator(valAddr, pks[0], stakingtypes.Description{})
 	require.NoError(t, err)
 	validator = stakingkeeper.TestingUpdateValidator(&suite.app.StakingKeeper, suite.ctx, validator, true)
 	err = suite.app.StakingKeeper.Hooks().AfterValidatorCreated(suite.ctx, validator.GetOperator())
