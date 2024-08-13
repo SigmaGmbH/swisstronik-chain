@@ -8,8 +8,8 @@ CXX=clang++
 SGX_MODE ?= HW
 ENCLAVE_HOME ?= $(HOME)/.swisstronik-enclave
 PRODUCTION_MODE ?= false
-AS_MODE ?= false 
-VERSION := v1.0.4
+AS_MODE ?= false
+VERSION := v1.0.5
 Wrapper_build_feature := ""
 
 Wrapper_lib := libsgx_wrapper_$(VERSION).x86_64.so
@@ -18,7 +18,7 @@ ifeq ($(AS_MODE), true)
 	Wrapper_build_feature += attestation_server
 endif
 
-ifeq ($(SGX_MODE), HW) 
+ifeq ($(SGX_MODE), HW)
 	Wrapper_build_feature += hardware_mode
 else
 	Wrapper_build_feature += simulation_mode
