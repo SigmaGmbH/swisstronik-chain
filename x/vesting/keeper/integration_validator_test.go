@@ -164,7 +164,7 @@ func (suite *VestingTestSuite) TestSetupWithJailedValidatorsBySelfUndelegation()
 	return nil
 }
 
-func (suite *VestingTestSuite) TestSetupWithJailedValidators() error {
+func (suite *VestingTestSuite) TestSetupWithJailedValidatorsByDowntime() error {
 	err := suite.SetupTest()
 	if err != nil {
 		return err
@@ -213,7 +213,7 @@ func (suite *VestingTestSuite) TestSetupWithJailedValidators() error {
 
 			_ = suite.Commit()
 
-			fmt.Printf("> %d: slash:%s status: %s, tokens: %s\n", i, params.SlashFractionDoubleSign.String(), val.GetStatus().String(), val.GetTokens().String())
+			fmt.Printf("> %d: slash:%s status: %s, tokens: %s\n", i, params.SlashFractionDowntime.String(), val.GetStatus().String(), val.GetTokens().String())
 		}
 	}
 
