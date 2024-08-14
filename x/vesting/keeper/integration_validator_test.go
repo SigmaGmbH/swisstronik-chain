@@ -1,8 +1,10 @@
 package keeper_test
 
 import (
-	"cosmossdk.io/math"
 	"fmt"
+	"time"
+
+	"cosmossdk.io/math"
 	abci "github.com/cometbft/cometbft/abci/types"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
@@ -15,11 +17,11 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
 	"swisstronik/tests"
 	"swisstronik/testutil"
 	"swisstronik/utils"
 	"swisstronik/x/vesting/types"
-	"time"
 )
 
 func (suite *VestingTestSuite) bootstrapValidators(numVals int) ([]sdk.AccAddress, []sdk.ValAddress, []cryptotypes.PubKey, []stakingtypes.Validator) {
