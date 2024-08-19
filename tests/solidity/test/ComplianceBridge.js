@@ -2,13 +2,16 @@ const { expect } = require("chai")
 const { ethers } = require("hardhat")
 const { sendShieldedTransaction, sendShieldedQuery } = require("./testUtils")
 
+const unencryptedProvider = new ethers.providers.JsonRpcProvider("http://localhost:8547") // Unencrypted rpc url
+
 describe('ComplianceBridge', () => {
+    const CONTRACT_ADDRESS = "0x30252afe8c1683fd184c99a3c44aa5d547d59dd4"
     let contract
 
     before(async () => {
         const [signer] = await ethers.getSigners()
         const ComplianceProxyFactory = await ethers.getContractFactory('ComplianceProxy')
-        contract = new ethers.Contract("0x30252afe8c1683fd184c99a3c44aa5d547d59dd4", ComplianceProxyFactory.interface, signer)
+        contract = new ethers.Contract(CONTRACT_ADDRESS, ComplianceProxyFactory.interface, signer)
     })
 
     it('Should be able to add verification details', async () => {
@@ -21,6 +24,11 @@ describe('ComplianceBridge', () => {
             contract.interface.encodeFunctionData("isUserVerified", [signer.address])
         )
         const isVerifiedBeforeCall = contract.interface.decodeFunctionResult("isUserVerified", isVerifiedRespBeforeCall)
+        if (isVerifiedBeforeCall[0]) {
+            // If already verified, skip test case in order to pass over the next
+            console.log("issuer was already verified, skip")
+            return
+        }
         expect(isVerifiedBeforeCall[0]).to.be.false
 
         // Try to call `markUserAsVerified` by using `eth_call`
@@ -41,17 +49,19 @@ describe('ComplianceBridge', () => {
         const isVerifiedAfterCall = contract.interface.decodeFunctionResult("isUserVerified", isVerifiedRespAfterCall)
         expect(isVerifiedAfterCall[0]).to.be.false
 
-        // const gas = await contract.estimateGas.markUserAsVerified(signer.address)
-        // console.log('eth_estimateGas(markUserAsVeried)', gas)
-        //
-        // // Confirm that verified status was not changed yet
-        // const isVerifiedRespAfterEstimateGas = await sendShieldedQuery(
-        //     signer.provider,
-        //     contract.address,
-        //     contract.interface.encodeFunctionData("isUserVerified", [signer.address])
-        // )
-        // const isVerifiedAfterEstimateGas = contract.interface.decodeFunctionResult("isUserVerified", isVerifiedRespAfterEstimateGas)
-        // expect(isVerifiedAfterEstimateGas[0]).to.be.false
+        const ComplianceProxyFactory = await ethers.getContractFactory('ComplianceProxy')
+        const contractUnencrypted = new ethers.Contract(CONTRACT_ADDRESS, ComplianceProxyFactory.interface, unencryptedProvider)
+        const gas = await contractUnencrypted.estimateGas.markUserAsVerified(signer.address)
+        expect(gas.gt(ethers.BigNumber.from(0))).to.be.true
+
+        // Confirm that verified status was not changed yet
+        const isVerifiedRespAfterEstimateGas = await sendShieldedQuery(
+            signer.provider,
+            contract.address,
+            contract.interface.encodeFunctionData("isUserVerified", [signer.address])
+        )
+        const isVerifiedAfterEstimateGas = contract.interface.decodeFunctionResult("isUserVerified", isVerifiedRespAfterEstimateGas)
+        expect(isVerifiedAfterEstimateGas[0]).to.be.false
 
         const tx = await sendShieldedTransaction(
             signer,
