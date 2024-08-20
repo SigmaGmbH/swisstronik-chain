@@ -383,9 +383,7 @@ var _ = Describe("Additional tests with multiple validators for Monthly Vesting 
 
 		// Different types of validators
 		powers []int64
-		//addrDels []sdk.AccAddress
 		addrVals []sdk.ValAddress
-		//pks      []cryptotypes.PubKey
 	)
 
 	BeforeEach(func() {
@@ -406,7 +404,6 @@ var _ = Describe("Additional tests with multiple validators for Monthly Vesting 
 
 		// Setup multiple validators
 		powers = []int64{0, 50, 100, 0, 200}
-		//addrDels, addrVals, pks, _ = s.initializeValidators(powers)
 		_, addrVals, _, _ = s.initializeValidators(powers)
 	})
 
