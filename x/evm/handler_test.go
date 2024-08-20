@@ -1,36 +1,35 @@
 package evm_test
 
 import (
+	"errors"
 	"math/big"
 	"testing"
 	"time"
 
 	sdkmath "cosmossdk.io/math"
-	"github.com/gogo/protobuf/proto"
-
-	abci "github.com/cometbft/cometbft/abci/types"
-	tmjson "github.com/cometbft/cometbft/libs/json"
-
 	"cosmossdk.io/simapp"
+	"github.com/SigmaGmbH/librustgo"
+	abci "github.com/cometbft/cometbft/abci/types"
+	"github.com/cometbft/cometbft/crypto/tmhash"
+	tmjson "github.com/cometbft/cometbft/libs/json"
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	tmversion "github.com/cometbft/cometbft/proto/tendermint/version"
+	"github.com/cometbft/cometbft/version"
+	"github.com/cosmos/cosmos-sdk/baseapp"
+	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/crypto/keyring"
+	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-
-	feemarkettypes "swisstronik/x/feemarket/types"
-
-	"errors"
-
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/gogo/protobuf/proto"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-
-	"github.com/cosmos/cosmos-sdk/baseapp"
-	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/crypto/keyring"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"swisstronik/app"
 	"swisstronik/crypto/ethsecp256k1"
@@ -40,13 +39,7 @@ import (
 	"swisstronik/x/evm"
 	"swisstronik/x/evm/keeper"
 	"swisstronik/x/evm/types"
-
-	"github.com/cometbft/cometbft/crypto/tmhash"
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
-	tmversion "github.com/cometbft/cometbft/proto/tendermint/version"
-
-	"github.com/SigmaGmbH/librustgo"
-	"github.com/cometbft/cometbft/version"
+	feemarkettypes "swisstronik/x/feemarket/types"
 )
 
 type EvmTestSuite struct {
@@ -79,9 +72,8 @@ func (suite *EvmTestSuite) DoSetupTest(t require.TestingT) {
 	suite.signer = tests.NewTestSigner(priv)
 	suite.from = address
 	// consensus key
-	priv, err = ethsecp256k1.GenerateKey()
-	require.NoError(t, err)
-	consAddress := sdk.ConsAddress(priv.PubKey().Address())
+	pks := simtestutil.CreateTestPubKeys(1)
+	consAddress := sdk.ConsAddress(pks[0].Address())
 
 	suite.app = app.Setup(func(app *app.App, genesis simapp.GenesisState) simapp.GenesisState {
 		if suite.dynamicTxFee {
@@ -161,7 +153,7 @@ func (suite *EvmTestSuite) DoSetupTest(t require.TestingT) {
 	suite.app.AccountKeeper.SetAccount(suite.ctx, acc)
 
 	valAddr := sdk.ValAddress(address.Bytes())
-	validator, err := stakingtypes.NewValidator(valAddr, priv.PubKey(), stakingtypes.Description{})
+	validator, err := stakingtypes.NewValidator(valAddr, pks[0], stakingtypes.Description{})
 	require.NoError(t, err)
 
 	err = suite.app.StakingKeeper.SetValidatorByConsAddr(suite.ctx, validator)
