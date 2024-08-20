@@ -22,7 +22,6 @@ describe('ComplianceBridge', () => {
             contract.address,
             contract.interface.encodeFunctionData("markUserAsVerified", [signer.address])
         )
-        // What happens after tx confirmation
         const res = await tx.wait()
         const parsedLog = contract.interface.parseLog(res.logs[0])
         expect(parsedLog.args.success).to.be.true
