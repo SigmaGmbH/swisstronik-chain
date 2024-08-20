@@ -108,6 +108,25 @@ describe('ComplianceBridge', () => {
         )
         const isVerifiedAfterEstimateGas = contract.interface.decodeFunctionResult("isUserVerified", isVerifiedRespAfterEstimateGas)
         expect(isVerifiedAfterEstimateGas[0]).to.be.false
+
+        const tx = await sendShieldedTransaction(
+            signer,
+            contract.address,
+            contract.interface.encodeFunctionData("markUserAsVerified", [wallet.address])
+        )
+        const res = await tx.wait()
+        const parsedLog = contract.interface.parseLog(res.logs[0])
+        expect(parsedLog.args.success).to.be.true
+        expect(parsedLog.args.data.length).to.be.greaterThan(0)
+
+        // Confirm that verified status was changed after tx confirmation
+        const isVerifiedRespAfterTx = await sendShieldedQuery(
+            signer.provider,
+            contract.address,
+            contract.interface.encodeFunctionData("isUserVerified", [wallet.address])
+        )
+        const isVerifiedAfterTx = contract.interface.decodeFunctionResult("isUserVerified", isVerifiedRespAfterTx)
+        expect(isVerifiedAfterTx[0]).to.be.true
     })
 
     it('Should be able to check for specific issuer of verification', async () => {
