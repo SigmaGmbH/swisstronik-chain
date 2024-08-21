@@ -15,13 +15,10 @@ describe('ComplianceBridge', () => {
     })
 
     describe('Should not change any state', async () => {
-        it('eth_call', async () => {
+        it('with eth_call', async () => {
             const [signer] = await ethers.getSigners()
 
             const wallet = ethers.Wallet.createRandom()
-            if (signer.address === wallet.address) {
-                return
-            }
 
             // Check if random wallet was not verified yet
             const isVerifiedRespBeforeCall = await sendShieldedQuery(
@@ -30,9 +27,7 @@ describe('ComplianceBridge', () => {
                 contract.interface.encodeFunctionData('isUserVerified', [wallet.address])
             )
             const isVerifiedBeforeCall = contract.interface.decodeFunctionResult('isUserVerified', isVerifiedRespBeforeCall)
-            if (isVerifiedBeforeCall[0]) {
-                return
-            }
+            expect(isVerifiedBeforeCall[0]).to.be.false
 
             // Try to call `markUserAsVerified` by using `eth_call`
             const markUserAsVerifiedResp = await sendShieldedQuery(
@@ -53,16 +48,13 @@ describe('ComplianceBridge', () => {
             expect(isVerifiedAfterCall[0]).to.be.false
         })
 
-        it('eth_estimateGas', async () => {
+        it('with eth_estimateGas', async () => {
             const [signer] = await ethers.getSigners()
 
             const ComplianceProxyFactory = await ethers.getContractFactory('ComplianceProxy')
             const contractUnencrypted = new ethers.Contract(CONTRACT_ADDRESS, ComplianceProxyFactory.interface, unencryptedProvider)
 
             const wallet = ethers.Wallet.createRandom()
-            if (signer.address === wallet.address) {
-                return
-            }
 
             // Check if random wallet was not verified yet
             const isVerifiedRespBeforeEstimateGas = await sendShieldedQuery(
@@ -71,9 +63,7 @@ describe('ComplianceBridge', () => {
                 contract.interface.encodeFunctionData('isUserVerified', [wallet.address])
             )
             const isVerifiedBeforeEstimateGas = contract.interface.decodeFunctionResult('isUserVerified', isVerifiedRespBeforeEstimateGas)
-            if (isVerifiedBeforeEstimateGas[0]) {
-                return
-            }
+            expect(isVerifiedBeforeEstimateGas[0]).to.be.false
 
             const gas = await contractUnencrypted.estimateGas.markUserAsVerified(signer.address)
             expect(gas.gt(ethers.BigNumber.from(0))).to.be.true
@@ -136,7 +126,7 @@ describe('ComplianceBridge', () => {
         beforeEach(async () => {
             const [signer] = await ethers.getSigners()
 
-            waitingForVerified = ethers.Wallet.createRandom()
+            const waitingForVerified = ethers.Wallet.createRandom()
             const tx = await sendShieldedTransaction(
                 signer,
                 contract.address,
