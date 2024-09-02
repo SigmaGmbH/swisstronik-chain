@@ -1,0 +1,22 @@
+{
+  "type": "cosmos",
+  "value": {
+    "key": "relayer",
+    "chain-id": "swisstronik_1291-1",
+    "rpc-addr": "http://localhost:26657",
+    "grpc-addr": "",
+    "account-prefix": "swtr",
+    "keyring-backend": "test",
+    "default-denom": "uswtr",
+    "gas-adjustment": 1.5,
+    "gas-prices": "0.025swtr",
+    "debug": true,
+    "timeout": "20s",
+    "output-format": "json",
+    "sign-mode": "direct",
+    "trusting-period": "330h",
+    "gas":900000
+  }
+}
+
+
