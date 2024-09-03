@@ -47,6 +47,28 @@ services:
       - localosmosis
     networks:
       - localnet
+      -
+  localswisstronik:
+    image: local:swisstronik
+    volumes:
+      - ./scripts/setup-swisstronik.sh:/swisstronik/setup.sh
+      - $HOME/.swisstronik/:/swisstronik/.swisstronik/
+    entrypoint:
+      - /swisstronik/setup.sh
+    env_file:
+      - .env
+    environment:
+      - CHAIN_ID=${SWISSTRONIK_CHAIN_ID}
+      - VALIDATOR_MONIKER=${SWISSTRONIK_VALIDATOR_MONIKER}
+      - VALIDATOR_MNEMONIC=${SWISSTRONIK_VALIDATOR_MNEMONIC}
+      - FAUCET_MNEMONIC=${SWISSTRONIK_FAUCET_MNEMONIC}
+      - RELAYER_MNEMONIC=${SWISSTRONIK_RELAYER_MNEMONIC}
+    ports:
+      - 6657:26657
+      - 1317:1317
+      - 9090:9090
+    networks:
+      - localnet
 
 networks:
   localnet:

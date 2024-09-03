@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 rm -r ~/.relayer || true
 
 export_env_vars() {
