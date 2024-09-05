@@ -47,26 +47,50 @@ services:
       - localosmosis
     networks:
       - localnet
-      -
-  localswisstronik:
-    image: local:swisstronik
+
+  #  localswisstronik:
+  #    image: local:swisstronik
+  #    volumes:
+  #      - ./scripts/setup-swisstronik.sh:/swisstronik/setup.sh
+  #      - $HOME/.swisstronik/:/swisstronik/.swisstronik/
+  #    entrypoint:
+  #      - /swisstronik/setup.sh
+  #    env_file:
+  #      - .env
+  #    environment:
+  #      - CHAIN_ID=${SWISSTRONIK_CHAIN_ID}
+  #      - VALIDATOR_MONIKER=${SWISSTRONIK_VALIDATOR_MONIKER}
+  #      - VALIDATOR_MNEMONIC=${SWISSTRONIK_VALIDATOR_MNEMONIC}
+  #      - FAUCET_MNEMONIC=${SWISSTRONIK_FAUCET_MNEMONIC}
+  #      - RELAYER_MNEMONIC=${SWISSTRONIK_RELAYER_MNEMONIC}
+  #    ports:
+  #      - 6657:26657
+  #      - 1317:1317
+  #      - 9090:9090
+  #    networks:
+  #      - localnet
+
+  hermes:
+    image: informalsystems/hermes:1.1.0
+    user: root:root
     volumes:
-      - ./scripts/setup-swisstronik.sh:/swisstronik/setup.sh
-      - $HOME/.swisstronik/:/swisstronik/.swisstronik/
+      - ./scripts/setup_hermes.sh:/home/hermes/setup.sh
+      - ./config/hermes/config.toml:/root/.hermes/config.toml
     entrypoint:
-      - /swisstronik/setup.sh
+      - /home/hermes/setup.sh
     env_file:
       - .env
     environment:
-      - CHAIN_ID=${SWISSTRONIK_CHAIN_ID}
-      - VALIDATOR_MONIKER=${SWISSTRONIK_VALIDATOR_MONIKER}
-      - VALIDATOR_MNEMONIC=${SWISSTRONIK_VALIDATOR_MNEMONIC}
-      - FAUCET_MNEMONIC=${SWISSTRONIK_FAUCET_MNEMONIC}
-      - RELAYER_MNEMONIC=${SWISSTRONIK_RELAYER_MNEMONIC}
+      - CHAIN_A_ID=${OSMOSIS_CHAIN_ID}
+      - CHAIN_A_MNEMONIC=${OSMOSIS_RELAYER_MNEMONIC}
+      - CHAIN_A_RPC=${OSMOSIS_RPC}
+      - CHAIN_B_ID=${SWISSTRONIK_CHAIN_ID}
+      - CHAIN_B_MNEMONIC=${SWISSTRONIK_RELAYER_MNEMONIC}
+      - CHAIN_B_RPC=${SWISSTRONIK_RPC}
     ports:
-      - 6657:26657
-      - 1317:1317
-      - 9090:9090
+      - 3000:3000
+    depends_on:
+      - localosmosis
     networks:
       - localnet
 
