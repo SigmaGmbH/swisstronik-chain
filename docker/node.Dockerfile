@@ -1,6 +1,7 @@
 ############ Install Intel SGX SDK & SGX PSW
 FROM ghcr.io/sigmagmbh/sgx:2.19-jammy as base
 RUN wget -qO - https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | apt-key add -
+RUN echo 'deb [arch=amd64] https://download.01.org/intel-sgx/sgx_repo/ubuntu jammy main' > /etc/apt/sources.list.d/intel-sgx.list
 RUN apt-get update
 
 
@@ -56,6 +57,11 @@ CMD ["swisstronikd"]
 
 ############ Node binary in Software Mode
 FROM ubuntu:22.04 as local-node
+
+ENV SGX_SDK="/opt/intel/sgxsdk"
+ENV PATH="${PATH}:${SGX_SDK}/bin:${SGX_SDK}/bin/x64"
+ENV PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${SGX_SDK}/pkgconfig"
+ENV LD_LIBRARY_PATH="/opt/intel/sgxsdk/sdk_libs:${LD_LIBRARY_PATH}"
 
 RUN apt-get update && apt-get install jq -y
 RUN rm -rf /var/lib/apt/lists/*
