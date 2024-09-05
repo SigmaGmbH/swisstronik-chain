@@ -18,7 +18,7 @@ RUN curl https://sh.rustup.rs -sSf | bash -s -- -y > /dev/null 2>&1
 RUN cargo install protobuf-codegen --version "2.8.1" -f
  
 # Install golang
-ADD https://go.dev/dl/go1.19.linux-amd64.tar.gz go.linux-amd64.tar.gz
+ADD https://go.dev/dl/go1.21.3.linux-amd64.tar.gz go.linux-amd64.tar.gz
 RUN tar -C /usr/local -xzf go.linux-amd64.tar.gz && rm go.linux-amd64.tar.gz
 RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && \
 	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest > /dev/null 2>&1
@@ -28,7 +28,7 @@ RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && \
 ############ Compile enclave & chain
 FROM compile-base as compile-chain
 
-RUN apt-get install -y automake autoconf build-essential libtool git 
+RUN apt-get install -y automake autoconf build-essential libtool git
 
 ARG SGX_MODE=HW
 ENV SGX_MODE=${SGX_MODE}
@@ -46,7 +46,7 @@ FROM base as hw-node
 
 COPY --from=compile-chain /root/chain/build/swisstronikd /usr/local/bin/swisstronikd
 COPY --from=compile-chain /root/.swisstronik-enclave /root/.swisstronik-enclave
-COPY --from=compile-chain /root/chain/go-sgxvm/internal/api/libsgx_wrapper_v1.0.5.x86_64.so /lib/x86_64-linux-gnu/libsgx_wrapper_v1.0.5.x86_64.so
+COPY --from=compile-chain /root/chain/go-sgxvm/internal/api/libsgx_wrapper_v1.0.5.x86_64.so /usr/lib/libsgx_wrapper_v1.0.5.x86_64.so
 COPY --from=compile-chain /opt/intel /opt/intel
 
 EXPOSE 26656 26657 1317 9090 8545 8546 8999
@@ -58,14 +58,16 @@ CMD ["swisstronikd"]
 FROM ubuntu:22.04 as local-node
 
 RUN apt-get update && apt-get install jq -y
-RUN rm -rf /var/lib/apt/lists/* 
+RUN rm -rf /var/lib/apt/lists/*
 
 COPY --from=compile-chain /root/chain/build/swisstronikd /usr/bin/swisstronikd
 COPY --from=compile-chain /root/.swisstronik-enclave /root/.swisstronik-enclave
-COPY --from=compile-chain /root/chain/go-sgxvm/internal/api/libsgx_wrapper_v1.0.5/x86_64.so /lib/x86_64-linux-gnu/libsgx_wrapper_v1.0.5.x86_64.so
-COPY --from=compile-chain /opt/intel/sgxsdk/sdk_libs/* /lib/x86_64-linux-gnu/
+COPY --from=compile-chain /root/chain/go-sgxvm/internal/api/libsgx_wrapper_v1.0.5.x86_64.so /usr/lib/libsgx_wrapper_v1.0.5.x86_64.so
+COPY --from=compile-chain /opt/intel /opt/intel
+COPY --from=compile-chain /root/chain/build/swisstronikd /root/build/swisstronikd
 COPY --from=compile-chain /root/chain/scripts/local-node.sh /root/local-node.sh
 
+WORKDIR /root
 RUN /bin/bash /root/local-node.sh
 
 EXPOSE 26656 26657 1317 9090 8545 8546 8999
