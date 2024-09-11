@@ -503,7 +503,7 @@ dependencies = [
 [[package]]
 name = "evm"
 version = "1.0.0-dev"
-source = "git+https://github.com/rust-ethereum/evm.git?branch=master#c5c927dd6a59f185541b4e1fc671d772acc396d2"
+source = "git+https://github.com/SigmaGmbH/evm.git#b76ffcde60078059e99f5f34a32b2b743767619b"
 dependencies = [
  "evm-interpreter",
  "primitive-types",
@@ -513,7 +513,7 @@ dependencies = [
 [[package]]
 name = "evm-interpreter"
 version = "1.0.0-dev"
-source = "git+https://github.com/rust-ethereum/evm.git?branch=master#c5c927dd6a59f185541b4e1fc671d772acc396d2"
+source = "git+https://github.com/SigmaGmbH/evm.git#b76ffcde60078059e99f5f34a32b2b743767619b"
 dependencies = [
  "auto_impl",
  "paste",
