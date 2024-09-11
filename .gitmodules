@@ -1,3 +1,0 @@
-[submodule "sgxvm/sgx-sdk"]
-	path = sgxvm/sgx-sdk
-	url = https://github.com/apache/teaclave-sgx-sdk.git
