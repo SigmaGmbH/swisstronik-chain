@@ -1,6 +1,6 @@
 // use ethereum::Log;
 // use evm::backend::{Apply, Backend as EvmBackend, Basic};
-use primitive_types::{H160, H256, U256};
+// use primitive_types::{H160, H256, U256};
 // use std::vec::Vec;
 //
 // use evm::backend::RuntimeEnvironment;
@@ -15,15 +15,15 @@ use primitive_types::{H160, H256, U256};
 // };
 //
 /// Contains context of the transaction such as gas price, block hash, block timestamp, etc.
-pub struct TxEnvironment {
-    pub chain_id: U256,
-    pub gas_price: U256,
-    pub block_number: U256,
-    pub timestamp: U256,
-    pub block_gas_limit: U256,
-    pub block_base_fee_per_gas: U256,
-    pub block_coinbase: H160,
-}
+// pub struct TxEnvironment {
+//     pub chain_id: U256,
+//     pub gas_price: U256,
+//     pub block_number: U256,
+//     pub timestamp: U256,
+//     pub block_gas_limit: U256,
+//     pub block_base_fee_per_gas: U256,
+//     pub block_coinbase: H160,
+// }
 //
 // impl From<ffi::TransactionContext> for TxEnvironment {
 //     fn from(context: ffi::TransactionContext) -> Self {
