@@ -1,10 +1,9 @@
 extern crate sgx_tstd as std;
 
-use evm::{
-    executor::stack::{PrecompileFailure, PrecompileHandle, PrecompileOutput, PrecompileSet, IsPrecompileResult},
-    ExitError, 
-    ExitSucceed,
-};
+use evm::GasMutState;
+use evm::interpreter::error::{ExitError, ExitException, ExitResult};
+use evm::interpreter::runtime::RuntimeState;
+use evm::standard::PrecompileSet;
 use std::vec::Vec;
 use primitive_types::H160 ;
 use crate::GoQuerier;
@@ -20,14 +19,18 @@ mod ripemd160;
 mod datacopy;
 mod compliance_bridge;
 mod secp256r1;
+//
+// pub type PrecompileResult = Result<PrecompileOutput, PrecompileFailure>;
+//
+// /// One single precompile used by EVM engine.
+// pub trait Precompile {
+//     /// Try to execute the precompile with given `handle` which provides all call data
+//     /// and allow to register costs and logs.
+//     fn execute(handle: &mut impl PrecompileHandle) -> PrecompileResult;
+// }
 
-pub type PrecompileResult = Result<PrecompileOutput, PrecompileFailure>;
-
-/// One single precompile used by EVM engine.
-pub trait Precompile {
-    /// Try to execute the precompile with given `handle` which provides all call data
-    /// and allow to register costs and logs.
-    fn execute(handle: &mut impl PrecompileHandle) -> PrecompileResult;
+pub trait Precompile<G> {
+    fn execute(input: &[u8], gasometer: &mut G) -> (ExitResult, Vec<u8>);
 }
 
 pub trait LinearCostPrecompile {
@@ -37,58 +40,60 @@ pub trait LinearCostPrecompile {
     fn raw_execute(
         input: &[u8],
         cost: u64,
-    ) -> Result<(ExitSucceed, Vec<u8>), PrecompileFailure>;
+    ) -> (ExitResult, Vec<u8>);
 }
 
 /// Precompile with possibility to interact with Cosmos side using GoQuerier
-pub trait LinearCostPrecompileWithQuerier {
+pub trait LinearCostPrecompileWithQuerier<G> {
     const BASE: u64;
     const WORD: u64;
 
-    fn execute(querier: *mut GoQuerier, handle: &mut impl PrecompileHandle) -> PrecompileResult;
+    fn execute(querier: *mut GoQuerier, input: &[u8], gasometer: &mut G) -> (ExitResult, Vec<u8>);
 }
 
-impl<T: LinearCostPrecompile> Precompile for T {
-    fn execute(handle: &mut impl PrecompileHandle) -> PrecompileResult {
-        let target_gas = handle.gas_limit();
-        let cost = ensure_linear_cost(target_gas, handle.input().len() as u64, T::BASE, T::WORD)?;
+impl<T: LinearCostPrecompile, G: AsRef<RuntimeState> + GasMutState> Precompile<G> for T {
+    fn execute(input: &[u8], gasometer: G) -> (ExitResult, Vec<u8>) {
+        let cost = linear_cost(input().len() as u64, T::BASE, T::WORD)?;
+        gasometer.record_cost(cost)?;
 
-        handle.record_cost(cost)?;
-        let (exit_status, output) = T::raw_execute(handle.input(), cost)?;
-        Ok(PrecompileOutput {
-            exit_status,
-            output,
-        })
+        T::raw_execute(input, cost)
     }
 }
 
-/// Linear gas cost
-pub fn ensure_linear_cost(
-    target_gas: Option<u64>,
-    len: u64,
-    base: u64,
-    word: u64,
-) -> Result<u64, PrecompileFailure> {
+fn linear_cost(len: u64, base: u64, word: u64) -> Result<u64, ExitError> {
     let cost = base
-        .checked_add(word.checked_mul(len.saturating_add(31) / 32).ok_or(
-            PrecompileFailure::Error {
-                exit_status: ExitError::OutOfGas,
-            },
-        )?)
-        .ok_or(PrecompileFailure::Error {
-            exit_status: ExitError::OutOfGas,
-        })?;
-
-    if let Some(target_gas) = target_gas {
-        if cost > target_gas {
-            return Err(PrecompileFailure::Error {
-                exit_status: ExitError::OutOfGas,
-            });
-        }
-    }
+        .checked_add(
+            word.checked_mul(len.saturating_add(31) / 32)
+                .ok_or(ExitException::OutOfGas)?,
+        )
+        .ok_or(ExitException::OutOfGas)?;
 
     Ok(cost)
 }
+
+// /// Linear gas cost
+// pub fn ensure_linear_cost(
+//     target_gas: Option<u64>,
+//     len: u64,
+//     base: u64,
+//     word: u64,
+// ) -> Result<u64, ExitError> {
+//     let cost = base
+//         .checked_add(word.checked_mul(len.saturating_add(31) / 32).ok_or(ExitException::OutOfGas)?)
+//         .ok_or(PrecompileFailure::Error {
+//             exit_status: ExitError::OutOfGas,
+//         })?;
+//
+//     if let Some(target_gas) = target_gas {
+//         if cost > target_gas {
+//             return Err(PrecompileFailure::Error {
+//                 exit_status: ExitError::OutOfGas,
+//             });
+//         }
+//     }
+//
+//     Ok(cost)
+// }
 
 pub struct EVMPrecompiles {
     querier: *mut GoQuerier,
@@ -121,39 +126,66 @@ impl EVMPrecompiles {
     }
 }
 
-impl PrecompileSet for EVMPrecompiles {
-    fn execute(&self, handle: &mut impl PrecompileHandle) -> Option<PrecompileResult> {
-        match handle.code_address() {
+impl<G, H> PrecompileSet<G, H> for EVMPrecompiles {
+    fn execute(&self, code_address: H160, input: &[u8], gasometer: &mut G, _handler: &mut H) -> Option<(ExitResult, Vec<u8>)> {
+        match code_address {
             // Ethereum precompiles:
-            a if a == hash(1) => Some(ec_recover::ECRecover::execute(handle)),
-            a if a == hash(2) => Some(sha256::Sha256::execute(handle)),
-            a if a == hash(3) => Some(ripemd160::Ripemd160::execute(handle)),
-            a if a == hash(4) => Some(datacopy::DataCopy::execute(handle)),
-            a if a == hash(5) => Some(modexp::Modexp::execute(handle)),
-            a if a == hash(6) => Some(bn128::Bn128Add::execute(handle)),
-            a if a == hash(7) => Some(bn128::Bn128Mul::execute(handle)),
-            a if a == hash(8) => Some(bn128::Bn128Pairing::execute(handle)),
-            a if a == hash(9) => Some(blake2f::Blake2F::execute(handle)),
+            a if a == hash(1) => Some(ec_recover::ECRecover::execute(input, gasometer)),
+            a if a == hash(2) => Some(sha256::Sha256::execute(input, gasometer)),
+            a if a == hash(3) => Some(ripemd160::Ripemd160::execute(input, gasometer)),
+            a if a == hash(4) => Some(datacopy::DataCopy::execute(input, gasometer)),
+            a if a == hash(5) => Some(modexp::Modexp::execute(input, gasometer)),
+            a if a == hash(6) => Some(bn128::Bn128Add::execute(input, gasometer)),
+            a if a == hash(7) => Some(bn128::Bn128Mul::execute(input, gasometer)),
+            a if a == hash(8) => Some(bn128::Bn128Pairing::execute(input, gasometer)),
+            a if a == hash(9) => Some(blake2f::Blake2F::execute(input, gasometer)),
             // RIP-7212
-            a if a == hash(0x100) => Some(secp256r1::P256Verify::execute(handle)),
+            a if a == hash(0x100) => Some(secp256r1::P256Verify::execute(input, gasometer)),
             // Non-Frontier specific nor Ethereum precompiles :
-            a if a == hash(1024) => Some(sha3fips::Sha3FIPS256::execute(handle)),
-            a if a == hash(1025) => Some(sha3fips::Sha3FIPS512::execute(handle)),
-            a if a == hash(1028) => Some(compliance_bridge::ComplianceBridge::execute(self.querier, handle)),
-            a if a == hash(1029) => Some(curve25519::Curve25519Add::execute(handle)),
-            a if a == hash(1030) => Some(curve25519::Curve25519ScalarMul::execute(handle)),
-            a if a == hash(1031) => Some(curve25519::Ed25519Verify::execute(handle)),
+            a if a == hash(1024) => Some(sha3fips::Sha3FIPS256::execute(input, gasometer)),
+            a if a == hash(1025) => Some(sha3fips::Sha3FIPS512::execute(input, gasometer)),
+            a if a == hash(1028) => Some(compliance_bridge::ComplianceBridge::execute(self.querier, input, gasometer)),
+            a if a == hash(1029) => Some(curve25519::Curve25519Add::execute(input, gasometer)),
+            a if a == hash(1030) => Some(curve25519::Curve25519ScalarMul::execute(input, gasometer)),
+            a if a == hash(1031) => Some(curve25519::Ed25519Verify::execute(input, gasometer)),
             _ => None,
         }
     }
-
-    fn is_precompile(&self, address: H160, _gas: u64) -> IsPrecompileResult {
-		IsPrecompileResult::Answer {
-			is_precompile: Self::used_addresses().contains(&address),
-			extra_cost: 0,
-		}
-    }
 }
+
+// impl PrecompileSet for EVMPrecompiles {
+//     fn execute(&self, handle: &mut impl PrecompileHandle) -> Option<PrecompileResult> {
+//         match handle.code_address() {
+//             // Ethereum precompiles:
+//             a if a == hash(1) => Some(ec_recover::ECRecover::execute(handle)),
+//             a if a == hash(2) => Some(sha256::Sha256::execute(handle)),
+//             a if a == hash(3) => Some(ripemd160::Ripemd160::execute(handle)),
+//             a if a == hash(4) => Some(datacopy::DataCopy::execute(handle)),
+//             a if a == hash(5) => Some(modexp::Modexp::execute(handle)),
+//             a if a == hash(6) => Some(bn128::Bn128Add::execute(handle)),
+//             a if a == hash(7) => Some(bn128::Bn128Mul::execute(handle)),
+//             a if a == hash(8) => Some(bn128::Bn128Pairing::execute(handle)),
+//             a if a == hash(9) => Some(blake2f::Blake2F::execute(handle)),
+//             // RIP-7212
+//             a if a == hash(0x100) => Some(secp256r1::P256Verify::execute(handle)),
+//             // Non-Frontier specific nor Ethereum precompiles :
+//             a if a == hash(1024) => Some(sha3fips::Sha3FIPS256::execute(handle)),
+//             a if a == hash(1025) => Some(sha3fips::Sha3FIPS512::execute(handle)),
+//             a if a == hash(1028) => Some(compliance_bridge::ComplianceBridge::execute(self.querier, handle)),
+//             a if a == hash(1029) => Some(curve25519::Curve25519Add::execute(handle)),
+//             a if a == hash(1030) => Some(curve25519::Curve25519ScalarMul::execute(handle)),
+//             a if a == hash(1031) => Some(curve25519::Ed25519Verify::execute(handle)),
+//             _ => None,
+//         }
+//     }
+//
+//     fn is_precompile(&self, address: H160, _gas: u64) -> IsPrecompileResult {
+// 		IsPrecompileResult::Answer {
+// 			is_precompile: Self::used_addresses().contains(&address),
+// 			extra_cost: 0,
+// 		}
+//     }
+// }
 
 #[inline]
 fn hash(a: u64) -> H160 {
