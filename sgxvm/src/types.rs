@@ -1,11 +1,6 @@
 use evm::standard::Config;
-use evm::backend::{
-    Apply,
-    Backend as EvmBackend,
-    Basic,
-    Log
-};
 use primitive_types::{H160, H256, U256};
+use ethereum::Log;
 use std::{
     vec::Vec,
     string::String,
@@ -23,18 +18,6 @@ pub struct Vicinity {
     pub nonce: U256,
 }
 
-/// Supertrait for our version of EVM Backend
-pub trait ExtendedBackend: EvmBackend {
-    fn get_logs(&self) -> Vec<Log>;
-
-    /// Apply given values and logs at backend.
-	fn apply<A, I, L>(&mut self, values: A, logs: L, delete_empty: bool) -> Result<(), Error>
-	where
-		A: IntoIterator<Item = Apply<I>>,
-		I: IntoIterator<Item = (H256, H256)>,
-		L: IntoIterator<Item = Log>;
-}
-
 /// A key-value storage trait
 pub trait Storage {
     /// Checks if there is entity with such key exists in DB
@@ -47,10 +30,10 @@ pub trait Storage {
     fn get_account_code(&self, key: &H160) -> Option<Vec<u8>>;
 
     /// Returns account basic data (balance and nonce)
-    fn get_account(&self, account: &H160) -> Basic;
+    fn get_account(&self, account: &H160) -> (U256, U256);
 
     /// Updates account balance and nonce
-    fn insert_account(&mut self, key: H160, data: Basic) -> Result<(), Error>;
+    fn insert_account(&mut self, key: H160, data: (U256, U256)) -> Result<(), Error>;
 
     /// Updates contract bytecode
     fn insert_account_code(&mut self, key: H160, code: Vec<u8>) -> Result<(), Error>;

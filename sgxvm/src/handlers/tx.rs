@@ -1,11 +1,10 @@
 use alloc::collections::BTreeSet;
 use evm::backend::OverlayedBackend;
-// use evm::executor::stack::{MemoryStackState, StackExecutor, StackSubstateMetadata};
 use evm::standard::{Etable, EtableResolver, Invoker, TransactArgs};
 use primitive_types::{H160, H256, U256};
 use protobuf::Message;
 use protobuf::RepeatedField;
-use std::{string::String, vec::Vec};
+use std::vec::Vec;
 
 use crate::encryption::{
     decrypt_transaction_data, encrypt_transaction_data, extract_public_key_and_data,
@@ -14,7 +13,7 @@ use crate::key_manager::utils::random_nonce;
 use crate::precompiles::EVMPrecompiles;
 use crate::protobuf_generated::ffi::{AccessListItem, HandleTransactionResponse, Log, SGXVMCallParams, SGXVMCallRequest, SGXVMCreateParams, SGXVMCreateRequest, Topic};
 use crate::std::string::ToString;
-use crate::types::{ExecutionResult, ExtendedBackend, Vicinity, GASOMETER_CONFIG};
+use crate::types::{ExecutionResult, GASOMETER_CONFIG};
 use crate::AllocationWithResult;
 use crate::GoQuerier;
 use crate::updated_backend::{TxEnvironment, UpdatedBackend};
