@@ -8,7 +8,7 @@ use crate::protobuf_generated::ffi;
 use crate::storage::FFIStorage;
 use crate::types::{Storage, Vicinity};
 
-pub struct OverlayedBackend<'state> {
+pub struct UpdatedBackend<'state> {
     // We keep GoQuerier to make it accessible for `OCALL` handlers
     pub querier: *mut querier::GoQuerier,
     // Contains gas price and original sender
@@ -21,7 +21,7 @@ pub struct OverlayedBackend<'state> {
     pub environment: TxEnvironment,
 }
 
-impl<'state> OverlayedBackend<'state> {
+impl<'state> UpdatedBackend<'state> {
     pub fn new(
         querier: *mut querier::GoQuerier,
         storage: &'state mut FFIStorage,
@@ -38,7 +38,7 @@ impl<'state> OverlayedBackend<'state> {
     }
 }
 
-impl<'state> RuntimeEnvironment for OverlayedBackend<'state> {
+impl<'state> RuntimeEnvironment for UpdatedBackend<'state> {
     fn block_hash(&self, number: U256) -> H256 {
         let encoded_request = coder::encode_query_block_hash(number);
         match querier::make_request(self.querier, encoded_request) {
@@ -95,7 +95,7 @@ impl<'state> RuntimeEnvironment for OverlayedBackend<'state> {
     }
 }
 
-impl<'state> RuntimeBaseBackend for OverlayedBackend<'state> {
+impl<'state> RuntimeBaseBackend for UpdatedBackend<'state> {
     fn balance(&self, address: H160) -> U256 {
         self.storage.get_account(&address).0
     }

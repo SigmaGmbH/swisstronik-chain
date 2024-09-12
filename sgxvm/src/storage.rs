@@ -1,4 +1,3 @@
-use evm::backend::Basic;
 use primitive_types::{H160, H256, U256};
 use std::vec::Vec;
 
@@ -106,8 +105,8 @@ impl Storage for FFIStorage {
         }
     }
 
-    fn insert_account(&mut self, key: H160, data: Basic) -> Result<(), Error> {
-        let encoded_request = coder::encode_insert_account(key, data);
+    fn insert_account(&mut self, key: H160, data: (&U256, &U256)) -> Result<(), Error> {
+        let encoded_request = coder::encode_insert_account(&key, data.0, data.1);
         if let Some(result) = querier::make_request(self.querier, encoded_request) {
             match protobuf::parse_from_bytes::<ffi::QueryInsertAccountResponse>(result.as_slice()) {
                 Err(err) => Err(err.into()),

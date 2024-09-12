@@ -1,5 +1,4 @@
 use ethabi::Address;
-use evm::backend::Basic;
 use primitive_types::{H160, U256, H256};
 use protobuf::Message;
 use crate::protobuf_generated::ffi;
@@ -8,13 +7,13 @@ use std::{
     string::String
 };
 
-fn u256_to_vec(value: U256) -> Vec<u8> {
+fn u256_to_vec(value: &U256) -> Vec<u8> {
     let mut buffer = [0u8; 32];
     value.to_big_endian(&mut buffer);
     buffer.to_vec()
 }
 
-pub fn encode_query_block_hash(number: U256) -> Vec<u8> {
+pub fn encode_query_block_hash(number: &U256) -> Vec<u8> {
     let mut cosmos_request = ffi::CosmosRequest::new();
     let mut request = ffi::QueryBlockHash::new();
     request.set_number(u256_to_vec(number));
@@ -55,12 +54,12 @@ pub fn encode_get_account_code(account_address: &H160) -> Vec<u8> {
     cosmos_request.write_to_bytes().unwrap()
 }
 
-pub fn encode_insert_account(account_address: H160, data: Basic) -> Vec<u8> {
+pub fn encode_insert_account(account_address: &H160, balance: &U256, nonce: &U256) -> Vec<u8> {
     let mut cosmos_request = ffi::CosmosRequest::new();
     let mut request = ffi::QueryInsertAccount::new();
     request.set_address(account_address.as_bytes().to_vec());
-    request.set_balance(u256_to_vec(data.balance));
-    request.set_nonce(data.nonce.as_u64());
+    request.set_balance(u256_to_vec(balance));
+    request.set_nonce(nonce.as_u64());
     cosmos_request.set_insertAccount(request);
     cosmos_request.write_to_bytes().unwrap()
 }
