@@ -1,4 +1,4 @@
-use evm::Config;
+use evm::standard::Config;
 use evm::backend::{
     Apply,
     Backend as EvmBackend,
@@ -14,7 +14,7 @@ use std::boxed::Box;
 use sgx_types::*;
 use crate::error::Error;
 
-pub static GASOMETER_CONFIG: Config = Config::london();
+pub static GASOMETER_CONFIG: Config = Config::cancun();
 
 /// Information required by the evm
 #[derive(Clone, Default, PartialEq, Eq)]

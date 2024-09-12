@@ -5,7 +5,7 @@ use protobuf::Message;
 use protobuf::RepeatedField;
 use std::{string::String, vec::Vec};
 
-use crate::backend::{FFIBackend, TxContext};
+use crate::backend::{FFIBackend, TxEnvironment};
 use crate::encryption::{
     decrypt_transaction_data, encrypt_transaction_data, extract_public_key_and_data,
 };
@@ -72,7 +72,7 @@ pub fn handle_call_request_inner(
         nonce: U256::from(params.nonce),
     };
     let mut storage = crate::storage::FFIStorage::new(querier, context.timestamp, block_number);
-    let mut backend = FFIBackend::new(querier, &mut storage, vicinity, TxContext::from(context));
+    let mut backend = FFIBackend::new(querier, &mut storage, vicinity, TxEnvironment::from(context));
 
     // We do not decrypt transaction if no tx.data provided, or provided explicit flag, that transaction is unencrypted
     let is_encrypted = params.data.len() != 0 && !params.unencrypted;
@@ -178,7 +178,7 @@ pub fn handle_create_request_inner(
         nonce: U256::from(params.nonce),
     };
     let mut storage = crate::storage::FFIStorage::new(querier, context.timestamp, context.block_number);
-    let mut backend = FFIBackend::new(querier, &mut storage, vicinity, TxContext::from(context));
+    let mut backend = FFIBackend::new(querier, &mut storage, vicinity, TxEnvironment::from(context));
 
     execute_create(
         querier,

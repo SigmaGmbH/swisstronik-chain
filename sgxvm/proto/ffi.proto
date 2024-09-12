@@ -103,6 +103,12 @@ message QueryGetAccountCode { bytes address = 1; }
 
 message QueryGetAccountCodeResponse { bytes code = 1; }
 
+message QueryGetAccountCodeSize { bytes address = 1; }
+message QueryGetAccountCodeSizeResponse { uint32 size = 1; }
+
+message QueryGetAccountCodeHash { bytes address = 1; }
+message QueryGetAccountCodeHashResponse { bytes hash = 1; }
+
 message QueryInsertAccountCode {
   bytes address = 1;
   bytes code = 2;

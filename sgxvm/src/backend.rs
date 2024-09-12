@@ -3,6 +3,8 @@ use evm::backend::{Apply, Backend as EvmBackend, Basic};
 use primitive_types::{H160, H256, U256};
 use std::vec::Vec;
 
+use evm::backend::RuntimeEnvironment;
+
 use crate::{
     coder,
     error::Error,
@@ -13,7 +15,7 @@ use crate::{
 };
 
 /// Contains context of the transaction such as gas price, block hash, block timestamp, etc.
-pub struct TxContext {
+pub struct TxEnvironment {
     pub chain_id: U256,
     pub gas_price: U256,
     pub block_number: U256,
@@ -23,7 +25,7 @@ pub struct TxContext {
     pub block_coinbase: H160,
 }
 
-impl From<ffi::TransactionContext> for TxContext {
+impl From<ffi::TransactionContext> for TxEnvironment {
     fn from(context: ffi::TransactionContext) -> Self {
         Self {
             chain_id: U256::from(context.chain_id),
@@ -47,7 +49,7 @@ pub struct FFIBackend<'state> {
     // Emitted events
     pub logs: Vec<Log>,
     // Transaction context
-    pub tx_context: TxContext,
+    pub tx_context: TxEnvironment,
 }
 
 impl<'state> ExtendedBackend for FFIBackend<'state> {
@@ -123,15 +125,129 @@ impl<'state> ExtendedBackend for FFIBackend<'state> {
     }
 }
 
-impl<'state> EvmBackend for FFIBackend<'state> {
-    fn gas_price(&self) -> U256 {
-        self.tx_context.gas_price
-    }
+// impl<'state> EvmBackend for FFIBackend<'state> {
+//     fn gas_price(&self) -> U256 {
+//         self.tx_context.gas_price
+//     }
+//
+//     fn origin(&self) -> H160 {
+//         self.vicinity.origin
+//     }
+//
+//     fn block_hash(&self, number: U256) -> H256 {
+//         let encoded_request = coder::encode_query_block_hash(number);
+//         match querier::make_request(self.querier, encoded_request) {
+//             Some(result) => {
+//                 // Decode protobuf
+//                 let decoded_result = match protobuf::parse_from_bytes::<ffi::QueryBlockHashResponse>(
+//                     result.as_slice(),
+//                 ) {
+//                     Ok(res) => res,
+//                     Err(err) => {
+//                         println!("Cannot decode protobuf response: {:?}", err);
+//                         return H256::default();
+//                     }
+//                 };
+//                 H256::from_slice(decoded_result.hash.as_slice())
+//             }
+//             None => {
+//                 println!("Get block hash failed. Empty response");
+//                 H256::default()
+//             }
+//         }
+//     }
+//
+//     fn block_number(&self) -> U256 {
+//         self.tx_context.block_number
+//     }
+//
+//     fn block_coinbase(&self) -> H160 {
+//         self.tx_context.block_coinbase
+//     }
+//
+//     fn block_timestamp(&self) -> U256 {
+//         self.tx_context.timestamp
+//     }
+//
+//     fn block_difficulty(&self) -> U256 {
+//         U256::zero() // Only applicable for PoW
+//     }
+//
+//     fn block_randomness(&self) -> Option<H256> {
+//         None
+//     }
+//
+//     fn block_gas_limit(&self) -> U256 {
+//         self.tx_context.block_gas_limit
+//     }
+//
+//     fn block_base_fee_per_gas(&self) -> U256 {
+//         self.tx_context.block_base_fee_per_gas
+//     }
+//
+//     fn chain_id(&self) -> U256 {
+//         self.tx_context.chain_id
+//     }
+//
+//     fn exists(&self, address: H160) -> bool {
+//         self.state.contains_key(&address)
+//     }
+//
+//     fn basic(&self, address: H160) -> Basic {
+//         if address == self.vicinity.origin {
+//             let mut account_data = self.state.get_account(&address);
+//             let updated_nonce = account_data
+//                 .nonce
+//                 .checked_sub(U256::from(1u8))
+//                 .unwrap_or(U256::zero());
+//             if updated_nonce > self.vicinity.nonce {
+//                 account_data.nonce = updated_nonce;
+//             } else {
+//                 account_data.nonce = self.vicinity.nonce;
+//             }
+//
+//             account_data
+//         } else {
+//             self.state.get_account(&address)
+//         }
+//     }
+//
+//     fn code(&self, address: H160) -> Vec<u8> {
+//         self.state.get_account_code(&address).unwrap_or_default()
+//     }
+//
+//     fn storage(&self, address: H160, index: H256) -> H256 {
+//         self.state
+//             .get_account_storage_cell(&address, &index)
+//             .unwrap_or_default()
+//     }
+//
+//     fn original_storage(&self, _address: H160, _index: H256) -> Option<H256> {
+//         None
+//     }
+// }
 
-    fn origin(&self) -> H160 {
-        self.vicinity.origin
+impl<'state> FFIBackend<'state> {
+    pub fn new(
+        querier: *mut querier::GoQuerier,
+        storage: &'state mut FFIStorage,
+        vicinity: Vicinity,
+        tx_context: TxEnvironment,
+    ) -> Self {
+        Self {
+            querier,
+            vicinity,
+            state: storage,
+            logs: vec![],
+            tx_context,
+        }
     }
+}
 
+
+
+
+impl<'state> RuntimeEnvironment for FFIBackend<'state> {
     fn block_hash(&self, number: U256) -> H256 {
         let encoded_request = coder::encode_query_block_hash(number);
         match querier::make_request(self.querier, encoded_request) {
@@ -168,7 +284,7 @@ impl<'state> EvmBackend for FFIBackend<'state> {
     }
 
     fn block_difficulty(&self) -> U256 {
-        U256::zero() // Only applicable for PoW
+        U256::zero()
     }
 
     fn block_randomness(&self) -> Option<H256> {
@@ -186,58 +302,6 @@ impl<'state> EvmBackend for FFIBackend<'state> {
     fn chain_id(&self) -> U256 {
         self.tx_context.chain_id
     }
-
-    fn exists(&self, address: H160) -> bool {
-        self.state.contains_key(&address)
-    }
-
-    fn basic(&self, address: H160) -> Basic {
-        if address == self.vicinity.origin {
-            let mut account_data = self.state.get_account(&address);
-            let updated_nonce = account_data
-                .nonce
-                .checked_sub(U256::from(1u8))
-                .unwrap_or(U256::zero());
-            if updated_nonce > self.vicinity.nonce {
-                account_data.nonce = updated_nonce;
-            } else {
-                account_data.nonce = self.vicinity.nonce;
-            }
-
-            account_data
-        } else {
-            self.state.get_account(&address)
-        }
-    }
-
-    fn code(&self, address: H160) -> Vec<u8> {
-        self.state.get_account_code(&address).unwrap_or_default()
-    }
-
-    fn storage(&self, address: H160, index: H256) -> H256 {
-        self.state
-            .get_account_storage_cell(&address, &index)
-            .unwrap_or_default()
-    }
-
-    fn original_storage(&self, _address: H160, _index: H256) -> Option<H256> {
-        None
-    }
 }
 
-impl<'state> FFIBackend<'state> {
-    pub fn new(
-        querier: *mut querier::GoQuerier,
-        storage: &'state mut FFIStorage,
-        vicinity: Vicinity,
-        tx_context: TxContext,
-    ) -> Self {
-        Self {
-            querier,
-            vicinity,
-            state: storage,
-            logs: vec![],
-            tx_context,
-        }
-    }
-}
+

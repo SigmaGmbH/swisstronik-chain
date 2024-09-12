@@ -84,7 +84,7 @@ impl Storage for FFIStorage {
         }
     }
 
-    fn get_account(&self, key: &H160) -> Basic {
+    fn get_account(&self, key: &H160) -> (U256, U256) {
         let encoded_request = coder::encode_get_account(key);
         if let Some(result) = querier::make_request(self.querier, encoded_request) {
             // Decode protobuf
@@ -92,17 +92,17 @@ impl Storage for FFIStorage {
                 Ok(res) => res,
                 Err(err) => {
                     println!("Cannot decode protobuf response: {:?}", err);
-                    return Basic::default();
+                    return (U256::zero(), U256::zero());
                 }
             };
             
-            Basic {
-                balance: U256::from_big_endian(decoded_result.balance.as_slice()),
-                nonce: U256::from(decoded_result.nonce),
-            }
+            (
+                U256::from_big_endian(decoded_result.balance.as_slice()),
+                U256::from(decoded_result.nonce)
+            )
         } else {
             println!("Get account failed. Empty response");
-            Basic::default()
+            (U256::zero(), U256::zero())
         }
     }
 
