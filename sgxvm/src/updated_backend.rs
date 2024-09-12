@@ -2,11 +2,34 @@ use alloc::vec::Vec;
 use ethereum::Log;
 use evm::backend::{RuntimeBaseBackend, RuntimeEnvironment};
 use primitive_types::{H160, H256, U256};
-use crate::backend::{FFIBackend, TxEnvironment};
 use crate::{coder, querier};
 use crate::protobuf_generated::ffi;
 use crate::storage::FFIStorage;
 use crate::types::{Storage, Vicinity};
+
+pub struct TxEnvironment {
+    pub chain_id: U256,
+    pub gas_price: U256,
+    pub block_number: U256,
+    pub timestamp: U256,
+    pub block_gas_limit: U256,
+    pub block_base_fee_per_gas: U256,
+    pub block_coinbase: H160,
+}
+
+impl From<ffi::TransactionContext> for TxEnvironment {
+    fn from(context: ffi::TransactionContext) -> Self {
+        Self {
+            chain_id: U256::from(context.chain_id),
+            gas_price: U256::from_big_endian(&context.gas_price),
+            block_number: U256::from(context.block_number),
+            timestamp: U256::from(context.timestamp),
+            block_gas_limit: U256::from(context.block_gas_limit),
+            block_base_fee_per_gas: U256::from_big_endian(&context.block_base_fee_per_gas),
+            block_coinbase: H160::from_slice(&context.block_coinbase),
+        }
+    }
+}
 
 pub struct UpdatedBackend<'state> {
     // We keep GoQuerier to make it accessible for `OCALL` handlers
@@ -31,7 +54,7 @@ impl<'state> UpdatedBackend<'state> {
         Self {
             querier,
             vicinity,
-            state: storage,
+            storage,
             logs: vec![],
             environment,
         }
@@ -40,7 +63,7 @@ impl<'state> UpdatedBackend<'state> {
 
 impl<'state> RuntimeEnvironment for UpdatedBackend<'state> {
     fn block_hash(&self, number: U256) -> H256 {
-        let encoded_request = coder::encode_query_block_hash(number);
+        let encoded_request = coder::encode_query_block_hash(&number);
         match querier::make_request(self.querier, encoded_request) {
             Some(result) => {
                 // Decode protobuf
