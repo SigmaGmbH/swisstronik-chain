@@ -3771,6 +3771,675 @@ impl ::protobuf::reflect::ProtobufValue for QueryGetAccountCodeResponse {
 }
 
 #[derive(PartialEq,Clone,Default)]
+pub struct QueryGetAccountCodeSize {
+    // message fields
+    pub address: ::std::vec::Vec<u8>,
+    // special fields
+    pub unknown_fields: ::protobuf::UnknownFields,
+    pub cached_size: ::protobuf::CachedSize,
+}
+
+impl<'a> ::std::default::Default for &'a QueryGetAccountCodeSize {
+    fn default() -> &'a QueryGetAccountCodeSize {
+        <QueryGetAccountCodeSize as ::protobuf::Message>::default_instance()
+    }
+}
+
+impl QueryGetAccountCodeSize {
+    pub fn new() -> QueryGetAccountCodeSize {
+        ::std::default::Default::default()
+    }
+
+    // bytes address = 1;
+
+
+    pub fn get_address(&self) -> &[u8] {
+        &self.address
+    }
+    pub fn clear_address(&mut self) {
+        self.address.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_address(&mut self, v: ::std::vec::Vec<u8>) {
+        self.address = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_address(&mut self) -> &mut ::std::vec::Vec<u8> {
+        &mut self.address
+    }
+
+    // Take field
+    pub fn take_address(&mut self) -> ::std::vec::Vec<u8> {
+        ::std::mem::replace(&mut self.address, ::std::vec::Vec::new())
+    }
+}
+
+impl ::protobuf::Message for QueryGetAccountCodeSize {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                1 => {
+                    ::protobuf::rt::read_singular_proto3_bytes_into(wire_type, is, &mut self.address)?;
+                },
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        if !self.address.is_empty() {
+            my_size += ::protobuf::rt::bytes_size(1, &self.address);
+        }
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        if !self.address.is_empty() {
+            os.write_bytes(1, &self.address)?;
+        }
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &dyn (::std::any::Any) {
+        self as &dyn (::std::any::Any)
+    }
+    fn as_any_mut(&mut self) -> &mut dyn (::std::any::Any) {
+        self as &mut dyn (::std::any::Any)
+    }
+    fn into_any(self: Box<Self>) -> ::std::boxed::Box<dyn (::std::any::Any)> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> QueryGetAccountCodeSize {
+        QueryGetAccountCodeSize::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
+        };
+        unsafe {
+            descriptor.get(|| {
+                let mut fields = ::std::vec::Vec::new();
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
+                    "address",
+                    |m: &QueryGetAccountCodeSize| { &m.address },
+                    |m: &mut QueryGetAccountCodeSize| { &mut m.address },
+                ));
+                ::protobuf::reflect::MessageDescriptor::new::<QueryGetAccountCodeSize>(
+                    "QueryGetAccountCodeSize",
+                    fields,
+                    file_descriptor_proto()
+                )
+            })
+        }
+    }
+
+    fn default_instance() -> &'static QueryGetAccountCodeSize {
+        static mut instance: ::protobuf::lazy::Lazy<QueryGetAccountCodeSize> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const QueryGetAccountCodeSize,
+        };
+        unsafe {
+            instance.get(QueryGetAccountCodeSize::new)
+        }
+    }
+}
+
+impl ::protobuf::Clear for QueryGetAccountCodeSize {
+    fn clear(&mut self) {
+        self.address.clear();
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for QueryGetAccountCodeSize {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for QueryGetAccountCodeSize {
+    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
+        ::protobuf::reflect::ProtobufValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
+pub struct QueryGetAccountCodeSizeResponse {
+    // message fields
+    pub size: u32,
+    // special fields
+    pub unknown_fields: ::protobuf::UnknownFields,
+    pub cached_size: ::protobuf::CachedSize,
+}
+
+impl<'a> ::std::default::Default for &'a QueryGetAccountCodeSizeResponse {
+    fn default() -> &'a QueryGetAccountCodeSizeResponse {
+        <QueryGetAccountCodeSizeResponse as ::protobuf::Message>::default_instance()
+    }
+}
+
+impl QueryGetAccountCodeSizeResponse {
+    pub fn new() -> QueryGetAccountCodeSizeResponse {
+        ::std::default::Default::default()
+    }
+
+    // uint32 size = 1;
+
+
+    pub fn get_size(&self) -> u32 {
+        self.size
+    }
+    pub fn clear_size(&mut self) {
+        self.size = 0;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_size(&mut self, v: u32) {
+        self.size = v;
+    }
+}
+
+impl ::protobuf::Message for QueryGetAccountCodeSizeResponse {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                1 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint32()?;
+                    self.size = tmp;
+                },
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        if self.size != 0 {
+            my_size += ::protobuf::rt::value_size(1, self.size, ::protobuf::wire_format::WireTypeVarint);
+        }
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        if self.size != 0 {
+            os.write_uint32(1, self.size)?;
+        }
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &dyn (::std::any::Any) {
+        self as &dyn (::std::any::Any)
+    }
+    fn as_any_mut(&mut self) -> &mut dyn (::std::any::Any) {
+        self as &mut dyn (::std::any::Any)
+    }
+    fn into_any(self: Box<Self>) -> ::std::boxed::Box<dyn (::std::any::Any)> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> QueryGetAccountCodeSizeResponse {
+        QueryGetAccountCodeSizeResponse::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
+        };
+        unsafe {
+            descriptor.get(|| {
+                let mut fields = ::std::vec::Vec::new();
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint32>(
+                    "size",
+                    |m: &QueryGetAccountCodeSizeResponse| { &m.size },
+                    |m: &mut QueryGetAccountCodeSizeResponse| { &mut m.size },
+                ));
+                ::protobuf::reflect::MessageDescriptor::new::<QueryGetAccountCodeSizeResponse>(
+                    "QueryGetAccountCodeSizeResponse",
+                    fields,
+                    file_descriptor_proto()
+                )
+            })
+        }
+    }
+
+    fn default_instance() -> &'static QueryGetAccountCodeSizeResponse {
+        static mut instance: ::protobuf::lazy::Lazy<QueryGetAccountCodeSizeResponse> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const QueryGetAccountCodeSizeResponse,
+        };
+        unsafe {
+            instance.get(QueryGetAccountCodeSizeResponse::new)
+        }
+    }
+}
+
+impl ::protobuf::Clear for QueryGetAccountCodeSizeResponse {
+    fn clear(&mut self) {
+        self.size = 0;
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for QueryGetAccountCodeSizeResponse {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for QueryGetAccountCodeSizeResponse {
+    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
+        ::protobuf::reflect::ProtobufValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
+pub struct QueryGetAccountCodeHash {
+    // message fields
+    pub address: ::std::vec::Vec<u8>,
+    // special fields
+    pub unknown_fields: ::protobuf::UnknownFields,
+    pub cached_size: ::protobuf::CachedSize,
+}
+
+impl<'a> ::std::default::Default for &'a QueryGetAccountCodeHash {
+    fn default() -> &'a QueryGetAccountCodeHash {
+        <QueryGetAccountCodeHash as ::protobuf::Message>::default_instance()
+    }
+}
+
+impl QueryGetAccountCodeHash {
+    pub fn new() -> QueryGetAccountCodeHash {
+        ::std::default::Default::default()
+    }
+
+    // bytes address = 1;
+
+
+    pub fn get_address(&self) -> &[u8] {
+        &self.address
+    }
+    pub fn clear_address(&mut self) {
+        self.address.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_address(&mut self, v: ::std::vec::Vec<u8>) {
+        self.address = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_address(&mut self) -> &mut ::std::vec::Vec<u8> {
+        &mut self.address
+    }
+
+    // Take field
+    pub fn take_address(&mut self) -> ::std::vec::Vec<u8> {
+        ::std::mem::replace(&mut self.address, ::std::vec::Vec::new())
+    }
+}
+
+impl ::protobuf::Message for QueryGetAccountCodeHash {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                1 => {
+                    ::protobuf::rt::read_singular_proto3_bytes_into(wire_type, is, &mut self.address)?;
+                },
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        if !self.address.is_empty() {
+            my_size += ::protobuf::rt::bytes_size(1, &self.address);
+        }
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        if !self.address.is_empty() {
+            os.write_bytes(1, &self.address)?;
+        }
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &dyn (::std::any::Any) {
+        self as &dyn (::std::any::Any)
+    }
+    fn as_any_mut(&mut self) -> &mut dyn (::std::any::Any) {
+        self as &mut dyn (::std::any::Any)
+    }
+    fn into_any(self: Box<Self>) -> ::std::boxed::Box<dyn (::std::any::Any)> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> QueryGetAccountCodeHash {
+        QueryGetAccountCodeHash::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
+        };
+        unsafe {
+            descriptor.get(|| {
+                let mut fields = ::std::vec::Vec::new();
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
+                    "address",
+                    |m: &QueryGetAccountCodeHash| { &m.address },
+                    |m: &mut QueryGetAccountCodeHash| { &mut m.address },
+                ));
+                ::protobuf::reflect::MessageDescriptor::new::<QueryGetAccountCodeHash>(
+                    "QueryGetAccountCodeHash",
+                    fields,
+                    file_descriptor_proto()
+                )
+            })
+        }
+    }
+
+    fn default_instance() -> &'static QueryGetAccountCodeHash {
+        static mut instance: ::protobuf::lazy::Lazy<QueryGetAccountCodeHash> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const QueryGetAccountCodeHash,
+        };
+        unsafe {
+            instance.get(QueryGetAccountCodeHash::new)
+        }
+    }
+}
+
+impl ::protobuf::Clear for QueryGetAccountCodeHash {
+    fn clear(&mut self) {
+        self.address.clear();
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for QueryGetAccountCodeHash {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for QueryGetAccountCodeHash {
+    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
+        ::protobuf::reflect::ProtobufValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
+pub struct QueryGetAccountCodeHashResponse {
+    // message fields
+    pub hash: ::std::vec::Vec<u8>,
+    // special fields
+    pub unknown_fields: ::protobuf::UnknownFields,
+    pub cached_size: ::protobuf::CachedSize,
+}
+
+impl<'a> ::std::default::Default for &'a QueryGetAccountCodeHashResponse {
+    fn default() -> &'a QueryGetAccountCodeHashResponse {
+        <QueryGetAccountCodeHashResponse as ::protobuf::Message>::default_instance()
+    }
+}
+
+impl QueryGetAccountCodeHashResponse {
+    pub fn new() -> QueryGetAccountCodeHashResponse {
+        ::std::default::Default::default()
+    }
+
+    // bytes hash = 1;
+
+
+    pub fn get_hash(&self) -> &[u8] {
+        &self.hash
+    }
+    pub fn clear_hash(&mut self) {
+        self.hash.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_hash(&mut self, v: ::std::vec::Vec<u8>) {
+        self.hash = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_hash(&mut self) -> &mut ::std::vec::Vec<u8> {
+        &mut self.hash
+    }
+
+    // Take field
+    pub fn take_hash(&mut self) -> ::std::vec::Vec<u8> {
+        ::std::mem::replace(&mut self.hash, ::std::vec::Vec::new())
+    }
+}
+
+impl ::protobuf::Message for QueryGetAccountCodeHashResponse {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                1 => {
+                    ::protobuf::rt::read_singular_proto3_bytes_into(wire_type, is, &mut self.hash)?;
+                },
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        if !self.hash.is_empty() {
+            my_size += ::protobuf::rt::bytes_size(1, &self.hash);
+        }
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        if !self.hash.is_empty() {
+            os.write_bytes(1, &self.hash)?;
+        }
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &dyn (::std::any::Any) {
+        self as &dyn (::std::any::Any)
+    }
+    fn as_any_mut(&mut self) -> &mut dyn (::std::any::Any) {
+        self as &mut dyn (::std::any::Any)
+    }
+    fn into_any(self: Box<Self>) -> ::std::boxed::Box<dyn (::std::any::Any)> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> QueryGetAccountCodeHashResponse {
+        QueryGetAccountCodeHashResponse::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
+        };
+        unsafe {
+            descriptor.get(|| {
+                let mut fields = ::std::vec::Vec::new();
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
+                    "hash",
+                    |m: &QueryGetAccountCodeHashResponse| { &m.hash },
+                    |m: &mut QueryGetAccountCodeHashResponse| { &mut m.hash },
+                ));
+                ::protobuf::reflect::MessageDescriptor::new::<QueryGetAccountCodeHashResponse>(
+                    "QueryGetAccountCodeHashResponse",
+                    fields,
+                    file_descriptor_proto()
+                )
+            })
+        }
+    }
+
+    fn default_instance() -> &'static QueryGetAccountCodeHashResponse {
+        static mut instance: ::protobuf::lazy::Lazy<QueryGetAccountCodeHashResponse> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const QueryGetAccountCodeHashResponse,
+        };
+        unsafe {
+            instance.get(QueryGetAccountCodeHashResponse::new)
+        }
+    }
+}
+
+impl ::protobuf::Clear for QueryGetAccountCodeHashResponse {
+    fn clear(&mut self) {
+        self.hash.clear();
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for QueryGetAccountCodeHashResponse {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for QueryGetAccountCodeHashResponse {
+    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
+        ::protobuf::reflect::ProtobufValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
 pub struct QueryInsertAccountCode {
     // message fields
     pub address: ::std::vec::Vec<u8>,
@@ -7808,6 +8477,8 @@ pub enum CosmosRequest_oneof_req {
     insertAccount(QueryInsertAccount),
     containsKey(QueryContainsKey),
     accountCode(QueryGetAccountCode),
+    codeHash(QueryGetAccountCodeHash),
+    codeSize(QueryGetAccountCodeSize),
     storageCell(QueryGetAccountStorageCell),
     insertAccountCode(QueryInsertAccountCode),
     insertStorageCell(QueryInsertStorageCell),
@@ -8021,7 +8692,105 @@ impl CosmosRequest {
         }
     }
 
-    // .ffi.ffi.QueryGetAccountStorageCell storageCell = 5;
+    // .ffi.ffi.QueryGetAccountCodeHash codeHash = 5;
+
+
+    pub fn get_codeHash(&self) -> &QueryGetAccountCodeHash {
+        match self.req {
+            ::std::option::Option::Some(CosmosRequest_oneof_req::codeHash(ref v)) => v,
+            _ => QueryGetAccountCodeHash::default_instance(),
+        }
+    }
+    pub fn clear_codeHash(&mut self) {
+        self.req = ::std::option::Option::None;
+    }
+
+    pub fn has_codeHash(&self) -> bool {
+        match self.req {
+            ::std::option::Option::Some(CosmosRequest_oneof_req::codeHash(..)) => true,
+            _ => false,
+        }
+    }
+
+    // Param is passed by value, moved
+    pub fn set_codeHash(&mut self, v: QueryGetAccountCodeHash) {
+        self.req = ::std::option::Option::Some(CosmosRequest_oneof_req::codeHash(v))
+    }
+
+    // Mutable pointer to the field.
+    pub fn mut_codeHash(&mut self) -> &mut QueryGetAccountCodeHash {
+        if let ::std::option::Option::Some(CosmosRequest_oneof_req::codeHash(_)) = self.req {
+        } else {
+            self.req = ::std::option::Option::Some(CosmosRequest_oneof_req::codeHash(QueryGetAccountCodeHash::new()));
+        }
+        match self.req {
+            ::std::option::Option::Some(CosmosRequest_oneof_req::codeHash(ref mut v)) => v,
+            _ => panic!(),
+        }
+    }
+
+    // Take field
+    pub fn take_codeHash(&mut self) -> QueryGetAccountCodeHash {
+        if self.has_codeHash() {
+            match self.req.take() {
+                ::std::option::Option::Some(CosmosRequest_oneof_req::codeHash(v)) => v,
+                _ => panic!(),
+            }
+        } else {
+            QueryGetAccountCodeHash::new()
+        }
+    }
+
+    // .ffi.ffi.QueryGetAccountCodeSize codeSize = 6;
+
+
+    pub fn get_codeSize(&self) -> &QueryGetAccountCodeSize {
+        match self.req {
+            ::std::option::Option::Some(CosmosRequest_oneof_req::codeSize(ref v)) => v,
+            _ => QueryGetAccountCodeSize::default_instance(),
+        }
+    }
+    pub fn clear_codeSize(&mut self) {
+        self.req = ::std::option::Option::None;
+    }
+
+    pub fn has_codeSize(&self) -> bool {
+        match self.req {
+            ::std::option::Option::Some(CosmosRequest_oneof_req::codeSize(..)) => true,
+            _ => false,
+        }
+    }
+
+    // Param is passed by value, moved
+    pub fn set_codeSize(&mut self, v: QueryGetAccountCodeSize) {
+        self.req = ::std::option::Option::Some(CosmosRequest_oneof_req::codeSize(v))
+    }
+
+    // Mutable pointer to the field.
+    pub fn mut_codeSize(&mut self) -> &mut QueryGetAccountCodeSize {
+        if let ::std::option::Option::Some(CosmosRequest_oneof_req::codeSize(_)) = self.req {
+        } else {
+            self.req = ::std::option::Option::Some(CosmosRequest_oneof_req::codeSize(QueryGetAccountCodeSize::new()));
+        }
+        match self.req {
+            ::std::option::Option::Some(CosmosRequest_oneof_req::codeSize(ref mut v)) => v,
+            _ => panic!(),
+        }
+    }
+
+    // Take field
+    pub fn take_codeSize(&mut self) -> QueryGetAccountCodeSize {
+        if self.has_codeSize() {
+            match self.req.take() {
+                ::std::option::Option::Some(CosmosRequest_oneof_req::codeSize(v)) => v,
+                _ => panic!(),
+            }
+        } else {
+            QueryGetAccountCodeSize::new()
+        }
+    }
+
+    // .ffi.ffi.QueryGetAccountStorageCell storageCell = 7;
 
 
     pub fn get_storageCell(&self) -> &QueryGetAccountStorageCell {
@@ -8070,7 +8839,7 @@ impl CosmosRequest {
         }
     }
 
-    // .ffi.ffi.QueryInsertAccountCode insertAccountCode = 6;
+    // .ffi.ffi.QueryInsertAccountCode insertAccountCode = 8;
 
 
     pub fn get_insertAccountCode(&self) -> &QueryInsertAccountCode {
@@ -8119,7 +8888,7 @@ impl CosmosRequest {
         }
     }
 
-    // .ffi.ffi.QueryInsertStorageCell insertStorageCell = 7;
+    // .ffi.ffi.QueryInsertStorageCell insertStorageCell = 9;
 
 
     pub fn get_insertStorageCell(&self) -> &QueryInsertStorageCell {
@@ -8168,7 +8937,7 @@ impl CosmosRequest {
         }
     }
 
-    // .ffi.ffi.QueryRemove remove = 8;
+    // .ffi.ffi.QueryRemove remove = 10;
 
 
     pub fn get_remove(&self) -> &QueryRemove {
@@ -8217,7 +8986,7 @@ impl CosmosRequest {
         }
     }
 
-    // .ffi.ffi.QueryRemoveStorageCell removeStorageCell = 9;
+    // .ffi.ffi.QueryRemoveStorageCell removeStorageCell = 11;
 
 
     pub fn get_removeStorageCell(&self) -> &QueryRemoveStorageCell {
@@ -8266,7 +9035,7 @@ impl CosmosRequest {
         }
     }
 
-    // .ffi.ffi.QueryRemoveStorage removeStorage = 10;
+    // .ffi.ffi.QueryRemoveStorage removeStorage = 12;
 
 
     pub fn get_removeStorage(&self) -> &QueryRemoveStorage {
@@ -8315,7 +9084,7 @@ impl CosmosRequest {
         }
     }
 
-    // .ffi.ffi.QueryBlockHash blockHash = 11;
+    // .ffi.ffi.QueryBlockHash blockHash = 13;
 
 
     pub fn get_blockHash(&self) -> &QueryBlockHash {
@@ -8364,7 +9133,7 @@ impl CosmosRequest {
         }
     }
 
-    // .ffi.ffi.QueryAddVerificationDetails addVerificationDetails = 12;
+    // .ffi.ffi.QueryAddVerificationDetails addVerificationDetails = 14;
 
 
     pub fn get_addVerificationDetails(&self) -> &QueryAddVerificationDetails {
@@ -8413,7 +9182,7 @@ impl CosmosRequest {
         }
     }
 
-    // .ffi.ffi.QueryHasVerification hasVerification = 13;
+    // .ffi.ffi.QueryHasVerification hasVerification = 15;
 
 
     pub fn get_hasVerification(&self) -> &QueryHasVerification {
@@ -8462,7 +9231,7 @@ impl CosmosRequest {
         }
     }
 
-    // .ffi.ffi.QueryGetVerificationData getVerificationData = 14;
+    // .ffi.ffi.QueryGetVerificationData getVerificationData = 16;
 
 
     pub fn get_getVerificationData(&self) -> &QueryGetVerificationData {
@@ -8530,6 +9299,16 @@ impl ::protobuf::Message for CosmosRequest {
             }
         }
         if let Some(CosmosRequest_oneof_req::accountCode(ref v)) = self.req {
+            if !v.is_initialized() {
+                return false;
+            }
+        }
+        if let Some(CosmosRequest_oneof_req::codeHash(ref v)) = self.req {
+            if !v.is_initialized() {
+                return false;
+            }
+        }
+        if let Some(CosmosRequest_oneof_req::codeSize(ref v)) = self.req {
             if !v.is_initialized() {
                 return false;
             }
@@ -8619,57 +9398,69 @@ impl ::protobuf::Message for CosmosRequest {
                     if wire_type != ::protobuf::wire_format::WireTypeLengthDelimited {
                         return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
                     }
-                    self.req = ::std::option::Option::Some(CosmosRequest_oneof_req::storageCell(is.read_message()?));
+                    self.req = ::std::option::Option::Some(CosmosRequest_oneof_req::codeHash(is.read_message()?));
                 },
                 6 => {
                     if wire_type != ::protobuf::wire_format::WireTypeLengthDelimited {
                         return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
                     }
-                    self.req = ::std::option::Option::Some(CosmosRequest_oneof_req::insertAccountCode(is.read_message()?));
+                    self.req = ::std::option::Option::Some(CosmosRequest_oneof_req::codeSize(is.read_message()?));
                 },
                 7 => {
                     if wire_type != ::protobuf::wire_format::WireTypeLengthDelimited {
                         return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
                     }
-                    self.req = ::std::option::Option::Some(CosmosRequest_oneof_req::insertStorageCell(is.read_message()?));
+                    self.req = ::std::option::Option::Some(CosmosRequest_oneof_req::storageCell(is.read_message()?));
                 },
                 8 => {
                     if wire_type != ::protobuf::wire_format::WireTypeLengthDelimited {
                         return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
                     }
-                    self.req = ::std::option::Option::Some(CosmosRequest_oneof_req::remove(is.read_message()?));
+                    self.req = ::std::option::Option::Some(CosmosRequest_oneof_req::insertAccountCode(is.read_message()?));
                 },
                 9 => {
                     if wire_type != ::protobuf::wire_format::WireTypeLengthDelimited {
                         return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
                     }
-                    self.req = ::std::option::Option::Some(CosmosRequest_oneof_req::removeStorageCell(is.read_message()?));
+                    self.req = ::std::option::Option::Some(CosmosRequest_oneof_req::insertStorageCell(is.read_message()?));
                 },
                 10 => {
                     if wire_type != ::protobuf::wire_format::WireTypeLengthDelimited {
                         return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
                     }
-                    self.req = ::std::option::Option::Some(CosmosRequest_oneof_req::removeStorage(is.read_message()?));
+                    self.req = ::std::option::Option::Some(CosmosRequest_oneof_req::remove(is.read_message()?));
                 },
                 11 => {
                     if wire_type != ::protobuf::wire_format::WireTypeLengthDelimited {
                         return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
                     }
-                    self.req = ::std::option::Option::Some(CosmosRequest_oneof_req::blockHash(is.read_message()?));
+                    self.req = ::std::option::Option::Some(CosmosRequest_oneof_req::removeStorageCell(is.read_message()?));
                 },
                 12 => {
                     if wire_type != ::protobuf::wire_format::WireTypeLengthDelimited {
                         return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
                     }
-                    self.req = ::std::option::Option::Some(CosmosRequest_oneof_req::addVerificationDetails(is.read_message()?));
+                    self.req = ::std::option::Option::Some(CosmosRequest_oneof_req::removeStorage(is.read_message()?));
                 },
                 13 => {
                     if wire_type != ::protobuf::wire_format::WireTypeLengthDelimited {
                         return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
                     }
-                    self.req = ::std::option::Option::Some(CosmosRequest_oneof_req::hasVerification(is.read_message()?));
+                    self.req = ::std::option::Option::Some(CosmosRequest_oneof_req::blockHash(is.read_message()?));
                 },
                 14 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeLengthDelimited {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    self.req = ::std::option::Option::Some(CosmosRequest_oneof_req::addVerificationDetails(is.read_message()?));
+                },
+                15 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeLengthDelimited {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    self.req = ::std::option::Option::Some(CosmosRequest_oneof_req::hasVerification(is.read_message()?));
+                },
+                16 => {
                     if wire_type != ::protobuf::wire_format::WireTypeLengthDelimited {
                         return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
                     }
@@ -8705,6 +9496,14 @@ impl ::protobuf::Message for CosmosRequest {
                     let len = v.compute_size();
                     my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
                 },
+                &CosmosRequest_oneof_req::codeHash(ref v) => {
+                    let len = v.compute_size();
+                    my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
+                },
+                &CosmosRequest_oneof_req::codeSize(ref v) => {
+                    let len = v.compute_size();
+                    my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
+                },
                 &CosmosRequest_oneof_req::storageCell(ref v) => {
                     let len = v.compute_size();
                     my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
@@ -8743,7 +9542,7 @@ impl ::protobuf::Message for CosmosRequest {
                 },
                 &CosmosRequest_oneof_req::getVerificationData(ref v) => {
                     let len = v.compute_size();
-                    my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
+                    my_size += 2 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
                 },
             };
         }
@@ -8775,53 +9574,63 @@ impl ::protobuf::Message for CosmosRequest {
                     os.write_raw_varint32(v.get_cached_size())?;
                     v.write_to_with_cached_sizes(os)?;
                 },
-                &CosmosRequest_oneof_req::storageCell(ref v) => {
+                &CosmosRequest_oneof_req::codeHash(ref v) => {
                     os.write_tag(5, ::protobuf::wire_format::WireTypeLengthDelimited)?;
                     os.write_raw_varint32(v.get_cached_size())?;
                     v.write_to_with_cached_sizes(os)?;
                 },
-                &CosmosRequest_oneof_req::insertAccountCode(ref v) => {
+                &CosmosRequest_oneof_req::codeSize(ref v) => {
                     os.write_tag(6, ::protobuf::wire_format::WireTypeLengthDelimited)?;
                     os.write_raw_varint32(v.get_cached_size())?;
                     v.write_to_with_cached_sizes(os)?;
                 },
-                &CosmosRequest_oneof_req::insertStorageCell(ref v) => {
+                &CosmosRequest_oneof_req::storageCell(ref v) => {
                     os.write_tag(7, ::protobuf::wire_format::WireTypeLengthDelimited)?;
                     os.write_raw_varint32(v.get_cached_size())?;
                     v.write_to_with_cached_sizes(os)?;
                 },
-                &CosmosRequest_oneof_req::remove(ref v) => {
+                &CosmosRequest_oneof_req::insertAccountCode(ref v) => {
                     os.write_tag(8, ::protobuf::wire_format::WireTypeLengthDelimited)?;
                     os.write_raw_varint32(v.get_cached_size())?;
                     v.write_to_with_cached_sizes(os)?;
                 },
-                &CosmosRequest_oneof_req::removeStorageCell(ref v) => {
+                &CosmosRequest_oneof_req::insertStorageCell(ref v) => {
                     os.write_tag(9, ::protobuf::wire_format::WireTypeLengthDelimited)?;
                     os.write_raw_varint32(v.get_cached_size())?;
                     v.write_to_with_cached_sizes(os)?;
                 },
-                &CosmosRequest_oneof_req::removeStorage(ref v) => {
+                &CosmosRequest_oneof_req::remove(ref v) => {
                     os.write_tag(10, ::protobuf::wire_format::WireTypeLengthDelimited)?;
                     os.write_raw_varint32(v.get_cached_size())?;
                     v.write_to_with_cached_sizes(os)?;
                 },
-                &CosmosRequest_oneof_req::blockHash(ref v) => {
+                &CosmosRequest_oneof_req::removeStorageCell(ref v) => {
                     os.write_tag(11, ::protobuf::wire_format::WireTypeLengthDelimited)?;
                     os.write_raw_varint32(v.get_cached_size())?;
                     v.write_to_with_cached_sizes(os)?;
                 },
-                &CosmosRequest_oneof_req::addVerificationDetails(ref v) => {
+                &CosmosRequest_oneof_req::removeStorage(ref v) => {
                     os.write_tag(12, ::protobuf::wire_format::WireTypeLengthDelimited)?;
                     os.write_raw_varint32(v.get_cached_size())?;
                     v.write_to_with_cached_sizes(os)?;
                 },
-                &CosmosRequest_oneof_req::hasVerification(ref v) => {
+                &CosmosRequest_oneof_req::blockHash(ref v) => {
                     os.write_tag(13, ::protobuf::wire_format::WireTypeLengthDelimited)?;
                     os.write_raw_varint32(v.get_cached_size())?;
                     v.write_to_with_cached_sizes(os)?;
                 },
-                &CosmosRequest_oneof_req::getVerificationData(ref v) => {
+                &CosmosRequest_oneof_req::addVerificationDetails(ref v) => {
                     os.write_tag(14, ::protobuf::wire_format::WireTypeLengthDelimited)?;
+                    os.write_raw_varint32(v.get_cached_size())?;
+                    v.write_to_with_cached_sizes(os)?;
+                },
+                &CosmosRequest_oneof_req::hasVerification(ref v) => {
+                    os.write_tag(15, ::protobuf::wire_format::WireTypeLengthDelimited)?;
+                    os.write_raw_varint32(v.get_cached_size())?;
+                    v.write_to_with_cached_sizes(os)?;
+                },
+                &CosmosRequest_oneof_req::getVerificationData(ref v) => {
+                    os.write_tag(16, ::protobuf::wire_format::WireTypeLengthDelimited)?;
                     os.write_raw_varint32(v.get_cached_size())?;
                     v.write_to_with_cached_sizes(os)?;
                 },
@@ -8888,6 +9697,16 @@ impl ::protobuf::Message for CosmosRequest {
                     "accountCode",
                     CosmosRequest::has_accountCode,
                     CosmosRequest::get_accountCode,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_singular_message_accessor::<_, QueryGetAccountCodeHash>(
+                    "codeHash",
+                    CosmosRequest::has_codeHash,
+                    CosmosRequest::get_codeHash,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_singular_message_accessor::<_, QueryGetAccountCodeSize>(
+                    "codeSize",
+                    CosmosRequest::has_codeSize,
+                    CosmosRequest::get_codeSize,
                 ));
                 fields.push(::protobuf::reflect::accessor::make_singular_message_accessor::<_, QueryGetAccountStorageCell>(
                     "storageCell",
@@ -8961,6 +9780,8 @@ impl ::protobuf::Message for CosmosRequest {
 
 impl ::protobuf::Clear for CosmosRequest {
     fn clear(&mut self) {
+        self.req = ::std::option::Option::None;
+        self.req = ::std::option::Option::None;
         self.req = ::std::option::Option::None;
         self.req = ::std::option::Option::None;
         self.req = ::std::option::Option::None;
@@ -11516,117 +12337,124 @@ static file_descriptor_proto_data: &'static [u8] = b"\
     \x0cR\x05index\":\n\"QueryGetAccountStorageCellResponse\x12\x14\n\x05val\
     ue\x18\x01\x20\x01(\x0cR\x05value\"/\n\x13QueryGetAccountCode\x12\x18\n\
     \x07address\x18\x01\x20\x01(\x0cR\x07address\"1\n\x1bQueryGetAccountCode\
-    Response\x12\x12\n\x04code\x18\x01\x20\x01(\x0cR\x04code\"F\n\x16QueryIn\
-    sertAccountCode\x12\x18\n\x07address\x18\x01\x20\x01(\x0cR\x07address\
-    \x12\x12\n\x04code\x18\x02\x20\x01(\x0cR\x04code\"\x20\n\x1eQueryInsertA\
-    ccountCodeResponse\"^\n\x16QueryInsertStorageCell\x12\x18\n\x07address\
-    \x18\x01\x20\x01(\x0cR\x07address\x12\x14\n\x05index\x18\x02\x20\x01(\
-    \x0cR\x05index\x12\x14\n\x05value\x18\x03\x20\x01(\x0cR\x05value\"\x20\n\
-    \x1eQueryInsertStorageCellResponse\"'\n\x0bQueryRemove\x12\x18\n\x07addr\
-    ess\x18\x01\x20\x01(\x0cR\x07address\"\x15\n\x13QueryRemoveResponse\"H\n\
-    \x16QueryRemoveStorageCell\x12\x18\n\x07address\x18\x01\x20\x01(\x0cR\
-    \x07address\x12\x14\n\x05index\x18\x02\x20\x01(\x0cR\x05index\"\x20\n\
-    \x1eQueryRemoveStorageCellResponse\".\n\x12QueryRemoveStorage\x12\x18\n\
-    \x07address\x18\x01\x20\x01(\x0cR\x07address\"\x1c\n\x1aQueryRemoveStora\
-    geResponse\"(\n\x0eQueryBlockHash\x12\x16\n\x06number\x18\x01\x20\x01(\
-    \x0cR\x06number\",\n\x16QueryBlockHashResponse\x12\x12\n\x04hash\x18\x01\
-    \x20\x01(\x0cR\x04hash\"\x97\x03\n\x1bQueryAddVerificationDetails\x12\
-    \x20\n\x0buserAddress\x18\x01\x20\x01(\x0cR\x0buserAddress\x12$\n\rissue\
-    rAddress\x18\x02\x20\x01(\x0cR\rissuerAddress\x12\x20\n\x0boriginChain\
-    \x18\x03\x20\x01(\tR\x0boriginChain\x12*\n\x10verificationType\x18\x04\
-    \x20\x01(\rR\x10verificationType\x12,\n\x11issuanceTimestamp\x18\x05\x20\
-    \x01(\rR\x11issuanceTimestamp\x120\n\x13expirationTimestamp\x18\x06\x20\
-    \x01(\rR\x13expirationTimestamp\x12\x1c\n\tproofData\x18\x07\x20\x01(\
-    \x0cR\tproofData\x12\x16\n\x06schema\x18\x08\x20\x01(\tR\x06schema\x122\
-    \n\x14issuerVerificationId\x18\t\x20\x01(\tR\x14issuerVerificationId\x12\
-    \x18\n\x07version\x18\n\x20\x01(\rR\x07version\"M\n#QueryAddVerification\
-    DetailsResponse\x12&\n\x0everificationId\x18\x01\x20\x01(\x0cR\x0everifi\
-    cationId\"\xbe\x01\n\x14QueryHasVerification\x12\x20\n\x0buserAddress\
-    \x18\x01\x20\x01(\x0cR\x0buserAddress\x12*\n\x10verificationType\x18\x02\
-    \x20\x01(\rR\x10verificationType\x120\n\x13expirationTimestamp\x18\x03\
-    \x20\x01(\rR\x13expirationTimestamp\x12&\n\x0eallowedIssuers\x18\x04\x20\
-    \x03(\x0cR\x0eallowedIssuers\"H\n\x1cQueryHasVerificationResponse\x12(\n\
-    \x0fhasVerification\x18\x01\x20\x01(\x08R\x0fhasVerification\"b\n\x18Que\
-    ryGetVerificationData\x12\x20\n\x0buserAddress\x18\x01\x20\x01(\x0cR\x0b\
-    userAddress\x12$\n\rissuerAddress\x18\x02\x20\x01(\x0cR\rissuerAddress\"\
-    \x9b\x03\n\x13VerificationDetails\x12*\n\x10verificationType\x18\x01\x20\
-    \x01(\rR\x10verificationType\x12&\n\x0everificationID\x18\x02\x20\x01(\
-    \x0cR\x0everificationID\x12$\n\rissuerAddress\x18\x03\x20\x01(\x0cR\riss\
-    uerAddress\x12\x20\n\x0boriginChain\x18\x04\x20\x01(\tR\x0boriginChain\
-    \x12,\n\x11issuanceTimestamp\x18\x05\x20\x01(\rR\x11issuanceTimestamp\
-    \x120\n\x13expirationTimestamp\x18\x06\x20\x01(\rR\x13expirationTimestam\
-    p\x12\"\n\x0coriginalData\x18\x07\x20\x01(\x0cR\x0coriginalData\x12\x16\
-    \n\x06schema\x18\x08\x20\x01(\tR\x06schema\x122\n\x14issuerVerificationI\
-    d\x18\t\x20\x01(\tR\x14issuerVerificationId\x12\x18\n\x07version\x18\n\
-    \x20\x01(\rR\x07version\"T\n\x20QueryGetVerificationDataResponse\x120\n\
-    \x04data\x18\x01\x20\x03(\x0b2\x1c.ffi.ffi.VerificationDetailsR\x04data\
-    \"\x84\x08\n\rCosmosRequest\x12:\n\ngetAccount\x18\x01\x20\x01(\x0b2\x18\
-    .ffi.ffi.QueryGetAccountH\0R\ngetAccount\x12C\n\rinsertAccount\x18\x02\
-    \x20\x01(\x0b2\x1b.ffi.ffi.QueryInsertAccountH\0R\rinsertAccount\x12=\n\
-    \x0bcontainsKey\x18\x03\x20\x01(\x0b2\x19.ffi.ffi.QueryContainsKeyH\0R\
-    \x0bcontainsKey\x12@\n\x0baccountCode\x18\x04\x20\x01(\x0b2\x1c.ffi.ffi.\
-    QueryGetAccountCodeH\0R\x0baccountCode\x12G\n\x0bstorageCell\x18\x05\x20\
-    \x01(\x0b2#.ffi.ffi.QueryGetAccountStorageCellH\0R\x0bstorageCell\x12O\n\
-    \x11insertAccountCode\x18\x06\x20\x01(\x0b2\x1f.ffi.ffi.QueryInsertAccou\
-    ntCodeH\0R\x11insertAccountCode\x12O\n\x11insertStorageCell\x18\x07\x20\
-    \x01(\x0b2\x1f.ffi.ffi.QueryInsertStorageCellH\0R\x11insertStorageCell\
-    \x12.\n\x06remove\x18\x08\x20\x01(\x0b2\x14.ffi.ffi.QueryRemoveH\0R\x06r\
-    emove\x12O\n\x11removeStorageCell\x18\t\x20\x01(\x0b2\x1f.ffi.ffi.QueryR\
-    emoveStorageCellH\0R\x11removeStorageCell\x12C\n\rremoveStorage\x18\n\
-    \x20\x01(\x0b2\x1b.ffi.ffi.QueryRemoveStorageH\0R\rremoveStorage\x127\n\
-    \tblockHash\x18\x0b\x20\x01(\x0b2\x17.ffi.ffi.QueryBlockHashH\0R\tblockH\
-    ash\x12^\n\x16addVerificationDetails\x18\x0c\x20\x01(\x0b2$.ffi.ffi.Quer\
-    yAddVerificationDetailsH\0R\x16addVerificationDetails\x12I\n\x0fhasVerif\
-    ication\x18\r\x20\x01(\x0b2\x1d.ffi.ffi.QueryHasVerificationH\0R\x0fhasV\
-    erification\x12U\n\x13getVerificationData\x18\x0e\x20\x01(\x0b2!.ffi.ffi\
-    .QueryGetVerificationDataH\0R\x13getVerificationDataB\x05\n\x03req\"\x84\
-    \x02\n\x0fSGXVMCallParams\x12\x12\n\x04from\x18\x01\x20\x01(\x0cR\x04fro\
-    m\x12\x0e\n\x02to\x18\x02\x20\x01(\x0cR\x02to\x12\x12\n\x04data\x18\x03\
-    \x20\x01(\x0cR\x04data\x12\x1a\n\x08gasLimit\x18\x04\x20\x01(\x04R\x08ga\
-    sLimit\x12\x14\n\x05value\x18\x05\x20\x01(\x0cR\x05value\x127\n\naccessL\
-    ist\x18\x06\x20\x03(\x0b2\x17.ffi.ffi.AccessListItemR\naccessList\x12\
-    \x16\n\x06commit\x18\x07\x20\x01(\x08R\x06commit\x12\x14\n\x05nonce\x18\
-    \x08\x20\x01(\x04R\x05nonce\x12\x20\n\x0bunencrypted\x18\t\x20\x01(\x08R\
-    \x0bunencrypted\"\xd4\x01\n\x11SGXVMCreateParams\x12\x12\n\x04from\x18\
-    \x01\x20\x01(\x0cR\x04from\x12\x12\n\x04data\x18\x02\x20\x01(\x0cR\x04da\
-    ta\x12\x1a\n\x08gasLimit\x18\x03\x20\x01(\x04R\x08gasLimit\x12\x14\n\x05\
-    value\x18\x04\x20\x01(\x0cR\x05value\x127\n\naccessList\x18\x05\x20\x03(\
-    \x0b2\x17.ffi.ffi.AccessListItemR\naccessList\x12\x16\n\x06commit\x18\
-    \x06\x20\x01(\x08R\x06commit\x12\x14\n\x05nonce\x18\x07\x20\x01(\x04R\
-    \x05nonce\"{\n\x10SGXVMCallRequest\x120\n\x06params\x18\x01\x20\x01(\x0b\
-    2\x18.ffi.ffi.SGXVMCallParamsR\x06params\x125\n\x07context\x18\x02\x20\
-    \x01(\x0b2\x1b.ffi.ffi.TransactionContextR\x07context\"\x7f\n\x12SGXVMCr\
-    eateRequest\x122\n\x06params\x18\x01\x20\x01(\x0b2\x1a.ffi.ffi.SGXVMCrea\
-    teParamsR\x06params\x125\n\x07context\x18\x02\x20\x01(\x0b2\x1b.ffi.ffi.\
-    TransactionContextR\x07context\"8\n\x14NodePublicKeyRequest\x12\x20\n\
-    \x0bblockNumber\x18\x01\x20\x01(\x04R\x0bblockNumber\"5\n\x15NodePublicK\
-    eyResponse\x12\x1c\n\tpublicKey\x18\x01\x20\x01(\x0cR\tpublicKey\"y\n\tE\
-    pochData\x12\x20\n\x0bepochNumber\x18\x01\x20\x01(\rR\x0bepochNumber\x12\
-    $\n\rstartingBlock\x18\x02\x20\x01(\x04R\rstartingBlock\x12$\n\rnodePubl\
-    icKey\x18\x03\x20\x01(\x0cR\rnodePublicKey\"@\n\x12ListEpochsResponse\
-    \x12*\n\x06epochs\x18\x01\x20\x03(\x0b2\x12.ffi.ffi.EpochDataR\x06epochs\
-    \"\xe4\x01\n\nFFIRequest\x12=\n\x0bcallRequest\x18\x01\x20\x01(\x0b2\x19\
-    .ffi.ffi.SGXVMCallRequestH\0R\x0bcallRequest\x12C\n\rcreateRequest\x18\
-    \x02\x20\x01(\x0b2\x1b.ffi.ffi.SGXVMCreateRequestH\0R\rcreateRequest\x12\
-    K\n\x10publicKeyRequest\x18\x03\x20\x01(\x0b2\x1d.ffi.ffi.NodePublicKeyR\
-    equestH\0R\x10publicKeyRequestB\x05\n\x03reqB&Z$github.com/SigmaGmbH/lib\
-    rustgo/typesJ\xf1N\n\x07\x12\x05\0\0\x93\x02\x01\n\x08\n\x01\x0c\x12\x03\
-    \0\0\x12\n\x08\n\x01\x02\x12\x03\x02\0\x10\n\x08\n\x01\x08\x12\x03\x04\0\
-    ;\n\t\n\x02\x08\x0b\x12\x03\x04\0;\n\x1d\n\x02\x04\0\x12\x04\x08\0\x0b\
-    \x012\x11\x20General\x20request\n\n\n\n\x03\x04\0\x01\x12\x03\x08\x08\
-    \x16\n\x0b\n\x04\x04\0\x02\0\x12\x03\t\x02!\n\x0c\n\x05\x04\0\x02\0\x04\
-    \x12\x03\t\x02\n\n\x0c\n\x05\x04\0\x02\0\x05\x12\x03\t\x0b\x10\n\x0c\n\
-    \x05\x04\0\x02\0\x01\x12\x03\t\x11\x1c\n\x0c\n\x05\x04\0\x02\0\x03\x12\
-    \x03\t\x1f\x20\n\x0b\n\x04\x04\0\x02\x01\x12\x03\n\x02\x14\n\x0c\n\x05\
-    \x04\0\x02\x01\x05\x12\x03\n\x02\x07\n\x0c\n\x05\x04\0\x02\x01\x01\x12\
-    \x03\n\x08\x0f\n\x0c\n\x05\x04\0\x02\x01\x03\x12\x03\n\x12\x13\n\n\n\x02\
-    \x04\x01\x12\x04\r\0\x14\x01\n\n\n\x03\x04\x01\x01\x12\x03\r\x08\x17\n\
-    \x0b\n\x04\x04\x01\x02\0\x12\x03\x0e\x02\x11\n\x0c\n\x05\x04\x01\x02\0\
-    \x05\x12\x03\x0e\x02\x07\n\x0c\n\x05\x04\x01\x02\0\x01\x12\x03\x0e\x08\
-    \x0c\n\x0c\n\x05\x04\x01\x02\0\x03\x12\x03\x0e\x0f\x10\n\x0b\n\x04\x04\
-    \x01\x02\x01\x12\x03\x0f\x02\x0f\n\x0c\n\x05\x04\x01\x02\x01\x05\x12\x03\
-    \x0f\x02\x07\n\x0c\n\x05\x04\x01\x02\x01\x01\x12\x03\x0f\x08\n\n\x0c\n\
-    \x05\x04\x01\x02\x01\x03\x12\x03\x0f\r\x0e\n\x0b\n\x04\x04\x01\x02\x02\
+    Response\x12\x12\n\x04code\x18\x01\x20\x01(\x0cR\x04code\"3\n\x17QueryGe\
+    tAccountCodeSize\x12\x18\n\x07address\x18\x01\x20\x01(\x0cR\x07address\"\
+    5\n\x1fQueryGetAccountCodeSizeResponse\x12\x12\n\x04size\x18\x01\x20\x01\
+    (\rR\x04size\"3\n\x17QueryGetAccountCodeHash\x12\x18\n\x07address\x18\
+    \x01\x20\x01(\x0cR\x07address\"5\n\x1fQueryGetAccountCodeHashResponse\
+    \x12\x12\n\x04hash\x18\x01\x20\x01(\x0cR\x04hash\"F\n\x16QueryInsertAcco\
+    untCode\x12\x18\n\x07address\x18\x01\x20\x01(\x0cR\x07address\x12\x12\n\
+    \x04code\x18\x02\x20\x01(\x0cR\x04code\"\x20\n\x1eQueryInsertAccountCode\
+    Response\"^\n\x16QueryInsertStorageCell\x12\x18\n\x07address\x18\x01\x20\
+    \x01(\x0cR\x07address\x12\x14\n\x05index\x18\x02\x20\x01(\x0cR\x05index\
+    \x12\x14\n\x05value\x18\x03\x20\x01(\x0cR\x05value\"\x20\n\x1eQueryInser\
+    tStorageCellResponse\"'\n\x0bQueryRemove\x12\x18\n\x07address\x18\x01\
+    \x20\x01(\x0cR\x07address\"\x15\n\x13QueryRemoveResponse\"H\n\x16QueryRe\
+    moveStorageCell\x12\x18\n\x07address\x18\x01\x20\x01(\x0cR\x07address\
+    \x12\x14\n\x05index\x18\x02\x20\x01(\x0cR\x05index\"\x20\n\x1eQueryRemov\
+    eStorageCellResponse\".\n\x12QueryRemoveStorage\x12\x18\n\x07address\x18\
+    \x01\x20\x01(\x0cR\x07address\"\x1c\n\x1aQueryRemoveStorageResponse\"(\n\
+    \x0eQueryBlockHash\x12\x16\n\x06number\x18\x01\x20\x01(\x0cR\x06number\"\
+    ,\n\x16QueryBlockHashResponse\x12\x12\n\x04hash\x18\x01\x20\x01(\x0cR\
+    \x04hash\"\x97\x03\n\x1bQueryAddVerificationDetails\x12\x20\n\x0buserAdd\
+    ress\x18\x01\x20\x01(\x0cR\x0buserAddress\x12$\n\rissuerAddress\x18\x02\
+    \x20\x01(\x0cR\rissuerAddress\x12\x20\n\x0boriginChain\x18\x03\x20\x01(\
+    \tR\x0boriginChain\x12*\n\x10verificationType\x18\x04\x20\x01(\rR\x10ver\
+    ificationType\x12,\n\x11issuanceTimestamp\x18\x05\x20\x01(\rR\x11issuanc\
+    eTimestamp\x120\n\x13expirationTimestamp\x18\x06\x20\x01(\rR\x13expirati\
+    onTimestamp\x12\x1c\n\tproofData\x18\x07\x20\x01(\x0cR\tproofData\x12\
+    \x16\n\x06schema\x18\x08\x20\x01(\tR\x06schema\x122\n\x14issuerVerificat\
+    ionId\x18\t\x20\x01(\tR\x14issuerVerificationId\x12\x18\n\x07version\x18\
+    \n\x20\x01(\rR\x07version\"M\n#QueryAddVerificationDetailsResponse\x12&\
+    \n\x0everificationId\x18\x01\x20\x01(\x0cR\x0everificationId\"\xbe\x01\n\
+    \x14QueryHasVerification\x12\x20\n\x0buserAddress\x18\x01\x20\x01(\x0cR\
+    \x0buserAddress\x12*\n\x10verificationType\x18\x02\x20\x01(\rR\x10verifi\
+    cationType\x120\n\x13expirationTimestamp\x18\x03\x20\x01(\rR\x13expirati\
+    onTimestamp\x12&\n\x0eallowedIssuers\x18\x04\x20\x03(\x0cR\x0eallowedIss\
+    uers\"H\n\x1cQueryHasVerificationResponse\x12(\n\x0fhasVerification\x18\
+    \x01\x20\x01(\x08R\x0fhasVerification\"b\n\x18QueryGetVerificationData\
+    \x12\x20\n\x0buserAddress\x18\x01\x20\x01(\x0cR\x0buserAddress\x12$\n\ri\
+    ssuerAddress\x18\x02\x20\x01(\x0cR\rissuerAddress\"\x9b\x03\n\x13Verific\
+    ationDetails\x12*\n\x10verificationType\x18\x01\x20\x01(\rR\x10verificat\
+    ionType\x12&\n\x0everificationID\x18\x02\x20\x01(\x0cR\x0everificationID\
+    \x12$\n\rissuerAddress\x18\x03\x20\x01(\x0cR\rissuerAddress\x12\x20\n\
+    \x0boriginChain\x18\x04\x20\x01(\tR\x0boriginChain\x12,\n\x11issuanceTim\
+    estamp\x18\x05\x20\x01(\rR\x11issuanceTimestamp\x120\n\x13expirationTime\
+    stamp\x18\x06\x20\x01(\rR\x13expirationTimestamp\x12\"\n\x0coriginalData\
+    \x18\x07\x20\x01(\x0cR\x0coriginalData\x12\x16\n\x06schema\x18\x08\x20\
+    \x01(\tR\x06schema\x122\n\x14issuerVerificationId\x18\t\x20\x01(\tR\x14i\
+    ssuerVerificationId\x12\x18\n\x07version\x18\n\x20\x01(\rR\x07version\"T\
+    \n\x20QueryGetVerificationDataResponse\x120\n\x04data\x18\x01\x20\x03(\
+    \x0b2\x1c.ffi.ffi.VerificationDetailsR\x04data\"\x84\t\n\rCosmosRequest\
+    \x12:\n\ngetAccount\x18\x01\x20\x01(\x0b2\x18.ffi.ffi.QueryGetAccountH\0\
+    R\ngetAccount\x12C\n\rinsertAccount\x18\x02\x20\x01(\x0b2\x1b.ffi.ffi.Qu\
+    eryInsertAccountH\0R\rinsertAccount\x12=\n\x0bcontainsKey\x18\x03\x20\
+    \x01(\x0b2\x19.ffi.ffi.QueryContainsKeyH\0R\x0bcontainsKey\x12@\n\x0bacc\
+    ountCode\x18\x04\x20\x01(\x0b2\x1c.ffi.ffi.QueryGetAccountCodeH\0R\x0bac\
+    countCode\x12>\n\x08codeHash\x18\x05\x20\x01(\x0b2\x20.ffi.ffi.QueryGetA\
+    ccountCodeHashH\0R\x08codeHash\x12>\n\x08codeSize\x18\x06\x20\x01(\x0b2\
+    \x20.ffi.ffi.QueryGetAccountCodeSizeH\0R\x08codeSize\x12G\n\x0bstorageCe\
+    ll\x18\x07\x20\x01(\x0b2#.ffi.ffi.QueryGetAccountStorageCellH\0R\x0bstor\
+    ageCell\x12O\n\x11insertAccountCode\x18\x08\x20\x01(\x0b2\x1f.ffi.ffi.Qu\
+    eryInsertAccountCodeH\0R\x11insertAccountCode\x12O\n\x11insertStorageCel\
+    l\x18\t\x20\x01(\x0b2\x1f.ffi.ffi.QueryInsertStorageCellH\0R\x11insertSt\
+    orageCell\x12.\n\x06remove\x18\n\x20\x01(\x0b2\x14.ffi.ffi.QueryRemoveH\
+    \0R\x06remove\x12O\n\x11removeStorageCell\x18\x0b\x20\x01(\x0b2\x1f.ffi.\
+    ffi.QueryRemoveStorageCellH\0R\x11removeStorageCell\x12C\n\rremoveStorag\
+    e\x18\x0c\x20\x01(\x0b2\x1b.ffi.ffi.QueryRemoveStorageH\0R\rremoveStorag\
+    e\x127\n\tblockHash\x18\r\x20\x01(\x0b2\x17.ffi.ffi.QueryBlockHashH\0R\t\
+    blockHash\x12^\n\x16addVerificationDetails\x18\x0e\x20\x01(\x0b2$.ffi.ff\
+    i.QueryAddVerificationDetailsH\0R\x16addVerificationDetails\x12I\n\x0fha\
+    sVerification\x18\x0f\x20\x01(\x0b2\x1d.ffi.ffi.QueryHasVerificationH\0R\
+    \x0fhasVerification\x12U\n\x13getVerificationData\x18\x10\x20\x01(\x0b2!\
+    .ffi.ffi.QueryGetVerificationDataH\0R\x13getVerificationDataB\x05\n\x03r\
+    eq\"\x84\x02\n\x0fSGXVMCallParams\x12\x12\n\x04from\x18\x01\x20\x01(\x0c\
+    R\x04from\x12\x0e\n\x02to\x18\x02\x20\x01(\x0cR\x02to\x12\x12\n\x04data\
+    \x18\x03\x20\x01(\x0cR\x04data\x12\x1a\n\x08gasLimit\x18\x04\x20\x01(\
+    \x04R\x08gasLimit\x12\x14\n\x05value\x18\x05\x20\x01(\x0cR\x05value\x127\
+    \n\naccessList\x18\x06\x20\x03(\x0b2\x17.ffi.ffi.AccessListItemR\naccess\
+    List\x12\x16\n\x06commit\x18\x07\x20\x01(\x08R\x06commit\x12\x14\n\x05no\
+    nce\x18\x08\x20\x01(\x04R\x05nonce\x12\x20\n\x0bunencrypted\x18\t\x20\
+    \x01(\x08R\x0bunencrypted\"\xd4\x01\n\x11SGXVMCreateParams\x12\x12\n\x04\
+    from\x18\x01\x20\x01(\x0cR\x04from\x12\x12\n\x04data\x18\x02\x20\x01(\
+    \x0cR\x04data\x12\x1a\n\x08gasLimit\x18\x03\x20\x01(\x04R\x08gasLimit\
+    \x12\x14\n\x05value\x18\x04\x20\x01(\x0cR\x05value\x127\n\naccessList\
+    \x18\x05\x20\x03(\x0b2\x17.ffi.ffi.AccessListItemR\naccessList\x12\x16\n\
+    \x06commit\x18\x06\x20\x01(\x08R\x06commit\x12\x14\n\x05nonce\x18\x07\
+    \x20\x01(\x04R\x05nonce\"{\n\x10SGXVMCallRequest\x120\n\x06params\x18\
+    \x01\x20\x01(\x0b2\x18.ffi.ffi.SGXVMCallParamsR\x06params\x125\n\x07cont\
+    ext\x18\x02\x20\x01(\x0b2\x1b.ffi.ffi.TransactionContextR\x07context\"\
+    \x7f\n\x12SGXVMCreateRequest\x122\n\x06params\x18\x01\x20\x01(\x0b2\x1a.\
+    ffi.ffi.SGXVMCreateParamsR\x06params\x125\n\x07context\x18\x02\x20\x01(\
+    \x0b2\x1b.ffi.ffi.TransactionContextR\x07context\"8\n\x14NodePublicKeyRe\
+    quest\x12\x20\n\x0bblockNumber\x18\x01\x20\x01(\x04R\x0bblockNumber\"5\n\
+    \x15NodePublicKeyResponse\x12\x1c\n\tpublicKey\x18\x01\x20\x01(\x0cR\tpu\
+    blicKey\"y\n\tEpochData\x12\x20\n\x0bepochNumber\x18\x01\x20\x01(\rR\x0b\
+    epochNumber\x12$\n\rstartingBlock\x18\x02\x20\x01(\x04R\rstartingBlock\
+    \x12$\n\rnodePublicKey\x18\x03\x20\x01(\x0cR\rnodePublicKey\"@\n\x12List\
+    EpochsResponse\x12*\n\x06epochs\x18\x01\x20\x03(\x0b2\x12.ffi.ffi.EpochD\
+    ataR\x06epochs\"\xe4\x01\n\nFFIRequest\x12=\n\x0bcallRequest\x18\x01\x20\
+    \x01(\x0b2\x19.ffi.ffi.SGXVMCallRequestH\0R\x0bcallRequest\x12C\n\rcreat\
+    eRequest\x18\x02\x20\x01(\x0b2\x1b.ffi.ffi.SGXVMCreateRequestH\0R\rcreat\
+    eRequest\x12K\n\x10publicKeyRequest\x18\x03\x20\x01(\x0b2\x1d.ffi.ffi.No\
+    dePublicKeyRequestH\0R\x10publicKeyRequestB\x05\n\x03reqB&Z$github.com/S\
+    igmaGmbH/librustgo/typesJ\xacR\n\x07\x12\x05\0\0\x9b\x02\x01\n\x08\n\x01\
+    \x0c\x12\x03\0\0\x12\n\x08\n\x01\x02\x12\x03\x02\0\x10\n\x08\n\x01\x08\
+    \x12\x03\x04\0;\n\t\n\x02\x08\x0b\x12\x03\x04\0;\n\x1d\n\x02\x04\0\x12\
+    \x04\x08\0\x0b\x012\x11\x20General\x20request\n\n\n\n\x03\x04\0\x01\x12\
+    \x03\x08\x08\x16\n\x0b\n\x04\x04\0\x02\0\x12\x03\t\x02!\n\x0c\n\x05\x04\
+    \0\x02\0\x04\x12\x03\t\x02\n\n\x0c\n\x05\x04\0\x02\0\x05\x12\x03\t\x0b\
+    \x10\n\x0c\n\x05\x04\0\x02\0\x01\x12\x03\t\x11\x1c\n\x0c\n\x05\x04\0\x02\
+    \0\x03\x12\x03\t\x1f\x20\n\x0b\n\x04\x04\0\x02\x01\x12\x03\n\x02\x14\n\
+    \x0c\n\x05\x04\0\x02\x01\x05\x12\x03\n\x02\x07\n\x0c\n\x05\x04\0\x02\x01\
+    \x01\x12\x03\n\x08\x0f\n\x0c\n\x05\x04\0\x02\x01\x03\x12\x03\n\x12\x13\n\
+    \n\n\x02\x04\x01\x12\x04\r\0\x14\x01\n\n\n\x03\x04\x01\x01\x12\x03\r\x08\
+    \x17\n\x0b\n\x04\x04\x01\x02\0\x12\x03\x0e\x02\x11\n\x0c\n\x05\x04\x01\
+    \x02\0\x05\x12\x03\x0e\x02\x07\n\x0c\n\x05\x04\x01\x02\0\x01\x12\x03\x0e\
+    \x08\x0c\n\x0c\n\x05\x04\x01\x02\0\x03\x12\x03\x0e\x0f\x10\n\x0b\n\x04\
+    \x04\x01\x02\x01\x12\x03\x0f\x02\x0f\n\x0c\n\x05\x04\x01\x02\x01\x05\x12\
+    \x03\x0f\x02\x07\n\x0c\n\x05\x04\x01\x02\x01\x01\x12\x03\x0f\x08\n\n\x0c\
+    \n\x05\x04\x01\x02\x01\x03\x12\x03\x0f\r\x0e\n\x0b\n\x04\x04\x01\x02\x02\
     \x12\x03\x10\x02\x11\n\x0c\n\x05\x04\x01\x02\x02\x05\x12\x03\x10\x02\x07\
     \n\x0c\n\x05\x04\x01\x02\x02\x01\x12\x03\x10\x08\x0c\n\x0c\n\x05\x04\x01\
     \x02\x02\x03\x12\x03\x10\x0f\x10\n\x0b\n\x04\x04\x01\x02\x03\x12\x03\x11\
@@ -11752,296 +12580,312 @@ static file_descriptor_proto_data: &'static [u8] = b"\
     \x04\x0f\x02\0\x03\x12\x03e./\n\t\n\x02\x04\x10\x12\x03g\07\n\n\n\x03\
     \x04\x10\x01\x12\x03g\x08#\n\x0b\n\x04\x04\x10\x02\0\x12\x03g&5\n\x0c\n\
     \x05\x04\x10\x02\0\x05\x12\x03g&+\n\x0c\n\x05\x04\x10\x02\0\x01\x12\x03g\
-    ,0\n\x0c\n\x05\x04\x10\x02\0\x03\x12\x03g34\n\n\n\x02\x04\x11\x12\x04i\0\
-    l\x01\n\n\n\x03\x04\x11\x01\x12\x03i\x08\x1e\n\x0b\n\x04\x04\x11\x02\0\
-    \x12\x03j\x02\x14\n\x0c\n\x05\x04\x11\x02\0\x05\x12\x03j\x02\x07\n\x0c\n\
-    \x05\x04\x11\x02\0\x01\x12\x03j\x08\x0f\n\x0c\n\x05\x04\x11\x02\0\x03\
-    \x12\x03j\x12\x13\n\x0b\n\x04\x04\x11\x02\x01\x12\x03k\x02\x11\n\x0c\n\
-    \x05\x04\x11\x02\x01\x05\x12\x03k\x02\x07\n\x0c\n\x05\x04\x11\x02\x01\
-    \x01\x12\x03k\x08\x0c\n\x0c\n\x05\x04\x11\x02\x01\x03\x12\x03k\x0f\x10\n\
-    \t\n\x02\x04\x12\x12\x03n\0)\n\n\n\x03\x04\x12\x01\x12\x03n\x08&\n\n\n\
-    \x02\x04\x13\x12\x04p\0t\x01\n\n\n\x03\x04\x13\x01\x12\x03p\x08\x1e\n\
-    \x0b\n\x04\x04\x13\x02\0\x12\x03q\x02\x14\n\x0c\n\x05\x04\x13\x02\0\x05\
-    \x12\x03q\x02\x07\n\x0c\n\x05\x04\x13\x02\0\x01\x12\x03q\x08\x0f\n\x0c\n\
-    \x05\x04\x13\x02\0\x03\x12\x03q\x12\x13\n\x0b\n\x04\x04\x13\x02\x01\x12\
-    \x03r\x02\x12\n\x0c\n\x05\x04\x13\x02\x01\x05\x12\x03r\x02\x07\n\x0c\n\
-    \x05\x04\x13\x02\x01\x01\x12\x03r\x08\r\n\x0c\n\x05\x04\x13\x02\x01\x03\
-    \x12\x03r\x10\x11\n\x0b\n\x04\x04\x13\x02\x02\x12\x03s\x02\x12\n\x0c\n\
-    \x05\x04\x13\x02\x02\x05\x12\x03s\x02\x07\n\x0c\n\x05\x04\x13\x02\x02\
-    \x01\x12\x03s\x08\r\n\x0c\n\x05\x04\x13\x02\x02\x03\x12\x03s\x10\x11\n\t\
-    \n\x02\x04\x14\x12\x03v\0)\n\n\n\x03\x04\x14\x01\x12\x03v\x08&\n\t\n\x02\
-    \x04\x15\x12\x03x\0*\n\n\n\x03\x04\x15\x01\x12\x03x\x08\x13\n\x0b\n\x04\
-    \x04\x15\x02\0\x12\x03x\x16(\n\x0c\n\x05\x04\x15\x02\0\x05\x12\x03x\x16\
-    \x1b\n\x0c\n\x05\x04\x15\x02\0\x01\x12\x03x\x1c#\n\x0c\n\x05\x04\x15\x02\
-    \0\x03\x12\x03x&'\n\t\n\x02\x04\x16\x12\x03z\0\x1e\n\n\n\x03\x04\x16\x01\
-    \x12\x03z\x08\x1b\n\n\n\x02\x04\x17\x12\x04|\0\x7f\x01\n\n\n\x03\x04\x17\
-    \x01\x12\x03|\x08\x1e\n\x0b\n\x04\x04\x17\x02\0\x12\x03}\x02\x14\n\x0c\n\
-    \x05\x04\x17\x02\0\x05\x12\x03}\x02\x07\n\x0c\n\x05\x04\x17\x02\0\x01\
-    \x12\x03}\x08\x0f\n\x0c\n\x05\x04\x17\x02\0\x03\x12\x03}\x12\x13\n\x0b\n\
-    \x04\x04\x17\x02\x01\x12\x03~\x02\x12\n\x0c\n\x05\x04\x17\x02\x01\x05\
-    \x12\x03~\x02\x07\n\x0c\n\x05\x04\x17\x02\x01\x01\x12\x03~\x08\r\n\x0c\n\
-    \x05\x04\x17\x02\x01\x03\x12\x03~\x10\x11\n\n\n\x02\x04\x18\x12\x04\x81\
-    \x01\0)\n\x0b\n\x03\x04\x18\x01\x12\x04\x81\x01\x08&\n\n\n\x02\x04\x19\
-    \x12\x04\x83\x01\01\n\x0b\n\x03\x04\x19\x01\x12\x04\x83\x01\x08\x1a\n\
-    \x0c\n\x04\x04\x19\x02\0\x12\x04\x83\x01\x1d/\n\r\n\x05\x04\x19\x02\0\
-    \x05\x12\x04\x83\x01\x1d\"\n\r\n\x05\x04\x19\x02\0\x01\x12\x04\x83\x01#*\
-    \n\r\n\x05\x04\x19\x02\0\x03\x12\x04\x83\x01-.\n\n\n\x02\x04\x1a\x12\x04\
-    \x85\x01\0%\n\x0b\n\x03\x04\x1a\x01\x12\x04\x85\x01\x08\"\n\n\n\x02\x04\
-    \x1b\x12\x04\x87\x01\0,\n\x0b\n\x03\x04\x1b\x01\x12\x04\x87\x01\x08\x16\
-    \n\x0c\n\x04\x04\x1b\x02\0\x12\x04\x87\x01\x19*\n\r\n\x05\x04\x1b\x02\0\
-    \x05\x12\x04\x87\x01\x19\x1e\n\r\n\x05\x04\x1b\x02\0\x01\x12\x04\x87\x01\
-    \x1f%\n\r\n\x05\x04\x1b\x02\0\x03\x12\x04\x87\x01()\n\n\n\x02\x04\x1c\
-    \x12\x04\x88\x01\02\n\x0b\n\x03\x04\x1c\x01\x12\x04\x88\x01\x08\x1e\n\
-    \x0c\n\x04\x04\x1c\x02\0\x12\x04\x88\x01!0\n\r\n\x05\x04\x1c\x02\0\x05\
-    \x12\x04\x88\x01!&\n\r\n\x05\x04\x1c\x02\0\x01\x12\x04\x88\x01'+\n\r\n\
-    \x05\x04\x1c\x02\0\x03\x12\x04\x88\x01./\n\x0c\n\x02\x04\x1d\x12\x06\x8a\
-    \x01\0\x95\x01\x01\n\x0b\n\x03\x04\x1d\x01\x12\x04\x8a\x01\x08#\n\x0c\n\
-    \x04\x04\x1d\x02\0\x12\x04\x8b\x01\x02\x18\n\r\n\x05\x04\x1d\x02\0\x05\
-    \x12\x04\x8b\x01\x02\x07\n\r\n\x05\x04\x1d\x02\0\x01\x12\x04\x8b\x01\x08\
-    \x13\n\r\n\x05\x04\x1d\x02\0\x03\x12\x04\x8b\x01\x16\x17\n\x0c\n\x04\x04\
-    \x1d\x02\x01\x12\x04\x8c\x01\x02\x1a\n\r\n\x05\x04\x1d\x02\x01\x05\x12\
-    \x04\x8c\x01\x02\x07\n\r\n\x05\x04\x1d\x02\x01\x01\x12\x04\x8c\x01\x08\
-    \x15\n\r\n\x05\x04\x1d\x02\x01\x03\x12\x04\x8c\x01\x18\x19\n\x0c\n\x04\
-    \x04\x1d\x02\x02\x12\x04\x8d\x01\x02\x19\n\r\n\x05\x04\x1d\x02\x02\x05\
-    \x12\x04\x8d\x01\x02\x08\n\r\n\x05\x04\x1d\x02\x02\x01\x12\x04\x8d\x01\t\
-    \x14\n\r\n\x05\x04\x1d\x02\x02\x03\x12\x04\x8d\x01\x17\x18\n\x0c\n\x04\
-    \x04\x1d\x02\x03\x12\x04\x8e\x01\x02\x1e\n\r\n\x05\x04\x1d\x02\x03\x05\
-    \x12\x04\x8e\x01\x02\x08\n\r\n\x05\x04\x1d\x02\x03\x01\x12\x04\x8e\x01\t\
-    \x19\n\r\n\x05\x04\x1d\x02\x03\x03\x12\x04\x8e\x01\x1c\x1d\n\x0c\n\x04\
-    \x04\x1d\x02\x04\x12\x04\x8f\x01\x02\x1f\n\r\n\x05\x04\x1d\x02\x04\x05\
-    \x12\x04\x8f\x01\x02\x08\n\r\n\x05\x04\x1d\x02\x04\x01\x12\x04\x8f\x01\t\
-    \x1a\n\r\n\x05\x04\x1d\x02\x04\x03\x12\x04\x8f\x01\x1d\x1e\n\x0c\n\x04\
-    \x04\x1d\x02\x05\x12\x04\x90\x01\x02!\n\r\n\x05\x04\x1d\x02\x05\x05\x12\
-    \x04\x90\x01\x02\x08\n\r\n\x05\x04\x1d\x02\x05\x01\x12\x04\x90\x01\t\x1c\
-    \n\r\n\x05\x04\x1d\x02\x05\x03\x12\x04\x90\x01\x1f\x20\n\x0c\n\x04\x04\
-    \x1d\x02\x06\x12\x04\x91\x01\x02\x16\n\r\n\x05\x04\x1d\x02\x06\x05\x12\
-    \x04\x91\x01\x02\x07\n\r\n\x05\x04\x1d\x02\x06\x01\x12\x04\x91\x01\x08\
-    \x11\n\r\n\x05\x04\x1d\x02\x06\x03\x12\x04\x91\x01\x14\x15\n\x0c\n\x04\
-    \x04\x1d\x02\x07\x12\x04\x92\x01\x02\x14\n\r\n\x05\x04\x1d\x02\x07\x05\
-    \x12\x04\x92\x01\x02\x08\n\r\n\x05\x04\x1d\x02\x07\x01\x12\x04\x92\x01\t\
-    \x0f\n\r\n\x05\x04\x1d\x02\x07\x03\x12\x04\x92\x01\x12\x13\n\x0c\n\x04\
-    \x04\x1d\x02\x08\x12\x04\x93\x01\x02\"\n\r\n\x05\x04\x1d\x02\x08\x05\x12\
-    \x04\x93\x01\x02\x08\n\r\n\x05\x04\x1d\x02\x08\x01\x12\x04\x93\x01\t\x1d\
-    \n\r\n\x05\x04\x1d\x02\x08\x03\x12\x04\x93\x01\x20!\n\x0c\n\x04\x04\x1d\
-    \x02\t\x12\x04\x94\x01\x02\x16\n\r\n\x05\x04\x1d\x02\t\x05\x12\x04\x94\
-    \x01\x02\x08\n\r\n\x05\x04\x1d\x02\t\x01\x12\x04\x94\x01\t\x10\n\r\n\x05\
-    \x04\x1d\x02\t\x03\x12\x04\x94\x01\x13\x15\n\x0c\n\x02\x04\x1e\x12\x06\
-    \x96\x01\0\x98\x01\x01\n\x0b\n\x03\x04\x1e\x01\x12\x04\x96\x01\x08+\n\
-    \x0c\n\x04\x04\x1e\x02\0\x12\x04\x97\x01\x02\x1b\n\r\n\x05\x04\x1e\x02\0\
-    \x05\x12\x04\x97\x01\x02\x07\n\r\n\x05\x04\x1e\x02\0\x01\x12\x04\x97\x01\
-    \x08\x16\n\r\n\x05\x04\x1e\x02\0\x03\x12\x04\x97\x01\x19\x1a\n\x0c\n\x02\
-    \x04\x1f\x12\x06\x9a\x01\0\x9f\x01\x01\n\x0b\n\x03\x04\x1f\x01\x12\x04\
-    \x9a\x01\x08\x1c\n\x0c\n\x04\x04\x1f\x02\0\x12\x04\x9b\x01\x02\x18\n\r\n\
-    \x05\x04\x1f\x02\0\x05\x12\x04\x9b\x01\x02\x07\n\r\n\x05\x04\x1f\x02\0\
-    \x01\x12\x04\x9b\x01\x08\x13\n\r\n\x05\x04\x1f\x02\0\x03\x12\x04\x9b\x01\
-    \x16\x17\n\x0c\n\x04\x04\x1f\x02\x01\x12\x04\x9c\x01\x02\x1e\n\r\n\x05\
-    \x04\x1f\x02\x01\x05\x12\x04\x9c\x01\x02\x08\n\r\n\x05\x04\x1f\x02\x01\
-    \x01\x12\x04\x9c\x01\t\x19\n\r\n\x05\x04\x1f\x02\x01\x03\x12\x04\x9c\x01\
-    \x1c\x1d\n\x0c\n\x04\x04\x1f\x02\x02\x12\x04\x9d\x01\x02!\n\r\n\x05\x04\
-    \x1f\x02\x02\x05\x12\x04\x9d\x01\x02\x08\n\r\n\x05\x04\x1f\x02\x02\x01\
-    \x12\x04\x9d\x01\t\x1c\n\r\n\x05\x04\x1f\x02\x02\x03\x12\x04\x9d\x01\x1f\
-    \x20\n\x0c\n\x04\x04\x1f\x02\x03\x12\x04\x9e\x01\x02$\n\r\n\x05\x04\x1f\
-    \x02\x03\x04\x12\x04\x9e\x01\x02\n\n\r\n\x05\x04\x1f\x02\x03\x05\x12\x04\
-    \x9e\x01\x0b\x10\n\r\n\x05\x04\x1f\x02\x03\x01\x12\x04\x9e\x01\x11\x1f\n\
-    \r\n\x05\x04\x1f\x02\x03\x03\x12\x04\x9e\x01\"#\n\x0c\n\x02\x04\x20\x12\
-    \x06\xa0\x01\0\xa2\x01\x01\n\x0b\n\x03\x04\x20\x01\x12\x04\xa0\x01\x08$\
-    \n\x0c\n\x04\x04\x20\x02\0\x12\x04\xa1\x01\x02\x1b\n\r\n\x05\x04\x20\x02\
-    \0\x05\x12\x04\xa1\x01\x02\x06\n\r\n\x05\x04\x20\x02\0\x01\x12\x04\xa1\
-    \x01\x07\x16\n\r\n\x05\x04\x20\x02\0\x03\x12\x04\xa1\x01\x19\x1a\n\x0c\n\
-    \x02\x04!\x12\x06\xa4\x01\0\xa7\x01\x01\n\x0b\n\x03\x04!\x01\x12\x04\xa4\
-    \x01\x08\x20\n\x0c\n\x04\x04!\x02\0\x12\x04\xa5\x01\x02\x18\n\r\n\x05\
-    \x04!\x02\0\x05\x12\x04\xa5\x01\x02\x07\n\r\n\x05\x04!\x02\0\x01\x12\x04\
-    \xa5\x01\x08\x13\n\r\n\x05\x04!\x02\0\x03\x12\x04\xa5\x01\x16\x17\n\x0c\
-    \n\x04\x04!\x02\x01\x12\x04\xa6\x01\x02\x1a\n\r\n\x05\x04!\x02\x01\x05\
-    \x12\x04\xa6\x01\x02\x07\n\r\n\x05\x04!\x02\x01\x01\x12\x04\xa6\x01\x08\
-    \x15\n\r\n\x05\x04!\x02\x01\x03\x12\x04\xa6\x01\x18\x19\n\xf1\x01\n\x02\
-    \x04\"\x12\x06\xab\x01\0\xc0\x01\x01\x1a\xe2\x01\x20VerificationDetails\
-    \x20must\x20have\x20same\x20members\x20with\x20VerificationDetails\x20in\
-    \x20\"sgxvm/proto/ffi.proto\"\n\x20including\x20verification\x20type\x20\
-    and\x20verification\x20id\x20as\x20key.\n\x20But\x20the\x20member\x20typ\
-    es\x20can\x20be\x20different,\x20such\x20as\x20string(address)\x20to\x20\
-    bytes\n\n\x0b\n\x03\x04\"\x01\x12\x04\xab\x01\x08\x1b\n!\n\x04\x04\"\x02\
-    \0\x12\x04\xad\x01\x02\x1e\x1a\x13\x20Verification\x20type\n\n\r\n\x05\
-    \x04\"\x02\0\x05\x12\x04\xad\x01\x02\x08\n\r\n\x05\x04\"\x02\0\x01\x12\
-    \x04\xad\x01\t\x19\n\r\n\x05\x04\"\x02\0\x03\x12\x04\xad\x01\x1c\x1d\n\
-    \x1f\n\x04\x04\"\x02\x01\x12\x04\xaf\x01\x02\x1b\x1a\x11\x20Verification\
-    \x20Id\n\n\r\n\x05\x04\"\x02\x01\x05\x12\x04\xaf\x01\x02\x07\n\r\n\x05\
-    \x04\"\x02\x01\x01\x12\x04\xaf\x01\x08\x16\n\r\n\x05\x04\"\x02\x01\x03\
-    \x12\x04\xaf\x01\x19\x1a\n+\n\x04\x04\"\x02\x02\x12\x04\xb1\x01\x02\x1a\
-    \x1a\x1d\x20Verification\x20issuer\x20address\n\n\r\n\x05\x04\"\x02\x02\
-    \x05\x12\x04\xb1\x01\x02\x07\n\r\n\x05\x04\"\x02\x02\x01\x12\x04\xb1\x01\
-    \x08\x15\n\r\n\x05\x04\"\x02\x02\x03\x12\x04\xb1\x01\x18\x19\n6\n\x04\
-    \x04\"\x02\x03\x12\x04\xb3\x01\x02\x19\x1a(\x20From\x20which\x20chain\
-    \x20proof\x20was\x20transferred\n\n\r\n\x05\x04\"\x02\x03\x05\x12\x04\
-    \xb3\x01\x02\x08\n\r\n\x05\x04\"\x02\x03\x01\x12\x04\xb3\x01\t\x14\n\r\n\
-    \x05\x04\"\x02\x03\x03\x12\x04\xb3\x01\x17\x18\n+\n\x04\x04\"\x02\x04\
-    \x12\x04\xb5\x01\x02\x1f\x1a\x1d\x20Original\x20issuance\x20timestamp\n\
-    \n\r\n\x05\x04\"\x02\x04\x05\x12\x04\xb5\x01\x02\x08\n\r\n\x05\x04\"\x02\
-    \x04\x01\x12\x04\xb5\x01\t\x1a\n\r\n\x05\x04\"\x02\x04\x03\x12\x04\xb5\
-    \x01\x1d\x1e\n-\n\x04\x04\"\x02\x05\x12\x04\xb7\x01\x02!\x1a\x1f\x20Orig\
-    inal\x20expiration\x20timestamp\n\n\r\n\x05\x04\"\x02\x05\x05\x12\x04\
-    \xb7\x01\x02\x08\n\r\n\x05\x04\"\x02\x05\x01\x12\x04\xb7\x01\t\x1c\n\r\n\
-    \x05\x04\"\x02\x05\x03\x12\x04\xb7\x01\x1f\x20\n.\n\x04\x04\"\x02\x06\
-    \x12\x04\xb9\x01\x02\x19\x1a\x20\x20Original\x20proof\x20data\x20(ZK-pro\
-    of)\n\n\r\n\x05\x04\"\x02\x06\x05\x12\x04\xb9\x01\x02\x07\n\r\n\x05\x04\
-    \"\x02\x06\x01\x12\x04\xb9\x01\x08\x14\n\r\n\x05\x04\"\x02\x06\x03\x12\
-    \x04\xb9\x01\x17\x18\n(\n\x04\x04\"\x02\x07\x12\x04\xbb\x01\x02\x14\x1a\
-    \x1a\x20ZK-proof\x20original\x20schema\n\n\r\n\x05\x04\"\x02\x07\x05\x12\
-    \x04\xbb\x01\x02\x08\n\r\n\x05\x04\"\x02\x07\x01\x12\x04\xbb\x01\t\x0f\n\
-    \r\n\x05\x04\"\x02\x07\x03\x12\x04\xbb\x01\x12\x13\nN\n\x04\x04\"\x02\
-    \x08\x12\x04\xbd\x01\x02\"\x1a@\x20Verification\x20id\x20for\x20checking\
-    (KYC/KYB/AML\x20etc)\x20from\x20issuer\x20side\n\n\r\n\x05\x04\"\x02\x08\
-    \x05\x12\x04\xbd\x01\x02\x08\n\r\n\x05\x04\"\x02\x08\x01\x12\x04\xbd\x01\
-    \t\x1d\n\r\n\x05\x04\"\x02\x08\x03\x12\x04\xbd\x01\x20!\n\x17\n\x04\x04\
-    \"\x02\t\x12\x04\xbf\x01\x02\x16\x1a\t\x20Version\n\n\r\n\x05\x04\"\x02\
-    \t\x05\x12\x04\xbf\x01\x02\x08\n\r\n\x05\x04\"\x02\t\x01\x12\x04\xbf\x01\
-    \t\x10\n\r\n\x05\x04\"\x02\t\x03\x12\x04\xbf\x01\x13\x15\n\x0c\n\x02\x04\
-    #\x12\x06\xc1\x01\0\xc3\x01\x01\n\x0b\n\x03\x04#\x01\x12\x04\xc1\x01\x08\
-    (\n\x0c\n\x04\x04#\x02\0\x12\x04\xc2\x01\x02(\n\r\n\x05\x04#\x02\0\x04\
-    \x12\x04\xc2\x01\x02\n\n\r\n\x05\x04#\x02\0\x06\x12\x04\xc2\x01\x0b\x1e\
-    \n\r\n\x05\x04#\x02\0\x01\x12\x04\xc2\x01\x1f#\n\r\n\x05\x04#\x02\0\x03\
-    \x12\x04\xc2\x01&'\n\x0c\n\x02\x04$\x12\x06\xc5\x01\0\xd6\x01\x01\n\x0b\
-    \n\x03\x04$\x01\x12\x04\xc5\x01\x08\x15\n\x0e\n\x04\x04$\x08\0\x12\x06\
-    \xc6\x01\x02\xd5\x01\x03\n\r\n\x05\x04$\x08\0\x01\x12\x04\xc6\x01\x08\
-    \x0b\n\x0c\n\x04\x04$\x02\0\x12\x04\xc7\x01\x04#\n\r\n\x05\x04$\x02\0\
-    \x06\x12\x04\xc7\x01\x04\x13\n\r\n\x05\x04$\x02\0\x01\x12\x04\xc7\x01\
-    \x14\x1e\n\r\n\x05\x04$\x02\0\x03\x12\x04\xc7\x01!\"\n\x0c\n\x04\x04$\
-    \x02\x01\x12\x04\xc8\x01\x04)\n\r\n\x05\x04$\x02\x01\x06\x12\x04\xc8\x01\
-    \x04\x16\n\r\n\x05\x04$\x02\x01\x01\x12\x04\xc8\x01\x17$\n\r\n\x05\x04$\
-    \x02\x01\x03\x12\x04\xc8\x01'(\n\x0c\n\x04\x04$\x02\x02\x12\x04\xc9\x01\
-    \x04%\n\r\n\x05\x04$\x02\x02\x06\x12\x04\xc9\x01\x04\x14\n\r\n\x05\x04$\
-    \x02\x02\x01\x12\x04\xc9\x01\x15\x20\n\r\n\x05\x04$\x02\x02\x03\x12\x04\
-    \xc9\x01#$\n\x0c\n\x04\x04$\x02\x03\x12\x04\xca\x01\x04(\n\r\n\x05\x04$\
-    \x02\x03\x06\x12\x04\xca\x01\x04\x17\n\r\n\x05\x04$\x02\x03\x01\x12\x04\
-    \xca\x01\x18#\n\r\n\x05\x04$\x02\x03\x03\x12\x04\xca\x01&'\n\x0c\n\x04\
-    \x04$\x02\x04\x12\x04\xcb\x01\x04/\n\r\n\x05\x04$\x02\x04\x06\x12\x04\
-    \xcb\x01\x04\x1e\n\r\n\x05\x04$\x02\x04\x01\x12\x04\xcb\x01\x1f*\n\r\n\
-    \x05\x04$\x02\x04\x03\x12\x04\xcb\x01-.\n\x0c\n\x04\x04$\x02\x05\x12\x04\
-    \xcc\x01\x041\n\r\n\x05\x04$\x02\x05\x06\x12\x04\xcc\x01\x04\x1a\n\r\n\
-    \x05\x04$\x02\x05\x01\x12\x04\xcc\x01\x1b,\n\r\n\x05\x04$\x02\x05\x03\
-    \x12\x04\xcc\x01/0\n\x0c\n\x04\x04$\x02\x06\x12\x04\xcd\x01\x041\n\r\n\
-    \x05\x04$\x02\x06\x06\x12\x04\xcd\x01\x04\x1a\n\r\n\x05\x04$\x02\x06\x01\
-    \x12\x04\xcd\x01\x1b,\n\r\n\x05\x04$\x02\x06\x03\x12\x04\xcd\x01/0\n\x0c\
-    \n\x04\x04$\x02\x07\x12\x04\xce\x01\x04\x1b\n\r\n\x05\x04$\x02\x07\x06\
-    \x12\x04\xce\x01\x04\x0f\n\r\n\x05\x04$\x02\x07\x01\x12\x04\xce\x01\x10\
-    \x16\n\r\n\x05\x04$\x02\x07\x03\x12\x04\xce\x01\x19\x1a\n\x0c\n\x04\x04$\
-    \x02\x08\x12\x04\xcf\x01\x041\n\r\n\x05\x04$\x02\x08\x06\x12\x04\xcf\x01\
-    \x04\x1a\n\r\n\x05\x04$\x02\x08\x01\x12\x04\xcf\x01\x1b,\n\r\n\x05\x04$\
-    \x02\x08\x03\x12\x04\xcf\x01/0\n\x0c\n\x04\x04$\x02\t\x12\x04\xd0\x01\
-    \x04*\n\r\n\x05\x04$\x02\t\x06\x12\x04\xd0\x01\x04\x16\n\r\n\x05\x04$\
-    \x02\t\x01\x12\x04\xd0\x01\x17$\n\r\n\x05\x04$\x02\t\x03\x12\x04\xd0\x01\
-    ')\n\x0c\n\x04\x04$\x02\n\x12\x04\xd1\x01\x04\"\n\r\n\x05\x04$\x02\n\x06\
-    \x12\x04\xd1\x01\x04\x12\n\r\n\x05\x04$\x02\n\x01\x12\x04\xd1\x01\x13\
-    \x1c\n\r\n\x05\x04$\x02\n\x03\x12\x04\xd1\x01\x1f!\n\x0c\n\x04\x04$\x02\
-    \x0b\x12\x04\xd2\x01\x04<\n\r\n\x05\x04$\x02\x0b\x06\x12\x04\xd2\x01\x04\
-    \x1f\n\r\n\x05\x04$\x02\x0b\x01\x12\x04\xd2\x01\x206\n\r\n\x05\x04$\x02\
-    \x0b\x03\x12\x04\xd2\x019;\n\x0c\n\x04\x04$\x02\x0c\x12\x04\xd3\x01\x04.\
-    \n\r\n\x05\x04$\x02\x0c\x06\x12\x04\xd3\x01\x04\x18\n\r\n\x05\x04$\x02\
-    \x0c\x01\x12\x04\xd3\x01\x19(\n\r\n\x05\x04$\x02\x0c\x03\x12\x04\xd3\x01\
-    +-\n\x0c\n\x04\x04$\x02\r\x12\x04\xd4\x01\x046\n\r\n\x05\x04$\x02\r\x06\
-    \x12\x04\xd4\x01\x04\x1c\n\r\n\x05\x04$\x02\r\x01\x12\x04\xd4\x01\x1d0\n\
-    \r\n\x05\x04$\x02\r\x03\x12\x04\xd4\x0135\nF\n\x02\x04%\x12\x06\xd9\x01\
-    \0\xe3\x01\x01\x1a8\x20Message\x20with\x20data\x20required\x20to\x20exec\
-    ute\x20`call`\x20operation\n\n\x0b\n\x03\x04%\x01\x12\x04\xd9\x01\x08\
-    \x17\n\x0c\n\x04\x04%\x02\0\x12\x04\xda\x01\x02\x11\n\r\n\x05\x04%\x02\0\
-    \x05\x12\x04\xda\x01\x02\x07\n\r\n\x05\x04%\x02\0\x01\x12\x04\xda\x01\
-    \x08\x0c\n\r\n\x05\x04%\x02\0\x03\x12\x04\xda\x01\x0f\x10\n\x0c\n\x04\
-    \x04%\x02\x01\x12\x04\xdb\x01\x02\x0f\n\r\n\x05\x04%\x02\x01\x05\x12\x04\
-    \xdb\x01\x02\x07\n\r\n\x05\x04%\x02\x01\x01\x12\x04\xdb\x01\x08\n\n\r\n\
-    \x05\x04%\x02\x01\x03\x12\x04\xdb\x01\r\x0e\n\x0c\n\x04\x04%\x02\x02\x12\
-    \x04\xdc\x01\x02\x11\n\r\n\x05\x04%\x02\x02\x05\x12\x04\xdc\x01\x02\x07\
-    \n\r\n\x05\x04%\x02\x02\x01\x12\x04\xdc\x01\x08\x0c\n\r\n\x05\x04%\x02\
-    \x02\x03\x12\x04\xdc\x01\x0f\x10\n\x0c\n\x04\x04%\x02\x03\x12\x04\xdd\
-    \x01\x02\x16\n\r\n\x05\x04%\x02\x03\x05\x12\x04\xdd\x01\x02\x08\n\r\n\
-    \x05\x04%\x02\x03\x01\x12\x04\xdd\x01\t\x11\n\r\n\x05\x04%\x02\x03\x03\
-    \x12\x04\xdd\x01\x14\x15\n\x0c\n\x04\x04%\x02\x04\x12\x04\xde\x01\x02\
-    \x12\n\r\n\x05\x04%\x02\x04\x05\x12\x04\xde\x01\x02\x07\n\r\n\x05\x04%\
-    \x02\x04\x01\x12\x04\xde\x01\x08\r\n\r\n\x05\x04%\x02\x04\x03\x12\x04\
-    \xde\x01\x10\x11\n\x0c\n\x04\x04%\x02\x05\x12\x04\xdf\x01\x02)\n\r\n\x05\
-    \x04%\x02\x05\x04\x12\x04\xdf\x01\x02\n\n\r\n\x05\x04%\x02\x05\x06\x12\
-    \x04\xdf\x01\x0b\x19\n\r\n\x05\x04%\x02\x05\x01\x12\x04\xdf\x01\x1a$\n\r\
-    \n\x05\x04%\x02\x05\x03\x12\x04\xdf\x01'(\n\x0c\n\x04\x04%\x02\x06\x12\
-    \x04\xe0\x01\x02\x12\n\r\n\x05\x04%\x02\x06\x05\x12\x04\xe0\x01\x02\x06\
-    \n\r\n\x05\x04%\x02\x06\x01\x12\x04\xe0\x01\x07\r\n\r\n\x05\x04%\x02\x06\
-    \x03\x12\x04\xe0\x01\x10\x11\n\x0c\n\x04\x04%\x02\x07\x12\x04\xe1\x01\
-    \x02\x13\n\r\n\x05\x04%\x02\x07\x05\x12\x04\xe1\x01\x02\x08\n\r\n\x05\
-    \x04%\x02\x07\x01\x12\x04\xe1\x01\t\x0e\n\r\n\x05\x04%\x02\x07\x03\x12\
-    \x04\xe1\x01\x11\x12\n\x0c\n\x04\x04%\x02\x08\x12\x04\xe2\x01\x02\x17\n\
-    \r\n\x05\x04%\x02\x08\x05\x12\x04\xe2\x01\x02\x06\n\r\n\x05\x04%\x02\x08\
-    \x01\x12\x04\xe2\x01\x07\x12\n\r\n\x05\x04%\x02\x08\x03\x12\x04\xe2\x01\
-    \x15\x16\nH\n\x02\x04&\x12\x06\xe6\x01\0\xee\x01\x01\x1a:\x20Message\x20\
-    with\x20data\x20required\x20to\x20execute\x20`create`\x20operation\n\n\
-    \x0b\n\x03\x04&\x01\x12\x04\xe6\x01\x08\x19\n\x0c\n\x04\x04&\x02\0\x12\
-    \x04\xe7\x01\x02\x11\n\r\n\x05\x04&\x02\0\x05\x12\x04\xe7\x01\x02\x07\n\
-    \r\n\x05\x04&\x02\0\x01\x12\x04\xe7\x01\x08\x0c\n\r\n\x05\x04&\x02\0\x03\
-    \x12\x04\xe7\x01\x0f\x10\n\x0c\n\x04\x04&\x02\x01\x12\x04\xe8\x01\x02\
-    \x11\n\r\n\x05\x04&\x02\x01\x05\x12\x04\xe8\x01\x02\x07\n\r\n\x05\x04&\
-    \x02\x01\x01\x12\x04\xe8\x01\x08\x0c\n\r\n\x05\x04&\x02\x01\x03\x12\x04\
-    \xe8\x01\x0f\x10\n\x0c\n\x04\x04&\x02\x02\x12\x04\xe9\x01\x02\x16\n\r\n\
-    \x05\x04&\x02\x02\x05\x12\x04\xe9\x01\x02\x08\n\r\n\x05\x04&\x02\x02\x01\
-    \x12\x04\xe9\x01\t\x11\n\r\n\x05\x04&\x02\x02\x03\x12\x04\xe9\x01\x14\
-    \x15\n\x0c\n\x04\x04&\x02\x03\x12\x04\xea\x01\x02\x12\n\r\n\x05\x04&\x02\
-    \x03\x05\x12\x04\xea\x01\x02\x07\n\r\n\x05\x04&\x02\x03\x01\x12\x04\xea\
-    \x01\x08\r\n\r\n\x05\x04&\x02\x03\x03\x12\x04\xea\x01\x10\x11\n\x0c\n\
-    \x04\x04&\x02\x04\x12\x04\xeb\x01\x02)\n\r\n\x05\x04&\x02\x04\x04\x12\
-    \x04\xeb\x01\x02\n\n\r\n\x05\x04&\x02\x04\x06\x12\x04\xeb\x01\x0b\x19\n\
-    \r\n\x05\x04&\x02\x04\x01\x12\x04\xeb\x01\x1a$\n\r\n\x05\x04&\x02\x04\
-    \x03\x12\x04\xeb\x01'(\n\x0c\n\x04\x04&\x02\x05\x12\x04\xec\x01\x02\x12\
-    \n\r\n\x05\x04&\x02\x05\x05\x12\x04\xec\x01\x02\x06\n\r\n\x05\x04&\x02\
-    \x05\x01\x12\x04\xec\x01\x07\r\n\r\n\x05\x04&\x02\x05\x03\x12\x04\xec\
-    \x01\x10\x11\n\x0c\n\x04\x04&\x02\x06\x12\x04\xed\x01\x02\x13\n\r\n\x05\
-    \x04&\x02\x06\x05\x12\x04\xed\x01\x02\x08\n\r\n\x05\x04&\x02\x06\x01\x12\
-    \x04\xed\x01\t\x0e\n\r\n\x05\x04&\x02\x06\x03\x12\x04\xed\x01\x11\x12\n3\
-    \n\x02\x04'\x12\x06\xf1\x01\0\xf4\x01\x01\x1a%\x20Request\x20to\x20execu\
-    te\x20`call`\x20operation\n\n\x0b\n\x03\x04'\x01\x12\x04\xf1\x01\x08\x18\
-    \n\x0c\n\x04\x04'\x02\0\x12\x04\xf2\x01\x02\x1d\n\r\n\x05\x04'\x02\0\x06\
-    \x12\x04\xf2\x01\x02\x11\n\r\n\x05\x04'\x02\0\x01\x12\x04\xf2\x01\x12\
-    \x18\n\r\n\x05\x04'\x02\0\x03\x12\x04\xf2\x01\x1b\x1c\n\x0c\n\x04\x04'\
-    \x02\x01\x12\x04\xf3\x01\x02!\n\r\n\x05\x04'\x02\x01\x06\x12\x04\xf3\x01\
-    \x02\x14\n\r\n\x05\x04'\x02\x01\x01\x12\x04\xf3\x01\x15\x1c\n\r\n\x05\
-    \x04'\x02\x01\x03\x12\x04\xf3\x01\x1f\x20\n5\n\x02\x04(\x12\x06\xf7\x01\
-    \0\xfa\x01\x01\x1a'\x20Request\x20to\x20execute\x20`create`\x20operation\
-    \n\n\x0b\n\x03\x04(\x01\x12\x04\xf7\x01\x08\x1a\n\x0c\n\x04\x04(\x02\0\
-    \x12\x04\xf8\x01\x02\x1f\n\r\n\x05\x04(\x02\0\x06\x12\x04\xf8\x01\x02\
-    \x13\n\r\n\x05\x04(\x02\0\x01\x12\x04\xf8\x01\x14\x1a\n\r\n\x05\x04(\x02\
-    \0\x03\x12\x04\xf8\x01\x1d\x1e\n\x0c\n\x04\x04(\x02\x01\x12\x04\xf9\x01\
-    \x02!\n\r\n\x05\x04(\x02\x01\x06\x12\x04\xf9\x01\x02\x14\n\r\n\x05\x04(\
-    \x02\x01\x01\x12\x04\xf9\x01\x15\x1c\n\r\n\x05\x04(\x02\x01\x03\x12\x04\
-    \xf9\x01\x1f\x20\n1\n\x02\x04)\x12\x06\xfd\x01\0\xff\x01\x01\x1a#\x20Req\
-    uest\x20to\x20obtain\x20node\x20public\x20key\n\n\x0b\n\x03\x04)\x01\x12\
-    \x04\xfd\x01\x08\x1c\n\x0c\n\x04\x04)\x02\0\x12\x04\xfe\x01\x02\x19\n\r\
-    \n\x05\x04)\x02\0\x05\x12\x04\xfe\x01\x02\x08\n\r\n\x05\x04)\x02\0\x01\
-    \x12\x04\xfe\x01\t\x14\n\r\n\x05\x04)\x02\0\x03\x12\x04\xfe\x01\x17\x18\
-    \n+\n\x02\x04*\x12\x04\x82\x02\06\x1a\x1f\x20Response\x20with\x20node\
-    \x20public\x20key\n\n\x0b\n\x03\x04*\x01\x12\x04\x82\x02\x08\x1d\n\x0c\n\
-    \x04\x04*\x02\0\x12\x04\x82\x02\x204\n\r\n\x05\x04*\x02\0\x05\x12\x04\
-    \x82\x02\x20%\n\r\n\x05\x04*\x02\0\x01\x12\x04\x82\x02&/\n\r\n\x05\x04*\
-    \x02\0\x03\x12\x04\x82\x0223\n\x0c\n\x02\x04+\x12\x06\x84\x02\0\x88\x02\
-    \x01\n\x0b\n\x03\x04+\x01\x12\x04\x84\x02\x08\x11\n\x0c\n\x04\x04+\x02\0\
-    \x12\x04\x85\x02\x02\x19\n\r\n\x05\x04+\x02\0\x05\x12\x04\x85\x02\x02\
-    \x08\n\r\n\x05\x04+\x02\0\x01\x12\x04\x85\x02\t\x14\n\r\n\x05\x04+\x02\0\
-    \x03\x12\x04\x85\x02\x17\x18\n\x0c\n\x04\x04+\x02\x01\x12\x04\x86\x02\
-    \x02\x1b\n\r\n\x05\x04+\x02\x01\x05\x12\x04\x86\x02\x02\x08\n\r\n\x05\
-    \x04+\x02\x01\x01\x12\x04\x86\x02\t\x16\n\r\n\x05\x04+\x02\x01\x03\x12\
-    \x04\x86\x02\x19\x1a\n\x0c\n\x04\x04+\x02\x02\x12\x04\x87\x02\x02\x1a\n\
-    \r\n\x05\x04+\x02\x02\x05\x12\x04\x87\x02\x02\x07\n\r\n\x05\x04+\x02\x02\
-    \x01\x12\x04\x87\x02\x08\x15\n\r\n\x05\x04+\x02\x02\x03\x12\x04\x87\x02\
-    \x18\x19\n\x0c\n\x02\x04,\x12\x06\x89\x02\0\x8b\x02\x01\n\x0b\n\x03\x04,\
-    \x01\x12\x04\x89\x02\x08\x1a\n\x0c\n\x04\x04,\x02\0\x12\x04\x8a\x02\x02\
-    \x20\n\r\n\x05\x04,\x02\0\x04\x12\x04\x8a\x02\x02\n\n\r\n\x05\x04,\x02\0\
-    \x06\x12\x04\x8a\x02\x0b\x14\n\r\n\x05\x04,\x02\0\x01\x12\x04\x8a\x02\
-    \x15\x1b\n\r\n\x05\x04,\x02\0\x03\x12\x04\x8a\x02\x1e\x1f\n\x0c\n\x02\
-    \x04-\x12\x06\x8d\x02\0\x93\x02\x01\n\x0b\n\x03\x04-\x01\x12\x04\x8d\x02\
-    \x08\x12\n\x0e\n\x04\x04-\x08\0\x12\x06\x8e\x02\x02\x92\x02\x03\n\r\n\
-    \x05\x04-\x08\0\x01\x12\x04\x8e\x02\x08\x0b\n\x0c\n\x04\x04-\x02\0\x12\
-    \x04\x8f\x02\x04%\n\r\n\x05\x04-\x02\0\x06\x12\x04\x8f\x02\x04\x14\n\r\n\
-    \x05\x04-\x02\0\x01\x12\x04\x8f\x02\x15\x20\n\r\n\x05\x04-\x02\0\x03\x12\
-    \x04\x8f\x02#$\n\x0c\n\x04\x04-\x02\x01\x12\x04\x90\x02\x04)\n\r\n\x05\
-    \x04-\x02\x01\x06\x12\x04\x90\x02\x04\x16\n\r\n\x05\x04-\x02\x01\x01\x12\
-    \x04\x90\x02\x17$\n\r\n\x05\x04-\x02\x01\x03\x12\x04\x90\x02'(\n\x0c\n\
-    \x04\x04-\x02\x02\x12\x04\x91\x02\x04.\n\r\n\x05\x04-\x02\x02\x06\x12\
-    \x04\x91\x02\x04\x18\n\r\n\x05\x04-\x02\x02\x01\x12\x04\x91\x02\x19)\n\r\
-    \n\x05\x04-\x02\x02\x03\x12\x04\x91\x02,-b\x06proto3\
+    ,0\n\x0c\n\x05\x04\x10\x02\0\x03\x12\x03g34\n\t\n\x02\x04\x11\x12\x03i\0\
+    6\n\n\n\x03\x04\x11\x01\x12\x03i\x08\x1f\n\x0b\n\x04\x04\x11\x02\0\x12\
+    \x03i\"4\n\x0c\n\x05\x04\x11\x02\0\x05\x12\x03i\"'\n\x0c\n\x05\x04\x11\
+    \x02\0\x01\x12\x03i(/\n\x0c\n\x05\x04\x11\x02\0\x03\x12\x03i23\n\t\n\x02\
+    \x04\x12\x12\x03j\0<\n\n\n\x03\x04\x12\x01\x12\x03j\x08'\n\x0b\n\x04\x04\
+    \x12\x02\0\x12\x03j*:\n\x0c\n\x05\x04\x12\x02\0\x05\x12\x03j*0\n\x0c\n\
+    \x05\x04\x12\x02\0\x01\x12\x03j15\n\x0c\n\x05\x04\x12\x02\0\x03\x12\x03j\
+    89\n\t\n\x02\x04\x13\x12\x03l\06\n\n\n\x03\x04\x13\x01\x12\x03l\x08\x1f\
+    \n\x0b\n\x04\x04\x13\x02\0\x12\x03l\"4\n\x0c\n\x05\x04\x13\x02\0\x05\x12\
+    \x03l\"'\n\x0c\n\x05\x04\x13\x02\0\x01\x12\x03l(/\n\x0c\n\x05\x04\x13\
+    \x02\0\x03\x12\x03l23\n\t\n\x02\x04\x14\x12\x03m\0;\n\n\n\x03\x04\x14\
+    \x01\x12\x03m\x08'\n\x0b\n\x04\x04\x14\x02\0\x12\x03m*9\n\x0c\n\x05\x04\
+    \x14\x02\0\x05\x12\x03m*/\n\x0c\n\x05\x04\x14\x02\0\x01\x12\x03m04\n\x0c\
+    \n\x05\x04\x14\x02\0\x03\x12\x03m78\n\n\n\x02\x04\x15\x12\x04o\0r\x01\n\
+    \n\n\x03\x04\x15\x01\x12\x03o\x08\x1e\n\x0b\n\x04\x04\x15\x02\0\x12\x03p\
+    \x02\x14\n\x0c\n\x05\x04\x15\x02\0\x05\x12\x03p\x02\x07\n\x0c\n\x05\x04\
+    \x15\x02\0\x01\x12\x03p\x08\x0f\n\x0c\n\x05\x04\x15\x02\0\x03\x12\x03p\
+    \x12\x13\n\x0b\n\x04\x04\x15\x02\x01\x12\x03q\x02\x11\n\x0c\n\x05\x04\
+    \x15\x02\x01\x05\x12\x03q\x02\x07\n\x0c\n\x05\x04\x15\x02\x01\x01\x12\
+    \x03q\x08\x0c\n\x0c\n\x05\x04\x15\x02\x01\x03\x12\x03q\x0f\x10\n\t\n\x02\
+    \x04\x16\x12\x03t\0)\n\n\n\x03\x04\x16\x01\x12\x03t\x08&\n\n\n\x02\x04\
+    \x17\x12\x04v\0z\x01\n\n\n\x03\x04\x17\x01\x12\x03v\x08\x1e\n\x0b\n\x04\
+    \x04\x17\x02\0\x12\x03w\x02\x14\n\x0c\n\x05\x04\x17\x02\0\x05\x12\x03w\
+    \x02\x07\n\x0c\n\x05\x04\x17\x02\0\x01\x12\x03w\x08\x0f\n\x0c\n\x05\x04\
+    \x17\x02\0\x03\x12\x03w\x12\x13\n\x0b\n\x04\x04\x17\x02\x01\x12\x03x\x02\
+    \x12\n\x0c\n\x05\x04\x17\x02\x01\x05\x12\x03x\x02\x07\n\x0c\n\x05\x04\
+    \x17\x02\x01\x01\x12\x03x\x08\r\n\x0c\n\x05\x04\x17\x02\x01\x03\x12\x03x\
+    \x10\x11\n\x0b\n\x04\x04\x17\x02\x02\x12\x03y\x02\x12\n\x0c\n\x05\x04\
+    \x17\x02\x02\x05\x12\x03y\x02\x07\n\x0c\n\x05\x04\x17\x02\x02\x01\x12\
+    \x03y\x08\r\n\x0c\n\x05\x04\x17\x02\x02\x03\x12\x03y\x10\x11\n\t\n\x02\
+    \x04\x18\x12\x03|\0)\n\n\n\x03\x04\x18\x01\x12\x03|\x08&\n\t\n\x02\x04\
+    \x19\x12\x03~\0*\n\n\n\x03\x04\x19\x01\x12\x03~\x08\x13\n\x0b\n\x04\x04\
+    \x19\x02\0\x12\x03~\x16(\n\x0c\n\x05\x04\x19\x02\0\x05\x12\x03~\x16\x1b\
+    \n\x0c\n\x05\x04\x19\x02\0\x01\x12\x03~\x1c#\n\x0c\n\x05\x04\x19\x02\0\
+    \x03\x12\x03~&'\n\n\n\x02\x04\x1a\x12\x04\x80\x01\0\x1e\n\x0b\n\x03\x04\
+    \x1a\x01\x12\x04\x80\x01\x08\x1b\n\x0c\n\x02\x04\x1b\x12\x06\x82\x01\0\
+    \x85\x01\x01\n\x0b\n\x03\x04\x1b\x01\x12\x04\x82\x01\x08\x1e\n\x0c\n\x04\
+    \x04\x1b\x02\0\x12\x04\x83\x01\x02\x14\n\r\n\x05\x04\x1b\x02\0\x05\x12\
+    \x04\x83\x01\x02\x07\n\r\n\x05\x04\x1b\x02\0\x01\x12\x04\x83\x01\x08\x0f\
+    \n\r\n\x05\x04\x1b\x02\0\x03\x12\x04\x83\x01\x12\x13\n\x0c\n\x04\x04\x1b\
+    \x02\x01\x12\x04\x84\x01\x02\x12\n\r\n\x05\x04\x1b\x02\x01\x05\x12\x04\
+    \x84\x01\x02\x07\n\r\n\x05\x04\x1b\x02\x01\x01\x12\x04\x84\x01\x08\r\n\r\
+    \n\x05\x04\x1b\x02\x01\x03\x12\x04\x84\x01\x10\x11\n\n\n\x02\x04\x1c\x12\
+    \x04\x87\x01\0)\n\x0b\n\x03\x04\x1c\x01\x12\x04\x87\x01\x08&\n\n\n\x02\
+    \x04\x1d\x12\x04\x89\x01\01\n\x0b\n\x03\x04\x1d\x01\x12\x04\x89\x01\x08\
+    \x1a\n\x0c\n\x04\x04\x1d\x02\0\x12\x04\x89\x01\x1d/\n\r\n\x05\x04\x1d\
+    \x02\0\x05\x12\x04\x89\x01\x1d\"\n\r\n\x05\x04\x1d\x02\0\x01\x12\x04\x89\
+    \x01#*\n\r\n\x05\x04\x1d\x02\0\x03\x12\x04\x89\x01-.\n\n\n\x02\x04\x1e\
+    \x12\x04\x8b\x01\0%\n\x0b\n\x03\x04\x1e\x01\x12\x04\x8b\x01\x08\"\n\n\n\
+    \x02\x04\x1f\x12\x04\x8d\x01\0,\n\x0b\n\x03\x04\x1f\x01\x12\x04\x8d\x01\
+    \x08\x16\n\x0c\n\x04\x04\x1f\x02\0\x12\x04\x8d\x01\x19*\n\r\n\x05\x04\
+    \x1f\x02\0\x05\x12\x04\x8d\x01\x19\x1e\n\r\n\x05\x04\x1f\x02\0\x01\x12\
+    \x04\x8d\x01\x1f%\n\r\n\x05\x04\x1f\x02\0\x03\x12\x04\x8d\x01()\n\n\n\
+    \x02\x04\x20\x12\x04\x8e\x01\02\n\x0b\n\x03\x04\x20\x01\x12\x04\x8e\x01\
+    \x08\x1e\n\x0c\n\x04\x04\x20\x02\0\x12\x04\x8e\x01!0\n\r\n\x05\x04\x20\
+    \x02\0\x05\x12\x04\x8e\x01!&\n\r\n\x05\x04\x20\x02\0\x01\x12\x04\x8e\x01\
+    '+\n\r\n\x05\x04\x20\x02\0\x03\x12\x04\x8e\x01./\n\x0c\n\x02\x04!\x12\
+    \x06\x90\x01\0\x9b\x01\x01\n\x0b\n\x03\x04!\x01\x12\x04\x90\x01\x08#\n\
+    \x0c\n\x04\x04!\x02\0\x12\x04\x91\x01\x02\x18\n\r\n\x05\x04!\x02\0\x05\
+    \x12\x04\x91\x01\x02\x07\n\r\n\x05\x04!\x02\0\x01\x12\x04\x91\x01\x08\
+    \x13\n\r\n\x05\x04!\x02\0\x03\x12\x04\x91\x01\x16\x17\n\x0c\n\x04\x04!\
+    \x02\x01\x12\x04\x92\x01\x02\x1a\n\r\n\x05\x04!\x02\x01\x05\x12\x04\x92\
+    \x01\x02\x07\n\r\n\x05\x04!\x02\x01\x01\x12\x04\x92\x01\x08\x15\n\r\n\
+    \x05\x04!\x02\x01\x03\x12\x04\x92\x01\x18\x19\n\x0c\n\x04\x04!\x02\x02\
+    \x12\x04\x93\x01\x02\x19\n\r\n\x05\x04!\x02\x02\x05\x12\x04\x93\x01\x02\
+    \x08\n\r\n\x05\x04!\x02\x02\x01\x12\x04\x93\x01\t\x14\n\r\n\x05\x04!\x02\
+    \x02\x03\x12\x04\x93\x01\x17\x18\n\x0c\n\x04\x04!\x02\x03\x12\x04\x94\
+    \x01\x02\x1e\n\r\n\x05\x04!\x02\x03\x05\x12\x04\x94\x01\x02\x08\n\r\n\
+    \x05\x04!\x02\x03\x01\x12\x04\x94\x01\t\x19\n\r\n\x05\x04!\x02\x03\x03\
+    \x12\x04\x94\x01\x1c\x1d\n\x0c\n\x04\x04!\x02\x04\x12\x04\x95\x01\x02\
+    \x1f\n\r\n\x05\x04!\x02\x04\x05\x12\x04\x95\x01\x02\x08\n\r\n\x05\x04!\
+    \x02\x04\x01\x12\x04\x95\x01\t\x1a\n\r\n\x05\x04!\x02\x04\x03\x12\x04\
+    \x95\x01\x1d\x1e\n\x0c\n\x04\x04!\x02\x05\x12\x04\x96\x01\x02!\n\r\n\x05\
+    \x04!\x02\x05\x05\x12\x04\x96\x01\x02\x08\n\r\n\x05\x04!\x02\x05\x01\x12\
+    \x04\x96\x01\t\x1c\n\r\n\x05\x04!\x02\x05\x03\x12\x04\x96\x01\x1f\x20\n\
+    \x0c\n\x04\x04!\x02\x06\x12\x04\x97\x01\x02\x16\n\r\n\x05\x04!\x02\x06\
+    \x05\x12\x04\x97\x01\x02\x07\n\r\n\x05\x04!\x02\x06\x01\x12\x04\x97\x01\
+    \x08\x11\n\r\n\x05\x04!\x02\x06\x03\x12\x04\x97\x01\x14\x15\n\x0c\n\x04\
+    \x04!\x02\x07\x12\x04\x98\x01\x02\x14\n\r\n\x05\x04!\x02\x07\x05\x12\x04\
+    \x98\x01\x02\x08\n\r\n\x05\x04!\x02\x07\x01\x12\x04\x98\x01\t\x0f\n\r\n\
+    \x05\x04!\x02\x07\x03\x12\x04\x98\x01\x12\x13\n\x0c\n\x04\x04!\x02\x08\
+    \x12\x04\x99\x01\x02\"\n\r\n\x05\x04!\x02\x08\x05\x12\x04\x99\x01\x02\
+    \x08\n\r\n\x05\x04!\x02\x08\x01\x12\x04\x99\x01\t\x1d\n\r\n\x05\x04!\x02\
+    \x08\x03\x12\x04\x99\x01\x20!\n\x0c\n\x04\x04!\x02\t\x12\x04\x9a\x01\x02\
+    \x16\n\r\n\x05\x04!\x02\t\x05\x12\x04\x9a\x01\x02\x08\n\r\n\x05\x04!\x02\
+    \t\x01\x12\x04\x9a\x01\t\x10\n\r\n\x05\x04!\x02\t\x03\x12\x04\x9a\x01\
+    \x13\x15\n\x0c\n\x02\x04\"\x12\x06\x9c\x01\0\x9e\x01\x01\n\x0b\n\x03\x04\
+    \"\x01\x12\x04\x9c\x01\x08+\n\x0c\n\x04\x04\"\x02\0\x12\x04\x9d\x01\x02\
+    \x1b\n\r\n\x05\x04\"\x02\0\x05\x12\x04\x9d\x01\x02\x07\n\r\n\x05\x04\"\
+    \x02\0\x01\x12\x04\x9d\x01\x08\x16\n\r\n\x05\x04\"\x02\0\x03\x12\x04\x9d\
+    \x01\x19\x1a\n\x0c\n\x02\x04#\x12\x06\xa0\x01\0\xa5\x01\x01\n\x0b\n\x03\
+    \x04#\x01\x12\x04\xa0\x01\x08\x1c\n\x0c\n\x04\x04#\x02\0\x12\x04\xa1\x01\
+    \x02\x18\n\r\n\x05\x04#\x02\0\x05\x12\x04\xa1\x01\x02\x07\n\r\n\x05\x04#\
+    \x02\0\x01\x12\x04\xa1\x01\x08\x13\n\r\n\x05\x04#\x02\0\x03\x12\x04\xa1\
+    \x01\x16\x17\n\x0c\n\x04\x04#\x02\x01\x12\x04\xa2\x01\x02\x1e\n\r\n\x05\
+    \x04#\x02\x01\x05\x12\x04\xa2\x01\x02\x08\n\r\n\x05\x04#\x02\x01\x01\x12\
+    \x04\xa2\x01\t\x19\n\r\n\x05\x04#\x02\x01\x03\x12\x04\xa2\x01\x1c\x1d\n\
+    \x0c\n\x04\x04#\x02\x02\x12\x04\xa3\x01\x02!\n\r\n\x05\x04#\x02\x02\x05\
+    \x12\x04\xa3\x01\x02\x08\n\r\n\x05\x04#\x02\x02\x01\x12\x04\xa3\x01\t\
+    \x1c\n\r\n\x05\x04#\x02\x02\x03\x12\x04\xa3\x01\x1f\x20\n\x0c\n\x04\x04#\
+    \x02\x03\x12\x04\xa4\x01\x02$\n\r\n\x05\x04#\x02\x03\x04\x12\x04\xa4\x01\
+    \x02\n\n\r\n\x05\x04#\x02\x03\x05\x12\x04\xa4\x01\x0b\x10\n\r\n\x05\x04#\
+    \x02\x03\x01\x12\x04\xa4\x01\x11\x1f\n\r\n\x05\x04#\x02\x03\x03\x12\x04\
+    \xa4\x01\"#\n\x0c\n\x02\x04$\x12\x06\xa6\x01\0\xa8\x01\x01\n\x0b\n\x03\
+    \x04$\x01\x12\x04\xa6\x01\x08$\n\x0c\n\x04\x04$\x02\0\x12\x04\xa7\x01\
+    \x02\x1b\n\r\n\x05\x04$\x02\0\x05\x12\x04\xa7\x01\x02\x06\n\r\n\x05\x04$\
+    \x02\0\x01\x12\x04\xa7\x01\x07\x16\n\r\n\x05\x04$\x02\0\x03\x12\x04\xa7\
+    \x01\x19\x1a\n\x0c\n\x02\x04%\x12\x06\xaa\x01\0\xad\x01\x01\n\x0b\n\x03\
+    \x04%\x01\x12\x04\xaa\x01\x08\x20\n\x0c\n\x04\x04%\x02\0\x12\x04\xab\x01\
+    \x02\x18\n\r\n\x05\x04%\x02\0\x05\x12\x04\xab\x01\x02\x07\n\r\n\x05\x04%\
+    \x02\0\x01\x12\x04\xab\x01\x08\x13\n\r\n\x05\x04%\x02\0\x03\x12\x04\xab\
+    \x01\x16\x17\n\x0c\n\x04\x04%\x02\x01\x12\x04\xac\x01\x02\x1a\n\r\n\x05\
+    \x04%\x02\x01\x05\x12\x04\xac\x01\x02\x07\n\r\n\x05\x04%\x02\x01\x01\x12\
+    \x04\xac\x01\x08\x15\n\r\n\x05\x04%\x02\x01\x03\x12\x04\xac\x01\x18\x19\
+    \n\xf1\x01\n\x02\x04&\x12\x06\xb1\x01\0\xc6\x01\x01\x1a\xe2\x01\x20Verif\
+    icationDetails\x20must\x20have\x20same\x20members\x20with\x20Verificatio\
+    nDetails\x20in\x20\"sgxvm/proto/ffi.proto\"\n\x20including\x20verificati\
+    on\x20type\x20and\x20verification\x20id\x20as\x20key.\n\x20But\x20the\
+    \x20member\x20types\x20can\x20be\x20different,\x20such\x20as\x20string(a\
+    ddress)\x20to\x20bytes\n\n\x0b\n\x03\x04&\x01\x12\x04\xb1\x01\x08\x1b\n!\
+    \n\x04\x04&\x02\0\x12\x04\xb3\x01\x02\x1e\x1a\x13\x20Verification\x20typ\
+    e\n\n\r\n\x05\x04&\x02\0\x05\x12\x04\xb3\x01\x02\x08\n\r\n\x05\x04&\x02\
+    \0\x01\x12\x04\xb3\x01\t\x19\n\r\n\x05\x04&\x02\0\x03\x12\x04\xb3\x01\
+    \x1c\x1d\n\x1f\n\x04\x04&\x02\x01\x12\x04\xb5\x01\x02\x1b\x1a\x11\x20Ver\
+    ification\x20Id\n\n\r\n\x05\x04&\x02\x01\x05\x12\x04\xb5\x01\x02\x07\n\r\
+    \n\x05\x04&\x02\x01\x01\x12\x04\xb5\x01\x08\x16\n\r\n\x05\x04&\x02\x01\
+    \x03\x12\x04\xb5\x01\x19\x1a\n+\n\x04\x04&\x02\x02\x12\x04\xb7\x01\x02\
+    \x1a\x1a\x1d\x20Verification\x20issuer\x20address\n\n\r\n\x05\x04&\x02\
+    \x02\x05\x12\x04\xb7\x01\x02\x07\n\r\n\x05\x04&\x02\x02\x01\x12\x04\xb7\
+    \x01\x08\x15\n\r\n\x05\x04&\x02\x02\x03\x12\x04\xb7\x01\x18\x19\n6\n\x04\
+    \x04&\x02\x03\x12\x04\xb9\x01\x02\x19\x1a(\x20From\x20which\x20chain\x20\
+    proof\x20was\x20transferred\n\n\r\n\x05\x04&\x02\x03\x05\x12\x04\xb9\x01\
+    \x02\x08\n\r\n\x05\x04&\x02\x03\x01\x12\x04\xb9\x01\t\x14\n\r\n\x05\x04&\
+    \x02\x03\x03\x12\x04\xb9\x01\x17\x18\n+\n\x04\x04&\x02\x04\x12\x04\xbb\
+    \x01\x02\x1f\x1a\x1d\x20Original\x20issuance\x20timestamp\n\n\r\n\x05\
+    \x04&\x02\x04\x05\x12\x04\xbb\x01\x02\x08\n\r\n\x05\x04&\x02\x04\x01\x12\
+    \x04\xbb\x01\t\x1a\n\r\n\x05\x04&\x02\x04\x03\x12\x04\xbb\x01\x1d\x1e\n-\
+    \n\x04\x04&\x02\x05\x12\x04\xbd\x01\x02!\x1a\x1f\x20Original\x20expirati\
+    on\x20timestamp\n\n\r\n\x05\x04&\x02\x05\x05\x12\x04\xbd\x01\x02\x08\n\r\
+    \n\x05\x04&\x02\x05\x01\x12\x04\xbd\x01\t\x1c\n\r\n\x05\x04&\x02\x05\x03\
+    \x12\x04\xbd\x01\x1f\x20\n.\n\x04\x04&\x02\x06\x12\x04\xbf\x01\x02\x19\
+    \x1a\x20\x20Original\x20proof\x20data\x20(ZK-proof)\n\n\r\n\x05\x04&\x02\
+    \x06\x05\x12\x04\xbf\x01\x02\x07\n\r\n\x05\x04&\x02\x06\x01\x12\x04\xbf\
+    \x01\x08\x14\n\r\n\x05\x04&\x02\x06\x03\x12\x04\xbf\x01\x17\x18\n(\n\x04\
+    \x04&\x02\x07\x12\x04\xc1\x01\x02\x14\x1a\x1a\x20ZK-proof\x20original\
+    \x20schema\n\n\r\n\x05\x04&\x02\x07\x05\x12\x04\xc1\x01\x02\x08\n\r\n\
+    \x05\x04&\x02\x07\x01\x12\x04\xc1\x01\t\x0f\n\r\n\x05\x04&\x02\x07\x03\
+    \x12\x04\xc1\x01\x12\x13\nN\n\x04\x04&\x02\x08\x12\x04\xc3\x01\x02\"\x1a\
+    @\x20Verification\x20id\x20for\x20checking(KYC/KYB/AML\x20etc)\x20from\
+    \x20issuer\x20side\n\n\r\n\x05\x04&\x02\x08\x05\x12\x04\xc3\x01\x02\x08\
+    \n\r\n\x05\x04&\x02\x08\x01\x12\x04\xc3\x01\t\x1d\n\r\n\x05\x04&\x02\x08\
+    \x03\x12\x04\xc3\x01\x20!\n\x17\n\x04\x04&\x02\t\x12\x04\xc5\x01\x02\x16\
+    \x1a\t\x20Version\n\n\r\n\x05\x04&\x02\t\x05\x12\x04\xc5\x01\x02\x08\n\r\
+    \n\x05\x04&\x02\t\x01\x12\x04\xc5\x01\t\x10\n\r\n\x05\x04&\x02\t\x03\x12\
+    \x04\xc5\x01\x13\x15\n\x0c\n\x02\x04'\x12\x06\xc7\x01\0\xc9\x01\x01\n\
+    \x0b\n\x03\x04'\x01\x12\x04\xc7\x01\x08(\n\x0c\n\x04\x04'\x02\0\x12\x04\
+    \xc8\x01\x02(\n\r\n\x05\x04'\x02\0\x04\x12\x04\xc8\x01\x02\n\n\r\n\x05\
+    \x04'\x02\0\x06\x12\x04\xc8\x01\x0b\x1e\n\r\n\x05\x04'\x02\0\x01\x12\x04\
+    \xc8\x01\x1f#\n\r\n\x05\x04'\x02\0\x03\x12\x04\xc8\x01&'\n\x0c\n\x02\x04\
+    (\x12\x06\xcb\x01\0\xde\x01\x01\n\x0b\n\x03\x04(\x01\x12\x04\xcb\x01\x08\
+    \x15\n\x0e\n\x04\x04(\x08\0\x12\x06\xcc\x01\x02\xdd\x01\x03\n\r\n\x05\
+    \x04(\x08\0\x01\x12\x04\xcc\x01\x08\x0b\n\x0c\n\x04\x04(\x02\0\x12\x04\
+    \xcd\x01\x04#\n\r\n\x05\x04(\x02\0\x06\x12\x04\xcd\x01\x04\x13\n\r\n\x05\
+    \x04(\x02\0\x01\x12\x04\xcd\x01\x14\x1e\n\r\n\x05\x04(\x02\0\x03\x12\x04\
+    \xcd\x01!\"\n\x0c\n\x04\x04(\x02\x01\x12\x04\xce\x01\x04)\n\r\n\x05\x04(\
+    \x02\x01\x06\x12\x04\xce\x01\x04\x16\n\r\n\x05\x04(\x02\x01\x01\x12\x04\
+    \xce\x01\x17$\n\r\n\x05\x04(\x02\x01\x03\x12\x04\xce\x01'(\n\x0c\n\x04\
+    \x04(\x02\x02\x12\x04\xcf\x01\x04%\n\r\n\x05\x04(\x02\x02\x06\x12\x04\
+    \xcf\x01\x04\x14\n\r\n\x05\x04(\x02\x02\x01\x12\x04\xcf\x01\x15\x20\n\r\
+    \n\x05\x04(\x02\x02\x03\x12\x04\xcf\x01#$\n\x0c\n\x04\x04(\x02\x03\x12\
+    \x04\xd0\x01\x04(\n\r\n\x05\x04(\x02\x03\x06\x12\x04\xd0\x01\x04\x17\n\r\
+    \n\x05\x04(\x02\x03\x01\x12\x04\xd0\x01\x18#\n\r\n\x05\x04(\x02\x03\x03\
+    \x12\x04\xd0\x01&'\n\x0c\n\x04\x04(\x02\x04\x12\x04\xd1\x01\x04)\n\r\n\
+    \x05\x04(\x02\x04\x06\x12\x04\xd1\x01\x04\x1b\n\r\n\x05\x04(\x02\x04\x01\
+    \x12\x04\xd1\x01\x1c$\n\r\n\x05\x04(\x02\x04\x03\x12\x04\xd1\x01'(\n\x0c\
+    \n\x04\x04(\x02\x05\x12\x04\xd2\x01\x04)\n\r\n\x05\x04(\x02\x05\x06\x12\
+    \x04\xd2\x01\x04\x1b\n\r\n\x05\x04(\x02\x05\x01\x12\x04\xd2\x01\x1c$\n\r\
+    \n\x05\x04(\x02\x05\x03\x12\x04\xd2\x01'(\n\x0c\n\x04\x04(\x02\x06\x12\
+    \x04\xd3\x01\x04/\n\r\n\x05\x04(\x02\x06\x06\x12\x04\xd3\x01\x04\x1e\n\r\
+    \n\x05\x04(\x02\x06\x01\x12\x04\xd3\x01\x1f*\n\r\n\x05\x04(\x02\x06\x03\
+    \x12\x04\xd3\x01-.\n\x0c\n\x04\x04(\x02\x07\x12\x04\xd4\x01\x041\n\r\n\
+    \x05\x04(\x02\x07\x06\x12\x04\xd4\x01\x04\x1a\n\r\n\x05\x04(\x02\x07\x01\
+    \x12\x04\xd4\x01\x1b,\n\r\n\x05\x04(\x02\x07\x03\x12\x04\xd4\x01/0\n\x0c\
+    \n\x04\x04(\x02\x08\x12\x04\xd5\x01\x041\n\r\n\x05\x04(\x02\x08\x06\x12\
+    \x04\xd5\x01\x04\x1a\n\r\n\x05\x04(\x02\x08\x01\x12\x04\xd5\x01\x1b,\n\r\
+    \n\x05\x04(\x02\x08\x03\x12\x04\xd5\x01/0\n\x0c\n\x04\x04(\x02\t\x12\x04\
+    \xd6\x01\x04\x1c\n\r\n\x05\x04(\x02\t\x06\x12\x04\xd6\x01\x04\x0f\n\r\n\
+    \x05\x04(\x02\t\x01\x12\x04\xd6\x01\x10\x16\n\r\n\x05\x04(\x02\t\x03\x12\
+    \x04\xd6\x01\x19\x1b\n\x0c\n\x04\x04(\x02\n\x12\x04\xd7\x01\x042\n\r\n\
+    \x05\x04(\x02\n\x06\x12\x04\xd7\x01\x04\x1a\n\r\n\x05\x04(\x02\n\x01\x12\
+    \x04\xd7\x01\x1b,\n\r\n\x05\x04(\x02\n\x03\x12\x04\xd7\x01/1\n\x0c\n\x04\
+    \x04(\x02\x0b\x12\x04\xd8\x01\x04*\n\r\n\x05\x04(\x02\x0b\x06\x12\x04\
+    \xd8\x01\x04\x16\n\r\n\x05\x04(\x02\x0b\x01\x12\x04\xd8\x01\x17$\n\r\n\
+    \x05\x04(\x02\x0b\x03\x12\x04\xd8\x01')\n\x0c\n\x04\x04(\x02\x0c\x12\x04\
+    \xd9\x01\x04\"\n\r\n\x05\x04(\x02\x0c\x06\x12\x04\xd9\x01\x04\x12\n\r\n\
+    \x05\x04(\x02\x0c\x01\x12\x04\xd9\x01\x13\x1c\n\r\n\x05\x04(\x02\x0c\x03\
+    \x12\x04\xd9\x01\x1f!\n\x0c\n\x04\x04(\x02\r\x12\x04\xda\x01\x04<\n\r\n\
+    \x05\x04(\x02\r\x06\x12\x04\xda\x01\x04\x1f\n\r\n\x05\x04(\x02\r\x01\x12\
+    \x04\xda\x01\x206\n\r\n\x05\x04(\x02\r\x03\x12\x04\xda\x019;\n\x0c\n\x04\
+    \x04(\x02\x0e\x12\x04\xdb\x01\x04.\n\r\n\x05\x04(\x02\x0e\x06\x12\x04\
+    \xdb\x01\x04\x18\n\r\n\x05\x04(\x02\x0e\x01\x12\x04\xdb\x01\x19(\n\r\n\
+    \x05\x04(\x02\x0e\x03\x12\x04\xdb\x01+-\n\x0c\n\x04\x04(\x02\x0f\x12\x04\
+    \xdc\x01\x046\n\r\n\x05\x04(\x02\x0f\x06\x12\x04\xdc\x01\x04\x1c\n\r\n\
+    \x05\x04(\x02\x0f\x01\x12\x04\xdc\x01\x1d0\n\r\n\x05\x04(\x02\x0f\x03\
+    \x12\x04\xdc\x0135\nF\n\x02\x04)\x12\x06\xe1\x01\0\xeb\x01\x01\x1a8\x20M\
+    essage\x20with\x20data\x20required\x20to\x20execute\x20`call`\x20operati\
+    on\n\n\x0b\n\x03\x04)\x01\x12\x04\xe1\x01\x08\x17\n\x0c\n\x04\x04)\x02\0\
+    \x12\x04\xe2\x01\x02\x11\n\r\n\x05\x04)\x02\0\x05\x12\x04\xe2\x01\x02\
+    \x07\n\r\n\x05\x04)\x02\0\x01\x12\x04\xe2\x01\x08\x0c\n\r\n\x05\x04)\x02\
+    \0\x03\x12\x04\xe2\x01\x0f\x10\n\x0c\n\x04\x04)\x02\x01\x12\x04\xe3\x01\
+    \x02\x0f\n\r\n\x05\x04)\x02\x01\x05\x12\x04\xe3\x01\x02\x07\n\r\n\x05\
+    \x04)\x02\x01\x01\x12\x04\xe3\x01\x08\n\n\r\n\x05\x04)\x02\x01\x03\x12\
+    \x04\xe3\x01\r\x0e\n\x0c\n\x04\x04)\x02\x02\x12\x04\xe4\x01\x02\x11\n\r\
+    \n\x05\x04)\x02\x02\x05\x12\x04\xe4\x01\x02\x07\n\r\n\x05\x04)\x02\x02\
+    \x01\x12\x04\xe4\x01\x08\x0c\n\r\n\x05\x04)\x02\x02\x03\x12\x04\xe4\x01\
+    \x0f\x10\n\x0c\n\x04\x04)\x02\x03\x12\x04\xe5\x01\x02\x16\n\r\n\x05\x04)\
+    \x02\x03\x05\x12\x04\xe5\x01\x02\x08\n\r\n\x05\x04)\x02\x03\x01\x12\x04\
+    \xe5\x01\t\x11\n\r\n\x05\x04)\x02\x03\x03\x12\x04\xe5\x01\x14\x15\n\x0c\
+    \n\x04\x04)\x02\x04\x12\x04\xe6\x01\x02\x12\n\r\n\x05\x04)\x02\x04\x05\
+    \x12\x04\xe6\x01\x02\x07\n\r\n\x05\x04)\x02\x04\x01\x12\x04\xe6\x01\x08\
+    \r\n\r\n\x05\x04)\x02\x04\x03\x12\x04\xe6\x01\x10\x11\n\x0c\n\x04\x04)\
+    \x02\x05\x12\x04\xe7\x01\x02)\n\r\n\x05\x04)\x02\x05\x04\x12\x04\xe7\x01\
+    \x02\n\n\r\n\x05\x04)\x02\x05\x06\x12\x04\xe7\x01\x0b\x19\n\r\n\x05\x04)\
+    \x02\x05\x01\x12\x04\xe7\x01\x1a$\n\r\n\x05\x04)\x02\x05\x03\x12\x04\xe7\
+    \x01'(\n\x0c\n\x04\x04)\x02\x06\x12\x04\xe8\x01\x02\x12\n\r\n\x05\x04)\
+    \x02\x06\x05\x12\x04\xe8\x01\x02\x06\n\r\n\x05\x04)\x02\x06\x01\x12\x04\
+    \xe8\x01\x07\r\n\r\n\x05\x04)\x02\x06\x03\x12\x04\xe8\x01\x10\x11\n\x0c\
+    \n\x04\x04)\x02\x07\x12\x04\xe9\x01\x02\x13\n\r\n\x05\x04)\x02\x07\x05\
+    \x12\x04\xe9\x01\x02\x08\n\r\n\x05\x04)\x02\x07\x01\x12\x04\xe9\x01\t\
+    \x0e\n\r\n\x05\x04)\x02\x07\x03\x12\x04\xe9\x01\x11\x12\n\x0c\n\x04\x04)\
+    \x02\x08\x12\x04\xea\x01\x02\x17\n\r\n\x05\x04)\x02\x08\x05\x12\x04\xea\
+    \x01\x02\x06\n\r\n\x05\x04)\x02\x08\x01\x12\x04\xea\x01\x07\x12\n\r\n\
+    \x05\x04)\x02\x08\x03\x12\x04\xea\x01\x15\x16\nH\n\x02\x04*\x12\x06\xee\
+    \x01\0\xf6\x01\x01\x1a:\x20Message\x20with\x20data\x20required\x20to\x20\
+    execute\x20`create`\x20operation\n\n\x0b\n\x03\x04*\x01\x12\x04\xee\x01\
+    \x08\x19\n\x0c\n\x04\x04*\x02\0\x12\x04\xef\x01\x02\x11\n\r\n\x05\x04*\
+    \x02\0\x05\x12\x04\xef\x01\x02\x07\n\r\n\x05\x04*\x02\0\x01\x12\x04\xef\
+    \x01\x08\x0c\n\r\n\x05\x04*\x02\0\x03\x12\x04\xef\x01\x0f\x10\n\x0c\n\
+    \x04\x04*\x02\x01\x12\x04\xf0\x01\x02\x11\n\r\n\x05\x04*\x02\x01\x05\x12\
+    \x04\xf0\x01\x02\x07\n\r\n\x05\x04*\x02\x01\x01\x12\x04\xf0\x01\x08\x0c\
+    \n\r\n\x05\x04*\x02\x01\x03\x12\x04\xf0\x01\x0f\x10\n\x0c\n\x04\x04*\x02\
+    \x02\x12\x04\xf1\x01\x02\x16\n\r\n\x05\x04*\x02\x02\x05\x12\x04\xf1\x01\
+    \x02\x08\n\r\n\x05\x04*\x02\x02\x01\x12\x04\xf1\x01\t\x11\n\r\n\x05\x04*\
+    \x02\x02\x03\x12\x04\xf1\x01\x14\x15\n\x0c\n\x04\x04*\x02\x03\x12\x04\
+    \xf2\x01\x02\x12\n\r\n\x05\x04*\x02\x03\x05\x12\x04\xf2\x01\x02\x07\n\r\
+    \n\x05\x04*\x02\x03\x01\x12\x04\xf2\x01\x08\r\n\r\n\x05\x04*\x02\x03\x03\
+    \x12\x04\xf2\x01\x10\x11\n\x0c\n\x04\x04*\x02\x04\x12\x04\xf3\x01\x02)\n\
+    \r\n\x05\x04*\x02\x04\x04\x12\x04\xf3\x01\x02\n\n\r\n\x05\x04*\x02\x04\
+    \x06\x12\x04\xf3\x01\x0b\x19\n\r\n\x05\x04*\x02\x04\x01\x12\x04\xf3\x01\
+    \x1a$\n\r\n\x05\x04*\x02\x04\x03\x12\x04\xf3\x01'(\n\x0c\n\x04\x04*\x02\
+    \x05\x12\x04\xf4\x01\x02\x12\n\r\n\x05\x04*\x02\x05\x05\x12\x04\xf4\x01\
+    \x02\x06\n\r\n\x05\x04*\x02\x05\x01\x12\x04\xf4\x01\x07\r\n\r\n\x05\x04*\
+    \x02\x05\x03\x12\x04\xf4\x01\x10\x11\n\x0c\n\x04\x04*\x02\x06\x12\x04\
+    \xf5\x01\x02\x13\n\r\n\x05\x04*\x02\x06\x05\x12\x04\xf5\x01\x02\x08\n\r\
+    \n\x05\x04*\x02\x06\x01\x12\x04\xf5\x01\t\x0e\n\r\n\x05\x04*\x02\x06\x03\
+    \x12\x04\xf5\x01\x11\x12\n3\n\x02\x04+\x12\x06\xf9\x01\0\xfc\x01\x01\x1a\
+    %\x20Request\x20to\x20execute\x20`call`\x20operation\n\n\x0b\n\x03\x04+\
+    \x01\x12\x04\xf9\x01\x08\x18\n\x0c\n\x04\x04+\x02\0\x12\x04\xfa\x01\x02\
+    \x1d\n\r\n\x05\x04+\x02\0\x06\x12\x04\xfa\x01\x02\x11\n\r\n\x05\x04+\x02\
+    \0\x01\x12\x04\xfa\x01\x12\x18\n\r\n\x05\x04+\x02\0\x03\x12\x04\xfa\x01\
+    \x1b\x1c\n\x0c\n\x04\x04+\x02\x01\x12\x04\xfb\x01\x02!\n\r\n\x05\x04+\
+    \x02\x01\x06\x12\x04\xfb\x01\x02\x14\n\r\n\x05\x04+\x02\x01\x01\x12\x04\
+    \xfb\x01\x15\x1c\n\r\n\x05\x04+\x02\x01\x03\x12\x04\xfb\x01\x1f\x20\n5\n\
+    \x02\x04,\x12\x06\xff\x01\0\x82\x02\x01\x1a'\x20Request\x20to\x20execute\
+    \x20`create`\x20operation\n\n\x0b\n\x03\x04,\x01\x12\x04\xff\x01\x08\x1a\
+    \n\x0c\n\x04\x04,\x02\0\x12\x04\x80\x02\x02\x1f\n\r\n\x05\x04,\x02\0\x06\
+    \x12\x04\x80\x02\x02\x13\n\r\n\x05\x04,\x02\0\x01\x12\x04\x80\x02\x14\
+    \x1a\n\r\n\x05\x04,\x02\0\x03\x12\x04\x80\x02\x1d\x1e\n\x0c\n\x04\x04,\
+    \x02\x01\x12\x04\x81\x02\x02!\n\r\n\x05\x04,\x02\x01\x06\x12\x04\x81\x02\
+    \x02\x14\n\r\n\x05\x04,\x02\x01\x01\x12\x04\x81\x02\x15\x1c\n\r\n\x05\
+    \x04,\x02\x01\x03\x12\x04\x81\x02\x1f\x20\n1\n\x02\x04-\x12\x06\x85\x02\
+    \0\x87\x02\x01\x1a#\x20Request\x20to\x20obtain\x20node\x20public\x20key\
+    \n\n\x0b\n\x03\x04-\x01\x12\x04\x85\x02\x08\x1c\n\x0c\n\x04\x04-\x02\0\
+    \x12\x04\x86\x02\x02\x19\n\r\n\x05\x04-\x02\0\x05\x12\x04\x86\x02\x02\
+    \x08\n\r\n\x05\x04-\x02\0\x01\x12\x04\x86\x02\t\x14\n\r\n\x05\x04-\x02\0\
+    \x03\x12\x04\x86\x02\x17\x18\n+\n\x02\x04.\x12\x04\x8a\x02\06\x1a\x1f\
+    \x20Response\x20with\x20node\x20public\x20key\n\n\x0b\n\x03\x04.\x01\x12\
+    \x04\x8a\x02\x08\x1d\n\x0c\n\x04\x04.\x02\0\x12\x04\x8a\x02\x204\n\r\n\
+    \x05\x04.\x02\0\x05\x12\x04\x8a\x02\x20%\n\r\n\x05\x04.\x02\0\x01\x12\
+    \x04\x8a\x02&/\n\r\n\x05\x04.\x02\0\x03\x12\x04\x8a\x0223\n\x0c\n\x02\
+    \x04/\x12\x06\x8c\x02\0\x90\x02\x01\n\x0b\n\x03\x04/\x01\x12\x04\x8c\x02\
+    \x08\x11\n\x0c\n\x04\x04/\x02\0\x12\x04\x8d\x02\x02\x19\n\r\n\x05\x04/\
+    \x02\0\x05\x12\x04\x8d\x02\x02\x08\n\r\n\x05\x04/\x02\0\x01\x12\x04\x8d\
+    \x02\t\x14\n\r\n\x05\x04/\x02\0\x03\x12\x04\x8d\x02\x17\x18\n\x0c\n\x04\
+    \x04/\x02\x01\x12\x04\x8e\x02\x02\x1b\n\r\n\x05\x04/\x02\x01\x05\x12\x04\
+    \x8e\x02\x02\x08\n\r\n\x05\x04/\x02\x01\x01\x12\x04\x8e\x02\t\x16\n\r\n\
+    \x05\x04/\x02\x01\x03\x12\x04\x8e\x02\x19\x1a\n\x0c\n\x04\x04/\x02\x02\
+    \x12\x04\x8f\x02\x02\x1a\n\r\n\x05\x04/\x02\x02\x05\x12\x04\x8f\x02\x02\
+    \x07\n\r\n\x05\x04/\x02\x02\x01\x12\x04\x8f\x02\x08\x15\n\r\n\x05\x04/\
+    \x02\x02\x03\x12\x04\x8f\x02\x18\x19\n\x0c\n\x02\x040\x12\x06\x91\x02\0\
+    \x93\x02\x01\n\x0b\n\x03\x040\x01\x12\x04\x91\x02\x08\x1a\n\x0c\n\x04\
+    \x040\x02\0\x12\x04\x92\x02\x02\x20\n\r\n\x05\x040\x02\0\x04\x12\x04\x92\
+    \x02\x02\n\n\r\n\x05\x040\x02\0\x06\x12\x04\x92\x02\x0b\x14\n\r\n\x05\
+    \x040\x02\0\x01\x12\x04\x92\x02\x15\x1b\n\r\n\x05\x040\x02\0\x03\x12\x04\
+    \x92\x02\x1e\x1f\n\x0c\n\x02\x041\x12\x06\x95\x02\0\x9b\x02\x01\n\x0b\n\
+    \x03\x041\x01\x12\x04\x95\x02\x08\x12\n\x0e\n\x04\x041\x08\0\x12\x06\x96\
+    \x02\x02\x9a\x02\x03\n\r\n\x05\x041\x08\0\x01\x12\x04\x96\x02\x08\x0b\n\
+    \x0c\n\x04\x041\x02\0\x12\x04\x97\x02\x04%\n\r\n\x05\x041\x02\0\x06\x12\
+    \x04\x97\x02\x04\x14\n\r\n\x05\x041\x02\0\x01\x12\x04\x97\x02\x15\x20\n\
+    \r\n\x05\x041\x02\0\x03\x12\x04\x97\x02#$\n\x0c\n\x04\x041\x02\x01\x12\
+    \x04\x98\x02\x04)\n\r\n\x05\x041\x02\x01\x06\x12\x04\x98\x02\x04\x16\n\r\
+    \n\x05\x041\x02\x01\x01\x12\x04\x98\x02\x17$\n\r\n\x05\x041\x02\x01\x03\
+    \x12\x04\x98\x02'(\n\x0c\n\x04\x041\x02\x02\x12\x04\x99\x02\x04.\n\r\n\
+    \x05\x041\x02\x02\x06\x12\x04\x99\x02\x04\x18\n\r\n\x05\x041\x02\x02\x01\
+    \x12\x04\x99\x02\x19)\n\r\n\x05\x041\x02\x02\x03\x12\x04\x99\x02,-b\x06p\
+    roto3\
 ";
 
 static mut file_descriptor_proto_lazy: ::protobuf::lazy::Lazy<::protobuf::descriptor::FileDescriptorProto> = ::protobuf::lazy::Lazy {

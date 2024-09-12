@@ -24,26 +24,31 @@ else
 	Wrapper_build_feature += simulation_mode
 endif
 
+define proto-gen
+	@protoc --go_out=types --proto_path=../sgxvm/proto/ ../sgxvm/proto/ffi.proto
+	@protoc --go_out=types --proto_path=proto/ proto/node.proto
+	@cp types/github.com/SigmaGmbH/librustgo/types/* types/ && rm -rf types/github.com
+endef
+
 build:
 	@ENCLAVE_HOME=$(ENCLAVE_HOME) PRODUCTION_MODE=$(PRODUCTION_MODE) SGX_MODE=$(SGX_MODE) AS_MODE=$(AS_MODE) VERSION=$(VERSION) make build -C ../sgxvm/
 	@protoc --rust_out src/protobuf_generated/ proto/node.proto
 	@ENCLAVE_HOME=$(ENCLAVE_HOME) cargo build --features "$(Wrapper_build_feature)" --release
 	@cp $(CURDIR)/target/release/libsgxvm_wrapper.so $(CURDIR)/internal/api/$(Wrapper_lib)
-	@protoc --go_out=types --proto_path=../sgxvm/proto/ ../sgxvm/proto/ffi.proto
-	@protoc --go_out=types --proto_path=proto/ proto/node.proto
-	@cp types/github.com/SigmaGmbH/librustgo/types/* types/ && rm -rf types/github.com
+	$(call proto-gen)
 
 build_d:
 	@ENCLAVE_HOME=$(ENCLAVE_HOME) PRODUCTION_MODE=$(PRODUCTION_MODE) SGX_MODE=$(SGX_MODE) AS_MODE=$(AS_MODE) VERSION=$(VERSION) make build_d -C ../sgxvm/
 	@protoc --rust_out src/protobuf_generated/ proto/node.proto
 	@ENCLAVE_HOME=$(ENCLAVE_HOME) cargo build --features "$(Wrapper_build_feature)" --release
 	@cp $(CURDIR)/target/release/libsgxvm_wrapper.so $(CURDIR)/internal/api/$(Wrapper_lib)
-	@protoc --go_out=types --proto_path=../sgxvm/proto/ ../sgxvm/proto/ffi.proto
-	@protoc --go_out=types --proto_path=proto/ proto/node.proto
-	@cp types/github.com/SigmaGmbH/librustgo/types/* types/ && rm -rf types/github.com
+	$(call proto-gen)
 
 build_AS: build
 	go build -tags osusergo,netgo,attestationServer -o ../build/attestationServer ./cmd/attestation
 
 build_AS_d: build_d
 	go build -tags osusergo,netgo,attestationServer -o ../build/attestationServer ./cmd/attestation
+
+proto-gen:
+	$(call proto-gen)

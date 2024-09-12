@@ -207,16 +207,18 @@ message CosmosRequest {
     QueryInsertAccount insertAccount = 2;
     QueryContainsKey containsKey = 3;
     QueryGetAccountCode accountCode = 4;
-    QueryGetAccountStorageCell storageCell = 5;
-    QueryInsertAccountCode insertAccountCode = 6;
-    QueryInsertStorageCell insertStorageCell = 7;
-    QueryRemove remove = 8;
-    QueryRemoveStorageCell removeStorageCell = 9;
-    QueryRemoveStorage removeStorage = 10;
-    QueryBlockHash blockHash = 11;
-    QueryAddVerificationDetails addVerificationDetails = 12;
-    QueryHasVerification hasVerification = 13;
-    QueryGetVerificationData getVerificationData = 14;
+    QueryGetAccountCodeHash codeHash = 5;
+    QueryGetAccountCodeSize codeSize = 6;
+    QueryGetAccountStorageCell storageCell = 7;
+    QueryInsertAccountCode insertAccountCode = 8;
+    QueryInsertStorageCell insertStorageCell = 9;
+    QueryRemove remove = 10;
+    QueryRemoveStorageCell removeStorageCell = 11;
+    QueryRemoveStorage removeStorage = 12;
+    QueryBlockHash blockHash = 13;
+    QueryAddVerificationDetails addVerificationDetails = 14;
+    QueryHasVerification hasVerification = 15;
+    QueryGetVerificationData getVerificationData = 16;
   }
 }
 
