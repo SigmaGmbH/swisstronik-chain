@@ -5,7 +5,7 @@ use primitive_types::{H160, H256, U256};
 use crate::{coder, querier};
 use crate::protobuf_generated::ffi;
 use crate::storage::FFIStorage;
-use crate::types::{Storage, Vicinity};
+use crate::types::{Storage};
 
 pub struct TxEnvironment {
     pub chain_id: U256,
@@ -34,8 +34,6 @@ impl From<ffi::TransactionContext> for TxEnvironment {
 pub struct UpdatedBackend<'state> {
     // We keep GoQuerier to make it accessible for `OCALL` handlers
     pub querier: *mut querier::GoQuerier,
-    // Contains gas price and original sender
-    pub vicinity: Vicinity,
     // Data storage
     pub storage: &'state mut FFIStorage,
     // Emitted events
@@ -48,12 +46,10 @@ impl<'state> UpdatedBackend<'state> {
     pub fn new(
         querier: *mut querier::GoQuerier,
         storage: &'state mut FFIStorage,
-        vicinity: Vicinity,
         environment: TxEnvironment,
     ) -> Self {
         Self {
             querier,
-            vicinity,
             storage,
             logs: vec![],
             environment,

@@ -1,23 +1,21 @@
-use evm::executor::stack::{MemoryStackState, StackExecutor, StackSubstateMetadata};
-use evm::ExitReason;
+// use evm::executor::stack::{MemoryStackState, StackExecutor, StackSubstateMetadata};
+use evm::standard::TransactArgs;
 use primitive_types::{H160, H256, U256};
 use protobuf::Message;
 use protobuf::RepeatedField;
 use std::{string::String, vec::Vec};
 
-use crate::backend::{FFIBackend, TxEnvironment};
 use crate::encryption::{
     decrypt_transaction_data, encrypt_transaction_data, extract_public_key_and_data,
 };
 use crate::key_manager::utils::random_nonce;
 use crate::precompiles::EVMPrecompiles;
-use crate::protobuf_generated::ffi::{
-    AccessListItem, HandleTransactionResponse, Log, SGXVMCallRequest, SGXVMCreateRequest, Topic,
-};
+use crate::protobuf_generated::ffi::{AccessListItem, HandleTransactionResponse, Log, SGXVMCallParams, SGXVMCallRequest, SGXVMCreateParams, SGXVMCreateRequest, Topic};
 use crate::std::string::ToString;
 use crate::types::{ExecutionResult, ExtendedBackend, Vicinity, GASOMETER_CONFIG};
 use crate::AllocationWithResult;
 use crate::GoQuerier;
+use crate::updated_backend::{TxEnvironment, UpdatedBackend};
 
 /// Converts raw execution result into protobuf and returns it outside of enclave
 pub fn convert_and_allocate_transaction_result(
@@ -65,29 +63,37 @@ pub fn handle_call_request_inner(
 ) -> ExecutionResult {
     let params = data.params.unwrap();
     let context = data.context.unwrap();
-    let block_number = context.block_number;
 
-    let vicinity = Vicinity {
-        origin: H160::from_slice(&params.from),
-        nonce: U256::from(params.nonce),
-    };
-    let mut storage = crate::storage::FFIStorage::new(querier, context.timestamp, block_number);
-    let mut backend = FFIBackend::new(querier, &mut storage, vicinity, TxEnvironment::from(context));
+    let timestamp = context.timestamp;
+    let block_number = context.block_number;
+    let gas_price = U256::from_big_endian(&context.gas_price);
+
+    let tx_environment = TxEnvironment::from(context);
+    let mut storage = crate::storage::FFIStorage::new(querier, timestamp, block_number);
+    let mut backend = UpdatedBackend::new(querier, &mut storage, tx_environment);
+    let should_commit = params.commit;
 
     // We do not decrypt transaction if no tx.data provided, or provided explicit flag, that transaction is unencrypted
     let is_encrypted = params.data.len() != 0 && !params.unencrypted;
     match is_encrypted {
-        false => execute_call(
-            querier,
-            &mut backend,
-            params.gasLimit,
-            H160::from_slice(&params.from),
-            H160::from_slice(&params.to),
-            U256::from_big_endian(&params.value),
-            params.data,
-            parse_access_list(params.accessList),
-            params.commit,
-        ),
+        false => {
+            let tx_args = construct_call_args(params, gas_price, params.data.clone());
+
+            run_tx(
+                querier,
+                &mut backend,
+                tx_args,
+                should_commit,
+            );
+
+            // TODO: Fulfill
+            ExecutionResult {
+                logs: vec![],
+                data: vec![],
+                gas_used: 0,
+                vm_error: "".to_string(),
+            }
+        },
         true => {
             // Extract user public key and nonce from transaction data
             let (user_public_key, data, nonce) = match extract_public_key_and_data(params.data) {
@@ -113,17 +119,33 @@ pub fn handle_call_request_inner(
                 Vec::default()
             };
 
-            let mut exec_result = execute_call(
+            let tx_args = construct_call_args(params.clone(), gas_price, decrypted_data);
+
+            run_tx(
                 querier,
                 &mut backend,
-                params.gasLimit,
-                H160::from_slice(&params.from),
-                H160::from_slice(&params.to),
-                U256::from_big_endian(&params.value),
-                decrypted_data,
-                parse_access_list(params.accessList),
-                params.commit,
+                tx_args,
+                should_commit,
             );
+
+            let mut exec_result= ExecutionResult {
+                logs: vec![],
+                data: vec![],
+                gas_used: 0,
+                vm_error: "".to_string(),
+            };
+
+            // let mut exec_result = execute_call(
+            //     querier,
+            //     &mut backend,
+            //     params.gasLimit,
+            //     H160::from_slice(&params.from),
+            //     H160::from_slice(&params.to),
+            //     U256::from_big_endian(&params.value),
+            //     decrypted_data,
+            //     parse_access_list(params.accessList),
+            //     params.commit,
+            // );
 
             // If there is transaction with no incoming transaction data, use random nonce to encrypt output
             let nonce = if nonce.is_empty() {
@@ -173,23 +195,30 @@ pub fn handle_create_request_inner(
     let params = data.params.unwrap();
     let context = data.context.unwrap();
 
-    let vicinity = Vicinity {
-        origin: H160::from_slice(&params.from),
-        nonce: U256::from(params.nonce),
-    };
-    let mut storage = crate::storage::FFIStorage::new(querier, context.timestamp, context.block_number);
-    let mut backend = FFIBackend::new(querier, &mut storage, vicinity, TxEnvironment::from(context));
+    let block_number = context.block_number;
+    let timestamp = context.timestamp;
+    let gas_price = U256::from_big_endian(&context.gas_price);
+    let should_commit = params.commit;
 
-    execute_create(
+    let mut storage = crate::storage::FFIStorage::new(querier, timestamp, block_number);
+    let mut backend = UpdatedBackend::new(querier, &mut storage, TxEnvironment::from(context));
+
+
+    let tx_args = construct_create_args(params, gas_price);
+    run_tx(
         querier,
         &mut backend,
-        params.gasLimit,
-        H160::from_slice(&params.from),
-        U256::from_big_endian(&params.value),
-        params.data,
-        parse_access_list(params.accessList),
-        params.commit,
-    )
+        tx_args,
+        should_commit,
+    );
+
+    // TODO: Fill
+    ExecutionResult {
+        logs: vec![],
+        data: vec![],
+        gas_used: 0,
+        vm_error: "".to_string(),
+    }
 }
 
 /// Converts access list from RepeatedField to Vec
@@ -218,112 +247,146 @@ fn convert_topic_to_proto(topic: H256) -> Topic {
     protobuf_topic
 }
 
-/// Executes call to smart contract or transferring value
-/// * querier - GoQuerier which is used to interact with Go (Cosmos) from SGX Enclave
-/// * backend - EVM backend for reading and writting state
-/// * gas_limit - gas limit for transaction
-/// * from - transaction origin address
-/// * to - destination address
-/// * data - encoded params for smart contract call or arbitrary data
-/// * access_list - EIP-2930 access list
-/// * commit - should apply changes. Provide `false` if you want to simulate transaction, without state changes
-///
-/// Returns EVM execution result  
-fn execute_call(
+fn construct_call_args(params: SGXVMCallParams, gas_price: U256, data: Vec<u8>) -> TransactArgs {
+    TransactArgs::Call {
+        caller: H160::from(&params.from),
+        address: H160::from(&params.to),
+        value: U256::from_big_endian(&params.value),
+        data,
+        gas_limit: U256::from(params.gasLimit),
+        gas_price: gas_price,
+        access_list: parse_access_list(params.accessList),
+    }
+}
+
+fn construct_create_args(params: SGXVMCreateParams, gas_price: U256) -> TransactArgs {
+    TransactArgs::Create {
+        caller: H160::from(&params.from),
+        value: U256::from_big_endian(&params.value),
+        init_code: params.data,
+        salt: None,
+        gas_limit: U256::from(params.gasLimit),
+        gas_price: gas_price,
+        access_list: parse_access_list(params.accessList),
+    }
+}
+
+fn run_tx(
     querier: *mut GoQuerier,
-    backend: &mut impl ExtendedBackend,
-    gas_limit: u64,
-    from: H160,
-    to: H160,
-    value: U256,
-    data: Vec<u8>,
-    access_list: Vec<(H160, Vec<H256>)>,
-    commit: bool,
-) -> ExecutionResult {
-    let metadata = StackSubstateMetadata::new(gas_limit, &GASOMETER_CONFIG);
-    let state = MemoryStackState::new(metadata, backend);
-    let precompiles = EVMPrecompiles::new(querier);
-
-    let mut executor = StackExecutor::new_with_precompiles(state, &GASOMETER_CONFIG, &precompiles);
-    let (exit_reason, ret) = executor.transact_call(from, to, value, data, gas_limit, access_list);
-
-    let gas_used = executor.used_gas();
-    let exit_value = match handle_evm_result(exit_reason, ret) {
-        Ok(data) => data,
-        Err((err, data)) => {
-            return ExecutionResult::from_error(err, data, Some(gas_used));
-        }
-    };
-
-    if commit {
-        let (vals, logs) = executor.into_state().deconstruct();
-        if let Err(err) = backend.apply(vals, logs, false) {
-            return ExecutionResult::from_error(err.to_string(), Vec::default(), None)
-        }
-    }
-
-    ExecutionResult {
-        logs: backend.get_logs(),
-        data: exit_value,
-        gas_used,
-        vm_error: "".to_string(),
-    }
+    backend: &mut UpdatedBackend,
+    args: TransactArgs,
+    commit: bool
+) {
+    // TODO: Construct invoker
+    let result = evm::transact(args, None, backend, invoker);
 }
 
-/// Creates new smart contract
-/// * querier - GoQuerier which is used to interact with Go (Cosmos) from SGX Enclave
-/// * backend - EVM backend for reading and writting state
-/// * gas_limit - gas limit for contract creation
-/// * from - creator address of smart contract
-/// * data - encoded bytecode and creation params
-/// * access_list - EIP-2930 access list
-/// * commit - should apply changes. Provide `false` if you want to simulate contract creation, without state changes
-///
-/// Returns EVM execution result  
-fn execute_create(
-    querier: *mut GoQuerier,
-    backend: &mut impl ExtendedBackend,
-    gas_limit: u64,
-    from: H160,
-    value: U256,
-    data: Vec<u8>,
-    access_list: Vec<(H160, Vec<H256>)>,
-    commit: bool,
-) -> ExecutionResult {
-    let metadata = StackSubstateMetadata::new(gas_limit, &GASOMETER_CONFIG);
-    let state = MemoryStackState::new(metadata, backend);
-    let precompiles = EVMPrecompiles::new(querier);
-
-    let mut executor = StackExecutor::new_with_precompiles(state, &GASOMETER_CONFIG, &precompiles);
-    let (exit_reason, ret) = executor.transact_create(from, value, data, gas_limit, access_list);
-
-    let gas_used = executor.used_gas();
-    let exit_value = match handle_evm_result(exit_reason, ret) {
-        Ok(data) => data,
-        Err((err, data)) => return ExecutionResult::from_error(err, data, Some(gas_used)),
-    };
-    
-    if commit {
-        let (vals, logs) = executor.into_state().deconstruct();
-        if let Err(err) = backend.apply(vals, logs, false) {
-            return ExecutionResult::from_error(err.to_string(), Vec::default(), None)
-        }
-    }
-
-    ExecutionResult {
-        logs: backend.get_logs(),
-        data: exit_value,
-        gas_used,
-        vm_error: "".to_string(),
-    }
-}
-
-/// Handles an EVM result to return either a successful result or a (readable) error reason.
-fn handle_evm_result(exit_reason: ExitReason, data: Vec<u8>) -> Result<Vec<u8>, (String, Vec<u8>)> {
-    match exit_reason {
-        ExitReason::Succeed(_) => Ok(data),
-        ExitReason::Revert(err) => Err((format!("execution reverted: {:?}", err), data)),
-        ExitReason::Error(err) => Err((format!("evm error: {:?}", err), data)),
-        ExitReason::Fatal(err) => Err((format!("fatal evm error: {:?}", err), data)),
-    }
-}
+// /// Executes call to smart contract or transferring value
+// /// * querier - GoQuerier which is used to interact with Go (Cosmos) from SGX Enclave
+// /// * backend - EVM backend for reading and writting state
+// /// * gas_limit - gas limit for transaction
+// /// * from - transaction origin address
+// /// * to - destination address
+// /// * data - encoded params for smart contract call or arbitrary data
+// /// * access_list - EIP-2930 access list
+// /// * commit - should apply changes. Provide `false` if you want to simulate transaction, without state changes
+// ///
+// /// Returns EVM execution result
+// fn execute_call(
+//     querier: *mut GoQuerier,
+//     backend: &mut impl ExtendedBackend,
+//     gas_limit: u64,
+//     from: H160,
+//     to: H160,
+//     value: U256,
+//     data: Vec<u8>,
+//     access_list: Vec<(H160, Vec<H256>)>,
+//     commit: bool,
+// ) -> ExecutionResult {
+//     let metadata = StackSubstateMetadata::new(gas_limit, &GASOMETER_CONFIG);
+//     let state = MemoryStackState::new(metadata, backend);
+//     let precompiles = EVMPrecompiles::new(querier);
+//
+//     let mut executor = StackExecutor::new_with_precompiles(state, &GASOMETER_CONFIG, &precompiles);
+//     let (exit_reason, ret) = executor.transact_call(from, to, value, data, gas_limit, access_list);
+//
+//     let gas_used = executor.used_gas();
+//     let exit_value = match handle_evm_result(exit_reason, ret) {
+//         Ok(data) => data,
+//         Err((err, data)) => {
+//             return ExecutionResult::from_error(err, data, Some(gas_used));
+//         }
+//     };
+//
+//     if commit {
+//         let (vals, logs) = executor.into_state().deconstruct();
+//         if let Err(err) = backend.apply(vals, logs, false) {
+//             return ExecutionResult::from_error(err.to_string(), Vec::default(), None)
+//         }
+//     }
+//
+//     ExecutionResult {
+//         logs: backend.get_logs(),
+//         data: exit_value,
+//         gas_used,
+//         vm_error: "".to_string(),
+//     }
+// }
+//
+// /// Creates new smart contract
+// /// * querier - GoQuerier which is used to interact with Go (Cosmos) from SGX Enclave
+// /// * backend - EVM backend for reading and writting state
+// /// * gas_limit - gas limit for contract creation
+// /// * from - creator address of smart contract
+// /// * data - encoded bytecode and creation params
+// /// * access_list - EIP-2930 access list
+// /// * commit - should apply changes. Provide `false` if you want to simulate contract creation, without state changes
+// ///
+// /// Returns EVM execution result
+// fn execute_create(
+//     querier: *mut GoQuerier,
+//     backend: &mut impl ExtendedBackend,
+//     gas_limit: u64,
+//     from: H160,
+//     value: U256,
+//     data: Vec<u8>,
+//     access_list: Vec<(H160, Vec<H256>)>,
+//     commit: bool,
+// ) -> ExecutionResult {
+//     let metadata = StackSubstateMetadata::new(gas_limit, &GASOMETER_CONFIG);
+//     let state = MemoryStackState::new(metadata, backend);
+//     let precompiles = EVMPrecompiles::new(querier);
+//
+//     let mut executor = StackExecutor::new_with_precompiles(state, &GASOMETER_CONFIG, &precompiles);
+//     let (exit_reason, ret) = executor.transact_create(from, value, data, gas_limit, access_list);
+//
+//     let gas_used = executor.used_gas();
+//     let exit_value = match handle_evm_result(exit_reason, ret) {
+//         Ok(data) => data,
+//         Err((err, data)) => return ExecutionResult::from_error(err, data, Some(gas_used)),
+//     };
+//
+//     if commit {
+//         let (vals, logs) = executor.into_state().deconstruct();
+//         if let Err(err) = backend.apply(vals, logs, false) {
+//             return ExecutionResult::from_error(err.to_string(), Vec::default(), None)
+//         }
+//     }
+//
+//     ExecutionResult {
+//         logs: backend.get_logs(),
+//         data: exit_value,
+//         gas_used,
+//         vm_error: "".to_string(),
+//     }
+// }
+//
+// /// Handles an EVM result to return either a successful result or a (readable) error reason.
+// fn handle_evm_result(exit_reason: ExitReason, data: Vec<u8>) -> Result<Vec<u8>, (String, Vec<u8>)> {
+//     match exit_reason {
+//         ExitReason::Succeed(_) => Ok(data),
+//         ExitReason::Revert(err) => Err((format!("execution reverted: {:?}", err), data)),
+//         ExitReason::Error(err) => Err((format!("evm error: {:?}", err), data)),
+//         ExitReason::Fatal(err) => Err((format!("fatal evm error: {:?}", err), data)),
+//     }
+// }
