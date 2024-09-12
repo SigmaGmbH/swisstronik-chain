@@ -14,7 +14,7 @@
 //     types::{ExtendedBackend, Storage, Vicinity},
 // };
 //
-/// Contains context of the transaction such as gas price, block hash, block timestamp, etc.
+// /// Contains context of the transaction such as gas price, block hash, block timestamp, etc.
 // pub struct TxEnvironment {
 //     pub chain_id: U256,
 //     pub gas_price: U256,

@@ -1,6 +1,7 @@
 use alloc::vec::Vec;
 use ethereum::Log;
 use evm::backend::{RuntimeBaseBackend, RuntimeEnvironment};
+use evm::{MergeStrategy, TransactionalBackend};
 use primitive_types::{H160, H256, U256};
 use crate::{coder, querier};
 use crate::protobuf_generated::ffi;

@@ -1,5 +1,7 @@
+use alloc::collections::BTreeSet;
+use evm::backend::OverlayedBackend;
 // use evm::executor::stack::{MemoryStackState, StackExecutor, StackSubstateMetadata};
-use evm::standard::TransactArgs;
+use evm::standard::{Etable, EtableResolver, Invoker, TransactArgs};
 use primitive_types::{H160, H256, U256};
 use protobuf::Message;
 use protobuf::RepeatedField;
@@ -68,9 +70,20 @@ pub fn handle_call_request_inner(
     let block_number = context.block_number;
     let gas_price = U256::from_big_endian(&context.gas_price);
 
+    let initial_accessed = {
+        let mut hots = BTreeSet::new();
+        for item in params.accessList.to_vec() {
+            for slot in item.storageSlot.to_vec() {
+                hots.insert((H160::from_slice(&item.address), Some(H256::from_slice(&slot))));
+            }
+        }
+        hots
+    };
+
     let tx_environment = TxEnvironment::from(context);
     let mut storage = crate::storage::FFIStorage::new(querier, timestamp, block_number);
-    let mut backend = UpdatedBackend::new(querier, &mut storage, tx_environment);
+    let base_backend = UpdatedBackend::new(querier, &mut storage, tx_environment);
+    let mut backend = OverlayedBackend::new(base_backend, initial_accessed);
     let should_commit = params.commit;
 
     // We do not decrypt transaction if no tx.data provided, or provided explicit flag, that transaction is unencrypted
@@ -200,8 +213,19 @@ pub fn handle_create_request_inner(
     let gas_price = U256::from_big_endian(&context.gas_price);
     let should_commit = params.commit;
 
+    let initial_accessed = {
+        let mut hots = BTreeSet::new();
+        for item in params.accessList.to_vec() {
+            for slot in item.storageSlot.to_vec() {
+                hots.insert((H160::from_slice(&item.address), Some(H256::from_slice(&slot))));
+            }
+        }
+        hots
+    };
+
     let mut storage = crate::storage::FFIStorage::new(querier, timestamp, block_number);
-    let mut backend = UpdatedBackend::new(querier, &mut storage, TxEnvironment::from(context));
+    let base_backend = UpdatedBackend::new(querier, &mut storage, TxEnvironment::from(context));
+    let mut backend = OverlayedBackend::new(base_backend, initial_accessed);
 
 
     let tx_args = construct_create_args(params, gas_price);
@@ -273,12 +297,18 @@ fn construct_create_args(params: SGXVMCreateParams, gas_price: U256) -> Transact
 
 fn run_tx(
     querier: *mut GoQuerier,
-    backend: &mut UpdatedBackend,
+    backend: &mut OverlayedBackend<UpdatedBackend>,
     args: TransactArgs,
     commit: bool
 ) {
-    // TODO: Construct invoker
-    let result = evm::transact(args, None, backend, invoker);
+    let gas_etable = Etable::single(evm::standard::eval_gasometer);
+    let exec_etable = Etable::runtime();
+    let etable = (gas_etable, exec_etable);
+    let precompiles = EVMPrecompiles::new(querier);
+    let resolver = EtableResolver::new(&GASOMETER_CONFIG, &precompiles, &etable);
+    let invoker = Invoker::new(&GASOMETER_CONFIG, &resolver);
+
+    let result = evm::transact(args, None, backend, &invoker);
 }
 
 // /// Executes call to smart contract or transferring value
