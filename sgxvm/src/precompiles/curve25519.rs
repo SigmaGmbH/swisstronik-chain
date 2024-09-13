@@ -93,7 +93,7 @@ impl LinearCostPrecompile for Curve25519ScalarMul {
 
     fn raw_execute(input: &[u8], _: u64) -> (ExitResult, Vec<u8>) {
         if input.len() != 64 {
-            (ExitException::Other("input must contain 64 bytes (scalar - 32 bytes, point - 32 bytes)".into()).into(), Vec::new());
+            return (ExitException::Other("input must contain 64 bytes (scalar - 32 bytes, point - 32 bytes)".into()).into(), Vec::new());
         };
 
         // first 32 bytes is for the scalar value

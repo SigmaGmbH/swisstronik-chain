@@ -125,7 +125,9 @@ impl<G: AsRef<RuntimeState> + GasMutState> Precompile<G> for Modexp {
 
         // Gas formula allows arbitrary large exp_len when base and modulus are empty, so we need to handle empty base first.
         let r = if base_len == 0 && mod_len == 0 {
-            gasometer.record_gas(MIN_GAS_COST.into())?;
+            if let Err(e) = gasometer.record_gas(MIN_GAS_COST.into()) {
+                return (e.into(), Vec::new());
+            }
             BigUint::zero()
         } else {
             // read the numbers themselves.
@@ -139,7 +141,9 @@ impl<G: AsRef<RuntimeState> + GasMutState> Precompile<G> for Modexp {
             let gas_cost =
                 calculate_gas_cost(base_len as u64, exp_len as u64, mod_len as u64, &exponent);
 
-            gasometer.record_gas(gas_cost.into())?;
+            if let Err(e) = gasometer.record_gas(gas_cost.into()) {
+                return (e.into(), Vec::new());
+            }
 
             let mod_start = exp_start + exp_len;
             let modulus = BigUint::from_bytes_be(&input[mod_start..mod_start + mod_len]);

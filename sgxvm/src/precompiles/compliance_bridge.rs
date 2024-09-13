@@ -27,11 +27,14 @@ impl<G> LinearCostPrecompileWithQuerier<G> for ComplianceBridge {
     const WORD: u64 = 150;
 
     fn execute(querier: *mut GoQuerier, input: &[u8], gasometer: &mut G) -> (ExitResult, Vec<u8>) {
-        let cost = crate::precompiles::linear_cost(
+        let cost = match crate::precompiles::linear_cost(
             input.len() as u64,
             Self::BASE,
             Self::WORD,
-        )?;
+        ) {
+            Ok(cost) => cost,
+            Err(e) => return (e.into(), Vec::new()),
+        };
 
         gasometer.record_gas(cost)?;
 
