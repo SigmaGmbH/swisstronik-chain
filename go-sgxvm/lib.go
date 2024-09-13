@@ -83,12 +83,14 @@ func Call(
 	querier types.Connector,
 	from, to, data, value []byte,
 	accessList ethtypes.AccessList,
-	gasLimit, nonce uint64,
+	gasLimit uint64,
+	gasPrice []byte,
+	nonce uint64,
 	txContext *TransactionContext,
 	commit bool,
 	isUnencrypted bool,
 ) (*types.HandleTransactionResponse, error) {
-	executionResult, err := api.Call(querier, from, to, data, value, accessList, gasLimit, nonce, txContext, commit, isUnencrypted)
+	executionResult, err := api.Call(querier, from, to, data, value, accessList, gasLimit, gasPrice, nonce, txContext, commit, isUnencrypted)
 	if err != nil {
 		return &types.HandleTransactionResponse{}, err
 	}
@@ -101,11 +103,13 @@ func Create(
 	querier types.Connector,
 	from, data, value []byte,
 	accessList ethtypes.AccessList,
-	gasLimit, nonce uint64,
+	gasLimit uint64,
+	gasPrice []byte,
+	nonce uint64,
 	txContext *TransactionContext,
 	commit bool,
 ) (*types.HandleTransactionResponse, error) {
-	executionResult, err := api.Create(querier, from, data, value, accessList, gasLimit, nonce, txContext, commit)
+	executionResult, err := api.Create(querier, from, data, value, accessList, gasLimit, gasPrice, nonce, txContext, commit)
 	if err != nil {
 		return &types.HandleTransactionResponse{}, err
 	}
