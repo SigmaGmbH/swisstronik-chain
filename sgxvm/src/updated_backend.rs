@@ -35,7 +35,7 @@ pub struct UpdatedBackend<'state> {
     // We keep GoQuerier to make it accessible for `OCALL` handlers
     pub querier: *mut querier::GoQuerier,
     // Data storage
-    pub storage: &'state mut FFIStorage,
+    pub storage: &'state FFIStorage,
     // Emitted events
     pub logs: Vec<Log>,
     // Transaction context
@@ -45,7 +45,7 @@ pub struct UpdatedBackend<'state> {
 impl<'state> UpdatedBackend<'state> {
     pub fn new(
         querier: *mut querier::GoQuerier,
-        storage: &'state mut FFIStorage,
+        storage: &'state FFIStorage,
         environment: TxEnvironment,
     ) -> Self {
         Self {
@@ -132,7 +132,7 @@ impl<'state> RuntimeBaseBackend for UpdatedBackend<'state> {
     }
 
     fn storage(&self, address: H160, index: H256) -> H256 {
-        todo!()
+        self.storage.get_account_storage_cell(&address, &index).unwrap_or(H256::default())
     }
 
     fn transient_storage(&self, address: H160, index: H256) -> H256 {

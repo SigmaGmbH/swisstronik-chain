@@ -1,6 +1,7 @@
 use alloc::collections::BTreeSet;
 use evm::backend::OverlayedBackend;
-use evm::standard::{Etable, EtableResolver, Invoker, TransactArgs};
+use evm::interpreter::error::ExitError;
+use evm::standard::{Etable, EtableResolver, Invoker, TransactArgs, TransactValue};
 use primitive_types::{H160, H256, U256};
 use protobuf::Message;
 use protobuf::RepeatedField;
@@ -91,7 +92,7 @@ pub fn handle_call_request_inner(
         false => {
             let tx_args = construct_call_args(params.clone(), gas_price, params.data);
 
-            run_tx(
+            let exec_result = run_tx(
                 querier,
                 &mut backend,
                 tx_args,
@@ -140,7 +141,7 @@ pub fn handle_call_request_inner(
                 should_commit,
             );
 
-            let mut exec_result= ExecutionResult {
+            let mut exec_result = ExecutionResult {
                 logs: vec![],
                 data: vec![],
                 gas_used: 0,
@@ -226,14 +227,14 @@ pub fn handle_create_request_inner(
     let base_backend = UpdatedBackend::new(querier, &mut storage, TxEnvironment::from(context));
     let mut backend = OverlayedBackend::new(base_backend, initial_accessed);
 
-
     let tx_args = construct_create_args(params, gas_price);
-    run_tx(
+    let exec_result = run_tx(
         querier,
         &mut backend,
         tx_args,
         should_commit,
     );
+    let (output_backend, changeSet) = backend.deconstruct();
 
     // TODO: Fill
     ExecutionResult {
@@ -298,8 +299,8 @@ fn run_tx(
     querier: *mut GoQuerier,
     backend: &mut OverlayedBackend<UpdatedBackend>,
     args: TransactArgs,
-    commit: bool
-) {
+    _commit: bool // TODO: Apply transaction changes if provided
+) -> Result<TransactValue, ExitError> {
     let gas_etable = Etable::single(evm::standard::eval_gasometer);
     let exec_etable = Etable::runtime();
     let etable = (gas_etable, exec_etable);
@@ -308,6 +309,9 @@ fn run_tx(
     let invoker = Invoker::new(&GASOMETER_CONFIG, &resolver);
 
     let result = evm::transact(args, None, backend, &invoker);
+
+    // TODO: Apply changes if commit = true
+    result
 }
 
 // /// Executes call to smart contract or transferring value
