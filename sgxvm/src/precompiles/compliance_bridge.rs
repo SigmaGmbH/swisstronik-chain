@@ -27,11 +27,9 @@ impl<G: AsRef<RuntimeState> + GasMutState> LinearCostPrecompileWithQuerier<G> fo
     const WORD: u64 = 150;
 
     fn execute(querier: *mut GoQuerier, input: &[u8], gasometer: &mut G) -> (ExitResult, Vec<u8>) {
-        let cost = match crate::precompiles::linear_cost(
-            input.len() as u64,
-            Self::BASE,
-            Self::WORD,
-        ) {
+        // For some reason, rust compiler cannot infer type for BASE and WORD consts,
+        // therefore their values provided directly
+        let cost = match crate::precompiles::linear_cost(input.len() as u64, 60, 150) {
             Ok(cost) => cost,
             Err(e) => return (e.into(), Vec::new()),
         };
@@ -41,8 +39,8 @@ impl<G: AsRef<RuntimeState> + GasMutState> LinearCostPrecompileWithQuerier<G> fo
         }
 
         // TODO: Check how to provide caller
-        let caller = H160::zero();
-        route(querier, caller, input)
+        let d = gasometer.as_ref();
+        route(querier, d.context.caller, input)
     }
 }
 
