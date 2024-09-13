@@ -1,4 +1,4 @@
-use evm::interpreter::error::{ExitException, ExitResult, ExitSucceed};
+use evm::interpreter::error::{ExitResult, ExitSucceed};
 use std::vec::Vec;
 use k256::sha2::{
     Sha256 as kSha256, 

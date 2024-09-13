@@ -22,7 +22,7 @@ const GET_VERIFICATION_DATA_FN_SELECTOR: &str = "cc8995ec";
 /// Precompile for interactions with x/compliance module.
 pub struct ComplianceBridge;
 
-impl<G> LinearCostPrecompileWithQuerier<G> for ComplianceBridge {
+impl<G: AsRef<RuntimeState> + GasMutState> LinearCostPrecompileWithQuerier<G> for ComplianceBridge {
     const BASE: u64 = 60;
     const WORD: u64 = 150;
 
@@ -36,7 +36,9 @@ impl<G> LinearCostPrecompileWithQuerier<G> for ComplianceBridge {
             Err(e) => return (e.into(), Vec::new()),
         };
 
-        gasometer.record_gas(cost)?;
+        if let Err(e) = gasometer.record_gas(cost.into()) {
+            return (e.into(), Vec::new());
+        }
 
         // TODO: Check how to provide caller
         let caller = H160::zero();
