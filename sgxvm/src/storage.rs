@@ -105,7 +105,7 @@ impl Storage for FFIStorage {
         }
     }
 
-    fn insert_account(&mut self, key: H160, data: (&U256, &U256)) -> Result<(), Error> {
+    fn insert_account(&self, key: H160, data: (&U256, &U256)) -> Result<(), Error> {
         let encoded_request = coder::encode_insert_account(&key, data.0, data.1);
         if let Some(result) = querier::make_request(self.querier, encoded_request) {
             match protobuf::parse_from_bytes::<ffi::QueryInsertAccountResponse>(result.as_slice()) {
@@ -118,7 +118,7 @@ impl Storage for FFIStorage {
         }
     }
 
-    fn insert_account_code(&mut self, key: H160, code: Vec<u8>) -> Result<(), Error>  {
+    fn insert_account_code(&self, key: H160, code: Vec<u8>) -> Result<(), Error>  {
         let encoded_request = coder::encode_insert_account_code(key, code);
         if let Some(result) = querier::make_request(self.querier, encoded_request) {
             match protobuf::parse_from_bytes::<ffi::QueryInsertAccountCodeResponse>(result.as_slice()) {
@@ -132,7 +132,7 @@ impl Storage for FFIStorage {
         }
     }
 
-    fn insert_storage_cell(&mut self, key: H160, index: H256, value: H256) -> Result<(), Error>  {
+    fn insert_storage_cell(&self, key: H160, index: H256, value: H256) -> Result<(), Error>  {
         // Encrypt value
         let encrypted_value = encryption::encrypt_storage_cell(
             key.as_bytes().to_vec(), 
@@ -154,7 +154,7 @@ impl Storage for FFIStorage {
         }
     }
 
-    fn remove(&mut self, key: &H160) -> Result<(), Error>  {
+    fn remove(&self, key: &H160) -> Result<(), Error>  {
         let encoded_request = coder::encode_remove(key);
         if let Some(result) = querier::make_request(self.querier, encoded_request) {
             match protobuf::parse_from_bytes::<ffi::QueryRemoveResponse>(result.as_slice()) {
@@ -168,7 +168,7 @@ impl Storage for FFIStorage {
         }
     }
 
-    fn remove_storage_cell(&mut self, key: &H160, index: &H256) -> Result<(), Error>  {
+    fn remove_storage_cell(&self, key: &H160, index: &H256) -> Result<(), Error>  {
         let encoded_request = coder::encode_remove_storage_cell(key, index);
         if let Some(result) = querier::make_request(self.querier, encoded_request) {
             match protobuf::parse_from_bytes::<ffi::QueryRemoveStorageCellResponse>(result.as_slice()) {

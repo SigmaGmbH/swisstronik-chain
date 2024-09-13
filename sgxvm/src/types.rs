@@ -33,22 +33,22 @@ pub trait Storage {
     fn get_account(&self, account: &H160) -> (U256, U256);
 
     /// Updates account balance and nonce
-    fn insert_account(&mut self, key: H160, data: (&U256, &U256)) -> Result<(), Error>;
+    fn insert_account(&self, key: H160, data: (&U256, &U256)) -> Result<(), Error>;
 
     /// Updates contract bytecode
-    fn insert_account_code(&mut self, key: H160, code: Vec<u8>) -> Result<(), Error>;
+    fn insert_account_code(&self, key: H160, code: Vec<u8>) -> Result<(), Error>;
 
     /// Update storage cell value
-    fn insert_storage_cell(&mut self, key: H160, index: H256, value: H256) -> Result<(), Error>;
+    fn insert_storage_cell(&self, key: H160, index: H256, value: H256) -> Result<(), Error>;
 
     /// Removes account (selfdestruct)
-    fn remove(&mut self, key: &H160) -> Result<(), Error>;
+    fn remove(&self, key: &H160) -> Result<(), Error>;
 
     /// Removes storage cell value
-    fn remove_storage_cell(&mut self, key: &H160, index: &H256) -> Result<(), Error>;
+    fn remove_storage_cell(&self, key: &H160, index: &H256) -> Result<(), Error>;
 }
 
-// Struct for allocated buffer outside of SGX Enclave
+// Struct for allocated buffer outside SGX Enclave
 #[repr(C)]
 #[allow(dead_code)]
 pub struct AllocatedBuffer {
