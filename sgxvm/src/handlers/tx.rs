@@ -89,7 +89,7 @@ pub fn handle_call_request_inner(
     let is_encrypted = params.data.len() != 0 && !params.unencrypted;
     match is_encrypted {
         false => {
-            let tx_args = construct_call_args(params, gas_price, params.data.clone());
+            let tx_args = construct_call_args(params.clone(), gas_price, params.data);
 
             run_tx(
                 querier,
@@ -108,7 +108,7 @@ pub fn handle_call_request_inner(
         },
         true => {
             // Extract user public key and nonce from transaction data
-            let (user_public_key, data, nonce) = match extract_public_key_and_data(params.data) {
+            let (user_public_key, data, nonce) = match extract_public_key_and_data(params.data.clone()) {
                 Ok((user_public_key, data, nonce)) => (user_public_key, data, nonce),
                 Err(err) => {
                     return ExecutionResult::from_error(format!("{:?}", err), Vec::default(), None);
