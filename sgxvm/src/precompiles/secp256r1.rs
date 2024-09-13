@@ -55,7 +55,7 @@ impl LinearCostPrecompile for P256Verify {
             buf[31] = 0u8;
         }
 
-        (ExitSucceed::Returned, buf.to_vec())
+        (ExitSucceed::Returned.into(), buf.to_vec())
     }
 }
 // #[cfg(test)]

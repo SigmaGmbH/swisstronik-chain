@@ -1,7 +1,9 @@
 extern crate sgx_tstd as std;
 
 use ethabi::{encode, Address, ParamType, Token as AbiToken, Token};
+use evm::GasMutState;
 use evm::interpreter::error::{ExitError, ExitResult, ExitSucceed};
+use evm::interpreter::runtime::RuntimeState;
 use primitive_types::H160;
 use std::prelude::v1::*;
 use std::vec::Vec;
@@ -25,19 +27,17 @@ impl<G> LinearCostPrecompileWithQuerier<G> for ComplianceBridge {
     const WORD: u64 = 150;
 
     fn execute(querier: *mut GoQuerier, input: &[u8], gasometer: &mut G) -> (ExitResult, Vec<u8>) {
-        let target_gas = gasometer.gas_limit();
         let cost = crate::precompiles::linear_cost(
-            input().len() as u64,
+            input.len() as u64,
             Self::BASE,
             Self::WORD,
         )?;
 
-        gasometer.record_cost(cost)?;
+        gasometer.record_gas(cost)?;
 
         // TODO: Check how to provide caller
-        let context = handle.context();
-        let (exit_result, output) = route(querier, context.caller, input())?;
-        (exit_result, output)
+        let caller = H160::zero();
+        route(querier, caller, input)
     }
 }
 

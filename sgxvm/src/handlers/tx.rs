@@ -272,8 +272,8 @@ fn convert_topic_to_proto(topic: H256) -> Topic {
 
 fn construct_call_args(params: SGXVMCallParams, gas_price: U256, data: Vec<u8>) -> TransactArgs {
     TransactArgs::Call {
-        caller: H160::from(&params.from),
-        address: H160::from(&params.to),
+        caller: H160::from_slice(&params.from),
+        address: H160::from_slice(&params.to),
         value: U256::from_big_endian(&params.value),
         data,
         gas_limit: U256::from(params.gasLimit),
@@ -284,7 +284,7 @@ fn construct_call_args(params: SGXVMCallParams, gas_price: U256, data: Vec<u8>) 
 
 fn construct_create_args(params: SGXVMCreateParams, gas_price: U256) -> TransactArgs {
     TransactArgs::Create {
-        caller: H160::from(&params.from),
+        caller: H160::from_slice(&params.from),
         value: U256::from_big_endian(&params.value),
         init_code: params.data,
         salt: None,

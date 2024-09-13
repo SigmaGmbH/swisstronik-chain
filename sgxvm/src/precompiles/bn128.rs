@@ -159,7 +159,7 @@ impl LinearCostPrecompile for Bn128Pairing {
 				} else {
 					match G2::from(AffineG2::new(b_a, b_b)) {
 						Ok(g2) => g2,
-						Err(_) => (ExitException::Other("Invalid b argument - not on curve".into()).into(), Vec::new())
+						Err(_) => return (ExitException::Other("Invalid b argument - not on curve".into()).into(), Vec::new())
 					}
 				};
 				let a = if a_x.is_zero() && a_y.is_zero() {

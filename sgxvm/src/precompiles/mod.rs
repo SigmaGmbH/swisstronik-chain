@@ -52,9 +52,14 @@ pub trait LinearCostPrecompileWithQuerier<G> {
 }
 
 impl<T: LinearCostPrecompile, G: AsRef<RuntimeState> + GasMutState> Precompile<G> for T {
-    fn execute(input: &[u8], gasometer: G) -> (ExitResult, Vec<u8>) {
-        let cost = linear_cost(input().len() as u64, T::BASE, T::WORD)?;
-        gasometer.record_cost(cost)?;
+    fn execute(input: &[u8], gasometer: &mut G) -> (ExitResult, Vec<u8>) {
+        let cost = match linear_cost(input.len() as u64, T::BASE, T::WORD) {
+            Ok(cost) => cost,
+            Err(e) => return (Err(e), Vec::new()),
+        };
+        if let Err(err) = gasometer.record_gas(cost.into()) {
+            return (err.into(), Vec::new());
+        };
 
         T::raw_execute(input, cost)
     }
@@ -126,7 +131,7 @@ impl EVMPrecompiles {
     }
 }
 
-impl<G, H> PrecompileSet<G, H> for EVMPrecompiles {
+impl<G: AsRef<RuntimeState> + GasMutState, H> PrecompileSet<G, H> for EVMPrecompiles {
     fn execute(&self, code_address: H160, input: &[u8], gasometer: &mut G, _handler: &mut H) -> Option<(ExitResult, Vec<u8>)> {
         match code_address {
             // Ethereum precompiles:

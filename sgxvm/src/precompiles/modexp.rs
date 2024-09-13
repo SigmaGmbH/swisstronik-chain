@@ -125,7 +125,7 @@ impl<G: AsRef<RuntimeState> + GasMutState> Precompile<G> for Modexp {
 
         // Gas formula allows arbitrary large exp_len when base and modulus are empty, so we need to handle empty base first.
         let r = if base_len == 0 && mod_len == 0 {
-            gasometer.record_cost(MIN_GAS_COST)?;
+            gasometer.record_gas(MIN_GAS_COST.into())?;
             BigUint::zero()
         } else {
             // read the numbers themselves.
@@ -139,7 +139,7 @@ impl<G: AsRef<RuntimeState> + GasMutState> Precompile<G> for Modexp {
             let gas_cost =
                 calculate_gas_cost(base_len as u64, exp_len as u64, mod_len as u64, &exponent);
 
-            gasometer.record_cost(gas_cost)?;
+            gasometer.record_gas(gas_cost.into())?;
 
             let mod_start = exp_start + exp_len;
             let modulus = BigUint::from_bytes_be(&input[mod_start..mod_start + mod_len]);
@@ -157,12 +157,12 @@ impl<G: AsRef<RuntimeState> + GasMutState> Precompile<G> for Modexp {
         // always true except in the case of zero-length modulus, which leads to
         // output of length and value 1.
         if bytes.len() == mod_len {
-            (ExitSucceed::Returned, bytes.to_vec())
+            (ExitSucceed::Returned.into(), bytes.to_vec())
         } else if bytes.len() < mod_len {
             let mut ret = Vec::with_capacity(mod_len);
             ret.extend(core::iter::repeat(0).take(mod_len - bytes.len()));
             ret.extend_from_slice(&bytes[..]);
-            (ExitSucceed::Returned, ret.to_vec())
+            (ExitSucceed::Returned.into(), ret.to_vec())
         } else {
             (ExitException::Other("failed".into()).into(), Vec::new())
         }
