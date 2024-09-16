@@ -1,4 +1,6 @@
 use alloc::collections::BTreeSet;
+use ethereum::Log;
+use evm::interpreter::runtime::Log as RuntimeLog;
 use evm::backend::OverlayedBackend;
 use evm::standard::TransactArgs;
 use primitive_types::{H160, H256, U256};
@@ -48,14 +50,6 @@ pub fn construct_call_args(params: SGXVMCallParams, data: Vec<u8>) -> TransactAr
     }
 }
 
-// pub fn construct_backend(querier: *mut GoQuerier, ctx: TransactionContext) -> OverlayedBackend<UpdatedBackend> {
-//     let mut storage = crate::storage::FFIStorage::new(querier, ctx.timestamp, ctx.block_number);
-//     let tx_environment = TxEnvironment::from(ctx);
-//     let base_backend = UpdatedBackend::new(querier, &mut storage, tx_environment);
-//
-//     OverlayedBackend::new(base_backend, BTreeSet::new())
-// }
-
 fn parse_access_list(data: RepeatedField<AccessListItem>) -> Vec<(H160, Vec<H256>)> {
     let mut access_list = Vec::default();
     for access_list_item in data.to_vec() {
@@ -71,4 +65,15 @@ fn parse_access_list(data: RepeatedField<AccessListItem>) -> Vec<(H160, Vec<H256
     }
 
     access_list
+}
+
+pub fn convert_logs(input: Vec<RuntimeLog>) -> Vec<Log> {
+    input
+        .into_iter()
+        .map(|rl| Log {
+            address: rl.address,
+            topics: rl.topics,
+            data: rl.data,
+        })
+        .collect()
 }

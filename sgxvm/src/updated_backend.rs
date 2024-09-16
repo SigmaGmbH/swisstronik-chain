@@ -121,11 +121,13 @@ impl<'state> RuntimeBaseBackend for UpdatedBackend<'state> {
 
     fn code_size(&self, address: H160) -> U256 {
         // TODO: todo!()
+        println!("DEBUG: code size req");
         U256::zero()
     }
 
     fn code_hash(&self, address: H160) -> H256 {
         // TODO: todo!()
+        println!("DEBUG: code size req");
         H256::zero()
     }
 
