@@ -1,6 +1,8 @@
+use alloc::string::ToString;
 use alloc::vec::Vec;
 use ethereum::Log;
-use evm::backend::{RuntimeBaseBackend, RuntimeEnvironment};
+use evm::backend::{OverlayedChangeSet, RuntimeBaseBackend, RuntimeEnvironment};
+use evm::interpreter::error::{ExitError, ExitException, ExitResult, ExitSucceed};
 use primitive_types::{H160, H256, U256};
 use crate::{coder, querier};
 use crate::protobuf_generated::ffi;
@@ -54,6 +56,32 @@ impl<'state> UpdatedBackend<'state> {
             logs: vec![],
             environment,
         }
+    }
+
+    pub fn apply_changeset(&self, changeset: &OverlayedChangeSet) -> ExitResult {
+        for (address, balance) in changeset.balances.clone() {
+            // self.storage.entry(address).or_default().balance = balance;
+            // TODO: Add handler for update of account balance
+        }
+
+        for (address, nonce) in changeset.nonces.clone() {
+            // self.storage.insert(address).or_default().nonce = nonce;
+            // TODO: Add handler for update of account nonce
+        }
+
+        for (address, code) in changeset.codes.clone() {
+            self.storage.insert_account_code(address, code).unwrap()
+        }
+
+        for ((address, key), value) in changeset.storages.clone() {
+            self.storage.insert_storage_cell(address, key, value).map_err(|err| ExitException::Other(err.to_string().into()))?;
+        }
+
+        for address in changeset.deletes.clone() {
+            self.storage.remove(&address).map_err(|err| ExitException::Other(err.to_string().into()))?;
+        }
+
+        Ok(ExitSucceed::Returned)
     }
 }
 

@@ -1,10 +1,8 @@
 use alloc::collections::BTreeSet;
 use evm::backend::OverlayedBackend;
-use evm::interpreter::error::ExitError;
 use evm::standard::{Etable, EtableResolver, Invoker, TransactArgs, TransactValue};
 use primitive_types::{H160, H256, U256};
 use protobuf::Message;
-use protobuf::RepeatedField;
 use std::vec::Vec;
 
 use crate::encryption::{
@@ -12,12 +10,12 @@ use crate::encryption::{
 };
 use crate::key_manager::utils::random_nonce;
 use crate::precompiles::EVMPrecompiles;
-use crate::protobuf_generated::ffi::{AccessListItem, HandleTransactionResponse, Log, SGXVMCallParams, SGXVMCallRequest, SGXVMCreateParams, SGXVMCreateRequest, Topic, TransactionContext};
+use crate::protobuf_generated::ffi::{HandleTransactionResponse, Log, SGXVMCallRequest, SGXVMCreateRequest, Topic, TransactionContext};
 use crate::std::string::ToString;
 use crate::types::{ExecutionResult, GASOMETER_CONFIG};
 use crate::AllocationWithResult;
 use crate::GoQuerier;
-use crate::handlers::utils::convert_logs;
+use crate::handlers::utils::{convert_logs, parse_access_list};
 use crate::updated_backend::{TxEnvironment, UpdatedBackend};
 
 /// Converts raw execution result into protobuf and returns it outside of enclave
@@ -67,14 +65,13 @@ pub fn handle_call_request_inner(
     let params = data.params.unwrap();
     let context = data.context.unwrap();
 
+    let should_commit = params.commit;
     let block_number = context.block_number;
-
-
 
     // Check if transaction is unencrypted, handle it as regular EVM transaction
     let is_unencrypted = params.data.is_empty() || params.unencrypted;
     if is_unencrypted {
-        return run_tx(querier, context, params.into())
+        return run_tx(querier, context, params.into(), should_commit)
     }
 
     // Otherwise, we should decrypt input, execute tx and encrypt output
@@ -100,7 +97,7 @@ pub fn handle_call_request_inner(
         gas_price: U256::from_big_endian(&params.gasPrice),
         access_list: parse_access_list(params.accessList),
     };
-    let mut execution_result = run_tx(querier, context, transact_args);
+    let mut execution_result = run_tx(querier, context, transact_args, should_commit);
 
     let nonce = match nonce.is_empty() {
         true => {
@@ -131,26 +128,9 @@ pub fn handle_create_request_inner(
 ) -> ExecutionResult {
     let params = data.params.unwrap();
     let context = data.context.unwrap();
+    let should_commit = params.commit;
 
-    run_tx(querier, context, params.into())
-}
-
-/// Converts access list from RepeatedField to Vec
-fn parse_access_list(data: RepeatedField<AccessListItem>) -> Vec<(H160, Vec<H256>)> {
-    let mut access_list = Vec::default();
-    for access_list_item in data.to_vec() {
-        let address = H160::from_slice(&access_list_item.address);
-        let slots = access_list_item
-            .storageSlot
-            .to_vec()
-            .into_iter()
-            .map(|item| H256::from_slice(&item))
-            .collect();
-
-        access_list.push((address, slots));
-    }
-
-    access_list
+    run_tx(querier, context, params.into(), should_commit)
 }
 
 /// Converts EVM topic into protobuf-generated `Topic
@@ -165,6 +145,7 @@ fn run_tx(
     querier: *mut GoQuerier,
     context: TransactionContext,
     args: TransactArgs,
+    should_commit: bool,
 ) -> ExecutionResult {
     let gas_etable = Etable::single(evm::standard::eval_gasometer);
     let exec_etable = Etable::runtime();
@@ -182,7 +163,11 @@ fn run_tx(
     let res = evm::transact(args, None, &mut backend, &invoker);
     let (base_backend, changeset) = backend.deconstruct();
 
-    // TODO: Implement apply changes function
+    if should_commit {
+        if let Err(err) = base_backend.apply_changeset(&changeset) {
+            return ExecutionResult::from_error(err.to_string(), Vec::new(), None)
+        }
+    }
 
     match res {
         Ok(res) => {

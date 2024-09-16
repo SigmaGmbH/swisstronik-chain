@@ -50,7 +50,7 @@ pub fn construct_call_args(params: SGXVMCallParams, data: Vec<u8>) -> TransactAr
     }
 }
 
-fn parse_access_list(data: RepeatedField<AccessListItem>) -> Vec<(H160, Vec<H256>)> {
+pub fn parse_access_list(data: RepeatedField<AccessListItem>) -> Vec<(H160, Vec<H256>)> {
     let mut access_list = Vec::default();
     for access_list_item in data.to_vec() {
         let address = H160::from_slice(&access_list_item.address);
