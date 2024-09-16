@@ -66,137 +66,161 @@ pub fn handle_call_request_inner(
     let params = data.params.unwrap();
     let context = data.context.unwrap();
 
-    let timestamp = context.timestamp;
-    let block_number = context.block_number;
-    let gas_price = U256::from_big_endian(&context.gas_price);
-
-    let initial_accessed = {
-        let mut hots = BTreeSet::new();
-        for item in params.accessList.to_vec() {
-            for slot in item.storageSlot.to_vec() {
-                hots.insert((H160::from_slice(&item.address), Some(H256::from_slice(&slot))));
-            }
-        }
-        hots
-    };
-
+    let mut storage = crate::storage::FFIStorage::new(querier, context.timestamp, context.block_number);
     let tx_environment = TxEnvironment::from(context);
-    let mut storage = crate::storage::FFIStorage::new(querier, timestamp, block_number);
     let base_backend = UpdatedBackend::new(querier, &mut storage, tx_environment);
-    let mut backend = OverlayedBackend::new(base_backend, initial_accessed);
-    let should_commit = params.commit;
+
+    let mut backend = OverlayedBackend::new(base_backend, BTreeSet::new());
+
+    // Check if transaction is unencrypted, handle it as regular EVM transaction
+    if params.data.is_empty() || params.unencrypted {
+        let execution_result = run_tx(querier, &mut backend, params.into());
+        let (run_backend, change_set) = backend.deconstruct();
+
+        // TODO: Extract used gas from runtimestate
+
+        match execution_result {
+            Ok(tv) => {},
+            Err(err) => return ExecutionResult::from(err),
+        }
+    }
+    // let params = data.params.unwrap();
+    // let context = data.context.unwrap();
+    //
+    // let timestamp = context.timestamp;
+    // let block_number = context.block_number;
+    // let gas_price = U256::from_big_endian(&context.gas_price);
+    //
+    // let initial_accessed = {
+    //     let mut hots = BTreeSet::new();
+    //     for item in params.accessList.to_vec() {
+    //         for slot in item.storageSlot.to_vec() {
+    //             hots.insert((H160::from_slice(&item.address), Some(H256::from_slice(&slot))));
+    //         }
+    //     }
+    //     hots
+    // };
+    //
+    // let tx_environment = TxEnvironment::from(context);
+    // let mut storage = crate::storage::FFIStorage::new(querier, timestamp, block_number);
+    // let base_backend = UpdatedBackend::new(querier, &mut storage, tx_environment);
+    // let mut backend = OverlayedBackend::new(base_backend, initial_accessed);
+    // let should_commit = params.commit;
 
     // We do not decrypt transaction if no tx.data provided, or provided explicit flag, that transaction is unencrypted
-    let is_encrypted = params.data.len() != 0 && !params.unencrypted;
-    match is_encrypted {
-        false => {
-            let tx_args = construct_call_args(params.clone(), gas_price, params.data);
-
-            let exec_result = run_tx(
-                querier,
-                &mut backend,
-                tx_args,
-                should_commit,
-            );
-
-            // TODO: Fulfill
-            ExecutionResult {
-                logs: vec![],
-                data: vec![],
-                gas_used: 0,
-                vm_error: "".to_string(),
-            }
-        },
-        true => {
-            // Extract user public key and nonce from transaction data
-            let (user_public_key, data, nonce) = match extract_public_key_and_data(params.data.clone()) {
-                Ok((user_public_key, data, nonce)) => (user_public_key, data, nonce),
-                Err(err) => {
-                    return ExecutionResult::from_error(format!("{:?}", err), Vec::default(), None);
-                }
-            };
-
-            // If encrypted data presents, decrypt it
-            let decrypted_data = if !data.is_empty() {
-                match decrypt_transaction_data(data, user_public_key.clone(), block_number) {
-                    Ok(decrypted_data) => decrypted_data,
-                    Err(err) => {
-                        return ExecutionResult::from_error(
-                            format!("{:?}", err),
-                            Vec::default(),
-                            None,
-                        );
-                    }
-                }
-            } else {
-                Vec::default()
-            };
-
-            let tx_args = construct_call_args(params.clone(), gas_price, decrypted_data);
-
-            run_tx(
-                querier,
-                &mut backend,
-                tx_args,
-                should_commit,
-            );
-
-            let mut exec_result = ExecutionResult {
-                logs: vec![],
-                data: vec![],
-                gas_used: 0,
-                vm_error: "".to_string(),
-            };
-
-            // let mut exec_result = execute_call(
-            //     querier,
-            //     &mut backend,
-            //     params.gasLimit,
-            //     H160::from_slice(&params.from),
-            //     H160::from_slice(&params.to),
-            //     U256::from_big_endian(&params.value),
-            //     decrypted_data,
-            //     parse_access_list(params.accessList),
-            //     params.commit,
-            // );
-
-            // If there is transaction with no incoming transaction data, use random nonce to encrypt output
-            let nonce = if nonce.is_empty() {
-                match random_nonce() {
-                    Ok(nonce) => nonce.to_vec(),
-                    Err(err) => {
-                        return ExecutionResult::from_error(
-                            format!("{:?}", err),
-                            Vec::default(),
-                            None,
-                        );
-                    } 
-                }
-            } else {
-                nonce
-            };
-
-            // Return unencrypted transaction response in case of revert
-            if !exec_result.vm_error.is_empty() {
-                return exec_result;
-            }
-
-            // Encrypt transaction data output
-            let encrypted_data =
-                match encrypt_transaction_data(exec_result.data, user_public_key, nonce, block_number) {
-                    Ok(data) => data,
-                    Err(err) => {
-                        return ExecutionResult::from_error(
-                            format!("{:?}", err),
-                            Vec::default(),
-                            None,
-                        );
-                    }
-                };
-
-            exec_result.data = encrypted_data;
-            exec_result
-        }
+    // let is_encrypted = params.data.len() != 0 && !params.unencrypted;
+    // match is_encrypted {
+    //     false => {
+    //         let exec_result = run_tx(
+    //             querier,
+    //             &mut backend,
+    //             params.into(),
+    //             should_commit,
+    //         );
+    //
+    //         // TODO: Fulfill
+    //         ExecutionResult {
+    //             logs: vec![],
+    //             data: vec![],
+    //             gas_used: 0,
+    //             vm_error: "".to_string(),
+    //         }
+    //     },
+    //     true => {
+    //         // Extract user public key and nonce from transaction data
+    //         let (user_public_key, data, nonce) = match extract_public_key_and_data(params.data.clone()) {
+    //             Ok((user_public_key, data, nonce)) => (user_public_key, data, nonce),
+    //             Err(err) => {
+    //                 return ExecutionResult::from_error(format!("{:?}", err), Vec::default(), None);
+    //             }
+    //         };
+    //
+    //         // If encrypted data presents, decrypt it
+    //         let decrypted_data = if !data.is_empty() {
+    //             match decrypt_transaction_data(data, user_public_key.clone(), block_number) {
+    //                 Ok(decrypted_data) => decrypted_data,
+    //                 Err(err) => {
+    //                     return ExecutionResult::from_error(
+    //                         format!("{:?}", err),
+    //                         Vec::default(),
+    //                         None,
+    //                     );
+    //                 }
+    //             }
+    //         } else {
+    //             Vec::default()
+    //         };
+    //
+    //         let tx_args = construct_call_args(params.clone(), decrypted_data);
+    //
+    //         run_tx(
+    //             querier,
+    //             &mut backend,
+    //             tx_args,
+    //             should_commit,
+    //         );
+    //
+    //         let mut exec_result = ExecutionResult {
+    //             logs: vec![],
+    //             data: vec![],
+    //             gas_used: 0,
+    //             vm_error: "".to_string(),
+    //         };
+    //
+    //         // let mut exec_result = execute_call(
+    //         //     querier,
+    //         //     &mut backend,
+    //         //     params.gasLimit,
+    //         //     H160::from_slice(&params.from),
+    //         //     H160::from_slice(&params.to),
+    //         //     U256::from_big_endian(&params.value),
+    //         //     decrypted_data,
+    //         //     parse_access_list(params.accessList),
+    //         //     params.commit,
+    //         // );
+    //
+    //         // If there is transaction with no incoming transaction data, use random nonce to encrypt output
+    //         let nonce = if nonce.is_empty() {
+    //             match random_nonce() {
+    //                 Ok(nonce) => nonce.to_vec(),
+    //                 Err(err) => {
+    //                     return ExecutionResult::from_error(
+    //                         format!("{:?}", err),
+    //                         Vec::default(),
+    //                         None,
+    //                     );
+    //                 }
+    //             }
+    //         } else {
+    //             nonce
+    //         };
+    //
+    //         // Return unencrypted transaction response in case of revert
+    //         if !exec_result.vm_error.is_empty() {
+    //             return exec_result;
+    //         }
+    //
+    //         // Encrypt transaction data output
+    //         let encrypted_data =
+    //             match encrypt_transaction_data(exec_result.data, user_public_key, nonce, block_number) {
+    //                 Ok(data) => data,
+    //                 Err(err) => {
+    //                     return ExecutionResult::from_error(
+    //                         format!("{:?}", err),
+    //                         Vec::default(),
+    //                         None,
+    //                     );
+    //                 }
+    //             };
+    //
+    //         exec_result.data = encrypted_data;
+    //         exec_result
+    //     }
+    ExecutionResult {
+        logs: vec![],
+        data: vec![],
+        gas_used: 21000,
+        vm_error: "not implemented".to_string(),
     }
 }
 
@@ -227,21 +251,20 @@ pub fn handle_create_request_inner(
     let base_backend = UpdatedBackend::new(querier, &mut storage, TxEnvironment::from(context));
     let mut backend = OverlayedBackend::new(base_backend, initial_accessed);
 
-    let tx_args = construct_create_args(params, gas_price);
-    let exec_result = run_tx(
-        querier,
-        &mut backend,
-        tx_args,
-        should_commit,
-    );
-    let (output_backend, changeSet) = backend.deconstruct();
+    // let exec_result = run_tx(
+    //     querier,
+    //     &mut backend,
+    //     params.into(),
+    //     should_commit,
+    // );
+    // let (output_backend, changeSet) = backend.deconstruct();
 
     // TODO: Fill
     ExecutionResult {
         logs: vec![],
         data: vec![],
-        gas_used: 0,
-        vm_error: "".to_string(),
+        gas_used: 21000,
+        vm_error: "not implemented".to_string(),
     }
 }
 
@@ -271,35 +294,10 @@ fn convert_topic_to_proto(topic: H256) -> Topic {
     protobuf_topic
 }
 
-fn construct_call_args(params: SGXVMCallParams, gas_price: U256, data: Vec<u8>) -> TransactArgs {
-    TransactArgs::Call {
-        caller: H160::from_slice(&params.from),
-        address: H160::from_slice(&params.to),
-        value: U256::from_big_endian(&params.value),
-        data,
-        gas_limit: U256::from(params.gasLimit),
-        gas_price: gas_price,
-        access_list: parse_access_list(params.accessList),
-    }
-}
-
-fn construct_create_args(params: SGXVMCreateParams, gas_price: U256) -> TransactArgs {
-    TransactArgs::Create {
-        caller: H160::from_slice(&params.from),
-        value: U256::from_big_endian(&params.value),
-        init_code: params.data,
-        salt: None,
-        gas_limit: U256::from(params.gasLimit),
-        gas_price: gas_price,
-        access_list: parse_access_list(params.accessList),
-    }
-}
-
 fn run_tx(
     querier: *mut GoQuerier,
     backend: &mut OverlayedBackend<UpdatedBackend>,
     args: TransactArgs,
-    _commit: bool // TODO: Apply transaction changes if provided
 ) -> Result<TransactValue, ExitError> {
     let gas_etable = Etable::single(evm::standard::eval_gasometer);
     let exec_etable = Etable::runtime();
@@ -308,10 +306,7 @@ fn run_tx(
     let resolver = EtableResolver::new(&GASOMETER_CONFIG, &precompiles, &etable);
     let invoker = Invoker::new(&GASOMETER_CONFIG, &resolver);
 
-    let result = evm::transact(args, None, backend, &invoker);
-
-    // TODO: Apply changes if commit = true
-    result
+    evm::transact(args, None, backend, &invoker)
 }
 
 // /// Executes call to smart contract or transferring value

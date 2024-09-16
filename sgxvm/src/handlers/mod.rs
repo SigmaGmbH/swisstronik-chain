@@ -15,6 +15,7 @@ use crate::protobuf_generated::ffi::{
 use crate::GoQuerier;
 
 pub mod tx;
+mod utils;
 
 /// Handles incoming protobuf-encoded request
 pub fn handle_protobuf_request_inner(

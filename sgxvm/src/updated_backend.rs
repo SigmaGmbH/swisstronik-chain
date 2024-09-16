@@ -120,11 +120,13 @@ impl<'state> RuntimeBaseBackend for UpdatedBackend<'state> {
     }
 
     fn code_size(&self, address: H160) -> U256 {
-        todo!()
+        // TODO: todo!()
+        U256::zero()
     }
 
     fn code_hash(&self, address: H160) -> H256 {
-        todo!()
+        // TODO: todo!()
+        H256::zero()
     }
 
     fn code(&self, address: H160) -> Vec<u8> {

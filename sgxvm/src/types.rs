@@ -1,6 +1,9 @@
+use alloc::string::ToString;
 use evm::standard::Config;
 use primitive_types::{H160, H256, U256};
 use ethereum::Log;
+use evm::interpreter::error::{ExitError, ExitFatal};
+use evm::interpreter::error::ExitError::Fatal;
 use std::{
     vec::Vec,
     string::String,
@@ -71,6 +74,17 @@ pub struct ExecutionResult {
     pub data: Vec<u8>,
     pub gas_used: u64,
     pub vm_error: String
+}
+
+impl From<ExitError> for ExecutionResult {
+    fn from(value: ExitError) -> Self {
+        ExecutionResult {
+            logs: vec![],
+            data: vec![],
+            gas_used: 0,
+            vm_error: value.to_string(),
+        }
+    }
 }
 
 impl ExecutionResult {
