@@ -2,8 +2,7 @@ use alloc::string::ToString;
 use evm::standard::Config;
 use primitive_types::{H160, H256, U256};
 use ethereum::Log;
-use evm::interpreter::error::{ExitError, ExitFatal};
-use evm::interpreter::error::ExitError::Fatal;
+use evm::interpreter::error::{ExitError};
 use std::{
     vec::Vec,
     string::String,
@@ -79,11 +78,21 @@ pub struct ExecutionResult {
 
 impl From<ExitError> for ExecutionResult {
     fn from(value: ExitError) -> Self {
+        let vm_error = match value {
+            ExitError::Reverted => "reverted".to_string(),
+            ExitError::Fatal(fatal) => {
+                format!("{:?}", fatal)
+            },
+            ExitError::Exception(exit) => {
+                format!("{:?}", exit)
+            }
+        };
+
         ExecutionResult {
             logs: vec![],
             data: vec![],
-            gas_used: 0,
-            vm_error: value.to_string(),
+            gas_used: 21000, // TODO: Check how to return used gas amount
+            vm_error,
         }
     }
 }
