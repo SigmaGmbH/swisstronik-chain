@@ -1,5 +1,4 @@
-use alloc::collections::BTreeSet;
-use evm::backend::OverlayedBackend;
+use evm::backend::{RuntimeBaseBackend};
 use evm::standard::{Etable, EtableResolver, Invoker, TransactArgs, TransactValue};
 use primitive_types::{H160, H256, U256};
 use protobuf::Message;
@@ -71,11 +70,8 @@ pub fn handle_call_request_inner(
     // Check if transaction is unencrypted, handle it as regular EVM transaction
     let is_unencrypted = params.data.is_empty() || params.unencrypted;
     if is_unencrypted {
-        println!("DEBUG: handle unencrypted transaction");
         return run_tx(querier, context, params.into(), should_commit)
     }
-
-    println!("DEBUG: handle encrypted transaction");
 
     // Otherwise, we should decrypt input, execute tx and encrypt output
     let (user_public_key, data, nonce) = match extract_public_key_and_data(params.data) {
@@ -118,8 +114,6 @@ pub fn handle_call_request_inner(
             Err(err) => return ExecutionResult::from_error(err.to_string(), Vec::new(), None)
         };
 
-        println!("DEBUG: Encrypted response: {:?}", encrypted_response);
-
         execution_result.data = encrypted_response;
     }
 
@@ -161,15 +155,21 @@ fn run_tx(
 
     let mut storage = crate::storage::FFIStorage::new(querier, context.timestamp, context.block_number);
     let tx_environment = TxEnvironment::from(context);
-    let base_backend = UpdatedBackend::new(querier, &mut storage, tx_environment);
+    let mut backend = UpdatedBackend::new(querier, &mut storage, tx_environment);
 
-    let mut backend = OverlayedBackend::new(base_backend, BTreeSet::new());
+    match args.clone() {
+        TransactArgs::Create { caller, value, init_code, salt, gas_limit, gas_price, access_list, } => {
+            let caller_nonce = backend.nonce(caller);
+        },
+        _ => {},
+    }
+
 
     let res = evm::transact(args, None, &mut backend, &invoker);
-    let (base_backend, changeset) = backend.deconstruct();
+    let changeset = backend.deconstruct();
 
     if should_commit {
-        if let Err(err) = base_backend.apply_changeset(&changeset) {
+        if let Err(err) = UpdatedBackend::apply_changeset(&storage, &changeset) {
             return ExecutionResult::from_error(err.to_string(), Vec::new(), None)
         }
     }

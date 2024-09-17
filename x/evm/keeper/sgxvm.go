@@ -292,6 +292,7 @@ func (k *Keeper) ApplyMessageWithConfig(
 
 	var res *librustgo.HandleTransactionResponse
 	if contractCreation {
+		k.SetNonce(ctx, msg.From(), msg.Nonce())
 		res, err = librustgo.Create(
 			connector,
 			msg.From().Bytes(),
@@ -304,6 +305,7 @@ func (k *Keeper) ApplyMessageWithConfig(
 			txContext,
 			commit,
 		)
+		k.SetNonce(ctx, msg.From(), msg.Nonce()+1)
 	} else {
 		res, err = librustgo.Call(
 			connector,
