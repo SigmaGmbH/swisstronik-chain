@@ -60,17 +60,15 @@ impl<'state> UpdatedBackend<'state> {
 
     pub fn apply_changeset(&self, changeset: &OverlayedChangeSet) -> ExitResult {
         for (address, balance) in changeset.balances.clone() {
-            // self.storage.entry(address).or_default().balance = balance;
-            // TODO: Add handler for update of account balance
+            self.storage.insert_account_balance(&address, &balance).map_err(|err| ExitException::Other(err.to_string().into()))?
         }
 
         for (address, nonce) in changeset.nonces.clone() {
-            // self.storage.insert(address).or_default().nonce = nonce;
-            // TODO: Add handler for update of account nonce
+            self.storage.insert_account_nonce(&address, &nonce).map_err(|err| ExitException::Other(err.to_string().into()))?
         }
 
         for (address, code) in changeset.codes.clone() {
-            self.storage.insert_account_code(address, code).unwrap()
+            self.storage.insert_account_code(address, code).map_err(|err| ExitException::Other(err.to_string().into()))?
         }
 
         for ((address, key), value) in changeset.storages.clone() {
@@ -148,15 +146,11 @@ impl<'state> RuntimeBaseBackend for UpdatedBackend<'state> {
     }
 
     fn code_size(&self, address: H160) -> U256 {
-        // TODO: todo!()
-        println!("DEBUG: code size req");
-        U256::zero()
+        self.storage.get_account_code_size(&address).unwrap_or(U256::zero())
     }
 
     fn code_hash(&self, address: H160) -> H256 {
-        // TODO: todo!()
-        println!("DEBUG: code size req");
-        H256::zero()
+        self.storage.get_account_code_hash(&address).unwrap_or(H256::default())
     }
 
     fn code(&self, address: H160) -> Vec<u8> {

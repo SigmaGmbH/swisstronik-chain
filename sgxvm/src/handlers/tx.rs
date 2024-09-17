@@ -71,8 +71,11 @@ pub fn handle_call_request_inner(
     // Check if transaction is unencrypted, handle it as regular EVM transaction
     let is_unencrypted = params.data.is_empty() || params.unencrypted;
     if is_unencrypted {
+        println!("DEBUG: handle unencrypted transaction");
         return run_tx(querier, context, params.into(), should_commit)
     }
+
+    println!("DEBUG: handle encrypted transaction");
 
     // Otherwise, we should decrypt input, execute tx and encrypt output
     let (user_public_key, data, nonce) = match extract_public_key_and_data(params.data) {
@@ -109,11 +112,13 @@ pub fn handle_call_request_inner(
         false => nonce,
     };
 
-    if !execution_result.vm_error.is_empty() {
+    if execution_result.vm_error.is_empty() {
         let encrypted_response = match encrypt_transaction_data(execution_result.data, user_public_key, nonce, block_number) {
             Ok(data) => data,
             Err(err) => return ExecutionResult::from_error(err.to_string(), Vec::new(), None)
         };
+
+        println!("DEBUG: Encrypted response: {:?}", encrypted_response);
 
         execution_result.data = encrypted_response;
     }

@@ -181,6 +181,62 @@ impl Storage for FFIStorage {
             Err(Error::enclave_err("Remove storage cell failed. Empty response"))
         }
     }
+
+    fn insert_account_balance(&self, address: &H160, balance: &U256) -> Result<(), Error> {
+        let encoded_request = coder::encode_insert_account_balance(address, balance);
+        if let Some(result) = querier::make_request(self.querier, encoded_request) {
+            match protobuf::parse_from_bytes::<ffi::QueryInsertAccountBalanceResponse>(result.as_slice()) {
+                Err(err) => {
+                    Err(err.into())
+                },
+                _ => Ok(())
+            }
+        } else {
+            Err(Error::enclave_err("Insert account balance failed. Empty response"))
+        }
+    }
+
+    fn insert_account_nonce(&self, address: &H160, nonce: &U256) -> Result<(), Error> {
+        let encoded_request = coder::encode_insert_account_nonce(address, nonce);
+        if let Some(result) = querier::make_request(self.querier, encoded_request) {
+            match protobuf::parse_from_bytes::<ffi::QueryInsertAccountNonceResponse>(result.as_slice()) {
+                Err(err) => {
+                    Err(err.into())
+                },
+                _ => Ok(())
+            }
+        } else {
+            Err(Error::enclave_err("Insert account nonce failed. Empty response"))
+        }
+    }
+
+    fn get_account_code_size(&self, address: &H160) -> Result<U256, Error> {
+        let encoded_request = coder::encode_get_account_code_size(address);
+        if let Some(result) = querier::make_request(self.querier, encoded_request) {
+            match protobuf::parse_from_bytes::<ffi::QueryGetAccountCodeSizeResponse>(result.as_slice()) {
+                Err(err) => {
+                    Err(err.into())
+                },
+                Ok(res) => Ok(U256::from(res.size))
+            }
+        } else {
+            Err(Error::enclave_err("Get account code size failed. Empty response"))
+        }
+    }
+
+    fn get_account_code_hash(&self, address: &H160) -> Result<H256, Error> {
+        let encoded_request = coder::encode_get_account_code_hash(&address);
+        if let Some(result) = querier::make_request(self.querier, encoded_request) {
+            match protobuf::parse_from_bytes::<ffi::QueryGetAccountCodeHashResponse>(result.as_slice()) {
+                Err(err) => {
+                    Err(err.into())
+                },
+                Ok(res) => Ok(H256::from_slice(&res.hash))
+            }
+        } else {
+            Err(Error::enclave_err("Get account code size failed. Empty response"))
+        }
+    }
 }
 
 impl FFIStorage {

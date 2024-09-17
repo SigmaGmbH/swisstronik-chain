@@ -14,13 +14,6 @@ use crate::error::Error;
 
 pub static GASOMETER_CONFIG: Config = Config::cancun();
 
-/// Information required by the evm
-#[derive(Clone, Default, PartialEq, Eq)]
-pub struct Vicinity {
-    pub origin: H160,
-    pub nonce: U256,
-}
-
 /// A key-value storage trait
 pub trait Storage {
     /// Checks if there is entity with such key exists in DB
@@ -49,6 +42,14 @@ pub trait Storage {
 
     /// Removes storage cell value
     fn remove_storage_cell(&self, key: &H160, index: &H256) -> Result<(), Error>;
+
+    fn insert_account_balance(&self, address: &H160, balance: &U256) -> Result<(), Error>;
+
+    fn insert_account_nonce(&self, address: &H160, nonce: &U256) -> Result<(), Error>;
+
+    fn get_account_code_size(&self, address: &H160) -> Result<U256, Error>;
+
+    fn get_account_code_hash(&self, address: &H160) -> Result<H256, Error>;
 }
 
 // Struct for allocated buffer outside SGX Enclave

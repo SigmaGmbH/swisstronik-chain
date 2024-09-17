@@ -161,3 +161,45 @@ pub fn encode_get_verification_data(user_address: Address, issuer_address: H160)
     cosmos_request.set_getVerificationData(request);
     cosmos_request.write_to_bytes().unwrap()
 }
+
+pub fn encode_insert_account_balance(address: &H160, balance: &U256) -> Vec<u8> {
+    let mut cosmos_request = ffi::CosmosRequest::new();
+    let mut request = ffi::QueryInsertAccountBalance::new();
+
+    request.set_address(address.as_bytes().to_vec());
+    request.set_balance(u256_to_vec(&balance));
+
+    cosmos_request.set_insertAccountBalance(request);
+    cosmos_request.write_to_bytes().unwrap()
+}
+
+pub fn encode_insert_account_nonce(address: &H160, nonce: &U256) -> Vec<u8> {
+    let mut cosmos_request = ffi::CosmosRequest::new();
+    let mut request = ffi::QueryInsertAccountNonce::new();
+
+    request.set_address(address.as_bytes().to_vec());
+    request.set_nonce(nonce.as_u64());
+
+    cosmos_request.set_insertAccountNonce(request);
+    cosmos_request.write_to_bytes().unwrap()
+}
+
+pub fn encode_get_account_code_hash(address: &H160) -> Vec<u8> {
+    let mut cosmos_request = ffi::CosmosRequest::new();
+    let mut request = ffi::QueryGetAccountCodeHash::new();
+
+    request.set_address(address.as_bytes().to_vec());
+
+    cosmos_request.set_codeHash(request);
+    cosmos_request.write_to_bytes().unwrap()
+}
+
+pub fn encode_get_account_code_size(address: &H160) -> Vec<u8> {
+    let mut cosmos_request = ffi::CosmosRequest::new();
+    let mut request = ffi::QueryGetAccountCodeSize::new();
+
+    request.set_address(address.as_bytes().to_vec());
+
+    cosmos_request.set_codeSize(request);
+    cosmos_request.write_to_bytes().unwrap()
+}

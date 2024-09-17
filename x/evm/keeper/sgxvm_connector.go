@@ -68,6 +68,14 @@ func (q Connector) Query(req []byte) ([]byte, error) {
 		return q.HasVerification(request)
 	case *librustgo.CosmosRequest_GetVerificationData:
 		return q.GetVerificationData(request)
+	case *librustgo.CosmosRequest_InsertAccountNonce:
+		return q.InsertAccountNonce(request)
+	case *librustgo.CosmosRequest_InsertAccountBalance:
+		return q.InsertAccountBalance(request)
+	case *librustgo.CosmosRequest_GetAccountCodeHash:
+		return q.GetAccountCodeHash(request)
+	case *librustgo.CosmosRequest_GetAccountCodeSize:
+		return q.GetAccountCodeSize(request)
 	}
 
 	return nil, errors.New("wrong query received")
@@ -199,6 +207,49 @@ func (q Connector) InsertAccount(req *librustgo.CosmosRequest_InsertAccount) ([]
 	}
 
 	return proto.Marshal(&librustgo.QueryInsertAccountResponse{})
+}
+
+func (q Connector) InsertAccountNonce(req *librustgo.CosmosRequest_InsertAccountNonce) ([]byte, error) {
+	ethAddress := common.BytesToAddress(req.InsertAccountNonce.Address)
+	nonce := req.InsertAccountNonce.Nonce
+
+	if err := q.EVMKeeper.SetNonce(q.Context, ethAddress, nonce); err != nil {
+		return nil, err
+	}
+
+	return proto.Marshal(&librustgo.QueryInsertAccountNonceResponse{})
+}
+
+func (q Connector) InsertAccountBalance(req *librustgo.CosmosRequest_InsertAccountBalance) ([]byte, error) {
+	ethAddress := common.BytesToAddress(req.InsertAccountBalance.Address)
+	balance := &big.Int{}
+	balance.SetBytes(req.InsertAccountBalance.Balance)
+
+	if err := q.EVMKeeper.SetBalance(q.Context, ethAddress, balance); err != nil {
+		return nil, err
+	}
+
+	return proto.Marshal(&librustgo.QueryInsertAccountBalanceResponse{})
+}
+
+func (q Connector) GetAccountCodeHash(req *librustgo.CosmosRequest_GetAccountCodeHash) ([]byte, error) {
+	ethAddress := common.BytesToAddress(req.CodeHash.Address)
+	account := q.EVMKeeper.GetAccountOrEmpty(q.Context, ethAddress)
+
+	return proto.Marshal(&librustgo.QueryAccountCodeHashResponse{Hash: account.CodeHash})
+}
+
+func (q Connector) GetAccountCodeSize(req *librustgo.CosmosRequest_GetAccountCodeSize) ([]byte, error) {
+	ethAddress := common.BytesToAddress(req.CodeSize.Address)
+	account := q.EVMKeeper.GetAccountWithoutBalance(q.Context, ethAddress)
+	if account == nil {
+		return proto.Marshal(&librustgo.QueryAccountCodeSizeResponse{
+			Size: 0,
+		})
+	}
+
+	code := q.EVMKeeper.GetCode(q.Context, common.BytesToHash(account.CodeHash))
+	return proto.Marshal(&librustgo.QueryAccountCodeSizeResponse{Size: uint32(len(code))})
 }
 
 // AddVerificationDetails writes provided verification details to x/compliance module

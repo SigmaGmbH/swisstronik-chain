@@ -85,6 +85,18 @@ message QueryInsertAccount {
   uint64 nonce = 3;
 }
 
+message QueryInsertAccountBalance {
+  bytes address = 1;
+  bytes balance = 2;
+}
+message QueryInsertAccountBalanceResponse {}
+
+message QueryInsertAccountNonce {
+  bytes address = 1;
+  uint64 nonce = 2;
+}
+message QueryInsertAccountNonceResponse{}
+
 // Response for account insertion
 message QueryInsertAccountResponse {}
 
@@ -219,6 +231,8 @@ message CosmosRequest {
     QueryAddVerificationDetails addVerificationDetails = 14;
     QueryHasVerification hasVerification = 15;
     QueryGetVerificationData getVerificationData = 16;
+    QueryInsertAccountBalance insertAccountBalance = 17;
+    QueryInsertAccountNonce insertAccountNonce = 18;
   }
 }
 
