@@ -627,7 +627,7 @@ func (suite *EvmTestSuite) TestERC20TransferReverted() {
 
 			after := k.GetBalance(suite.ctx, suite.from)
 
-			if tc.expErr == "evm error: OutOfGas" {
+			if tc.expErr == "OutOfGas" {
 				suite.Require().Equal(tc.gasLimit, res.GasUsed)
 			} else {
 				suite.Require().Greater(tc.gasLimit, res.GasUsed)

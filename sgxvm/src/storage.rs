@@ -197,19 +197,19 @@ impl Storage for FFIStorage {
     }
 
     fn insert_account_nonce(&self, address: &H160, nonce: &U256) -> Result<(), Error> {
-        println!("DEBUG: Insert account nonce disabled");
-        Ok(())
-        // let encoded_request = coder::encode_insert_account_nonce(address, nonce);
-        // if let Some(result) = querier::make_request(self.querier, encoded_request) {
-        //     match protobuf::parse_from_bytes::<ffi::QueryInsertAccountNonceResponse>(result.as_slice()) {
-        //         Err(err) => {
-        //             Err(err.into())
-        //         },
-        //         _ => Ok(())
-        //     }
-        // } else {
-        //     Err(Error::enclave_err("Insert account nonce failed. Empty response"))
-        // }
+        // println!("DEBUG: Insert account nonce disabled");
+        // Ok(())
+        let encoded_request = coder::encode_insert_account_nonce(address, nonce);
+        if let Some(result) = querier::make_request(self.querier, encoded_request) {
+            match protobuf::parse_from_bytes::<ffi::QueryInsertAccountNonceResponse>(result.as_slice()) {
+                Err(err) => {
+                    Err(err.into())
+                },
+                _ => Ok(())
+            }
+        } else {
+            Err(Error::enclave_err("Insert account nonce failed. Empty response"))
+        }
     }
 
     fn get_account_code_size(&self, address: &H160) -> Result<U256, Error> {

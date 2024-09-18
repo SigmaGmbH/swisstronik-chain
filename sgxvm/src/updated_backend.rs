@@ -296,9 +296,8 @@ impl<'state> RuntimeBackend for UpdatedBackend<'state> {
     }
 
     fn inc_nonce(&mut self, address: H160) -> Result<(), ExitError> {
-        // let new_nonce = self.nonce(address).saturating_add(U256::from(1));
-        // self.substate.nonces.insert(address, new_nonce);
-        // Ok(())
+        let new_nonce = self.nonce(address).saturating_add(U256::from(1));
+        self.substate.nonces.insert(address, new_nonce);
         Ok(())
     }
 }

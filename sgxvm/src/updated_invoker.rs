@@ -36,24 +36,6 @@ impl IntoCallCreateTrap for Opcode {
         Ok(self)
     }
 }
-//
-// /// Return value of a transaction.
-// pub enum TransactValue {
-//     Call {
-//         /// The exit result. If we return a value, then it will be an
-//         /// `ExitSucceed`.
-//         succeed: ExitSucceed,
-//         /// The return value, if any.
-//         retval: Vec<u8>,
-//     },
-//     Create {
-//         /// The exit result. If we return a value, then it will be an
-//         /// `ExitSucceed`.
-//         succeed: ExitSucceed,
-//         /// The contract address created.
-//         address: H160,
-//     },
-// }
 
 /// The invoke used in a top-layer transaction stack.
 pub struct TransactInvoke {
@@ -111,8 +93,8 @@ where
     > {
         let caller = args.caller();
         let gas_price = args.gas_price();
-        //
-        // handler.inc_nonce(caller)?;
+
+        handler.inc_nonce(caller)?;
 
         let address = match &args {
             TransactArgs::Call { address, .. } => *address,
