@@ -499,9 +499,7 @@ func (suite *EvmTestSuite) TestErrorWhenDeployContract() {
 
 	_ = proto.Unmarshal(result.Data, &res)
 
-	suite.Require().Equal("evm error: InvalidCode(Opcode(166))", res.VmError, "correct evm error")
-
-	// TODO: snapshot checking
+	suite.Require().Equal(res.VmError, "InvalidOpcode(Opcode(166))", "correct evm error")
 }
 
 // DeployTestContract deploy a test erc20 contract and returns the contract address
@@ -549,13 +547,13 @@ func (suite *EvmTestSuite) TestERC20TransferReverted() {
 			"no hooks",
 			intrinsicGas, // enough for intrinsicGas, but not enough for execution
 			nil,
-			"evm error: OutOfGas",
+			"OutOfGas",
 		},
 		{
 			"success hooks",
 			intrinsicGas, // enough for intrinsicGas, but not enough for execution
 			&DummyHook{},
-			"evm error: OutOfGas",
+			"OutOfGas",
 		},
 		{
 			"failure hooks",

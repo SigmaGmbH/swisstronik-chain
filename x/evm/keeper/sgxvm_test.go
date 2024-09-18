@@ -93,7 +93,7 @@ func (suite *KeeperTestSuite) TestNativeCurrencyTransfer() {
 
 			res, err := suite.app.EvmKeeper.HandleTx(suite.ctx, msg)
 			if tc.expErr {
-				suite.Require().Equal(res.VmError, "evm error: OutOfFund")
+				suite.Require().Equal("OutOfFund", res.VmError)
 				suite.Require().NoError(err)
 				return
 			} else {

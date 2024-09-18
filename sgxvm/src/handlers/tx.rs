@@ -1,5 +1,5 @@
 use evm::backend::{RuntimeBaseBackend};
-use evm::standard::{Etable, EtableResolver, Invoker, TransactArgs, TransactValue};
+use evm::standard::{Etable, EtableResolver, TransactArgs, TransactValue};
 use primitive_types::{H160, H256, U256};
 use protobuf::Message;
 use std::vec::Vec;
@@ -16,6 +16,7 @@ use crate::AllocationWithResult;
 use crate::GoQuerier;
 use crate::handlers::utils::{convert_logs, parse_access_list};
 use crate::updated_backend::{TxEnvironment, UpdatedBackend};
+use crate::updated_invoker::UpdatedInvoker;
 
 /// Converts raw execution result into protobuf and returns it outside of enclave
 pub fn convert_and_allocate_transaction_result(
@@ -151,7 +152,7 @@ fn run_tx(
     let etable = (gas_etable, exec_etable);
     let precompiles = EVMPrecompiles::new(querier);
     let resolver = EtableResolver::new(&GASOMETER_CONFIG, &precompiles, &etable);
-    let invoker = Invoker::new(&GASOMETER_CONFIG, &resolver);
+    let invoker = UpdatedInvoker::new(&GASOMETER_CONFIG, &resolver);
 
     let mut storage = crate::storage::FFIStorage::new(querier, context.timestamp, context.block_number);
     let tx_environment = TxEnvironment::from(context);
