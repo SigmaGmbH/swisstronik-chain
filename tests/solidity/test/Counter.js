@@ -22,7 +22,6 @@ describe('Counter', () => {
             counterContract.interface.encodeFunctionData("counter", [])
         );
         const countBefore = counterContract.interface.decodeFunctionResult("counter", countBeforeResponse)
-        console.log('res: ', countBefore)
 
         const tx = await sendShieldedTransaction(
             signer,
