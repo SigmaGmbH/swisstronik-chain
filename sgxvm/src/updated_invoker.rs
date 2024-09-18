@@ -1,5 +1,6 @@
 use alloc::{rc::Rc, vec::Vec};
 use core::{cmp::min, convert::Infallible};
+use core::cell::RefCell;
 use evm::interpreter::error::{ExitError, ExitResult, ExitException, ExitSucceed};
 use evm::{MergeStrategy, TransactionalBackend};
 use evm::standard::{routines, Config, Resolver, TransactArgs, TransactValue, InvokerState, SubstackInvoke};
@@ -45,6 +46,20 @@ pub struct TransactInvoke {
     pub caller: H160,
 }
 
+pub struct DataContainer {
+    pub gas_used: U256,
+    pub return_value: Vec<u8>,
+}
+
+impl Default for DataContainer {
+    fn default() -> Self {
+        Self {
+            gas_used: U256::from(21000),
+            return_value: vec![],
+        }
+    }
+}
+
 /// Updated Invoker.
 ///
 /// The generic parameters are as follows:
@@ -54,6 +69,7 @@ pub struct TransactInvoke {
 ///   [EtableResolver] but can be customized.
 /// * `Tr`: Trap type, usually [crate::Opcode] but can be customized.
 pub struct UpdatedInvoker<'config, 'resolver, R> {
+    container: RefCell<Option<DataContainer>>,
     config: &'config Config,
     resolver: &'resolver R,
 }
@@ -61,7 +77,15 @@ pub struct UpdatedInvoker<'config, 'resolver, R> {
 impl<'config, 'resolver, R> UpdatedInvoker<'config, 'resolver, R> {
     /// Create a new standard invoker with the given config and resolver.
     pub fn new(config: &'config Config, resolver: &'resolver R) -> Self {
-        Self { config, resolver }
+        Self { config, resolver, container: RefCell::new(None) }
+    }
+
+    pub fn get_gas_used(&self) -> Option<U256> {
+        self.container.borrow().as_ref().map(|data| data.gas_used)
+    }
+
+    pub fn get_return_value(&self) -> Option<Vec<u8>> {
+        self.container.borrow().as_ref().map(|data| data.return_value.clone())
     }
 }
 
@@ -241,6 +265,9 @@ where
         (mut substate, retval): (R::State, Vec<u8>),
         handler: &mut H,
     ) -> Result<TransactValue, ExitError> {
+        // Since retval is moved into closure, we clone it here
+        let retval_copy = retval.clone();
+
         let work = || -> Result<TransactValue, ExitError> {
             match result {
                 Ok(result) => {
@@ -281,6 +308,12 @@ where
                 handler.pop_substate(MergeStrategy::Discard);
             }
         }
+
+        let used_gas = invoke.gas_limit.saturating_sub(substate.effective_gas());
+        *self.container.borrow_mut() = Some(DataContainer{
+            gas_used: used_gas,
+            return_value: retval_copy,
+        });
 
         result
     }

@@ -154,24 +154,22 @@ fn run_tx(
     let resolver = EtableResolver::new(&GASOMETER_CONFIG, &precompiles, &etable);
     let invoker = UpdatedInvoker::new(&GASOMETER_CONFIG, &resolver);
 
-    let mut storage = crate::storage::FFIStorage::new(querier, context.timestamp, context.block_number);
+    let storage = crate::storage::FFIStorage::new(querier, context.timestamp, context.block_number);
     let tx_environment = TxEnvironment::from(context);
-    let mut backend = UpdatedBackend::new(querier, &mut storage, tx_environment);
-
-    match args.clone() {
-        TransactArgs::Create { caller, value, init_code, salt, gas_limit, gas_price, access_list, } => {
-            let caller_nonce = backend.nonce(caller);
-        },
-        _ => {},
-    }
-
+    let mut backend = UpdatedBackend::new(querier, &storage, tx_environment);
 
     let res = evm::transact(args, None, &mut backend, &invoker);
     let changeset = backend.deconstruct();
 
+    let used_gas = invoker.get_gas_used().map(|used_gas| used_gas.as_u64()).unwrap_or(21000);
+
     if should_commit {
         if let Err(err) = UpdatedBackend::apply_changeset(&storage, &changeset) {
-            return ExecutionResult::from_error(err.to_string(), Vec::new(), None)
+            return ExecutionResult::from_exit_error(
+                err,
+                invoker.get_return_value().unwrap_or_default(),
+                used_gas,
+            );
         }
     }
 
@@ -182,7 +180,7 @@ fn run_tx(
                     ExecutionResult {
                         logs: convert_logs(changeset.logs),
                         data: retval,
-                        gas_used: 21000, // TODO: Find out how to get effectiveGas value
+                        gas_used: used_gas,
                         vm_error: "".to_string()
                     }
                 }
@@ -190,12 +188,15 @@ fn run_tx(
                     ExecutionResult {
                         logs: convert_logs(changeset.logs),
                         data: address.to_fixed_bytes().to_vec(),
-                        gas_used: 21000, // TODO: Find out how to get effectiveGas value
+                        gas_used: used_gas,
                         vm_error: "".to_string()
                     }
                 }
             }
         },
-        Err(err) => ExecutionResult::from(err)
+        Err(err) => {
+            let error_data = invoker.get_return_value().unwrap_or_default();
+            ExecutionResult::from_exit_error(err, error_data, used_gas)
+        }
     }
 }

@@ -76,27 +76,6 @@ pub struct ExecutionResult {
     pub vm_error: String
 }
 
-impl From<ExitError> for ExecutionResult {
-    fn from(value: ExitError) -> Self {
-        let vm_error = match value {
-            ExitError::Reverted => "reverted".to_string(),
-            ExitError::Fatal(fatal) => {
-                format!("{:?}", fatal)
-            },
-            ExitError::Exception(exit) => {
-                format!("{:?}", exit)
-            }
-        };
-
-        ExecutionResult {
-            logs: vec![],
-            data: vec![],
-            gas_used: 21000, // TODO: Check how to return used gas amount
-            vm_error,
-        }
-    }
-}
-
 impl ExecutionResult {
     /// Creates execution result that only contains error reason and possible amount of used gas
     pub fn from_error(reason: String, data: Vec<u8>, gas_used: Option<u64>) -> Self {
@@ -106,6 +85,20 @@ impl ExecutionResult {
             vm_error: reason,
             data,
         }
+    }
+
+    pub fn from_exit_error(error: ExitError, data: Vec<u8>, gas_used: u64) -> Self {
+        let vm_error = match error {
+            ExitError::Reverted => "reverted".to_string(),
+            ExitError::Fatal(fatal) => {
+                format!("{:?}", fatal)
+            },
+            ExitError::Exception(exit) => {
+                format!("{:?}", exit)
+            }
+        };
+
+        ExecutionResult { logs: vec![], data, gas_used, vm_error }
     }
 }
 
