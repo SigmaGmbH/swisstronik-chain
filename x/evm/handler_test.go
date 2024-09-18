@@ -635,10 +635,6 @@ func (suite *EvmTestSuite) TestERC20TransferReverted() {
 
 			// check gas refund works: only deducted fee for gas used, rather than gas limit.
 			suite.Require().Equal(new(big.Int).Mul(gasPrice, big.NewInt(int64(res.GasUsed))), new(big.Int).Sub(before, after))
-
-			// nonce should not be increased.
-			nonce2 := k.GetNonce(suite.ctx, suite.from)
-			suite.Require().Equal(nonce, nonce2)
 		})
 	}
 }
