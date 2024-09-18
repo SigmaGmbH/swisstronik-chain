@@ -517,7 +517,7 @@ func (suite *KeeperTestSuite) TestEstimateGas() {
 				}
 			},
 			true,
-			1186778,
+			1187108,
 			false,
 		},
 		// estimate gas of an erc20 transfer, the exact gas number is checked with geth
@@ -534,7 +534,7 @@ func (suite *KeeperTestSuite) TestEstimateGas() {
 				args = types.TransactionArgs{To: &contractAddr, From: &suite.address, Data: (*hexutil.Bytes)(&encryptedTransferData)}
 			},
 			true,
-			49080,
+			51880,
 			false,
 		},
 		// repeated tests with enableFeemarket
@@ -596,7 +596,7 @@ func (suite *KeeperTestSuite) TestEstimateGas() {
 				}
 			},
 			true,
-			1186778,
+			1187108,
 			true,
 		},
 		// For some reason rust/evm returns different gas estimation. Geth: 51880, SputnikVM: 49080
@@ -612,7 +612,7 @@ func (suite *KeeperTestSuite) TestEstimateGas() {
 				args = types.TransactionArgs{To: &contractAddr, From: &suite.address, Data: (*hexutil.Bytes)(&encryptedTransferData)}
 			},
 			true,
-			49080,
+			51880,
 			true,
 		},
 		{
