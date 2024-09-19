@@ -4,14 +4,13 @@ const { sendShieldedTransaction, sendShieldedQuery } = require('./testUtils')
 
 const unencryptedProvider = new ethers.providers.JsonRpcProvider('http://localhost:8547') // Unencrypted rpc url
 
+const CONTRACT_ADDRESS = '0x2fc0b35e41a9a2ea248a275269af1c8b3a061167'
+
 describe('ComplianceBridge', () => {
-    const CONTRACT_ADDRESS = '0x30252afe8c1683fd184c99a3c44aa5d547d59dd4'
     let contract
 
     before(async () => {
-        const [signer] = await ethers.getSigners()
-        const ComplianceProxyFactory = await ethers.getContractFactory('ComplianceProxy')
-        contract = new ethers.Contract(CONTRACT_ADDRESS, ComplianceProxyFactory.interface, signer)
+        contract = await ethers.getContractAt('ComplianceProxy', CONTRACT_ADDRESS)
     })
 
     describe('Should not change any state', async () => {
