@@ -185,12 +185,24 @@ fn run_tx(
                     }
                 }
                 TransactValue::Create {succeed, address} => {
-                    ExecutionResult {
-                        logs: convert_logs(changeset.logs),
-                        data: address.to_fixed_bytes().to_vec(),
-                        gas_used: used_gas,
-                        vm_error: "".to_string()
+                    // Check if run_tx was called in context of transaction or in context of eth_call or eth_estimateGas.
+                    // We commit changes only in case of transaction context.
+                    if should_commit {
+                        ExecutionResult {
+                            logs: convert_logs(changeset.logs),
+                            data: address.to_fixed_bytes().to_vec(),
+                            gas_used: used_gas,
+                            vm_error: "".to_string()
+                        }
+                    } else {
+                        ExecutionResult {
+                            logs: convert_logs(changeset.logs),
+                            data: invoker.get_return_value().unwrap_or_default(),
+                            gas_used: used_gas,
+                            vm_error: "".to_string()
+                        }
                     }
+
                 }
             }
         },
