@@ -2,11 +2,11 @@ const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const { sendShieldedTransaction, sendShieldedQuery } = require("./testUtils")
 
-const unencryptedProvider = new ethers.providers.JsonRpcProvider('http://localhost:8547')
-const unencryptedSigner = new ethers.Wallet("DBE7E6AE8303E055B68CEFBF01DEC07E76957FF605E5333FA21B6A8022EA7B55", unencryptedProvider)
-
 describe("MsgInfo", function () {
     describe('Unencrypted', () => {
+        const unencryptedProvider = new ethers.providers.JsonRpcProvider('http://localhost:8547')
+        const unencryptedSigner = new ethers.Wallet("DBE7E6AE8303E055B68CEFBF01DEC07E76957FF605E5333FA21B6A8022EA7B55", unencryptedProvider)
+
         let msgInfoContract
 
         before(async () => {
