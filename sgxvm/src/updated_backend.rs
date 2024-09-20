@@ -38,11 +38,11 @@ impl From<ffi::TransactionContext> for TxEnvironment {
 }
 
 pub struct UpdatedBackend<'state> {
-    pub querier: *mut querier::GoQuerier,
-    pub storage: &'state FFIStorage,
-    pub environment: TxEnvironment,
+    querier: *mut querier::GoQuerier,
+    storage: &'state FFIStorage,
+    environment: TxEnvironment,
     substate: Box<Substate>,
-    pub accessed: BTreeSet<(H160, Option<H256>)>,
+    accessed: BTreeSet<(H160, Option<H256>)>,
 }
 
 impl<'state> UpdatedBackend<'state> {

@@ -7,7 +7,6 @@ import (
 	"github.com/SigmaGmbH/librustgo"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/golang/protobuf/proto"
 
 	compliancetypes "swisstronik/x/compliance/types"
@@ -16,8 +15,6 @@ import (
 // Connector allows our VM interact with existing Cosmos application.
 // It is passed by pointer into SGX to make it accessible for our VM.
 type Connector struct {
-	// GetHashFn returns the hash corresponding to n
-	GetHashFn vm.GetHashFunc
 	// Keeper used to store and obtain state
 	EVMKeeper *Keeper
 	// Context used to make Keeper calls available
@@ -142,7 +139,7 @@ func (q Connector) BlockHash(req *librustgo.CosmosRequest_BlockHash) ([]byte, er
 
 	blockNumber := &big.Int{}
 	blockNumber.SetBytes(req.BlockHash.Number)
-	blockHash := q.GetHashFn(blockNumber.Uint64())
+	blockHash := q.EVMKeeper.GetHashFn(q.Context)(blockNumber.Uint64())
 
 	return proto.Marshal(&librustgo.QueryBlockHashResponse{Hash: blockHash.Bytes()})
 }
