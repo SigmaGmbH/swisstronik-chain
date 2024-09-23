@@ -2,7 +2,17 @@ require("@nomicfoundation/hardhat-toolbox");
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
-    solidity: "0.8.24",
+    solidity: {
+        compilers: [
+            {version: "0.8.24"},
+        ],
+        overrides: {
+            "contracts/tokens/WETH9.sol": {
+                version: "0.5.5"
+            }
+        }
+
+    },
     networks: {
         tronik: {
             url: "http://localhost:8545",
