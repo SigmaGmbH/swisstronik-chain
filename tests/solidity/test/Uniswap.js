@@ -11,6 +11,8 @@ const receiver = new ethers.Wallet("DBE7E6AE8303E055B68CEFBF01DEC07E76957FF605E5
 
 const FEE_TIER = 3000; // 0.3% fee tier
 const INITIAL_LIQUIDITY = ethers.utils.parseEther("10");
+const SWAP_AMOUNT = ethers.utils.parseEther("1")
+
 describe("Uniswap V3", function() {
     let weth, factory, router, nftManager, erc20First, erc20Second
 
@@ -123,6 +125,39 @@ describe("Uniswap V3", function() {
 
         // Check that liquidity has been added
         expect(position.liquidity).to.be.gt(0);
+    });
+
+
+    it("should swap tokens", async function() {
+        // User approves router to spend tokens
+        const approveTx = await erc20First.approve(router.address, SWAP_AMOUNT);
+        await approveTx.wait()
+
+        // Record balances before swap
+        const token0BalanceBefore = await erc20First.balanceOf(signer.address);
+        const token1BalanceBefore = await erc20Second.balanceOf(signer.address);
+
+        // Perform swap
+        const swapParams = {
+            tokenIn: erc20First.address,
+            tokenOut: erc20Second.address,
+            fee: FEE_TIER,
+            recipient: signer.address,
+            deadline: Math.floor(Date.now() / 1000) + 300,
+            amountIn: SWAP_AMOUNT,
+            amountOutMinimum: 0,
+            sqrtPriceLimitX96: 0
+        }
+
+        const tx = await router.exactInputSingle(swapParams);
+        await tx.wait()
+
+        // Check balances after swap
+        const token0BalanceAfter = await erc20First.balanceOf(signer.address);
+        const token1BalanceAfter = await erc20Second.balanceOf(signer.address);
+
+        expect(token0BalanceAfter).to.be.lt(token0BalanceBefore);
+        expect(token1BalanceAfter).to.be.gt(token1BalanceBefore);
     });
 })
 
