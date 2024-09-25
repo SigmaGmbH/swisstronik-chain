@@ -136,13 +136,6 @@ func NewExecErrorWithReason(revertReason []byte) *RevertError {
 	}
 }
 
-func NewRevertError(err error, revertReason []byte) *RevertError {
-	return &RevertError{
-		error:  err,
-		reason: hexutil.Encode(revertReason),
-	}
-}
-
 // RevertError is an API error that encompass an EVM revert with JSON error
 // code and a binary data blob.
 type RevertError struct {
