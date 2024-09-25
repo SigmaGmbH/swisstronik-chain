@@ -243,6 +243,8 @@ message EthCallRequest {
 message EstimateGasResponse {
   // gas returns the estimated gas
   uint64 gas = 1;
+  bool failed = 2;
+  bytes return_value = 3;
 }
 
 // QueryTraceTxRequest defines TraceTx request

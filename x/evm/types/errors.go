@@ -16,13 +16,11 @@
 package types
 
 import (
+	errorsmod "cosmossdk.io/errors"
 	"errors"
 	"fmt"
-
-	errorsmod "cosmossdk.io/errors"
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/vm"
 )
@@ -126,7 +124,7 @@ var (
 // with the return reason.
 func NewExecErrorWithReason(revertReason []byte) *RevertError {
 	result := common.CopyBytes(revertReason)
-	reason, errUnpack := abi.UnpackRevert(result)
+	reason, errUnpack := UnpackRevert(result)
 	err := errors.New("execution reverted")
 	if errUnpack == nil {
 		err = fmt.Errorf("execution reverted: %v", reason)
@@ -134,6 +132,13 @@ func NewExecErrorWithReason(revertReason []byte) *RevertError {
 	return &RevertError{
 		error:  err,
 		reason: hexutil.Encode(result),
+	}
+}
+
+func NewRevertError(err error, revertReason []byte) *RevertError {
+	return &RevertError{
+		error:  err,
+		reason: hexutil.Encode(revertReason),
 	}
 }
 
