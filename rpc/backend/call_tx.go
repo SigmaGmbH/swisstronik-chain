@@ -29,7 +29,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -401,7 +400,7 @@ func (b *Backend) DoCall(
 	}
 
 	if res.Failed() {
-		if !strings.Contains(res.VmError, vm.ErrExecutionReverted.Error()) {
+		if !strings.Contains(res.VmError, "reverted") {
 			return nil, status.Error(codes.Internal, res.VmError)
 		}
 		return nil, evmtypes.NewExecErrorWithReason(res.Ret)
