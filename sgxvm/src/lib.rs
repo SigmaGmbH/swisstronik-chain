@@ -41,8 +41,7 @@ mod protobuf_generated;
 mod querier;
 mod storage;
 mod types;
-mod updated_backend;
-mod updated_invoker;
+mod invoker;
 
 #[no_mangle]
 /// Checks if there is already sealed master key

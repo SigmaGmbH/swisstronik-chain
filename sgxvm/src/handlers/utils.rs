@@ -1,14 +1,10 @@
-use alloc::collections::BTreeSet;
 use ethereum::Log;
 use evm::interpreter::runtime::Log as RuntimeLog;
-use evm::backend::OverlayedBackend;
 use evm::standard::TransactArgs;
 use primitive_types::{H160, H256, U256};
 use protobuf::RepeatedField;
 use std::vec::Vec;
-use crate::protobuf_generated::ffi::{AccessListItem, SGXVMCallParams, SGXVMCreateParams, TransactionContext};
-use crate::querier::GoQuerier;
-use crate::updated_backend::{TxEnvironment, UpdatedBackend};
+use crate::protobuf_generated::ffi::{AccessListItem, SGXVMCallParams, SGXVMCreateParams};
 
 impl Into<TransactArgs> for SGXVMCallParams {
     fn into(self) -> TransactArgs {

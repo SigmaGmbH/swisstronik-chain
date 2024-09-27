@@ -1,7 +1,7 @@
 use alloc::{rc::Rc, vec::Vec};
 use core::{cmp::min, convert::Infallible};
 use core::cell::RefCell;
-use evm::interpreter::error::{ExitError, ExitResult, ExitException, ExitSucceed};
+use evm::interpreter::error::{ExitError, ExitResult, ExitException};
 use evm::{MergeStrategy, TransactionalBackend};
 use evm::standard::{routines, Config, Resolver, TransactArgs, TransactValue, InvokerState, SubstackInvoke};
 use evm::{Invoker, InvokerControl};
@@ -60,7 +60,7 @@ impl Default for DataContainer {
     }
 }
 
-/// Updated Invoker.
+/// Overlayed Invoker.
 ///
 /// The generic parameters are as follows:
 /// * `S`: The runtime state, usually [RuntimeState] but can be customized.
@@ -68,13 +68,13 @@ impl Default for DataContainer {
 /// * `R`: Code resolver type, also handle precompiles. Usually
 ///   [EtableResolver] but can be customized.
 /// * `Tr`: Trap type, usually [crate::Opcode] but can be customized.
-pub struct UpdatedInvoker<'config, 'resolver, R> {
+pub struct OverlayedInvoker<'config, 'resolver, R> {
     container: RefCell<Option<DataContainer>>,
     config: &'config Config,
     resolver: &'resolver R,
 }
 
-impl<'config, 'resolver, R> UpdatedInvoker<'config, 'resolver, R> {
+impl<'config, 'resolver, R> OverlayedInvoker<'config, 'resolver, R> {
     /// Create a new standard invoker with the given config and resolver.
     pub fn new(config: &'config Config, resolver: &'resolver R) -> Self {
         Self { config, resolver, container: RefCell::new(None) }
@@ -89,7 +89,7 @@ impl<'config, 'resolver, R> UpdatedInvoker<'config, 'resolver, R> {
     }
 }
 
-impl<'config, 'resolver, H, R, Tr> Invoker<H, Tr> for UpdatedInvoker<'config, 'resolver, R>
+impl<'config, 'resolver, H, R, Tr> Invoker<H, Tr> for OverlayedInvoker<'config, 'resolver, R>
 where
     R::State: InvokerState<'config> + AsRef<RuntimeState> + AsMut<RuntimeState>,
     H: RuntimeEnvironment + RuntimeBackend + TransactionalBackend,

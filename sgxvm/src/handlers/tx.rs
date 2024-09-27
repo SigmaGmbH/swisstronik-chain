@@ -1,4 +1,3 @@
-use evm::backend::{RuntimeBaseBackend};
 use evm::standard::{Etable, EtableResolver, TransactArgs, TransactValue};
 use primitive_types::{H160, H256, U256};
 use protobuf::Message;
@@ -15,8 +14,8 @@ use crate::types::{ExecutionResult, GASOMETER_CONFIG};
 use crate::AllocationWithResult;
 use crate::GoQuerier;
 use crate::handlers::utils::{convert_logs, parse_access_list};
-use crate::updated_backend::{TxEnvironment, UpdatedBackend};
-use crate::updated_invoker::UpdatedInvoker;
+use crate::backend::{TxEnvironment, Backend};
+use crate::invoker::OverlayedInvoker;
 
 /// Converts raw execution result into protobuf and returns it outside of enclave
 pub fn convert_and_allocate_transaction_result(
@@ -152,11 +151,11 @@ fn run_tx(
     let etable = (gas_etable, exec_etable);
     let precompiles = EVMPrecompiles::new(querier);
     let resolver = EtableResolver::new(&GASOMETER_CONFIG, &precompiles, &etable);
-    let invoker = UpdatedInvoker::new(&GASOMETER_CONFIG, &resolver);
+    let invoker = OverlayedInvoker::new(&GASOMETER_CONFIG, &resolver);
 
     let storage = crate::storage::FFIStorage::new(querier, context.timestamp, context.block_number);
     let tx_environment = TxEnvironment::from(context);
-    let mut backend = UpdatedBackend::new(querier, &storage, tx_environment);
+    let mut backend = Backend::new(querier, &storage, tx_environment);
 
     let res = evm::transact(args, None, &mut backend, &invoker);
     let changeset = backend.deconstruct();
@@ -164,7 +163,7 @@ fn run_tx(
     let used_gas = invoker.get_gas_used().map(|used_gas| used_gas.as_u64()).unwrap_or(21000);
 
     if should_commit {
-        if let Err(err) = UpdatedBackend::apply_changeset(&storage, &changeset) {
+        if let Err(err) = Backend::apply_changeset(&storage, &changeset) {
             return ExecutionResult::from_exit_error(
                 err,
                 invoker.get_return_value().unwrap_or_default(),
