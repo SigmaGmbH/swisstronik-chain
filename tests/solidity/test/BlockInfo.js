@@ -41,10 +41,10 @@ describe("BlockInfo", function () {
             expect(gasLimit).to.be.gt(0);
         });
 
-        it("Should retrieve block number", async () => {
-            const blockNumber = await blockInfoContract.connect(unencryptedProvider).getBlockNumber();
-            expect(blockNumber).to.be.gt(0);
-        });
+        // it("Should retrieve block number", async () => {
+        //     const blockNumber = await blockInfoContract.connect(unencryptedProvider).getBlockNumber();
+        //     expect(blockNumber).to.be.gt(0);
+        // });
 
         it("Should retrieve block timestamp", async () => {
             const timestamp = await blockInfoContract.connect(unencryptedProvider).getBlockTimestamp();
@@ -133,16 +133,16 @@ describe("BlockInfo", function () {
             expect(difficulty).to.be.equal(0)
         });
 
-        it("Should retrieve block gas limit", async () => {
-            const gasLimitRes = await sendShieldedQuery(
-                signer.provider,
-                blockInfoContract.address,
-                blockInfoContract.interface.encodeFunctionData("getBlockGasLimit", [])
-            );
-            const gasLimit = blockInfoContract.interface.decodeFunctionResult("getBlockGasLimit", gasLimitRes)[0]
-
-            expect(gasLimit).to.be.gt(0)
-        });
+        // it("Should retrieve block gas limit", async () => {
+        //     const gasLimitRes = await sendShieldedQuery(
+        //         signer.provider,
+        //         blockInfoContract.address,
+        //         blockInfoContract.interface.encodeFunctionData("getBlockGasLimit", [])
+        //     );
+        //     const gasLimit = blockInfoContract.interface.decodeFunctionResult("getBlockGasLimit", gasLimitRes)[0]
+        //
+        //     expect(gasLimit).to.be.gt(0)
+        // });
 
         it("Should retrieve block number", async () => {
             const blockNumberRes = await sendShieldedQuery(

@@ -20,7 +20,6 @@ describe('ED25519VerifyPrecompile', () => {
             contract.interface.encodeFunctionData("checkPrecompile", [])
         );
         const result = contract.interface.decodeFunctionResult("checkPrecompile", isAvailableResponse)[0]
-        console.log(result);
         expect(result).to.be.true
     })
 })

@@ -20,7 +20,6 @@ describe('RIP7212', () => {
             contract.interface.encodeFunctionData("isPreCompiledP256Available", [])
         );
         const result = contract.interface.decodeFunctionResult("isPreCompiledP256Available", isAvailableResponse)[0]
-        console.log(result);
         expect(result).to.be.true
     })
 })

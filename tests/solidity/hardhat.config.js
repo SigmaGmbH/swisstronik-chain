@@ -11,7 +11,6 @@ module.exports = {
                 version: "0.5.5"
             }
         }
-
     },
     networks: {
         tronik: {

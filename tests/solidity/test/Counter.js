@@ -73,18 +73,12 @@ describe('Counter', () => {
     it('Should revert correctly', async () => {
         const [signer] = await ethers.getSigners()
 
-        let failed = false
-        try {
-            const tx = await sendShieldedTransaction(
+        await expect(
+            sendShieldedTransaction(
                 signer,
                 counterContract.address,
                 counterContract.interface.encodeFunctionData("subtract", [])
             )
-            await tx.wait()
-        } catch (e) {
-            failed = e.reason.indexOf('reverted') !== -1
-        }
-
-        expect(failed).to.be.true
+        ).to.be.rejectedWith("COUNTER_TOO_LOW")
     })
 })
