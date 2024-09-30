@@ -36,15 +36,15 @@ describe("BlockInfo", function () {
             expect(difficulty).to.be.equal(0);
         });
 
-        it("Should retrieve block gas limit", async () => {
-            const gasLimit = await blockInfoContract.connect(unencryptedProvider).getBlockGasLimit();
-            expect(gasLimit).to.be.gt(0);
-        });
-
-        // it("Should retrieve block number", async () => {
-        //     const blockNumber = await blockInfoContract.connect(unencryptedProvider).getBlockNumber();
-        //     expect(blockNumber).to.be.gt(0);
+        // it("Should retrieve block gas limit", async () => {
+        //     const gasLimit = await blockInfoContract.connect(unencryptedProvider).getBlockGasLimit();
+        //     expect(gasLimit).to.be.gt(0);
         // });
+
+        it("Should retrieve block number", async () => {
+            const blockNumber = await blockInfoContract.connect(unencryptedProvider).getBlockNumber();
+            expect(blockNumber).to.be.gt(0);
+        });
 
         it("Should retrieve block timestamp", async () => {
             const timestamp = await blockInfoContract.connect(unencryptedProvider).getBlockTimestamp();
