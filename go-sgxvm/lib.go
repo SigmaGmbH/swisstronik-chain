@@ -21,8 +21,6 @@ type TransactionData = types.TransactionData
 type QueryGetAccount = types.QueryGetAccount
 type QueryGetAccountResponse = types.QueryGetAccountResponse
 type CosmosRequest = types.CosmosRequest
-type QueryInsertAccount = types.QueryInsertAccount
-type QueryInsertAccountResponse = types.QueryInsertAccountResponse
 type QueryContainsKey = types.QueryContainsKey
 type QueryContainsKeyResponse = types.QueryContainsKeyResponse
 type QueryGetAccountStorageCell = types.QueryGetAccountStorageCell
@@ -57,7 +55,6 @@ type QueryInsertAccountBalanceResponse = types.QueryInsertAccountBalanceResponse
 
 // Storage requests
 type CosmosRequest_GetAccount = types.CosmosRequest_GetAccount
-type CosmosRequest_InsertAccount = types.CosmosRequest_InsertAccount
 type CosmosRequest_ContainsKey = types.CosmosRequest_ContainsKey
 type CosmosRequest_AccountCode = types.CosmosRequest_AccountCode
 type CosmosRequest_StorageCell = types.CosmosRequest_StorageCell

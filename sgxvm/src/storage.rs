@@ -105,19 +105,6 @@ impl Storage for FFIStorage {
         }
     }
 
-    fn insert_account(&self, key: H160, data: (&U256, &U256)) -> Result<(), Error> {
-        let encoded_request = coder::encode_insert_account(&key, data.0, data.1);
-        if let Some(result) = querier::make_request(self.querier, encoded_request) {
-            match protobuf::parse_from_bytes::<ffi::QueryInsertAccountResponse>(result.as_slice()) {
-                Err(err) => Err(err.into()),
-                _ => Ok(())
-            }
-        } else {
-            println!("Insert account failed. Writting error");
-            Err(Error::enclave_err("Insert account failed. Empty response"))
-        }
-    }
-
     fn insert_account_code(&self, key: H160, code: Vec<u8>) -> Result<(), Error>  {
         let encoded_request = coder::encode_insert_account_code(key, code);
         if let Some(result) = querier::make_request(self.querier, encoded_request) {

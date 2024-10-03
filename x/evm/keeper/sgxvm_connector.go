@@ -32,9 +32,6 @@ func (q Connector) Query(req []byte) ([]byte, error) {
 	// Handle request for account data such as balance and nonce
 	case *librustgo.CosmosRequest_GetAccount:
 		return q.GetAccount(request)
-	// Handles request for updating account data
-	case *librustgo.CosmosRequest_InsertAccount:
-		return q.InsertAccount(request)
 	// Handles request if such account exists
 	case *librustgo.CosmosRequest_ContainsKey:
 		return q.ContainsKey(request)
@@ -179,31 +176,6 @@ func (q Connector) GetAccountCode(req *librustgo.CosmosRequest_AccountCode) ([]b
 	return proto.Marshal(&librustgo.QueryGetAccountCodeResponse{
 		Code: code,
 	})
-}
-
-// InsertAccount handles incoming protobuf-encoded request for inserting new account data
-// such as balance and nonce. If there is deployed contract behind given address, its bytecode
-// or code hash won't be changed
-func (q Connector) InsertAccount(req *librustgo.CosmosRequest_InsertAccount) ([]byte, error) {
-	//println("Connector::Query Request to insert account code")
-	ethAddress := common.BytesToAddress(req.InsertAccount.Address)
-
-	balance := &big.Int{}
-	balance.SetBytes(req.InsertAccount.Balance)
-	nonce := req.InsertAccount.Nonce
-
-	account := q.EVMKeeper.GetAccountOrEmpty(q.Context, ethAddress)
-	if err := q.EVMKeeper.SetBalance(q.Context, ethAddress, balance); err != nil {
-		return nil, err
-	}
-
-	account.Balance = balance
-	account.Nonce = nonce
-	if err := q.EVMKeeper.SetAccount(q.Context, ethAddress, account); err != nil {
-		return nil, err
-	}
-
-	return proto.Marshal(&librustgo.QueryInsertAccountResponse{})
 }
 
 func (q Connector) InsertAccountNonce(req *librustgo.CosmosRequest_InsertAccountNonce) ([]byte, error) {

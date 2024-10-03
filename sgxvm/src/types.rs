@@ -27,9 +27,6 @@ pub trait Storage {
     /// Returns account basic data (balance and nonce)
     fn get_account(&self, account: &H160) -> (U256, U256);
 
-    /// Updates account balance and nonce
-    fn insert_account(&self, key: H160, data: (&U256, &U256)) -> Result<(), Error>;
-
     /// Updates contract bytecode
     fn insert_account_code(&self, key: H160, code: Vec<u8>) -> Result<(), Error>;
 

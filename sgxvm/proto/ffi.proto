@@ -78,13 +78,6 @@ message QueryGetAccountResponse {
   uint64 nonce = 2;
 }
 
-// Request to insert account data such as balance and nonce
-message QueryInsertAccount {
-  bytes address = 1;
-  bytes balance = 2;
-  uint64 nonce = 3;
-}
-
 message QueryInsertAccountBalance {
   bytes address = 1;
   bytes balance = 2;
@@ -96,9 +89,6 @@ message QueryInsertAccountNonce {
   uint64 nonce = 2;
 }
 message QueryInsertAccountNonceResponse{}
-
-// Response for account insertion
-message QueryInsertAccountResponse {}
 
 message QueryContainsKey { bytes key = 1; }
 
@@ -216,23 +206,22 @@ message QueryGetVerificationDataResponse {
 message CosmosRequest {
   oneof req {
     QueryGetAccount getAccount = 1;
-    QueryInsertAccount insertAccount = 2;
-    QueryContainsKey containsKey = 3;
-    QueryGetAccountCode accountCode = 4;
-    QueryGetAccountCodeHash codeHash = 5;
-    QueryGetAccountCodeSize codeSize = 6;
-    QueryGetAccountStorageCell storageCell = 7;
-    QueryInsertAccountCode insertAccountCode = 8;
-    QueryInsertStorageCell insertStorageCell = 9;
-    QueryRemove remove = 10;
-    QueryRemoveStorageCell removeStorageCell = 11;
-    QueryRemoveStorage removeStorage = 12;
-    QueryBlockHash blockHash = 13;
-    QueryAddVerificationDetails addVerificationDetails = 14;
-    QueryHasVerification hasVerification = 15;
-    QueryGetVerificationData getVerificationData = 16;
-    QueryInsertAccountBalance insertAccountBalance = 17;
-    QueryInsertAccountNonce insertAccountNonce = 18;
+    QueryContainsKey containsKey = 2;
+    QueryGetAccountCode accountCode = 3;
+    QueryGetAccountCodeHash codeHash = 4;
+    QueryGetAccountCodeSize codeSize = 5;
+    QueryGetAccountStorageCell storageCell = 6;
+    QueryInsertAccountCode insertAccountCode = 7;
+    QueryInsertStorageCell insertStorageCell = 8;
+    QueryRemove remove = 9;
+    QueryRemoveStorageCell removeStorageCell = 10;
+    QueryRemoveStorage removeStorage = 11;
+    QueryBlockHash blockHash = 12;
+    QueryAddVerificationDetails addVerificationDetails = 13;
+    QueryHasVerification hasVerification = 14;
+    QueryGetVerificationData getVerificationData = 15;
+    QueryInsertAccountBalance insertAccountBalance = 16;
+    QueryInsertAccountNonce insertAccountNonce = 17;
   }
 }
 

@@ -54,16 +54,6 @@ pub fn encode_get_account_code(account_address: &H160) -> Vec<u8> {
     cosmos_request.write_to_bytes().unwrap()
 }
 
-pub fn encode_insert_account(account_address: &H160, balance: &U256, nonce: &U256) -> Vec<u8> {
-    let mut cosmos_request = ffi::CosmosRequest::new();
-    let mut request = ffi::QueryInsertAccount::new();
-    request.set_address(account_address.as_bytes().to_vec());
-    request.set_balance(u256_to_vec(balance));
-    request.set_nonce(nonce.as_u64());
-    cosmos_request.set_insertAccount(request);
-    cosmos_request.write_to_bytes().unwrap()
-}
-
 pub fn encode_insert_account_code(account_address: H160, code: Vec<u8>) -> Vec<u8> {
     let mut cosmos_request = ffi::CosmosRequest::new();
     let mut request = ffi::QueryInsertAccountCode::new();
