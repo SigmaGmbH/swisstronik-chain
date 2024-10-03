@@ -9,6 +9,12 @@ module.exports = {
         overrides: {
             "contracts/tokens/WETH9.sol": {
                 version: "0.5.5"
+            },
+            "contracts/opcodes/TransientStorage.sol": {
+                version: "0.8.27",
+                settings: {
+                    evmVersion: "cancun"
+                }
             }
         }
     },
