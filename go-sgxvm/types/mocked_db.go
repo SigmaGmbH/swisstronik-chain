@@ -140,13 +140,9 @@ func (m MockedDB) InsertContractCode(address ethcommon.Address, code []byte) err
 }
 
 func (m MockedDB) InsertAccountBalance(address ethcommon.Address, balance []byte) error {
-	acct, err := m.GetAccount(address)
+	acct, err := m.GetAccountOrEmpty(address)
 	if err != nil {
 		return err
-	}
-
-	if acct == nil {
-		return errors.New("cannot insert account balance. Account not found")
 	}
 
 	txn := m.db.Txn(true)
@@ -165,13 +161,9 @@ func (m MockedDB) InsertAccountBalance(address ethcommon.Address, balance []byte
 }
 
 func (m MockedDB) InsertAccountNonce(address ethcommon.Address, nonce uint64) error {
-	acct, err := m.GetAccount(address)
+	acct, err := m.GetAccountOrEmpty(address)
 	if err != nil {
 		return err
-	}
-
-	if acct == nil {
-		return errors.New("cannot insert account nonce. Account not found")
 	}
 
 	txn := m.db.Txn(true)
