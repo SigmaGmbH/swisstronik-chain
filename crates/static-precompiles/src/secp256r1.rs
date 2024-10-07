@@ -64,7 +64,6 @@ impl LinearCostPrecompile for P256Verify {
 
 #[cfg(test)]
 mod tests {
-    use evm::interpreter::error::ExitError;
     use super::*;
 
     #[test]
@@ -72,7 +71,7 @@ mod tests {
         let input: [u8; 0] = [];
         let cost: u64 = 1;
 
-        let (success, res) = P256Verify::raw_execute(&input, cost);
+        let (success, _) = P256Verify::raw_execute(&input, cost);
         assert_eq!(success, ExitException::Other("input must contain 160 bytes".into()).into());
     }
 

@@ -133,22 +133,8 @@ mod tests {
         let input: [u8; 0] = [];
         let cost: u64 = 1;
 
-        let (success, res) = Ed25519Verify::raw_execute(&input, cost);
+        let (success, _) = Ed25519Verify::raw_execute(&input, cost);
         assert_eq!(success, ExitException::Other("input must contain 128 bytes".into()).into());
-
-            //
-            // Ok((_, _)) => {
-            //     panic!("Test not expected to pass");
-            // }
-            // Err(e) => {
-            //     assert_eq!(
-            //         e,
-            //         PrecompileFailure::Error {
-            //             exit_status: ExitError::Other("input must contain 128 bytes".into())
-            //         }
-            //     );
-            // }
-        // }
     }
 
     #[test]
@@ -186,20 +172,6 @@ mod tests {
         assert_eq!(res[31], 0u8);
         assert_eq!(success, ExitSucceed::Returned.into());
 
-
-        // {
-        //     Ok((_, output)) => {
-        //         assert_eq!(output.len(), 32);
-        //         assert_eq!(output[0], 0u8);
-        //         assert_eq!(output[1], 0u8);
-        //         assert_eq!(output[2], 0u8);
-        //         assert_eq!(output[31], 0u8);
-        //     }
-        //     Err(e) => {
-        //         return Err(e);
-        //     }
-        // };
-
         // try again with a different message
         let msg: &[u8] = b"BAD_MESSAGE_mnopqrstuvwxyz123456";
 
@@ -216,19 +188,6 @@ mod tests {
         assert_eq!(output[1], 0u8);
         assert_eq!(output[2], 0u8);
         assert_eq!(output[31], 1u8); // non-zero indicates error (in our case, 1)
-
-        // {
-        //     Ok((_, output)) => {
-        //         assert_eq!(output.len(), 32);
-        //         assert_eq!(output[0], 0u8);
-        //         assert_eq!(output[1], 0u8);
-        //         assert_eq!(output[2], 0u8);
-        //         assert_eq!(output[31], 1u8); // non-zero indicates error (in our case, 1)
-        //     }
-        //     Err(e) => {
-        //         return Err(e);
-        //     }
-        // };
     }
 
     #[test]
@@ -250,17 +209,6 @@ mod tests {
         let (success, out) = Curve25519Add::raw_execute(&input, cost);
         assert_eq!(success, ExitSucceed::Returned.into());
         assert_eq!(out, sum.compress().to_bytes());
-
-        //
-        // {
-        //     Ok((_, out)) => {
-        //         assert_eq!(out, sum.compress().to_bytes());
-        //         Ok(())
-        //     }
-        //     Err(e) => {
-        //         panic!("Test not expected to fail: {:?}", e);
-        //     }
-        // }
     }
 
     #[test]
@@ -273,14 +221,6 @@ mod tests {
         let (success, res) = Curve25519Add::raw_execute(&input, cost);
         assert_eq!(success, ExitSucceed::Returned.into());
         assert_eq!(res, RistrettoPoint::identity().compress().to_bytes());
-        // {
-        //     Ok((_, out)) => {
-        //         assert_eq!(out, RistrettoPoint::identity().compress().to_bytes());
-        //     }
-        //     Err(e) => {
-        //         panic!("Test not expected to fail: {:?}", e);
-        //     }
-        // }
     }
 
     #[test]
@@ -300,16 +240,6 @@ mod tests {
         assert_eq!(success, ExitSucceed::Returned.into());
         assert_eq!(out, p1.compress().to_bytes());
         assert_ne!(out, p2.compress().to_bytes());
-
-        // {
-        //     Ok((_, out)) => {
-        //         assert_eq!(out, p1.compress().to_bytes());
-        //         assert_ne!(out, p2.compress().to_bytes());
-        //     }
-        //     Err(e) => {
-        //         panic!("Test not expected to fail: {:?}", e);
-        //     }
-        // }
     }
 
     #[test]
@@ -320,23 +250,6 @@ mod tests {
 
         let (success, _) = Curve25519ScalarMul::raw_execute(&input, cost);
         assert_eq!(success, ExitException::Other("input must contain 64 bytes (scalar - 32 bytes, point - 32 bytes)".into()).into());
-        //
-        // {
-        //     Ok((_, _out)) => {
-        //         panic!("Test not expected to work");
-        //     }
-        //     Err(e) => {
-        //         assert_eq!(
-        //             e,
-        //             PrecompileFailure::Error {
-        //                 exit_status: ExitError::Other(
-        //                     "input must contain 64 bytes (scalar - 32 bytes, point - 32 bytes)"
-        //                         .into()
-        //                 )
-        //             }
-        //         );
-        //     }
-        // }
     }
 
     #[test]
@@ -347,22 +260,6 @@ mod tests {
 
         let (success, _) = Curve25519Add::raw_execute(&input, cost);
         assert_eq!(success, ExitException::Other("input must contain multiple of 32 bytes".into()).into());
-
-        // {
-        //     Ok((_, _out)) => {
-        //         panic!("Test not expected to work");
-        //     }
-        //     Err(e) => {
-        //         assert_eq!(
-        //             e,
-        //             PrecompileFailure::Error {
-        //                 exit_status: ExitError::Other(
-        //                     "input must contain multiple of 32 bytes".into()
-        //                 )
-        //             }
-        //         );
-        //     }
-        // }
     }
 
     #[test]
@@ -384,22 +281,5 @@ mod tests {
 
         let (success, _) = Curve25519Add::raw_execute(&input, cost);
         assert_eq!(success, ExitException::Other("input cannot be greater than 320 bytes (10 compressed points)".into()).into());
-
-        //
-        // {
-        //     Ok((_, _out)) => {
-        //         panic!("Test not expected to work");
-        //     }
-        //     Err(e) => {
-        //         assert_eq!(
-        //             e,
-        //             PrecompileFailure::Error {
-        //                 exit_status: ExitError::Other(
-        //                     "input cannot be greater than 320 bytes (10 compressed points)".into()
-        //                 )
-        //             }
-        //         );
-        //     }
-        // }
     }
 }
