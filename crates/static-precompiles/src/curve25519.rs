@@ -120,245 +120,286 @@ impl LinearCostPrecompile for Curve25519ScalarMul {
         )
     }
 }
-//
-// #[cfg(test)]
-// mod tests {
-//     use curve25519_dalek::constants;
-//     use ed25519_dalek::{Signer, SigningKey};
-//
-//     use super::*;
-//
-//     #[test]
-//     fn test_empty_input() {
-//         let input: [u8; 0] = [];
-//         let cost: u64 = 1;
-//
-//         match Ed25519Verify::raw_execute(&input, cost) {
-//             Ok((_, _)) => {
-//                 panic!("Test not expected to pass");
-//             }
-//             Err(e) => {
-//                 assert_eq!(
-//                     e,
-//                     PrecompileFailure::Error {
-//                         exit_status: ExitError::Other("input must contain 128 bytes".into())
-//                     }
-//                 );
-//             }
-//         }
-//     }
-//
-//     #[test]
-//     fn test_verify() {
-//         #[allow(clippy::zero_prefixed_literal)]
-//             let secret_key_bytes: [u8; ed25519_dalek::SECRET_KEY_LENGTH] = [
-//             157, 097, 177, 157, 239, 253, 090, 096, 186, 132, 074, 244, 146, 236, 044, 196, 068,
-//             073, 197, 105, 123, 050, 105, 025, 112, 059, 172, 003, 028, 174, 127, 096,
-//         ];
-//
-//         let keypair = SigningKey::from_bytes(&secret_key_bytes);
-//         let public_key = keypair.verifying_key();
-//
-//         let msg: &[u8] = b"abcdefghijklmnopqrstuvwxyz123456";
-//         assert_eq!(msg.len(), 32);
-//         let signature = keypair.sign(msg);
-//
-//         // input is:
-//         // 1) message (32 bytes)
-//         // 2) pubkey (32 bytes)
-//         // 3) signature (64 bytes)
-//         let mut input: Vec<u8> = Vec::with_capacity(128);
-//         input.extend_from_slice(msg);
-//         input.extend_from_slice(&public_key.to_bytes());
-//         input.extend_from_slice(&signature.to_bytes());
-//         assert_eq!(input.len(), 128);
-//
-//         let cost: u64 = 1;
-//
-//         match Ed25519Verify::raw_execute(&input, cost) {
-//             Ok((_, output)) => {
-//                 assert_eq!(output.len(), 32);
-//                 assert_eq!(output[0], 0u8);
-//                 assert_eq!(output[1], 0u8);
-//                 assert_eq!(output[2], 0u8);
-//                 assert_eq!(output[31], 0u8);
-//             }
-//             Err(e) => {
-//                 return Err(e);
-//             }
-//         };
-//
-//         // try again with a different message
-//         let msg: &[u8] = b"BAD_MESSAGE_mnopqrstuvwxyz123456";
-//
-//         let mut input: Vec<u8> = Vec::with_capacity(128);
-//         input.extend_from_slice(msg);
-//         input.extend_from_slice(&public_key.to_bytes());
-//         input.extend_from_slice(&signature.to_bytes());
-//         assert_eq!(input.len(), 128);
-//
-//         match Ed25519Verify::raw_execute(&input, cost) {
-//             Ok((_, output)) => {
-//                 assert_eq!(output.len(), 32);
-//                 assert_eq!(output[0], 0u8);
-//                 assert_eq!(output[1], 0u8);
-//                 assert_eq!(output[2], 0u8);
-//                 assert_eq!(output[31], 1u8); // non-zero indicates error (in our case, 1)
-//             }
-//             Err(e) => {
-//                 return Err(e);
-//             }
-//         };
-//
-//         Ok(())
-//     }
-//
-//     #[test]
-//     fn test_sum() {
-//         let s1 = Scalar::from(999u64);
-//         let p1 = constants::RISTRETTO_BASEPOINT_POINT * s1;
-//
-//         let s2 = Scalar::from(333u64);
-//         let p2 = constants::RISTRETTO_BASEPOINT_POINT * s2;
-//
-//         let vec = vec![p1, p2];
-//         let mut input = vec![];
-//         input.extend_from_slice(&p1.compress().to_bytes());
-//         input.extend_from_slice(&p2.compress().to_bytes());
-//
-//         let sum: RistrettoPoint = vec.iter().sum();
-//         let cost: u64 = 1;
-//
-//         match Curve25519Add::raw_execute(&input, cost) {
-//             Ok((_, out)) => {
-//                 assert_eq!(out, sum.compress().to_bytes());
-//                 Ok(())
-//             }
-//             Err(e) => {
-//                 panic!("Test not expected to fail: {:?}", e);
-//             }
-//         }
-//     }
-//
-//     #[test]
-//     fn test_empty() {
-//         // Test that sum works for the empty iterator
-//         let input = vec![];
-//
-//         let cost: u64 = 1;
-//
-//         match Curve25519Add::raw_execute(&input, cost) {
-//             Ok((_, out)) => {
-//                 assert_eq!(out, RistrettoPoint::identity().compress().to_bytes());
-//             }
-//             Err(e) => {
-//                 panic!("Test not expected to fail: {:?}", e);
-//             }
-//         }
-//     }
-//
-//     #[test]
-//     fn test_scalar_mul() {
-//         let s1 = Scalar::from(999u64);
-//         let s2 = Scalar::from(333u64);
-//         let p1 = constants::RISTRETTO_BASEPOINT_POINT * s1;
-//         let p2 = constants::RISTRETTO_BASEPOINT_POINT * s2;
-//
-//         let mut input = vec![];
-//         input.extend_from_slice(&s1.to_bytes());
-//         input.extend_from_slice(&constants::RISTRETTO_BASEPOINT_POINT.compress().to_bytes());
-//
-//         let cost: u64 = 1;
-//
-//         match Curve25519ScalarMul::raw_execute(&input, cost) {
-//             Ok((_, out)) => {
-//                 assert_eq!(out, p1.compress().to_bytes());
-//                 assert_ne!(out, p2.compress().to_bytes());
-//             }
-//             Err(e) => {
-//                 panic!("Test not expected to fail: {:?}", e);
-//             }
-//         }
-//     }
-//
-//     #[test]
-//     fn test_scalar_mul_empty_error() {
-//         let input = vec![];
-//
-//         let cost: u64 = 1;
-//
-//         match Curve25519ScalarMul::raw_execute(&input, cost) {
-//             Ok((_, _out)) => {
-//                 panic!("Test not expected to work");
-//             }
-//             Err(e) => {
-//                 assert_eq!(
-//                     e,
-//                     PrecompileFailure::Error {
-//                         exit_status: ExitError::Other(
-//                             "input must contain 64 bytes (scalar - 32 bytes, point - 32 bytes)"
-//                                 .into()
-//                         )
-//                     }
-//                 );
-//             }
-//         }
-//     }
-//
-//     #[test]
-//     fn test_point_addition_bad_length() {
-//         let input: Vec<u8> = [0u8; 33].to_vec();
-//
-//         let cost: u64 = 1;
-//
-//         match Curve25519Add::raw_execute(&input, cost) {
-//             Ok((_, _out)) => {
-//                 panic!("Test not expected to work");
-//             }
-//             Err(e) => {
-//                 assert_eq!(
-//                     e,
-//                     PrecompileFailure::Error {
-//                         exit_status: ExitError::Other(
-//                             "input must contain multiple of 32 bytes".into()
-//                         )
-//                     }
-//                 );
-//             }
-//         }
-//     }
-//
-//     #[test]
-//     fn test_point_addition_too_many_points() {
-//         let mut input = vec![];
-//         input.extend_from_slice(&constants::RISTRETTO_BASEPOINT_POINT.compress().to_bytes()); // 1
-//         input.extend_from_slice(&constants::RISTRETTO_BASEPOINT_POINT.compress().to_bytes()); // 2
-//         input.extend_from_slice(&constants::RISTRETTO_BASEPOINT_POINT.compress().to_bytes()); // 3
-//         input.extend_from_slice(&constants::RISTRETTO_BASEPOINT_POINT.compress().to_bytes()); // 4
-//         input.extend_from_slice(&constants::RISTRETTO_BASEPOINT_POINT.compress().to_bytes()); // 5
-//         input.extend_from_slice(&constants::RISTRETTO_BASEPOINT_POINT.compress().to_bytes()); // 6
-//         input.extend_from_slice(&constants::RISTRETTO_BASEPOINT_POINT.compress().to_bytes()); // 7
-//         input.extend_from_slice(&constants::RISTRETTO_BASEPOINT_POINT.compress().to_bytes()); // 8
-//         input.extend_from_slice(&constants::RISTRETTO_BASEPOINT_POINT.compress().to_bytes()); // 9
-//         input.extend_from_slice(&constants::RISTRETTO_BASEPOINT_POINT.compress().to_bytes()); // 10
-//         input.extend_from_slice(&constants::RISTRETTO_BASEPOINT_POINT.compress().to_bytes()); // 11
-//
-//         let cost: u64 = 1;
-//
-//         match Curve25519Add::raw_execute(&input, cost) {
-//             Ok((_, _out)) => {
-//                 panic!("Test not expected to work");
-//             }
-//             Err(e) => {
-//                 assert_eq!(
-//                     e,
-//                     PrecompileFailure::Error {
-//                         exit_status: ExitError::Other(
-//                             "input cannot be greater than 320 bytes (10 compressed points)".into()
-//                         )
-//                     }
-//                 );
-//             }
-//         }
-//     }
-// }
+
+#[cfg(test)]
+mod tests {
+    use curve25519_dalek::constants;
+    use ed25519_dalek::{Signer, SigningKey};
+
+    use super::*;
+
+    #[test]
+    fn test_empty_input() {
+        let input: [u8; 0] = [];
+        let cost: u64 = 1;
+
+        let (success, res) = Ed25519Verify::raw_execute(&input, cost);
+        assert_eq!(success, ExitException::Other("input must contain 128 bytes".into()).into());
+
+            //
+            // Ok((_, _)) => {
+            //     panic!("Test not expected to pass");
+            // }
+            // Err(e) => {
+            //     assert_eq!(
+            //         e,
+            //         PrecompileFailure::Error {
+            //             exit_status: ExitError::Other("input must contain 128 bytes".into())
+            //         }
+            //     );
+            // }
+        // }
+    }
+
+    #[test]
+    fn test_verify() {
+        #[allow(clippy::zero_prefixed_literal)]
+            let secret_key_bytes: [u8; ed25519_dalek::SECRET_KEY_LENGTH] = [
+            157, 097, 177, 157, 239, 253, 090, 096, 186, 132, 074, 244, 146, 236, 044, 196, 068,
+            073, 197, 105, 123, 050, 105, 025, 112, 059, 172, 003, 028, 174, 127, 096,
+        ];
+
+        let keypair = SigningKey::from_bytes(&secret_key_bytes);
+        let public_key = keypair.verifying_key();
+
+        let msg: &[u8] = b"abcdefghijklmnopqrstuvwxyz123456";
+        assert_eq!(msg.len(), 32);
+        let signature = keypair.sign(msg);
+
+        // input is:
+        // 1) message (32 bytes)
+        // 2) pubkey (32 bytes)
+        // 3) signature (64 bytes)
+        let mut input: Vec<u8> = Vec::with_capacity(128);
+        input.extend_from_slice(msg);
+        input.extend_from_slice(&public_key.to_bytes());
+        input.extend_from_slice(&signature.to_bytes());
+        assert_eq!(input.len(), 128);
+
+        let cost: u64 = 1;
+
+        let (success, res) = Ed25519Verify::raw_execute(&input, cost);
+        assert_eq!(res.len(), 32);
+        assert_eq!(res[0], 0u8);
+        assert_eq!(res[1], 0u8);
+        assert_eq!(res[2], 0u8);
+        assert_eq!(res[31], 0u8);
+        assert_eq!(success, ExitSucceed::Returned.into());
+
+
+        // {
+        //     Ok((_, output)) => {
+        //         assert_eq!(output.len(), 32);
+        //         assert_eq!(output[0], 0u8);
+        //         assert_eq!(output[1], 0u8);
+        //         assert_eq!(output[2], 0u8);
+        //         assert_eq!(output[31], 0u8);
+        //     }
+        //     Err(e) => {
+        //         return Err(e);
+        //     }
+        // };
+
+        // try again with a different message
+        let msg: &[u8] = b"BAD_MESSAGE_mnopqrstuvwxyz123456";
+
+        let mut input: Vec<u8> = Vec::with_capacity(128);
+        input.extend_from_slice(msg);
+        input.extend_from_slice(&public_key.to_bytes());
+        input.extend_from_slice(&signature.to_bytes());
+        assert_eq!(input.len(), 128);
+
+        let (success, output) = Ed25519Verify::raw_execute(&input, cost);
+        assert_eq!(success, ExitSucceed::Returned.into());
+        assert_eq!(output.len(), 32);
+        assert_eq!(output[0], 0u8);
+        assert_eq!(output[1], 0u8);
+        assert_eq!(output[2], 0u8);
+        assert_eq!(output[31], 1u8); // non-zero indicates error (in our case, 1)
+
+        // {
+        //     Ok((_, output)) => {
+        //         assert_eq!(output.len(), 32);
+        //         assert_eq!(output[0], 0u8);
+        //         assert_eq!(output[1], 0u8);
+        //         assert_eq!(output[2], 0u8);
+        //         assert_eq!(output[31], 1u8); // non-zero indicates error (in our case, 1)
+        //     }
+        //     Err(e) => {
+        //         return Err(e);
+        //     }
+        // };
+    }
+
+    #[test]
+    fn test_sum() {
+        let s1 = Scalar::from(999u64);
+        let p1 = constants::RISTRETTO_BASEPOINT_POINT * s1;
+
+        let s2 = Scalar::from(333u64);
+        let p2 = constants::RISTRETTO_BASEPOINT_POINT * s2;
+
+        let vec = vec![p1, p2];
+        let mut input = vec![];
+        input.extend_from_slice(&p1.compress().to_bytes());
+        input.extend_from_slice(&p2.compress().to_bytes());
+
+        let sum: RistrettoPoint = vec.iter().sum();
+        let cost: u64 = 1;
+
+        let (success, out) = Curve25519Add::raw_execute(&input, cost);
+        assert_eq!(success, ExitSucceed::Returned.into());
+        assert_eq!(out, sum.compress().to_bytes());
+
+        //
+        // {
+        //     Ok((_, out)) => {
+        //         assert_eq!(out, sum.compress().to_bytes());
+        //         Ok(())
+        //     }
+        //     Err(e) => {
+        //         panic!("Test not expected to fail: {:?}", e);
+        //     }
+        // }
+    }
+
+    #[test]
+    fn test_empty() {
+        // Test that sum works for the empty iterator
+        let input = vec![];
+
+        let cost: u64 = 1;
+
+        let (success, res) = Curve25519Add::raw_execute(&input, cost);
+        assert_eq!(success, ExitSucceed::Returned.into());
+        assert_eq!(res, RistrettoPoint::identity().compress().to_bytes());
+        // {
+        //     Ok((_, out)) => {
+        //         assert_eq!(out, RistrettoPoint::identity().compress().to_bytes());
+        //     }
+        //     Err(e) => {
+        //         panic!("Test not expected to fail: {:?}", e);
+        //     }
+        // }
+    }
+
+    #[test]
+    fn test_scalar_mul() {
+        let s1 = Scalar::from(999u64);
+        let s2 = Scalar::from(333u64);
+        let p1 = constants::RISTRETTO_BASEPOINT_POINT * s1;
+        let p2 = constants::RISTRETTO_BASEPOINT_POINT * s2;
+
+        let mut input = vec![];
+        input.extend_from_slice(&s1.to_bytes());
+        input.extend_from_slice(&constants::RISTRETTO_BASEPOINT_POINT.compress().to_bytes());
+
+        let cost: u64 = 1;
+
+        let (success, out) = Curve25519ScalarMul::raw_execute(&input, cost);
+        assert_eq!(success, ExitSucceed::Returned.into());
+        assert_eq!(out, p1.compress().to_bytes());
+        assert_ne!(out, p2.compress().to_bytes());
+
+        // {
+        //     Ok((_, out)) => {
+        //         assert_eq!(out, p1.compress().to_bytes());
+        //         assert_ne!(out, p2.compress().to_bytes());
+        //     }
+        //     Err(e) => {
+        //         panic!("Test not expected to fail: {:?}", e);
+        //     }
+        // }
+    }
+
+    #[test]
+    fn test_scalar_mul_empty_error() {
+        let input = vec![];
+
+        let cost: u64 = 1;
+
+        let (success, _) = Curve25519ScalarMul::raw_execute(&input, cost);
+        assert_eq!(success, ExitException::Other("input must contain 64 bytes (scalar - 32 bytes, point - 32 bytes)".into()).into());
+        //
+        // {
+        //     Ok((_, _out)) => {
+        //         panic!("Test not expected to work");
+        //     }
+        //     Err(e) => {
+        //         assert_eq!(
+        //             e,
+        //             PrecompileFailure::Error {
+        //                 exit_status: ExitError::Other(
+        //                     "input must contain 64 bytes (scalar - 32 bytes, point - 32 bytes)"
+        //                         .into()
+        //                 )
+        //             }
+        //         );
+        //     }
+        // }
+    }
+
+    #[test]
+    fn test_point_addition_bad_length() {
+        let input: Vec<u8> = [0u8; 33].to_vec();
+
+        let cost: u64 = 1;
+
+        let (success, _) = Curve25519Add::raw_execute(&input, cost);
+        assert_eq!(success, ExitException::Other("input must contain multiple of 32 bytes".into()).into());
+
+        // {
+        //     Ok((_, _out)) => {
+        //         panic!("Test not expected to work");
+        //     }
+        //     Err(e) => {
+        //         assert_eq!(
+        //             e,
+        //             PrecompileFailure::Error {
+        //                 exit_status: ExitError::Other(
+        //                     "input must contain multiple of 32 bytes".into()
+        //                 )
+        //             }
+        //         );
+        //     }
+        // }
+    }
+
+    #[test]
+    fn test_point_addition_too_many_points() {
+        let mut input = vec![];
+        input.extend_from_slice(&constants::RISTRETTO_BASEPOINT_POINT.compress().to_bytes()); // 1
+        input.extend_from_slice(&constants::RISTRETTO_BASEPOINT_POINT.compress().to_bytes()); // 2
+        input.extend_from_slice(&constants::RISTRETTO_BASEPOINT_POINT.compress().to_bytes()); // 3
+        input.extend_from_slice(&constants::RISTRETTO_BASEPOINT_POINT.compress().to_bytes()); // 4
+        input.extend_from_slice(&constants::RISTRETTO_BASEPOINT_POINT.compress().to_bytes()); // 5
+        input.extend_from_slice(&constants::RISTRETTO_BASEPOINT_POINT.compress().to_bytes()); // 6
+        input.extend_from_slice(&constants::RISTRETTO_BASEPOINT_POINT.compress().to_bytes()); // 7
+        input.extend_from_slice(&constants::RISTRETTO_BASEPOINT_POINT.compress().to_bytes()); // 8
+        input.extend_from_slice(&constants::RISTRETTO_BASEPOINT_POINT.compress().to_bytes()); // 9
+        input.extend_from_slice(&constants::RISTRETTO_BASEPOINT_POINT.compress().to_bytes()); // 10
+        input.extend_from_slice(&constants::RISTRETTO_BASEPOINT_POINT.compress().to_bytes()); // 11
+
+        let cost: u64 = 1;
+
+        let (success, _) = Curve25519Add::raw_execute(&input, cost);
+        assert_eq!(success, ExitException::Other("input cannot be greater than 320 bytes (10 compressed points)".into()).into());
+
+        //
+        // {
+        //     Ok((_, _out)) => {
+        //         panic!("Test not expected to work");
+        //     }
+        //     Err(e) => {
+        //         assert_eq!(
+        //             e,
+        //             PrecompileFailure::Error {
+        //                 exit_status: ExitError::Other(
+        //                     "input cannot be greater than 320 bytes (10 compressed points)".into()
+        //                 )
+        //             }
+        //         );
+        //     }
+        // }
+    }
+}
