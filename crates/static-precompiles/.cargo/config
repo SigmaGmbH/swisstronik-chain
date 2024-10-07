@@ -1,0 +1,5 @@
+[target.'cfg(not(target_env = "sgx"))']
+rustflags = ["-C", "target-feature=+avx2"]
+
+[target.x86_64-unknown-linux-gnu]
+rustflags = ["-C", "target-cpu=skylake"]
