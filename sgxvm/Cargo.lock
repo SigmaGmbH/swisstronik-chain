@@ -1386,6 +1386,7 @@ dependencies = [
  "sgx_types",
  "sha2 0.9.9",
  "sha3",
+ "static-precompiles",
  "substrate-bn",
  "thiserror-no-std",
  "tiny-keccak",
@@ -1455,6 +1456,25 @@ name = "spin"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6e63cff320ae2c57904679ba7cb63280a3dc4613885beafb148ee7bf9aa9042d"
+
+[[package]]
+name = "static-precompiles"
+version = "0.1.0"
+dependencies = [
+ "curve25519-dalek 4.1.1",
+ "ed25519-dalek",
+ "evm",
+ "k256",
+ "num",
+ "p256",
+ "primitive-types",
+ "ripemd",
+ "sgx_tstd",
+ "sha2 0.9.9",
+ "sha3",
+ "substrate-bn",
+ "tiny-keccak",
+]
 
 [[package]]
 name = "static_assertions"

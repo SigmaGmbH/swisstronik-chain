@@ -5,34 +5,14 @@ use evm::interpreter::error::{ExitError, ExitException, ExitResult};
 use evm::interpreter::runtime::RuntimeState;
 use evm::standard::PrecompileSet;
 use std::vec::Vec;
-use primitive_types::H160 ;
+use primitive_types::H160;
+
+use static_precompiles::{secp256r1, modexp, ripemd160, ec_recover, sha3fips, sha256, datacopy, bn128, blake2f, curve25519};
+use static_precompiles::Precompile;
+
 use crate::GoQuerier;
 
-mod blake2f;
-mod bn128;
-mod curve25519;
-mod modexp;
-mod sha3fips;
-mod ec_recover;
-mod sha256;
-mod ripemd160;
-mod datacopy;
 mod compliance_bridge;
-mod secp256r1;
-
-pub trait Precompile<G> {
-    fn execute(input: &[u8], gasometer: &mut G) -> (ExitResult, Vec<u8>);
-}
-
-pub trait LinearCostPrecompile {
-    const BASE: u64;
-    const WORD: u64;
-
-    fn raw_execute(
-        input: &[u8],
-        cost: u64,
-    ) -> (ExitResult, Vec<u8>);
-}
 
 /// Precompile with possibility to interact with Cosmos side using GoQuerier
 pub trait LinearCostPrecompileWithQuerier<G> {
@@ -40,31 +20,6 @@ pub trait LinearCostPrecompileWithQuerier<G> {
     const WORD: u64;
 
     fn execute(querier: *mut GoQuerier, input: &[u8], gasometer: &mut G) -> (ExitResult, Vec<u8>);
-}
-
-impl<T: LinearCostPrecompile, G: AsRef<RuntimeState> + GasMutState> Precompile<G> for T {
-    fn execute(input: &[u8], gasometer: &mut G) -> (ExitResult, Vec<u8>) {
-        let cost = match linear_cost(input.len() as u64, T::BASE, T::WORD) {
-            Ok(cost) => cost,
-            Err(e) => return (Err(e), Vec::new()),
-        };
-        if let Err(err) = gasometer.record_gas(cost.into()) {
-            return (err.into(), Vec::new());
-        };
-
-        T::raw_execute(input, cost)
-    }
-}
-
-fn linear_cost(len: u64, base: u64, word: u64) -> Result<u64, ExitError> {
-    let cost = base
-        .checked_add(
-            word.checked_mul(len.saturating_add(31) / 32)
-                .ok_or(ExitException::OutOfGas)?,
-        )
-        .ok_or(ExitException::OutOfGas)?;
-
-    Ok(cost)
 }
 
 pub struct EVMPrecompiles {

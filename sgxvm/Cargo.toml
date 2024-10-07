@@ -52,6 +52,7 @@ num = { version = "0.4", default-features = false, features = ["alloc"] }
 bech32 = { version = "0.9.1", default-features = false }
 multibase = { version = "0.9.1", default-features=false }
 ethabi = { version = "18.0.0", default-features=false }
+static-precompiles = { path="../crates/static-precompiles", default-features = false, features = ["sgx"] }
 
 # Encryption
 curve25519-dalek = { version = "4.1.1", default-features = false, features = ["alloc"] }
