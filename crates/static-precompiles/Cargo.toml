@@ -1,0 +1,30 @@
+[package]
+name = "static-precompiles"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+primitive-types = { version = "^0.12", default-features = false, features = ["rlp"] }
+evm = { git = "https://github.com/SigmaGmbH/evm.git", default-features = false, commit = "b76ffcde60078059e99f5f34a32b2b743767619b"}
+substrate-bn = { version = "0.6.0", default-features = false }
+tiny-keccak = { version = "2.0.2", features = ["fips202"] }
+sha2 = { version = "0.9.5", default-features=false }
+k256 = { version = "0.11.6", default-features = false, features = ["keccak256", "sha2", "ecdsa"] }
+sha3 = { version = "0.10", default-features = false }
+num = { version = "0.4", default-features = false, features = ["alloc"] }
+ed25519-dalek = { version = "2.0.0", default-features=false }
+curve25519-dalek = { version = "=4.1.1", default-features = false, features = ["alloc"] }
+sgx_tstd = { git = "https://github.com/apache/teaclave-sgx-sdk.git", rev = "3c903bda", features = ["net", "backtrace"], optional = true }
+p256 = { version = "0.13.2",default-features = false, features = ["ecdsa"] }
+ripemd = { version = "0.1.3", default-features = false }
+
+[dev-dependencies]
+hex = "0.4.3"
+
+[features]
+default = []
+std = []
+sgx = ["sgx_tstd"]
+
+[patch."https://github.com/apache/teaclave-sgx-sdk.git"]
+sgx_tstd = { path = "../../sgxvm/sgx-sdk/sgx_tstd" }
