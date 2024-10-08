@@ -86,6 +86,9 @@ func (suite *BackendTestSuite) SetupTest() {
 	suite.backend.queryClient.FeeMarket = mocks.NewFeeMarketQueryClient(suite.T())
 	suite.backend.ctx = rpctypes.ContextWithHeight(1)
 
+	// Enable unsafe eth endpoints for testing
+	suite.backend.cfg.JSONRPC.UnsafeEthEndpointsEnabled = true
+
 	// Add codec
 	encCfg := encoding.MakeConfig(app.ModuleBasics)
 	suite.backend.clientCtx.Codec = encCfg.Codec

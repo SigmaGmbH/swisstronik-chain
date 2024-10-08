@@ -35,6 +35,10 @@ import (
 
 // SendTransaction sends transaction based on received args using Node's key to sign it
 func (b *Backend) SendTransaction(args evmtypes.TransactionArgs) (common.Hash, error) {
+	if !b.cfg.JSONRPC.UnsafeEthEndpointsEnabled {
+		return common.Hash{}, fmt.Errorf("eth_sendTransaction not enabled")
+	}
+
 	// Look up the wallet containing the requested signer
 	_, err := b.clientCtx.Keyring.KeyByAddress(sdk.AccAddress(args.GetFrom().Bytes()))
 	if err != nil {
@@ -121,6 +125,10 @@ func (b *Backend) SendTransaction(args evmtypes.TransactionArgs) (common.Hash, e
 
 // Sign signs the provided data using the private key of address via Geth's signature standard.
 func (b *Backend) Sign(address common.Address, data hexutil.Bytes) (hexutil.Bytes, error) {
+	if !b.cfg.JSONRPC.UnsafeEthEndpointsEnabled {
+		return nil, fmt.Errorf("eth_sendTransaction not enabled")
+	}
+
 	from := sdk.AccAddress(address.Bytes())
 
 	_, err := b.clientCtx.Keyring.KeyByAddress(from)
@@ -142,6 +150,10 @@ func (b *Backend) Sign(address common.Address, data hexutil.Bytes) (hexutil.Byte
 
 // SignTypedData signs EIP-712 conformant typed data
 func (b *Backend) SignTypedData(address common.Address, typedData apitypes.TypedData) (hexutil.Bytes, error) {
+	if !b.cfg.JSONRPC.UnsafeEthEndpointsEnabled {
+		return nil, fmt.Errorf("eth_sendTransaction not enabled")
+	}
+
 	from := sdk.AccAddress(address.Bytes())
 
 	_, err := b.clientCtx.Keyring.KeyByAddress(from)
