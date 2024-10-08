@@ -39,7 +39,7 @@ rustls = { git = "https://github.com/mesalock-linux/rustls", branch = "mesalock_
 hmac = { version = "0.11.0", default-features=false }
 sha2 = { version = "0.9.5", default-features=false }
 primitive-types = { version = "^0.12", default-features = false, features = ["rlp"] }
-evm = { version = "0.41.1", default-features = false }
+evm = { git = "https://github.com/SigmaGmbH/evm.git", default-features = false, commit = "b76ffcde60078059e99f5f34a32b2b743767619b"}
 ethereum = { version = "0.15.0", default-features = false, features = ["with-codec", "with-serde"] }
 substrate-bn = { version = "0.6.0", default-features = false }
 tiny-keccak = { version = "2.0.2", features = ["fips202"] }
@@ -52,10 +52,11 @@ num = { version = "0.4", default-features = false, features = ["alloc"] }
 bech32 = { version = "0.9.1", default-features = false }
 multibase = { version = "0.9.1", default-features=false }
 ethabi = { version = "18.0.0", default-features=false }
+static-precompiles = { path="../crates/static-precompiles", default-features = false, features = ["sgx"] }
 
 # Encryption
 curve25519-dalek = { version = "4.1.1", default-features = false, features = ["alloc"] }
-deoxysii = { version = "0.2.4", path="./deoxysii-rust" }
+deoxysii = { version = "0.2.4", path="../crates/deoxysii-rust" }
 x25519-dalek = { version = "2.0.0-pre.1", default-features=false, features=[ "u64_backend" ] }
 ed25519-dalek = { version = "2.0.0", default-features=false }
 rand_chacha = { version = "0.3.1", default-features=false }

@@ -21,8 +21,6 @@ type TransactionData = types.TransactionData
 type QueryGetAccount = types.QueryGetAccount
 type QueryGetAccountResponse = types.QueryGetAccountResponse
 type CosmosRequest = types.CosmosRequest
-type QueryInsertAccount = types.QueryInsertAccount
-type QueryInsertAccountResponse = types.QueryInsertAccountResponse
 type QueryContainsKey = types.QueryContainsKey
 type QueryContainsKeyResponse = types.QueryContainsKeyResponse
 type QueryGetAccountStorageCell = types.QueryGetAccountStorageCell
@@ -46,10 +44,17 @@ type QueryHasVerificationResponse = types.QueryHasVerificationResponse
 type QueryGetVerificationData = types.QueryGetVerificationData
 type VerificationDetails = types.VerificationDetails
 type QueryGetVerificationDataResponse = types.QueryGetVerificationDataResponse
+type QueryAccountCodeSize = types.QueryGetAccountCodeSize
+type QueryAccountCodeSizeResponse = types.QueryGetAccountCodeSizeResponse
+type QueryAccountCodeHash = types.QueryGetAccountCodeHash
+type QueryAccountCodeHashResponse = types.QueryGetAccountCodeHashResponse
+type QueryInsertAccountNonce = types.QueryInsertAccountNonce
+type QueryInsertAccountNonceResponse = types.QueryInsertAccountNonceResponse
+type QueryInsertAccountBalance = types.QueryInsertAccountBalance
+type QueryInsertAccountBalanceResponse = types.QueryInsertAccountBalanceResponse
 
 // Storage requests
 type CosmosRequest_GetAccount = types.CosmosRequest_GetAccount
-type CosmosRequest_InsertAccount = types.CosmosRequest_InsertAccount
 type CosmosRequest_ContainsKey = types.CosmosRequest_ContainsKey
 type CosmosRequest_AccountCode = types.CosmosRequest_AccountCode
 type CosmosRequest_StorageCell = types.CosmosRequest_StorageCell
@@ -60,6 +65,10 @@ type CosmosRequest_RemoveStorageCell = types.CosmosRequest_RemoveStorageCell
 type CosmosRequest_AddVerificationDetails = types.CosmosRequest_AddVerificationDetails
 type CosmosRequest_HasVerification = types.CosmosRequest_HasVerification
 type CosmosRequest_GetVerificationData = types.CosmosRequest_GetVerificationData
+type CosmosRequest_GetAccountCodeSize = types.CosmosRequest_CodeSize
+type CosmosRequest_GetAccountCodeHash = types.CosmosRequest_CodeHash
+type CosmosRequest_InsertAccountBalance = types.CosmosRequest_InsertAccountBalance
+type CosmosRequest_InsertAccountNonce = types.CosmosRequest_InsertAccountNonce
 
 // Backend requests
 type CosmosRequest_BlockHash = types.CosmosRequest_BlockHash
@@ -83,12 +92,14 @@ func Call(
 	querier types.Connector,
 	from, to, data, value []byte,
 	accessList ethtypes.AccessList,
-	gasLimit, nonce uint64,
+	gasLimit uint64,
+	gasPrice []byte,
+	nonce uint64,
 	txContext *TransactionContext,
 	commit bool,
 	isUnencrypted bool,
 ) (*types.HandleTransactionResponse, error) {
-	executionResult, err := api.Call(querier, from, to, data, value, accessList, gasLimit, nonce, txContext, commit, isUnencrypted)
+	executionResult, err := api.Call(querier, from, to, data, value, accessList, gasLimit, gasPrice, nonce, txContext, commit, isUnencrypted)
 	if err != nil {
 		return &types.HandleTransactionResponse{}, err
 	}
@@ -101,11 +112,13 @@ func Create(
 	querier types.Connector,
 	from, data, value []byte,
 	accessList ethtypes.AccessList,
-	gasLimit, nonce uint64,
+	gasLimit uint64,
+	gasPrice []byte,
+	nonce uint64,
 	txContext *TransactionContext,
 	commit bool,
 ) (*types.HandleTransactionResponse, error) {
-	executionResult, err := api.Create(querier, from, data, value, accessList, gasLimit, nonce, txContext, commit)
+	executionResult, err := api.Create(querier, from, data, value, accessList, gasLimit, gasPrice, nonce, txContext, commit)
 	if err != nil {
 		return &types.HandleTransactionResponse{}, err
 	}

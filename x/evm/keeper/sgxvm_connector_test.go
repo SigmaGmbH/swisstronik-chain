@@ -23,29 +23,33 @@ func insertAccount(
 	balance, nonce *big.Int,
 ) error {
 	// Encode request
-	request, encodeErr := proto.Marshal(&librustgo.CosmosRequest{
-		Req: &librustgo.CosmosRequest_InsertAccount{
-			InsertAccount: &librustgo.QueryInsertAccount{
+	requestInsertBalance, _ := proto.Marshal(&librustgo.CosmosRequest{
+		Req: &librustgo.CosmosRequest_InsertAccountBalance{
+			InsertAccountBalance: &librustgo.QueryInsertAccountBalance{
 				Address: address.Bytes(),
 				Balance: balance.Bytes(),
+			},
+		},
+	})
+
+	// Encode request
+	requestInsertNonce, _ := proto.Marshal(&librustgo.CosmosRequest{
+		Req: &librustgo.CosmosRequest_InsertAccountNonce{
+			InsertAccountNonce: &librustgo.QueryInsertAccountNonce{
+				Address: address.Bytes(),
 				Nonce:   nonce.Uint64(),
 			},
 		},
 	})
 
-	if encodeErr != nil {
-		return encodeErr
-	}
-
-	responseBytes, queryErr := connector.Query(request)
+	_, queryErr := connector.Query(requestInsertBalance)
 	if queryErr != nil {
 		return queryErr
 	}
 
-	response := &librustgo.QueryInsertAccountResponse{}
-	decodingError := proto.Unmarshal(responseBytes, response)
-	if decodingError != nil {
-		return decodingError
+	_, queryErr = connector.Query(requestInsertNonce)
+	if queryErr != nil {
+		return queryErr
 	}
 
 	return nil

@@ -139,6 +139,48 @@ func (m MockedDB) InsertContractCode(address ethcommon.Address, code []byte) err
 	return nil
 }
 
+func (m MockedDB) InsertAccountBalance(address ethcommon.Address, balance []byte) error {
+	acct, err := m.GetAccountOrEmpty(address)
+	if err != nil {
+		return err
+	}
+
+	txn := m.db.Txn(true)
+	updatedAcct := Account{
+		Address: acct.Address,
+		Balance: balance,
+		Nonce:   acct.Nonce,
+		Code:    acct.Code,
+		State:   acct.State,
+	}
+	if err := txn.Insert("account", &updatedAcct); err != nil {
+		return err
+	}
+	txn.Commit()
+	return nil
+}
+
+func (m MockedDB) InsertAccountNonce(address ethcommon.Address, nonce uint64) error {
+	acct, err := m.GetAccountOrEmpty(address)
+	if err != nil {
+		return err
+	}
+
+	txn := m.db.Txn(true)
+	updatedAcct := Account{
+		Address: acct.Address,
+		Balance: acct.Balance,
+		Nonce:   nonce,
+		Code:    acct.Code,
+		State:   acct.State,
+	}
+	if err := txn.Insert("account", &updatedAcct); err != nil {
+		return err
+	}
+	txn.Commit()
+	return nil
+}
+
 // InsertStorageCell inserts new storage cell
 func (m MockedDB) InsertStorageCell(address ethcommon.Address, key []byte, value []byte) error {
 	acct, err := m.GetAccount(address)

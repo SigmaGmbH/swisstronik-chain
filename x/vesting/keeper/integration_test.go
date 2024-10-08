@@ -1031,7 +1031,7 @@ var _ = Describe("Monthly Vesting Account", Ordered, func() {
 			Expect(err).To(BeNil())
 			_, err = testutil.DeliverEthTx(s.app, s.vaPrivKey, msg)
 			Expect(err).ToNot(BeNil())
-			Expect(err).Should(MatchError(ContainSubstring("Insert account failed. Empty response")))
+			Expect(err).Should(MatchError(ContainSubstring("Insert account balance failed. Empty response")))
 		})
 	})
 

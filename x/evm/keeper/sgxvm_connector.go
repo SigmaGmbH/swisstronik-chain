@@ -7,7 +7,6 @@ import (
 	"github.com/SigmaGmbH/librustgo"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/golang/protobuf/proto"
 
 	compliancetypes "swisstronik/x/compliance/types"
@@ -16,8 +15,6 @@ import (
 // Connector allows our VM interact with existing Cosmos application.
 // It is passed by pointer into SGX to make it accessible for our VM.
 type Connector struct {
-	// GetHashFn returns the hash corresponding to n
-	GetHashFn vm.GetHashFunc
 	// Keeper used to store and obtain state
 	EVMKeeper *Keeper
 	// Context used to make Keeper calls available
@@ -35,9 +32,6 @@ func (q Connector) Query(req []byte) ([]byte, error) {
 	// Handle request for account data such as balance and nonce
 	case *librustgo.CosmosRequest_GetAccount:
 		return q.GetAccount(request)
-	// Handles request for updating account data
-	case *librustgo.CosmosRequest_InsertAccount:
-		return q.InsertAccount(request)
 	// Handles request if such account exists
 	case *librustgo.CosmosRequest_ContainsKey:
 		return q.ContainsKey(request)
@@ -68,6 +62,14 @@ func (q Connector) Query(req []byte) ([]byte, error) {
 		return q.HasVerification(request)
 	case *librustgo.CosmosRequest_GetVerificationData:
 		return q.GetVerificationData(request)
+	case *librustgo.CosmosRequest_InsertAccountNonce:
+		return q.InsertAccountNonce(request)
+	case *librustgo.CosmosRequest_InsertAccountBalance:
+		return q.InsertAccountBalance(request)
+	case *librustgo.CosmosRequest_GetAccountCodeHash:
+		return q.GetAccountCodeHash(request)
+	case *librustgo.CosmosRequest_GetAccountCodeSize:
+		return q.GetAccountCodeSize(request)
 	}
 
 	return nil, errors.New("wrong query received")
@@ -134,7 +136,7 @@ func (q Connector) BlockHash(req *librustgo.CosmosRequest_BlockHash) ([]byte, er
 
 	blockNumber := &big.Int{}
 	blockNumber.SetBytes(req.BlockHash.Number)
-	blockHash := q.GetHashFn(blockNumber.Uint64())
+	blockHash := q.EVMKeeper.GetHashFn(q.Context)(blockNumber.Uint64())
 
 	return proto.Marshal(&librustgo.QueryBlockHashResponse{Hash: blockHash.Bytes()})
 }
@@ -176,29 +178,47 @@ func (q Connector) GetAccountCode(req *librustgo.CosmosRequest_AccountCode) ([]b
 	})
 }
 
-// InsertAccount handles incoming protobuf-encoded request for inserting new account data
-// such as balance and nonce. If there is deployed contract behind given address, its bytecode
-// or code hash won't be changed
-func (q Connector) InsertAccount(req *librustgo.CosmosRequest_InsertAccount) ([]byte, error) {
-	//println("Connector::Query Request to insert account code")
-	ethAddress := common.BytesToAddress(req.InsertAccount.Address)
+func (q Connector) InsertAccountNonce(req *librustgo.CosmosRequest_InsertAccountNonce) ([]byte, error) {
+	ethAddress := common.BytesToAddress(req.InsertAccountNonce.Address)
+	nonce := req.InsertAccountNonce.Nonce
 
+	if err := q.EVMKeeper.SetNonce(q.Context, ethAddress, nonce); err != nil {
+		return nil, err
+	}
+
+	return proto.Marshal(&librustgo.QueryInsertAccountNonceResponse{})
+}
+
+func (q Connector) InsertAccountBalance(req *librustgo.CosmosRequest_InsertAccountBalance) ([]byte, error) {
+	ethAddress := common.BytesToAddress(req.InsertAccountBalance.Address)
 	balance := &big.Int{}
-	balance.SetBytes(req.InsertAccount.Balance)
-	nonce := req.InsertAccount.Nonce
+	balance.SetBytes(req.InsertAccountBalance.Balance)
 
-	account := q.EVMKeeper.GetAccountOrEmpty(q.Context, ethAddress)
 	if err := q.EVMKeeper.SetBalance(q.Context, ethAddress, balance); err != nil {
 		return nil, err
 	}
 
-	account.Balance = balance
-	account.Nonce = nonce
-	if err := q.EVMKeeper.SetAccount(q.Context, ethAddress, account); err != nil {
-		return nil, err
+	return proto.Marshal(&librustgo.QueryInsertAccountBalanceResponse{})
+}
+
+func (q Connector) GetAccountCodeHash(req *librustgo.CosmosRequest_GetAccountCodeHash) ([]byte, error) {
+	ethAddress := common.BytesToAddress(req.CodeHash.Address)
+	account := q.EVMKeeper.GetAccountOrEmpty(q.Context, ethAddress)
+
+	return proto.Marshal(&librustgo.QueryAccountCodeHashResponse{Hash: account.CodeHash})
+}
+
+func (q Connector) GetAccountCodeSize(req *librustgo.CosmosRequest_GetAccountCodeSize) ([]byte, error) {
+	ethAddress := common.BytesToAddress(req.CodeSize.Address)
+	account := q.EVMKeeper.GetAccountWithoutBalance(q.Context, ethAddress)
+	if account == nil {
+		return proto.Marshal(&librustgo.QueryAccountCodeSizeResponse{
+			Size: 0,
+		})
 	}
 
-	return proto.Marshal(&librustgo.QueryInsertAccountResponse{})
+	code := q.EVMKeeper.GetCode(q.Context, common.BytesToHash(account.CodeHash))
+	return proto.Marshal(&librustgo.QueryAccountCodeSizeResponse{Size: uint32(len(code))})
 }
 
 // AddVerificationDetails writes provided verification details to x/compliance module

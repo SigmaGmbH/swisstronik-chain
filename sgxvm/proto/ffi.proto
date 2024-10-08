@@ -78,15 +78,17 @@ message QueryGetAccountResponse {
   uint64 nonce = 2;
 }
 
-// Request to insert account data such as balance and nonce
-message QueryInsertAccount {
+message QueryInsertAccountBalance {
   bytes address = 1;
   bytes balance = 2;
-  uint64 nonce = 3;
 }
+message QueryInsertAccountBalanceResponse {}
 
-// Response for account insertion
-message QueryInsertAccountResponse {}
+message QueryInsertAccountNonce {
+  bytes address = 1;
+  uint64 nonce = 2;
+}
+message QueryInsertAccountNonceResponse{}
 
 message QueryContainsKey { bytes key = 1; }
 
@@ -102,6 +104,12 @@ message QueryGetAccountStorageCellResponse { bytes value = 1; }
 message QueryGetAccountCode { bytes address = 1; }
 
 message QueryGetAccountCodeResponse { bytes code = 1; }
+
+message QueryGetAccountCodeSize { bytes address = 1; }
+message QueryGetAccountCodeSizeResponse { uint32 size = 1; }
+
+message QueryGetAccountCodeHash { bytes address = 1; }
+message QueryGetAccountCodeHashResponse { bytes hash = 1; }
 
 message QueryInsertAccountCode {
   bytes address = 1;
@@ -198,19 +206,22 @@ message QueryGetVerificationDataResponse {
 message CosmosRequest {
   oneof req {
     QueryGetAccount getAccount = 1;
-    QueryInsertAccount insertAccount = 2;
-    QueryContainsKey containsKey = 3;
-    QueryGetAccountCode accountCode = 4;
-    QueryGetAccountStorageCell storageCell = 5;
-    QueryInsertAccountCode insertAccountCode = 6;
-    QueryInsertStorageCell insertStorageCell = 7;
-    QueryRemove remove = 8;
-    QueryRemoveStorageCell removeStorageCell = 9;
-    QueryRemoveStorage removeStorage = 10;
-    QueryBlockHash blockHash = 11;
-    QueryAddVerificationDetails addVerificationDetails = 12;
-    QueryHasVerification hasVerification = 13;
-    QueryGetVerificationData getVerificationData = 14;
+    QueryContainsKey containsKey = 2;
+    QueryGetAccountCode accountCode = 3;
+    QueryGetAccountCodeHash codeHash = 4;
+    QueryGetAccountCodeSize codeSize = 5;
+    QueryGetAccountStorageCell storageCell = 6;
+    QueryInsertAccountCode insertAccountCode = 7;
+    QueryInsertStorageCell insertStorageCell = 8;
+    QueryRemove remove = 9;
+    QueryRemoveStorageCell removeStorageCell = 10;
+    QueryRemoveStorage removeStorage = 11;
+    QueryBlockHash blockHash = 12;
+    QueryAddVerificationDetails addVerificationDetails = 13;
+    QueryHasVerification hasVerification = 14;
+    QueryGetVerificationData getVerificationData = 15;
+    QueryInsertAccountBalance insertAccountBalance = 16;
+    QueryInsertAccountNonce insertAccountNonce = 17;
   }
 }
 
@@ -220,11 +231,12 @@ message SGXVMCallParams {
   bytes to = 2;
   bytes data = 3;
   uint64 gasLimit = 4;
-  bytes value = 5;
-  repeated AccessListItem accessList = 6;
-  bool commit = 7;
-  uint64 nonce = 8;
-  bool unencrypted = 9;
+  bytes gasPrice = 5;
+  bytes value = 6;
+  repeated AccessListItem accessList = 7;
+  bool commit = 8;
+  uint64 nonce = 9;
+  bool unencrypted = 10;
 }
 
 // Message with data required to execute `create` operation
@@ -232,10 +244,11 @@ message SGXVMCreateParams {
   bytes from = 1;
   bytes data = 2;
   uint64 gasLimit = 3;
-  bytes value = 4;
-  repeated AccessListItem accessList = 5;
-  bool commit = 6;
-  uint64 nonce = 7;
+  bytes gasPrice = 4;
+  bytes value = 5;
+  repeated AccessListItem accessList = 6;
+  bool commit = 7;
+  uint64 nonce = 8;
 }
 
 // Request to execute `call` operation

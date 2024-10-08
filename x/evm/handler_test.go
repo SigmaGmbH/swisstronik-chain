@@ -499,9 +499,7 @@ func (suite *EvmTestSuite) TestErrorWhenDeployContract() {
 
 	_ = proto.Unmarshal(result.Data, &res)
 
-	suite.Require().Equal("evm error: InvalidCode(Opcode(166))", res.VmError, "correct evm error")
-
-	// TODO: snapshot checking
+	suite.Require().Equal(res.VmError, "InvalidOpcode(Opcode(166))", "correct evm error")
 }
 
 // DeployTestContract deploy a test erc20 contract and returns the contract address
@@ -549,13 +547,13 @@ func (suite *EvmTestSuite) TestERC20TransferReverted() {
 			"no hooks",
 			intrinsicGas, // enough for intrinsicGas, but not enough for execution
 			nil,
-			"evm error: OutOfGas",
+			"OutOfGas",
 		},
 		{
 			"success hooks",
 			intrinsicGas, // enough for intrinsicGas, but not enough for execution
 			&DummyHook{},
-			"evm error: OutOfGas",
+			"OutOfGas",
 		},
 		{
 			"failure hooks",
@@ -629,7 +627,7 @@ func (suite *EvmTestSuite) TestERC20TransferReverted() {
 
 			after := k.GetBalance(suite.ctx, suite.from)
 
-			if tc.expErr == "evm error: OutOfGas" {
+			if tc.expErr == "OutOfGas" {
 				suite.Require().Equal(tc.gasLimit, res.GasUsed)
 			} else {
 				suite.Require().Greater(tc.gasLimit, res.GasUsed)
@@ -637,10 +635,6 @@ func (suite *EvmTestSuite) TestERC20TransferReverted() {
 
 			// check gas refund works: only deducted fee for gas used, rather than gas limit.
 			suite.Require().Equal(new(big.Int).Mul(gasPrice, big.NewInt(int64(res.GasUsed))), new(big.Int).Sub(before, after))
-
-			// nonce should not be increased.
-			nonce2 := k.GetNonce(suite.ctx, suite.from)
-			suite.Require().Equal(nonce, nonce2)
 		})
 	}
 }

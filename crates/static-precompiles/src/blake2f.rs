@@ -1,11 +1,13 @@
+#[cfg(feature = "std")]
 use std::vec::Vec;
+
+#[cfg(not(feature = "std"))]
+use sgx_tstd::vec::Vec;
+
 use core::mem::size_of;
-use crate::precompiles::{
-    ExitSucceed, 
-    ExitError, 
-    LinearCostPrecompile, 
-    PrecompileFailure
-};
+use evm::interpreter::error::{ExitException, ExitResult, ExitSucceed};
+
+use crate::LinearCostPrecompile;
 
 const SIGMA: [[usize; 16]; 10] = [
 	[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
@@ -88,13 +90,11 @@ impl LinearCostPrecompile for Blake2F {
 
     /// Format of `input`:
     /// [4 bytes for rounds][64 bytes for h][128 bytes for m][8 bytes for t_0][8 bytes for t_1][1 byte for f]
-    fn raw_execute(input: &[u8], _: u64) -> Result<(ExitSucceed, Vec<u8>), PrecompileFailure> {
+    fn raw_execute(input: &[u8], _: u64) -> (ExitResult, Vec<u8>) {
         const BLAKE2_F_ARG_LEN: usize = 213;
 
         if input.len() != BLAKE2_F_ARG_LEN {
-            return Err(PrecompileFailure::Error {
-                exit_status: ExitError::Other("input length for Blake2 F precompile should be exactly 213 bytes".into())
-            });
+            return (ExitException::Other("input length for Blake2 F precompile should be exactly 213 bytes".into()).into(), Vec::new());
         }
 
         let mut rounds_buf: [u8; 4] = [0; 4];
@@ -136,9 +136,7 @@ impl LinearCostPrecompile for Blake2F {
         } else if input[212] == 0 {
             false
         } else {
-            return Err(PrecompileFailure::Error {
-                exit_status: ExitError::Other("incorrect final block indicator flag".into())
-            });
+            return (ExitException::Other("incorrect final block indicator flag".into()).into(), Vec::new());
         };
 
         compress(&mut h, m, [t_0.into(), t_1.into()], f, rounds as usize);
@@ -148,6 +146,6 @@ impl LinearCostPrecompile for Blake2F {
             output_buf[i * 8..(i + 1) * 8].copy_from_slice(&state_word.to_le_bytes());
         }
 
-        Ok((ExitSucceed::Returned, output_buf.to_vec()))
+        (ExitSucceed::Returned.into(), output_buf.to_vec())
     }
 }
