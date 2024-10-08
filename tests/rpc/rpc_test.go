@@ -361,6 +361,12 @@ func TestEth_UnsafeEndpoints(t *testing.T) {
 	// require well-formatted error (should not be "method handler crashed")
 	require.Error(t, err)
 	require.Equal(t, "eth_sendTransaction not enabled", err.Error(), "unsafe endpoint still enabled")
+
+	// eth_sign
+	signParam := []string{"0x9b2055d370f73ec7d8a03e965129118dc8f5bf83", "0xdeadbeaf"}
+	_, err = callWithError("eth_sign", signParam)
+	require.Error(t, err)
+	require.Equal(t, "eth_sign not enabled", err.Error(), "unsafe endpoint still enabled")
 }
 
 func TestEth_GetFilterChanges_NoTopics(t *testing.T) {
