@@ -31,8 +31,6 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/rpc"
-	"github.com/ethereum/go-ethereum/signer/core/apitypes"
-
 	rpctypes "swisstronik/rpc/types"
 	"swisstronik/server/config"
 	ethermint "swisstronik/types"
@@ -75,7 +73,6 @@ type EVMBackend interface {
 	// Sign Tx
 	Sign(address common.Address, data hexutil.Bytes) (hexutil.Bytes, error)
 	SendTransaction(args evmtypes.TransactionArgs) (common.Hash, error)
-	SignTypedData(address common.Address, typedData apitypes.TypedData) (hexutil.Bytes, error)
 
 	// Blocks Info
 	BlockNumber() (hexutil.Uint64, error)
