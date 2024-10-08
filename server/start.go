@@ -228,6 +228,7 @@ which accepts a path for the resulting pprof file.
 	cmd.Flags().Bool(srvflags.JSONRPCEnableIndexer, false, "Enable the custom tx indexer for json-rpc")
 	cmd.Flags().Bool(srvflags.JSONRPCEnableMetrics, false, "Define if EVM rpc metrics server should be enabled")
 	cmd.Flags().Int32(srvflags.JSONRPCFeeHistoryCap, config.DefaultFeeHistoryCap, "Sets a max fee history depth")
+	cmd.Flags().Bool(srvflags.JSONRPCEnableUnsafeEndpoints, false, "Enable eth_sendTransaction, eth_sign, eth_signTypedData")
 
 	cmd.Flags().String(srvflags.EVMTracer, config.DefaultEVMTracer, "the EVM tracer type to collect execution traces from the EVM transaction execution (json|struct|access_list|markdown)") //nolint:lll
 	cmd.Flags().Uint64(srvflags.EVMMaxTxGasWanted, config.DefaultMaxTxGasWanted, "the gas wanted for each eth tx returned in ante handler in check tx mode")                                 //nolint:lll
