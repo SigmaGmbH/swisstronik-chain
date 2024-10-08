@@ -57,6 +57,9 @@ sed -i 's/prometheus = false/prometheus = true/' "$CONFIG"
 sed -i 's/prometheus-retention-time  = "0"/prometheus-retention-time  = "1000000000000"/g' "$APP_TOML"
 sed -i 's/enabled = false/enabled = true/g' "$APP_TOML"
 
+# disable unsafe eth endpoints
+sed -i 's/unsafe-eth-endpoints-enabled = true/unsafe-eth-endpoints-enabled = false/' "$APP_TOML"
+
 # set min gas price
 sed -i 's/minimum-gas-prices = ""/minimum-gas-prices = "0aswtr"/' "$APP_TOML"
 
