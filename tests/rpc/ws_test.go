@@ -20,7 +20,7 @@ var (
 
 func init() {
 	if HOST_WS == "" {
-		HOST_WS = "localhost:8542"
+		HOST_WS = "localhost:8548"
 	}
 
 	u := url.URL{Scheme: "ws", Host: HOST_WS, Path: ""}
