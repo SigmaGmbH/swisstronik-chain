@@ -1068,6 +1068,51 @@ func (suite *KeeperTestSuite) TestHandleRevokeVerification() {
 			},
 			expected: func(resp *types.MsgRevokeVerificationResponse, err error) {
 				suite.Require().ErrorIs(err, types.ErrInvalidIssuer)
+				suite.Require().ErrorContains(err, "issuer does not exist")
+				suite.Require().Nil(resp)
+			},
+		},
+		{
+			name: "signer is not issuer creator nor operator",
+			init: func() {
+				details := &types.IssuerDetails{Creator: tests.RandomAccAddress().String(), Name: "test issuer"}
+				issuer = tests.RandomAccAddress()
+				_ = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
+
+				signer = tests.RandomAccAddress()
+				verificationId = tests.RandomAccAddress().Bytes()
+			},
+			malleate: func() *types.MsgRevokeVerification {
+				return &types.MsgRevokeVerification{
+					Signer:         signer.String(),
+					Issuer:         issuer.String(),
+					VerificationId: verificationId,
+				}
+			},
+			expected: func(resp *types.MsgRevokeVerificationResponse, err error) {
+				suite.Require().ErrorContains(err, "issuer creator or operator does not match")
+				suite.Require().Nil(resp)
+			},
+		},
+		{
+			name: "non-existing verification id",
+			init: func() {
+				signer = tests.RandomAccAddress()
+				details := &types.IssuerDetails{Creator: signer.String(), Name: "test issuer"}
+				issuer = tests.RandomAccAddress()
+				_ = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
+
+				verificationId = tests.RandomAccAddress().Bytes()
+			},
+			malleate: func() *types.MsgRevokeVerification {
+				return &types.MsgRevokeVerification{
+					Signer:         signer.String(),
+					Issuer:         issuer.String(),
+					VerificationId: verificationId,
+				}
+			},
+			expected: func(resp *types.MsgRevokeVerificationResponse, err error) {
+				suite.Require().ErrorContains(err, "verification does not exist")
 				suite.Require().Nil(resp)
 			},
 		},

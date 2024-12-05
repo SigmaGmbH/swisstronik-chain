@@ -128,7 +128,7 @@ func (k msgServer) HandleRevokeVerification(goCtx context.Context, msg *types.Ms
 	// Since this function can be called by operator or issuer creator, check if signer belongs to them
 	details, err := k.GetIssuerDetails(ctx, issuer)
 	if err != nil || len(details.Name) < 1 {
-		return nil, errors.Wrap(types.ErrInvalidIssuer, "issuer does not exist")
+		return nil, errors.Wrap(types.ErrInvalidIssuer, "issuer details not found")
 	}
 
 	if details.Creator != signer.String() {
@@ -142,7 +142,7 @@ func (k msgServer) HandleRevokeVerification(goCtx context.Context, msg *types.Ms
 	if err != nil {
 		return nil, err
 	}
-	if verificationDetails == nil {
+	if verificationDetails.IsEmpty() {
 		return nil, errors.Wrap(types.ErrInvalidParam, "verification does not exist")
 	}
 
