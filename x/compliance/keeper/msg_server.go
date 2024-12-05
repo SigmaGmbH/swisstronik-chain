@@ -105,6 +105,55 @@ func (k msgServer) HandleRemoveOperator(goCtx context.Context, msg *types.MsgRem
 	return &types.MsgRemoveOperatorResponse{}, nil
 }
 
+func (k msgServer) HandleRevokeVerification(goCtx context.Context, msg *types.MsgRevokeVerification) (*types.MsgRevokeVerificationResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// Check validity of signer address
+	signer, err := sdk.AccAddressFromBech32(msg.Signer)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check validity of issuer address
+	issuer, err := sdk.AccAddressFromBech32(msg.Issuer)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if issuer exists
+	if existingIssuer, err := k.IssuerExists(ctx, issuer); !existingIssuer || err != nil {
+		return nil, errors.Wrap(types.ErrInvalidIssuer, "issuer does not exist")
+	}
+
+	// Since this function can be called by operator or issuer creator, check if signer belongs to them
+	details, err := k.GetIssuerDetails(ctx, issuer)
+	if err != nil || len(details.Name) < 1 {
+		return nil, errors.Wrap(types.ErrInvalidIssuer, "issuer does not exist")
+	}
+
+	if details.Creator != signer.String() {
+		if exists, err := k.OperatorExists(ctx, signer); !exists || err != nil {
+			// If signer is neither an operator nor issuer creator
+			return nil, errors.Wrap(types.ErrNotOperatorOrIssuerCreator, "issuer creator or operator does not match")
+		}
+	}
+
+	verificationDetails, err := k.GetVerificationDetails(ctx, msg.VerificationId)
+	if err != nil {
+		return nil, err
+	}
+	if verificationDetails == nil {
+		return nil, errors.Wrap(types.ErrInvalidParam, "verification does not exist")
+	}
+
+	verificationDetails.IsRevoked = true
+	if err = k.SetVerificationDetails(ctx, msg.VerificationId, verificationDetails); err != nil {
+		return nil, err
+	}
+
+	return &types.MsgRevokeVerificationResponse{}, nil
+}
+
 func (k msgServer) HandleSetVerificationStatus(goCtx context.Context, msg *types.MsgSetVerificationStatus) (*types.MsgSetVerificationStatusResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 

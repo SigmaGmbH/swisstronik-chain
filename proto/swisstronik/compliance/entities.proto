@@ -95,4 +95,6 @@ message VerificationDetails {
     string issuer_verification_id = 8;
     // Version
     uint32 version = 9;
+    // Is revoked
+    bool is_revoked = 10;
 }

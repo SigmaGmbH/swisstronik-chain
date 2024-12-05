@@ -16,6 +16,7 @@ service Msg {
   rpc HandleCreateIssuer(MsgCreateIssuer) returns (MsgCreateIssuerResponse);
   rpc HandleUpdateIssuerDetails(MsgUpdateIssuerDetails) returns (MsgUpdateIssuerDetailsResponse);
   rpc HandleRemoveIssuer(MsgRemoveIssuer) returns (MsgRemoveIssuerResponse);
+  rpc HandleRevokeVerification(MsgRevokeVerification) returns (MsgRevokeVerificationResponse);
 }
 
 message MsgAddOperator {
