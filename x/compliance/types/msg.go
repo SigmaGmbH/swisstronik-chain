@@ -226,3 +226,42 @@ func (msg *MsgRemoveIssuer) GetSigners() []sdk.AccAddress {
 	}
 	return []sdk.AccAddress{signer}
 }
+
+func NewRevokeVerificationMsg(signerAddress, issuerAddress string, verificationId []byte) MsgRevokeVerification {
+	return MsgRevokeVerification{
+		Signer:         signerAddress,
+		Issuer:         issuerAddress,
+		VerificationId: verificationId,
+	}
+}
+
+func (msg *MsgRevokeVerification) ValidateBasic() error {
+	_, err := sdk.AccAddressFromBech32(msg.Signer)
+	if err != nil {
+		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid signer address (%s)", err)
+	}
+
+	_, err = sdk.AccAddressFromBech32(msg.Issuer)
+	if err != nil {
+		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid issuer address (%s)", err)
+	}
+
+	if msg.VerificationId == nil {
+		return sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, "missing verification id")
+	}
+
+	return nil
+}
+
+func (msg *MsgRevokeVerification) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(msg)
+	return sdk.MustSortJSON(bz)
+}
+
+func (msg *MsgRevokeVerification) GetSigners() []sdk.AccAddress {
+	signer, err := sdk.AccAddressFromBech32(msg.Signer)
+	if err != nil {
+		panic(err)
+	}
+	return []sdk.AccAddress{signer}
+}

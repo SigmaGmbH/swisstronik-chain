@@ -1002,3 +1002,86 @@ func (suite *KeeperTestSuite) TestRemoveIssuer() {
 		})
 	}
 }
+
+func (suite *KeeperTestSuite) TestHandleRevokeVerification() {
+	var (
+		signer         sdk.AccAddress
+		issuer         sdk.AccAddress
+		verificationId []byte
+	)
+
+	testCases := []struct {
+		name     string
+		init     func()
+		malleate func() *types.MsgRevokeVerification
+		expected func(resp *types.MsgRevokeVerificationResponse, err error)
+	}{
+		{
+			name: "invalid signer address",
+			init: func() {
+				issuer = tests.RandomAccAddress()
+				verificationId = tests.RandomAccAddress().Bytes()
+			},
+			malleate: func() *types.MsgRevokeVerification {
+				return &types.MsgRevokeVerification{
+					Signer:         "invalidSigner",
+					Issuer:         issuer.String(),
+					VerificationId: verificationId,
+				}
+			},
+			expected: func(resp *types.MsgRevokeVerificationResponse, err error) {
+				suite.Require().ErrorContains(err, "decoding bech32")
+				suite.Require().Nil(resp)
+			},
+		},
+		{
+			name: "invalid issuer address",
+			init: func() {
+				signer = tests.RandomAccAddress()
+				verificationId = tests.RandomAccAddress().Bytes()
+			},
+			malleate: func() *types.MsgRevokeVerification {
+				return &types.MsgRevokeVerification{
+					Signer:         signer.String(),
+					Issuer:         "invalidIssuer",
+					VerificationId: verificationId,
+				}
+			},
+			expected: func(resp *types.MsgRevokeVerificationResponse, err error) {
+				suite.Require().ErrorContains(err, "decoding bech32")
+				suite.Require().Nil(resp)
+			},
+		},
+		{
+			name: "issuer does not exist",
+			init: func() {
+				issuer = tests.RandomAccAddress()
+				signer = tests.RandomAccAddress()
+				verificationId = tests.RandomAccAddress().Bytes()
+			},
+			malleate: func() *types.MsgRevokeVerification {
+				return &types.MsgRevokeVerification{
+					Signer:         signer.String(),
+					Issuer:         issuer.String(),
+					VerificationId: verificationId,
+				}
+			},
+			expected: func(resp *types.MsgRevokeVerificationResponse, err error) {
+				suite.Require().ErrorIs(err, types.ErrInvalidIssuer)
+				suite.Require().Nil(resp)
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		suite.Run(tc.name, func() {
+			if tc.init != nil {
+				tc.init()
+			}
+			msgServer := keeper.NewMsgServerImpl(suite.keeper)
+			msg := tc.malleate()
+			resp, err := msgServer.HandleRevokeVerification(sdk.WrapSDKContext(suite.ctx), msg)
+			tc.expected(resp, err)
+		})
+	}
+}
