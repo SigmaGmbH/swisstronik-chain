@@ -65,6 +65,14 @@ message MsgRemoveIssuer {
 }
 message MsgRemoveIssuerResponse {}
 
+message MsgRevokeVerification {
+  option (cosmos.msg.v1.signer) = "signer";
+  string signer = 1;
+  string issuer = 2;
+  bytes verification_id = 3;
+}
+message MsgRevokeVerificationResponse {}
+
 // VerifyIssuerProposal is a gov Content type to verify issuer
 message VerifyIssuerProposal {
   option (gogoproto.equal) = false;
