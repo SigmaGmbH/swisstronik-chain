@@ -2,6 +2,7 @@ package keeper_test
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/status-im/keycard-go/hexutils"
 
 	"swisstronik/tests"
@@ -1114,6 +1115,90 @@ func (suite *KeeperTestSuite) TestHandleRevokeVerification() {
 			expected: func(resp *types.MsgRevokeVerificationResponse, err error) {
 				suite.Require().ErrorContains(err, "verification does not exist")
 				suite.Require().Nil(resp)
+			},
+		},
+		{
+			name: "issuer creator should be able to revoke verification",
+			init: func() {
+				signer = tests.RandomAccAddress()
+				issuer = tests.RandomAccAddress()
+				details := &types.IssuerDetails{Creator: signer.String(), Name: "test issuer"}
+				_ = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
+
+				verificationDetails := &types.VerificationDetails{
+					Type:                 types.VerificationType_VT_KYC,
+					IssuerAddress:        issuer.String(),
+					OriginChain:          "swisstronik",
+					IssuanceTimestamp:    100,
+					ExpirationTimestamp:  200,
+					OriginalData:         nil,
+					Schema:               "",
+					IssuerVerificationId: "",
+					Version:              0,
+					IsRevoked:            false,
+				}
+				detailsBytes, _ := verificationDetails.Marshal()
+				verificationId = crypto.Keccak256(tests.RandomAccAddress().Bytes(), types.VerificationType_VT_KYC.ToBytes(), detailsBytes)
+				_ = suite.keeper.SetVerificationDetails(suite.ctx, verificationId, verificationDetails, false)
+			},
+			malleate: func() *types.MsgRevokeVerification {
+				return &types.MsgRevokeVerification{
+					Signer:         signer.String(),
+					Issuer:         issuer.String(),
+					VerificationId: verificationId,
+				}
+			},
+			expected: func(resp *types.MsgRevokeVerificationResponse, err error) {
+				suite.Require().NoError(err)
+				suite.Require().NotNil(resp)
+
+				details, err := suite.keeper.GetVerificationDetails(suite.ctx, verificationId)
+				suite.Require().NoError(err)
+				suite.Require().NotNil(details)
+				suite.Require().True(details.IsRevoked)
+			},
+		},
+		{
+			name: "operator should be able to revoke verification",
+			init: func() {
+				signer = tests.RandomAccAddress()
+				_ = suite.keeper.AddOperator(suite.ctx, signer, types.OperatorType_OT_REGULAR)
+
+				issuer = tests.RandomAccAddress()
+				details := &types.IssuerDetails{Creator: tests.RandomAccAddress().String(), Name: "test issuer"}
+				_ = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
+
+				verificationDetails := &types.VerificationDetails{
+					Type:                 types.VerificationType_VT_KYC,
+					IssuerAddress:        issuer.String(),
+					OriginChain:          "swisstronik",
+					IssuanceTimestamp:    100,
+					ExpirationTimestamp:  200,
+					OriginalData:         nil,
+					Schema:               "",
+					IssuerVerificationId: "",
+					Version:              0,
+					IsRevoked:            false,
+				}
+				detailsBytes, _ := verificationDetails.Marshal()
+				verificationId = crypto.Keccak256(tests.RandomAccAddress().Bytes(), types.VerificationType_VT_KYC.ToBytes(), detailsBytes)
+				_ = suite.keeper.SetVerificationDetails(suite.ctx, verificationId, verificationDetails, false)
+			},
+			malleate: func() *types.MsgRevokeVerification {
+				return &types.MsgRevokeVerification{
+					Signer:         signer.String(),
+					Issuer:         issuer.String(),
+					VerificationId: verificationId,
+				}
+			},
+			expected: func(resp *types.MsgRevokeVerificationResponse, err error) {
+				suite.Require().NoError(err)
+				suite.Require().NotNil(resp)
+
+				details, err := suite.keeper.GetVerificationDetails(suite.ctx, verificationId)
+				suite.Require().NoError(err)
+				suite.Require().NotNil(details)
+				suite.Require().True(details.IsRevoked)
 			},
 		},
 	}

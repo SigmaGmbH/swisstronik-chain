@@ -246,9 +246,14 @@ func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.AccAddre
 }
 
 // SetVerificationDetails writes verification details
-func (k Keeper) SetVerificationDetails(ctx sdk.Context, verificationDetailsId []byte, details *types.VerificationDetails) error {
+func (k Keeper) SetVerificationDetails(
+	ctx sdk.Context,
+	verificationDetailsId []byte,
+	details *types.VerificationDetails,
+	allowOverride bool,
+) error {
 	verificationDetailsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationDetails)
-	if verificationDetailsStore.Has(verificationDetailsId) {
+	if verificationDetailsStore.Has(verificationDetailsId) && !allowOverride {
 		return errors.Wrap(types.ErrInvalidParam, "provided verification details already in storage")
 	}
 
