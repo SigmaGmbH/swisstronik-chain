@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+	"math/big"
 	"slices"
 
 	"cosmossdk.io/errors"
@@ -619,6 +620,16 @@ func (k Keeper) ExportIssuerDetails(ctx sdk.Context) ([]*types.GenesisIssuerDeta
 	}
 
 	return issuerDetails, nil
+}
+
+func (k Keeper) GetRevocationTreeRoot(_ sdk.Context) *big.Int {
+	// TODO: Implement
+	return big.NewInt(123)
+}
+
+func (k Keeper) GetIssuanceTreeRoot(_ sdk.Context) *big.Int {
+	// TODO: Implement
+	return big.NewInt(321)
 }
 
 func closeIteratorOrPanic(iterator sdk.Iterator) {
