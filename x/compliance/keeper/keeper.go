@@ -622,12 +622,12 @@ func (k Keeper) ExportIssuerDetails(ctx sdk.Context) ([]*types.GenesisIssuerDeta
 	return issuerDetails, nil
 }
 
-func (k Keeper) GetRevocationTreeRoot(_ sdk.Context) *big.Int {
+func (k Keeper) GetIssuanceTreeRoot(_ sdk.Context) *big.Int {
 	// TODO: Implement
 	return big.NewInt(123)
 }
 
-func (k Keeper) GetIssuanceTreeRoot(_ sdk.Context) *big.Int {
+func (k Keeper) GetRevocationTreeRoot(_ sdk.Context) *big.Int {
 	// TODO: Implement
 	return big.NewInt(321)
 }

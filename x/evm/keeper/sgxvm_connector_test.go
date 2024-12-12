@@ -619,3 +619,53 @@ func (suite *KeeperTestSuite) TestMultipleVerificationDetails() {
 		suite.Require().Equal(expected[i].Version, details.Version)
 	}
 }
+
+func (suite *KeeperTestSuite) TestIssuanceRoot() {
+	// TODO: Update test after implementation of trees
+	expectedValue := big.NewInt(123)
+
+	connector := evmkeeper.Connector{
+		Context:   suite.ctx,
+		EVMKeeper: suite.app.EvmKeeper,
+	}
+
+	request, encodeErr := proto.Marshal(&librustgo.CosmosRequest{
+		Req: &librustgo.CosmosRequest_IssuanceTreeRoot{
+			IssuanceTreeRoot: &librustgo.QueryIssuanceTreeRoot{},
+		},
+	})
+	suite.Require().NoError(encodeErr)
+
+	respBytes, queryErr := connector.Query(request)
+	suite.Require().NoError(queryErr)
+
+	resp := &librustgo.QueryIssuanceTreeRootResponse{}
+	decodeErr := proto.Unmarshal(respBytes, resp)
+	suite.Require().NoError(decodeErr)
+	suite.Require().Equal(expectedValue.Bytes(), resp.Root)
+}
+
+func (suite *KeeperTestSuite) TestRevocationRoot() {
+	// TODO: Update test after implementation of trees
+	expectedValue := big.NewInt(321)
+
+	connector := evmkeeper.Connector{
+		Context:   suite.ctx,
+		EVMKeeper: suite.app.EvmKeeper,
+	}
+
+	request, encodeErr := proto.Marshal(&librustgo.CosmosRequest{
+		Req: &librustgo.CosmosRequest_RevocationTreeRoot{
+			RevocationTreeRoot: &librustgo.QueryRevocationTreeRoot{},
+		},
+	})
+	suite.Require().NoError(encodeErr)
+
+	respBytes, queryErr := connector.Query(request)
+	suite.Require().NoError(queryErr)
+
+	resp := &librustgo.QueryRevocationTreeRootResponse{}
+	decodeErr := proto.Unmarshal(respBytes, resp)
+	suite.Require().NoError(decodeErr)
+	suite.Require().Equal(expectedValue.Bytes(), resp.Root)
+}
