@@ -121,6 +121,20 @@ pub fn encode_add_verification_details_request(
     cosmos_request.write_to_bytes().unwrap()
 }
 
+pub fn encode_get_issuance_tree_root_request() -> Vec<u8> {
+    let mut cosmos_request = ffi::CosmosRequest::new();
+    let request = ffi::QueryIssuanceTreeRoot::new();
+    cosmos_request.set_issuanceTreeRoot(request);
+    cosmos_request.write_to_bytes().unwrap()
+}
+
+pub fn encode_get_revocation_tree_root_request() -> Vec<u8> {
+    let mut cosmos_request = ffi::CosmosRequest::new();
+    let request = ffi::QueryRevocationTreeRoot::new();
+    cosmos_request.set_revocationTreeRoot(request);
+    cosmos_request.write_to_bytes().unwrap()
+}
+
 pub fn encode_has_verification_request(
     user_address: H160,
     verification_type: u32,

@@ -4,20 +4,24 @@ use ethabi::{encode, Address, ParamType, Token as AbiToken, Token};
 use evm::GasMutState;
 use evm::interpreter::error::{ExitError, ExitResult, ExitSucceed};
 use evm::interpreter::runtime::RuntimeState;
-use primitive_types::H160;
+use primitive_types::{H160, U256};
 use std::prelude::v1::*;
 use std::vec::Vec;
 
 use crate::precompiles::LinearCostPrecompileWithQuerier;
 use crate::{coder, querier, GoQuerier};
-use crate::protobuf_generated::ffi::{QueryAddVerificationDetailsResponse, QueryGetVerificationDataResponse, QueryHasVerificationResponse};
+use crate::protobuf_generated::ffi::{QueryAddVerificationDetailsResponse, QueryGetVerificationDataResponse, QueryHasVerificationResponse, QueryIssuanceTreeRoot, QueryIssuanceTreeRootResponse, QueryRevocationTreeRootResponse};
 
-// Selector of addVerificationDetails function
+// Selector of `addVerificationDetails` function
 const ADD_VERIFICATION_FN_SELECTOR: &str = "e62364ab";
-// Selector of hasVerification function
+// Selector of `hasVerification` function
 const HAS_VERIFICATION_FN_SELECTOR: &str = "4887fcd8";
-// Selector of getVerificationData function
+// Selector of `getVerificationData` function
 const GET_VERIFICATION_DATA_FN_SELECTOR: &str = "cc8995ec";
+// Selector of `getRevocationTreeRoot` function
+const GET_REVOCATION_TREE_ROOT_FN_SELECTOR: &str = "3db94a04";
+// Selector of `getIssuanceTreeRoot` function
+const GET_ISSUANCE_TREE_ROOT_FN_SELECTOR: &str = "d0376bd2";
 
 /// Precompile for interactions with x/compliance module.
 pub struct ComplianceBridge;
@@ -38,7 +42,6 @@ impl<G: AsRef<RuntimeState> + GasMutState> LinearCostPrecompileWithQuerier<G> fo
             return (e.into(), Vec::new());
         }
 
-        // TODO: Check how to provide caller
         let d = gasometer.as_ref();
         route(querier, d.context.caller, input)
     }
@@ -55,6 +58,42 @@ fn route(
 
     let input_signature = hex::encode(data[..4].to_vec());
     match input_signature.as_str() {
+        GET_REVOCATION_TREE_ROOT_FN_SELECTOR => {
+            let encoded_request = coder::encode_get_revocation_tree_root_request();
+            match querier::make_request(querier, encoded_request) {
+                Some(result) => {
+                    let res: QueryRevocationTreeRootResponse = match protobuf::parse_from_bytes(&result) {
+                        Ok(response) => response,
+                        Err(_) => return (ExitError::Reverted.into(), encode(&[AbiToken::String("cannot decode protobuf response".into())]))
+                    };
+
+                    let value = U256::from_big_endian(&res.root);
+                    let tokens = vec![AbiToken::Uint(value)];
+
+                    let encoded_response = encode(&tokens);
+                    (ExitSucceed::Returned.into(), encoded_response.to_vec())
+                }
+                None => (ExitError::Reverted.into(), encode(&[AbiToken::String("call to getRevocationTreeRoot function to x/compliance failed".into())]))
+            }
+        }
+        GET_ISSUANCE_TREE_ROOT_FN_SELECTOR => {
+            let encoded_request = coder::encode_get_issuance_tree_root_request();
+            match querier::make_request(querier, encoded_request) {
+                Some(result) => {
+                    let res: QueryIssuanceTreeRootResponse = match protobuf::parse_from_bytes(&result) {
+                        Ok(response) => response,
+                        Err(_) => return (ExitError::Reverted.into(), encode(&[AbiToken::String("cannot decode protobuf response".into())]))
+                    };
+
+                    let value = U256::from_big_endian(&res.root);
+                    let tokens = vec![AbiToken::Uint(value)];
+
+                    let encoded_response = encode(&tokens);
+                    (ExitSucceed::Returned.into(), encoded_response.to_vec())
+                }
+                None => (ExitError::Reverted.into(), encode(&[AbiToken::String("call to getIssuanceTreeRoot function to x/compliance failed".into())]))
+            }
+        }
         HAS_VERIFICATION_FN_SELECTOR => {
             let has_verification_params = vec![
                 ParamType::Address,

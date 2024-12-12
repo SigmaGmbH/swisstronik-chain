@@ -144,6 +144,16 @@ message QueryRemoveStorageResponse {}
 message QueryBlockHash { bytes number = 1; }
 message QueryBlockHashResponse { bytes hash = 1; }
 
+message QueryIssuanceTreeRoot {}
+message QueryIssuanceTreeRootResponse {
+  bytes root = 1;
+}
+
+message QueryRevocationTreeRoot {}
+message QueryRevocationTreeRootResponse {
+  bytes root = 1;
+}
+
 message QueryAddVerificationDetails {
   bytes userAddress = 1;
   bytes issuerAddress = 2;
@@ -222,6 +232,8 @@ message CosmosRequest {
     QueryGetVerificationData getVerificationData = 15;
     QueryInsertAccountBalance insertAccountBalance = 16;
     QueryInsertAccountNonce insertAccountNonce = 17;
+    QueryIssuanceTreeRoot issuanceTreeRoot = 18;
+    QueryRevocationTreeRoot revocationTreeRoot = 19;
   }
 }
 
