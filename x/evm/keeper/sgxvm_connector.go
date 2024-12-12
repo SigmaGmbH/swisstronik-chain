@@ -70,6 +70,10 @@ func (q Connector) Query(req []byte) ([]byte, error) {
 		return q.GetAccountCodeHash(request)
 	case *librustgo.CosmosRequest_GetAccountCodeSize:
 		return q.GetAccountCodeSize(request)
+	case *librustgo.CosmosRequest_IssuanceTreeRoot:
+		return q.GetIssuanceTreeRoot()
+	case *librustgo.CosmosRequest_RevocationTreeRoot:
+		return q.GetRevocationTreeRoot()
 	}
 
 	return nil, errors.New("wrong query received")
@@ -305,5 +309,27 @@ func (q Connector) GetVerificationData(req *librustgo.CosmosRequest_GetVerificat
 	}
 	return proto.Marshal(&librustgo.QueryGetVerificationDataResponse{
 		Data: resData,
+	})
+}
+
+func (q Connector) GetIssuanceTreeRoot() ([]byte, error) {
+	root := q.EVMKeeper.ComplianceKeeper.GetIssuanceTreeRoot(q.Context)
+	if root == nil {
+		return nil, errors.New("issuance root not found")
+	}
+
+	return proto.Marshal(&librustgo.QueryIssuanceTreeRootResponse{
+		Root: root.Bytes(),
+	})
+}
+
+func (q Connector) GetRevocationTreeRoot() ([]byte, error) {
+	root := q.EVMKeeper.ComplianceKeeper.GetRevocationTreeRoot(q.Context)
+	if root == nil {
+		return nil, errors.New("revocation root not found")
+	}
+
+	return proto.Marshal(&librustgo.QueryRevocationTreeRootResponse{
+		Root: root.Bytes(),
 	})
 }
