@@ -52,7 +52,7 @@ fn route(
     caller: H160,
     data: &[u8],
 ) -> (ExitResult, Vec<u8>) {
-    if data.len() <= 4 {
+    if data.len() < 4 {
         return (ExitError::Reverted.into(), encode(&[AbiToken::String("cannot decode input".into())]));
     }
 
