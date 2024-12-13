@@ -313,7 +313,11 @@ func (q Connector) GetVerificationData(req *librustgo.CosmosRequest_GetVerificat
 }
 
 func (q Connector) GetIssuanceTreeRoot() ([]byte, error) {
-	root := q.EVMKeeper.ComplianceKeeper.GetIssuanceTreeRoot(q.Context)
+	root, err := q.EVMKeeper.ComplianceKeeper.GetIssuanceTreeRoot(q.Context)
+	if err != nil {
+		return nil, err
+	}
+
 	if root == nil {
 		return nil, errors.New("issuance root not found")
 	}
@@ -324,7 +328,11 @@ func (q Connector) GetIssuanceTreeRoot() ([]byte, error) {
 }
 
 func (q Connector) GetRevocationTreeRoot() ([]byte, error) {
-	root := q.EVMKeeper.ComplianceKeeper.GetRevocationTreeRoot(q.Context)
+	root, err := q.EVMKeeper.ComplianceKeeper.GetRevocationTreeRoot(q.Context)
+	if err != nil {
+		return nil, err
+	}
+
 	if root == nil {
 		return nil, errors.New("revocation root not found")
 	}

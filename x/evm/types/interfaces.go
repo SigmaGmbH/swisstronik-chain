@@ -70,8 +70,8 @@ type ComplianceKeeper interface {
 	AddVerificationDetails(ctx sdk.Context, userAddress sdk.AccAddress, verificationType compliancetypes.VerificationType, details *compliancetypes.VerificationDetails) ([]byte, error)
 	HasVerificationOfType(ctx sdk.Context, userAddress sdk.AccAddress, expectedType compliancetypes.VerificationType, expirationTimestamp uint32, expectedIssuers []sdk.AccAddress) (bool, error)
 	GetVerificationDetailsByIssuer(ctx sdk.Context, userAddress, issuerAddress sdk.AccAddress) ([]*compliancetypes.Verification, []*compliancetypes.VerificationDetails, error)
-	GetIssuanceTreeRoot(ctx sdk.Context) *big.Int
-	GetRevocationTreeRoot(ctx sdk.Context) *big.Int
+	GetIssuanceTreeRoot(ctx sdk.Context) (*big.Int, error)
+	GetRevocationTreeRoot(ctx sdk.Context) (*big.Int, error)
 }
 
 // Event Hooks
