@@ -3,6 +3,7 @@ package keeper
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/iden3/go-iden3-crypto/poseidon"
 	"github.com/iden3/go-merkletree-sql"
 	"math/big"
 	"swisstronik/x/compliance/types"
@@ -33,13 +34,35 @@ func (k Keeper) GetRevocationTreeRoot(ctx sdk.Context) (*big.Int, error) {
 }
 
 func (k Keeper) AddCredentialHashToIssued(context sdk.Context, credentialHash common.Hash) error {
-	// TODO: Implement
-	return nil
+	storage := NewTreeStorage(&k, types.KeyPrefixIssuanceTree)
+	tree, err := merkletree.NewMerkleTree(context, &storage, 32)
+	if err != nil {
+		return err
+	}
+
+	value := credentialHash.Big()
+	key, err := poseidon.Hash([]*big.Int{value})
+	if err != nil {
+		return err
+	}
+
+	return tree.Add(sdk.WrapSDKContext(context), key, value)
 }
 
 func (k Keeper) MarkCredentialHashAsRevoked(context sdk.Context, credentialHash common.Hash) error {
-	// TODO: Implement
-	return nil
+	storage := NewTreeStorage(&k, types.KeyPrefixRevocationTree)
+	tree, err := merkletree.NewMerkleTree(context, &storage, 32)
+	if err != nil {
+		return err
+	}
+
+	value := credentialHash.Big()
+	key, err := poseidon.Hash([]*big.Int{value})
+	if err != nil {
+		return err
+	}
+
+	return tree.Add(sdk.WrapSDKContext(context), key, value)
 }
 
 func (k Keeper) GetIssuanceProof(context sdk.Context, credentialHash common.Hash) ([]byte, error) {
