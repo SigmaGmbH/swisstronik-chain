@@ -13,14 +13,16 @@ type TreeStorage struct {
 	keyPrefix      []byte
 	internalPrefix []byte
 	currentRoot    *merkletree.Hash
+	ctx            sdk.Context
 }
 
-func NewTreeStorage(k *Keeper, treeKeyPrefix []byte) TreeStorage {
+func NewTreeStorage(ctx sdk.Context, k *Keeper, treeKeyPrefix []byte) TreeStorage {
 	return TreeStorage{
 		keeper:         k,
 		keyPrefix:      treeKeyPrefix,
 		internalPrefix: []byte{},
 		currentRoot:    nil,
+		ctx:            ctx,
 	}
 }
 
@@ -31,13 +33,13 @@ func (ts *TreeStorage) WithPrefix(prefix []byte) merkletree.Storage {
 		ts.keyPrefix,
 		merkletree.Concat(ts.internalPrefix, prefix),
 		nil,
+		ts.ctx,
 	}
 }
 
 // Get retrieves a value from a key in the db.Storage
-func (ts *TreeStorage) Get(ctx context.Context, key []byte) (*merkletree.Node, error) {
-	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	store := prefix.NewStore(sdkCtx.KVStore(ts.keeper.storeKey), ts.keyPrefix)
+func (ts *TreeStorage) Get(_ context.Context, key []byte) (*merkletree.Node, error) {
+	store := prefix.NewStore(ts.ctx.KVStore(ts.keeper.storeKey), ts.keyPrefix)
 
 	res := store.Get(merkletree.Concat(ts.internalPrefix, key))
 	if res == nil {
@@ -48,9 +50,8 @@ func (ts *TreeStorage) Get(ctx context.Context, key []byte) (*merkletree.Node, e
 }
 
 // Put inserts new node into Sparse Merkle Tree
-func (ts *TreeStorage) Put(ctx context.Context, key []byte, node *merkletree.Node) error {
-	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	store := prefix.NewStore(sdkCtx.KVStore(ts.keeper.storeKey), ts.keyPrefix)
+func (ts *TreeStorage) Put(_ context.Context, key []byte, node *merkletree.Node) error {
+	store := prefix.NewStore(ts.ctx.KVStore(ts.keeper.storeKey), ts.keyPrefix)
 	value := node.Value()
 
 	store.Set(merkletree.Concat(ts.internalPrefix, key), value)
@@ -60,15 +61,14 @@ func (ts *TreeStorage) Put(ctx context.Context, key []byte, node *merkletree.Nod
 }
 
 // GetRoot returns current Sparse Merkle Tree root
-func (ts *TreeStorage) GetRoot(ctx context.Context) (*merkletree.Hash, error) {
+func (ts *TreeStorage) GetRoot(_ context.Context) (*merkletree.Hash, error) {
 	if ts.currentRoot != nil {
 		hash := merkletree.Hash{}
 		copy(hash[:], ts.currentRoot[:])
 		return &hash, nil
 	}
 
-	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	store := prefix.NewStore(sdkCtx.KVStore(ts.keeper.storeKey), ts.keyPrefix)
+	store := prefix.NewStore(ts.ctx.KVStore(ts.keeper.storeKey), ts.keyPrefix)
 	value := store.Get(merkletree.Concat(ts.internalPrefix, []byte("root")))
 	if value == nil {
 		return nil, merkletree.ErrNotFound
@@ -84,12 +84,11 @@ func (ts *TreeStorage) GetRoot(ctx context.Context) (*merkletree.Hash, error) {
 }
 
 // SetRoot updates current Sparse Merkle Tree root
-func (ts *TreeStorage) SetRoot(ctx context.Context, hash *merkletree.Hash) error {
+func (ts *TreeStorage) SetRoot(_ context.Context, hash *merkletree.Hash) error {
 	root := &merkletree.Hash{}
 	copy(root[:], hash[:])
 
-	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	store := prefix.NewStore(sdkCtx.KVStore(ts.keeper.storeKey), ts.keyPrefix)
+	store := prefix.NewStore(ts.ctx.KVStore(ts.keeper.storeKey), ts.keyPrefix)
 	store.Set(merkletree.Concat(ts.internalPrefix, []byte("root")), []byte(root.Hex()))
 	ts.currentRoot = root
 
@@ -98,9 +97,8 @@ func (ts *TreeStorage) SetRoot(ctx context.Context, hash *merkletree.Hash) error
 }
 
 // Iterate implements the method Iterate of the interface db.Storage
-func (ts *TreeStorage) Iterate(ctx context.Context, f func([]byte, *merkletree.Node) (bool, error)) error {
-	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	iterator := sdk.KVStorePrefixIterator(sdkCtx.KVStore(ts.keeper.storeKey), ts.keyPrefix)
+func (ts *TreeStorage) Iterate(_ context.Context, f func([]byte, *merkletree.Node) (bool, error)) error {
+	iterator := sdk.KVStorePrefixIterator(ts.ctx.KVStore(ts.keeper.storeKey), ts.keyPrefix)
 	defer closeIteratorOrPanic(iterator)
 
 	for ; iterator.Valid(); iterator.Next() {
@@ -125,9 +123,8 @@ func (ts *TreeStorage) Iterate(ctx context.Context, f func([]byte, *merkletree.N
 }
 
 // List implements the method List of the interface db.Storage
-func (ts *TreeStorage) List(ctx context.Context, limit int) ([]merkletree.KV, error) {
-	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	iterator := sdk.KVStorePrefixIterator(sdkCtx.KVStore(ts.keeper.storeKey), ts.keyPrefix)
+func (ts *TreeStorage) List(_ context.Context, limit int) ([]merkletree.KV, error) {
+	iterator := sdk.KVStorePrefixIterator(ts.ctx.KVStore(ts.keeper.storeKey), ts.keyPrefix)
 	defer closeIteratorOrPanic(iterator)
 
 	var result []merkletree.KV

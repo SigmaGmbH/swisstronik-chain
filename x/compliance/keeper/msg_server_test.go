@@ -1139,7 +1139,7 @@ func (suite *KeeperTestSuite) TestHandleRevokeVerification() {
 				}
 				detailsBytes, _ := verificationDetails.Marshal()
 				verificationId = crypto.Keccak256(tests.RandomAccAddress().Bytes(), types.VerificationType_VT_KYC.ToBytes(), detailsBytes)
-				_ = suite.keeper.SetVerificationDetails(suite.ctx, verificationId, verificationDetails, false)
+				_ = suite.keeper.SetVerificationDetails(suite.ctx, verificationId, verificationDetails)
 			},
 			malleate: func() *types.MsgRevokeVerification {
 				return &types.MsgRevokeVerification{
@@ -1182,7 +1182,7 @@ func (suite *KeeperTestSuite) TestHandleRevokeVerification() {
 				}
 				detailsBytes, _ := verificationDetails.Marshal()
 				verificationId = crypto.Keccak256(tests.RandomAccAddress().Bytes(), types.VerificationType_VT_KYC.ToBytes(), detailsBytes)
-				_ = suite.keeper.SetVerificationDetails(suite.ctx, verificationId, verificationDetails, false)
+				_ = suite.keeper.SetVerificationDetails(suite.ctx, verificationId, verificationDetails)
 			},
 			malleate: func() *types.MsgRevokeVerification {
 				return &types.MsgRevokeVerification{

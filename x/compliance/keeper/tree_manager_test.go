@@ -9,8 +9,9 @@ import (
 )
 
 func (suite *KeeperTestSuite) TestProofGeneration() {
-	//ctx := sdk.WrapSDKContext(suite.ctx)
-	storage := keeper.NewTreeStorage(&suite.keeper, types.KeyPrefixRevocationTree)
+	suite.Setup(suite.T())
+
+	storage := keeper.NewTreeStorage(suite.ctx, &suite.keeper, types.KeyPrefixRevocationTree)
 
 	// construct storage-based merkle tree
 	tree1, err := merkletree.NewMerkleTree(suite.ctx, &storage, 32)

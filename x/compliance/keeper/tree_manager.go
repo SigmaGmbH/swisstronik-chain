@@ -12,7 +12,7 @@ import (
 // GetIssuanceTreeRoot returns root of Sparse Merkle Tree with issued credentials
 func (k Keeper) GetIssuanceTreeRoot(ctx sdk.Context) (*big.Int, error) {
 	context := sdk.WrapSDKContext(ctx)
-	storage := NewTreeStorage(&k, types.KeyPrefixIssuanceTree)
+	storage := NewTreeStorage(ctx, &k, types.KeyPrefixIssuanceTree)
 	tree, err := merkletree.NewMerkleTree(context, &storage, 32)
 	if err != nil {
 		return nil, err
@@ -24,7 +24,7 @@ func (k Keeper) GetIssuanceTreeRoot(ctx sdk.Context) (*big.Int, error) {
 // GetRevocationTreeRoot returns root of Sparse Merkle Tree with revoked credentials
 func (k Keeper) GetRevocationTreeRoot(ctx sdk.Context) (*big.Int, error) {
 	context := sdk.WrapSDKContext(ctx)
-	storage := NewTreeStorage(&k, types.KeyPrefixRevocationTree)
+	storage := NewTreeStorage(ctx, &k, types.KeyPrefixRevocationTree)
 	tree, err := merkletree.NewMerkleTree(context, &storage, 32)
 	if err != nil {
 		return nil, err
@@ -33,9 +33,9 @@ func (k Keeper) GetRevocationTreeRoot(ctx sdk.Context) (*big.Int, error) {
 	return tree.Root().BigInt(), nil
 }
 
-func (k Keeper) AddCredentialHashToIssued(context sdk.Context, credentialHash common.Hash) error {
-	storage := NewTreeStorage(&k, types.KeyPrefixIssuanceTree)
-	tree, err := merkletree.NewMerkleTree(context, &storage, 32)
+func (k Keeper) AddCredentialHashToIssued(ctx sdk.Context, credentialHash common.Hash) error {
+	storage := NewTreeStorage(ctx, &k, types.KeyPrefixIssuanceTree)
+	tree, err := merkletree.NewMerkleTree(ctx, &storage, 32)
 	if err != nil {
 		return err
 	}
@@ -46,12 +46,12 @@ func (k Keeper) AddCredentialHashToIssued(context sdk.Context, credentialHash co
 		return err
 	}
 
-	return tree.Add(sdk.WrapSDKContext(context), key, value)
+	return tree.Add(sdk.WrapSDKContext(ctx), key, value)
 }
 
-func (k Keeper) MarkCredentialHashAsRevoked(context sdk.Context, credentialHash common.Hash) error {
-	storage := NewTreeStorage(&k, types.KeyPrefixRevocationTree)
-	tree, err := merkletree.NewMerkleTree(context, &storage, 32)
+func (k Keeper) MarkCredentialHashAsRevoked(ctx sdk.Context, credentialHash common.Hash) error {
+	storage := NewTreeStorage(ctx, &k, types.KeyPrefixRevocationTree)
+	tree, err := merkletree.NewMerkleTree(ctx, &storage, 32)
 	if err != nil {
 		return err
 	}
@@ -62,18 +62,18 @@ func (k Keeper) MarkCredentialHashAsRevoked(context sdk.Context, credentialHash 
 		return err
 	}
 
-	return tree.Add(sdk.WrapSDKContext(context), key, value)
+	return tree.Add(sdk.WrapSDKContext(ctx), key, value)
 }
 
-func (k Keeper) GetIssuanceProof(context sdk.Context, credentialHash common.Hash) ([]byte, error) {
-	storage := NewTreeStorage(&k, types.KeyPrefixIssuanceTree)
-	tree, err := merkletree.NewMerkleTree(context, &storage, 32)
+func (k Keeper) GetIssuanceProof(ctx sdk.Context, credentialHash common.Hash) ([]byte, error) {
+	storage := NewTreeStorage(ctx, &k, types.KeyPrefixIssuanceTree)
+	tree, err := merkletree.NewMerkleTree(ctx, &storage, 32)
 	if err != nil {
 		return nil, err
 	}
 
 	credentialHashBig := new(big.Int).SetBytes(credentialHash.Bytes())
-	proof, _, err := tree.GenerateProof(sdk.WrapSDKContext(context), credentialHashBig, nil)
+	proof, _, err := tree.GenerateProof(sdk.WrapSDKContext(ctx), credentialHashBig, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -81,15 +81,15 @@ func (k Keeper) GetIssuanceProof(context sdk.Context, credentialHash common.Hash
 	return proof.MarshalJSON()
 }
 
-func (k Keeper) GetNonRevocationProof(context sdk.Context, credentialHash common.Hash) ([]byte, error) {
-	storage := NewTreeStorage(&k, types.KeyPrefixRevocationTree)
-	tree, err := merkletree.NewMerkleTree(context, &storage, 32)
+func (k Keeper) GetNonRevocationProof(ctx sdk.Context, credentialHash common.Hash) ([]byte, error) {
+	storage := NewTreeStorage(ctx, &k, types.KeyPrefixRevocationTree)
+	tree, err := merkletree.NewMerkleTree(ctx, &storage, 32)
 	if err != nil {
 		return nil, err
 	}
 
 	credentialHashBig := new(big.Int).SetBytes(credentialHash.Bytes())
-	proof, _, err := tree.GenerateProof(sdk.WrapSDKContext(context), credentialHashBig, nil)
+	proof, _, err := tree.GenerateProof(sdk.WrapSDKContext(ctx), credentialHashBig, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -100,6 +100,6 @@ func (k Keeper) GetNonRevocationProof(context sdk.Context, credentialHash common
 // SetTreeRoot is used only for testing
 func (k Keeper) SetTreeRoot(context sdk.Context, treeKey []byte, root *merkletree.Hash) error {
 	ctx := sdk.WrapSDKContext(context)
-	storage := NewTreeStorage(&k, treeKey)
+	storage := NewTreeStorage(context, &k, treeKey)
 	return storage.SetRoot(ctx, root)
 }

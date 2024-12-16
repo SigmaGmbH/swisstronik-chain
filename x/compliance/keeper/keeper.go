@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+	"github.com/ethereum/go-ethereum/common"
 	"slices"
 
 	"cosmossdk.io/errors"
@@ -242,20 +243,33 @@ func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.AccAddre
 		return nil, err
 	}
 
-	// TODO: Update issuance tree with provided credential
+	credentialValue := &types.ZKCredential{
+		Type:                verificationType,
+		IssuerAddress:       issuerAddress.Bytes(),
+		HolderPublicKey:     nil, // TODO: Find out the best way to provide holder public key
+		ExpirationTimestamp: details.ExpirationTimestamp,
+	}
+	credentialHash, err := credentialValue.Hash()
+	if err != nil {
+		return nil, errors.Wrap(types.ErrBadRequest, err.Error())
+	}
+	err = k.AddCredentialHashToIssued(ctx, common.BigToHash(credentialHash))
+	if err != nil {
+		return nil, errors.Wrap(types.ErrBadRequest, err.Error())
+	}
 
 	return verificationDetailsID, nil
 }
 
-// SetVerificationDetails writes verification details
+// SetVerificationDetails writes verification details. Since this function writes directly to the storage,
+// it should be used only in genesis.go or in tests
 func (k Keeper) SetVerificationDetails(
 	ctx sdk.Context,
 	verificationDetailsId []byte,
 	details *types.VerificationDetails,
-	allowOverride bool,
 ) error {
 	verificationDetailsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationDetails)
-	if verificationDetailsStore.Has(verificationDetailsId) && !allowOverride {
+	if verificationDetailsStore.Has(verificationDetailsId) {
 		return errors.Wrap(types.ErrInvalidParam, "provided verification details already in storage")
 	}
 
@@ -267,20 +281,112 @@ func (k Keeper) SetVerificationDetails(
 	// If there is no such verification details associated with provided address, write them to the table
 	verificationDetailsStore.Set(verificationDetailsId, detailsBytes)
 
-	// TODO: Update issuance tree with provided credential
+	issuerAddress, err := sdk.AccAddressFromBech32(details.IssuerAddress)
+	if err != nil {
+		return err
+	}
 
-	return nil
+	credentialValue := &types.ZKCredential{
+		Type:                details.Type,
+		IssuerAddress:       issuerAddress.Bytes(),
+		HolderPublicKey:     nil, // TODO: Find out how to get holder public key
+		ExpirationTimestamp: details.ExpirationTimestamp,
+	}
+	credentialHash, err := credentialValue.Hash()
+	if err != nil {
+		return err
+	}
+	return k.AddCredentialHashToIssued(ctx, common.BigToHash(credentialHash))
+}
+
+func (k Keeper) MarkVerificationDetailsAsRevoked(
+	ctx sdk.Context,
+	verificationDetailsId []byte,
+) error {
+	verificationDetailsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationDetails)
+	if !verificationDetailsStore.Has(verificationDetailsId) {
+		return errors.Wrap(types.ErrInvalidParam, "there is no such verification with provided ID")
+	}
+
+	prevVerificationDetailsBytes := verificationDetailsStore.Get(verificationDetailsId)
+	if prevVerificationDetailsBytes == nil {
+		return errors.Wrap(types.ErrInvalidParam, "verification with provided ID is empty")
+	}
+
+	prevVerificationDetails := &types.VerificationDetails{}
+	err := proto.Unmarshal(prevVerificationDetailsBytes, prevVerificationDetails)
+	if err != nil {
+		return err
+	}
+
+	prevVerificationDetails.IsRevoked = true
+
+	detailsBytes, err := prevVerificationDetails.Marshal()
+	if err != nil {
+		return err
+	}
+
+	// If there is no such verification details associated with provided address, write them to the table
+	verificationDetailsStore.Set(verificationDetailsId, detailsBytes)
+
+	issuerAddress, err := sdk.AccAddressFromBech32(prevVerificationDetails.IssuerAddress)
+	if err != nil {
+		return err
+	}
+
+	// Update revocation tree with provided credential
+	credential := &types.ZKCredential{
+		Type:                prevVerificationDetails.Type,
+		IssuerAddress:       issuerAddress.Bytes(),
+		HolderPublicKey:     nil, // TODO: Find out how to find holder key
+		ExpirationTimestamp: prevVerificationDetails.ExpirationTimestamp,
+	}
+	credentialHash, err := credential.Hash()
+	if err != nil {
+		return err
+	}
+
+	return k.MarkCredentialHashAsRevoked(ctx, common.BigToHash(credentialHash))
 }
 
 // RemoveVerificationDetails removes verification details for provided ID
-func (k Keeper) RemoveVerificationDetails(ctx sdk.Context, verificationDetailsId []byte) {
+func (k Keeper) RemoveVerificationDetails(ctx sdk.Context, verificationDetailsId []byte) error {
 	if verificationDetailsId == nil {
-		return
+		return errors.Wrap(types.ErrInvalidParam, "empty verification details ID")
 	}
 	verificationDetailsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationDetails)
-	verificationDetailsStore.Delete(verificationDetailsId)
 
-	// TODO: Update revocation tree with provided credential
+	prevVerificationDetailsBytes := verificationDetailsStore.Get(verificationDetailsId)
+	if prevVerificationDetailsBytes == nil {
+		return errors.Wrap(types.ErrInvalidParam, "verification with provided ID is empty")
+	}
+
+	prevVerificationDetails := &types.VerificationDetails{}
+	err := proto.Unmarshal(prevVerificationDetailsBytes, prevVerificationDetails)
+	if err != nil {
+		return err
+	}
+
+	issuerAddress, err := sdk.AccAddressFromBech32(prevVerificationDetails.IssuerAddress)
+	if err != nil {
+		return err
+	}
+
+	// Update revocation tree with provided credential
+	credential := &types.ZKCredential{
+		Type:                prevVerificationDetails.Type,
+		IssuerAddress:       issuerAddress.Bytes(),
+		HolderPublicKey:     nil, // TODO: Find out how to find holder key
+		ExpirationTimestamp: prevVerificationDetails.ExpirationTimestamp,
+	}
+	credentialHash, err := credential.Hash()
+	if err != nil {
+		return err
+	}
+
+	// Delete credential data and mark it as revoked
+	verificationDetailsStore.Delete(verificationDetailsId)
+	return k.MarkCredentialHashAsRevoked(ctx, common.BigToHash(credentialHash))
 }
 
 // GetVerificationDetails returns verification details for provided ID

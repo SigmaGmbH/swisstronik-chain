@@ -393,7 +393,7 @@ func (suite *KeeperTestSuite) TestSetVerificationDetails() {
 		OriginalData:        hexutils.HexToBytes("B639DF194671CDE06EFAA368A404F72E3306DF0359117AC7E78EC2BE04B7629D"),
 	}
 	verificationId := hexutils.HexToBytes("83456ef3b8ea6777da69d1509cf51861985e2b4e24cf7f5d4c5080996bf8cf4e")
-	err = suite.keeper.SetVerificationDetails(suite.ctx, verificationId, verificationDetails, false)
+	err = suite.keeper.SetVerificationDetails(suite.ctx, verificationId, verificationDetails)
 	suite.Require().NoError(err)
 
 	resp, err := suite.keeper.GetVerificationDetails(suite.ctx, verificationId)

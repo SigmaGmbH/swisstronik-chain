@@ -9,8 +9,10 @@ import (
 )
 
 func (suite *KeeperTestSuite) TestSetSMTRoot() {
+	suite.Setup(suite.T())
+
 	ctx := sdk.WrapSDKContext(suite.ctx)
-	storage := keeper.NewTreeStorage(&suite.keeper, types.KeyPrefixRevocationTree)
+	storage := keeper.NewTreeStorage(suite.ctx, &suite.keeper, types.KeyPrefixRevocationTree)
 
 	r, err := merkletree.NewHashFromBigInt(big.NewInt(1))
 	suite.Require().NoError(err)
@@ -24,8 +26,10 @@ func (suite *KeeperTestSuite) TestSetSMTRoot() {
 }
 
 func (suite *KeeperTestSuite) TestPutAndGet() {
+	suite.Setup(suite.T())
+
 	ctx := sdk.WrapSDKContext(suite.ctx)
-	storage := keeper.NewTreeStorage(&suite.keeper, types.KeyPrefixRevocationTree)
+	storage := keeper.NewTreeStorage(suite.ctx, &suite.keeper, types.KeyPrefixRevocationTree)
 
 	key, err := merkletree.NewHashFromBigInt(big.NewInt(1))
 	suite.Require().NoError(err)
@@ -45,8 +49,10 @@ func (suite *KeeperTestSuite) TestPutAndGet() {
 }
 
 func (suite *KeeperTestSuite) TestList() {
+	suite.Setup(suite.T())
+
 	ctx := sdk.WrapSDKContext(suite.ctx)
-	storage := keeper.NewTreeStorage(&suite.keeper, types.KeyPrefixRevocationTree)
+	storage := keeper.NewTreeStorage(suite.ctx, &suite.keeper, types.KeyPrefixRevocationTree)
 
 	key, err := merkletree.NewHashFromBigInt(big.NewInt(1))
 	suite.Require().NoError(err)

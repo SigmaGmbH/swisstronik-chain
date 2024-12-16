@@ -60,7 +60,7 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 			panic(errors.Wrap(types.ErrInvalidParam, "empty proof data"))
 		}
 
-		if err = k.SetVerificationDetails(ctx, verificationData.Id, verificationData.Details, false); err != nil {
+		if err = k.SetVerificationDetails(ctx, verificationData.Id, verificationData.Details); err != nil {
 			panic(err)
 		}
 	}
