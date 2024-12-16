@@ -1071,6 +1071,342 @@ func (m *QueryVerificationsDetailsResponse_MergedVerificationDetails) GetVersion
 	return 0
 }
 
+type QueryIssuanceTreeRootRequest struct {
+}
+
+func (m *QueryIssuanceTreeRootRequest) Reset()         { *m = QueryIssuanceTreeRootRequest{} }
+func (m *QueryIssuanceTreeRootRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryIssuanceTreeRootRequest) ProtoMessage()    {}
+func (*QueryIssuanceTreeRootRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_f80d6bdaf4aa1245, []int{16}
+}
+func (m *QueryIssuanceTreeRootRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryIssuanceTreeRootRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryIssuanceTreeRootRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryIssuanceTreeRootRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryIssuanceTreeRootRequest.Merge(m, src)
+}
+func (m *QueryIssuanceTreeRootRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryIssuanceTreeRootRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryIssuanceTreeRootRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryIssuanceTreeRootRequest proto.InternalMessageInfo
+
+type QueryIssuanceTreeRootResponse struct {
+	Root []byte `protobuf:"bytes,1,opt,name=root,proto3" json:"root,omitempty"`
+}
+
+func (m *QueryIssuanceTreeRootResponse) Reset()         { *m = QueryIssuanceTreeRootResponse{} }
+func (m *QueryIssuanceTreeRootResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryIssuanceTreeRootResponse) ProtoMessage()    {}
+func (*QueryIssuanceTreeRootResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_f80d6bdaf4aa1245, []int{17}
+}
+func (m *QueryIssuanceTreeRootResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryIssuanceTreeRootResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryIssuanceTreeRootResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryIssuanceTreeRootResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryIssuanceTreeRootResponse.Merge(m, src)
+}
+func (m *QueryIssuanceTreeRootResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryIssuanceTreeRootResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryIssuanceTreeRootResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryIssuanceTreeRootResponse proto.InternalMessageInfo
+
+func (m *QueryIssuanceTreeRootResponse) GetRoot() []byte {
+	if m != nil {
+		return m.Root
+	}
+	return nil
+}
+
+type QueryRevocationTreeRootRequest struct {
+}
+
+func (m *QueryRevocationTreeRootRequest) Reset()         { *m = QueryRevocationTreeRootRequest{} }
+func (m *QueryRevocationTreeRootRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryRevocationTreeRootRequest) ProtoMessage()    {}
+func (*QueryRevocationTreeRootRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_f80d6bdaf4aa1245, []int{18}
+}
+func (m *QueryRevocationTreeRootRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryRevocationTreeRootRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryRevocationTreeRootRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryRevocationTreeRootRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryRevocationTreeRootRequest.Merge(m, src)
+}
+func (m *QueryRevocationTreeRootRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryRevocationTreeRootRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryRevocationTreeRootRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryRevocationTreeRootRequest proto.InternalMessageInfo
+
+type QueryRevocationTreeRootResponse struct {
+	Root []byte `protobuf:"bytes,1,opt,name=root,proto3" json:"root,omitempty"`
+}
+
+func (m *QueryRevocationTreeRootResponse) Reset()         { *m = QueryRevocationTreeRootResponse{} }
+func (m *QueryRevocationTreeRootResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryRevocationTreeRootResponse) ProtoMessage()    {}
+func (*QueryRevocationTreeRootResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_f80d6bdaf4aa1245, []int{19}
+}
+func (m *QueryRevocationTreeRootResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryRevocationTreeRootResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryRevocationTreeRootResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryRevocationTreeRootResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryRevocationTreeRootResponse.Merge(m, src)
+}
+func (m *QueryRevocationTreeRootResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryRevocationTreeRootResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryRevocationTreeRootResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryRevocationTreeRootResponse proto.InternalMessageInfo
+
+func (m *QueryRevocationTreeRootResponse) GetRoot() []byte {
+	if m != nil {
+		return m.Root
+	}
+	return nil
+}
+
+type QueryIssuanceProofRequest struct {
+	CredentialHash []byte `protobuf:"bytes,1,opt,name=credential_hash,json=credentialHash,proto3" json:"credential_hash,omitempty"`
+}
+
+func (m *QueryIssuanceProofRequest) Reset()         { *m = QueryIssuanceProofRequest{} }
+func (m *QueryIssuanceProofRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryIssuanceProofRequest) ProtoMessage()    {}
+func (*QueryIssuanceProofRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_f80d6bdaf4aa1245, []int{20}
+}
+func (m *QueryIssuanceProofRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryIssuanceProofRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryIssuanceProofRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryIssuanceProofRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryIssuanceProofRequest.Merge(m, src)
+}
+func (m *QueryIssuanceProofRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryIssuanceProofRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryIssuanceProofRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryIssuanceProofRequest proto.InternalMessageInfo
+
+func (m *QueryIssuanceProofRequest) GetCredentialHash() []byte {
+	if m != nil {
+		return m.CredentialHash
+	}
+	return nil
+}
+
+type QueryIssuanceProofResponse struct {
+	EncodedProof []byte `protobuf:"bytes,1,opt,name=encoded_proof,json=encodedProof,proto3" json:"encoded_proof,omitempty"`
+}
+
+func (m *QueryIssuanceProofResponse) Reset()         { *m = QueryIssuanceProofResponse{} }
+func (m *QueryIssuanceProofResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryIssuanceProofResponse) ProtoMessage()    {}
+func (*QueryIssuanceProofResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_f80d6bdaf4aa1245, []int{21}
+}
+func (m *QueryIssuanceProofResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryIssuanceProofResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryIssuanceProofResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryIssuanceProofResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryIssuanceProofResponse.Merge(m, src)
+}
+func (m *QueryIssuanceProofResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryIssuanceProofResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryIssuanceProofResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryIssuanceProofResponse proto.InternalMessageInfo
+
+func (m *QueryIssuanceProofResponse) GetEncodedProof() []byte {
+	if m != nil {
+		return m.EncodedProof
+	}
+	return nil
+}
+
+type QueryRevocationProofRequest struct {
+	CredentialHash []byte `protobuf:"bytes,1,opt,name=credential_hash,json=credentialHash,proto3" json:"credential_hash,omitempty"`
+}
+
+func (m *QueryRevocationProofRequest) Reset()         { *m = QueryRevocationProofRequest{} }
+func (m *QueryRevocationProofRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryRevocationProofRequest) ProtoMessage()    {}
+func (*QueryRevocationProofRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_f80d6bdaf4aa1245, []int{22}
+}
+func (m *QueryRevocationProofRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryRevocationProofRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryRevocationProofRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryRevocationProofRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryRevocationProofRequest.Merge(m, src)
+}
+func (m *QueryRevocationProofRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryRevocationProofRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryRevocationProofRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryRevocationProofRequest proto.InternalMessageInfo
+
+func (m *QueryRevocationProofRequest) GetCredentialHash() []byte {
+	if m != nil {
+		return m.CredentialHash
+	}
+	return nil
+}
+
+type QueryRevocationProofResponse struct {
+	EncodedProof []byte `protobuf:"bytes,1,opt,name=encoded_proof,json=encodedProof,proto3" json:"encoded_proof,omitempty"`
+}
+
+func (m *QueryRevocationProofResponse) Reset()         { *m = QueryRevocationProofResponse{} }
+func (m *QueryRevocationProofResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryRevocationProofResponse) ProtoMessage()    {}
+func (*QueryRevocationProofResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_f80d6bdaf4aa1245, []int{23}
+}
+func (m *QueryRevocationProofResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryRevocationProofResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryRevocationProofResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryRevocationProofResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryRevocationProofResponse.Merge(m, src)
+}
+func (m *QueryRevocationProofResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryRevocationProofResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryRevocationProofResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryRevocationProofResponse proto.InternalMessageInfo
+
+func (m *QueryRevocationProofResponse) GetEncodedProof() []byte {
+	if m != nil {
+		return m.EncodedProof
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterType((*QueryParamsRequest)(nil), "swisstronik.compliance.QueryParamsRequest")
 	proto.RegisterType((*QueryParamsResponse)(nil), "swisstronik.compliance.QueryParamsResponse")
@@ -1091,6 +1427,14 @@ func init() {
 	proto.RegisterType((*QueryVerificationsDetailsRequest)(nil), "swisstronik.compliance.QueryVerificationsDetailsRequest")
 	proto.RegisterType((*QueryVerificationsDetailsResponse)(nil), "swisstronik.compliance.QueryVerificationsDetailsResponse")
 	proto.RegisterType((*QueryVerificationsDetailsResponse_MergedVerificationDetails)(nil), "swisstronik.compliance.QueryVerificationsDetailsResponse.MergedVerificationDetails")
+	proto.RegisterType((*QueryIssuanceTreeRootRequest)(nil), "swisstronik.compliance.QueryIssuanceTreeRootRequest")
+	proto.RegisterType((*QueryIssuanceTreeRootResponse)(nil), "swisstronik.compliance.QueryIssuanceTreeRootResponse")
+	proto.RegisterType((*QueryRevocationTreeRootRequest)(nil), "swisstronik.compliance.QueryRevocationTreeRootRequest")
+	proto.RegisterType((*QueryRevocationTreeRootResponse)(nil), "swisstronik.compliance.QueryRevocationTreeRootResponse")
+	proto.RegisterType((*QueryIssuanceProofRequest)(nil), "swisstronik.compliance.QueryIssuanceProofRequest")
+	proto.RegisterType((*QueryIssuanceProofResponse)(nil), "swisstronik.compliance.QueryIssuanceProofResponse")
+	proto.RegisterType((*QueryRevocationProofRequest)(nil), "swisstronik.compliance.QueryRevocationProofRequest")
+	proto.RegisterType((*QueryRevocationProofResponse)(nil), "swisstronik.compliance.QueryRevocationProofResponse")
 }
 
 func init() {
@@ -1098,83 +1442,98 @@ func init() {
 }
 
 var fileDescriptor_f80d6bdaf4aa1245 = []byte{
-	// 1212 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x58, 0xcf, 0x6f, 0xdc, 0x44,
-	0x14, 0x8e, 0xbb, 0xe9, 0xa6, 0x79, 0x9b, 0xa4, 0x61, 0xb2, 0x8a, 0xdc, 0xa5, 0xdd, 0x24, 0x4e,
-	0xf3, 0xa3, 0x8d, 0xba, 0x26, 0x9b, 0xb4, 0x0d, 0x15, 0x08, 0xa5, 0xa4, 0x44, 0xa9, 0x84, 0x28,
-	0x6e, 0x54, 0x09, 0x24, 0xb4, 0x9a, 0xac, 0xa7, 0xee, 0xd0, 0x5d, 0xdb, 0xf5, 0x38, 0xa1, 0x51,
-	0x14, 0x21, 0x71, 0x41, 0xdc, 0x90, 0x38, 0x70, 0x47, 0xe2, 0x82, 0x10, 0x67, 0x84, 0x38, 0x71,
-	0xa1, 0xc7, 0x8a, 0x5e, 0x38, 0x21, 0x94, 0xf0, 0x87, 0x20, 0xcf, 0x8c, 0xbb, 0xf6, 0xd4, 0xde,
-	0xee, 0x46, 0xed, 0x6d, 0xfd, 0x7e, 0x7d, 0xdf, 0x1b, 0x7f, 0xcf, 0xf3, 0xb4, 0x60, 0xb0, 0x2f,
-	0x28, 0x63, 0x61, 0xe0, 0xb9, 0xf4, 0xa1, 0xd9, 0xf4, 0xda, 0x7e, 0x8b, 0x62, 0xb7, 0x49, 0xcc,
-	0x47, 0xbb, 0x24, 0xd8, 0xaf, 0xf9, 0x81, 0x17, 0x7a, 0x68, 0x32, 0x11, 0x53, 0xeb, 0xc4, 0x54,
-	0xca, 0x8e, 0xe7, 0x78, 0x3c, 0xc4, 0x8c, 0x7e, 0x89, 0xe8, 0xca, 0x79, 0xc7, 0xf3, 0x9c, 0x16,
-	0x31, 0xb1, 0x4f, 0x4d, 0xec, 0xba, 0x5e, 0x88, 0x43, 0xea, 0xb9, 0x4c, 0x7a, 0x2f, 0x37, 0x3d,
-	0xd6, 0xf6, 0x98, 0xb9, 0x83, 0x99, 0x04, 0x31, 0xf7, 0x96, 0x77, 0x48, 0x88, 0x97, 0x4d, 0x1f,
-	0x3b, 0xd4, 0xe5, 0xc1, 0x32, 0x76, 0x36, 0x87, 0x9b, 0x8f, 0x03, 0xdc, 0x8e, 0x0b, 0xce, 0xe5,
-	0x04, 0x11, 0x37, 0xa4, 0x21, 0x25, 0x32, 0xcc, 0x28, 0x03, 0xfa, 0x38, 0x42, 0xbb, 0xc3, 0x73,
-	0x2d, 0xf2, 0x68, 0x97, 0xb0, 0xd0, 0xb8, 0x0b, 0x13, 0x29, 0x2b, 0xf3, 0x3d, 0x97, 0x11, 0xf4,
-	0x0e, 0x14, 0x05, 0x86, 0xae, 0x4d, 0x6b, 0x8b, 0xa5, 0x7a, 0xb5, 0x96, 0x7d, 0x02, 0x35, 0x91,
-	0x77, 0x73, 0xf0, 0xc9, 0x3f, 0x53, 0x03, 0x96, 0xcc, 0x31, 0x36, 0xe1, 0x4d, 0x5e, 0xf4, 0x23,
-	0x9f, 0x04, 0x38, 0xf4, 0x82, 0x0d, 0x12, 0x62, 0xda, 0x8a, 0x31, 0xd1, 0x22, 0x9c, 0xf5, 0xa4,
-	0x67, 0xdd, 0xb6, 0x03, 0xc2, 0x04, 0xca, 0xb0, 0xa5, 0x9a, 0x0d, 0x0c, 0xe7, 0xb3, 0x0b, 0x49,
-	0x9a, 0xeb, 0x30, 0x64, 0x0b, 0x93, 0xe4, 0xb9, 0x90, 0xc7, 0x53, 0xad, 0x10, 0xe7, 0x19, 0xd7,
-	0xa0, 0xc2, 0x21, 0x24, 0xa4, 0x42, 0x55, 0x87, 0x21, 0x9c, 0xa2, 0x18, 0x3f, 0x1a, 0x9f, 0xc8,
-	0x1e, 0xd5, 0x3c, 0xc9, 0xec, 0x06, 0x0c, 0xda, 0x38, 0xc4, 0x92, 0xd6, 0x7c, 0x1e, 0x2d, 0x25,
-	0x9b, 0xe7, 0x18, 0xf7, 0x65, 0xd7, 0xd2, 0x49, 0x54, 0x52, 0x1f, 0x00, 0x74, 0x94, 0xf2, 0x1c,
-	0x41, 0xc8, 0xaa, 0x16, 0xc9, 0xaa, 0x26, 0xb4, 0x2b, 0x65, 0x55, 0xbb, 0x83, 0x1d, 0x22, 0x73,
-	0xad, 0x44, 0xa6, 0xf1, 0x7d, 0x01, 0x2e, 0xe4, 0x00, 0xc9, 0x2e, 0x5c, 0x18, 0xc6, 0xb1, 0x4f,
-	0xd7, 0xa6, 0x0b, 0x8b, 0xa5, 0xfa, 0xed, 0xbc, 0x56, 0xba, 0x56, 0xaa, 0x7d, 0x48, 0x02, 0x87,
-	0xd8, 0xe9, 0x76, 0xa5, 0x6a, 0x3a, 0x10, 0x68, 0x33, 0xd5, 0xd9, 0x29, 0xf9, 0x4a, 0x5f, 0xd6,
-	0x99, 0x80, 0x48, 0xb6, 0x56, 0xf9, 0x5d, 0x83, 0x72, 0x16, 0x64, 0xfe, 0x0b, 0x45, 0x53, 0x50,
-	0xa2, 0xac, 0xb1, 0x47, 0x02, 0x7a, 0x9f, 0x12, 0x9b, 0x83, 0x9f, 0xb1, 0x80, 0xb2, 0x7b, 0xd2,
-	0x82, 0x2e, 0x00, 0x50, 0xd6, 0x08, 0xc8, 0x9e, 0xf7, 0x90, 0xd8, 0x7a, 0x81, 0xfb, 0x87, 0x29,
-	0xb3, 0x84, 0x01, 0xdd, 0x86, 0x51, 0x91, 0xdc, 0x14, 0xe3, 0xae, 0x0f, 0xf2, 0xf3, 0xba, 0x98,
-	0x77, 0x5e, 0xf7, 0x12, 0xc1, 0x56, 0x3a, 0xd5, 0x58, 0x87, 0x73, 0xfc, 0x38, 0xb7, 0x18, 0xdb,
-	0x25, 0xea, 0xf8, 0x5c, 0x84, 0x51, 0xca, 0xed, 0xe9, 0xe1, 0x49, 0x1b, 0x8d, 0xcf, 0xa4, 0xae,
-	0x95, 0x12, 0xf2, 0xc5, 0xbe, 0xa7, 0x0e, 0xce, 0x5c, 0x1e, 0xcd, 0x74, 0xfe, 0xf3, 0xb1, 0xb1,
-	0x53, 0xe5, 0x5f, 0x97, 0x42, 0x7f, 0x2c, 0xc8, 0x29, 0x53, 0x61, 0x64, 0x1b, 0x0e, 0x0c, 0x89,
-	0xae, 0x63, 0x75, 0x6e, 0x76, 0x55, 0x67, 0x76, 0x15, 0xa9, 0xcd, 0x54, 0xa3, 0x52, 0x9a, 0x71,
-	0xf5, 0x57, 0x27, 0xcc, 0x67, 0x1a, 0x4c, 0x64, 0xe0, 0xf5, 0xf6, 0x52, 0x11, 0x82, 0x41, 0x17,
-	0xb7, 0x09, 0x27, 0x30, 0x6c, 0xf1, 0xdf, 0x68, 0x1a, 0x4a, 0x36, 0x61, 0xcd, 0x80, 0xfa, 0x9c,
-	0x5b, 0x81, 0xbb, 0x92, 0x26, 0x34, 0x0e, 0x85, 0xdd, 0xa0, 0xa5, 0x0f, 0x72, 0x4f, 0xf4, 0x33,
-	0xaa, 0xd3, 0xf2, 0x1c, 0x4f, 0x3f, 0x2d, 0xea, 0x44, 0xbf, 0xa3, 0x3a, 0x2d, 0xe2, 0xe0, 0xd6,
-	0xad, 0xe8, 0xda, 0xd8, 0xd7, 0x8b, 0xa2, 0x4e, 0xc2, 0x14, 0xcd, 0x4e, 0x33, 0x20, 0xd1, 0x57,
-	0x54, 0x1f, 0x12, 0xb3, 0x23, 0x1f, 0x8d, 0x2d, 0x98, 0xe2, 0x07, 0x9c, 0xd4, 0xb4, 0x22, 0x89,
-	0x79, 0x18, 0x4b, 0x6a, 0x7c, 0x6b, 0x43, 0x76, 0xa8, 0x58, 0x0d, 0x0a, 0xd3, 0xf9, 0xa5, 0xe4,
-	0x6b, 0xbf, 0xa5, 0xaa, 0x77, 0xa9, 0x97, 0x21, 0x7b, 0x41, 0xc3, 0x9f, 0x67, 0x40, 0xbd, 0x2e,
-	0x25, 0xff, 0x71, 0x1a, 0x66, 0xba, 0x80, 0xc9, 0xc6, 0xbe, 0x54, 0xbf, 0x21, 0x42, 0xd5, 0x77,
-	0xbb, 0xaa, 0xba, 0x5b, 0x45, 0xa9, 0xed, 0x8c, 0x63, 0x90, 0x0a, 0x4f, 0xe3, 0xbd, 0x3a, 0x9d,
-	0xff, 0x55, 0x80, 0x73, 0xb9, 0xd8, 0x68, 0x1b, 0xc6, 0x93, 0xb8, 0xdb, 0xfb, 0x3e, 0xe1, 0x67,
-	0x3b, 0x56, 0x5f, 0xec, 0xe5, 0x4d, 0x46, 0xf1, 0xd6, 0x0b, 0x15, 0x32, 0x24, 0x16, 0x35, 0x30,
-	0xa2, 0x4a, 0x0c, 0xcd, 0xc1, 0x98, 0x18, 0xab, 0x46, 0x7c, 0x15, 0x14, 0xb2, 0x86, 0x6d, 0x06,
-	0x46, 0xbc, 0x80, 0x3a, 0xd4, 0x6d, 0x34, 0x1f, 0x60, 0xea, 0xca, 0xf9, 0x29, 0x09, 0xdb, 0xfb,
-	0x91, 0x09, 0x5d, 0x01, 0x14, 0xe5, 0x44, 0x04, 0x1b, 0x21, 0x6d, 0x13, 0x16, 0xe2, 0xb6, 0xcf,
-	0xa7, 0x6a, 0xd4, 0x7a, 0x23, 0xf6, 0x6c, 0xc7, 0x0e, 0xb4, 0x0c, 0x65, 0xf2, 0xd8, 0xa7, 0x01,
-	0x27, 0x92, 0x48, 0x28, 0xf2, 0x84, 0x89, 0x8e, 0xaf, 0x93, 0x32, 0x0b, 0xa3, 0x02, 0x10, 0xb7,
-	0x1a, 0x7c, 0xa1, 0x18, 0xe2, 0x2d, 0x8d, 0xc4, 0xc6, 0x0d, 0x1c, 0x62, 0x34, 0x09, 0x45, 0xd6,
-	0x7c, 0x40, 0xda, 0x58, 0x3f, 0xc3, 0x39, 0xca, 0x27, 0xb4, 0x0a, 0x93, 0xb2, 0xd1, 0xe4, 0x09,
-	0x34, 0xa8, 0xad, 0x0f, 0xf3, 0xb8, 0xb2, 0xf0, 0x26, 0x8f, 0x76, 0xcb, 0x8e, 0xc6, 0x7c, 0x8f,
-	0x04, 0x2c, 0x12, 0x00, 0x70, 0x62, 0xf1, 0x63, 0xfd, 0xeb, 0x12, 0x9c, 0xe6, 0x92, 0x43, 0xdf,
-	0x68, 0x50, 0x14, 0xab, 0x1f, 0xba, 0xdc, 0x55, 0x9c, 0xa9, 0x6d, 0xb3, 0xb2, 0xd4, 0x53, 0xac,
-	0x90, 0x93, 0x31, 0xff, 0xd5, 0xb3, 0xff, 0xbe, 0x3b, 0x35, 0x8d, 0xaa, 0x66, 0xd7, 0x2d, 0x18,
-	0xfd, 0xaa, 0xc1, 0x59, 0x65, 0xbd, 0x43, 0x2b, 0x5d, 0x81, 0xb2, 0xf7, 0xd2, 0xca, 0x6a, 0x7f,
-	0x49, 0x92, 0xe6, 0x0d, 0x4e, 0x73, 0x15, 0xd5, 0xf3, 0x68, 0xc6, 0x4b, 0xad, 0x79, 0xa0, 0xac,
-	0xb7, 0x87, 0xe8, 0x67, 0x0d, 0xc6, 0x94, 0x05, 0xa5, 0xde, 0xcb, 0x7e, 0xa5, 0x10, 0x5f, 0xe9,
-	0x2b, 0x47, 0xf2, 0x5e, 0xe6, 0xbc, 0x97, 0xd0, 0xa5, 0x3c, 0xde, 0x72, 0x38, 0xcc, 0x03, 0x1c,
-	0xd3, 0xfd, 0x49, 0x83, 0x71, 0x75, 0xc3, 0x43, 0xab, 0x7d, 0x2e, 0x84, 0x82, 0xf2, 0xd5, 0x13,
-	0xad, 0x91, 0xc6, 0x25, 0x4e, 0x7a, 0x16, 0xcd, 0xbc, 0x84, 0x34, 0x61, 0xe8, 0x17, 0x0d, 0x46,
-	0xd3, 0x77, 0xec, 0x72, 0x0f, 0xcb, 0x81, 0x42, 0xb3, 0xde, 0x4f, 0x8a, 0xe4, 0x78, 0x8d, 0x73,
-	0x7c, 0x0b, 0xd5, 0xf2, 0x38, 0x8a, 0xa9, 0x33, 0x0f, 0x52, 0x9f, 0x9b, 0x43, 0xf4, 0x83, 0x06,
-	0x63, 0xe9, 0x0d, 0x05, 0xd5, 0xfb, 0x5a, 0x67, 0x7a, 0x11, 0x43, 0xf6, 0x0a, 0x64, 0x2c, 0x70,
-	0xce, 0x33, 0x68, 0xaa, 0x3b, 0x67, 0x86, 0xfe, 0xd4, 0x60, 0x22, 0xeb, 0x8b, 0x7e, 0xbd, 0xe7,
-	0x2b, 0x4a, 0xa1, 0xbb, 0xd6, 0x7f, 0xa2, 0xe4, 0xfc, 0x2e, 0xe7, 0x7c, 0x1d, 0x5d, 0xcd, 0xe3,
-	0x9c, 0xfc, 0xe8, 0x99, 0x07, 0xe9, 0x4b, 0xe0, 0x10, 0xfd, 0xa6, 0x41, 0x39, 0xeb, 0xea, 0x44,
-	0x6b, 0x27, 0xb8, 0x6d, 0x45, 0x2f, 0x6f, 0x9f, 0xf8, 0x9e, 0x36, 0xae, 0xf0, 0x66, 0x16, 0xd0,
-	0x5c, 0x2f, 0xcd, 0xb0, 0x9b, 0x6b, 0x4f, 0x8e, 0xaa, 0xda, 0xd3, 0xa3, 0xaa, 0xf6, 0xef, 0x51,
-	0x55, 0xfb, 0xf6, 0xb8, 0x3a, 0xf0, 0xf4, 0xb8, 0x3a, 0xf0, 0xf7, 0x71, 0x75, 0xe0, 0xd3, 0x6a,
-	0x32, 0xff, 0x71, 0xb2, 0x42, 0xb8, 0xef, 0x13, 0xb6, 0x53, 0xe4, 0xff, 0x06, 0xac, 0xfc, 0x1f,
-	0x00, 0x00, 0xff, 0xff, 0x24, 0x98, 0xa0, 0xc1, 0xf7, 0x10, 0x00, 0x00,
+	// 1454 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x58, 0xcb, 0x6f, 0xd4, 0x56,
+	0x17, 0x8f, 0x99, 0x90, 0x90, 0x93, 0xe7, 0x77, 0x13, 0xa1, 0x61, 0x3e, 0x98, 0x24, 0x0e, 0x79,
+	0x00, 0x62, 0x4c, 0x26, 0xe1, 0x51, 0xd4, 0xaa, 0x0a, 0x04, 0x68, 0x90, 0xaa, 0xd2, 0x01, 0x21,
+	0xb5, 0x52, 0x35, 0xba, 0x8c, 0x2f, 0x13, 0x97, 0x19, 0x5f, 0xe3, 0xeb, 0xa4, 0x44, 0x11, 0xaa,
+	0xd4, 0x5d, 0x77, 0x95, 0xba, 0xe8, 0xbe, 0x52, 0xbb, 0xa8, 0x2a, 0x96, 0x55, 0x55, 0x75, 0xd5,
+	0x4d, 0x91, 0xba, 0x41, 0x65, 0xd3, 0x55, 0x55, 0x91, 0xfe, 0x21, 0x95, 0xef, 0x3d, 0xce, 0xd8,
+	0x37, 0xf6, 0x3c, 0x22, 0xd8, 0x79, 0xce, 0xf3, 0x77, 0xee, 0xfd, 0x1d, 0x9f, 0xe3, 0x01, 0x53,
+	0x7c, 0xe6, 0x08, 0x11, 0xf8, 0xdc, 0x75, 0x1e, 0x59, 0x35, 0xde, 0xf4, 0x1a, 0x0e, 0x75, 0x6b,
+	0xcc, 0x7a, 0xbc, 0xc5, 0xfc, 0x9d, 0x92, 0xe7, 0xf3, 0x80, 0x93, 0xe3, 0x31, 0x9b, 0x52, 0xcb,
+	0xa6, 0x30, 0x55, 0xe7, 0x75, 0x2e, 0x4d, 0xac, 0xf0, 0x49, 0x59, 0x17, 0x4e, 0xd6, 0x39, 0xaf,
+	0x37, 0x98, 0x45, 0x3d, 0xc7, 0xa2, 0xae, 0xcb, 0x03, 0x1a, 0x38, 0xdc, 0x15, 0xa8, 0x3d, 0x5b,
+	0xe3, 0xa2, 0xc9, 0x85, 0xf5, 0x80, 0x0a, 0x4c, 0x62, 0x6d, 0x2f, 0x3f, 0x60, 0x01, 0x5d, 0xb6,
+	0x3c, 0x5a, 0x77, 0x5c, 0x69, 0x8c, 0xb6, 0x73, 0x19, 0xd8, 0x3c, 0xea, 0xd3, 0x66, 0x14, 0x70,
+	0x3e, 0xc3, 0x88, 0xb9, 0x81, 0x13, 0x38, 0x0c, 0xcd, 0xcc, 0x29, 0x20, 0x1f, 0x86, 0xd9, 0xee,
+	0x48, 0xdf, 0x0a, 0x7b, 0xbc, 0xc5, 0x44, 0x60, 0xde, 0x85, 0xc9, 0x84, 0x54, 0x78, 0xdc, 0x15,
+	0x8c, 0xbc, 0x0d, 0x03, 0x2a, 0x47, 0xde, 0x98, 0x31, 0x96, 0x86, 0xcb, 0xc5, 0x52, 0xfa, 0x09,
+	0x94, 0x94, 0xdf, 0xb5, 0xfe, 0xe7, 0x7f, 0x4f, 0xf7, 0x55, 0xd0, 0xc7, 0xbc, 0x05, 0xff, 0x97,
+	0x41, 0x3f, 0xf0, 0x98, 0x4f, 0x03, 0xee, 0xaf, 0xb3, 0x80, 0x3a, 0x8d, 0x28, 0x27, 0x59, 0x82,
+	0x71, 0x8e, 0x9a, 0x35, 0xdb, 0xf6, 0x99, 0x50, 0x59, 0x86, 0x2a, 0xba, 0xd8, 0xa4, 0x70, 0x32,
+	0x3d, 0x10, 0xc2, 0x5c, 0x83, 0x41, 0x5b, 0x89, 0x10, 0xe7, 0x62, 0x16, 0x4e, 0x3d, 0x42, 0xe4,
+	0x67, 0x5e, 0x82, 0x82, 0x4c, 0x81, 0x29, 0x35, 0xa8, 0x79, 0x18, 0xa4, 0x09, 0x88, 0xd1, 0x4f,
+	0xf3, 0x23, 0xac, 0x51, 0xf7, 0x43, 0x64, 0x57, 0xa1, 0xdf, 0xa6, 0x01, 0x45, 0x58, 0x0b, 0x59,
+	0xb0, 0x34, 0x6f, 0xe9, 0x63, 0x3e, 0xc4, 0xaa, 0x51, 0xc9, 0x74, 0x50, 0x37, 0x01, 0x5a, 0x4c,
+	0xd9, 0xcf, 0xa0, 0x68, 0x55, 0x0a, 0x69, 0x55, 0x52, 0xdc, 0x45, 0x5a, 0x95, 0xee, 0xd0, 0x3a,
+	0x43, 0xdf, 0x4a, 0xcc, 0xd3, 0xfc, 0x26, 0x07, 0xa7, 0x32, 0x12, 0x61, 0x15, 0x2e, 0x0c, 0xd1,
+	0x48, 0x97, 0x37, 0x66, 0x72, 0x4b, 0xc3, 0xe5, 0xdb, 0x59, 0xa5, 0xb4, 0x8d, 0x54, 0x7a, 0x9f,
+	0xf9, 0x75, 0x66, 0x27, 0xcb, 0x45, 0xd6, 0xb4, 0x52, 0x90, 0x5b, 0x89, 0xca, 0x8e, 0xe0, 0x95,
+	0x76, 0xaa, 0x4c, 0xa5, 0x88, 0x97, 0x56, 0xf8, 0xd5, 0x80, 0xa9, 0xb4, 0x94, 0xd9, 0x17, 0x4a,
+	0xa6, 0x61, 0xd8, 0x11, 0xd5, 0x6d, 0xe6, 0x3b, 0x0f, 0x1d, 0x66, 0xcb, 0xe4, 0xc7, 0x2a, 0xe0,
+	0x88, 0xfb, 0x28, 0x21, 0xa7, 0x00, 0x1c, 0x51, 0xf5, 0xd9, 0x36, 0x7f, 0xc4, 0xec, 0x7c, 0x4e,
+	0xea, 0x87, 0x1c, 0x51, 0x51, 0x02, 0x72, 0x1b, 0x46, 0x95, 0x73, 0x4d, 0xb5, 0x7b, 0xbe, 0x5f,
+	0x9e, 0xd7, 0xe9, 0xac, 0xf3, 0xba, 0x1f, 0x33, 0xae, 0x24, 0x5d, 0xcd, 0x35, 0x38, 0x21, 0x8f,
+	0x73, 0x43, 0x88, 0x2d, 0xa6, 0xb7, 0xcf, 0x69, 0x18, 0x75, 0xa4, 0x3c, 0xd9, 0x3c, 0x49, 0xa1,
+	0xf9, 0x09, 0xf2, 0x5a, 0x0b, 0x81, 0x17, 0xfb, 0xae, 0xde, 0x38, 0xf3, 0x59, 0x30, 0x93, 0xfe,
+	0xfb, 0x6d, 0x63, 0x27, 0xc2, 0xbf, 0x29, 0x86, 0x7e, 0x97, 0xc3, 0x2e, 0xd3, 0xd3, 0x60, 0x19,
+	0x75, 0x18, 0x54, 0x55, 0x47, 0xec, 0xbc, 0xd5, 0x96, 0x9d, 0xe9, 0x51, 0x90, 0x9b, 0x89, 0x42,
+	0x91, 0x9a, 0x51, 0xf4, 0xd7, 0x47, 0xcc, 0x97, 0x06, 0x4c, 0xa6, 0xe4, 0xeb, 0xee, 0x52, 0x09,
+	0x81, 0x7e, 0x97, 0x36, 0x99, 0x04, 0x30, 0x54, 0x91, 0xcf, 0x64, 0x06, 0x86, 0x6d, 0x26, 0x6a,
+	0xbe, 0xe3, 0x49, 0x6c, 0x39, 0xa9, 0x8a, 0x8b, 0xc8, 0x04, 0xe4, 0xb6, 0xfc, 0x46, 0xbe, 0x5f,
+	0x6a, 0xc2, 0xc7, 0x30, 0x4e, 0x83, 0xd7, 0x79, 0xfe, 0xa8, 0x8a, 0x13, 0x3e, 0x87, 0x71, 0x1a,
+	0xac, 0x4e, 0x1b, 0x37, 0xc2, 0xb1, 0xb1, 0x93, 0x1f, 0x50, 0x71, 0x62, 0xa2, 0xb0, 0x77, 0x6a,
+	0x3e, 0x0b, 0xdf, 0xa2, 0xf9, 0x41, 0xd5, 0x3b, 0xf8, 0xd3, 0xdc, 0x80, 0x69, 0x79, 0xc0, 0x71,
+	0x4e, 0x6b, 0x94, 0x58, 0x80, 0xb1, 0x38, 0xc7, 0x37, 0xd6, 0xb1, 0x42, 0x4d, 0x6a, 0x3a, 0x30,
+	0x93, 0x1d, 0x0a, 0xaf, 0xfd, 0x86, 0xce, 0xde, 0x73, 0xdd, 0x34, 0xd9, 0x01, 0x0e, 0x7f, 0x9a,
+	0x92, 0xea, 0x4d, 0x31, 0xf9, 0xb7, 0xa3, 0x30, 0xdb, 0x26, 0x19, 0x16, 0xf6, 0xb9, 0xfe, 0x0e,
+	0x51, 0xac, 0xbe, 0xdb, 0x96, 0xd5, 0xed, 0x22, 0x22, 0xb7, 0x53, 0x8e, 0x01, 0x19, 0x9e, 0xcc,
+	0xf7, 0xfa, 0x78, 0xfe, 0x67, 0x0e, 0x4e, 0x64, 0xe6, 0x26, 0xf7, 0x60, 0x22, 0x9e, 0xf7, 0xde,
+	0x8e, 0xc7, 0xe4, 0xd9, 0x8e, 0x95, 0x97, 0xba, 0xb9, 0xc9, 0xd0, 0xbe, 0x72, 0x20, 0x42, 0x0a,
+	0xc5, 0xc2, 0x02, 0x46, 0x74, 0x8a, 0x91, 0x79, 0x18, 0x53, 0x6d, 0x55, 0x8d, 0x46, 0x41, 0x2e,
+	0xad, 0xd9, 0x66, 0x61, 0x84, 0xfb, 0x4e, 0xdd, 0x71, 0xab, 0xb5, 0x4d, 0xea, 0xb8, 0xd8, 0x3f,
+	0xc3, 0x4a, 0x76, 0x3d, 0x14, 0x91, 0xf3, 0x40, 0x42, 0x9f, 0x10, 0x60, 0x35, 0x70, 0x9a, 0x4c,
+	0x04, 0xb4, 0xe9, 0xc9, 0xae, 0x1a, 0xad, 0xfc, 0x2f, 0xd2, 0xdc, 0x8b, 0x14, 0x64, 0x19, 0xa6,
+	0xd8, 0x13, 0xcf, 0xf1, 0x25, 0x90, 0x98, 0xc3, 0x80, 0x74, 0x98, 0x6c, 0xe9, 0x5a, 0x2e, 0x73,
+	0x30, 0xaa, 0x12, 0xd2, 0x46, 0x55, 0x2e, 0x14, 0x83, 0xb2, 0xa4, 0x91, 0x48, 0xb8, 0x4e, 0x03,
+	0x4a, 0x8e, 0xc3, 0x80, 0xa8, 0x6d, 0xb2, 0x26, 0xcd, 0x1f, 0x93, 0x18, 0xf1, 0x17, 0x59, 0x85,
+	0xe3, 0x58, 0x68, 0xfc, 0x04, 0xaa, 0x8e, 0x9d, 0x1f, 0x92, 0x76, 0x53, 0x4a, 0x1b, 0x3f, 0xda,
+	0x0d, 0x3b, 0x6c, 0xf3, 0x6d, 0xe6, 0x8b, 0x90, 0x00, 0x20, 0x81, 0x45, 0x3f, 0xcd, 0x22, 0x2e,
+	0x26, 0x1b, 0x51, 0x65, 0x3e, 0x63, 0x15, 0xce, 0x83, 0x68, 0x99, 0x5c, 0xc1, 0x7d, 0xe2, 0xa0,
+	0x1e, 0xf9, 0x4d, 0xa0, 0xdf, 0xe7, 0x3c, 0x90, 0x77, 0x3d, 0x52, 0x91, 0xcf, 0xe6, 0x0c, 0x14,
+	0xa5, 0x53, 0x38, 0x47, 0xf1, 0x32, 0xb5, 0xb0, 0x17, 0xf1, 0xed, 0x92, 0x66, 0xd1, 0x26, 0xf0,
+	0x7a, 0x6c, 0x88, 0x86, 0x68, 0xee, 0xf8, 0x9c, 0x3f, 0x8c, 0xfa, 0x7a, 0x11, 0xc6, 0x6b, 0x3e,
+	0xb3, 0xc3, 0x1d, 0x99, 0x36, 0xaa, 0x9b, 0x54, 0x6c, 0xa2, 0xef, 0x58, 0x4b, 0xfc, 0x1e, 0x15,
+	0x9b, 0xe6, 0x5a, 0x6c, 0xd0, 0xc5, 0xa2, 0x60, 0xde, 0x39, 0x18, 0x65, 0x6e, 0x8d, 0xdb, 0xcc,
+	0xae, 0x7a, 0xa1, 0x02, 0x83, 0x8c, 0xa0, 0x50, 0x1a, 0x9b, 0x37, 0x71, 0x88, 0xb5, 0xf0, 0x1f,
+	0x0e, 0xca, 0x75, 0x3c, 0xfe, 0x03, 0x71, 0x7a, 0x00, 0x53, 0xfe, 0x63, 0x02, 0x8e, 0xca, 0x28,
+	0xe4, 0x4b, 0x03, 0x06, 0xd4, 0xfa, 0x4e, 0xce, 0xb6, 0x7d, 0xc1, 0x24, 0xbe, 0x18, 0x0a, 0xe7,
+	0xba, 0xb2, 0x55, 0x90, 0xcc, 0x85, 0x2f, 0x5e, 0xfe, 0xfb, 0xf5, 0x91, 0x19, 0x52, 0xb4, 0xda,
+	0x7e, 0xc9, 0x90, 0x9f, 0x0d, 0x18, 0xd7, 0x56, 0x74, 0xb2, 0xd2, 0x36, 0x51, 0xfa, 0xb7, 0x45,
+	0x61, 0xb5, 0x37, 0x27, 0x84, 0x79, 0x55, 0xc2, 0x5c, 0x25, 0xe5, 0x2c, 0x98, 0xd1, 0x87, 0x89,
+	0xb5, 0xab, 0x7d, 0xa2, 0x3c, 0x25, 0x3f, 0x1a, 0x30, 0xa6, 0x2d, 0x99, 0xe5, 0x6e, 0x76, 0x64,
+	0x0d, 0xf8, 0x4a, 0x4f, 0x3e, 0x88, 0x7b, 0x59, 0xe2, 0x3e, 0x47, 0xce, 0x64, 0xe1, 0xc6, 0x17,
+	0x9c, 0xb5, 0x4b, 0x23, 0xb8, 0x3f, 0x18, 0x30, 0xa1, 0x6f, 0xe9, 0x64, 0xb5, 0xc7, 0xa5, 0x5e,
+	0x41, 0xbe, 0x78, 0xa8, 0x4f, 0x01, 0xf3, 0x8c, 0x04, 0x3d, 0x47, 0x66, 0x3b, 0x80, 0x66, 0x82,
+	0x3c, 0x33, 0x60, 0x34, 0xb9, 0x27, 0x2d, 0x77, 0xb1, 0xe0, 0x69, 0x30, 0xcb, 0xbd, 0xb8, 0x20,
+	0xc6, 0x4b, 0x12, 0xe3, 0x05, 0x52, 0xca, 0xc2, 0xa8, 0xde, 0x9c, 0xd6, 0x6e, 0x62, 0x64, 0x3c,
+	0x25, 0xdf, 0x1a, 0x30, 0x96, 0xdc, 0x32, 0x49, 0xb9, 0xa7, 0x95, 0xb4, 0x1b, 0x32, 0xa4, 0xaf,
+	0xb1, 0xe6, 0xa2, 0xc4, 0x3c, 0x4b, 0xa6, 0xdb, 0x63, 0x16, 0xe4, 0x77, 0x03, 0x26, 0xd3, 0xa6,
+	0xf2, 0xe5, 0xae, 0xd7, 0x0c, 0x0d, 0xee, 0x95, 0xde, 0x1d, 0x11, 0xf3, 0x3b, 0x12, 0xf3, 0x65,
+	0x72, 0x31, 0x0b, 0x73, 0x7c, 0x70, 0x59, 0xbb, 0xc9, 0x41, 0xfe, 0x94, 0xfc, 0x62, 0xc0, 0x54,
+	0xda, 0xfa, 0x43, 0xae, 0x1c, 0x62, 0x63, 0x52, 0xb5, 0xbc, 0x75, 0xe8, 0x5d, 0xcb, 0x3c, 0x2f,
+	0x8b, 0x59, 0x24, 0xf3, 0xdd, 0x14, 0x23, 0xc9, 0x3d, 0xa1, 0x4f, 0xca, 0x0e, 0x9d, 0x98, 0x31,
+	0x78, 0x3b, 0x74, 0x62, 0xd6, 0x38, 0xee, 0x0c, 0x38, 0x5a, 0x61, 0xac, 0x70, 0xa0, 0x92, 0xef,
+	0xb1, 0x1b, 0xf7, 0xc7, 0x60, 0x17, 0xdd, 0xa8, 0x0f, 0xde, 0x2e, 0xba, 0xf1, 0xc0, 0x94, 0x35,
+	0x4b, 0x12, 0xe7, 0x12, 0x59, 0xe8, 0x88, 0x53, 0xce, 0x3d, 0xf2, 0x93, 0x01, 0xe4, 0xe0, 0xb2,
+	0x40, 0x2e, 0xb5, 0x4d, 0x9d, 0xb9, 0x7f, 0x14, 0x2e, 0xf7, 0xec, 0x87, 0xb8, 0x2d, 0x89, 0xfb,
+	0x0c, 0x59, 0xcc, 0xc2, 0xed, 0xef, 0xfb, 0xaa, 0x13, 0x7e, 0x66, 0xc0, 0xb8, 0x36, 0xdd, 0x3b,
+	0x8c, 0xc1, 0xf4, 0x9d, 0xa2, 0xc3, 0x18, 0xcc, 0x58, 0x20, 0xcc, 0x0b, 0x12, 0xef, 0x59, 0xb2,
+	0xd4, 0x05, 0x5e, 0x79, 0xd2, 0xd7, 0xae, 0x3c, 0x7f, 0x55, 0x34, 0x5e, 0xbc, 0x2a, 0x1a, 0xff,
+	0xbc, 0x2a, 0x1a, 0x5f, 0xed, 0x15, 0xfb, 0x5e, 0xec, 0x15, 0xfb, 0xfe, 0xda, 0x2b, 0xf6, 0x7d,
+	0x5c, 0x8c, 0x87, 0x78, 0x12, 0x0f, 0x12, 0xec, 0x78, 0x4c, 0x3c, 0x18, 0x90, 0xff, 0x4a, 0xae,
+	0xfc, 0x17, 0x00, 0x00, 0xff, 0xff, 0xab, 0x46, 0xfc, 0x3b, 0x7f, 0x15, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -1198,6 +1557,10 @@ type QueryClient interface {
 	IssuersDetails(ctx context.Context, in *QueryIssuersDetailsRequest, opts ...grpc.CallOption) (*QueryIssuersDetailsResponse, error)
 	VerificationDetails(ctx context.Context, in *QueryVerificationDetailsRequest, opts ...grpc.CallOption) (*QueryVerificationDetailsResponse, error)
 	VerificationsDetails(ctx context.Context, in *QueryVerificationsDetailsRequest, opts ...grpc.CallOption) (*QueryVerificationsDetailsResponse, error)
+	IssuanceTreeRoot(ctx context.Context, in *QueryIssuanceTreeRootRequest, opts ...grpc.CallOption) (*QueryIssuanceTreeRootResponse, error)
+	IssuanceProof(ctx context.Context, in *QueryIssuanceProofRequest, opts ...grpc.CallOption) (*QueryIssuanceProofResponse, error)
+	RevocationTreeRoot(ctx context.Context, in *QueryRevocationTreeRootRequest, opts ...grpc.CallOption) (*QueryRevocationTreeRootResponse, error)
+	RevocationProof(ctx context.Context, in *QueryRevocationProofRequest, opts ...grpc.CallOption) (*QueryRevocationProofResponse, error)
 }
 
 type queryClient struct {
@@ -1280,6 +1643,42 @@ func (c *queryClient) VerificationsDetails(ctx context.Context, in *QueryVerific
 	return out, nil
 }
 
+func (c *queryClient) IssuanceTreeRoot(ctx context.Context, in *QueryIssuanceTreeRootRequest, opts ...grpc.CallOption) (*QueryIssuanceTreeRootResponse, error) {
+	out := new(QueryIssuanceTreeRootResponse)
+	err := c.cc.Invoke(ctx, "/swisstronik.compliance.Query/IssuanceTreeRoot", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) IssuanceProof(ctx context.Context, in *QueryIssuanceProofRequest, opts ...grpc.CallOption) (*QueryIssuanceProofResponse, error) {
+	out := new(QueryIssuanceProofResponse)
+	err := c.cc.Invoke(ctx, "/swisstronik.compliance.Query/IssuanceProof", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) RevocationTreeRoot(ctx context.Context, in *QueryRevocationTreeRootRequest, opts ...grpc.CallOption) (*QueryRevocationTreeRootResponse, error) {
+	out := new(QueryRevocationTreeRootResponse)
+	err := c.cc.Invoke(ctx, "/swisstronik.compliance.Query/RevocationTreeRoot", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) RevocationProof(ctx context.Context, in *QueryRevocationProofRequest, opts ...grpc.CallOption) (*QueryRevocationProofResponse, error) {
+	out := new(QueryRevocationProofResponse)
+	err := c.cc.Invoke(ctx, "/swisstronik.compliance.Query/RevocationProof", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // QueryServer is the server API for Query service.
 type QueryServer interface {
 	// Parameters queries the parameters of the module.
@@ -1291,6 +1690,10 @@ type QueryServer interface {
 	IssuersDetails(context.Context, *QueryIssuersDetailsRequest) (*QueryIssuersDetailsResponse, error)
 	VerificationDetails(context.Context, *QueryVerificationDetailsRequest) (*QueryVerificationDetailsResponse, error)
 	VerificationsDetails(context.Context, *QueryVerificationsDetailsRequest) (*QueryVerificationsDetailsResponse, error)
+	IssuanceTreeRoot(context.Context, *QueryIssuanceTreeRootRequest) (*QueryIssuanceTreeRootResponse, error)
+	IssuanceProof(context.Context, *QueryIssuanceProofRequest) (*QueryIssuanceProofResponse, error)
+	RevocationTreeRoot(context.Context, *QueryRevocationTreeRootRequest) (*QueryRevocationTreeRootResponse, error)
+	RevocationProof(context.Context, *QueryRevocationProofRequest) (*QueryRevocationProofResponse, error)
 }
 
 // UnimplementedQueryServer can be embedded to have forward compatible implementations.
@@ -1320,6 +1723,18 @@ func (*UnimplementedQueryServer) VerificationDetails(ctx context.Context, req *Q
 }
 func (*UnimplementedQueryServer) VerificationsDetails(ctx context.Context, req *QueryVerificationsDetailsRequest) (*QueryVerificationsDetailsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VerificationsDetails not implemented")
+}
+func (*UnimplementedQueryServer) IssuanceTreeRoot(ctx context.Context, req *QueryIssuanceTreeRootRequest) (*QueryIssuanceTreeRootResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method IssuanceTreeRoot not implemented")
+}
+func (*UnimplementedQueryServer) IssuanceProof(ctx context.Context, req *QueryIssuanceProofRequest) (*QueryIssuanceProofResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method IssuanceProof not implemented")
+}
+func (*UnimplementedQueryServer) RevocationTreeRoot(ctx context.Context, req *QueryRevocationTreeRootRequest) (*QueryRevocationTreeRootResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RevocationTreeRoot not implemented")
+}
+func (*UnimplementedQueryServer) RevocationProof(ctx context.Context, req *QueryRevocationProofRequest) (*QueryRevocationProofResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RevocationProof not implemented")
 }
 
 func RegisterQueryServer(s grpc1.Server, srv QueryServer) {
@@ -1470,6 +1885,78 @@ func _Query_VerificationsDetails_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Query_IssuanceTreeRoot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryIssuanceTreeRootRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).IssuanceTreeRoot(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/swisstronik.compliance.Query/IssuanceTreeRoot",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).IssuanceTreeRoot(ctx, req.(*QueryIssuanceTreeRootRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_IssuanceProof_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryIssuanceProofRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).IssuanceProof(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/swisstronik.compliance.Query/IssuanceProof",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).IssuanceProof(ctx, req.(*QueryIssuanceProofRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_RevocationTreeRoot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryRevocationTreeRootRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).RevocationTreeRoot(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/swisstronik.compliance.Query/RevocationTreeRoot",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).RevocationTreeRoot(ctx, req.(*QueryRevocationTreeRootRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_RevocationProof_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryRevocationProofRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).RevocationProof(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/swisstronik.compliance.Query/RevocationProof",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).RevocationProof(ctx, req.(*QueryRevocationProofRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Query_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "swisstronik.compliance.Query",
 	HandlerType: (*QueryServer)(nil),
@@ -1505,6 +1992,22 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "VerificationsDetails",
 			Handler:    _Query_VerificationsDetails_Handler,
+		},
+		{
+			MethodName: "IssuanceTreeRoot",
+			Handler:    _Query_IssuanceTreeRoot_Handler,
+		},
+		{
+			MethodName: "IssuanceProof",
+			Handler:    _Query_IssuanceProof_Handler,
+		},
+		{
+			MethodName: "RevocationTreeRoot",
+			Handler:    _Query_RevocationTreeRoot_Handler,
+		},
+		{
+			MethodName: "RevocationProof",
+			Handler:    _Query_RevocationProof_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -2300,6 +2803,232 @@ func (m *QueryVerificationsDetailsResponse_MergedVerificationDetails) MarshalToS
 	return len(dAtA) - i, nil
 }
 
+func (m *QueryIssuanceTreeRootRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryIssuanceTreeRootRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryIssuanceTreeRootRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryIssuanceTreeRootResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryIssuanceTreeRootResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryIssuanceTreeRootResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Root) > 0 {
+		i -= len(m.Root)
+		copy(dAtA[i:], m.Root)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Root)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryRevocationTreeRootRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryRevocationTreeRootRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryRevocationTreeRootRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryRevocationTreeRootResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryRevocationTreeRootResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryRevocationTreeRootResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Root) > 0 {
+		i -= len(m.Root)
+		copy(dAtA[i:], m.Root)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Root)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryIssuanceProofRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryIssuanceProofRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryIssuanceProofRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.CredentialHash) > 0 {
+		i -= len(m.CredentialHash)
+		copy(dAtA[i:], m.CredentialHash)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.CredentialHash)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryIssuanceProofResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryIssuanceProofResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryIssuanceProofResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.EncodedProof) > 0 {
+		i -= len(m.EncodedProof)
+		copy(dAtA[i:], m.EncodedProof)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.EncodedProof)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryRevocationProofRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryRevocationProofRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryRevocationProofRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.CredentialHash) > 0 {
+		i -= len(m.CredentialHash)
+		copy(dAtA[i:], m.CredentialHash)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.CredentialHash)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryRevocationProofResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryRevocationProofResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryRevocationProofResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.EncodedProof) > 0 {
+		i -= len(m.EncodedProof)
+		copy(dAtA[i:], m.EncodedProof)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.EncodedProof)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintQuery(dAtA []byte, offset int, v uint64) int {
 	offset -= sovQuery(v)
 	base := offset
@@ -2634,6 +3363,102 @@ func (m *QueryVerificationsDetailsResponse_MergedVerificationDetails) Size() (n 
 	}
 	if m.Version != 0 {
 		n += 1 + sovQuery(uint64(m.Version))
+	}
+	return n
+}
+
+func (m *QueryIssuanceTreeRootRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *QueryIssuanceTreeRootResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Root)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryRevocationTreeRootRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *QueryRevocationTreeRootResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Root)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryIssuanceProofRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.CredentialHash)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryIssuanceProofResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.EncodedProof)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryRevocationProofRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.CredentialHash)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryRevocationProofResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.EncodedProof)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
 	}
 	return n
 }
@@ -4798,6 +5623,610 @@ func (m *QueryVerificationsDetailsResponse_MergedVerificationDetails) Unmarshal(
 					break
 				}
 			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryIssuanceTreeRootRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryIssuanceTreeRootRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryIssuanceTreeRootRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryIssuanceTreeRootResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryIssuanceTreeRootResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryIssuanceTreeRootResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Root", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Root = append(m.Root[:0], dAtA[iNdEx:postIndex]...)
+			if m.Root == nil {
+				m.Root = []byte{}
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryRevocationTreeRootRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryRevocationTreeRootRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryRevocationTreeRootRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryRevocationTreeRootResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryRevocationTreeRootResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryRevocationTreeRootResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Root", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Root = append(m.Root[:0], dAtA[iNdEx:postIndex]...)
+			if m.Root == nil {
+				m.Root = []byte{}
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryIssuanceProofRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryIssuanceProofRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryIssuanceProofRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CredentialHash", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.CredentialHash = append(m.CredentialHash[:0], dAtA[iNdEx:postIndex]...)
+			if m.CredentialHash == nil {
+				m.CredentialHash = []byte{}
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryIssuanceProofResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryIssuanceProofResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryIssuanceProofResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field EncodedProof", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.EncodedProof = append(m.EncodedProof[:0], dAtA[iNdEx:postIndex]...)
+			if m.EncodedProof == nil {
+				m.EncodedProof = []byte{}
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryRevocationProofRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryRevocationProofRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryRevocationProofRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CredentialHash", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.CredentialHash = append(m.CredentialHash[:0], dAtA[iNdEx:postIndex]...)
+			if m.CredentialHash == nil {
+				m.CredentialHash = []byte{}
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryRevocationProofResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryRevocationProofResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryRevocationProofResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field EncodedProof", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.EncodedProof = append(m.EncodedProof[:0], dAtA[iNdEx:postIndex]...)
+			if m.EncodedProof == nil {
+				m.EncodedProof = []byte{}
+			}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipQuery(dAtA[iNdEx:])

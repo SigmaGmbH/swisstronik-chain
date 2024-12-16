@@ -242,6 +242,8 @@ func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.AccAddre
 		return nil, err
 	}
 
+	// TODO: Update issuance tree with provided credential
+
 	return verificationDetailsID, nil
 }
 
@@ -264,6 +266,9 @@ func (k Keeper) SetVerificationDetails(
 
 	// If there is no such verification details associated with provided address, write them to the table
 	verificationDetailsStore.Set(verificationDetailsId, detailsBytes)
+
+	// TODO: Update issuance tree with provided credential
+
 	return nil
 }
 
@@ -274,6 +279,8 @@ func (k Keeper) RemoveVerificationDetails(ctx sdk.Context, verificationDetailsId
 	}
 	verificationDetailsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationDetails)
 	verificationDetailsStore.Delete(verificationDetailsId)
+
+	// TODO: Update revocation tree with provided credential
 }
 
 // GetVerificationDetails returns verification details for provided ID
