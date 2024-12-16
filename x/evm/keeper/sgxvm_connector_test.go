@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	"github.com/iden3/go-merkletree-sql"
 	"math/big"
 	"math/rand"
 	"time"
@@ -621,13 +622,17 @@ func (suite *KeeperTestSuite) TestMultipleVerificationDetails() {
 }
 
 func (suite *KeeperTestSuite) TestIssuanceRoot() {
-	// TODO: Update test after implementation of trees
-	expectedValue := big.NewInt(123)
+	expectedRootValue := big.NewInt(123)
+	expectedRoot, err := merkletree.NewHashFromBigInt(expectedRootValue)
+	suite.Require().NoError(err)
 
 	connector := evmkeeper.Connector{
 		Context:   suite.ctx,
 		EVMKeeper: suite.app.EvmKeeper,
 	}
+
+	err = connector.EVMKeeper.ComplianceKeeper.SetTreeRoot(suite.ctx, compliancetypes.KeyPrefixIssuanceTree, expectedRoot)
+	suite.Require().NoError(err)
 
 	request, encodeErr := proto.Marshal(&librustgo.CosmosRequest{
 		Req: &librustgo.CosmosRequest_IssuanceTreeRoot{
@@ -642,17 +647,25 @@ func (suite *KeeperTestSuite) TestIssuanceRoot() {
 	resp := &librustgo.QueryIssuanceTreeRootResponse{}
 	decodeErr := proto.Unmarshal(respBytes, resp)
 	suite.Require().NoError(decodeErr)
-	suite.Require().Equal(expectedValue.Bytes(), resp.Root)
+
+	decodedRootValue := new(big.Int)
+	decodedRootValue.SetBytes(resp.Root)
+
+	suite.Require().Equal(expectedRootValue, decodedRootValue)
 }
 
 func (suite *KeeperTestSuite) TestRevocationRoot() {
-	// TODO: Update test after implementation of trees
-	expectedValue := big.NewInt(321)
+	expectedRootValue := big.NewInt(321)
+	expectedRoot, err := merkletree.NewHashFromBigInt(expectedRootValue)
+	suite.Require().NoError(err)
 
 	connector := evmkeeper.Connector{
 		Context:   suite.ctx,
 		EVMKeeper: suite.app.EvmKeeper,
 	}
+
+	err = connector.EVMKeeper.ComplianceKeeper.SetTreeRoot(suite.ctx, compliancetypes.KeyPrefixRevocationTree, expectedRoot)
+	suite.Require().NoError(err)
 
 	request, encodeErr := proto.Marshal(&librustgo.CosmosRequest{
 		Req: &librustgo.CosmosRequest_RevocationTreeRoot{
@@ -667,5 +680,9 @@ func (suite *KeeperTestSuite) TestRevocationRoot() {
 	resp := &librustgo.QueryRevocationTreeRootResponse{}
 	decodeErr := proto.Unmarshal(respBytes, resp)
 	suite.Require().NoError(decodeErr)
-	suite.Require().Equal(expectedValue.Bytes(), resp.Root)
+
+	decodedRootValue := new(big.Int)
+	decodedRootValue.SetBytes(resp.Root)
+
+	suite.Require().Equal(expectedRootValue, decodedRootValue)
 }

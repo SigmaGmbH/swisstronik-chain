@@ -96,3 +96,10 @@ func (k Keeper) GetNonRevocationProof(context sdk.Context, credentialHash common
 
 	return proof.MarshalJSON()
 }
+
+// SetTreeRoot is used only for testing
+func (k Keeper) SetTreeRoot(context sdk.Context, treeKey []byte, root *merkletree.Hash) error {
+	ctx := sdk.WrapSDKContext(context)
+	storage := NewTreeStorage(&k, treeKey)
+	return storage.SetRoot(ctx, root)
+}

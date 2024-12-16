@@ -16,6 +16,7 @@
 package types
 
 import (
+	"github.com/iden3/go-merkletree-sql"
 	"math/big"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -72,6 +73,7 @@ type ComplianceKeeper interface {
 	GetVerificationDetailsByIssuer(ctx sdk.Context, userAddress, issuerAddress sdk.AccAddress) ([]*compliancetypes.Verification, []*compliancetypes.VerificationDetails, error)
 	GetIssuanceTreeRoot(ctx sdk.Context) (*big.Int, error)
 	GetRevocationTreeRoot(ctx sdk.Context) (*big.Int, error)
+	SetTreeRoot(context sdk.Context, treeKey []byte, root *merkletree.Hash) error
 }
 
 // Event Hooks

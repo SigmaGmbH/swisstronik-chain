@@ -104,7 +104,7 @@ func (ts *TreeStorage) Iterate(ctx context.Context, f func([]byte, *merkletree.N
 	defer closeIteratorOrPanic(iterator)
 
 	for ; iterator.Valid(); iterator.Next() {
-		key := iterator.Key()
+		key := merkletree.Clone(bytes.TrimPrefix(iterator.Key(), ts.keyPrefix))
 		value := iterator.Value()
 
 		node, err := merkletree.NewNodeFromBytes(value)
@@ -132,7 +132,7 @@ func (ts *TreeStorage) List(ctx context.Context, limit int) ([]merkletree.KV, er
 
 	var result []merkletree.KV
 	for ; iterator.Valid(); iterator.Next() {
-		key := iterator.Key()
+		key := merkletree.Clone(bytes.TrimPrefix(iterator.Key(), ts.keyPrefix))
 		value := iterator.Value()
 
 		node, err := merkletree.NewNodeFromBytes(value)
@@ -141,7 +141,7 @@ func (ts *TreeStorage) List(ctx context.Context, limit int) ([]merkletree.KV, er
 		}
 
 		result = append(result, merkletree.KV{
-			K: merkletree.Clone(bytes.TrimPrefix(key, ts.internalPrefix)),
+			K: bytes.TrimPrefix(key, ts.internalPrefix),
 			V: *node,
 		})
 
