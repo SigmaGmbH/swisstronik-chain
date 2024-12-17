@@ -1,14 +1,12 @@
 package compliance
 
 import (
+	"bytes"
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
 	"swisstronik/x/compliance/keeper"
 	"swisstronik/x/compliance/types"
 )
-
-// TODO: Patch implementation
 
 // InitGenesis initializes the module's state from a provided genesis state.
 func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) {
@@ -62,7 +60,21 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 			panic(errors.Wrap(types.ErrInvalidParam, "empty proof data"))
 		}
 
-		if err = k.SetVerificationDetails(ctx, verificationData.Id, verificationData.Details); err != nil {
+		// Not the most efficient implementation, but it will not destroy genesis state
+		var userAddress sdk.AccAddress
+		for _, addressData := range genState.AddressDetails {
+			for _, addressVerification := range addressData.Details.Verifications {
+				if bytes.Equal(verificationData.Id, addressVerification.VerificationId) {
+					userAddress, err = sdk.AccAddressFromBech32(addressData.Address)
+					if err != nil {
+						panic(err)
+					}
+					break
+				}
+			}
+		}
+
+		if err = k.SetVerificationDetails(ctx, userAddress, verificationData.Id, verificationData.Details); err != nil {
 			panic(err)
 		}
 	}
