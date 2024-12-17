@@ -1120,6 +1120,7 @@ func (suite *KeeperTestSuite) TestHandleRevokeVerification() {
 		{
 			name: "issuer creator should be able to revoke verification",
 			init: func() {
+				holder := tests.RandomAccAddress()
 				signer = tests.RandomAccAddress()
 				issuer = tests.RandomAccAddress()
 				details := &types.IssuerDetails{Creator: signer.String(), Name: "test issuer"}
@@ -1139,7 +1140,7 @@ func (suite *KeeperTestSuite) TestHandleRevokeVerification() {
 				}
 				detailsBytes, _ := verificationDetails.Marshal()
 				verificationId = crypto.Keccak256(tests.RandomAccAddress().Bytes(), types.VerificationType_VT_KYC.ToBytes(), detailsBytes)
-				_ = suite.keeper.SetVerificationDetails(suite.ctx, verificationId, verificationDetails)
+				_ = suite.keeper.SetVerificationDetails(suite.ctx, holder, verificationId, verificationDetails)
 			},
 			malleate: func() *types.MsgRevokeVerification {
 				return &types.MsgRevokeVerification{
@@ -1161,6 +1162,7 @@ func (suite *KeeperTestSuite) TestHandleRevokeVerification() {
 		{
 			name: "operator should be able to revoke verification",
 			init: func() {
+				holder := tests.RandomAccAddress()
 				signer = tests.RandomAccAddress()
 				_ = suite.keeper.AddOperator(suite.ctx, signer, types.OperatorType_OT_REGULAR)
 
@@ -1182,7 +1184,7 @@ func (suite *KeeperTestSuite) TestHandleRevokeVerification() {
 				}
 				detailsBytes, _ := verificationDetails.Marshal()
 				verificationId = crypto.Keccak256(tests.RandomAccAddress().Bytes(), types.VerificationType_VT_KYC.ToBytes(), detailsBytes)
-				_ = suite.keeper.SetVerificationDetails(suite.ctx, verificationId, verificationDetails)
+				_ = suite.keeper.SetVerificationDetails(suite.ctx, holder, verificationId, verificationDetails)
 			},
 			malleate: func() *types.MsgRevokeVerification {
 				return &types.MsgRevokeVerification{

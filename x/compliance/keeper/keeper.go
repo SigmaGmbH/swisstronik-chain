@@ -372,7 +372,7 @@ func (k Keeper) MarkVerificationDetailsAsRevoked(
 		credential := &types.ZKCredential{
 			Type:                prevVerificationDetails.Type,
 			IssuerAddress:       issuerAddress.Bytes(),
-			HolderPublicKey:     nil, // TODO: Find out how to find holder key
+			HolderPublicKey:     userPublicKey,
 			ExpirationTimestamp: prevVerificationDetails.ExpirationTimestamp,
 		}
 		credentialHash, err := credential.Hash()
