@@ -281,6 +281,46 @@ func (k Querier) AttachedHolderPublicKey(goCtx context.Context, req *types.Query
 }
 
 func (k Querier) IsSuitableForZK(goCtx context.Context, req *types.QueryIsCredentialInZKSDIRequest) (*types.QueryIsCredentialInZKSDIResponse, error) {
-	//TODO implement me
-	panic("implement me")
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	details, err := k.GetVerificationDetails(ctx, req.VerificationID)
+	if err != nil {
+		return nil, err
+	}
+
+	userAddress, err := sdk.AccAddressFromBech32(req.Address)
+	if err != nil {
+		return nil, err
+	}
+
+	issuerAddress, err := sdk.AccAddressFromBech32(details.IssuerAddress)
+	if err != nil {
+		return nil, err
+	}
+
+	userKey := k.GetHolderPublicKey(ctx, userAddress)
+	if userKey == nil {
+		return &types.QueryIsCredentialInZKSDIResponse{Included: false}, nil
+	}
+
+	credentialValue := &types.ZKCredential{
+		Type:                details.Type,
+		IssuerAddress:       issuerAddress.Bytes(),
+		HolderPublicKey:     userKey,
+		ExpirationTimestamp: details.ExpirationTimestamp,
+	}
+	credentialHash, err := credentialValue.Hash()
+	if err != nil {
+		return nil, err
+	}
+
+	isIncluded, err := k.IsIncludedInIssuanceTree(ctx, credentialHash)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.QueryIsCredentialInZKSDIResponse{Included: isIncluded}, nil
 }

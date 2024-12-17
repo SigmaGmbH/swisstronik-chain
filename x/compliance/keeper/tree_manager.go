@@ -103,3 +103,24 @@ func (k Keeper) SetTreeRoot(context sdk.Context, treeKey []byte, root *merkletre
 	storage := NewTreeStorage(context, &k, treeKey)
 	return storage.SetRoot(ctx, root)
 }
+
+func (k Keeper) IsIncludedInIssuanceTree(context sdk.Context, credentialHash *big.Int) (bool, error) {
+	ctx := sdk.WrapSDKContext(context)
+	storage := NewTreeStorage(context, &k, types.KeyPrefixIssuanceTree)
+	tree, err := merkletree.NewMerkleTree(ctx, &storage, 32)
+	if err != nil {
+		return false, err
+	}
+
+	_, _, _, err = tree.Get(context, credentialHash)
+
+	if err != nil {
+		if err == merkletree.ErrKeyNotFound {
+			return false, nil
+		}
+
+		return false, err
+	}
+
+	return true, nil
+}

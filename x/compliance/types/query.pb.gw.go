@@ -584,6 +584,17 @@ func request_Query_IsSuitableForZK_0(ctx context.Context, marshaler runtime.Mars
 		_   = err
 	)
 
+	val, ok = pathParams["address"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "address")
+	}
+
+	protoReq.Address, err = runtime.String(val)
+
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "address", err)
+	}
+
 	val, ok = pathParams["verificationID"]
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "verificationID")
@@ -610,6 +621,17 @@ func local_request_Query_IsSuitableForZK_0(ctx context.Context, marshaler runtim
 		err error
 		_   = err
 	)
+
+	val, ok = pathParams["address"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "address")
+	}
+
+	protoReq.Address, err = runtime.String(val)
+
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "address", err)
+	}
 
 	val, ok = pathParams["verificationID"]
 	if !ok {
@@ -1306,7 +1328,7 @@ var (
 
 	pattern_Query_AttachedHolderPublicKey_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"swisstronik", "compliance", "publicKey", "address"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_IsSuitableForZK_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"swisstronik", "compliance", "zk", "isSuitable", "verificationID"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_IsSuitableForZK_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4, 1, 0, 4, 1, 5, 5}, []string{"swisstronik", "compliance", "zk", "isSuitable", "address", "verificationID"}, "", runtime.AssumeColonVerbOpt(false)))
 )
 
 var (

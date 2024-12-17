@@ -65,7 +65,7 @@ service Query {
   }
 
   rpc IsSuitableForZK(QueryIsCredentialInZKSDIRequest) returns (QueryIsCredentialInZKSDIResponse) {
-    option (google.api.http).get = "/swisstronik/compliance/zk/isSuitable/{verificationID}";
+    option (google.api.http).get = "/swisstronik/compliance/zk/isSuitable/{address}/{verificationID}";
   }
 }
 
@@ -229,7 +229,8 @@ message QueryAttachedHolderPublicKeyResponse {
 }
 
 message QueryIsCredentialInZKSDIRequest {
-  bytes verificationID = 1;
+  string address = 1;
+  bytes verificationID = 2;
 }
 message QueryIsCredentialInZKSDIResponse {
   bool included = 1;
