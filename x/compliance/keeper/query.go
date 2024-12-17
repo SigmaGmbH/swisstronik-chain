@@ -264,3 +264,23 @@ func (k Querier) VerificationsDetails(goCtx context.Context, req *types.QueryVer
 		Pagination:    pageRes,
 	}, nil
 }
+
+func (k Querier) AttachedHolderPublicKey(goCtx context.Context, req *types.QueryAttachedHolderPublicKeyRequest) (*types.QueryAttachedHolderPublicKeyResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	address, err := sdk.AccAddressFromBech32(req.Address)
+	if err != nil {
+		return nil, err
+	}
+
+	pubKey := k.GetHolderPublicKey(ctx, address)
+	return &types.QueryAttachedHolderPublicKeyResponse{PubKey: pubKey}, nil
+}
+
+func (k Querier) IsSuitableForZK(goCtx context.Context, req *types.QueryIsCredentialInZKSDIRequest) (*types.QueryIsCredentialInZKSDIResponse, error) {
+	//TODO implement me
+	panic("implement me")
+}

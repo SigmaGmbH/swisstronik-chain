@@ -3,6 +3,7 @@ package keeper
 import (
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/iden3/go-iden3-crypto/babyjub"
 	"slices"
 
 	"cosmossdk.io/errors"
@@ -732,6 +733,44 @@ func (k Keeper) ExportIssuerDetails(ctx sdk.Context) ([]*types.GenesisIssuerDeta
 	}
 
 	return issuerDetails, nil
+}
+
+// GetHolderPublicKey returns the compressed holder public key
+func (k Keeper) GetHolderPublicKey(ctx sdk.Context, user sdk.AccAddress) []byte {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixHolderPublicKeys)
+
+	publicKeyBytes := store.Get(user.Bytes())
+	if publicKeyBytes == nil {
+		return nil
+	}
+
+	return publicKeyBytes
+}
+
+// SetHolderPublicKey returns the compressed holder public key
+func (k Keeper) SetHolderPublicKey(ctx sdk.Context, user sdk.AccAddress, publicKey []byte) error {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixHolderPublicKeys)
+
+	// Check if there is no public key
+	currentPublicKeyBytes := k.GetHolderPublicKey(ctx, user)
+	if currentPublicKeyBytes != nil {
+		return errors.Wrap(types.ErrInvalidParam, "public key already set")
+	}
+
+	// Validate provided BJJ public key
+	if len(publicKey) != 32 {
+		return errors.Wrapf(types.ErrInvalidParam, "invalid holder public key len")
+	}
+
+	pointBuf := babyjub.NewPoint()
+	_, err := pointBuf.Decompress([32]byte(publicKey))
+	if err != nil {
+		return errors.Wrapf(types.ErrInvalidParam, "invalid holder public key: (%s)", err)
+	}
+
+	store.Set(user.Bytes(), publicKey)
+
+	return nil
 }
 
 func closeIteratorOrPanic(iterator sdk.Iterator) {

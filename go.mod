@@ -33,7 +33,7 @@ require (
 	github.com/gorilla/websocket v1.5.0
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.18.0
-	github.com/iden3/go-iden3-crypto v0.0.13
+	github.com/iden3/go-iden3-crypto v0.0.17
 	github.com/iden3/go-merkletree-sql v1.0.2
 	github.com/improbable-eng/grpc-web v0.15.0
 	github.com/lestrrat-go/jwx v1.2.26
@@ -97,6 +97,7 @@ require (
 	github.com/cosmos/rosetta-sdk-go v0.10.0 // indirect
 	github.com/creachadair/taskgroup v0.4.2 // indirect
 	github.com/danieljoos/wincred v1.1.2 // indirect
+	github.com/dchest/blake512 v1.0.0 // indirect
 	github.com/deckarep/golang-set v1.8.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0 // indirect
 	github.com/desertbit/timer v0.0.0-20180107155436-c41aec40b27f // indirect

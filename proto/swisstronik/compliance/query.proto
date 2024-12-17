@@ -49,7 +49,7 @@ service Query {
   }
 
   rpc IssuanceProof(QueryIssuanceProofRequest) returns (QueryIssuanceProofResponse) {
-    option (google.api.http).get = "/swisstronik/compliance/issuance/proof";
+    option (google.api.http).get = "/swisstronik/compliance/issuance/proof/{credentialHash}";
   }
 
   rpc RevocationTreeRoot(QueryRevocationTreeRootRequest) returns (QueryRevocationTreeRootResponse) {
@@ -57,7 +57,15 @@ service Query {
   }
 
   rpc RevocationProof(QueryRevocationProofRequest) returns (QueryRevocationProofResponse) {
-    option (google.api.http).get = "/swisstronik/compliance/revocation/proof";
+    option (google.api.http).get = "/swisstronik/compliance/revocation/proof/{credentialHash}";
+  }
+
+  rpc AttachedHolderPublicKey(QueryAttachedHolderPublicKeyRequest) returns (QueryAttachedHolderPublicKeyResponse) {
+    option (google.api.http).get = "/swisstronik/compliance/publicKey/{address}";
+  }
+
+  rpc IsSuitableForZK(QueryIsCredentialInZKSDIRequest) returns (QueryIsCredentialInZKSDIResponse) {
+    option (google.api.http).get = "/swisstronik/compliance/zk/isSuitable/{verificationID}";
   }
 }
 
@@ -200,15 +208,29 @@ message QueryRevocationTreeRootResponse {
 }
 
 message QueryIssuanceProofRequest {
-  bytes credential_hash = 1;
+  bytes credentialHash = 1;
 }
 message QueryIssuanceProofResponse {
-  bytes encoded_proof = 1;
+  bytes encodedProof = 1;
 }
 
 message QueryRevocationProofRequest {
-  bytes credential_hash = 1;
+  bytes credentialHash = 1;
 }
 message QueryRevocationProofResponse {
-  bytes encoded_proof = 1;
+  bytes encodedProof = 1;
+}
+
+message QueryAttachedHolderPublicKeyRequest {
+  string address = 1;
+}
+message QueryAttachedHolderPublicKeyResponse {
+  bytes pubKey = 1;
+}
+
+message QueryIsCredentialInZKSDIRequest {
+  bytes verificationID = 1;
+}
+message QueryIsCredentialInZKSDIResponse {
+  bool included = 1;
 }

@@ -26,6 +26,7 @@ const (
 	prefixOperatorDetails
 	prefixIssuanceTree
 	prefixRevocationTree
+	prefixHolderPublicKeys
 )
 
 var (
@@ -35,6 +36,7 @@ var (
 	KeyPrefixVerificationDetails = []byte{prefixVerificationDetails}
 	KeyPrefixIssuanceTree        = []byte{prefixIssuanceTree}
 	KeyPrefixRevocationTree      = []byte{prefixRevocationTree}
+	KeyPrefixHolderPublicKeys    = []byte{prefixHolderPublicKeys}
 )
 
 func AccAddressFromKey(key []byte) sdk.AccAddress {

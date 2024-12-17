@@ -325,3 +325,24 @@ func (k msgServer) HandleRemoveIssuer(goCtx context.Context, msg *types.MsgRemov
 
 	return &types.MsgRemoveIssuerResponse{}, nil
 }
+
+func (k msgServer) HandleAttachHolderPublicKey(goCtx context.Context, msg *types.MsgAttachHolderPublicKey) (*types.MsgAttachHolderPublicKeyResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// Check validity of signer address
+	signer, err := sdk.AccAddressFromBech32(msg.Signer)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = k.SetHolderPublicKey(ctx, signer, msg.HolderPublicKey); err != nil {
+		return nil, err
+	}
+
+	return &types.MsgAttachHolderPublicKeyResponse{}, nil
+}
+
+func (k msgServer) HandleConvertCredentials(goCtx context.Context, msg *types.MsgConvertCredentials) (*types.MsgConvertCredentialsResponse, error) {
+	//TODO implement me
+	panic("implement me")
+}

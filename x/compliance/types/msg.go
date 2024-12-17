@@ -3,6 +3,8 @@ package types
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/iden3/go-iden3-crypto/babyjub"
+	"github.com/pkg/errors"
 )
 
 func NewMsgAddOperator(operatorAddress, newOperatorAddress string) MsgAddOperator {
@@ -259,6 +261,45 @@ func (msg *MsgRevokeVerification) GetSignBytes() []byte {
 }
 
 func (msg *MsgRevokeVerification) GetSigners() []sdk.AccAddress {
+	signer, err := sdk.AccAddressFromBech32(msg.Signer)
+	if err != nil {
+		panic(err)
+	}
+	return []sdk.AccAddress{signer}
+}
+
+func NewMsgAttachHolderPublicKey(signer string, publicKey []byte) MsgAttachHolderPublicKey {
+	return MsgAttachHolderPublicKey{
+		Signer:          signer,
+		HolderPublicKey: publicKey,
+	}
+}
+
+func (msg *MsgAttachHolderPublicKey) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(msg)
+	return sdk.MustSortJSON(bz)
+}
+
+func (msg *MsgAttachHolderPublicKey) ValidateBasic() error {
+	_, err := sdk.AccAddressFromBech32(msg.Signer)
+	if err != nil {
+		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid signer address (%s)", err)
+	}
+
+	if msg.HolderPublicKey == nil || len(msg.HolderPublicKey) != 32 {
+		return errors.Wrap(sdkerrors.ErrInvalidPubKey, "invalid holder public key")
+	}
+
+	pointBuf := babyjub.NewPoint()
+	_, err = pointBuf.Decompress([32]byte(msg.HolderPublicKey))
+	if err != nil {
+		return errors.Wrapf(sdkerrors.ErrInvalidPubKey, "invalid holder public key: (%s)", err)
+	}
+
+	return nil
+}
+
+func (msg *MsgAttachHolderPublicKey) GetSigners() []sdk.AccAddress {
 	signer, err := sdk.AccAddressFromBech32(msg.Signer)
 	if err != nil {
 		panic(err)
