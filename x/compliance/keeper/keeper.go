@@ -244,19 +244,23 @@ func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.AccAddre
 		return nil, err
 	}
 
-	credentialValue := &types.ZKCredential{
-		Type:                verificationType,
-		IssuerAddress:       issuerAddress.Bytes(),
-		HolderPublicKey:     nil, // TODO: Find out the best way to provide holder public key
-		ExpirationTimestamp: details.ExpirationTimestamp,
-	}
-	credentialHash, err := credentialValue.Hash()
-	if err != nil {
-		return nil, errors.Wrap(types.ErrBadRequest, err.Error())
-	}
-	err = k.AddCredentialHashToIssued(ctx, common.BigToHash(credentialHash))
-	if err != nil {
-		return nil, errors.Wrap(types.ErrBadRequest, err.Error())
+	// If user has attached public key, add to ZK-SDI
+	userPublicKey := k.GetHolderPublicKey(ctx, userAddress)
+	if userPublicKey != nil {
+		credentialValue := &types.ZKCredential{
+			Type:                verificationType,
+			IssuerAddress:       issuerAddress.Bytes(),
+			HolderPublicKey:     userPublicKey,
+			ExpirationTimestamp: details.ExpirationTimestamp,
+		}
+		credentialHash, err := credentialValue.Hash()
+		if err != nil {
+			return nil, errors.Wrap(types.ErrBadRequest, err.Error())
+		}
+		err = k.AddCredentialHashToIssued(ctx, common.BigToHash(credentialHash))
+		if err != nil {
+			return nil, errors.Wrap(types.ErrBadRequest, err.Error())
+		}
 	}
 
 	return verificationDetailsID, nil
@@ -347,46 +351,6 @@ func (k Keeper) MarkVerificationDetailsAsRevoked(
 		return err
 	}
 
-	return k.MarkCredentialHashAsRevoked(ctx, common.BigToHash(credentialHash))
-}
-
-// RemoveVerificationDetails removes verification details for provided ID
-func (k Keeper) RemoveVerificationDetails(ctx sdk.Context, verificationDetailsId []byte) error {
-	if verificationDetailsId == nil {
-		return errors.Wrap(types.ErrInvalidParam, "empty verification details ID")
-	}
-	verificationDetailsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationDetails)
-
-	prevVerificationDetailsBytes := verificationDetailsStore.Get(verificationDetailsId)
-	if prevVerificationDetailsBytes == nil {
-		return errors.Wrap(types.ErrInvalidParam, "verification with provided ID is empty")
-	}
-
-	prevVerificationDetails := &types.VerificationDetails{}
-	err := proto.Unmarshal(prevVerificationDetailsBytes, prevVerificationDetails)
-	if err != nil {
-		return err
-	}
-
-	issuerAddress, err := sdk.AccAddressFromBech32(prevVerificationDetails.IssuerAddress)
-	if err != nil {
-		return err
-	}
-
-	// Update revocation tree with provided credential
-	credential := &types.ZKCredential{
-		Type:                prevVerificationDetails.Type,
-		IssuerAddress:       issuerAddress.Bytes(),
-		HolderPublicKey:     nil, // TODO: Find out how to find holder key
-		ExpirationTimestamp: prevVerificationDetails.ExpirationTimestamp,
-	}
-	credentialHash, err := credential.Hash()
-	if err != nil {
-		return err
-	}
-
-	// Delete credential data and mark it as revoked
-	verificationDetailsStore.Delete(verificationDetailsId)
 	return k.MarkCredentialHashAsRevoked(ctx, common.BigToHash(credentialHash))
 }
 
@@ -771,6 +735,16 @@ func (k Keeper) SetHolderPublicKey(ctx sdk.Context, user sdk.AccAddress, publicK
 	store.Set(user.Bytes(), publicKey)
 
 	return nil
+}
+
+func (k Keeper) linkVerificationByHolder(ctx sdk.Context, userAddress sdk.AccAddress, verificationId []byte) {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationToHolder)
+	store.Set(verificationId, userAddress.Bytes())
+}
+
+func (k Keeper) getHolderByVerificationId(ctx sdk.Context, verificationId []byte) sdk.AccAddress {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationToHolder)
+	return store.Get(verificationId)
 }
 
 func closeIteratorOrPanic(iterator sdk.Iterator) {
