@@ -262,7 +262,7 @@ func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.AccAddre
 		if err != nil {
 			return nil, errors.Wrap(types.ErrBadRequest, err.Error())
 		}
-		err = k.AddCredentialHashToIssued(ctx, common.BigToHash(credentialHash))
+		err = k.AddCredentialHashToIssued(ctx, credentialHash)
 		if err != nil {
 			return nil, errors.Wrap(types.ErrBadRequest, err.Error())
 		}
@@ -314,7 +314,7 @@ func (k Keeper) SetVerificationDetails(
 		if err != nil {
 			return err
 		}
-		err = k.AddCredentialHashToIssued(ctx, common.BigToHash(credentialHash))
+		err = k.AddCredentialHashToIssued(ctx, credentialHash)
 		if err != nil {
 			return err
 		}

@@ -306,3 +306,36 @@ func (msg *MsgAttachHolderPublicKey) GetSigners() []sdk.AccAddress {
 	}
 	return []sdk.AccAddress{signer}
 }
+
+func NewMsgConvertCredential(signer string, publicKey []byte) MsgAttachHolderPublicKey {
+	return MsgAttachHolderPublicKey{
+		Signer:          signer,
+		HolderPublicKey: publicKey,
+	}
+}
+
+func (msg *MsgConvertCredential) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(msg)
+	return sdk.MustSortJSON(bz)
+}
+
+func (msg *MsgConvertCredential) ValidateBasic() error {
+	_, err := sdk.AccAddressFromBech32(msg.Signer)
+	if err != nil {
+		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid signer address (%s)", err)
+	}
+
+	if msg.VerificationId == nil {
+		return errors.Wrap(sdkerrors.ErrInvalidRequest, "missing verification id")
+	}
+
+	return nil
+}
+
+func (msg *MsgConvertCredential) GetSigners() []sdk.AccAddress {
+	signer, err := sdk.AccAddressFromBech32(msg.Signer)
+	if err != nil {
+		panic(err)
+	}
+	return []sdk.AccAddress{signer}
+}

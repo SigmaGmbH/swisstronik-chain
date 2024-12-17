@@ -18,7 +18,7 @@ service Msg {
   rpc HandleRemoveIssuer(MsgRemoveIssuer) returns (MsgRemoveIssuerResponse);
   rpc HandleRevokeVerification(MsgRevokeVerification) returns (MsgRevokeVerificationResponse);
   rpc HandleAttachHolderPublicKey(MsgAttachHolderPublicKey) returns (MsgAttachHolderPublicKeyResponse);
-  rpc HandleConvertCredentials(MsgConvertCredentials) returns (MsgConvertCredentialsResponse);
+  rpc HandleConvertCredential(MsgConvertCredential) returns (MsgConvertCredentialResponse);
 }
 
 message MsgAddOperator {
@@ -83,13 +83,12 @@ message MsgAttachHolderPublicKey {
 }
 message MsgAttachHolderPublicKeyResponse {}
 
-message MsgConvertCredentials {
+message MsgConvertCredential {
   option (cosmos.msg.v1.signer) = "signer";
   string signer = 1;
-  uint32 limit = 2;
-  uint32 offset = 3;
+  bytes verificationId = 2;
 }
-message MsgConvertCredentialsResponse {}
+message MsgConvertCredentialResponse {}
 
 // VerifyIssuerProposal is a gov Content type to verify issuer
 message VerifyIssuerProposal {

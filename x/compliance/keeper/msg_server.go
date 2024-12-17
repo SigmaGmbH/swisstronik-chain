@@ -342,7 +342,51 @@ func (k msgServer) HandleAttachHolderPublicKey(goCtx context.Context, msg *types
 	return &types.MsgAttachHolderPublicKeyResponse{}, nil
 }
 
-func (k msgServer) HandleConvertCredentials(goCtx context.Context, msg *types.MsgConvertCredentials) (*types.MsgConvertCredentialsResponse, error) {
-	//TODO implement me
-	panic("implement me")
+func (k msgServer) HandleConvertCredential(goCtx context.Context, msg *types.MsgConvertCredential) (*types.MsgConvertCredentialResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// Check validity of signer address
+	holderAddress, err := sdk.AccAddressFromBech32(msg.Signer)
+	if err != nil {
+		return nil, err
+	}
+
+	holderPublicKey := k.GetHolderPublicKey(ctx, holderAddress)
+	if holderPublicKey == nil {
+		return nil, errors.Wrap(types.ErrBadRequest, "holder public key not found. Please attach it")
+	}
+
+	details, err := k.GetVerificationDetails(ctx, msg.VerificationId)
+	if err != nil {
+		return nil, err
+	}
+
+	issuerAddress, err := sdk.AccAddressFromBech32(details.IssuerAddress)
+	if err != nil {
+		return nil, err
+	}
+
+	credentialValue := &types.ZKCredential{
+		Type:                details.Type,
+		IssuerAddress:       issuerAddress.Bytes(),
+		HolderPublicKey:     holderPublicKey,
+		ExpirationTimestamp: details.ExpirationTimestamp,
+	}
+	credentialHash, err := credentialValue.Hash()
+	if err != nil {
+		return nil, err
+	}
+
+	isIncluded, err := k.IsIncludedInIssuanceTree(ctx, credentialHash)
+	if err != nil {
+		return nil, err
+	}
+
+	if !isIncluded {
+		if err = k.AddCredentialHashToIssued(ctx, credentialHash); err != nil {
+			return nil, err
+		}
+	}
+
+	return &types.MsgConvertCredentialResponse{}, nil
 }
