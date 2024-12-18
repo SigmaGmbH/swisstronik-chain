@@ -34,6 +34,7 @@ func (k Keeper) GetRevocationTreeRoot(ctx sdk.Context) (*big.Int, error) {
 }
 
 func (k Keeper) AddCredentialHashToIssued(ctx sdk.Context, credentialHash *big.Int) error {
+	context := sdk.WrapSDKContext(ctx)
 	storage := NewTreeStorage(ctx, &k, types.KeyPrefixIssuanceTree)
 	tree, err := merkletree.NewMerkleTree(ctx, &storage, 32)
 	if err != nil {
@@ -45,7 +46,7 @@ func (k Keeper) AddCredentialHashToIssued(ctx sdk.Context, credentialHash *big.I
 		return err
 	}
 
-	return tree.Add(sdk.WrapSDKContext(ctx), key, credentialHash)
+	return tree.Add(context, key, credentialHash)
 }
 
 func (k Keeper) MarkCredentialHashAsRevoked(ctx sdk.Context, credentialHash common.Hash) error {
