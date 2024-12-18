@@ -224,7 +224,7 @@ func TestInitGenesis_Validation(t *testing.T) {
 					},
 				},
 			},
-			expPanic: false,
+			expPanic: true,
 		},
 		{
 			name: "invalid verification type",
