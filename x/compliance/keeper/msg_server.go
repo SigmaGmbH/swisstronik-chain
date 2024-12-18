@@ -361,6 +361,10 @@ func (k msgServer) HandleConvertCredential(goCtx context.Context, msg *types.Msg
 		return nil, err
 	}
 
+	if details.IsRevoked {
+		return nil, errors.Wrap(types.ErrBadRequest, "credential was revoked")
+	}
+
 	issuerAddress, err := sdk.AccAddressFromBech32(details.IssuerAddress)
 	if err != nil {
 		return nil, err
