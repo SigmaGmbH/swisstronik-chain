@@ -3,6 +3,7 @@ package keeper_test
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/iden3/go-iden3-crypto/babyjub"
 	"github.com/status-im/keycard-go/hexutils"
 
 	"swisstronik/tests"
@@ -1213,6 +1214,91 @@ func (suite *KeeperTestSuite) TestHandleRevokeVerification() {
 			msgServer := keeper.NewMsgServerImpl(suite.keeper)
 			msg := tc.malleate()
 			resp, err := msgServer.HandleRevokeVerification(sdk.WrapSDKContext(suite.ctx), msg)
+			tc.expected(resp, err)
+		})
+	}
+}
+
+func (suite *KeeperTestSuite) TestHandleAttachPublicKey() {
+	var (
+		signer    sdk.AccAddress
+		publicKey []byte
+	)
+
+	testCases := []struct {
+		name     string
+		init     func()
+		malleate func() *types.MsgAttachHolderPublicKey
+		expected func(resp *types.MsgAttachHolderPublicKeyResponse, err error)
+	}{
+		{
+			name: "invalid signer address",
+			init: func() {
+				pk := babyjub.NewRandPrivKey()
+				pubKeyCompressed := pk.Public().Compress()
+				publicKey = pubKeyCompressed[:]
+			},
+			malleate: func() *types.MsgAttachHolderPublicKey {
+				return &types.MsgAttachHolderPublicKey{
+					Signer:          "invalidSigner",
+					HolderPublicKey: publicKey,
+				}
+			},
+			expected: func(resp *types.MsgAttachHolderPublicKeyResponse, err error) {
+				suite.Require().ErrorContains(err, "decoding bech32")
+				suite.Require().Nil(resp)
+			},
+		},
+		{
+			name: "invalid public key",
+			init: func() {
+				signer = tests.RandomAccAddress()
+				publicKey = make([]byte, 32)
+				// Construct max value, which is bigger than field order
+				for i := range publicKey {
+					publicKey[i] = 255
+				}
+			},
+			malleate: func() *types.MsgAttachHolderPublicKey {
+				return &types.MsgAttachHolderPublicKey{
+					Signer:          signer.String(),
+					HolderPublicKey: publicKey,
+				}
+			},
+			expected: func(resp *types.MsgAttachHolderPublicKeyResponse, err error) {
+				suite.Require().ErrorContains(err, "invalid holder public")
+				suite.Require().Nil(resp)
+			},
+		},
+		{
+			name: "valid signer, valid public key",
+			init: func() {
+				signer = tests.RandomAccAddress()
+				pk := babyjub.NewRandPrivKey()
+				pubKeyCompressed := pk.Public().Compress()
+				publicKey = pubKeyCompressed[:]
+			},
+			malleate: func() *types.MsgAttachHolderPublicKey {
+				return &types.MsgAttachHolderPublicKey{
+					Signer:          signer.String(),
+					HolderPublicKey: publicKey,
+				}
+			},
+			expected: func(resp *types.MsgAttachHolderPublicKeyResponse, err error) {
+				suite.Require().NoError(err)
+				suite.Require().NotNil(resp)
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		suite.Run(tc.name, func() {
+			if tc.init != nil {
+				tc.init()
+			}
+			msgServer := keeper.NewMsgServerImpl(suite.keeper)
+			msg := tc.malleate()
+			resp, err := msgServer.HandleAttachHolderPublicKey(sdk.WrapSDKContext(suite.ctx), msg)
 			tc.expected(resp, err)
 		})
 	}
