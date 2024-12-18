@@ -1303,3 +1303,140 @@ func (suite *KeeperTestSuite) TestHandleAttachPublicKey() {
 		})
 	}
 }
+
+func (suite *KeeperTestSuite) TestRevokeInSMT() {
+	var (
+		signer         sdk.AccAddress
+		issuer         sdk.AccAddress
+		verificationId []byte
+	)
+
+	testCases := []struct {
+		name     string
+		init     func()
+		malleate func()
+	}{
+		{
+			name: "if user has no attached public key, revocation tree should still the same",
+			init: func() {
+				holder := tests.RandomAccAddress()
+				signer = tests.RandomAccAddress()
+				err := suite.keeper.AddOperator(suite.ctx, signer, types.OperatorType_OT_REGULAR)
+				suite.Require().NoError(err)
+
+				issuer = tests.RandomAccAddress()
+				details := &types.IssuerDetails{Creator: tests.RandomAccAddress().String(), Name: "test issuer"}
+				err = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
+				suite.Require().NoError(err)
+
+				verificationDetails := &types.VerificationDetails{
+					Type:                 types.VerificationType_VT_KYC,
+					IssuerAddress:        issuer.String(),
+					OriginChain:          "swisstronik",
+					IssuanceTimestamp:    100,
+					ExpirationTimestamp:  200,
+					OriginalData:         nil,
+					Schema:               "",
+					IssuerVerificationId: "",
+					Version:              0,
+					IsRevoked:            false,
+				}
+				detailsBytes, _ := verificationDetails.Marshal()
+				verificationId = crypto.Keccak256(tests.RandomAccAddress().Bytes(), types.VerificationType_VT_KYC.ToBytes(), detailsBytes)
+				err = suite.keeper.SetVerificationDetails(suite.ctx, holder, verificationId, verificationDetails)
+				suite.Require().NoError(err)
+			},
+			malleate: func() {
+				rootBefore, err := suite.keeper.GetRevocationTreeRoot(suite.ctx)
+				suite.Require().NoError(err)
+
+				msg := &types.MsgRevokeVerification{
+					Signer:         signer.String(),
+					Issuer:         issuer.String(),
+					VerificationId: verificationId,
+				}
+
+				msgServer := keeper.NewMsgServerImpl(suite.keeper)
+				resp, err := msgServer.HandleRevokeVerification(sdk.WrapSDKContext(suite.ctx), msg)
+
+				suite.Require().NoError(err)
+				suite.Require().NotNil(resp)
+
+				rootAfter, err := suite.keeper.GetRevocationTreeRoot(suite.ctx)
+				suite.Require().NoError(err)
+
+				// Tree roots should be the same
+				suite.Require().Equal(rootBefore, rootAfter)
+			},
+		},
+		{
+			name: "if user has attached public key, revocation tree should be updated",
+			init: func() {
+				holder := tests.RandomAccAddress()
+				signer = tests.RandomAccAddress()
+				err := suite.keeper.AddOperator(suite.ctx, signer, types.OperatorType_OT_REGULAR)
+				suite.Require().NoError(err)
+
+				issuer = tests.RandomAccAddress()
+				details := &types.IssuerDetails{Creator: tests.RandomAccAddress().String(), Name: "test issuer"}
+				err = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
+				suite.Require().NoError(err)
+
+				// Set holder public key
+				pk := babyjub.NewRandPrivKey()
+				pubKeyCompressed := pk.Public().Compress()
+				err = suite.keeper.SetHolderPublicKey(suite.ctx, holder, pubKeyCompressed[:])
+				suite.Require().NoError(err)
+
+				verificationDetails := &types.VerificationDetails{
+					Type:                 types.VerificationType_VT_KYC,
+					IssuerAddress:        issuer.String(),
+					OriginChain:          "swisstronik",
+					IssuanceTimestamp:    100,
+					ExpirationTimestamp:  200,
+					OriginalData:         nil,
+					Schema:               "",
+					IssuerVerificationId: "",
+					Version:              0,
+					IsRevoked:            false,
+				}
+				detailsBytes, _ := verificationDetails.Marshal()
+				verificationId = crypto.Keccak256(tests.RandomAccAddress().Bytes(), types.VerificationType_VT_KYC.ToBytes(), detailsBytes)
+				err = suite.keeper.SetVerificationDetails(suite.ctx, holder, verificationId, verificationDetails)
+				suite.Require().NoError(err)
+			},
+			malleate: func() {
+				rootBefore, err := suite.keeper.GetRevocationTreeRoot(suite.ctx)
+				suite.Require().NoError(err)
+
+				msg := &types.MsgRevokeVerification{
+					Signer:         signer.String(),
+					Issuer:         issuer.String(),
+					VerificationId: verificationId,
+				}
+
+				msgServer := keeper.NewMsgServerImpl(suite.keeper)
+				resp, err := msgServer.HandleRevokeVerification(sdk.WrapSDKContext(suite.ctx), msg)
+
+				suite.Require().NoError(err)
+				suite.Require().NotNil(resp)
+
+				rootAfter, err := suite.keeper.GetRevocationTreeRoot(suite.ctx)
+				suite.Require().NoError(err)
+
+				// Tree roots should be the same
+				suite.Require().NotEqual(rootBefore, rootAfter)
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		suite.Run(tc.name, func() {
+			if tc.init != nil {
+				tc.init()
+			}
+
+			tc.malleate()
+		})
+	}
+}
