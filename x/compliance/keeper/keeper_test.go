@@ -660,6 +660,92 @@ func (suite *KeeperTestSuite) TestShouldAddToIssuanceTree() {
 				suite.Require().NotEqual(rootBefore, rootAfter)
 			},
 		},
+		{
+			name: "addVerification without attached public key. Root should be the same",
+			init: func() {
+				userAddress = tests.RandomAccAddress()
+				issuerAddress = tests.RandomAccAddress()
+				issuerCreator = tests.RandomAccAddress()
+			},
+			malleate: func() {
+				details := &types.IssuerDetails{Creator: issuerCreator.String(), Name: "testIssuer"}
+				err := suite.keeper.SetIssuerDetails(suite.ctx, issuerAddress, details)
+				suite.Require().NoError(err)
+
+				err = suite.keeper.SetAddressVerificationStatus(suite.ctx, issuerAddress, true)
+				suite.Require().NoError(err)
+
+				rootBefore, err := suite.keeper.GetIssuanceTreeRoot(suite.ctx)
+				suite.Require().NoError(err)
+
+				verificationDetails := &types.VerificationDetails{
+					IssuerAddress:       issuerAddress.String(),
+					OriginChain:         "test chain",
+					IssuanceTimestamp:   712018692,
+					ExpirationTimestamp: 1715018692,
+					OriginalData:        hexutils.HexToBytes("B639DF194671CDE06EFAA368A404F72E3306DF0359117AC7E78EC2BE04B7629D"),
+				}
+				_, err = suite.keeper.AddVerificationDetails(
+					suite.ctx,
+					userAddress,
+					types.VerificationType_VT_KYC,
+					verificationDetails,
+				)
+				suite.Require().NoError(err)
+
+				rootAfter, err := suite.keeper.GetIssuanceTreeRoot(suite.ctx)
+				suite.Require().NoError(err)
+
+				// Tree roots should be the same
+				suite.Require().Equal(rootBefore, rootAfter)
+			},
+		},
+		{
+			name: "addVerification with attached public key. Root should change",
+			init: func() {
+				userAddress = tests.RandomAccAddress()
+				issuerAddress = tests.RandomAccAddress()
+				issuerCreator = tests.RandomAccAddress()
+			},
+			malleate: func() {
+				details := &types.IssuerDetails{Creator: issuerCreator.String(), Name: "testIssuer"}
+				err := suite.keeper.SetIssuerDetails(suite.ctx, issuerAddress, details)
+				suite.Require().NoError(err)
+
+				// Set holder public key
+				pk := babyjub.NewRandPrivKey()
+				pubKeyCompressed := pk.Public().Compress()
+				err = suite.keeper.SetHolderPublicKey(suite.ctx, userAddress, pubKeyCompressed[:])
+				suite.Require().NoError(err)
+
+				err = suite.keeper.SetAddressVerificationStatus(suite.ctx, issuerAddress, true)
+				suite.Require().NoError(err)
+
+				rootBefore, err := suite.keeper.GetIssuanceTreeRoot(suite.ctx)
+				suite.Require().NoError(err)
+
+				verificationDetails := &types.VerificationDetails{
+					IssuerAddress:       issuerAddress.String(),
+					OriginChain:         "test chain",
+					IssuanceTimestamp:   712018692,
+					ExpirationTimestamp: 1715018692,
+					OriginalData:        hexutils.HexToBytes("B639DF194671CDE06EFAA368A404F72E3306DF0359117AC7E78EC2BE04B7629D"),
+				}
+				_, err = suite.keeper.AddVerificationDetails(
+					suite.ctx,
+					userAddress,
+					types.VerificationType_VT_KYC,
+					verificationDetails,
+				)
+				suite.Require().NoError(err)
+
+				rootAfter, err := suite.keeper.GetIssuanceTreeRoot(suite.ctx)
+				suite.Require().NoError(err)
+
+				// Tree roots should be the same
+				suite.Require().NotEqual(rootBefore, rootAfter)
+			},
+		},
 	}
 
 	for _, tc := range testCases {
