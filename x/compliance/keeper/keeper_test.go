@@ -2,6 +2,7 @@ package keeper_test
 
 import (
 	"context"
+	"github.com/iden3/go-iden3-crypto/babyjub"
 	"testing"
 	"time"
 
@@ -449,4 +450,128 @@ func (suite *KeeperTestSuite) TestRegularOperator() {
 	exists, err := suite.keeper.OperatorExists(suite.ctx, operator)
 	suite.Require().False(exists)
 	suite.Require().NoError(err)
+}
+
+func (suite *KeeperTestSuite) TestShouldSetPublicKey() {
+	var userAddress sdk.AccAddress
+
+	testCases := []struct {
+		name     string
+		init     func()
+		malleate func() error
+		expPass  bool
+	}{
+		{
+			name: "correct public key",
+			init: func() {
+				userAddress = tests.RandomAccAddress()
+			},
+			malleate: func() error {
+				pk := babyjub.NewRandPrivKey()
+				pubKeyCompressed := pk.Public().Compress()
+
+				return suite.keeper.SetHolderPublicKey(suite.ctx, userAddress, pubKeyCompressed[:])
+			},
+			expPass: true,
+		},
+		{
+			name: "incorrect public key",
+			init: func() {
+				userAddress = tests.RandomAccAddress()
+			},
+			malleate: func() error {
+				invalidPublicKey := make([]byte, 32)
+				// Construct max value, which is bigger than field order
+				for i := range invalidPublicKey {
+					invalidPublicKey[i] = 255
+				}
+				return suite.keeper.SetHolderPublicKey(suite.ctx, userAddress, invalidPublicKey)
+			},
+			expPass: false,
+		},
+		{
+			name: "key is already set",
+			init: func() {
+				userAddress = tests.RandomAccAddress()
+			},
+			malleate: func() error {
+				pk := babyjub.NewRandPrivKey()
+				pubKeyCompressed := pk.Public().Compress()
+
+				err := suite.keeper.SetHolderPublicKey(suite.ctx, userAddress, pubKeyCompressed[:])
+				suite.Require().NoError(err)
+
+				// Try to set same key again
+				return suite.keeper.SetHolderPublicKey(suite.ctx, userAddress, pubKeyCompressed[:])
+			},
+			expPass: false,
+		},
+	}
+
+	for _, tc := range testCases {
+		suite.Run(tc.name, func() {
+			if tc.init != nil {
+				tc.init()
+			}
+
+			err := tc.malleate()
+			if tc.expPass {
+				suite.Require().NoError(err)
+			} else {
+				suite.Require().Error(err)
+			}
+		})
+	}
+}
+
+func (suite *KeeperTestSuite) TestShouldGetPublicKey() {
+	var (
+		userAddress sdk.AccAddress
+		expectedKey []byte
+	)
+
+	testCases := []struct {
+		name     string
+		init     func()
+		malleate func()
+	}{
+		{
+			name: "public key was set",
+			init: func() {
+				userAddress = tests.RandomAccAddress()
+
+				pk := babyjub.NewRandPrivKey()
+				pubKeyCompressed := pk.Public().Compress()
+				expectedKey = pubKeyCompressed[:]
+			},
+			malleate: func() {
+				err := suite.keeper.SetHolderPublicKey(suite.ctx, userAddress, expectedKey)
+				suite.Require().NoError(err)
+
+				publicKey := suite.keeper.GetHolderPublicKey(suite.ctx, userAddress)
+				suite.Require().Equal(expectedKey, publicKey)
+			},
+		},
+		{
+			name: "empty public key",
+			init: func() {
+				userAddress = tests.RandomAccAddress()
+				expectedKey = nil
+			},
+			malleate: func() {
+				publicKey := suite.keeper.GetHolderPublicKey(suite.ctx, userAddress)
+				suite.Require().Equal(expectedKey, publicKey)
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		suite.Run(tc.name, func() {
+			if tc.init != nil {
+				tc.init()
+			}
+
+			tc.malleate()
+		})
+	}
 }
