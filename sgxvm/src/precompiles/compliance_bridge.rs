@@ -10,10 +10,12 @@ use std::vec::Vec;
 
 use crate::precompiles::LinearCostPrecompileWithQuerier;
 use crate::{coder, querier, GoQuerier};
-use crate::protobuf_generated::ffi::{QueryAddVerificationDetailsResponse, QueryGetVerificationDataResponse, QueryHasVerificationResponse, QueryIssuanceTreeRoot, QueryIssuanceTreeRootResponse, QueryRevocationTreeRootResponse};
+use crate::protobuf_generated::ffi::{QueryAddVerificationDetailsResponse, QueryAddVerificationDetailsV2, QueryAddVerificationDetailsV2Response, QueryGetVerificationDataResponse, QueryHasVerificationResponse, QueryIssuanceTreeRoot, QueryIssuanceTreeRootResponse, QueryRevocationTreeRootResponse};
 
 // Selector of `addVerificationDetails` function
 const ADD_VERIFICATION_FN_SELECTOR: &str = "e62364ab";
+// Selector of `addVerificationDetailsV2` function
+const ADD_VERIFICATION_V2_FN_SELECTOR: &str = "c2206580";
 // Selector of `hasVerification` function
 const HAS_VERIFICATION_FN_SELECTOR: &str = "4887fcd8";
 // Selector of `getVerificationData` function
@@ -265,7 +267,118 @@ fn route(
                 },
                 None => (ExitError::Reverted.into(), encode(&[AbiToken::String("call to addVerificationDetails to x/compliance failed".into())]))
             }
-        }
+        },
+        ADD_VERIFICATION_V2_FN_SELECTOR => {
+            let verification_params = vec![
+                ParamType::Address,
+                ParamType::String,
+                ParamType::Uint(32),
+                ParamType::Uint(32),
+                ParamType::Uint(32),
+                ParamType::Bytes,
+                ParamType::String,
+                ParamType::String,
+                ParamType::Uint(32),
+            ];
+
+            let decoded_params = match decode_input(verification_params, &data[4..]) {
+                Ok(params) => params,
+                Err(_) => return (ExitError::Reverted.into(), encode(&[AbiToken::String("failed to decode input parameters".into())]))
+            };
+
+            let user_address = match decoded_params[0].clone().into_address() {
+                Some(addr) => addr,
+                None => return (ExitError::Reverted.into(), encode(&[AbiToken::String("invalid user address".into())]))
+            };
+
+            let origin_chain = match decoded_params[1].clone().into_string() {
+                Some(chain) => chain,
+                None => return (ExitError::Reverted.into(), encode(&[AbiToken::String("invalid origin chain".into())]))
+            };
+
+            let verification_type = match decoded_params[2].clone().into_uint() {
+                Some(vtype) => vtype.as_u32(),
+                None => return (ExitError::Reverted.into(), encode(&[AbiToken::String("invalid verification type".into())]))
+            };
+
+            let issuance_timestamp = match decoded_params[3].clone().into_uint() {
+                Some(timestamp) => timestamp.as_u32(),
+                None => return (ExitError::Reverted.into(), encode(&[AbiToken::String("invalid issuance timestamp".into())]))
+            };
+
+            let expiration_timestamp = match decoded_params[4].clone().into_uint() {
+                Some(timestamp) => timestamp.as_u32(),
+                None => return (ExitError::Reverted.into(), encode(&[AbiToken::String("invalid expiration timestamp".into())]))
+            };
+
+            let proof_data = match decoded_params[5].clone().into_bytes() {
+                Some(data) => data,
+                None => return (ExitError::Reverted.into(), encode(&[AbiToken::String("invalid proof data".into())]))
+            };
+
+            let schema = match decoded_params[6].clone().into_string() {
+                Some(schema) => schema,
+                None => {
+                    return (
+                        ExitError::Reverted.into(), encode(&[AbiToken::String("invalid schema".into())]),
+                    );
+                }
+            };
+
+            let issuer_verification_id = match decoded_params[7].clone().into_string() {
+                Some(id) => id,
+                None => return (ExitError::Reverted.into(), encode(&[AbiToken::String("invalid issuer verification ID".into())]))
+            };
+
+            let version = match decoded_params[8].clone().into_uint() {
+                Some(ver) => ver.as_u32(),
+                None => return (
+                    ExitError::Reverted.into(), encode(&[AbiToken::String(
+                        "invalid version".into(),
+                    )])
+                )
+            };
+
+            let user_public_key = match decoded_params[9].clone().into_fixed_bytes() {
+                Some(pk) => pk,
+                None => {
+                    return (
+                        ExitError::Reverted.into(), encode(&[AbiToken::String("invalid user public key".into())]),
+                    );
+                }
+            };
+
+            let encoded_request = coder::encode_add_verification_details_v2_request(
+                user_address,
+                caller,
+                origin_chain,
+                verification_type,
+                issuance_timestamp,
+                expiration_timestamp,
+                proof_data,
+                schema,
+                issuer_verification_id,
+                version,
+                user_public_key,
+            );
+
+            match querier::make_request(querier, encoded_request) {
+                Some(result) => {
+                    let added_verification: QueryAddVerificationDetailsV2Response = match protobuf::parse_from_bytes(result.as_slice()) {
+                        Ok(response) => response,
+                        Err(_) => return (ExitError::Reverted.into(), encode(&[AbiToken::String("cannot parse protobuf response".into())]))
+                    };
+
+                    let token = vec![AbiToken::Bytes(
+                        added_verification.verificationId.into(),
+                    )];
+                    let encoded_response = encode(&token);
+
+                    (ExitSucceed::Returned.into(), encoded_response.to_vec())
+                },
+                None => (ExitError::Reverted.into(), encode(&[AbiToken::String("call to addVerificationDetailsV2 to x/compliance failed".into())]))
+            }
+        },
         GET_VERIFICATION_DATA_FN_SELECTOR => {
             let get_verification_data_params = vec![ParamType::Address, ParamType::Address];
             let decoded_params = match decode_input(get_verification_data_params, &data[4..]) {

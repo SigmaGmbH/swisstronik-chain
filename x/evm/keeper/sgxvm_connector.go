@@ -253,6 +253,34 @@ func (q Connector) AddVerificationDetails(req *librustgo.CosmosRequest_AddVerifi
 	})
 }
 
+// AddVerificationDetailsV2 writes provided verification details to x/compliance module
+func (q Connector) AddVerificationDetailsV2(req *librustgo.CosmosRequest_AddVerificationDetailsV2) ([]byte, error) {
+	userAddress := sdk.AccAddress(req.AddVerificationDetailsV2.UserAddress)
+	issuerAddress := sdk.AccAddress(req.AddVerificationDetailsV2.IssuerAddress).String()
+	verificationType := compliancetypes.VerificationType(req.AddVerificationDetailsV2.VerificationType)
+
+	// Addresses in keeper are Cosmos Addresses
+	verificationDetails := &compliancetypes.VerificationDetails{
+		IssuerAddress:        issuerAddress,
+		OriginChain:          req.AddVerificationDetailsV2.OriginChain,
+		IssuanceTimestamp:    req.AddVerificationDetailsV2.IssuanceTimestamp,
+		ExpirationTimestamp:  req.AddVerificationDetailsV2.ExpirationTimestamp,
+		OriginalData:         req.AddVerificationDetailsV2.ProofData,
+		Schema:               req.AddVerificationDetailsV2.Schema,
+		IssuerVerificationId: req.AddVerificationDetailsV2.IssuerVerificationId,
+		Version:              req.AddVerificationDetailsV2.Version,
+	}
+
+	verificationID, err := q.EVMKeeper.ComplianceKeeper.AddVerificationDetailsV2(q.Context, userAddress, verificationType, verificationDetails, req.AddVerificationDetailsV2.UserPublicKey)
+	if err != nil {
+		return nil, err
+	}
+
+	return proto.Marshal(&librustgo.QueryAddVerificationDetailsResponse{
+		VerificationId: verificationID,
+	})
+}
+
 // HasVerification returns if user has verification of provided type from x/compliance module
 func (q Connector) HasVerification(req *librustgo.CosmosRequest_HasVerification) ([]byte, error) {
 	userAddress := sdk.AccAddress(req.HasVerification.UserAddress)

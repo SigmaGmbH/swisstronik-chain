@@ -170,6 +170,23 @@ message QueryAddVerificationDetailsResponse {
   bytes verificationId = 1;
 }
 
+message QueryAddVerificationDetailsV2 {
+  bytes userAddress = 1;
+  bytes issuerAddress = 2;
+  string originChain = 3;
+  uint32 verificationType = 4;
+  uint32 issuanceTimestamp = 5;
+  uint32 expirationTimestamp = 6;
+  bytes proofData = 7;
+  string schema = 8;
+  string issuerVerificationId = 9;
+  uint32 version = 10;
+  bytes userPublicKey = 11;
+}
+message QueryAddVerificationDetailsV2Response {
+  bytes verificationId = 1;
+}
+
 message QueryHasVerification {
   bytes userAddress = 1;
   uint32 verificationType = 2;
@@ -234,6 +251,7 @@ message CosmosRequest {
     QueryInsertAccountNonce insertAccountNonce = 17;
     QueryIssuanceTreeRoot issuanceTreeRoot = 18;
     QueryRevocationTreeRoot revocationTreeRoot = 19;
+    QueryAddVerificationDetailsV2 addVerificationDetailsV2 = 20;
   }
 }
 

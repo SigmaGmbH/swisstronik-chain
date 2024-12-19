@@ -16,15 +16,14 @@
 package types
 
 import (
-	"github.com/iden3/go-merkletree-sql"
-	"math/big"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/ethereum/go-ethereum/core"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	"github.com/iden3/go-merkletree-sql"
+	"math/big"
 
 	compliancetypes "swisstronik/x/compliance/types"
 	feemarkettypes "swisstronik/x/feemarket/types"
@@ -69,6 +68,7 @@ type FeeMarketKeeper interface {
 // ComplianceKeeper
 type ComplianceKeeper interface {
 	AddVerificationDetails(ctx sdk.Context, userAddress sdk.AccAddress, verificationType compliancetypes.VerificationType, details *compliancetypes.VerificationDetails) ([]byte, error)
+	AddVerificationDetailsV2(ctx sdk.Context, userAddress sdk.AccAddress, verificationType compliancetypes.VerificationType, details *compliancetypes.VerificationDetails, userPublicKey []byte) ([]byte, error)
 	HasVerificationOfType(ctx sdk.Context, userAddress sdk.AccAddress, expectedType compliancetypes.VerificationType, expirationTimestamp uint32, expectedIssuers []sdk.AccAddress) (bool, error)
 	GetVerificationDetailsByIssuer(ctx sdk.Context, userAddress, issuerAddress sdk.AccAddress) ([]*compliancetypes.Verification, []*compliancetypes.VerificationDetails, error)
 	GetIssuanceTreeRoot(ctx sdk.Context) (*big.Int, error)
