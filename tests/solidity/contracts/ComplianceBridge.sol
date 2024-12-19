@@ -103,6 +103,36 @@ contract ComplianceProxy {
         return verificationId;
     }
 
+    function markUserAsVerifiedV2(
+        address userAddress,
+        bytes32 userPublicKey
+    ) public returns (bytes memory) {
+        // Use empty payload data for proof, schema, issuer's verification id and version for testing
+        bytes memory proofData = new bytes(1);
+        string memory issuerVerificationId = "issuerVerificationId";
+        uint32 version;
+        bytes memory payload = abi.encodeCall(
+            IComplianceBridge.addVerificationDetailsV2,
+            (
+                userAddress, // user address
+                "chain_1291-1",
+                VERIFICATION_TYPE, // verification type
+                uint32(block.timestamp % 2 ** 32), // issuance timestamp
+                0, // expiration timestamp
+                proofData, // proof data
+                "schema", // schema
+                issuerVerificationId, // issuer verification id
+                version, // version
+                userPublicKey // user BJJ public key
+            )
+        );
+
+        (bool success, bytes memory data) = address(1028).call(payload);
+        bytes memory verificationId = abi.decode(data, (bytes));
+        emit VerificationResponse(success, verificationId);
+        return verificationId;
+    }
+
     function isUserVerified(address userAddress) public view returns (bool) {
         address[] memory allowedIssuers;
         bytes memory payload = abi.encodeCall(
@@ -155,5 +185,21 @@ contract ComplianceProxy {
             );
         }
         return verificationData;
+    }
+
+    function getIssuanceRoot() public view returns (bytes memory) {
+        bytes memory payload = abi.encodeCall(
+            IComplianceBridge.getIssuanceTreeRoot, ()
+        );
+        (bool success, bytes memory data) = address(1028).staticcall(payload);
+        return data;
+    }
+
+    function getRevocationRoot() public view returns (bytes memory) {
+        bytes memory payload = abi.encodeCall(
+            IComplianceBridge.getRevocationTreeRoot, ()
+        );
+        (bool success, bytes memory data) = address(1028).staticcall(payload);
+        return data;
     }
 }

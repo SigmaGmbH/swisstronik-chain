@@ -120,6 +120,46 @@ describe('ComplianceBridge', () => {
         expect(isVerifiedAfterTx[0]).to.be.true
     })
 
+    it('Should be able to add verification details V2', async () => {
+        const [signer] = await ethers.getSigners()
+        const userPublicKey = ethers.constants.HashZero // [0; 32] is valid BJJ public key
+
+        const rootBeforeResp = await sendShieldedQuery(
+            signer.provider,
+            contract.address,
+            contract.interface.encodeFunctionData('getIssuanceTreeRoot')
+        )
+        const rootBefore = contract.interface.decodeFunctionResult('getIssuanceTreeRoot', rootBeforeResp)
+
+        const tx = await sendShieldedTransaction(
+            signer,
+            contract.address,
+            contract.interface.encodeFunctionData('markUserAsVerifiedV2', [signer.address, userPublicKey])
+        )
+        const res = await tx.wait()
+        const parsedLog = contract.interface.parseLog(res.logs[0])
+        expect(parsedLog.args.success).to.be.true
+        expect(parsedLog.args.data.length).to.be.greaterThan(0)
+
+        // Confirm that verified status was changed after tx confirmation
+        const isVerifiedRespAfterTx = await sendShieldedQuery(
+            signer.provider,
+            contract.address,
+            contract.interface.encodeFunctionData('isUserVerified', [signer.address])
+        )
+        const isVerifiedAfterTx = contract.interface.decodeFunctionResult('isUserVerified', isVerifiedRespAfterTx)
+        expect(isVerifiedAfterTx[0]).to.be.true
+
+        // Confirm that issuance SMT was updated
+        const rootAfterResp = await sendShieldedQuery(
+            signer.provider,
+            contract.address,
+            contract.interface.encodeFunctionData('getIssuanceTreeRoot')
+        )
+        const rootAfter = contract.interface.decodeFunctionResult('getIssuanceTreeRoot', rootAfterResp)
+        expect(rootAfter).to.be.not.equal(rootBefore)
+    })
+
     describe('With verified user', async () => {
         let verified
         beforeEach(async () => {
