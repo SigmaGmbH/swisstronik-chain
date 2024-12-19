@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/iden3/go-iden3-crypto/babyjub"
 	"slices"
 
 	"cosmossdk.io/errors"
@@ -193,6 +192,10 @@ func (k Keeper) AddVerificationDetailsV2(ctx sdk.Context, userAddress sdk.AccAdd
 	verificationDetailsID, err := k.addVerificationDetailsInternal(ctx, userAddress, issuerAddress, verificationType, details)
 	if err != nil {
 		return nil, err
+	}
+
+	if err = types.ValidateEdDSAPublicKey(userPublicKey); err != nil {
+		return nil, errors.Wrap(types.ErrBadRequest, err.Error())
 	}
 
 	credentialValue := &types.ZKCredential{
@@ -795,15 +798,8 @@ func (k Keeper) SetHolderPublicKey(ctx sdk.Context, user sdk.AccAddress, publicK
 		return errors.Wrap(types.ErrInvalidParam, "public key already set")
 	}
 
-	// Validate provided BJJ public key
-	if len(publicKey) != 32 {
-		return errors.Wrapf(types.ErrInvalidParam, "invalid holder public key len")
-	}
-
-	pointBuf := babyjub.NewPoint()
-	_, err := pointBuf.Decompress([32]byte(publicKey))
-	if err != nil {
-		return errors.Wrapf(types.ErrInvalidParam, "invalid holder public key: (%s)", err)
+	if err := types.ValidateEdDSAPublicKey(publicKey); err != nil {
+		return errors.Wrapf(types.ErrInvalidParam, "cannot parse provided public key: (%s)", err)
 	}
 
 	store.Set(user.Bytes(), publicKey)

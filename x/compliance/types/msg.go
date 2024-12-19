@@ -3,7 +3,6 @@ package types
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/iden3/go-iden3-crypto/babyjub"
 	"github.com/pkg/errors"
 )
 
@@ -286,13 +285,7 @@ func (msg *MsgAttachHolderPublicKey) ValidateBasic() error {
 		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid signer address (%s)", err)
 	}
 
-	if msg.HolderPublicKey == nil || len(msg.HolderPublicKey) != 32 {
-		return errors.Wrap(sdkerrors.ErrInvalidPubKey, "invalid holder public key")
-	}
-
-	pointBuf := babyjub.NewPoint()
-	_, err = pointBuf.Decompress([32]byte(msg.HolderPublicKey))
-	if err != nil {
+	if err = ValidateEdDSAPublicKey(msg.HolderPublicKey); err != nil {
 		return errors.Wrapf(sdkerrors.ErrInvalidPubKey, "invalid holder public key: (%s)", err)
 	}
 
