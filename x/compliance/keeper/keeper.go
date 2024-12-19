@@ -198,6 +198,9 @@ func (k Keeper) AddVerificationDetailsV2(ctx sdk.Context, userAddress sdk.AccAdd
 		return nil, errors.Wrap(types.ErrBadRequest, err.Error())
 	}
 
+	if err = k.LinkVerificationIdToPubKey(ctx, userPublicKey, verificationDetailsID); err != nil {
+		return nil, errors.Wrap(types.ErrBadRequest, err.Error())
+	}
 	credentialValue := &types.ZKCredential{
 		Type:                verificationType,
 		IssuerAddress:       issuerAddress.Bytes(),
@@ -233,6 +236,10 @@ func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.AccAddre
 	// If user has attached public key, add to ZK-SDI
 	userPublicKey := k.GetHolderPublicKey(ctx, userAddress)
 	if userPublicKey != nil {
+		if err = k.LinkVerificationIdToPubKey(ctx, userPublicKey, verificationDetailsID); err != nil {
+			return nil, err
+		}
+
 		credentialValue := &types.ZKCredential{
 			Type:                verificationType,
 			IssuerAddress:       issuerAddress.Bytes(),
@@ -349,6 +356,10 @@ func (k Keeper) SetVerificationDetails(
 	// If user has attached public key, add to ZK-SDI
 	userPublicKey := k.GetHolderPublicKey(ctx, userAddress)
 	if userPublicKey != nil {
+		if err = k.LinkVerificationIdToPubKey(ctx, userPublicKey, verificationDetailsId); err != nil {
+			return err
+		}
+
 		credentialValue := &types.ZKCredential{
 			Type:                details.Type,
 			IssuerAddress:       issuerAddress.Bytes(),
@@ -411,13 +422,13 @@ func (k Keeper) MarkVerificationDetailsAsRevoked(
 		)
 	}
 
-	userPublicKey := k.GetHolderPublicKey(ctx, userAddress)
-	if userPublicKey != nil {
+	attachedPublicKey := k.GetPubKeyByVerificationId(ctx, verificationDetailsId)
+	if attachedPublicKey != nil {
 		// Update revocation tree with provided credential
 		credential := &types.ZKCredential{
 			Type:                prevVerificationDetails.Type,
 			IssuerAddress:       issuerAddress.Bytes(),
-			HolderPublicKey:     userPublicKey,
+			HolderPublicKey:     attachedPublicKey,
 			ExpirationTimestamp: prevVerificationDetails.ExpirationTimestamp,
 		}
 		credentialHash, err := credential.Hash()
@@ -827,6 +838,29 @@ func (k Keeper) linkVerificationToHolder(ctx sdk.Context, userAddress sdk.AccAdd
 
 func (k Keeper) getHolderByVerificationId(ctx sdk.Context, verificationId []byte) sdk.AccAddress {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationToHolder)
+	return store.Get(verificationId)
+}
+
+func (k Keeper) LinkVerificationIdToPubKey(ctx sdk.Context, publicKey []byte, verificationId []byte) error {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationToPubKey)
+
+	// Check if there is already linked user
+	currentPublicKey := store.Get(verificationId)
+	if currentPublicKey != nil {
+		if bytes.Equal(currentPublicKey, publicKey) {
+			// This user is already linked
+			return nil
+		}
+
+		return errors.Wrap(types.ErrBadRequest, "provided verification id is already linked to another public key")
+	}
+
+	store.Set(verificationId, publicKey)
+	return nil
+}
+
+func (k Keeper) GetPubKeyByVerificationId(ctx sdk.Context, verificationId []byte) []byte {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationToPubKey)
 	return store.Get(verificationId)
 }
 

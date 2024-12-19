@@ -758,3 +758,182 @@ func (suite *KeeperTestSuite) TestShouldAddToIssuanceTree() {
 		})
 	}
 }
+
+func (suite *KeeperTestSuite) TestAddVerificationDetailsV2() {
+	var (
+		issuerAddress       sdk.AccAddress
+		holderAddress       sdk.AccAddress
+		verificationDetails *types.VerificationDetails
+	)
+
+	testCases := []struct {
+		name     string
+		init     func()
+		malleate func()
+	}{
+		{
+			name: "incorrect user public key",
+			init: func() {
+				issuerAddress = tests.RandomAccAddress()
+				holderAddress = tests.RandomAccAddress()
+
+				details := &types.IssuerDetails{Creator: tests.RandomAccAddress().String(), Name: "testIssuer"}
+
+				err := suite.keeper.SetIssuerDetails(suite.ctx, issuerAddress, details)
+				suite.Require().NoError(err)
+
+				err = suite.keeper.SetAddressVerificationStatus(suite.ctx, issuerAddress, true)
+				suite.Require().NoError(err)
+
+				verificationDetails = &types.VerificationDetails{
+					IssuerAddress:       issuerAddress.String(),
+					OriginChain:         "test chain",
+					IssuanceTimestamp:   1712018692,
+					ExpirationTimestamp: 1715018692,
+					OriginalData:        tests.RandomBytes(32),
+				}
+			},
+			malleate: func() {
+				invalidPublicKey := make([]byte, 32)
+				// Construct max value, which is bigger than field order
+				for i := range invalidPublicKey {
+					invalidPublicKey[i] = 255
+				}
+
+				verificationId, err := suite.keeper.AddVerificationDetailsV2(
+					suite.ctx,
+					holderAddress,
+					types.VerificationType_VT_KYC,
+					verificationDetails,
+					invalidPublicKey[:],
+				)
+				suite.Require().Error(err)
+				suite.Require().ErrorContains(err, "bad request")
+				suite.Require().Nil(verificationId)
+			},
+		},
+		{
+			name: "user has no attached public key",
+			init: func() {
+				issuerAddress = tests.RandomAccAddress()
+				holderAddress = tests.RandomAccAddress()
+
+				details := &types.IssuerDetails{Creator: tests.RandomAccAddress().String(), Name: "testIssuer"}
+
+				err := suite.keeper.SetIssuerDetails(suite.ctx, issuerAddress, details)
+				suite.Require().NoError(err)
+
+				err = suite.keeper.SetAddressVerificationStatus(suite.ctx, issuerAddress, true)
+				suite.Require().NoError(err)
+
+				verificationDetails = &types.VerificationDetails{
+					IssuerAddress:       issuerAddress.String(),
+					OriginChain:         "test chain",
+					IssuanceTimestamp:   1712018692,
+					ExpirationTimestamp: 1715018692,
+					OriginalData:        tests.RandomBytes(32),
+				}
+			},
+			malleate: func() {
+				attachedPublicKeyBefore := suite.keeper.GetHolderPublicKey(suite.ctx, holderAddress)
+				suite.Require().Nil(attachedPublicKeyBefore)
+
+				rootBefore, err := suite.keeper.GetIssuanceTreeRoot(suite.ctx)
+				suite.Require().NoError(err)
+
+				holderPublicKeyToSet := tests.RandomEdDSAPubKey()
+				verificationId, err := suite.keeper.AddVerificationDetailsV2(
+					suite.ctx,
+					holderAddress,
+					types.VerificationType_VT_KYC,
+					verificationDetails,
+					holderPublicKeyToSet[:],
+				)
+				suite.Require().NoError(err)
+				suite.Require().NotNil(verificationId)
+
+				// holder public key should be the same
+				attachedPublicKeyAfter := suite.keeper.GetHolderPublicKey(suite.ctx, holderAddress)
+				suite.Require().Equal(attachedPublicKeyBefore, attachedPublicKeyAfter)
+
+				// provided public key should be linked to verification id
+				linkedPublicKey := suite.keeper.GetPubKeyByVerificationId(suite.ctx, verificationId)
+				suite.Require().Equal(holderPublicKeyToSet, [32]byte(linkedPublicKey))
+
+				// issuance tree should be updated
+				rootAfter, err := suite.keeper.GetIssuanceTreeRoot(suite.ctx)
+				suite.Require().NoError(err)
+				suite.Require().NotEqual(rootBefore, rootAfter)
+			},
+		},
+		{
+			name: "user has attached public key. should be used key provided by issuer",
+			init: func() {
+				issuerAddress = tests.RandomAccAddress()
+				holderAddress = tests.RandomAccAddress()
+
+				details := &types.IssuerDetails{Creator: tests.RandomAccAddress().String(), Name: "testIssuer"}
+
+				err := suite.keeper.SetIssuerDetails(suite.ctx, issuerAddress, details)
+				suite.Require().NoError(err)
+
+				err = suite.keeper.SetAddressVerificationStatus(suite.ctx, issuerAddress, true)
+				suite.Require().NoError(err)
+
+				verificationDetails = &types.VerificationDetails{
+					IssuerAddress:       issuerAddress.String(),
+					OriginChain:         "test chain",
+					IssuanceTimestamp:   1712018692,
+					ExpirationTimestamp: 1715018692,
+					OriginalData:        tests.RandomBytes(32),
+				}
+
+				holderPublicKey := tests.RandomEdDSAPubKey()
+				err = suite.keeper.SetHolderPublicKey(suite.ctx, holderAddress, holderPublicKey[:])
+				suite.Require().NoError(err)
+			},
+			malleate: func() {
+				attachedPublicKeyBefore := suite.keeper.GetHolderPublicKey(suite.ctx, holderAddress)
+				suite.Require().NotNil(attachedPublicKeyBefore)
+
+				rootBefore, err := suite.keeper.GetIssuanceTreeRoot(suite.ctx)
+				suite.Require().NoError(err)
+
+				holderPublicKeyToSet := tests.RandomEdDSAPubKey()
+				verificationId, err := suite.keeper.AddVerificationDetailsV2(
+					suite.ctx,
+					holderAddress,
+					types.VerificationType_VT_KYC,
+					verificationDetails,
+					holderPublicKeyToSet[:],
+				)
+				suite.Require().NoError(err)
+				suite.Require().NotNil(verificationId)
+
+				// it should not change holder public key
+				attachedPublicKeyAfter := suite.keeper.GetHolderPublicKey(suite.ctx, holderAddress)
+				suite.Require().Equal(attachedPublicKeyBefore, attachedPublicKeyAfter)
+				suite.Require().NotEqual(holderPublicKeyToSet, attachedPublicKeyAfter)
+
+				// provided public key should be linked to verification id
+				linkedPublicKey := suite.keeper.GetPubKeyByVerificationId(suite.ctx, verificationId)
+				suite.Require().Equal(holderPublicKeyToSet, [32]byte(linkedPublicKey))
+
+				// issuance tree should be updated
+				rootAfter, err := suite.keeper.GetIssuanceTreeRoot(suite.ctx)
+				suite.Require().NoError(err)
+				suite.Require().NotEqual(rootBefore, rootAfter)
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		suite.Run(tc.name, func() {
+			if tc.init != nil {
+				tc.init()
+			}
+
+			tc.malleate()
+		})
+	}
+}
