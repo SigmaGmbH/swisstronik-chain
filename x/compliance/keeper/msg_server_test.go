@@ -1266,7 +1266,7 @@ func (suite *KeeperTestSuite) TestHandleAttachPublicKey() {
 				}
 			},
 			expected: func(resp *types.MsgAttachHolderPublicKeyResponse, err error) {
-				suite.Require().ErrorContains(err, "invalid holder public")
+				suite.Require().ErrorContains(err, "cannot parse provided public key")
 				suite.Require().Nil(resp)
 			},
 		},
