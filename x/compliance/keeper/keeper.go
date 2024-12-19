@@ -181,7 +181,40 @@ func (k Keeper) SetAddressVerificationStatus(ctx sdk.Context, address sdk.AccAdd
 	return nil
 }
 
+// AddVerificationDetailsV2 writes details of passed verification by provided address. It writes credential to ZK-SDI
+// even if user has no attached public key
+func (k Keeper) AddVerificationDetailsV2(ctx sdk.Context, userAddress sdk.AccAddress, verificationType types.VerificationType, details *types.VerificationDetails, userPublicKey []byte) ([]byte, error) {
+	// Check if issuer is verified and not banned
+	issuerAddress, err := sdk.AccAddressFromBech32(details.IssuerAddress)
+	if err != nil {
+		return nil, err
+	}
+
+	verificationDetailsID, err := k.addVerificationDetailsInternal(ctx, userAddress, issuerAddress, verificationType, details)
+	if err != nil {
+		return nil, err
+	}
+
+	credentialValue := &types.ZKCredential{
+		Type:                verificationType,
+		IssuerAddress:       issuerAddress.Bytes(),
+		HolderPublicKey:     userPublicKey,
+		ExpirationTimestamp: details.ExpirationTimestamp,
+	}
+	credentialHash, err := credentialValue.Hash()
+	if err != nil {
+		return nil, errors.Wrap(types.ErrBadRequest, err.Error())
+	}
+	err = k.AddCredentialHashToIssued(ctx, credentialHash)
+	if err != nil {
+		return nil, errors.Wrap(types.ErrBadRequest, err.Error())
+	}
+
+	return verificationDetailsID, nil
+}
+
 // AddVerificationDetails writes details of passed verification by provided address.
+// It writes to ZK-SDI only if user has attached public key
 func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.AccAddress, verificationType types.VerificationType, details *types.VerificationDetails) ([]byte, error) {
 	// Check if issuer is verified and not banned
 	issuerAddress, err := sdk.AccAddressFromBech32(details.IssuerAddress)
@@ -189,6 +222,34 @@ func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.AccAddre
 		return nil, err
 	}
 
+	verificationDetailsID, err := k.addVerificationDetailsInternal(ctx, userAddress, issuerAddress, verificationType, details)
+	if err != nil {
+		return nil, err
+	}
+
+	// If user has attached public key, add to ZK-SDI
+	userPublicKey := k.GetHolderPublicKey(ctx, userAddress)
+	if userPublicKey != nil {
+		credentialValue := &types.ZKCredential{
+			Type:                verificationType,
+			IssuerAddress:       issuerAddress.Bytes(),
+			HolderPublicKey:     userPublicKey,
+			ExpirationTimestamp: details.ExpirationTimestamp,
+		}
+		credentialHash, err := credentialValue.Hash()
+		if err != nil {
+			return nil, errors.Wrap(types.ErrBadRequest, err.Error())
+		}
+		err = k.AddCredentialHashToIssued(ctx, credentialHash)
+		if err != nil {
+			return nil, errors.Wrap(types.ErrBadRequest, err.Error())
+		}
+	}
+
+	return verificationDetailsID, nil
+}
+
+func (k Keeper) addVerificationDetailsInternal(ctx sdk.Context, userAddress sdk.AccAddress, issuerAddress sdk.AccAddress, verificationType types.VerificationType, details *types.VerificationDetails) ([]byte, error) {
 	isAddressVerified, err := k.IsAddressVerified(ctx, issuerAddress)
 	if err != nil {
 		return nil, err
@@ -247,25 +308,6 @@ func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.AccAddre
 
 	if err = k.linkVerificationToHolder(ctx, userAddress, verificationDetailsID); err != nil {
 		return nil, err
-	}
-
-	// If user has attached public key, add to ZK-SDI
-	userPublicKey := k.GetHolderPublicKey(ctx, userAddress)
-	if userPublicKey != nil {
-		credentialValue := &types.ZKCredential{
-			Type:                verificationType,
-			IssuerAddress:       issuerAddress.Bytes(),
-			HolderPublicKey:     userPublicKey,
-			ExpirationTimestamp: details.ExpirationTimestamp,
-		}
-		credentialHash, err := credentialValue.Hash()
-		if err != nil {
-			return nil, errors.Wrap(types.ErrBadRequest, err.Error())
-		}
-		err = k.AddCredentialHashToIssued(ctx, credentialHash)
-		if err != nil {
-			return nil, errors.Wrap(types.ErrBadRequest, err.Error())
-		}
 	}
 
 	return verificationDetailsID, nil
