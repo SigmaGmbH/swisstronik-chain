@@ -188,17 +188,13 @@ contract ComplianceProxy {
     }
 
     function getIssuanceRoot() public view returns (bytes memory) {
-        bytes memory payload = abi.encodeCall(
-            IComplianceBridge.getIssuanceTreeRoot, ()
-        );
+        bytes memory payload = abi.encodeCall(IComplianceBridge.getIssuanceTreeRoot, ());
         (bool success, bytes memory data) = address(1028).staticcall(payload);
         return data;
     }
 
     function getRevocationRoot() public view returns (bytes memory) {
-        bytes memory payload = abi.encodeCall(
-            IComplianceBridge.getRevocationTreeRoot, ()
-        );
+        bytes memory payload = abi.encodeCall(IComplianceBridge.getRevocationTreeRoot, ());
         (bool success, bytes memory data) = address(1028).staticcall(payload);
         return data;
     }
