@@ -74,6 +74,8 @@ func (q Connector) Query(req []byte) ([]byte, error) {
 		return q.GetIssuanceTreeRoot()
 	case *librustgo.CosmosRequest_RevocationTreeRoot:
 		return q.GetRevocationTreeRoot()
+	case *librustgo.CosmosRequest_AddVerificationDetailsV2:
+        return q.AddVerificationDetailsV2(request)
 	}
 
 	return nil, errors.New("wrong query received")

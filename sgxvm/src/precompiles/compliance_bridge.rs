@@ -279,6 +279,7 @@ fn route(
                 ParamType::String,
                 ParamType::String,
                 ParamType::Uint(32),
+                ParamType::FixedBytes(32),
             ];
 
             let decoded_params = match decode_input(verification_params, &data[4..]) {
