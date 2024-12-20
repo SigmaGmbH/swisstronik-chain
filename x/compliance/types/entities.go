@@ -17,6 +17,7 @@ func (c *ZKCredential) Hash() (*big.Int, error) {
 	typeBig := big.NewInt(int64(c.Type))
 	issuerAddressBig := new(big.Int).SetBytes(c.IssuerAddress)
 	expirationBig := big.NewInt(int64(c.ExpirationTimestamp))
+	issuanceBig := big.NewInt(int64(c.IssuanceTimestamp))
 
 	// Decompress public key and hash only X-coordinate
 	point, err := babyjub.NewPoint().Decompress([32]byte(c.HolderPublicKey))
@@ -25,6 +26,6 @@ func (c *ZKCredential) Hash() (*big.Int, error) {
 	}
 	holderPublicKeyBig := point.X
 
-	valuesToHash := []*big.Int{typeBig, issuerAddressBig, holderPublicKeyBig, expirationBig}
+	valuesToHash := []*big.Int{typeBig, issuerAddressBig, holderPublicKeyBig, expirationBig, issuanceBig}
 	return poseidon.Hash(valuesToHash)
 }

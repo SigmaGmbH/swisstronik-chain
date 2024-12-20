@@ -105,4 +105,5 @@ message ZKCredential {
     bytes issuer_address = 2;
     bytes holder_public_key = 3;
     uint32 expiration_timestamp = 4;
+    uint32 issuance_timestamp = 5;
 }

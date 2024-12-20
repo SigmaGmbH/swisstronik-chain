@@ -375,6 +375,7 @@ func (k msgServer) HandleConvertCredential(goCtx context.Context, msg *types.Msg
 		IssuerAddress:       issuerAddress.Bytes(),
 		HolderPublicKey:     holderPublicKey,
 		ExpirationTimestamp: details.ExpirationTimestamp,
+		IssuanceTimestamp:   details.IssuanceTimestamp,
 	}
 	credentialHash, err := credentialValue.Hash()
 	if err != nil {

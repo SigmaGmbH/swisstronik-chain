@@ -311,6 +311,7 @@ func (k Querier) IsSuitableForZK(goCtx context.Context, req *types.QueryIsCreden
 		IssuerAddress:       issuerAddress.Bytes(),
 		HolderPublicKey:     userKey,
 		ExpirationTimestamp: details.ExpirationTimestamp,
+		IssuanceTimestamp:   details.IssuanceTimestamp,
 	}
 	credentialHash, err := credentialValue.Hash()
 	if err != nil {

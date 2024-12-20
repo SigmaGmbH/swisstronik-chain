@@ -206,6 +206,7 @@ func (k Keeper) AddVerificationDetailsV2(ctx sdk.Context, userAddress sdk.AccAdd
 		IssuerAddress:       issuerAddress.Bytes(),
 		HolderPublicKey:     userPublicKey,
 		ExpirationTimestamp: details.ExpirationTimestamp,
+		IssuanceTimestamp:   details.IssuanceTimestamp,
 	}
 	credentialHash, err := credentialValue.Hash()
 	if err != nil {
@@ -245,6 +246,7 @@ func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.AccAddre
 			IssuerAddress:       issuerAddress.Bytes(),
 			HolderPublicKey:     userPublicKey,
 			ExpirationTimestamp: details.ExpirationTimestamp,
+			IssuanceTimestamp:   details.IssuanceTimestamp,
 		}
 		credentialHash, err := credentialValue.Hash()
 		if err != nil {
@@ -365,6 +367,7 @@ func (k Keeper) SetVerificationDetails(
 			IssuerAddress:       issuerAddress.Bytes(),
 			HolderPublicKey:     userPublicKey,
 			ExpirationTimestamp: details.ExpirationTimestamp,
+			IssuanceTimestamp:   details.IssuanceTimestamp,
 		}
 		credentialHash, err := credentialValue.Hash()
 		if err != nil {
@@ -430,6 +433,7 @@ func (k Keeper) MarkVerificationDetailsAsRevoked(
 			IssuerAddress:       issuerAddress.Bytes(),
 			HolderPublicKey:     attachedPublicKey,
 			ExpirationTimestamp: prevVerificationDetails.ExpirationTimestamp,
+			IssuanceTimestamp:   prevVerificationDetails.IssuanceTimestamp,
 		}
 		credentialHash, err := credential.Hash()
 		if err != nil {
