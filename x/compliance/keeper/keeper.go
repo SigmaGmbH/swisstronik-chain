@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"slices"
 
 	"cosmossdk.io/errors"
@@ -292,7 +293,11 @@ func (k Keeper) addVerificationDetailsInternal(ctx sdk.Context, userAddress sdk.
 	verificationDetailsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationDetails)
 
 	if verificationDetailsStore.Has(verificationDetailsID) {
-		return nil, errors.Wrap(types.ErrInvalidParam, "provided verification details already in storage")
+		return nil, errors.Wrapf(
+			types.ErrInvalidParam,
+			"provided verification details already in storage. Verification ID: (%s)",
+			hexutil.Encode(verificationDetailsID),
+		)
 	}
 
 	// If there is no such verification details associated with provided address, write them to the table
