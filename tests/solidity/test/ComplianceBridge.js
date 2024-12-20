@@ -127,9 +127,9 @@ describe('ComplianceBridge', () => {
         const rootBeforeResp = await sendShieldedQuery(
             signer.provider,
             contract.address,
-            contract.interface.encodeFunctionData('getIssuanceTreeRoot')
+            contract.interface.encodeFunctionData('getIssuanceRoot')
         )
-        const rootBefore = contract.interface.decodeFunctionResult('getIssuanceTreeRoot', rootBeforeResp)
+        const rootBefore = contract.interface.decodeFunctionResult('getIssuanceRoot', rootBeforeResp)
 
         const tx = await sendShieldedTransaction(
             signer,
@@ -154,9 +154,9 @@ describe('ComplianceBridge', () => {
         const rootAfterResp = await sendShieldedQuery(
             signer.provider,
             contract.address,
-            contract.interface.encodeFunctionData('getIssuanceTreeRoot')
+            contract.interface.encodeFunctionData('getIssuanceRoot')
         )
-        const rootAfter = contract.interface.decodeFunctionResult('getIssuanceTreeRoot', rootAfterResp)
+        const rootAfter = contract.interface.decodeFunctionResult('getIssuanceRoot', rootAfterResp)
         expect(rootAfter).to.be.not.equal(rootBefore)
     })
 
