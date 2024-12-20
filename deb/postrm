@@ -3,8 +3,8 @@
 
 set -e
 
-systemctl stop swisstronik-node-v1.0.6                    || true
-systemctl disable swisstronik-node-v1.0.6                 || true
-rm -f /etc/systemd/system/swisstronik-node-v1.0.6.service || true
+systemctl stop swisstronik-node-v1.0.7                    || true
+systemctl disable swisstronik-node-v1.0.7                 || true
+rm -f /etc/systemd/system/swisstronik-node-v1.0.7.service || true
 rm -r /opt/swisstronik/                                   || true
 systemctl daemon-reload                                   || true

@@ -8,7 +8,7 @@ then
     export SUDO_USER=root
 fi
 
-cat <<EOF > /etc/systemd/system/swisstronik-node-v1.0.6.service
+cat <<EOF > /etc/systemd/system/swisstronik-node-v1.0.7.service
 [Unit]
 Description=Swisstronik node service
 After=network.target

@@ -17,7 +17,7 @@ Enclave_Security_Link_Flags := -Wl,-z,relro,-z,now,-z,noexecstack
 Enclave_config_file ?= Enclave.config.development.xml
 Enclave_signing_key ?= Enclave_dev_private.pem
 Enclave_signed_file ?= enclave.signed.so
-VERSION ?= v1.0.6
+VERSION ?= v1.0.7
 
 # ENCLAVE SETTINGS
 ifneq ($(SGX_MODE), HW)
