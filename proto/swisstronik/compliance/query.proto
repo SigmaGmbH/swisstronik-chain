@@ -67,6 +67,10 @@ service Query {
   rpc IsSuitableForZK(QueryIsCredentialInZKSDIRequest) returns (QueryIsCredentialInZKSDIResponse) {
     option (google.api.http).get = "/swisstronik/compliance/zk/isSuitable/{address}/{verificationID}";
   }
+
+  rpc CredentialHash(QueryCredentialHashRequest) returns (QueryCredentialHashResponse) {
+    option (google.api.http).get = "/swisstronik/compliance/zk/credentialHash/{verificationId}";
+  }
 }
 
 // QueryParamsRequest is request type for the Query/Params RPC method.
@@ -234,4 +238,11 @@ message QueryIsCredentialInZKSDIRequest {
 }
 message QueryIsCredentialInZKSDIResponse {
   bool included = 1;
+}
+
+message QueryCredentialHashRequest {
+  bytes verificationId = 1;
+}
+message QueryCredentialHashResponse {
+  bytes credentialHash = 1;
 }

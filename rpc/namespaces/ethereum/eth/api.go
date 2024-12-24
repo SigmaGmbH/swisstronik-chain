@@ -311,6 +311,12 @@ func (e *PublicAPI) NonRevocationProof(credentialHash hexutil.Bytes) (string, er
 	return e.backend.GetNonRevocationProof(credentialHash)
 }
 
+// CredentialHash returns credential hash for ZK-sdi
+func (e *PublicAPI) CredentialHash(verificationId hexutil.Bytes) (hexutil.Bytes, error) {
+	e.logger.Debug("eth_credentialHash", "id", verificationId.String())
+	return e.backend.GetCredentialHash(verificationId)
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///                           Event Logs													          ///
 ///////////////////////////////////////////////////////////////////////////////

@@ -107,6 +107,7 @@ type EVMBackend interface {
 	GetNodePublicKey(blockNum rpctypes.BlockNumber) (string, error)
 	GetIssuanceProof(credentialHash hexutil.Bytes) (string, error)
 	GetNonRevocationProof(credentialHash hexutil.Bytes) (string, error)
+	GetCredentialHash(verificationId hexutil.Bytes) (hexutil.Bytes, error)
 
 	// Chain Info
 	ChainID() (*hexutil.Big, error)

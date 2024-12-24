@@ -11,12 +11,14 @@
     "test": "hardhat test --network tronik"
   },
   "dependencies": {
+    "@noble/hashes": "^1.6.1",
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.0",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.0",
     "@openzeppelin/contracts": "^5.0.2",
     "@swisstronik/swisstronik.js": "^1.0.0",
     "@types/chai": "^4.2.0",
     "@types/mocha": ">=9.1.0",
+    "@zk-kit/eddsa-poseidon": "^1.1.0",
     "chai": "^4.2.0",
     "solidity-rlp": "^2.0.8",
     "ts-node": ">=8.0.0",
