@@ -299,6 +299,18 @@ func (e *PublicAPI) GetNodePublicKey(blockNum rpctypes.BlockNumber) (string, err
 	return e.backend.GetNodePublicKey(blockNum)
 }
 
+// IssuanceProof returns issuance proof for ZK-sdi
+func (e *PublicAPI) IssuanceProof(credentialHash hexutil.Bytes) (string, error) {
+	e.logger.Debug("eth_issuanceProof", "hash", credentialHash.String())
+	return e.backend.GetIssuanceProof(credentialHash)
+}
+
+// NonRevocationProof returns non-revocation proof for ZK-sdi
+func (e *PublicAPI) NonRevocationProof(credentialHash hexutil.Bytes) (string, error) {
+	e.logger.Debug("eth_nonRevocationProof", "hash", credentialHash.String())
+	return e.backend.GetNonRevocationProof(credentialHash)
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///                           Event Logs													          ///
 ///////////////////////////////////////////////////////////////////////////////

@@ -2,9 +2,9 @@ package utils
 
 import (
 	"fmt"
-	"strings"
-	"github.com/ethereum/go-ethereum/common"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/ethereum/go-ethereum/common"
+	"strings"
 	"swisstronik/app"
 )
 

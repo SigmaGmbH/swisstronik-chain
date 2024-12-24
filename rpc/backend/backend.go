@@ -43,6 +43,11 @@ type BackendI interface { //nolint: revive
 	EVMBackend
 }
 
+type UtilsBackend interface {
+	IssuanceProof(credentialHash hexutil.Bytes) (string, error)
+	NonRevocationProof(credentialHash hexutil.Bytes) (string, error)
+}
+
 // CosmosBackend implements the functionality shared within cosmos namespaces
 // as defined by Wallet Connect V2: https://docs.walletconnect.com/2.0/json-rpc/cosmos.
 // Implemented by Backend.
@@ -100,6 +105,8 @@ type EVMBackend interface {
 	GetProof(address common.Address, storageKeys []string, blockNrOrHash rpctypes.BlockNumberOrHash) (*rpctypes.AccountResult, error)
 	GetTransactionCount(address common.Address, blockNum rpctypes.BlockNumber) (*hexutil.Uint64, error)
 	GetNodePublicKey(blockNum rpctypes.BlockNumber) (string, error)
+	GetIssuanceProof(credentialHash hexutil.Bytes) (string, error)
+	GetNonRevocationProof(credentialHash hexutil.Bytes) (string, error)
 
 	// Chain Info
 	ChainID() (*hexutil.Big, error)
