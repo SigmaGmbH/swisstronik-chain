@@ -1,10 +1,10 @@
 package types
 
 import (
-	"errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/iden3/go-iden3-crypto/babyjub"
+	"math/big"
 	"strings"
 )
 
@@ -28,17 +28,27 @@ func ParseAddress(input string) (sdk.AccAddress, error) {
 	return accAddress, nil
 }
 
-// ValidateEdDSAPublicKey tries to decompress provided BJJ public key
-func ValidateEdDSAPublicKey(input []byte) error {
-	if len(input) != 32 {
-		return errors.New("invalid public key length. Expected 32 bytes")
-	}
-
-	pointBuf := babyjub.NewPoint()
-	_, err := pointBuf.Decompress([32]byte(input))
+// ExtractXCoordinate tries to extract X-coordinate from provided BJJ public key
+func ExtractXCoordinate(compressedPublicKeyBytes []byte) (*big.Int, error) {
+	compressedPubKeyBig := new(big.Int).SetBytes(compressedPublicKeyBytes)
+	println("DEBUG: Restored compressed public key: ", compressedPubKeyBig.String())
+	decodedBytes := bigIntToLittleEndianBytes(compressedPubKeyBig)
+	pointBuf, err := babyjub.NewPoint().Decompress([32]byte(decodedBytes))
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return pointBuf.X, nil
+}
+
+func bigIntToLittleEndianBytes(n *big.Int) []byte {
+	if n.Sign() == 0 {
+		return []byte{0}
+	}
+
+	bytes := n.Bytes()
+	for i, j := 0, len(bytes)-1; i < j; i, j = i+1, j-1 {
+		bytes[i], bytes[j] = bytes[j], bytes[i]
+	}
+	return bytes
 }

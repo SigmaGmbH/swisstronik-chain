@@ -183,7 +183,7 @@ func (k Keeper) SetAddressVerificationStatus(ctx sdk.Context, address sdk.AccAdd
 
 // AddVerificationDetailsV2 writes details of passed verification by provided address. It writes credential to ZK-SDI
 // even if user has no attached public key
-func (k Keeper) AddVerificationDetailsV2(ctx sdk.Context, userAddress sdk.AccAddress, verificationType types.VerificationType, details *types.VerificationDetails, userPublicKey []byte) ([]byte, error) {
+func (k Keeper) AddVerificationDetailsV2(ctx sdk.Context, userAddress sdk.AccAddress, verificationType types.VerificationType, details *types.VerificationDetails, userPublicKeyCompressed []byte) ([]byte, error) {
 	// Check if issuer is verified and not banned
 	issuerAddress, err := sdk.AccAddressFromBech32(details.IssuerAddress)
 	if err != nil {
@@ -195,17 +195,22 @@ func (k Keeper) AddVerificationDetailsV2(ctx sdk.Context, userAddress sdk.AccAdd
 		return nil, err
 	}
 
-	if err = types.ValidateEdDSAPublicKey(userPublicKey); err != nil {
+	println("DEBUG: Provided user public key: ", hexutil.Encode(userPublicKeyCompressed))
+
+	xPublicKey, err := types.ExtractXCoordinate(userPublicKeyCompressed)
+	if err != nil {
 		return nil, errors.Wrap(types.ErrBadRequest, err.Error())
 	}
 
-	if err = k.LinkVerificationIdToPubKey(ctx, userPublicKey, verificationDetailsID); err != nil {
+	println("DEBUG: X coordinate: ", xPublicKey.String())
+
+	if err = k.LinkVerificationIdToPubKey(ctx, xPublicKey.Bytes(), verificationDetailsID); err != nil {
 		return nil, errors.Wrap(types.ErrBadRequest, err.Error())
 	}
 	credentialValue := &types.ZKCredential{
 		Type:                verificationType,
 		IssuerAddress:       issuerAddress.Bytes(),
-		HolderPublicKey:     userPublicKey,
+		HolderPublicKey:     xPublicKey.Bytes(),
 		ExpirationTimestamp: details.ExpirationTimestamp,
 		IssuanceTimestamp:   details.IssuanceTimestamp,
 	}
@@ -818,11 +823,12 @@ func (k Keeper) SetHolderPublicKey(ctx sdk.Context, user sdk.AccAddress, publicK
 		return errors.Wrap(types.ErrInvalidParam, "public key already set")
 	}
 
-	if err := types.ValidateEdDSAPublicKey(publicKey); err != nil {
+	xCoordPublicKey, err := types.ExtractXCoordinate(publicKey)
+	if err != nil {
 		return errors.Wrapf(types.ErrInvalidParam, "cannot parse provided public key: (%s)", err)
 	}
 
-	store.Set(user.Bytes(), publicKey)
+	store.Set(user.Bytes(), xCoordPublicKey.Bytes())
 
 	return nil
 }

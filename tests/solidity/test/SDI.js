@@ -2,20 +2,31 @@ const {ethers} = require("hardhat");
 const {sendShieldedQuery, sendShieldedTransaction} = require("./testUtils");
 const {expect} = require("chai");
 const {randomBytes} = require("@noble/hashes/utils");
-const {deriveSecretScalar, derivePublicKey} = require("@zk-kit/eddsa-poseidon");
+const {deriveSecretScalar, derivePublicKey, packPublicKey} = require("@zk-kit/eddsa-poseidon");
+const {packPoint, inCurve} = require("@zk-kit/baby-jubjub")
 
 const DEFAULT_PROXY_CONTRACT_ADDRESS = '0x2fc0b35e41a9a2ea248a275269af1c8b3a061167'
 // WARNING: This private key is publicly available
 const DEFAULT_PK = "D5DA6D43250C8EB630C1AB8A80F19C673267A6B210C10C41065D5C34FC369DCB";
 
 const createKeypair = () => {
-    const seed = randomBytes(32);
+    const seed = randomBytes(30);
     const privateKey = deriveSecretScalar(seed);
     const publicKey = derivePublicKey(seed);
+
+    console.log('created public key: ', publicKey)
+
+    if (!inCurve(publicKey)) {
+        throw Error('public key is not on curve')
+    }
+
+    const compressedKey = packPoint(publicKey);
+    console.log('compressed key: ', compressedKey.toString())
 
     return {
         seed, privateKey,
         publicKey: publicKey[0],
+        compressedKey,
     };
 }
 
@@ -45,7 +56,8 @@ describe('SDI tests', () => {
         userKeypair = createKeypair();
 
         // Verify user
-        const encodedPublicKey = ethers.utils.hexlify(userKeypair.publicKey)
+        const encodedPublicKey = ethers.utils.hexlify(userKeypair.compressedKey)
+        console.log(encodedPublicKey)
         const tx = await contract.markUserAsVerifiedV2(userSigner.address, encodedPublicKey);
         const res = await tx.wait();
 

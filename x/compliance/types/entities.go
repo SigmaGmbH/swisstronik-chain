@@ -2,7 +2,6 @@ package types
 
 import (
 	"encoding/binary"
-	"github.com/iden3/go-iden3-crypto/babyjub"
 	"github.com/iden3/go-iden3-crypto/poseidon"
 	"math/big"
 )
@@ -18,13 +17,8 @@ func (c *ZKCredential) Hash() (*big.Int, error) {
 	issuerAddressBig := new(big.Int).SetBytes(c.IssuerAddress)
 	expirationBig := big.NewInt(int64(c.ExpirationTimestamp))
 	issuanceBig := big.NewInt(int64(c.IssuanceTimestamp))
-
-	// Decompress public key and hash only X-coordinate
-	point, err := babyjub.NewPoint().Decompress([32]byte(c.HolderPublicKey))
-	if err != nil {
-		return nil, err
-	}
-	holderPublicKeyBig := point.X
+	holderPublicKeyBig := new(big.Int).SetBytes(c.HolderPublicKey)
+	println("DEBUG: Hash x-coord: ", holderPublicKeyBig.String())
 
 	valuesToHash := []*big.Int{typeBig, issuerAddressBig, holderPublicKeyBig, expirationBig, issuanceBig}
 	return poseidon.Hash(valuesToHash)

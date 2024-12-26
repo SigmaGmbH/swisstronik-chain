@@ -285,7 +285,7 @@ func (msg *MsgAttachHolderPublicKey) ValidateBasic() error {
 		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid signer address (%s)", err)
 	}
 
-	if err = ValidateEdDSAPublicKey(msg.HolderPublicKey); err != nil {
+	if _, err = ExtractXCoordinate(msg.HolderPublicKey); err != nil {
 		return errors.Wrapf(sdkerrors.ErrInvalidPubKey, "invalid holder public key: (%s)", err)
 	}
 
