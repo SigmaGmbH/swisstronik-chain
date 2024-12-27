@@ -18,7 +18,6 @@ func (c *ZKCredential) Hash() (*big.Int, error) {
 	expirationBig := big.NewInt(int64(c.ExpirationTimestamp))
 	issuanceBig := big.NewInt(int64(c.IssuanceTimestamp))
 	holderPublicKeyBig := new(big.Int).SetBytes(c.HolderPublicKey)
-	println("DEBUG: Hash x-coord: ", holderPublicKeyBig.String())
 
 	valuesToHash := []*big.Int{typeBig, issuerAddressBig, holderPublicKeyBig, expirationBig, issuanceBig}
 	return poseidon.Hash(valuesToHash)

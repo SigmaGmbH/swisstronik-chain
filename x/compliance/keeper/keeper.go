@@ -195,14 +195,10 @@ func (k Keeper) AddVerificationDetailsV2(ctx sdk.Context, userAddress sdk.AccAdd
 		return nil, err
 	}
 
-	println("DEBUG: Provided user public key: ", hexutil.Encode(userPublicKeyCompressed))
-
 	xPublicKey, err := types.ExtractXCoordinate(userPublicKeyCompressed)
 	if err != nil {
 		return nil, errors.Wrap(types.ErrBadRequest, err.Error())
 	}
-
-	println("DEBUG: X coordinate: ", xPublicKey.String())
 
 	if err = k.LinkVerificationIdToPubKey(ctx, xPublicKey.Bytes(), verificationDetailsID); err != nil {
 		return nil, errors.Wrap(types.ErrBadRequest, err.Error())
@@ -218,6 +214,7 @@ func (k Keeper) AddVerificationDetailsV2(ctx sdk.Context, userAddress sdk.AccAdd
 	if err != nil {
 		return nil, errors.Wrap(types.ErrBadRequest, err.Error())
 	}
+	println("DEBUG: credential hash: ", credentialHash.String())
 	err = k.AddCredentialHashToIssued(ctx, credentialHash)
 	if err != nil {
 		return nil, errors.Wrap(types.ErrBadRequest, err.Error())

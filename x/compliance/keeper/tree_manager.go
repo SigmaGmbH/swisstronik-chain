@@ -73,7 +73,12 @@ func (k Keeper) GetIssuanceProof(ctx sdk.Context, credentialHash common.Hash) ([
 	}
 
 	credentialHashBig := new(big.Int).SetBytes(credentialHash.Bytes())
-	proof, _, err := tree.GenerateProof(sdk.WrapSDKContext(ctx), credentialHashBig, nil)
+	credentialKey, err := poseidon.Hash([]*big.Int{credentialHashBig})
+	if err != nil {
+		return nil, err
+	}
+	println("DEBUG: get issuance proof: restored credential hash: ", credentialHashBig.String())
+	proof, _, err := tree.GenerateProof(sdk.WrapSDKContext(ctx), credentialKey, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +94,11 @@ func (k Keeper) GetNonRevocationProof(ctx sdk.Context, credentialHash common.Has
 	}
 
 	credentialHashBig := new(big.Int).SetBytes(credentialHash.Bytes())
-	proof, _, err := tree.GenerateProof(sdk.WrapSDKContext(ctx), credentialHashBig, nil)
+	credentialKey, err := poseidon.Hash([]*big.Int{credentialHashBig})
+	if err != nil {
+		return nil, err
+	}
+	proof, _, err := tree.GenerateProof(sdk.WrapSDKContext(ctx), credentialKey, nil)
 	if err != nil {
 		return nil, err
 	}

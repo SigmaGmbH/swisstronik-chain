@@ -58,7 +58,7 @@ describe('SDI tests', () => {
         // Verify user
         const encodedPublicKey = ethers.utils.hexlify(userKeypair.compressedKey)
         console.log(encodedPublicKey)
-        const tx = await contract.markUserAsVerifiedV2(userSigner.address, encodedPublicKey);
+        const tx = await contract.markUserAsVerifiedV2(userSigner.address, encodedPublicKey, {gasLimit: 500_000});
         const res = await tx.wait();
 
         expect(res.events[0].args.success).to.be.true
@@ -67,6 +67,7 @@ describe('SDI tests', () => {
 
     it('Should be able to verify correct proof', async () => {
         const credentialHash = await recoverCredentialHash(provider, verificationId)
+        console.log('Credential hash JS: ', credentialHash)
         const issuanceProof = await provider.send("eth_issuanceProof", [credentialHash]);
         const revocationProof = await provider.send("eth_nonRevocationProof", [credentialHash]);
 
