@@ -75,7 +75,7 @@ func (q Connector) Query(req []byte) ([]byte, error) {
 	case *librustgo.CosmosRequest_RevocationTreeRoot:
 		return q.GetRevocationTreeRoot()
 	case *librustgo.CosmosRequest_AddVerificationDetailsV2:
-        return q.AddVerificationDetailsV2(request)
+		return q.AddVerificationDetailsV2(request)
 	}
 
 	return nil, errors.New("wrong query received")
@@ -337,6 +337,7 @@ func (q Connector) GetVerificationData(req *librustgo.CosmosRequest_GetVerificat
 			Version:              details.Version,
 		})
 	}
+	println("debug: return data len: ", len(resData))
 	return proto.Marshal(&librustgo.QueryGetVerificationDataResponse{
 		Data: resData,
 	})

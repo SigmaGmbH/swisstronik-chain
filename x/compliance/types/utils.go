@@ -1,10 +1,12 @@
 package types
 
 import (
+	"fmt"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/iden3/go-iden3-crypto/babyjub"
 	"math/big"
+	"slices"
 	"strings"
 )
 
@@ -30,10 +32,14 @@ func ParseAddress(input string) (sdk.AccAddress, error) {
 
 // ExtractXCoordinate tries to extract X-coordinate from provided BJJ public key
 func ExtractXCoordinate(compressedPublicKeyBytes []byte) (*big.Int, error) {
-	compressedPubKeyBig := new(big.Int).SetBytes(compressedPublicKeyBytes)
-	println("DEBUG: Restored compressed public key: ", compressedPubKeyBig.String())
-	decodedBytes := bigIntToLittleEndianBytes(compressedPubKeyBig)
-	pointBuf, err := babyjub.NewPoint().Decompress([32]byte(decodedBytes))
+	if len(compressedPublicKeyBytes) != 32 {
+		return nil, fmt.Errorf("invalid compressed public key bytes. Got length: %d", len(compressedPublicKeyBytes))
+	}
+
+	// Convert to little endian
+	slices.Reverse(compressedPublicKeyBytes)
+
+	pointBuf, err := babyjub.NewPoint().Decompress([32]byte(compressedPublicKeyBytes))
 	if err != nil {
 		return nil, err
 	}
