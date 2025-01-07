@@ -103,7 +103,8 @@ describe('ComplianceBridge', () => {
         const tx = await sendShieldedTransaction(
             signer,
             contract.address,
-            contract.interface.encodeFunctionData('markUserAsVerified', [signer.address])
+            contract.interface.encodeFunctionData('markUserAsVerified', [signer.address]),
+            0, true
         )
         const res = await tx.wait()
         const parsedLog = contract.interface.parseLog(res.logs[0])
@@ -134,7 +135,8 @@ describe('ComplianceBridge', () => {
         const tx = await sendShieldedTransaction(
             signer,
             contract.address,
-            contract.interface.encodeFunctionData('markUserAsVerifiedV2', [signer.address, userPublicKey])
+            contract.interface.encodeFunctionData('markUserAsVerifiedV2', [signer.address, userPublicKey]),
+            0, true
         )
         const res = await tx.wait()
         const parsedLog = contract.interface.parseLog(res.logs[0])
@@ -169,7 +171,8 @@ describe('ComplianceBridge', () => {
             const tx = await sendShieldedTransaction(
                 signer,
                 contract.address,
-                contract.interface.encodeFunctionData('markUserAsVerified', [waitingForVerified.address])
+                contract.interface.encodeFunctionData('markUserAsVerified', [waitingForVerified.address]),
+                0, true
             )
             await tx.wait()
 

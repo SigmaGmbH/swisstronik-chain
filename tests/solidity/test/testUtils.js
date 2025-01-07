@@ -1,6 +1,6 @@
 const { encryptDataField, decryptNodeResponse } = require('@swisstronik/swisstronik.js')
 
-module.exports.sendShieldedTransaction = async (signer, destination, data, value) => {
+module.exports.sendShieldedTransaction = async (signer, destination, data, value, constantGasLimit) => {
     // Encrypt transaction data
     const [encryptedData] = await encryptDataField(
         signer.provider.connection.url,
@@ -13,7 +13,7 @@ module.exports.sendShieldedTransaction = async (signer, destination, data, value
         to: destination,
         data: encryptedData,
         value,
-        gasLimit: 500_000,
+        gasLimit: constantGasLimit ? 500_000 : undefined,
         // gasPrice: 0 // We're using 0 gas price in tests. Comment it, if you're running tests on actual network
     })
 }
