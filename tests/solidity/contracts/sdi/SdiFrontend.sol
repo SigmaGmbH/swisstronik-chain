@@ -8,7 +8,7 @@ error PrecompileError(bytes _data);
 contract SdiFrontend {
     event Verified(address _user);
 
-    address issuer = 0x2Fc0B35E41a9a2eA248a275269Af1c8B3a061167;
+    address public issuer = 0x2Fc0B35E41a9a2eA248a275269Af1c8B3a061167;
 
     PlonkVerifier public verifier;
 

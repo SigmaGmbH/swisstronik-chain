@@ -2,9 +2,10 @@ const {ethers} = require("hardhat");
 const {sendShieldedQuery, sendShieldedTransaction} = require("./testUtils");
 const {expect} = require("chai");
 const {randomBytes} = require("@noble/hashes/utils");
-const {deriveSecretScalar, derivePublicKey, packPublicKey} = require("@zk-kit/eddsa-poseidon");
+const {deriveSecretScalar, derivePublicKey, packPublicKey, signMessage} = require("@zk-kit/eddsa-poseidon");
 const {packPoint, inCurve} = require("@zk-kit/baby-jubjub")
 const snarkjs = require('snarkjs')
+const {bech32toEthAddress} = require('@swisstronik/utils')
 
 const DEFAULT_PROXY_CONTRACT_ADDRESS = '0x2fc0b35e41a9a2ea248a275269af1c8b3a061167'
 // WARNING: This private key is publicly available
@@ -115,11 +116,42 @@ describe('SDI tests', () => {
     });
 
     it('Should construct and verify correct proof', async () => {
+        const expectedIssuer = await frontendContract.issuer();
+        const allowedIssuers = [BigInt(expectedIssuer).toString(), "0", "0", "0", "0"];
+        const currentTimestamp = Date.now(); // should be `block.timestamp`
+
         const credentialHash = await recoverCredentialHash(provider, verificationId);
         const issuanceProof = await getIssuanceProofInput(provider, credentialHash);
-        const revocationProof = await getNonRevocationProofInput(provider, credentialHash);
-        console.log('DEBUG: is proof: ', issuanceProof);
-        console.log('DEBUG: rev proof: ', revocationProof);
+        const nonRevocationProof = await getNonRevocationProofInput(provider, credentialHash);
+
+        const verificationData = await frontendContract.getVerificationData(userSigner.address);
+        const encodedIssuer = BigInt(verificationData[0].issuerAddress);
+
+        const credentialElements = [
+            `${verificationData[0].verificationType}`,
+            encodedIssuer.toString(),
+            `${verificationData[0].issuanceTimestamp}`,
+            `${verificationData[0].expirationTimestamp}`
+        ];
+
+        const holderSignature = signMessage(userKeypair.seed, credentialHash);
+
+        const input = {
+            holderPrivateKey: userKeypair.privateKey,
+            ...issuanceProof,
+            ...nonRevocationProof,
+            credentialElements,
+            allowedIssuers,
+            currentTimestamp,
+            S: holderSignature.S,
+            Rx: holderSignature.R8[0],
+            Ry: holderSignature.R8[1],
+        };
+
+        console.log('input: ', input)
+
+        // TODO: Construct final proof using snarkjs
+        // TODO: Verify on-chain
     });
 
     // it('Should be able to verify correct proof', async () => {
