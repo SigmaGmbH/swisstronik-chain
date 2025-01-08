@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"encoding/json"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/iden3/go-iden3-crypto/poseidon"
@@ -77,13 +78,12 @@ func (k Keeper) GetIssuanceProof(ctx sdk.Context, credentialHash common.Hash) ([
 	if err != nil {
 		return nil, err
 	}
-	println("DEBUG: get issuance proof: restored credential hash: ", credentialHashBig.String())
-	proof, _, err := tree.GenerateProof(sdk.WrapSDKContext(ctx), credentialKey, nil)
+	proof, err := tree.GenerateCircomVerifierProof(sdk.WrapSDKContext(ctx), credentialKey, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	return proof.MarshalJSON()
+	return json.Marshal(proof)
 }
 
 func (k Keeper) GetNonRevocationProof(ctx sdk.Context, credentialHash common.Hash) ([]byte, error) {
@@ -98,12 +98,12 @@ func (k Keeper) GetNonRevocationProof(ctx sdk.Context, credentialHash common.Has
 	if err != nil {
 		return nil, err
 	}
-	proof, _, err := tree.GenerateProof(sdk.WrapSDKContext(ctx), credentialKey, nil)
+	proof, err := tree.GenerateCircomVerifierProof(sdk.WrapSDKContext(ctx), credentialKey, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	return proof.MarshalJSON()
+	return json.Marshal(proof)
 }
 
 // SetTreeRoot is used only for testing

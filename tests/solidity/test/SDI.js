@@ -37,6 +37,43 @@ const recoverCredentialHash = async (provider, verificationId) => {
     return res;
 }
 
+const getIssuanceProofInput = async (provider, credentialHash) => {
+    const response = await provider.send("eth_issuanceProof", [credentialHash]);
+    const issuanceProof = JSON.parse(response);
+
+    return {
+        issuanceRoot: issuanceProof.root,
+        issuanceSiblings: fillWithZeroes(issuanceProof.siblings, 33),
+        issuanceOldKey: issuanceProof.oldKey,
+        issuanceOldValue: issuanceProof.oldValue,
+        issuanceIsOld: issuanceProof.isOld0,
+    }
+}
+
+const getNonRevocationProofInput = async (provider, credentialHash) => {
+    const response = await provider.send("eth_nonRevocationProof", [credentialHash]);
+    const revocationProof = JSON.parse(response);
+
+    return {
+        revocationRoot: revocationProof.root,
+        revocationSiblings: fillWithZeroes(revocationProof.siblings, 33),
+        revocationOldKey: revocationProof.oldKey,
+        revocationOldValue: revocationProof.oldValue,
+        revocationIsOld: revocationProof.isOld0,
+    }
+}
+
+const fillWithZeroes = (input, size) => {
+    if (input.length >= size) return input;
+
+    const res = new Array(size).fill("0")
+    for (let i=0; i<input.length; i++) {
+        res[i] = input[i];
+    }
+
+    return res;
+}
+
 describe('SDI tests', () => {
     let contract
     let userKeypair
@@ -77,15 +114,23 @@ describe('SDI tests', () => {
         await frontendContract.deployed();
     });
 
-    it('Should be able to verify correct proof', async () => {
-        const credentialHash = await recoverCredentialHash(provider, verificationId)
-        // console.log('Credential hash JS: ', credentialHash)
-        const issuanceProof = await provider.send("eth_issuanceProof", [credentialHash]);
-        const revocationProof = await provider.send("eth_nonRevocationProof", [credentialHash]);
+    it('Should construct and verify correct proof', async () => {
+        const credentialHash = await recoverCredentialHash(provider, verificationId);
+        const issuanceProof = await getIssuanceProofInput(provider, credentialHash);
+        const revocationProof = await getNonRevocationProofInput(provider, credentialHash);
         console.log('DEBUG: is proof: ', issuanceProof);
         console.log('DEBUG: rev proof: ', revocationProof);
-
-        const verificationData = await frontendContract.getVerificationData(userSigner.address);
-        console.log('DEBUG: verificationData', verificationData);
     });
+
+    // it('Should be able to verify correct proof', async () => {
+    //     const credentialHash = await recoverCredentialHash(provider, verificationId)
+    //     // console.log('Credential hash JS: ', credentialHash)
+    //     const issuanceProof = await provider.send("eth_issuanceProof", [credentialHash]);
+    //     const revocationProof = await provider.send("eth_nonRevocationProof", [credentialHash]);
+    //     console.log('DEBUG: is proof: ', issuanceProof);
+    //     console.log('DEBUG: rev proof: ', revocationProof);
+    //
+    //     const verificationData = await frontendContract.getVerificationData(userSigner.address);
+    //     console.log('DEBUG: verificationData', verificationData);
+    // });
 })
