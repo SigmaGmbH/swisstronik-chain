@@ -337,7 +337,6 @@ func (q Connector) GetVerificationData(req *librustgo.CosmosRequest_GetVerificat
 			Version:              details.Version,
 		})
 	}
-	println("debug: return data len: ", len(resData))
 	return proto.Marshal(&librustgo.QueryGetVerificationDataResponse{
 		Data: resData,
 	})

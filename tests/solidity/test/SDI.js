@@ -5,7 +5,7 @@ const {randomBytes} = require("@noble/hashes/utils");
 const {deriveSecretScalar, derivePublicKey, packPublicKey, signMessage} = require("@zk-kit/eddsa-poseidon");
 const {packPoint, inCurve} = require("@zk-kit/baby-jubjub")
 const snarkjs = require('snarkjs')
-const {bech32toEthAddress} = require('@swisstronik/utils')
+const path = require('path');
 
 const DEFAULT_PROXY_CONTRACT_ADDRESS = '0x2fc0b35e41a9a2ea248a275269af1c8b3a061167'
 // WARNING: This private key is publicly available
@@ -40,6 +40,7 @@ const recoverCredentialHash = async (provider, verificationId) => {
 
 const getIssuanceProofInput = async (provider, credentialHash) => {
     const response = await provider.send("eth_issuanceProof", [credentialHash]);
+    console.log('debug: response')
     const issuanceProof = JSON.parse(response);
 
     return {
@@ -47,7 +48,7 @@ const getIssuanceProofInput = async (provider, credentialHash) => {
         issuanceSiblings: fillWithZeroes(issuanceProof.siblings, 33),
         issuanceOldKey: issuanceProof.oldKey,
         issuanceOldValue: issuanceProof.oldValue,
-        issuanceIsOld: issuanceProof.isOld0,
+        issuanceIsOld0: issuanceProof.isOld0,
     }
 }
 
@@ -60,7 +61,7 @@ const getNonRevocationProofInput = async (provider, credentialHash) => {
         revocationSiblings: fillWithZeroes(revocationProof.siblings, 33),
         revocationOldKey: revocationProof.oldKey,
         revocationOldValue: revocationProof.oldValue,
-        revocationIsOld: revocationProof.isOld0,
+        revocationIsOld0: revocationProof.isOld0,
     }
 }
 
@@ -73,6 +74,15 @@ const fillWithZeroes = (input, size) => {
     }
 
     return res;
+}
+
+const getProofFiles = () => {
+    return {
+        sdi: {
+            zkey: path.join(process.cwd(), 'test', 'misc', 'sdi.zkey'),
+            wasm: path.join(process.cwd(), 'test', 'misc', 'sdi.wasm'),
+        }
+    }
 }
 
 describe('SDI tests', () => {
@@ -130,8 +140,8 @@ describe('SDI tests', () => {
         const credentialElements = [
             `${verificationData[0].verificationType}`,
             encodedIssuer.toString(),
+            `${verificationData[0].expirationTimestamp}`,
             `${verificationData[0].issuanceTimestamp}`,
-            `${verificationData[0].expirationTimestamp}`
         ];
 
         const holderSignature = signMessage(userKeypair.seed, credentialHash);
@@ -150,7 +160,10 @@ describe('SDI tests', () => {
 
         console.log('input: ', input)
 
-        // TODO: Construct final proof using snarkjs
+        const proofFiles = getProofFiles();
+        const proof = await snarkjs.plonk.fullProve(input, proofFiles.sdi.wasm, proofFiles.sdi.zkey);
+
+        console.log(proof)
         // TODO: Verify on-chain
     });
 

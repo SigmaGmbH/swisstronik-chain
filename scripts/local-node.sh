@@ -57,6 +57,9 @@ jq '.app_state.compliance.issuerDetails += [{"address": "swtr19lqtxhjp4x3w5fy2ya
 jq '.app_state.compliance.addressDetails += [{"address": "swtr19lqtxhjp4x3w5fy2yafxntcu3vaqvyt827e4ct", "details": {"is_revoked": false, "is_verified": true, "verifications": []}}]' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
 jq --arg CODE_HASH $COMPLIANCE_PROXY_CODEHASH '.app_state.auth.accounts += [{"@type": "/ethermint.types.v1.EthAccount", "base_account": {"account_number": "5", "address": "swtr19lqtxhjp4x3w5fy2yafxntcu3vaqvyt827e4ct", "pub_key": null, "sequence": "1" }, "code_hash": $CODE_HASH}]' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
 
+# disable node logs. remove this line if you need all logs
+sed -i 's/info/error/g' "$CONFIG"
+
 # expose ports
 sed -i 's/127.0.0.1:26657/0.0.0.0:26657/g' "$CONFIG"
 sed -i 's/127.0.0.1:8545/0.0.0.0:8545/g' "$APP_TOML"
