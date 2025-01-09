@@ -47,6 +47,11 @@ func (k Keeper) AddCredentialHashToIssued(ctx sdk.Context, credentialHash *big.I
 		return err
 	}
 
+	// TODO: Quick fix move somewhere
+	if err = k.addZeroElementToRevocationTree(ctx); err != nil {
+		return err
+	}
+
 	return tree.Add(context, key, credentialHash)
 }
 
@@ -64,6 +69,24 @@ func (k Keeper) MarkCredentialHashAsRevoked(ctx sdk.Context, credentialHash comm
 	}
 
 	return tree.Add(sdk.WrapSDKContext(ctx), key, value)
+}
+
+func (k Keeper) addZeroElementToRevocationTree(ctx sdk.Context) error {
+	storage := NewTreeStorage(ctx, &k, types.KeyPrefixRevocationTree)
+	tree, err := merkletree.NewMerkleTree(ctx, &storage, 32)
+	if err != nil {
+		return err
+	}
+
+	// We add zero element to revocation tree to make it work correctly
+	zero := big.NewInt(0)
+	if _, _, _, err = tree.Get(sdk.WrapSDKContext(ctx), zero); err != nil {
+		if err = tree.Add(sdk.WrapSDKContext(ctx), zero, zero); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (k Keeper) GetIssuanceProof(ctx sdk.Context, credentialHash common.Hash) ([]byte, error) {
