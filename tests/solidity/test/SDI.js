@@ -166,16 +166,4 @@ describe('SDI tests', () => {
         console.log(proof)
         // TODO: Verify on-chain
     });
-
-    // it('Should be able to verify correct proof', async () => {
-    //     const credentialHash = await recoverCredentialHash(provider, verificationId)
-    //     // console.log('Credential hash JS: ', credentialHash)
-    //     const issuanceProof = await provider.send("eth_issuanceProof", [credentialHash]);
-    //     const revocationProof = await provider.send("eth_nonRevocationProof", [credentialHash]);
-    //     console.log('DEBUG: is proof: ', issuanceProof);
-    //     console.log('DEBUG: rev proof: ', revocationProof);
-    //
-    //     const verificationData = await frontendContract.getVerificationData(userSigner.address);
-    //     console.log('DEBUG: verificationData', verificationData);
-    // });
 })
