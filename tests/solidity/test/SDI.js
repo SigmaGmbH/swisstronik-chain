@@ -1,8 +1,7 @@
 const {ethers} = require("hardhat");
-const {sendShieldedQuery, sendShieldedTransaction} = require("./testUtils");
 const {expect} = require("chai");
 const {randomBytes} = require("@noble/hashes/utils");
-const {deriveSecretScalar, derivePublicKey, packPublicKey, signMessage} = require("@zk-kit/eddsa-poseidon");
+const {deriveSecretScalar, derivePublicKey, signMessage} = require("@zk-kit/eddsa-poseidon");
 const {packPoint, inCurve} = require("@zk-kit/baby-jubjub")
 const snarkjs = require('snarkjs')
 const path = require('path');
@@ -161,9 +160,13 @@ describe('SDI tests', () => {
         console.log('input: ', input)
 
         const proofFiles = getProofFiles();
-        const proof = await snarkjs.plonk.fullProve(input, proofFiles.sdi.wasm, proofFiles.sdi.zkey);
+        const {proof, publicSignals} = await snarkjs.plonk.fullProve(input, proofFiles.sdi.wasm, proofFiles.sdi.zkey);
 
-        console.log(proof)
-        // TODO: Verify on-chain
+        const calldata = await snarkjs.plonk.exportSolidityCallData(proof, publicSignals);
+        const [encodedProof] = calldata.split(',')
+        const proofBytes = encodedProof.trim()
+
+        const isVerifiedOnChain = await verifierContract.verifyProof(proofBytes, publicSignals);
+        expect(isVerifiedOnChain).to.be.true;
     });
 })
