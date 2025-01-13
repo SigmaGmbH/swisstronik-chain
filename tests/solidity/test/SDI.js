@@ -102,7 +102,6 @@ describe('SDI tests', () => {
 
         // Verify user
         const encodedPublicKey = ethers.utils.hexlify(userKeypair.compressedKey)
-        console.log(encodedPublicKey)
         const tx = await contract.markUserAsVerifiedV2(userSigner.address, encodedPublicKey, {gasLimit: 500_000});
         const res = await tx.wait();
 
