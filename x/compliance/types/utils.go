@@ -31,13 +31,15 @@ func ParseAddress(input string) (sdk.AccAddress, error) {
 }
 
 // ExtractXCoordinate tries to extract X-coordinate from provided BJJ public key
-func ExtractXCoordinate(compressedPublicKeyBytes []byte) (*big.Int, error) {
+func ExtractXCoordinate(compressedPublicKeyBytes []byte, isLittleEndian bool) (*big.Int, error) {
 	if len(compressedPublicKeyBytes) != 32 {
 		return nil, fmt.Errorf("invalid compressed public key bytes. Got length: %d", len(compressedPublicKeyBytes))
 	}
 
-	// Convert to little endian
-	slices.Reverse(compressedPublicKeyBytes)
+	if !isLittleEndian {
+		// Convert to little endian
+		slices.Reverse(compressedPublicKeyBytes)
+	}
 
 	pointBuf, err := babyjub.NewPoint().Decompress([32]byte(compressedPublicKeyBytes))
 	if err != nil {
@@ -45,16 +47,4 @@ func ExtractXCoordinate(compressedPublicKeyBytes []byte) (*big.Int, error) {
 	}
 
 	return pointBuf.X, nil
-}
-
-func bigIntToLittleEndianBytes(n *big.Int) []byte {
-	if n.Sign() == 0 {
-		return []byte{0}
-	}
-
-	bytes := n.Bytes()
-	for i, j := 0, len(bytes)-1; i < j; i, j = i+1, j-1 {
-		bytes[i], bytes[j] = bytes[j], bytes[i]
-	}
-	return bytes
 }

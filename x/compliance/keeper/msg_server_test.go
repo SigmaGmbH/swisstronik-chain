@@ -1274,8 +1274,7 @@ func (suite *KeeperTestSuite) TestHandleAttachPublicKey() {
 			name: "valid signer, valid public key",
 			init: func() {
 				signer = tests.RandomAccAddress()
-				pk := babyjub.NewRandPrivKey()
-				pubKeyCompressed := pk.Public().Compress()
+				pubKeyCompressed := tests.RandomEdDSAPubKey()
 				publicKey = pubKeyCompressed[:]
 			},
 			malleate: func() *types.MsgAttachHolderPublicKey {
@@ -1383,8 +1382,7 @@ func (suite *KeeperTestSuite) TestRevokeInSMT() {
 				suite.Require().NoError(err)
 
 				// Set holder public key
-				pk := babyjub.NewRandPrivKey()
-				pubKeyCompressed := pk.Public().Compress()
+				pubKeyCompressed := tests.RandomEdDSAPubKey()
 				err = suite.keeper.SetHolderPublicKey(suite.ctx, holder, pubKeyCompressed[:])
 				suite.Require().NoError(err)
 
@@ -1542,8 +1540,7 @@ func (suite *KeeperTestSuite) TestConvertCredential() {
 				suite.Require().NoError(err)
 
 				// Set holder public key
-				pk := babyjub.NewRandPrivKey()
-				pubKeyCompressed := pk.Public().Compress()
+				pubKeyCompressed := tests.RandomEdDSAPubKey()
 				err = suite.keeper.SetHolderPublicKey(suite.ctx, holder, pubKeyCompressed[:])
 				suite.Require().NoError(err)
 
@@ -1600,8 +1597,7 @@ func (suite *KeeperTestSuite) TestConvertCredential() {
 				suite.Require().NoError(err)
 
 				// Set holder public key
-				pk := babyjub.NewRandPrivKey()
-				pubKeyCompressed := pk.Public().Compress()
+				pubKeyCompressed := tests.RandomEdDSAPubKey()
 				err = suite.keeper.SetHolderPublicKey(suite.ctx, holder, pubKeyCompressed[:])
 				suite.Require().NoError(err)
 

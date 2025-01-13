@@ -1,8 +1,8 @@
 package keeper_test
 
 import (
+	"bytes"
 	"context"
-	"github.com/iden3/go-iden3-crypto/babyjub"
 	"testing"
 	"time"
 
@@ -467,9 +467,7 @@ func (suite *KeeperTestSuite) TestShouldSetPublicKey() {
 				userAddress = tests.RandomAccAddress()
 			},
 			malleate: func() error {
-				pk := babyjub.NewRandPrivKey()
-				pubKeyCompressed := pk.Public().Compress()
-
+				pubKeyCompressed := tests.RandomEdDSAPubKey()
 				return suite.keeper.SetHolderPublicKey(suite.ctx, userAddress, pubKeyCompressed[:])
 			},
 			expPass: true,
@@ -495,8 +493,7 @@ func (suite *KeeperTestSuite) TestShouldSetPublicKey() {
 				userAddress = tests.RandomAccAddress()
 			},
 			malleate: func() error {
-				pk := babyjub.NewRandPrivKey()
-				pubKeyCompressed := pk.Public().Compress()
+				pubKeyCompressed := tests.RandomEdDSAPubKey()
 
 				err := suite.keeper.SetHolderPublicKey(suite.ctx, userAddress, pubKeyCompressed[:])
 				suite.Require().NoError(err)
@@ -526,8 +523,9 @@ func (suite *KeeperTestSuite) TestShouldSetPublicKey() {
 
 func (suite *KeeperTestSuite) TestShouldGetPublicKey() {
 	var (
-		userAddress sdk.AccAddress
-		expectedKey []byte
+		userAddress    sdk.AccAddress
+		compressedKey  []byte
+		expectedXValue []byte
 	)
 
 	testCases := []struct {
@@ -539,28 +537,31 @@ func (suite *KeeperTestSuite) TestShouldGetPublicKey() {
 			name: "public key was set",
 			init: func() {
 				userAddress = tests.RandomAccAddress()
+				pubKey := tests.RandomEdDSAPubKey()
 
-				pk := babyjub.NewRandPrivKey()
-				pubKeyCompressed := pk.Public().Compress()
-				expectedKey = pubKeyCompressed[:]
+				compressedKey = pubKey[:]
+
+				xCoordinateBig, err := types.ExtractXCoordinate(bytes.Clone(compressedKey), false)
+				suite.Require().NoError(err)
+				expectedXValue = xCoordinateBig.Bytes()
 			},
 			malleate: func() {
-				err := suite.keeper.SetHolderPublicKey(suite.ctx, userAddress, expectedKey)
+				err := suite.keeper.SetHolderPublicKey(suite.ctx, userAddress, compressedKey)
 				suite.Require().NoError(err)
 
-				publicKey := suite.keeper.GetHolderPublicKey(suite.ctx, userAddress)
-				suite.Require().Equal(expectedKey, publicKey)
+				restoredXCoordinate := suite.keeper.GetHolderPublicKey(suite.ctx, userAddress)
+				suite.Require().Equal(expectedXValue, restoredXCoordinate)
 			},
 		},
 		{
 			name: "empty public key",
 			init: func() {
 				userAddress = tests.RandomAccAddress()
-				expectedKey = nil
+				expectedXValue = nil
 			},
 			malleate: func() {
-				publicKey := suite.keeper.GetHolderPublicKey(suite.ctx, userAddress)
-				suite.Require().Equal(expectedKey, publicKey)
+				restoredXCoordinate := suite.keeper.GetHolderPublicKey(suite.ctx, userAddress)
+				suite.Require().Equal(expectedXValue, restoredXCoordinate)
 			},
 		},
 	}
@@ -637,8 +638,7 @@ func (suite *KeeperTestSuite) TestShouldAddToIssuanceTree() {
 				suite.Require().NoError(err)
 
 				// Set holder public key
-				pk := babyjub.NewRandPrivKey()
-				pubKeyCompressed := pk.Public().Compress()
+				pubKeyCompressed := tests.RandomEdDSAPubKey()
 				err = suite.keeper.SetHolderPublicKey(suite.ctx, userAddress, pubKeyCompressed[:])
 				suite.Require().NoError(err)
 
@@ -713,8 +713,7 @@ func (suite *KeeperTestSuite) TestShouldAddToIssuanceTree() {
 				suite.Require().NoError(err)
 
 				// Set holder public key
-				pk := babyjub.NewRandPrivKey()
-				pubKeyCompressed := pk.Public().Compress()
+				pubKeyCompressed := tests.RandomEdDSAPubKey()
 				err = suite.keeper.SetHolderPublicKey(suite.ctx, userAddress, pubKeyCompressed[:])
 				suite.Require().NoError(err)
 
@@ -841,13 +840,18 @@ func (suite *KeeperTestSuite) TestAddVerificationDetailsV2() {
 				rootBefore, err := suite.keeper.GetIssuanceTreeRoot(suite.ctx)
 				suite.Require().NoError(err)
 
-				holderPublicKeyToSet := tests.RandomEdDSAPubKey()
+				// Create holder public key and extract X-coordinate
+				compressedPublicKeyToSet := tests.RandomEdDSAPubKey()
+				expectedXCoordinate, err := types.ExtractXCoordinate(bytes.Clone(compressedPublicKeyToSet[:]), false)
+				suite.Require().NoError(err)
+				xCoordinateBytes := expectedXCoordinate.Bytes()
+
 				verificationId, err := suite.keeper.AddVerificationDetailsV2(
 					suite.ctx,
 					holderAddress,
 					types.VerificationType_VT_KYC,
 					verificationDetails,
-					holderPublicKeyToSet[:],
+					compressedPublicKeyToSet[:],
 				)
 				suite.Require().NoError(err)
 				suite.Require().NotNil(verificationId)
@@ -857,8 +861,8 @@ func (suite *KeeperTestSuite) TestAddVerificationDetailsV2() {
 				suite.Require().Equal(attachedPublicKeyBefore, attachedPublicKeyAfter)
 
 				// provided public key should be linked to verification id
-				linkedPublicKey := suite.keeper.GetPubKeyByVerificationId(suite.ctx, verificationId)
-				suite.Require().Equal(holderPublicKeyToSet, [32]byte(linkedPublicKey))
+				linkedPublicKeyBytes := suite.keeper.GetPubKeyByVerificationId(suite.ctx, verificationId)
+				suite.Require().Equal(xCoordinateBytes, linkedPublicKeyBytes)
 
 				// issuance tree should be updated
 				rootAfter, err := suite.keeper.GetIssuanceTreeRoot(suite.ctx)
@@ -899,13 +903,18 @@ func (suite *KeeperTestSuite) TestAddVerificationDetailsV2() {
 				rootBefore, err := suite.keeper.GetIssuanceTreeRoot(suite.ctx)
 				suite.Require().NoError(err)
 
-				holderPublicKeyToSet := tests.RandomEdDSAPubKey()
+				// Create holder public key and extract X-coordinate
+				compressedPublicKeyToSet := tests.RandomEdDSAPubKey()
+				expectedXCoordinate, err := types.ExtractXCoordinate(bytes.Clone(compressedPublicKeyToSet[:]), false)
+				suite.Require().NoError(err)
+				expectedXCoordinateBytes := expectedXCoordinate.Bytes()
+
 				verificationId, err := suite.keeper.AddVerificationDetailsV2(
 					suite.ctx,
 					holderAddress,
 					types.VerificationType_VT_KYC,
 					verificationDetails,
-					holderPublicKeyToSet[:],
+					compressedPublicKeyToSet[:],
 				)
 				suite.Require().NoError(err)
 				suite.Require().NotNil(verificationId)
@@ -913,11 +922,11 @@ func (suite *KeeperTestSuite) TestAddVerificationDetailsV2() {
 				// it should not change holder public key
 				attachedPublicKeyAfter := suite.keeper.GetHolderPublicKey(suite.ctx, holderAddress)
 				suite.Require().Equal(attachedPublicKeyBefore, attachedPublicKeyAfter)
-				suite.Require().NotEqual(holderPublicKeyToSet, attachedPublicKeyAfter)
+				suite.Require().NotEqual(compressedPublicKeyToSet, attachedPublicKeyAfter)
 
 				// provided public key should be linked to verification id
 				linkedPublicKey := suite.keeper.GetPubKeyByVerificationId(suite.ctx, verificationId)
-				suite.Require().Equal(holderPublicKeyToSet, [32]byte(linkedPublicKey))
+				suite.Require().Equal(expectedXCoordinateBytes, linkedPublicKey)
 
 				// issuance tree should be updated
 				rootAfter, err := suite.keeper.GetIssuanceTreeRoot(suite.ctx)

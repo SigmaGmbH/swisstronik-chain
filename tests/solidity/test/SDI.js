@@ -15,14 +15,11 @@ const createKeypair = () => {
     const privateKey = deriveSecretScalar(seed);
     const publicKey = derivePublicKey(seed);
 
-    console.log('created public key: ', publicKey)
-
     if (!inCurve(publicKey)) {
         throw Error('public key is not on curve')
     }
 
     const compressedKey = packPoint(publicKey);
-    console.log('compressed key: ', compressedKey.toString())
 
     return {
         seed, privateKey,
@@ -33,13 +30,11 @@ const createKeypair = () => {
 
 const recoverCredentialHash = async (provider, verificationId) => {
     const res = await provider.send("eth_credentialHash", [verificationId]);
-    console.log('DEBUG credential hash: ', res);
     return res;
 }
 
 const getIssuanceProofInput = async (provider, credentialHash) => {
     const response = await provider.send("eth_issuanceProof", [credentialHash]);
-    console.log('debug: response')
     const issuanceProof = JSON.parse(response);
 
     return {
@@ -101,7 +96,6 @@ describe('SDI tests', () => {
 
         // Construct user signer
         userSigner = ethers.Wallet.createRandom().connect(provider);
-        console.log('DEBUG: user address: ', userSigner.address)
 
         // Generate user keypair
         userKeypair = createKeypair();
@@ -156,8 +150,6 @@ describe('SDI tests', () => {
             Rx: holderSignature.R8[0],
             Ry: holderSignature.R8[1],
         };
-
-        console.log('input: ', input)
 
         const proofFiles = getProofFiles();
         const {proof, publicSignals} = await snarkjs.plonk.fullProve(input, proofFiles.sdi.wasm, proofFiles.sdi.zkey);

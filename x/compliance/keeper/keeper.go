@@ -195,7 +195,7 @@ func (k Keeper) AddVerificationDetailsV2(ctx sdk.Context, userAddress sdk.AccAdd
 		return nil, err
 	}
 
-	xPublicKey, err := types.ExtractXCoordinate(userPublicKeyCompressed)
+	xPublicKey, err := types.ExtractXCoordinate(userPublicKeyCompressed, false)
 	if err != nil {
 		return nil, errors.Wrap(types.ErrBadRequest, err.Error())
 	}
@@ -214,7 +214,7 @@ func (k Keeper) AddVerificationDetailsV2(ctx sdk.Context, userAddress sdk.AccAdd
 	if err != nil {
 		return nil, errors.Wrap(types.ErrBadRequest, err.Error())
 	}
-	println("DEBUG: credential hash: ", credentialHash.String())
+
 	err = k.AddCredentialHashToIssued(ctx, credentialHash)
 	if err != nil {
 		return nil, errors.Wrap(types.ErrBadRequest, err.Error())
@@ -820,7 +820,7 @@ func (k Keeper) SetHolderPublicKey(ctx sdk.Context, user sdk.AccAddress, publicK
 		return errors.Wrap(types.ErrInvalidParam, "public key already set")
 	}
 
-	xCoordPublicKey, err := types.ExtractXCoordinate(publicKey)
+	xCoordPublicKey, err := types.ExtractXCoordinate(publicKey, false)
 	if err != nil {
 		return errors.Wrapf(types.ErrInvalidParam, "cannot parse provided public key: (%s)", err)
 	}
