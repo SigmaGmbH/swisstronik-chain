@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/iden3/go-merkletree-sql"
 	"github.com/iden3/go-merkletree-sql/db/memory"
 	"math/big"
@@ -40,4 +41,14 @@ func (suite *KeeperTestSuite) TestProofGeneration() {
 	suite.Require().NoError(err)
 
 	suite.Require().Equal(proof1, proof2)
+}
+
+func (suite *KeeperTestSuite) TestNonInclusionProof() {
+	suite.Setup(suite.T())
+
+	sampleCredentialHash := common.HexToHash("0xabcd")
+	res, err := suite.keeper.GetNonRevocationProof(suite.ctx, sampleCredentialHash)
+	suite.Require().NoError(err)
+
+	suite.Require().NotNil(res)
 }

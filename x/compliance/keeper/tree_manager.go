@@ -47,7 +47,7 @@ func (k Keeper) AddCredentialHashToIssued(ctx sdk.Context, credentialHash *big.I
 		return err
 	}
 
-	// TODO: Quick fix move somewhere
+	// Add zero element to revocation tree
 	if err = k.addZeroElementToRevocationTree(ctx); err != nil {
 		return err
 	}

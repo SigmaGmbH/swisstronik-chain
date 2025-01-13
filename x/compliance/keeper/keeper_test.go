@@ -639,7 +639,7 @@ func (suite *KeeperTestSuite) TestShouldAddToIssuanceTree() {
 
 				// Set holder public key
 				pubKeyCompressed := tests.RandomEdDSAPubKey()
-				err = suite.keeper.SetHolderPublicKey(suite.ctx, userAddress, pubKeyCompressed[:])
+				err = suite.keeper.SetHolderPublicKey(suite.ctx, userAddress, bytes.Clone(pubKeyCompressed[:]))
 				suite.Require().NoError(err)
 
 				verificationDetails := &types.VerificationDetails{
@@ -714,7 +714,7 @@ func (suite *KeeperTestSuite) TestShouldAddToIssuanceTree() {
 
 				// Set holder public key
 				pubKeyCompressed := tests.RandomEdDSAPubKey()
-				err = suite.keeper.SetHolderPublicKey(suite.ctx, userAddress, pubKeyCompressed[:])
+				err = suite.keeper.SetHolderPublicKey(suite.ctx, userAddress, bytes.Clone(pubKeyCompressed[:]))
 				suite.Require().NoError(err)
 
 				err = suite.keeper.SetAddressVerificationStatus(suite.ctx, issuerAddress, true)
@@ -748,6 +748,7 @@ func (suite *KeeperTestSuite) TestShouldAddToIssuanceTree() {
 	}
 
 	for _, tc := range testCases {
+		suite.Setup(suite.T())
 		suite.Run(tc.name, func() {
 			if tc.init != nil {
 				tc.init()

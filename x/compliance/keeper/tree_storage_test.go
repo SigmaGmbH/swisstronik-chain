@@ -52,7 +52,7 @@ func (suite *KeeperTestSuite) TestList() {
 	suite.Setup(suite.T())
 
 	ctx := sdk.WrapSDKContext(suite.ctx)
-	storage := keeper.NewTreeStorage(suite.ctx, &suite.keeper, types.KeyPrefixRevocationTree)
+	storage := keeper.NewTreeStorage(suite.ctx, &suite.keeper, types.KeyPrefixIssuanceTree)
 
 	key, err := merkletree.NewHashFromBigInt(big.NewInt(1))
 	suite.Require().NoError(err)
