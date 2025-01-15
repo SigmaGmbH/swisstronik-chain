@@ -4,6 +4,7 @@ const {randomBytes} = require("@noble/hashes/utils");
 const {deriveSecretScalar, derivePublicKey, signMessage} = require("@zk-kit/eddsa-poseidon");
 const {packPoint, inCurve} = require("@zk-kit/baby-jubjub")
 const snarkjs = require('snarkjs')
+const {buildEddsa} = require('circomlibjs')
 const path = require('path');
 
 const DEFAULT_PROXY_CONTRACT_ADDRESS = '0x2fc0b35e41a9a2ea248a275269af1c8b3a061167'
@@ -30,7 +31,8 @@ const createKeypair = () => {
 
 const recoverCredentialHash = async (provider, verificationId) => {
     const res = await provider.send("eth_credentialHash", [verificationId]);
-    return res;
+    console.log('got credential hash: ', res)
+    return res
 }
 
 const getIssuanceProofInput = async (provider, credentialHash) => {
@@ -77,6 +79,17 @@ const getProofFiles = () => {
             wasm: path.join(process.cwd(), 'test', 'misc', 'sdi.wasm'),
         }
     }
+}
+
+const signMiMC = async (privateKey, message) => {
+    const eddsa = await buildEddsa();
+    const privKey = Buffer.from(privateKey);
+    const msgBuffer = eddsa.F.e(message)
+    const signature = eddsa.signMiMCSponge(privKey, msgBuffer);
+    return {
+        S: signature.S,
+        R8: [eddsa.F.toObject(signature.R8[0]), eddsa.F.toObject(signature.R8[1])]
+    };
 }
 
 describe('SDI tests', () => {
@@ -136,7 +149,7 @@ describe('SDI tests', () => {
             `${verificationData[0].issuanceTimestamp}`,
         ];
 
-        const holderSignature = signMessage(userKeypair.seed, credentialHash);
+        const holderSignature = await signMiMC(userKeypair.seed, BigInt(credentialHash));
 
         const input = {
             holderPrivateKey: userKeypair.privateKey,
