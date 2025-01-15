@@ -136,6 +136,7 @@ describe('SDI tests', () => {
         const currentTimestamp = Date.now(); // should be `block.timestamp`
 
         const credentialHash = await recoverCredentialHash(provider, verificationId);
+        console.log('SDI: got credential hash big int: ', BigInt(credentialHash))
         const issuanceProof = await getIssuanceProofInput(provider, credentialHash);
         const nonRevocationProof = await getNonRevocationProofInput(provider, credentialHash);
 
@@ -148,6 +149,8 @@ describe('SDI tests', () => {
             `${verificationData[0].expirationTimestamp}`,
             `${verificationData[0].issuanceTimestamp}`,
         ];
+
+        console.log('credential elements: ', credentialElements)
 
         const holderSignature = await signMiMC(userKeypair.seed, BigInt(credentialHash));
 

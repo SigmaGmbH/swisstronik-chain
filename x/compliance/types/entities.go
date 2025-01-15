@@ -2,7 +2,7 @@ package types
 
 import (
 	"encoding/binary"
-	"github.com/iden3/go-iden3-crypto/poseidon"
+	"github.com/iden3/go-iden3-crypto/mimc7"
 	"math/big"
 )
 
@@ -20,5 +20,5 @@ func (c *ZKCredential) Hash() (*big.Int, error) {
 	holderPublicKeyBig := new(big.Int).SetBytes(c.HolderPublicKey)
 
 	valuesToHash := []*big.Int{typeBig, issuerAddressBig, holderPublicKeyBig, expirationBig, issuanceBig}
-	return poseidon.Hash(valuesToHash)
+	return mimc7.Hash(valuesToHash, big.NewInt(0))
 }

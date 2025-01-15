@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/iden3/go-iden3-crypto/poseidon"
+	"github.com/iden3/go-iden3-crypto/mimc7"
 	"github.com/iden3/go-merkletree-sql"
 	"math/big"
 	"swisstronik/x/compliance/types"
@@ -42,7 +42,7 @@ func (k Keeper) AddCredentialHashToIssued(ctx sdk.Context, credentialHash *big.I
 		return err
 	}
 
-	key, err := poseidon.Hash([]*big.Int{credentialHash})
+	key, err := mimc7.Hash([]*big.Int{credentialHash}, big.NewInt(0))
 	if err != nil {
 		return err
 	}
@@ -63,7 +63,7 @@ func (k Keeper) MarkCredentialHashAsRevoked(ctx sdk.Context, credentialHash comm
 	}
 
 	value := credentialHash.Big()
-	key, err := poseidon.Hash([]*big.Int{value})
+	key, err := mimc7.Hash([]*big.Int{value}, big.NewInt(0))
 	if err != nil {
 		return err
 	}
@@ -97,7 +97,7 @@ func (k Keeper) GetIssuanceProof(ctx sdk.Context, credentialHash common.Hash) ([
 	}
 
 	credentialHashBig := new(big.Int).SetBytes(credentialHash.Bytes())
-	credentialKey, err := poseidon.Hash([]*big.Int{credentialHashBig})
+	credentialKey, err := mimc7.Hash([]*big.Int{credentialHashBig}, big.NewInt(0))
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +117,7 @@ func (k Keeper) GetNonRevocationProof(ctx sdk.Context, credentialHash common.Has
 	}
 
 	credentialHashBig := new(big.Int).SetBytes(credentialHash.Bytes())
-	credentialKey, err := poseidon.Hash([]*big.Int{credentialHashBig})
+	credentialKey, err := mimc7.Hash([]*big.Int{credentialHashBig}, big.NewInt(0))
 	if err != nil {
 		return nil, err
 	}
