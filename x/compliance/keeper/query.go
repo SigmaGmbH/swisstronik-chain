@@ -352,7 +352,6 @@ func (k Querier) CredentialHash(goCtx context.Context, req *types.QueryCredentia
 		IssuanceTimestamp:   details.IssuanceTimestamp,
 	}
 	credentialHash, err := credentialValue.Hash()
-	println("DEBUG: served request for credential hash: result: ", credentialHash.String())
 	if err != nil {
 		return nil, err
 	}

@@ -1,7 +1,7 @@
 const {ethers} = require("hardhat");
 const {expect} = require("chai");
 const {randomBytes} = require("@noble/hashes/utils");
-const {deriveSecretScalar, derivePublicKey, signMessage} = require("@zk-kit/eddsa-poseidon");
+const {deriveSecretScalar, derivePublicKey} = require("@zk-kit/eddsa-poseidon");
 const {packPoint, inCurve} = require("@zk-kit/baby-jubjub")
 const snarkjs = require('snarkjs')
 const {buildEddsa} = require('circomlibjs')
@@ -30,9 +30,7 @@ const createKeypair = () => {
 }
 
 const recoverCredentialHash = async (provider, verificationId) => {
-    const res = await provider.send("eth_credentialHash", [verificationId]);
-    console.log('got credential hash: ', res)
-    return res
+    return await provider.send("eth_credentialHash", [verificationId]);
 }
 
 const getIssuanceProofInput = async (provider, credentialHash) => {
@@ -136,7 +134,6 @@ describe('SDI tests', () => {
         const currentTimestamp = Date.now(); // should be `block.timestamp`
 
         const credentialHash = await recoverCredentialHash(provider, verificationId);
-        console.log('SDI: got credential hash big int: ', BigInt(credentialHash))
         const issuanceProof = await getIssuanceProofInput(provider, credentialHash);
         const nonRevocationProof = await getNonRevocationProofInput(provider, credentialHash);
 
@@ -149,8 +146,6 @@ describe('SDI tests', () => {
             `${verificationData[0].expirationTimestamp}`,
             `${verificationData[0].issuanceTimestamp}`,
         ];
-
-        console.log('credential elements: ', credentialElements)
 
         const holderSignature = await signMiMC(userKeypair.seed, BigInt(credentialHash));
 
