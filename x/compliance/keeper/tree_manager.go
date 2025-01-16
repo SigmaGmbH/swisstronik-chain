@@ -2,10 +2,10 @@ package keeper
 
 import (
 	"encoding/json"
+	merkletree "github.com/SigmaGmbH/go-merkletree-sql/v2"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/iden3/go-iden3-crypto/mimc7"
-	"github.com/iden3/go-merkletree-sql"
 	"math/big"
 	"swisstronik/x/compliance/types"
 )

@@ -1,9 +1,10 @@
 package keeper_test
 
 import (
+	"encoding/json"
+	"github.com/SigmaGmbH/go-merkletree-sql/v2"
+	"github.com/SigmaGmbH/go-merkletree-sql/v2/db/memory"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/iden3/go-merkletree-sql"
-	"github.com/iden3/go-merkletree-sql/db/memory"
 	"math/big"
 	"swisstronik/x/compliance/keeper"
 	"swisstronik/x/compliance/types"
@@ -51,4 +52,21 @@ func (suite *KeeperTestSuite) TestNonInclusionProof() {
 	suite.Require().NoError(err)
 
 	suite.Require().NotNil(res)
+}
+
+func (suite *KeeperTestSuite) TestDebugProof() {
+	suite.Setup(suite.T())
+
+	storage := keeper.NewTreeStorage(suite.ctx, &suite.keeper, types.KeyPrefixRevocationTree)
+	tree, err := merkletree.NewMerkleTree(suite.ctx, &storage, 32)
+	suite.Require().NoError(err)
+
+	err = tree.Add(suite.ctx, big.NewInt(1), big.NewInt(1))
+	suite.Require().NoError(err)
+
+	proof, err := tree.GenerateCircomVerifierProof(suite.ctx, big.NewInt(1), nil)
+	res, err := json.Marshal(proof)
+	suite.Require().NoError(err)
+
+	println(string(res))
 }

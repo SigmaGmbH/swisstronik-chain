@@ -9,6 +9,7 @@ require (
 	cosmossdk.io/simapp v0.0.0-20230608160436-666c345ad23d
 	cosmossdk.io/tools/rosetta v0.2.1
 	filippo.io/edwards25519 v1.0.0
+	github.com/SigmaGmbH/go-merkletree-sql/v2 v2.0.0-20250116143543-b06326dac718
 	github.com/SigmaGmbH/librustgo v0.0.2-0.20230725120829-f1a254f14ac6
 	github.com/armon/go-metrics v0.4.1
 	github.com/btcsuite/btcd v0.23.3
@@ -34,7 +35,6 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.18.0
 	github.com/iden3/go-iden3-crypto v0.0.17
-	github.com/iden3/go-merkletree-sql v1.0.2
 	github.com/improbable-eng/grpc-web v0.15.0
 	github.com/lestrrat-go/jwx v1.2.26
 	github.com/mr-tron/base58 v1.2.0

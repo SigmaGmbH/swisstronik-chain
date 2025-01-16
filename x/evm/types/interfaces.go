@@ -16,13 +16,13 @@
 package types
 
 import (
+	"github.com/SigmaGmbH/go-merkletree-sql/v2"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/ethereum/go-ethereum/core"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/iden3/go-merkletree-sql"
 	"math/big"
 
 	compliancetypes "swisstronik/x/compliance/types"

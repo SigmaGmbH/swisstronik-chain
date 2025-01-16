@@ -1,8 +1,8 @@
 package keeper_test
 
 import (
+	"github.com/SigmaGmbH/go-merkletree-sql/v2"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/iden3/go-merkletree-sql"
 	"math/big"
 	"swisstronik/x/compliance/keeper"
 	"swisstronik/x/compliance/types"

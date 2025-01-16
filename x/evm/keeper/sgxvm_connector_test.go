@@ -1,7 +1,7 @@
 package keeper_test
 
 import (
-	"github.com/iden3/go-merkletree-sql"
+	"github.com/SigmaGmbH/go-merkletree-sql/v2"
 	"math/big"
 	"math/rand"
 	"time"
