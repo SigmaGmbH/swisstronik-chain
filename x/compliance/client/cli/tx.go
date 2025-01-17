@@ -3,6 +3,7 @@ package cli
 import (
 	"errors"
 	"fmt"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"strconv"
 
 	"github.com/cosmos/cosmos-sdk/client"
@@ -34,6 +35,8 @@ func GetTxCmd() *cobra.Command {
 		CmdCreateIssuer(),
 		CmdUpdateIssuerDetails(),
 		CmdRemoveIssuer(),
+		CmdConvertCredentialToZK(),
+		CmdAttachHolderPublicKey(),
 	)
 
 	return cmd
@@ -325,5 +328,74 @@ func CmdVerifyIssuerProposal() *cobra.Command {
 	if err := cmd.MarkFlagRequired(cli.FlagDeposit); err != nil {
 		panic(err)
 	}
+	return cmd
+}
+
+// CmdAttachHolderPublicKey command attaches holder BJJ public key if it was not done before.
+func CmdAttachHolderPublicKey() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "set-zk-pubkey [hex with compressed BJJ public key]",
+		Short: "Set BJJ public key for ZK-SDI. Note: It can be done only once",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			publicKeyBytes, err := hexutil.Decode(args[0])
+			if err != nil {
+				return err
+			}
+
+			_, err = types.ExtractXCoordinate(publicKeyBytes, false)
+			if err != nil {
+				return err
+			}
+
+			msg := types.NewMsgAttachHolderPublicKey(
+				clientCtx.GetFromAddress().String(),
+				publicKeyBytes,
+			)
+
+			_ = clientCtx.PrintProto(&msg)
+
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), &msg)
+		},
+	}
+
+	flags.AddTxFlagsToCmd(cmd)
+	return cmd
+}
+
+// CmdConvertCredentialToZK command converts selected V1 credential to ZK-SDI (V2).
+func CmdConvertCredentialToZK() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "convert-credential [hex verification id]",
+		Short: "Converts selected verification to ZK-SDI credential",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			verificationId, err := hexutil.Decode(args[0])
+			if err != nil {
+				return err
+			}
+
+			msg := types.NewMsgConvertCredential(
+				clientCtx.GetFromAddress().String(),
+				verificationId,
+			)
+
+			_ = clientCtx.PrintProto(&msg)
+
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), &msg)
+		},
+	}
+
+	flags.AddTxFlagsToCmd(cmd)
 	return cmd
 }

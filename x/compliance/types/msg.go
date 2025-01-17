@@ -300,10 +300,10 @@ func (msg *MsgAttachHolderPublicKey) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{signer}
 }
 
-func NewMsgConvertCredential(signer string, publicKey []byte) MsgAttachHolderPublicKey {
-	return MsgAttachHolderPublicKey{
-		Signer:          signer,
-		HolderPublicKey: publicKey,
+func NewMsgConvertCredential(signer string, verificationId []byte) MsgConvertCredential {
+	return MsgConvertCredential{
+		Signer:         signer,
+		VerificationId: verificationId,
 	}
 }
 
