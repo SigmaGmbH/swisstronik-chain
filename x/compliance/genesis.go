@@ -112,6 +112,14 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 			panic(err)
 		}
 	}
+
+	// TODO: Restore holder public keys
+
+	// TODO: Restore verification -> pubkey
+
+	// TODO: Restore userAddress -> pubkey
+
+	// TODO: rebuild issuance and revocation trees
 }
 
 // ExportGenesis returns the module's exported genesis
@@ -142,6 +150,24 @@ func ExportGenesis(ctx sdk.Context, k keeper.Keeper) *types.GenesisState {
 		panic(err)
 	}
 	genesis.VerificationDetails = verificationDetails
+
+	holderPublicKeys, err := k.ExportHolderPublicKeys(ctx)
+	if err != nil {
+		panic(err)
+	}
+	genesis.PublicKeys = holderPublicKeys
+
+	linksToPublicKey, err := k.ExportLinksVerificationIdToPublicKey(ctx)
+	if err != nil {
+		panic(err)
+	}
+	genesis.LinksToPublicKey = linksToPublicKey
+
+	linksToHolder, err := k.ExportLinksVerificationToHolder(ctx)
+	if err != nil {
+		panic(err)
+	}
+	genesis.LinksToHolder = linksToHolder
 
 	return genesis
 }

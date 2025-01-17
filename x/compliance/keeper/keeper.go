@@ -707,6 +707,45 @@ func (k Keeper) IterateIssuerDetails(ctx sdk.Context, callback func(address sdk.
 	}
 }
 
+func (k Keeper) IterateHolderPublicKeys(ctx sdk.Context, callback func(address sdk.AccAddress) (continue_ bool)) {
+	latestVersionIterator := sdk.KVStorePrefixIterator(ctx.KVStore(k.storeKey), types.KeyPrefixHolderPublicKeys)
+	defer closeIteratorOrPanic(latestVersionIterator)
+
+	for ; latestVersionIterator.Valid(); latestVersionIterator.Next() {
+		key := latestVersionIterator.Key()
+		address := types.AccAddressFromKey(key)
+		if !callback(address) {
+			break
+		}
+	}
+}
+
+func (k Keeper) IterateLinksToHolder(ctx sdk.Context, callback func(verificationId []byte) (continue_ bool)) {
+	latestVersionIterator := sdk.KVStorePrefixIterator(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationToHolder)
+	defer closeIteratorOrPanic(latestVersionIterator)
+
+	for ; latestVersionIterator.Valid(); latestVersionIterator.Next() {
+		key := latestVersionIterator.Key()
+		id := types.VerificationIdFromKey(key)
+		if !callback(id) {
+			break
+		}
+	}
+}
+
+func (k Keeper) IterateLinksToPublicKey(ctx sdk.Context, callback func(verificationId []byte) (continue_ bool)) {
+	latestVersionIterator := sdk.KVStorePrefixIterator(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationToPubKey)
+	defer closeIteratorOrPanic(latestVersionIterator)
+
+	for ; latestVersionIterator.Valid(); latestVersionIterator.Next() {
+		key := latestVersionIterator.Key()
+		id := types.VerificationIdFromKey(key)
+		if !callback(id) {
+			break
+		}
+	}
+}
+
 func (k Keeper) ExportOperators(ctx sdk.Context) ([]*types.OperatorDetails, error) {
 	var (
 		allDetails []*types.OperatorDetails
@@ -796,6 +835,63 @@ func (k Keeper) ExportIssuerDetails(ctx sdk.Context) ([]*types.GenesisIssuerDeta
 	}
 
 	return issuerDetails, nil
+}
+
+func (k Keeper) ExportHolderPublicKeys(ctx sdk.Context) ([]*types.GenesisHolderPublicKeys, error) {
+	var (
+		holderPublicKeys []*types.GenesisHolderPublicKeys
+	)
+
+	k.IterateHolderPublicKeys(ctx, func(holder sdk.AccAddress) bool {
+		publicKey := k.GetHolderPublicKey(ctx, holder)
+		if publicKey != nil {
+			holderPublicKeys = append(holderPublicKeys, &types.GenesisHolderPublicKeys{
+				Address:   holder.String(),
+				PublicKey: publicKey,
+			})
+		}
+		return true
+	})
+
+	return holderPublicKeys, nil
+}
+
+func (k Keeper) ExportLinksVerificationToHolder(ctx sdk.Context) ([]*types.GenesisLinkVerificationIdToHolder, error) {
+	var (
+		links []*types.GenesisLinkVerificationIdToHolder
+	)
+
+	k.IterateLinksToHolder(ctx, func(verificationId []byte) bool {
+		holder := k.getHolderByVerificationId(ctx, verificationId)
+		if holder != nil {
+			links = append(links, &types.GenesisLinkVerificationIdToHolder{
+				Id:      verificationId,
+				Address: holder.String(),
+			})
+		}
+		return true
+	})
+
+	return links, nil
+}
+
+func (k Keeper) ExportLinksVerificationIdToPublicKey(ctx sdk.Context) ([]*types.GenesisLinkVerificationIdToPublicKey, error) {
+	var (
+		links []*types.GenesisLinkVerificationIdToPublicKey
+	)
+
+	k.IterateLinksToPublicKey(ctx, func(verificationId []byte) bool {
+		publicKey := k.GetPubKeyByVerificationId(ctx, verificationId)
+		if publicKey != nil {
+			links = append(links, &types.GenesisLinkVerificationIdToPublicKey{
+				Id:        verificationId,
+				PublicKey: publicKey,
+			})
+		}
+		return true
+	})
+
+	return links, nil
 }
 
 // GetHolderPublicKey returns the compressed holder public key
