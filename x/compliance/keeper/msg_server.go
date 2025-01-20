@@ -351,7 +351,17 @@ func (k msgServer) HandleConvertCredential(goCtx context.Context, msg *types.Msg
 		return nil, err
 	}
 
-	holderPublicKey := k.GetHolderPublicKey(ctx, holderAddress)
+	// Check if signer is owner of credential
+	credentialOwner := k.getHolderByVerificationId(ctx, msg.VerificationId)
+	if credentialOwner.String() != msg.Signer {
+		return nil, errors.Wrap(types.ErrBadRequest, "signer is not credential holder")
+	}
+
+	var holderPublicKey []byte
+	holderPublicKey = k.GetPubKeyByVerificationId(ctx, msg.VerificationId)
+	if holderPublicKey == nil {
+		holderPublicKey = k.GetHolderPublicKey(ctx, holderAddress)
+	}
 	if holderPublicKey == nil {
 		return nil, errors.Wrap(types.ErrBadRequest, "holder public key not found. Please attach it")
 	}

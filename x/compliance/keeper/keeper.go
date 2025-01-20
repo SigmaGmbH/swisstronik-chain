@@ -362,8 +362,14 @@ func (k Keeper) SetVerificationDetails(
 		return err
 	}
 
-	// If user has attached public key, add to ZK-SDI
-	userPublicKey := k.GetHolderPublicKey(ctx, userAddress)
+	// If user has linked public key or self-attached public key, add to ZK-SDI
+	var userPublicKey []byte
+	userPublicKey = k.GetPubKeyByVerificationId(ctx, verificationDetailsId)
+	if userPublicKey == nil {
+		userPublicKey = k.GetHolderPublicKey(ctx, userAddress)
+	}
+
+	// If there is no public key, skip adding to issuance tree
 	if userPublicKey != nil {
 		if err = k.LinkVerificationIdToPubKey(ctx, userPublicKey, verificationDetailsId); err != nil {
 			return err
@@ -432,7 +438,11 @@ func (k Keeper) MarkVerificationDetailsAsRevoked(
 		)
 	}
 
-	attachedPublicKey := k.GetPubKeyByVerificationId(ctx, verificationDetailsId)
+	var attachedPublicKey []byte
+	attachedPublicKey = k.GetPubKeyByVerificationId(ctx, verificationDetailsId)
+	if attachedPublicKey == nil {
+		attachedPublicKey = k.GetHolderPublicKey(ctx, userAddress)
+	}
 	if attachedPublicKey != nil {
 		// Update revocation tree with provided credential
 		credential := &types.ZKCredential{
@@ -504,6 +514,43 @@ func (k Keeper) GetVerificationDetailsByIssuer(ctx sdk.Context, userAddress sdk.
 		filteredVerificationDetails = append(filteredVerificationDetails, verificationDetails)
 	}
 	return filteredVerifications, filteredVerificationDetails, nil
+}
+
+func (k Keeper) GetCredentialHashByVerificationId(ctx sdk.Context, verificationId []byte) ([]byte, error) {
+	details, err := k.GetVerificationDetails(ctx, verificationId)
+	if err != nil {
+		return nil, err
+	}
+
+	issuerAddress, err := sdk.AccAddressFromBech32(details.IssuerAddress)
+	if err != nil {
+		return nil, err
+	}
+
+	holder := k.getHolderByVerificationId(ctx, verificationId)
+	var userPublicKey []byte
+	userPublicKey = k.GetPubKeyByVerificationId(ctx, verificationId)
+	if userPublicKey == nil {
+		userPublicKey = k.GetHolderPublicKey(ctx, holder)
+	}
+
+	if userPublicKey == nil {
+		return nil, errors.Wrap(types.ErrInvalidParam, "verification with provided ID has no public key to attach")
+	}
+
+	credentialValue := &types.ZKCredential{
+		Type:                details.Type,
+		IssuerAddress:       issuerAddress.Bytes(),
+		HolderPublicKey:     userPublicKey,
+		ExpirationTimestamp: details.ExpirationTimestamp,
+		IssuanceTimestamp:   details.IssuanceTimestamp,
+	}
+	credentialHash, err := credentialValue.Hash()
+	if err != nil {
+		return nil, err
+	}
+
+	return credentialHash.Bytes(), nil
 }
 
 // HasVerificationOfType checks if user has verifications of specific type (for example, passed KYC) from provided issuers.
@@ -854,25 +901,6 @@ func (k Keeper) ExportHolderPublicKeys(ctx sdk.Context) ([]*types.GenesisHolderP
 	})
 
 	return holderPublicKeys, nil
-}
-
-func (k Keeper) ExportLinksVerificationToHolder(ctx sdk.Context) ([]*types.GenesisLinkVerificationIdToHolder, error) {
-	var (
-		links []*types.GenesisLinkVerificationIdToHolder
-	)
-
-	k.IterateLinksToHolder(ctx, func(verificationId []byte) bool {
-		holder := k.getHolderByVerificationId(ctx, verificationId)
-		if holder != nil {
-			links = append(links, &types.GenesisLinkVerificationIdToHolder{
-				Id:      verificationId,
-				Address: holder.String(),
-			})
-		}
-		return true
-	})
-
-	return links, nil
 }
 
 func (k Keeper) ExportLinksVerificationIdToPublicKey(ctx sdk.Context) ([]*types.GenesisLinkVerificationIdToPublicKey, error) {

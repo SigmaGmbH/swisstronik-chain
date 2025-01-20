@@ -1563,6 +1563,57 @@ func (suite *KeeperTestSuite) TestConvertCredential() {
 			},
 		},
 		{
+			name: "non-owner should not be able to convert credential",
+			init: func() {
+				holder = tests.RandomAccAddress()
+				signer = tests.RandomAccAddress()
+				err := suite.keeper.AddOperator(suite.ctx, signer, types.OperatorType_OT_REGULAR)
+				suite.Require().NoError(err)
+
+				issuer = tests.RandomAccAddress()
+				details := &types.IssuerDetails{Creator: tests.RandomAccAddress().String(), Name: "test issuer"}
+				err = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
+				suite.Require().NoError(err)
+
+				verificationDetails := &types.VerificationDetails{
+					Type:                 types.VerificationType_VT_KYC,
+					IssuerAddress:        issuer.String(),
+					OriginChain:          "swisstronik",
+					IssuanceTimestamp:    200,
+					ExpirationTimestamp:  300,
+					OriginalData:         nil,
+					Schema:               "",
+					IssuerVerificationId: "",
+					Version:              0,
+					IsRevoked:            false,
+				}
+				detailsBytes, _ := verificationDetails.Marshal()
+				verificationId = crypto.Keccak256(tests.RandomAccAddress().Bytes(), types.VerificationType_VT_KYC.ToBytes(), detailsBytes)
+				err = suite.keeper.SetVerificationDetails(suite.ctx, holder, verificationId, verificationDetails)
+				suite.Require().NoError(err)
+			},
+			malleate: func() {
+				// Set holder public key
+				pubKeyCompressed := tests.RandomEdDSAPubKey()
+				err := suite.keeper.SetHolderPublicKey(suite.ctx, holder, pubKeyCompressed[:])
+				suite.Require().NoError(err)
+
+				wrongSigner := tests.RandomAccAddress()
+
+				msg := &types.MsgConvertCredential{
+					Signer:         wrongSigner.String(),
+					VerificationId: verificationId,
+				}
+
+				msgServer := keeper.NewMsgServerImpl(suite.keeper)
+				resp, err := msgServer.HandleConvertCredential(sdk.WrapSDKContext(suite.ctx), msg)
+
+				suite.Require().Error(err)
+				suite.Require().Nil(resp)
+				suite.Require().ErrorContains(err, "signer is not credential holder")
+			},
+		},
+		{
 			name: "user cannot convert revoked credential",
 			init: func() {
 				holder = tests.RandomAccAddress()

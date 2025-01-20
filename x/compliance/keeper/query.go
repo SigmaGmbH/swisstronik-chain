@@ -332,29 +332,10 @@ func (k Querier) CredentialHash(goCtx context.Context, req *types.QueryCredentia
 	}
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	details, err := k.GetVerificationDetails(ctx, req.VerificationId)
+	credentialHashBytes, err := k.GetCredentialHashByVerificationId(ctx, req.VerificationId)
 	if err != nil {
 		return nil, err
 	}
 
-	issuerAddress, err := sdk.AccAddressFromBech32(details.IssuerAddress)
-	if err != nil {
-		return nil, err
-	}
-
-	userKey := k.GetPubKeyByVerificationId(ctx, req.VerificationId)
-
-	credentialValue := &types.ZKCredential{
-		Type:                details.Type,
-		IssuerAddress:       issuerAddress.Bytes(),
-		HolderPublicKey:     userKey,
-		ExpirationTimestamp: details.ExpirationTimestamp,
-		IssuanceTimestamp:   details.IssuanceTimestamp,
-	}
-	credentialHash, err := credentialValue.Hash()
-	if err != nil {
-		return nil, err
-	}
-
-	return &types.QueryCredentialHashResponse{CredentialHash: credentialHash.Bytes()}, nil
+	return &types.QueryCredentialHashResponse{CredentialHash: credentialHashBytes}, nil
 }

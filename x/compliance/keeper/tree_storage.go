@@ -3,7 +3,7 @@ package keeper
 import (
 	"bytes"
 	"context"
-	merkletree "github.com/SigmaGmbH/go-merkletree-sql/v2"
+	"github.com/SigmaGmbH/go-merkletree-sql/v2"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
