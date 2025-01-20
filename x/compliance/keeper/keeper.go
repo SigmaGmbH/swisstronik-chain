@@ -325,7 +325,7 @@ func (k Keeper) addVerificationDetailsInternal(ctx sdk.Context, userAddress sdk.
 		return nil, err
 	}
 
-	if err = k.linkVerificationToHolder(ctx, userAddress, verificationDetailsID); err != nil {
+	if err = k.LinkVerificationToHolder(ctx, userAddress, verificationDetailsID); err != nil {
 		return nil, err
 	}
 
@@ -358,7 +358,7 @@ func (k Keeper) SetVerificationDetails(
 		return err
 	}
 
-	if err = k.linkVerificationToHolder(ctx, userAddress, verificationDetailsId); err != nil {
+	if err = k.LinkVerificationToHolder(ctx, userAddress, verificationDetailsId); err != nil {
 		return err
 	}
 
@@ -908,8 +908,6 @@ func (k Keeper) GetHolderPublicKey(ctx sdk.Context, user sdk.AccAddress) []byte 
 
 // SetHolderPublicKey returns the compressed holder public key
 func (k Keeper) SetHolderPublicKey(ctx sdk.Context, user sdk.AccAddress, publicKey []byte) error {
-	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixHolderPublicKeys)
-
 	// Check if there is no public key
 	currentPublicKeyBytes := k.GetHolderPublicKey(ctx, user)
 	if currentPublicKeyBytes != nil {
@@ -921,12 +919,17 @@ func (k Keeper) SetHolderPublicKey(ctx sdk.Context, user sdk.AccAddress, publicK
 		return errors.Wrapf(types.ErrInvalidParam, "cannot parse provided public key: (%s)", err)
 	}
 
-	store.Set(user.Bytes(), xCoordPublicKey.Bytes())
+	k.SetHolderPublicKeyBytes(ctx, user, xCoordPublicKey.Bytes())
 
 	return nil
 }
 
-func (k Keeper) linkVerificationToHolder(ctx sdk.Context, userAddress sdk.AccAddress, verificationId []byte) error {
+func (k Keeper) SetHolderPublicKeyBytes(ctx sdk.Context, user sdk.AccAddress, xCoordinateBytes []byte) {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixHolderPublicKeys)
+	store.Set(user.Bytes(), xCoordinateBytes)
+}
+
+func (k Keeper) LinkVerificationToHolder(ctx sdk.Context, userAddress sdk.AccAddress, verificationId []byte) error {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationToHolder)
 
 	// Check if there is already linked user

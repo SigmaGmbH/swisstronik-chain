@@ -113,11 +113,55 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 		}
 	}
 
-	// TODO: Restore holder public keys
+	for _, publicKeyData := range genState.PublicKeys {
+		address, err := sdk.AccAddressFromBech32(publicKeyData.Address)
+		if err != nil {
+			panic(err)
+		}
 
-	// TODO: Restore verification -> pubkey
+		if publicKeyData.PublicKey == nil {
+			panic(errors.Wrap(types.ErrInvalidParam, "public key is nil"))
+		}
 
-	// TODO: Restore userAddress -> pubkey
+		k.SetHolderPublicKeyBytes(ctx, address, publicKeyData.PublicKey)
+	}
+
+	for _, verificationToPublicKeyData := range genState.LinksToPublicKey {
+		// check if verification id exists
+		vd, err := k.GetVerificationDetails(ctx, verificationToPublicKeyData.Id)
+		if err != nil {
+			panic(err)
+		}
+		if vd.IsEmpty() {
+			panic(errors.Wrap(types.ErrInvalidParam, "verification with given id is empty"))
+		}
+		if verificationToPublicKeyData.PublicKey == nil {
+			panic(errors.Wrap(types.ErrInvalidParam, "given public key is nil"))
+		}
+
+		if err = k.LinkVerificationIdToPubKey(ctx, verificationToPublicKeyData.PublicKey, verificationToPublicKeyData.Id); err != nil {
+			panic(err)
+		}
+	}
+
+	for _, verificationToHolderData := range genState.LinksToHolder {
+		// check if verification id exists
+		vd, err := k.GetVerificationDetails(ctx, verificationToHolderData.Id)
+		if err != nil {
+			panic(err)
+		}
+		if vd.IsEmpty() {
+			panic(errors.Wrap(types.ErrInvalidParam, "verification with given id is empty"))
+		}
+		address, err := sdk.AccAddressFromBech32(verificationToHolderData.Address)
+		if err != nil {
+			panic(err)
+		}
+
+		if err = k.LinkVerificationToHolder(ctx, address, verificationToHolderData.Id); err != nil {
+			panic(err)
+		}
+	}
 
 	// TODO: rebuild issuance and revocation trees
 }
