@@ -348,7 +348,9 @@ func CmdAttachHolderPublicKey() *cobra.Command {
 				return err
 			}
 
-			_, err = types.ExtractXCoordinate(publicKeyBytes, false)
+			buf := make([]byte, 32)
+			copy(buf, publicKeyBytes)
+			_, err = types.ExtractXCoordinate(buf, false)
 			if err != nil {
 				return err
 			}

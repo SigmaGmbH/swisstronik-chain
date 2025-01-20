@@ -36,12 +36,15 @@ func ExtractXCoordinate(compressedPublicKeyBytes []byte, isLittleEndian bool) (*
 		return nil, fmt.Errorf("invalid compressed public key bytes. Got length: %d", len(compressedPublicKeyBytes))
 	}
 
+	buf := make([]byte, 32)
+	copy(buf, compressedPublicKeyBytes)
+
 	if !isLittleEndian {
 		// Convert to little endian
-		slices.Reverse(compressedPublicKeyBytes)
+		slices.Reverse(buf)
 	}
 
-	pointBuf, err := babyjub.NewPoint().Decompress([32]byte(compressedPublicKeyBytes))
+	pointBuf, err := babyjub.NewPoint().Decompress([32]byte(buf))
 	if err != nil {
 		return nil, err
 	}
