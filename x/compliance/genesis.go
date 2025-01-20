@@ -41,6 +41,34 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 		}
 	}
 
+	// Restore linked public keys to verification id
+	for _, verificationToPublicKeyData := range genState.LinksToPublicKey {
+		if verificationToPublicKeyData.Id == nil {
+			panic(errors.Wrap(types.ErrInvalidParam, "given verification id is empty"))
+		}
+		if verificationToPublicKeyData.PublicKey == nil {
+			panic(errors.Wrap(types.ErrInvalidParam, "given public key is nil"))
+		}
+
+		if err := k.LinkVerificationIdToPubKey(ctx, verificationToPublicKeyData.PublicKey, verificationToPublicKeyData.Id); err != nil {
+			panic(err)
+		}
+	}
+
+	// Restore holders public keys
+	for _, publicKeyData := range genState.PublicKeys {
+		address, err := sdk.AccAddressFromBech32(publicKeyData.Address)
+		if err != nil {
+			panic(err)
+		}
+
+		if publicKeyData.PublicKey == nil {
+			panic(errors.Wrap(types.ErrInvalidParam, "public key is nil"))
+		}
+
+		k.SetHolderPublicKeyBytes(ctx, address, publicKeyData.PublicKey)
+	}
+
 	// Restore verification data
 	for _, verificationData := range genState.VerificationDetails {
 		// Check if issuer address is valid
@@ -77,6 +105,12 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 		if err = k.SetVerificationDetails(ctx, userAddress, verificationData.Id, verificationData.Details); err != nil {
 			panic(err)
 		}
+
+		if verificationData.Details.IsRevoked {
+			if err = k.MarkVerificationDetailsAsRevoked(ctx, verificationData.Id); err != nil {
+				panic(err)
+			}
+		}
 	}
 
 	// Restore accounts
@@ -112,58 +146,6 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 			panic(err)
 		}
 	}
-
-	for _, publicKeyData := range genState.PublicKeys {
-		address, err := sdk.AccAddressFromBech32(publicKeyData.Address)
-		if err != nil {
-			panic(err)
-		}
-
-		if publicKeyData.PublicKey == nil {
-			panic(errors.Wrap(types.ErrInvalidParam, "public key is nil"))
-		}
-
-		k.SetHolderPublicKeyBytes(ctx, address, publicKeyData.PublicKey)
-	}
-
-	for _, verificationToPublicKeyData := range genState.LinksToPublicKey {
-		// check if verification id exists
-		vd, err := k.GetVerificationDetails(ctx, verificationToPublicKeyData.Id)
-		if err != nil {
-			panic(err)
-		}
-		if vd.IsEmpty() {
-			panic(errors.Wrap(types.ErrInvalidParam, "verification with given id is empty"))
-		}
-		if verificationToPublicKeyData.PublicKey == nil {
-			panic(errors.Wrap(types.ErrInvalidParam, "given public key is nil"))
-		}
-
-		if err = k.LinkVerificationIdToPubKey(ctx, verificationToPublicKeyData.PublicKey, verificationToPublicKeyData.Id); err != nil {
-			panic(err)
-		}
-	}
-
-	for _, verificationToHolderData := range genState.LinksToHolder {
-		// check if verification id exists
-		vd, err := k.GetVerificationDetails(ctx, verificationToHolderData.Id)
-		if err != nil {
-			panic(err)
-		}
-		if vd.IsEmpty() {
-			panic(errors.Wrap(types.ErrInvalidParam, "verification with given id is empty"))
-		}
-		address, err := sdk.AccAddressFromBech32(verificationToHolderData.Address)
-		if err != nil {
-			panic(err)
-		}
-
-		if err = k.LinkVerificationToHolder(ctx, address, verificationToHolderData.Id); err != nil {
-			panic(err)
-		}
-	}
-
-	// TODO: rebuild issuance and revocation trees
 }
 
 // ExportGenesis returns the module's exported genesis
@@ -206,12 +188,6 @@ func ExportGenesis(ctx sdk.Context, k keeper.Keeper) *types.GenesisState {
 		panic(err)
 	}
 	genesis.LinksToPublicKey = linksToPublicKey
-
-	linksToHolder, err := k.ExportLinksVerificationToHolder(ctx)
-	if err != nil {
-		panic(err)
-	}
-	genesis.LinksToHolder = linksToHolder
 
 	return genesis
 }
