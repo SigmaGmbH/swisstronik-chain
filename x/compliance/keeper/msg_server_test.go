@@ -1027,7 +1027,6 @@ func (suite *KeeperTestSuite) TestHandleRevokeVerification() {
 			malleate: func() *types.MsgRevokeVerification {
 				return &types.MsgRevokeVerification{
 					Signer:         "invalidSigner",
-					Issuer:         issuer.String(),
 					VerificationId: verificationId,
 				}
 			},
@@ -1037,25 +1036,7 @@ func (suite *KeeperTestSuite) TestHandleRevokeVerification() {
 			},
 		},
 		{
-			name: "invalid issuer address",
-			init: func() {
-				signer = tests.RandomAccAddress()
-				verificationId = tests.RandomAccAddress().Bytes()
-			},
-			malleate: func() *types.MsgRevokeVerification {
-				return &types.MsgRevokeVerification{
-					Signer:         signer.String(),
-					Issuer:         "invalidIssuer",
-					VerificationId: verificationId,
-				}
-			},
-			expected: func(resp *types.MsgRevokeVerificationResponse, err error) {
-				suite.Require().ErrorContains(err, "decoding bech32")
-				suite.Require().Nil(resp)
-			},
-		},
-		{
-			name: "issuer does not exist",
+			name: "verification does not exist",
 			init: func() {
 				issuer = tests.RandomAccAddress()
 				signer = tests.RandomAccAddress()
@@ -1063,14 +1044,13 @@ func (suite *KeeperTestSuite) TestHandleRevokeVerification() {
 			},
 			malleate: func() *types.MsgRevokeVerification {
 				return &types.MsgRevokeVerification{
-					Signer:         signer.String(),
-					Issuer:         issuer.String(),
+					Signer:         issuer.String(),
 					VerificationId: verificationId,
 				}
 			},
 			expected: func(resp *types.MsgRevokeVerificationResponse, err error) {
-				suite.Require().ErrorIs(err, types.ErrInvalidIssuer)
-				suite.Require().ErrorContains(err, "issuer does not exist")
+				suite.Require().ErrorIs(err, types.ErrInvalidParam)
+				suite.Require().ErrorContains(err, "verification does not exist")
 				suite.Require().Nil(resp)
 			},
 		},
@@ -1082,12 +1062,27 @@ func (suite *KeeperTestSuite) TestHandleRevokeVerification() {
 				_ = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
 
 				signer = tests.RandomAccAddress()
-				verificationId = tests.RandomAccAddress().Bytes()
+				holder := tests.RandomAccAddress()
+
+				verificationDetails := &types.VerificationDetails{
+					Type:                 types.VerificationType_VT_KYC,
+					IssuerAddress:        issuer.String(),
+					OriginChain:          "swisstronik",
+					IssuanceTimestamp:    100,
+					ExpirationTimestamp:  200,
+					OriginalData:         nil,
+					Schema:               "",
+					IssuerVerificationId: "",
+					Version:              0,
+					IsRevoked:            false,
+				}
+				detailsBytes, _ := verificationDetails.Marshal()
+				verificationId = crypto.Keccak256(tests.RandomAccAddress().Bytes(), types.VerificationType_VT_KYC.ToBytes(), detailsBytes)
+				_ = suite.keeper.SetVerificationDetails(suite.ctx, holder, verificationId, verificationDetails)
 			},
 			malleate: func() *types.MsgRevokeVerification {
 				return &types.MsgRevokeVerification{
 					Signer:         signer.String(),
-					Issuer:         issuer.String(),
 					VerificationId: verificationId,
 				}
 			},
@@ -1109,7 +1104,6 @@ func (suite *KeeperTestSuite) TestHandleRevokeVerification() {
 			malleate: func() *types.MsgRevokeVerification {
 				return &types.MsgRevokeVerification{
 					Signer:         signer.String(),
-					Issuer:         issuer.String(),
 					VerificationId: verificationId,
 				}
 			},
@@ -1146,7 +1140,6 @@ func (suite *KeeperTestSuite) TestHandleRevokeVerification() {
 			malleate: func() *types.MsgRevokeVerification {
 				return &types.MsgRevokeVerification{
 					Signer:         signer.String(),
-					Issuer:         issuer.String(),
 					VerificationId: verificationId,
 				}
 			},
@@ -1190,7 +1183,6 @@ func (suite *KeeperTestSuite) TestHandleRevokeVerification() {
 			malleate: func() *types.MsgRevokeVerification {
 				return &types.MsgRevokeVerification{
 					Signer:         signer.String(),
-					Issuer:         issuer.String(),
 					VerificationId: verificationId,
 				}
 			},
@@ -1351,7 +1343,6 @@ func (suite *KeeperTestSuite) TestRevokeInSMT() {
 
 				msg := &types.MsgRevokeVerification{
 					Signer:         signer.String(),
-					Issuer:         issuer.String(),
 					VerificationId: verificationId,
 				}
 
@@ -1409,7 +1400,6 @@ func (suite *KeeperTestSuite) TestRevokeInSMT() {
 
 				msg := &types.MsgRevokeVerification{
 					Signer:         signer.String(),
-					Issuer:         issuer.String(),
 					VerificationId: verificationId,
 				}
 
