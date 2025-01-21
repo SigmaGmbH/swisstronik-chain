@@ -401,3 +401,34 @@ func CmdConvertCredentialToZK() *cobra.Command {
 	flags.AddTxFlagsToCmd(cmd)
 	return cmd
 }
+
+//func CmdRevokeVerification() *cobra.Command {
+//	cmd := &cobra.Command{
+//		Use:   "revoke-verification [hex verification id]",
+//		Short: "Revokes selected verification by operator",
+//		Args:  cobra.ExactArgs(1),
+//		RunE: func(cmd *cobra.Command, args []string) error {
+//			clientCtx, err := client.GetClientTxContext(cmd)
+//			if err != nil {
+//				return err
+//			}
+//
+//			verificationId, err := hexutil.Decode(args[0])
+//			if err != nil {
+//				return err
+//			}
+//
+//			//msg := types.NewRevokeVerificationMsg(
+//			//	clientCtx.GetFromAddress().String(),
+//			//	verificationId,
+//			//)
+//
+//			_ = clientCtx.PrintProto(&msg)
+//
+//			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), &msg)
+//		},
+//	}
+//
+//	flags.AddTxFlagsToCmd(cmd)
+//	return cmd
+//}

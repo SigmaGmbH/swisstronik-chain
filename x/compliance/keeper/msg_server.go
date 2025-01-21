@@ -114,36 +114,32 @@ func (k msgServer) HandleRevokeVerification(goCtx context.Context, msg *types.Ms
 		return nil, err
 	}
 
-	// Check validity of issuer address
-	issuer, err := sdk.AccAddressFromBech32(msg.Issuer)
-	if err != nil {
-		return nil, err
-	}
-
-	// Check if issuer exists
-	if existingIssuer, err := k.IssuerExists(ctx, issuer); !existingIssuer || err != nil {
-		return nil, errors.Wrap(types.ErrInvalidIssuer, "issuer does not exist")
-	}
-
-	// Since this function can be called by operator or issuer creator, check if signer belongs to them
-	details, err := k.GetIssuerDetails(ctx, issuer)
-	if err != nil || len(details.Name) < 1 {
-		return nil, errors.Wrap(types.ErrInvalidIssuer, "issuer details not found")
-	}
-
-	if details.Creator != signer.String() {
-		if exists, err := k.OperatorExists(ctx, signer); !exists || err != nil {
-			// If signer is neither an operator nor issuer creator
-			return nil, errors.Wrap(types.ErrNotOperatorOrIssuerCreator, "issuer creator or operator does not match")
-		}
-	}
-
+	// Check if verification details exist
 	verificationDetails, err := k.GetVerificationDetails(ctx, msg.VerificationId)
 	if err != nil {
 		return nil, err
 	}
 	if verificationDetails.IsEmpty() {
 		return nil, errors.Wrap(types.ErrInvalidParam, "verification does not exist")
+	}
+
+	// Check validity of issuer address
+	issuer, err := sdk.AccAddressFromBech32(verificationDetails.IssuerAddress)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if signer is operator or issuer creator
+	if exists, err := k.OperatorExists(ctx, signer); !exists || err != nil {
+		// If signer is not an operator, check if it's issuer creator
+		details, err := k.GetIssuerDetails(ctx, issuer)
+		if err != nil || len(details.Name) < 1 {
+			return nil, errors.Wrap(types.ErrInvalidIssuer, "issuer details not found")
+		}
+
+		if details.Creator != signer.String() {
+			return nil, errors.Wrap(types.ErrNotOperatorOrIssuerCreator, "issuer creator or operator does not match")
+		}
 	}
 
 	verificationDetails.IsRevoked = true
