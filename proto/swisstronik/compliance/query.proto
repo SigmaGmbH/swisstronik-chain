@@ -43,6 +43,34 @@ service Query {
   rpc VerificationsDetails(QueryVerificationsDetailsRequest) returns (QueryVerificationsDetailsResponse) {
     option (google.api.http).get = "/swisstronik/compliance/verifications";
   }
+
+  rpc IssuanceTreeRoot(QueryIssuanceTreeRootRequest) returns (QueryIssuanceTreeRootResponse) {
+    option (google.api.http).get = "/swisstronik/compliance/issuance/root";
+  }
+
+  rpc IssuanceProof(QueryIssuanceProofRequest) returns (QueryIssuanceProofResponse) {
+    option (google.api.http).get = "/swisstronik/compliance/issuance/proof/{credentialHash}";
+  }
+
+  rpc RevocationTreeRoot(QueryRevocationTreeRootRequest) returns (QueryRevocationTreeRootResponse) {
+    option (google.api.http).get = "/swisstronik/compliance/revocation/root";
+  }
+
+  rpc RevocationProof(QueryRevocationProofRequest) returns (QueryRevocationProofResponse) {
+    option (google.api.http).get = "/swisstronik/compliance/revocation/proof/{credentialHash}";
+  }
+
+  rpc AttachedHolderPublicKey(QueryAttachedHolderPublicKeyRequest) returns (QueryAttachedHolderPublicKeyResponse) {
+    option (google.api.http).get = "/swisstronik/compliance/publicKey/{address}";
+  }
+
+  rpc IsSuitableForZK(QueryIsCredentialInZKSDIRequest) returns (QueryIsCredentialInZKSDIResponse) {
+    option (google.api.http).get = "/swisstronik/compliance/zk/isSuitable/{address}/{verificationID}";
+  }
+
+  rpc CredentialHash(QueryCredentialHashRequest) returns (QueryCredentialHashResponse) {
+    option (google.api.http).get = "/swisstronik/compliance/zk/credentialHash/{verificationId}";
+  }
 }
 
 // QueryParamsRequest is request type for the Query/Params RPC method.
@@ -171,4 +199,50 @@ message QueryVerificationsDetailsResponse {
   repeated MergedVerificationDetails verifications = 1 [(gogoproto.nullable) = false];
   // pagination defines the pagination in the response.
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+message QueryIssuanceTreeRootRequest {}
+message QueryIssuanceTreeRootResponse {
+  bytes root = 1;
+}
+
+message QueryRevocationTreeRootRequest {}
+message QueryRevocationTreeRootResponse {
+  bytes root = 1;
+}
+
+message QueryIssuanceProofRequest {
+  bytes credentialHash = 1;
+}
+message QueryIssuanceProofResponse {
+  bytes encodedProof = 1;
+}
+
+message QueryRevocationProofRequest {
+  bytes credentialHash = 1;
+}
+message QueryRevocationProofResponse {
+  bytes encodedProof = 1;
+}
+
+message QueryAttachedHolderPublicKeyRequest {
+  string address = 1;
+}
+message QueryAttachedHolderPublicKeyResponse {
+  bytes pubKey = 1;
+}
+
+message QueryIsCredentialInZKSDIRequest {
+  string address = 1;
+  bytes verificationID = 2;
+}
+message QueryIsCredentialInZKSDIResponse {
+  bool included = 1;
+}
+
+message QueryCredentialHashRequest {
+  bytes verificationId = 1;
+}
+message QueryCredentialHashResponse {
+  bytes credentialHash = 1;
 }

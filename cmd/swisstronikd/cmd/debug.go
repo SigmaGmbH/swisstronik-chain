@@ -6,7 +6,10 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/iden3/go-iden3-crypto/babyjub"
 	"os"
+	"slices"
 	"strings"
 
 	"encoding/hex"
@@ -36,6 +39,7 @@ func DebugCmd() *cobra.Command {
 	cmd.AddCommand(RandomEd25519PrivateKeypair())
 	cmd.AddCommand(ExtractPubkeyCmd())
 	cmd.AddCommand(ConvertAddressCmd())
+	cmd.AddCommand(RandomBJJKeypair())
 
 	return cmd
 }
@@ -58,6 +62,41 @@ func RandomEd25519PrivateKeypair() *cobra.Command {
 			}{
 				PrivateKeyBase64: base64.StdEncoding.EncodeToString(private),
 				PublicKeyBase64:  base64.StdEncoding.EncodeToString(public),
+			}
+
+			jsonKeyPair, err := json.Marshal(keyPair)
+			if err != nil {
+				return err
+			}
+
+			_, err = fmt.Fprintln(cmd.OutOrStdout(), string(jsonKeyPair))
+			return err
+		},
+	}
+
+	return cmd
+}
+
+// RandomBJJKeypair returns random BJJ-keypair cobra Command.
+func RandomBJJKeypair() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "random-bjj-keypair",
+		Short: "Generates random ed25519 keypair",
+		Long:  `Generates random ed25519 keypair and outputs it in JSON format with hex-encoded private and public keys. Do not use that keypair in production`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			privateKey := babyjub.NewRandPrivKey()
+			compressed := privateKey.Public().Compress()
+			compressedPublicKey := compressed[:]
+
+			// Return as big endian
+			slices.Reverse(compressedPublicKey)
+
+			keyPair := struct {
+				PrivateKey string `json:"private_key"`
+				PublicKey  string `json:"public_key"`
+			}{
+				PrivateKey: hexutil.Encode(privateKey[:]),
+				PublicKey:  hexutil.Encode(compressedPublicKey[:]),
 			}
 
 			jsonKeyPair, err := json.Marshal(keyPair)

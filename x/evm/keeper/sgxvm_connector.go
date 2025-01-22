@@ -70,6 +70,12 @@ func (q Connector) Query(req []byte) ([]byte, error) {
 		return q.GetAccountCodeHash(request)
 	case *librustgo.CosmosRequest_GetAccountCodeSize:
 		return q.GetAccountCodeSize(request)
+	case *librustgo.CosmosRequest_IssuanceTreeRoot:
+		return q.GetIssuanceTreeRoot()
+	case *librustgo.CosmosRequest_RevocationTreeRoot:
+		return q.GetRevocationTreeRoot()
+	case *librustgo.CosmosRequest_AddVerificationDetailsV2:
+		return q.AddVerificationDetailsV2(request)
 	}
 
 	return nil, errors.New("wrong query received")
@@ -249,6 +255,34 @@ func (q Connector) AddVerificationDetails(req *librustgo.CosmosRequest_AddVerifi
 	})
 }
 
+// AddVerificationDetailsV2 writes provided verification details to x/compliance module
+func (q Connector) AddVerificationDetailsV2(req *librustgo.CosmosRequest_AddVerificationDetailsV2) ([]byte, error) {
+	userAddress := sdk.AccAddress(req.AddVerificationDetailsV2.UserAddress)
+	issuerAddress := sdk.AccAddress(req.AddVerificationDetailsV2.IssuerAddress).String()
+	verificationType := compliancetypes.VerificationType(req.AddVerificationDetailsV2.VerificationType)
+
+	// Addresses in keeper are Cosmos Addresses
+	verificationDetails := &compliancetypes.VerificationDetails{
+		IssuerAddress:        issuerAddress,
+		OriginChain:          req.AddVerificationDetailsV2.OriginChain,
+		IssuanceTimestamp:    req.AddVerificationDetailsV2.IssuanceTimestamp,
+		ExpirationTimestamp:  req.AddVerificationDetailsV2.ExpirationTimestamp,
+		OriginalData:         req.AddVerificationDetailsV2.ProofData,
+		Schema:               req.AddVerificationDetailsV2.Schema,
+		IssuerVerificationId: req.AddVerificationDetailsV2.IssuerVerificationId,
+		Version:              req.AddVerificationDetailsV2.Version,
+	}
+
+	verificationID, err := q.EVMKeeper.ComplianceKeeper.AddVerificationDetailsV2(q.Context, userAddress, verificationType, verificationDetails, req.AddVerificationDetailsV2.UserPublicKey)
+	if err != nil {
+		return nil, err
+	}
+
+	return proto.Marshal(&librustgo.QueryAddVerificationDetailsResponse{
+		VerificationId: verificationID,
+	})
+}
+
 // HasVerification returns if user has verification of provided type from x/compliance module
 func (q Connector) HasVerification(req *librustgo.CosmosRequest_HasVerification) ([]byte, error) {
 	userAddress := sdk.AccAddress(req.HasVerification.UserAddress)
@@ -305,5 +339,35 @@ func (q Connector) GetVerificationData(req *librustgo.CosmosRequest_GetVerificat
 	}
 	return proto.Marshal(&librustgo.QueryGetVerificationDataResponse{
 		Data: resData,
+	})
+}
+
+func (q Connector) GetIssuanceTreeRoot() ([]byte, error) {
+	root, err := q.EVMKeeper.ComplianceKeeper.GetIssuanceTreeRoot(q.Context)
+	if err != nil {
+		return nil, err
+	}
+
+	if root == nil {
+		return nil, errors.New("issuance root not found")
+	}
+
+	return proto.Marshal(&librustgo.QueryIssuanceTreeRootResponse{
+		Root: root.Bytes(),
+	})
+}
+
+func (q Connector) GetRevocationTreeRoot() ([]byte, error) {
+	root, err := q.EVMKeeper.ComplianceKeeper.GetRevocationTreeRoot(q.Context)
+	if err != nil {
+		return nil, err
+	}
+
+	if root == nil {
+		return nil, errors.New("revocation root not found")
+	}
+
+	return proto.Marshal(&librustgo.QueryRevocationTreeRootResponse{
+		Root: root.Bytes(),
 	})
 }

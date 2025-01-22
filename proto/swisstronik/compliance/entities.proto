@@ -95,4 +95,15 @@ message VerificationDetails {
     string issuer_verification_id = 8;
     // Version
     uint32 version = 9;
+    // Is revoked
+    bool is_revoked = 10;
+}
+
+// ZKCredential contains basic information, which can be used to construct proof-of-ownership of some credential
+message ZKCredential {
+    VerificationType type = 1;
+    bytes issuer_address = 2;
+    bytes holder_public_key = 3;
+    uint32 expiration_timestamp = 4;
+    uint32 issuance_timestamp = 5;
 }

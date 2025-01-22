@@ -3,11 +3,11 @@ package keeper
 import (
 	"context"
 	"encoding/base64"
-
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
 	"github.com/cosmos/gogoproto/proto"
+	"github.com/ethereum/go-ethereum/common"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -20,6 +20,62 @@ type Querier struct {
 }
 
 var _ types.QueryServer = Querier{}
+
+func (k Querier) IssuanceTreeRoot(goCtx context.Context, req *types.QueryIssuanceTreeRootRequest) (*types.QueryIssuanceTreeRootResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	root, err := k.GetIssuanceTreeRoot(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &types.QueryIssuanceTreeRootResponse{Root: root.Bytes()}, nil
+}
+
+func (k Querier) IssuanceProof(goCtx context.Context, req *types.QueryIssuanceProofRequest) (*types.QueryIssuanceProofResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	hash := common.BytesToHash(req.CredentialHash)
+	proof, err := k.GetIssuanceProof(ctx, hash)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &types.QueryIssuanceProofResponse{EncodedProof: proof}, nil
+}
+
+func (k Querier) RevocationTreeRoot(goCtx context.Context, req *types.QueryRevocationTreeRootRequest) (*types.QueryRevocationTreeRootResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	root, err := k.GetRevocationTreeRoot(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &types.QueryRevocationTreeRootResponse{Root: root.Bytes()}, nil
+}
+
+func (k Querier) RevocationProof(goCtx context.Context, req *types.QueryRevocationProofRequest) (*types.QueryRevocationProofResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	hash := common.BytesToHash(req.CredentialHash)
+	proof, err := k.GetNonRevocationProof(ctx, hash)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &types.QueryRevocationProofResponse{EncodedProof: proof}, nil
+}
 
 func (k Querier) OperatorDetails(goCtx context.Context, req *types.QueryOperatorDetailsRequest) (*types.QueryOperatorDetailsResponse, error) {
 	if req == nil {
@@ -207,4 +263,79 @@ func (k Querier) VerificationsDetails(goCtx context.Context, req *types.QueryVer
 		Verifications: verifications,
 		Pagination:    pageRes,
 	}, nil
+}
+
+func (k Querier) AttachedHolderPublicKey(goCtx context.Context, req *types.QueryAttachedHolderPublicKeyRequest) (*types.QueryAttachedHolderPublicKeyResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	address, err := sdk.AccAddressFromBech32(req.Address)
+	if err != nil {
+		return nil, err
+	}
+
+	pubKey := k.GetHolderPublicKey(ctx, address)
+	return &types.QueryAttachedHolderPublicKeyResponse{PubKey: pubKey}, nil
+}
+
+func (k Querier) IsSuitableForZK(goCtx context.Context, req *types.QueryIsCredentialInZKSDIRequest) (*types.QueryIsCredentialInZKSDIResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	details, err := k.GetVerificationDetails(ctx, req.VerificationID)
+	if err != nil {
+		return nil, err
+	}
+
+	userAddress, err := sdk.AccAddressFromBech32(req.Address)
+	if err != nil {
+		return nil, err
+	}
+
+	issuerAddress, err := sdk.AccAddressFromBech32(details.IssuerAddress)
+	if err != nil {
+		return nil, err
+	}
+
+	userKey := k.GetHolderPublicKey(ctx, userAddress)
+	if userKey == nil {
+		return &types.QueryIsCredentialInZKSDIResponse{Included: false}, nil
+	}
+
+	credentialValue := &types.ZKCredential{
+		Type:                details.Type,
+		IssuerAddress:       issuerAddress.Bytes(),
+		HolderPublicKey:     userKey,
+		ExpirationTimestamp: details.ExpirationTimestamp,
+		IssuanceTimestamp:   details.IssuanceTimestamp,
+	}
+	credentialHash, err := credentialValue.Hash()
+	if err != nil {
+		return nil, err
+	}
+
+	isIncluded, err := k.IsIncludedInIssuanceTree(ctx, credentialHash)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.QueryIsCredentialInZKSDIResponse{Included: isIncluded}, nil
+}
+
+func (k Querier) CredentialHash(goCtx context.Context, req *types.QueryCredentialHashRequest) (*types.QueryCredentialHashResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	credentialHashBytes, err := k.GetCredentialHashByVerificationId(ctx, req.VerificationId)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.QueryCredentialHashResponse{CredentialHash: credentialHashBytes}, nil
 }

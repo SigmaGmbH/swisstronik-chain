@@ -2,6 +2,8 @@ package keeper_test
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/iden3/go-iden3-crypto/babyjub"
 	"github.com/status-im/keycard-go/hexutils"
 
 	"swisstronik/tests"
@@ -999,6 +1001,675 @@ func (suite *KeeperTestSuite) TestRemoveIssuer() {
 			msg := tc.malleate()
 			resp, err := msgServer.HandleRemoveIssuer(sdk.WrapSDKContext(suite.ctx), msg)
 			tc.expected(resp, err)
+		})
+	}
+}
+
+func (suite *KeeperTestSuite) TestHandleRevokeVerification() {
+	var (
+		signer         sdk.AccAddress
+		issuer         sdk.AccAddress
+		verificationId []byte
+	)
+
+	testCases := []struct {
+		name     string
+		init     func()
+		malleate func() *types.MsgRevokeVerification
+		expected func(resp *types.MsgRevokeVerificationResponse, err error)
+	}{
+		{
+			name: "invalid signer address",
+			init: func() {
+				issuer = tests.RandomAccAddress()
+				verificationId = tests.RandomAccAddress().Bytes()
+			},
+			malleate: func() *types.MsgRevokeVerification {
+				return &types.MsgRevokeVerification{
+					Signer:         "invalidSigner",
+					VerificationId: verificationId,
+				}
+			},
+			expected: func(resp *types.MsgRevokeVerificationResponse, err error) {
+				suite.Require().ErrorContains(err, "decoding bech32")
+				suite.Require().Nil(resp)
+			},
+		},
+		{
+			name: "verification does not exist",
+			init: func() {
+				issuer = tests.RandomAccAddress()
+				signer = tests.RandomAccAddress()
+				verificationId = tests.RandomAccAddress().Bytes()
+			},
+			malleate: func() *types.MsgRevokeVerification {
+				return &types.MsgRevokeVerification{
+					Signer:         issuer.String(),
+					VerificationId: verificationId,
+				}
+			},
+			expected: func(resp *types.MsgRevokeVerificationResponse, err error) {
+				suite.Require().ErrorIs(err, types.ErrInvalidParam)
+				suite.Require().ErrorContains(err, "verification does not exist")
+				suite.Require().Nil(resp)
+			},
+		},
+		{
+			name: "signer is not issuer creator nor operator",
+			init: func() {
+				details := &types.IssuerDetails{Creator: tests.RandomAccAddress().String(), Name: "test issuer"}
+				issuer = tests.RandomAccAddress()
+				_ = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
+
+				signer = tests.RandomAccAddress()
+				holder := tests.RandomAccAddress()
+
+				verificationDetails := &types.VerificationDetails{
+					Type:                 types.VerificationType_VT_KYC,
+					IssuerAddress:        issuer.String(),
+					OriginChain:          "swisstronik",
+					IssuanceTimestamp:    100,
+					ExpirationTimestamp:  200,
+					OriginalData:         nil,
+					Schema:               "",
+					IssuerVerificationId: "",
+					Version:              0,
+					IsRevoked:            false,
+				}
+				detailsBytes, _ := verificationDetails.Marshal()
+				verificationId = crypto.Keccak256(tests.RandomAccAddress().Bytes(), types.VerificationType_VT_KYC.ToBytes(), detailsBytes)
+				_ = suite.keeper.SetVerificationDetails(suite.ctx, holder, verificationId, verificationDetails)
+			},
+			malleate: func() *types.MsgRevokeVerification {
+				return &types.MsgRevokeVerification{
+					Signer:         signer.String(),
+					VerificationId: verificationId,
+				}
+			},
+			expected: func(resp *types.MsgRevokeVerificationResponse, err error) {
+				suite.Require().ErrorContains(err, "issuer creator or operator does not match")
+				suite.Require().Nil(resp)
+			},
+		},
+		{
+			name: "non-existing verification id",
+			init: func() {
+				signer = tests.RandomAccAddress()
+				details := &types.IssuerDetails{Creator: signer.String(), Name: "test issuer"}
+				issuer = tests.RandomAccAddress()
+				_ = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
+
+				verificationId = tests.RandomAccAddress().Bytes()
+			},
+			malleate: func() *types.MsgRevokeVerification {
+				return &types.MsgRevokeVerification{
+					Signer:         signer.String(),
+					VerificationId: verificationId,
+				}
+			},
+			expected: func(resp *types.MsgRevokeVerificationResponse, err error) {
+				suite.Require().ErrorContains(err, "verification does not exist")
+				suite.Require().Nil(resp)
+			},
+		},
+		{
+			name: "issuer creator should be able to revoke verification",
+			init: func() {
+				holder := tests.RandomAccAddress()
+				signer = tests.RandomAccAddress()
+				issuer = tests.RandomAccAddress()
+				details := &types.IssuerDetails{Creator: signer.String(), Name: "test issuer"}
+				_ = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
+
+				verificationDetails := &types.VerificationDetails{
+					Type:                 types.VerificationType_VT_KYC,
+					IssuerAddress:        issuer.String(),
+					OriginChain:          "swisstronik",
+					IssuanceTimestamp:    100,
+					ExpirationTimestamp:  200,
+					OriginalData:         nil,
+					Schema:               "",
+					IssuerVerificationId: "",
+					Version:              0,
+					IsRevoked:            false,
+				}
+				detailsBytes, _ := verificationDetails.Marshal()
+				verificationId = crypto.Keccak256(tests.RandomAccAddress().Bytes(), types.VerificationType_VT_KYC.ToBytes(), detailsBytes)
+				_ = suite.keeper.SetVerificationDetails(suite.ctx, holder, verificationId, verificationDetails)
+			},
+			malleate: func() *types.MsgRevokeVerification {
+				return &types.MsgRevokeVerification{
+					Signer:         signer.String(),
+					VerificationId: verificationId,
+				}
+			},
+			expected: func(resp *types.MsgRevokeVerificationResponse, err error) {
+				suite.Require().NoError(err)
+				suite.Require().NotNil(resp)
+
+				details, err := suite.keeper.GetVerificationDetails(suite.ctx, verificationId)
+				suite.Require().NoError(err)
+				suite.Require().NotNil(details)
+				suite.Require().True(details.IsRevoked)
+			},
+		},
+		{
+			name: "operator should be able to revoke verification",
+			init: func() {
+				holder := tests.RandomAccAddress()
+				signer = tests.RandomAccAddress()
+				_ = suite.keeper.AddOperator(suite.ctx, signer, types.OperatorType_OT_REGULAR)
+
+				issuer = tests.RandomAccAddress()
+				details := &types.IssuerDetails{Creator: tests.RandomAccAddress().String(), Name: "test issuer"}
+				_ = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
+
+				verificationDetails := &types.VerificationDetails{
+					Type:                 types.VerificationType_VT_KYC,
+					IssuerAddress:        issuer.String(),
+					OriginChain:          "swisstronik",
+					IssuanceTimestamp:    100,
+					ExpirationTimestamp:  200,
+					OriginalData:         nil,
+					Schema:               "",
+					IssuerVerificationId: "",
+					Version:              0,
+					IsRevoked:            false,
+				}
+				detailsBytes, _ := verificationDetails.Marshal()
+				verificationId = crypto.Keccak256(tests.RandomAccAddress().Bytes(), types.VerificationType_VT_KYC.ToBytes(), detailsBytes)
+				_ = suite.keeper.SetVerificationDetails(suite.ctx, holder, verificationId, verificationDetails)
+			},
+			malleate: func() *types.MsgRevokeVerification {
+				return &types.MsgRevokeVerification{
+					Signer:         signer.String(),
+					VerificationId: verificationId,
+				}
+			},
+			expected: func(resp *types.MsgRevokeVerificationResponse, err error) {
+				suite.Require().NoError(err)
+				suite.Require().NotNil(resp)
+
+				details, err := suite.keeper.GetVerificationDetails(suite.ctx, verificationId)
+				suite.Require().NoError(err)
+				suite.Require().NotNil(details)
+				suite.Require().True(details.IsRevoked)
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		suite.Run(tc.name, func() {
+			if tc.init != nil {
+				tc.init()
+			}
+			msgServer := keeper.NewMsgServerImpl(suite.keeper)
+			msg := tc.malleate()
+			resp, err := msgServer.HandleRevokeVerification(sdk.WrapSDKContext(suite.ctx), msg)
+			tc.expected(resp, err)
+		})
+	}
+}
+
+func (suite *KeeperTestSuite) TestHandleAttachPublicKey() {
+	var (
+		signer    sdk.AccAddress
+		publicKey []byte
+	)
+
+	testCases := []struct {
+		name     string
+		init     func()
+		malleate func() *types.MsgAttachHolderPublicKey
+		expected func(resp *types.MsgAttachHolderPublicKeyResponse, err error)
+	}{
+		{
+			name: "invalid signer address",
+			init: func() {
+				pk := babyjub.NewRandPrivKey()
+				pubKeyCompressed := pk.Public().Compress()
+				publicKey = pubKeyCompressed[:]
+			},
+			malleate: func() *types.MsgAttachHolderPublicKey {
+				return &types.MsgAttachHolderPublicKey{
+					Signer:          "invalidSigner",
+					HolderPublicKey: publicKey,
+				}
+			},
+			expected: func(resp *types.MsgAttachHolderPublicKeyResponse, err error) {
+				suite.Require().ErrorContains(err, "decoding bech32")
+				suite.Require().Nil(resp)
+			},
+		},
+		{
+			name: "invalid public key",
+			init: func() {
+				signer = tests.RandomAccAddress()
+				publicKey = make([]byte, 32)
+				// Construct max value, which is bigger than field order
+				for i := range publicKey {
+					publicKey[i] = 255
+				}
+			},
+			malleate: func() *types.MsgAttachHolderPublicKey {
+				return &types.MsgAttachHolderPublicKey{
+					Signer:          signer.String(),
+					HolderPublicKey: publicKey,
+				}
+			},
+			expected: func(resp *types.MsgAttachHolderPublicKeyResponse, err error) {
+				suite.Require().ErrorContains(err, "cannot parse provided public key")
+				suite.Require().Nil(resp)
+			},
+		},
+		{
+			name: "valid signer, valid public key",
+			init: func() {
+				signer = tests.RandomAccAddress()
+				pubKeyCompressed := tests.RandomEdDSAPubKey()
+				publicKey = pubKeyCompressed[:]
+			},
+			malleate: func() *types.MsgAttachHolderPublicKey {
+				return &types.MsgAttachHolderPublicKey{
+					Signer:          signer.String(),
+					HolderPublicKey: publicKey,
+				}
+			},
+			expected: func(resp *types.MsgAttachHolderPublicKeyResponse, err error) {
+				suite.Require().NoError(err)
+				suite.Require().NotNil(resp)
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		suite.Run(tc.name, func() {
+			if tc.init != nil {
+				tc.init()
+			}
+			msgServer := keeper.NewMsgServerImpl(suite.keeper)
+			msg := tc.malleate()
+			resp, err := msgServer.HandleAttachHolderPublicKey(sdk.WrapSDKContext(suite.ctx), msg)
+			tc.expected(resp, err)
+		})
+	}
+}
+
+func (suite *KeeperTestSuite) TestRevokeInSMT() {
+	var (
+		signer         sdk.AccAddress
+		issuer         sdk.AccAddress
+		verificationId []byte
+	)
+
+	testCases := []struct {
+		name     string
+		init     func()
+		malleate func()
+	}{
+		{
+			name: "if user has no attached public key, revocation tree should still the same",
+			init: func() {
+				holder := tests.RandomAccAddress()
+				signer = tests.RandomAccAddress()
+				err := suite.keeper.AddOperator(suite.ctx, signer, types.OperatorType_OT_REGULAR)
+				suite.Require().NoError(err)
+
+				issuer = tests.RandomAccAddress()
+				details := &types.IssuerDetails{Creator: tests.RandomAccAddress().String(), Name: "test issuer"}
+				err = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
+				suite.Require().NoError(err)
+
+				verificationDetails := &types.VerificationDetails{
+					Type:                 types.VerificationType_VT_KYC,
+					IssuerAddress:        issuer.String(),
+					OriginChain:          "swisstronik",
+					IssuanceTimestamp:    100,
+					ExpirationTimestamp:  200,
+					OriginalData:         nil,
+					Schema:               "",
+					IssuerVerificationId: "",
+					Version:              0,
+					IsRevoked:            false,
+				}
+				detailsBytes, _ := verificationDetails.Marshal()
+				verificationId = crypto.Keccak256(tests.RandomAccAddress().Bytes(), types.VerificationType_VT_KYC.ToBytes(), detailsBytes)
+				err = suite.keeper.SetVerificationDetails(suite.ctx, holder, verificationId, verificationDetails)
+				suite.Require().NoError(err)
+			},
+			malleate: func() {
+				rootBefore, err := suite.keeper.GetRevocationTreeRoot(suite.ctx)
+				suite.Require().NoError(err)
+
+				msg := &types.MsgRevokeVerification{
+					Signer:         signer.String(),
+					VerificationId: verificationId,
+				}
+
+				msgServer := keeper.NewMsgServerImpl(suite.keeper)
+				resp, err := msgServer.HandleRevokeVerification(sdk.WrapSDKContext(suite.ctx), msg)
+
+				suite.Require().NoError(err)
+				suite.Require().NotNil(resp)
+
+				rootAfter, err := suite.keeper.GetRevocationTreeRoot(suite.ctx)
+				suite.Require().NoError(err)
+
+				// Tree roots should be the same
+				suite.Require().Equal(rootBefore, rootAfter)
+			},
+		},
+		{
+			name: "if user has attached public key, revocation tree should be updated",
+			init: func() {
+				holder := tests.RandomAccAddress()
+				signer = tests.RandomAccAddress()
+				err := suite.keeper.AddOperator(suite.ctx, signer, types.OperatorType_OT_REGULAR)
+				suite.Require().NoError(err)
+
+				issuer = tests.RandomAccAddress()
+				details := &types.IssuerDetails{Creator: tests.RandomAccAddress().String(), Name: "test issuer"}
+				err = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
+				suite.Require().NoError(err)
+
+				// Set holder public key
+				pubKeyCompressed := tests.RandomEdDSAPubKey()
+				err = suite.keeper.SetHolderPublicKey(suite.ctx, holder, pubKeyCompressed[:])
+				suite.Require().NoError(err)
+
+				verificationDetails := &types.VerificationDetails{
+					Type:                 types.VerificationType_VT_KYC,
+					IssuerAddress:        issuer.String(),
+					OriginChain:          "swisstronik",
+					IssuanceTimestamp:    100,
+					ExpirationTimestamp:  200,
+					OriginalData:         nil,
+					Schema:               "",
+					IssuerVerificationId: "",
+					Version:              0,
+					IsRevoked:            false,
+				}
+				detailsBytes, _ := verificationDetails.Marshal()
+				verificationId = crypto.Keccak256(tests.RandomAccAddress().Bytes(), types.VerificationType_VT_KYC.ToBytes(), detailsBytes)
+				err = suite.keeper.SetVerificationDetails(suite.ctx, holder, verificationId, verificationDetails)
+				suite.Require().NoError(err)
+			},
+			malleate: func() {
+				rootBefore, err := suite.keeper.GetRevocationTreeRoot(suite.ctx)
+				suite.Require().NoError(err)
+
+				msg := &types.MsgRevokeVerification{
+					Signer:         signer.String(),
+					VerificationId: verificationId,
+				}
+
+				msgServer := keeper.NewMsgServerImpl(suite.keeper)
+				resp, err := msgServer.HandleRevokeVerification(sdk.WrapSDKContext(suite.ctx), msg)
+
+				suite.Require().NoError(err)
+				suite.Require().NotNil(resp)
+
+				rootAfter, err := suite.keeper.GetRevocationTreeRoot(suite.ctx)
+				suite.Require().NoError(err)
+
+				// Tree roots should be the same
+				suite.Require().NotEqual(rootBefore, rootAfter)
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		suite.Run(tc.name, func() {
+			if tc.init != nil {
+				tc.init()
+			}
+
+			tc.malleate()
+		})
+	}
+}
+
+func (suite *KeeperTestSuite) TestConvertCredential() {
+	var (
+		holder         sdk.AccAddress
+		signer         sdk.AccAddress
+		issuer         sdk.AccAddress
+		verificationId []byte
+	)
+
+	testCases := []struct {
+		name     string
+		init     func()
+		malleate func()
+	}{
+		{
+			name: "user cannot convert credential before attaching public key",
+			init: func() {
+				holder = tests.RandomAccAddress()
+				signer = tests.RandomAccAddress()
+				err := suite.keeper.AddOperator(suite.ctx, signer, types.OperatorType_OT_REGULAR)
+				suite.Require().NoError(err)
+
+				issuer = tests.RandomAccAddress()
+				details := &types.IssuerDetails{Creator: tests.RandomAccAddress().String(), Name: "test issuer"}
+				err = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
+				suite.Require().NoError(err)
+
+				verificationDetails := &types.VerificationDetails{
+					Type:                 types.VerificationType_VT_KYC,
+					IssuerAddress:        issuer.String(),
+					OriginChain:          "swisstronik",
+					IssuanceTimestamp:    100,
+					ExpirationTimestamp:  200,
+					OriginalData:         nil,
+					Schema:               "",
+					IssuerVerificationId: "",
+					Version:              0,
+					IsRevoked:            false,
+				}
+				detailsBytes, _ := verificationDetails.Marshal()
+				verificationId = crypto.Keccak256(tests.RandomAccAddress().Bytes(), types.VerificationType_VT_KYC.ToBytes(), detailsBytes)
+				err = suite.keeper.SetVerificationDetails(suite.ctx, holder, verificationId, verificationDetails)
+				suite.Require().NoError(err)
+			},
+			malleate: func() {
+				rootBefore, err := suite.keeper.GetIssuanceTreeRoot(suite.ctx)
+				suite.Require().NoError(err)
+
+				msg := &types.MsgConvertCredential{
+					Signer:         holder.String(),
+					VerificationId: verificationId,
+				}
+
+				msgServer := keeper.NewMsgServerImpl(suite.keeper)
+				resp, err := msgServer.HandleConvertCredential(sdk.WrapSDKContext(suite.ctx), msg)
+
+				suite.Require().Error(err)
+				suite.Require().Nil(resp)
+				suite.Require().ErrorContains(err, "holder public key not found")
+
+				rootAfter, err := suite.keeper.GetIssuanceTreeRoot(suite.ctx)
+				suite.Require().NoError(err)
+
+				// Tree roots should be the same
+				suite.Require().Equal(rootBefore, rootAfter)
+			},
+		},
+		{
+			name: "user should be able to convert credential with attached public key",
+			init: func() {
+				holder = tests.RandomAccAddress()
+				signer = tests.RandomAccAddress()
+				err := suite.keeper.AddOperator(suite.ctx, signer, types.OperatorType_OT_REGULAR)
+				suite.Require().NoError(err)
+
+				issuer = tests.RandomAccAddress()
+				details := &types.IssuerDetails{Creator: tests.RandomAccAddress().String(), Name: "test issuer"}
+				err = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
+				suite.Require().NoError(err)
+
+				verificationDetails := &types.VerificationDetails{
+					Type:                 types.VerificationType_VT_KYC,
+					IssuerAddress:        issuer.String(),
+					OriginChain:          "swisstronik",
+					IssuanceTimestamp:    200,
+					ExpirationTimestamp:  300,
+					OriginalData:         nil,
+					Schema:               "",
+					IssuerVerificationId: "",
+					Version:              0,
+					IsRevoked:            false,
+				}
+				detailsBytes, _ := verificationDetails.Marshal()
+				verificationId = crypto.Keccak256(tests.RandomAccAddress().Bytes(), types.VerificationType_VT_KYC.ToBytes(), detailsBytes)
+				err = suite.keeper.SetVerificationDetails(suite.ctx, holder, verificationId, verificationDetails)
+				suite.Require().NoError(err)
+			},
+			malleate: func() {
+				rootBefore, err := suite.keeper.GetIssuanceTreeRoot(suite.ctx)
+				suite.Require().NoError(err)
+
+				// Set holder public key
+				pubKeyCompressed := tests.RandomEdDSAPubKey()
+				err = suite.keeper.SetHolderPublicKey(suite.ctx, holder, pubKeyCompressed[:])
+				suite.Require().NoError(err)
+
+				msg := &types.MsgConvertCredential{
+					Signer:         holder.String(),
+					VerificationId: verificationId,
+				}
+
+				msgServer := keeper.NewMsgServerImpl(suite.keeper)
+				resp, err := msgServer.HandleConvertCredential(sdk.WrapSDKContext(suite.ctx), msg)
+
+				suite.Require().NoError(err)
+				suite.Require().NotNil(resp)
+
+				rootAfter, err := suite.keeper.GetIssuanceTreeRoot(suite.ctx)
+				suite.Require().NoError(err)
+
+				// Tree roots should be different
+				suite.Require().NotEqual(rootBefore, rootAfter)
+			},
+		},
+		{
+			name: "non-owner should not be able to convert credential",
+			init: func() {
+				holder = tests.RandomAccAddress()
+				signer = tests.RandomAccAddress()
+				err := suite.keeper.AddOperator(suite.ctx, signer, types.OperatorType_OT_REGULAR)
+				suite.Require().NoError(err)
+
+				issuer = tests.RandomAccAddress()
+				details := &types.IssuerDetails{Creator: tests.RandomAccAddress().String(), Name: "test issuer"}
+				err = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
+				suite.Require().NoError(err)
+
+				verificationDetails := &types.VerificationDetails{
+					Type:                 types.VerificationType_VT_KYC,
+					IssuerAddress:        issuer.String(),
+					OriginChain:          "swisstronik",
+					IssuanceTimestamp:    200,
+					ExpirationTimestamp:  300,
+					OriginalData:         nil,
+					Schema:               "",
+					IssuerVerificationId: "",
+					Version:              0,
+					IsRevoked:            false,
+				}
+				detailsBytes, _ := verificationDetails.Marshal()
+				verificationId = crypto.Keccak256(tests.RandomAccAddress().Bytes(), types.VerificationType_VT_KYC.ToBytes(), detailsBytes)
+				err = suite.keeper.SetVerificationDetails(suite.ctx, holder, verificationId, verificationDetails)
+				suite.Require().NoError(err)
+			},
+			malleate: func() {
+				// Set holder public key
+				pubKeyCompressed := tests.RandomEdDSAPubKey()
+				err := suite.keeper.SetHolderPublicKey(suite.ctx, holder, pubKeyCompressed[:])
+				suite.Require().NoError(err)
+
+				wrongSigner := tests.RandomAccAddress()
+
+				msg := &types.MsgConvertCredential{
+					Signer:         wrongSigner.String(),
+					VerificationId: verificationId,
+				}
+
+				msgServer := keeper.NewMsgServerImpl(suite.keeper)
+				resp, err := msgServer.HandleConvertCredential(sdk.WrapSDKContext(suite.ctx), msg)
+
+				suite.Require().Error(err)
+				suite.Require().Nil(resp)
+				suite.Require().ErrorContains(err, "signer is not credential holder")
+			},
+		},
+		{
+			name: "user cannot convert revoked credential",
+			init: func() {
+				holder = tests.RandomAccAddress()
+				signer = tests.RandomAccAddress()
+				err := suite.keeper.AddOperator(suite.ctx, signer, types.OperatorType_OT_REGULAR)
+				suite.Require().NoError(err)
+
+				issuer = tests.RandomAccAddress()
+				details := &types.IssuerDetails{Creator: tests.RandomAccAddress().String(), Name: "test issuer"}
+				err = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
+				suite.Require().NoError(err)
+
+				verificationDetails := &types.VerificationDetails{
+					Type:                 types.VerificationType_VT_KYC,
+					IssuerAddress:        issuer.String(),
+					OriginChain:          "swisstronik",
+					IssuanceTimestamp:    300,
+					ExpirationTimestamp:  400,
+					OriginalData:         nil,
+					Schema:               "",
+					IssuerVerificationId: "",
+					Version:              0,
+					IsRevoked:            true,
+				}
+				detailsBytes, _ := verificationDetails.Marshal()
+				verificationId = crypto.Keccak256(tests.RandomAccAddress().Bytes(), types.VerificationType_VT_KYC.ToBytes(), detailsBytes)
+				err = suite.keeper.SetVerificationDetails(suite.ctx, holder, verificationId, verificationDetails)
+				suite.Require().NoError(err)
+			},
+			malleate: func() {
+				rootBefore, err := suite.keeper.GetIssuanceTreeRoot(suite.ctx)
+				suite.Require().NoError(err)
+
+				// Set holder public key
+				pubKeyCompressed := tests.RandomEdDSAPubKey()
+				err = suite.keeper.SetHolderPublicKey(suite.ctx, holder, pubKeyCompressed[:])
+				suite.Require().NoError(err)
+
+				msg := &types.MsgConvertCredential{
+					Signer:         holder.String(),
+					VerificationId: verificationId,
+				}
+
+				msgServer := keeper.NewMsgServerImpl(suite.keeper)
+				resp, err := msgServer.HandleConvertCredential(sdk.WrapSDKContext(suite.ctx), msg)
+
+				suite.Require().Error(err)
+				suite.Require().Nil(resp)
+				suite.Require().ErrorContains(err, "credential was revoked")
+
+				rootAfter, err := suite.keeper.GetIssuanceTreeRoot(suite.ctx)
+				suite.Require().NoError(err)
+
+				// Tree roots should be the same
+				suite.Require().Equal(rootBefore, rootAfter)
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		suite.Run(tc.name, func() {
+			if tc.init != nil {
+				tc.init()
+			}
+
+			tc.malleate()
 		})
 	}
 }

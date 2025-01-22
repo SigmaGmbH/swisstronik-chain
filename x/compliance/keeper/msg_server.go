@@ -105,6 +105,51 @@ func (k msgServer) HandleRemoveOperator(goCtx context.Context, msg *types.MsgRem
 	return &types.MsgRemoveOperatorResponse{}, nil
 }
 
+func (k msgServer) HandleRevokeVerification(goCtx context.Context, msg *types.MsgRevokeVerification) (*types.MsgRevokeVerificationResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// Check validity of signer address
+	signer, err := sdk.AccAddressFromBech32(msg.Signer)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if verification details exist
+	verificationDetails, err := k.GetVerificationDetails(ctx, msg.VerificationId)
+	if err != nil {
+		return nil, err
+	}
+	if verificationDetails.IsEmpty() {
+		return nil, errors.Wrap(types.ErrInvalidParam, "verification does not exist")
+	}
+
+	// Check validity of issuer address
+	issuer, err := sdk.AccAddressFromBech32(verificationDetails.IssuerAddress)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if signer is operator or issuer creator
+	if exists, err := k.OperatorExists(ctx, signer); !exists || err != nil {
+		// If signer is not an operator, check if it's issuer creator
+		details, err := k.GetIssuerDetails(ctx, issuer)
+		if err != nil || len(details.Name) < 1 {
+			return nil, errors.Wrap(types.ErrInvalidIssuer, "issuer details not found")
+		}
+
+		if details.Creator != signer.String() {
+			return nil, errors.Wrap(types.ErrNotOperatorOrIssuerCreator, "issuer creator or operator does not match")
+		}
+	}
+
+	verificationDetails.IsRevoked = true
+	if err = k.MarkVerificationDetailsAsRevoked(ctx, msg.VerificationId); err != nil {
+		return nil, err
+	}
+
+	return &types.MsgRevokeVerificationResponse{}, nil
+}
+
 func (k msgServer) HandleSetVerificationStatus(goCtx context.Context, msg *types.MsgSetVerificationStatus) (*types.MsgSetVerificationStatusResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
@@ -275,4 +320,84 @@ func (k msgServer) HandleRemoveIssuer(goCtx context.Context, msg *types.MsgRemov
 	)
 
 	return &types.MsgRemoveIssuerResponse{}, nil
+}
+
+func (k msgServer) HandleAttachHolderPublicKey(goCtx context.Context, msg *types.MsgAttachHolderPublicKey) (*types.MsgAttachHolderPublicKeyResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// Check validity of signer address
+	signer, err := sdk.AccAddressFromBech32(msg.Signer)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = k.SetHolderPublicKey(ctx, signer, msg.HolderPublicKey); err != nil {
+		return nil, err
+	}
+
+	return &types.MsgAttachHolderPublicKeyResponse{}, nil
+}
+
+func (k msgServer) HandleConvertCredential(goCtx context.Context, msg *types.MsgConvertCredential) (*types.MsgConvertCredentialResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// Check validity of signer address
+	holderAddress, err := sdk.AccAddressFromBech32(msg.Signer)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if signer is owner of credential
+	credentialOwner := k.getHolderByVerificationId(ctx, msg.VerificationId)
+	if credentialOwner.String() != msg.Signer {
+		return nil, errors.Wrap(types.ErrBadRequest, "signer is not credential holder")
+	}
+
+	var holderPublicKey []byte
+	holderPublicKey = k.GetPubKeyByVerificationId(ctx, msg.VerificationId)
+	if holderPublicKey == nil {
+		holderPublicKey = k.GetHolderPublicKey(ctx, holderAddress)
+	}
+	if holderPublicKey == nil {
+		return nil, errors.Wrap(types.ErrBadRequest, "holder public key not found. Please attach it")
+	}
+
+	details, err := k.GetVerificationDetails(ctx, msg.VerificationId)
+	if err != nil {
+		return nil, err
+	}
+
+	if details.IsRevoked {
+		return nil, errors.Wrap(types.ErrBadRequest, "credential was revoked")
+	}
+
+	issuerAddress, err := sdk.AccAddressFromBech32(details.IssuerAddress)
+	if err != nil {
+		return nil, err
+	}
+
+	credentialValue := &types.ZKCredential{
+		Type:                details.Type,
+		IssuerAddress:       issuerAddress.Bytes(),
+		HolderPublicKey:     holderPublicKey,
+		ExpirationTimestamp: details.ExpirationTimestamp,
+		IssuanceTimestamp:   details.IssuanceTimestamp,
+	}
+	credentialHash, err := credentialValue.Hash()
+	if err != nil {
+		return nil, err
+	}
+
+	isIncluded, err := k.IsIncludedInIssuanceTree(ctx, credentialHash)
+	if err != nil {
+		return nil, err
+	}
+
+	if !isIncluded {
+		if err = k.AddCredentialHashToIssued(ctx, credentialHash); err != nil {
+			return nil, err
+		}
+	}
+
+	return &types.MsgConvertCredentialResponse{}, nil
 }

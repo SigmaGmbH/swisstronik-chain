@@ -144,6 +144,16 @@ message QueryRemoveStorageResponse {}
 message QueryBlockHash { bytes number = 1; }
 message QueryBlockHashResponse { bytes hash = 1; }
 
+message QueryIssuanceTreeRoot {}
+message QueryIssuanceTreeRootResponse {
+  bytes root = 1;
+}
+
+message QueryRevocationTreeRoot {}
+message QueryRevocationTreeRootResponse {
+  bytes root = 1;
+}
+
 message QueryAddVerificationDetails {
   bytes userAddress = 1;
   bytes issuerAddress = 2;
@@ -157,6 +167,23 @@ message QueryAddVerificationDetails {
   uint32 version = 10;
 }
 message QueryAddVerificationDetailsResponse {
+  bytes verificationId = 1;
+}
+
+message QueryAddVerificationDetailsV2 {
+  bytes userAddress = 1;
+  bytes issuerAddress = 2;
+  string originChain = 3;
+  uint32 verificationType = 4;
+  uint32 issuanceTimestamp = 5;
+  uint32 expirationTimestamp = 6;
+  bytes proofData = 7;
+  string schema = 8;
+  string issuerVerificationId = 9;
+  uint32 version = 10;
+  bytes userPublicKey = 11;
+}
+message QueryAddVerificationDetailsV2Response {
   bytes verificationId = 1;
 }
 
@@ -222,6 +249,9 @@ message CosmosRequest {
     QueryGetVerificationData getVerificationData = 15;
     QueryInsertAccountBalance insertAccountBalance = 16;
     QueryInsertAccountNonce insertAccountNonce = 17;
+    QueryIssuanceTreeRoot issuanceTreeRoot = 18;
+    QueryRevocationTreeRoot revocationTreeRoot = 19;
+    QueryAddVerificationDetailsV2 addVerificationDetailsV2 = 20;
   }
 }
 

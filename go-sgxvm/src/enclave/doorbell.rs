@@ -6,10 +6,10 @@ use std::ops::Deref;
 use std::time::Duration;
 
 #[cfg(not(feature = "attestation_server"))]
-static ENCLAVE_FILE: &'static str = "v1.0.6_enclave.signed.so";
+static ENCLAVE_FILE: &'static str = "v1.0.7_enclave.signed.so";
 
 #[cfg(feature = "attestation_server")]
-static ENCLAVE_FILE: &'static str = "v1.0.6_attestation_enclave.signed.so";
+static ENCLAVE_FILE: &'static str = "v1.0.7_attestation_enclave.signed.so";
 
 #[cfg(feature = "attestation_server")]
 const ENCLAVE_LOCK_TIMEOUT: u64 = 6 * 50;

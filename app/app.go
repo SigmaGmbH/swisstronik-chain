@@ -123,7 +123,6 @@ import (
 	srvflags "swisstronik/server/flags"
 	evmcommontypes "swisstronik/types"
 	compliancemodule "swisstronik/x/compliance"
-	compliancemoduleclient "swisstronik/x/compliance/client"
 	compliancemodulekeeper "swisstronik/x/compliance/keeper"
 	compliancemoduletypes "swisstronik/x/compliance/types"
 	"swisstronik/x/evm"
@@ -155,7 +154,7 @@ func getGovProposalHandlers() []govclient.ProposalHandler {
 		upgradeclient.LegacyCancelProposalHandler,
 		ibcclientclient.UpdateClientProposalHandler,
 		ibcclientclient.UpgradeProposalHandler,
-		compliancemoduleclient.VerifyIssuerProposalHandler,
+		// compliancemoduleclient.VerifyIssuerProposalHandler, this functionality is disabled for now
 		// this line is used by starport scaffolding # stargate/app/govProposalHandler
 	)
 

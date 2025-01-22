@@ -17,6 +17,7 @@ package types
 
 import (
 	"fmt"
+	compliancetypes "swisstronik/x/compliance/types"
 
 	"github.com/cosmos/cosmos-sdk/types/tx"
 
@@ -36,15 +37,17 @@ import (
 type QueryClient struct {
 	tx.ServiceClient
 	evmtypes.QueryClient
-	FeeMarket feemarkettypes.QueryClient
+	FeeMarket        feemarkettypes.QueryClient
+	ComplianceClient compliancetypes.QueryClient
 }
 
 // NewQueryClient creates a new gRPC query client
 func NewQueryClient(clientCtx client.Context) *QueryClient {
 	return &QueryClient{
-		ServiceClient: tx.NewServiceClient(clientCtx),
-		QueryClient:   evmtypes.NewQueryClient(clientCtx),
-		FeeMarket:     feemarkettypes.NewQueryClient(clientCtx),
+		ServiceClient:    tx.NewServiceClient(clientCtx),
+		QueryClient:      evmtypes.NewQueryClient(clientCtx),
+		FeeMarket:        feemarkettypes.NewQueryClient(clientCtx),
+		ComplianceClient: compliancetypes.NewQueryClient(clientCtx),
 	}
 }
 

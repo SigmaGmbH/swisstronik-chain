@@ -6716,6 +6716,596 @@ impl ::protobuf::reflect::ProtobufValue for QueryBlockHashResponse {
 }
 
 #[derive(PartialEq,Clone,Default)]
+pub struct QueryIssuanceTreeRoot {
+    // special fields
+    pub unknown_fields: ::protobuf::UnknownFields,
+    pub cached_size: ::protobuf::CachedSize,
+}
+
+impl<'a> ::std::default::Default for &'a QueryIssuanceTreeRoot {
+    fn default() -> &'a QueryIssuanceTreeRoot {
+        <QueryIssuanceTreeRoot as ::protobuf::Message>::default_instance()
+    }
+}
+
+impl QueryIssuanceTreeRoot {
+    pub fn new() -> QueryIssuanceTreeRoot {
+        ::std::default::Default::default()
+    }
+}
+
+impl ::protobuf::Message for QueryIssuanceTreeRoot {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &dyn (::std::any::Any) {
+        self as &dyn (::std::any::Any)
+    }
+    fn as_any_mut(&mut self) -> &mut dyn (::std::any::Any) {
+        self as &mut dyn (::std::any::Any)
+    }
+    fn into_any(self: Box<Self>) -> ::std::boxed::Box<dyn (::std::any::Any)> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> QueryIssuanceTreeRoot {
+        QueryIssuanceTreeRoot::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
+        };
+        unsafe {
+            descriptor.get(|| {
+                let fields = ::std::vec::Vec::new();
+                ::protobuf::reflect::MessageDescriptor::new::<QueryIssuanceTreeRoot>(
+                    "QueryIssuanceTreeRoot",
+                    fields,
+                    file_descriptor_proto()
+                )
+            })
+        }
+    }
+
+    fn default_instance() -> &'static QueryIssuanceTreeRoot {
+        static mut instance: ::protobuf::lazy::Lazy<QueryIssuanceTreeRoot> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const QueryIssuanceTreeRoot,
+        };
+        unsafe {
+            instance.get(QueryIssuanceTreeRoot::new)
+        }
+    }
+}
+
+impl ::protobuf::Clear for QueryIssuanceTreeRoot {
+    fn clear(&mut self) {
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for QueryIssuanceTreeRoot {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for QueryIssuanceTreeRoot {
+    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
+        ::protobuf::reflect::ProtobufValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
+pub struct QueryIssuanceTreeRootResponse {
+    // message fields
+    pub root: ::std::vec::Vec<u8>,
+    // special fields
+    pub unknown_fields: ::protobuf::UnknownFields,
+    pub cached_size: ::protobuf::CachedSize,
+}
+
+impl<'a> ::std::default::Default for &'a QueryIssuanceTreeRootResponse {
+    fn default() -> &'a QueryIssuanceTreeRootResponse {
+        <QueryIssuanceTreeRootResponse as ::protobuf::Message>::default_instance()
+    }
+}
+
+impl QueryIssuanceTreeRootResponse {
+    pub fn new() -> QueryIssuanceTreeRootResponse {
+        ::std::default::Default::default()
+    }
+
+    // bytes root = 1;
+
+
+    pub fn get_root(&self) -> &[u8] {
+        &self.root
+    }
+    pub fn clear_root(&mut self) {
+        self.root.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_root(&mut self, v: ::std::vec::Vec<u8>) {
+        self.root = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_root(&mut self) -> &mut ::std::vec::Vec<u8> {
+        &mut self.root
+    }
+
+    // Take field
+    pub fn take_root(&mut self) -> ::std::vec::Vec<u8> {
+        ::std::mem::replace(&mut self.root, ::std::vec::Vec::new())
+    }
+}
+
+impl ::protobuf::Message for QueryIssuanceTreeRootResponse {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                1 => {
+                    ::protobuf::rt::read_singular_proto3_bytes_into(wire_type, is, &mut self.root)?;
+                },
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        if !self.root.is_empty() {
+            my_size += ::protobuf::rt::bytes_size(1, &self.root);
+        }
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        if !self.root.is_empty() {
+            os.write_bytes(1, &self.root)?;
+        }
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &dyn (::std::any::Any) {
+        self as &dyn (::std::any::Any)
+    }
+    fn as_any_mut(&mut self) -> &mut dyn (::std::any::Any) {
+        self as &mut dyn (::std::any::Any)
+    }
+    fn into_any(self: Box<Self>) -> ::std::boxed::Box<dyn (::std::any::Any)> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> QueryIssuanceTreeRootResponse {
+        QueryIssuanceTreeRootResponse::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
+        };
+        unsafe {
+            descriptor.get(|| {
+                let mut fields = ::std::vec::Vec::new();
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
+                    "root",
+                    |m: &QueryIssuanceTreeRootResponse| { &m.root },
+                    |m: &mut QueryIssuanceTreeRootResponse| { &mut m.root },
+                ));
+                ::protobuf::reflect::MessageDescriptor::new::<QueryIssuanceTreeRootResponse>(
+                    "QueryIssuanceTreeRootResponse",
+                    fields,
+                    file_descriptor_proto()
+                )
+            })
+        }
+    }
+
+    fn default_instance() -> &'static QueryIssuanceTreeRootResponse {
+        static mut instance: ::protobuf::lazy::Lazy<QueryIssuanceTreeRootResponse> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const QueryIssuanceTreeRootResponse,
+        };
+        unsafe {
+            instance.get(QueryIssuanceTreeRootResponse::new)
+        }
+    }
+}
+
+impl ::protobuf::Clear for QueryIssuanceTreeRootResponse {
+    fn clear(&mut self) {
+        self.root.clear();
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for QueryIssuanceTreeRootResponse {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for QueryIssuanceTreeRootResponse {
+    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
+        ::protobuf::reflect::ProtobufValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
+pub struct QueryRevocationTreeRoot {
+    // special fields
+    pub unknown_fields: ::protobuf::UnknownFields,
+    pub cached_size: ::protobuf::CachedSize,
+}
+
+impl<'a> ::std::default::Default for &'a QueryRevocationTreeRoot {
+    fn default() -> &'a QueryRevocationTreeRoot {
+        <QueryRevocationTreeRoot as ::protobuf::Message>::default_instance()
+    }
+}
+
+impl QueryRevocationTreeRoot {
+    pub fn new() -> QueryRevocationTreeRoot {
+        ::std::default::Default::default()
+    }
+}
+
+impl ::protobuf::Message for QueryRevocationTreeRoot {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &dyn (::std::any::Any) {
+        self as &dyn (::std::any::Any)
+    }
+    fn as_any_mut(&mut self) -> &mut dyn (::std::any::Any) {
+        self as &mut dyn (::std::any::Any)
+    }
+    fn into_any(self: Box<Self>) -> ::std::boxed::Box<dyn (::std::any::Any)> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> QueryRevocationTreeRoot {
+        QueryRevocationTreeRoot::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
+        };
+        unsafe {
+            descriptor.get(|| {
+                let fields = ::std::vec::Vec::new();
+                ::protobuf::reflect::MessageDescriptor::new::<QueryRevocationTreeRoot>(
+                    "QueryRevocationTreeRoot",
+                    fields,
+                    file_descriptor_proto()
+                )
+            })
+        }
+    }
+
+    fn default_instance() -> &'static QueryRevocationTreeRoot {
+        static mut instance: ::protobuf::lazy::Lazy<QueryRevocationTreeRoot> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const QueryRevocationTreeRoot,
+        };
+        unsafe {
+            instance.get(QueryRevocationTreeRoot::new)
+        }
+    }
+}
+
+impl ::protobuf::Clear for QueryRevocationTreeRoot {
+    fn clear(&mut self) {
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for QueryRevocationTreeRoot {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for QueryRevocationTreeRoot {
+    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
+        ::protobuf::reflect::ProtobufValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
+pub struct QueryRevocationTreeRootResponse {
+    // message fields
+    pub root: ::std::vec::Vec<u8>,
+    // special fields
+    pub unknown_fields: ::protobuf::UnknownFields,
+    pub cached_size: ::protobuf::CachedSize,
+}
+
+impl<'a> ::std::default::Default for &'a QueryRevocationTreeRootResponse {
+    fn default() -> &'a QueryRevocationTreeRootResponse {
+        <QueryRevocationTreeRootResponse as ::protobuf::Message>::default_instance()
+    }
+}
+
+impl QueryRevocationTreeRootResponse {
+    pub fn new() -> QueryRevocationTreeRootResponse {
+        ::std::default::Default::default()
+    }
+
+    // bytes root = 1;
+
+
+    pub fn get_root(&self) -> &[u8] {
+        &self.root
+    }
+    pub fn clear_root(&mut self) {
+        self.root.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_root(&mut self, v: ::std::vec::Vec<u8>) {
+        self.root = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_root(&mut self) -> &mut ::std::vec::Vec<u8> {
+        &mut self.root
+    }
+
+    // Take field
+    pub fn take_root(&mut self) -> ::std::vec::Vec<u8> {
+        ::std::mem::replace(&mut self.root, ::std::vec::Vec::new())
+    }
+}
+
+impl ::protobuf::Message for QueryRevocationTreeRootResponse {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                1 => {
+                    ::protobuf::rt::read_singular_proto3_bytes_into(wire_type, is, &mut self.root)?;
+                },
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        if !self.root.is_empty() {
+            my_size += ::protobuf::rt::bytes_size(1, &self.root);
+        }
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        if !self.root.is_empty() {
+            os.write_bytes(1, &self.root)?;
+        }
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &dyn (::std::any::Any) {
+        self as &dyn (::std::any::Any)
+    }
+    fn as_any_mut(&mut self) -> &mut dyn (::std::any::Any) {
+        self as &mut dyn (::std::any::Any)
+    }
+    fn into_any(self: Box<Self>) -> ::std::boxed::Box<dyn (::std::any::Any)> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> QueryRevocationTreeRootResponse {
+        QueryRevocationTreeRootResponse::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
+        };
+        unsafe {
+            descriptor.get(|| {
+                let mut fields = ::std::vec::Vec::new();
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
+                    "root",
+                    |m: &QueryRevocationTreeRootResponse| { &m.root },
+                    |m: &mut QueryRevocationTreeRootResponse| { &mut m.root },
+                ));
+                ::protobuf::reflect::MessageDescriptor::new::<QueryRevocationTreeRootResponse>(
+                    "QueryRevocationTreeRootResponse",
+                    fields,
+                    file_descriptor_proto()
+                )
+            })
+        }
+    }
+
+    fn default_instance() -> &'static QueryRevocationTreeRootResponse {
+        static mut instance: ::protobuf::lazy::Lazy<QueryRevocationTreeRootResponse> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const QueryRevocationTreeRootResponse,
+        };
+        unsafe {
+            instance.get(QueryRevocationTreeRootResponse::new)
+        }
+    }
+}
+
+impl ::protobuf::Clear for QueryRevocationTreeRootResponse {
+    fn clear(&mut self) {
+        self.root.clear();
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for QueryRevocationTreeRootResponse {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for QueryRevocationTreeRootResponse {
+    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
+        ::protobuf::reflect::ProtobufValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
 pub struct QueryAddVerificationDetails {
     // message fields
     pub userAddress: ::std::vec::Vec<u8>,
@@ -7398,6 +7988,736 @@ impl ::std::fmt::Debug for QueryAddVerificationDetailsResponse {
 }
 
 impl ::protobuf::reflect::ProtobufValue for QueryAddVerificationDetailsResponse {
+    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
+        ::protobuf::reflect::ProtobufValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
+pub struct QueryAddVerificationDetailsV2 {
+    // message fields
+    pub userAddress: ::std::vec::Vec<u8>,
+    pub issuerAddress: ::std::vec::Vec<u8>,
+    pub originChain: ::std::string::String,
+    pub verificationType: u32,
+    pub issuanceTimestamp: u32,
+    pub expirationTimestamp: u32,
+    pub proofData: ::std::vec::Vec<u8>,
+    pub schema: ::std::string::String,
+    pub issuerVerificationId: ::std::string::String,
+    pub version: u32,
+    pub userPublicKey: ::std::vec::Vec<u8>,
+    // special fields
+    pub unknown_fields: ::protobuf::UnknownFields,
+    pub cached_size: ::protobuf::CachedSize,
+}
+
+impl<'a> ::std::default::Default for &'a QueryAddVerificationDetailsV2 {
+    fn default() -> &'a QueryAddVerificationDetailsV2 {
+        <QueryAddVerificationDetailsV2 as ::protobuf::Message>::default_instance()
+    }
+}
+
+impl QueryAddVerificationDetailsV2 {
+    pub fn new() -> QueryAddVerificationDetailsV2 {
+        ::std::default::Default::default()
+    }
+
+    // bytes userAddress = 1;
+
+
+    pub fn get_userAddress(&self) -> &[u8] {
+        &self.userAddress
+    }
+    pub fn clear_userAddress(&mut self) {
+        self.userAddress.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_userAddress(&mut self, v: ::std::vec::Vec<u8>) {
+        self.userAddress = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_userAddress(&mut self) -> &mut ::std::vec::Vec<u8> {
+        &mut self.userAddress
+    }
+
+    // Take field
+    pub fn take_userAddress(&mut self) -> ::std::vec::Vec<u8> {
+        ::std::mem::replace(&mut self.userAddress, ::std::vec::Vec::new())
+    }
+
+    // bytes issuerAddress = 2;
+
+
+    pub fn get_issuerAddress(&self) -> &[u8] {
+        &self.issuerAddress
+    }
+    pub fn clear_issuerAddress(&mut self) {
+        self.issuerAddress.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_issuerAddress(&mut self, v: ::std::vec::Vec<u8>) {
+        self.issuerAddress = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_issuerAddress(&mut self) -> &mut ::std::vec::Vec<u8> {
+        &mut self.issuerAddress
+    }
+
+    // Take field
+    pub fn take_issuerAddress(&mut self) -> ::std::vec::Vec<u8> {
+        ::std::mem::replace(&mut self.issuerAddress, ::std::vec::Vec::new())
+    }
+
+    // string originChain = 3;
+
+
+    pub fn get_originChain(&self) -> &str {
+        &self.originChain
+    }
+    pub fn clear_originChain(&mut self) {
+        self.originChain.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_originChain(&mut self, v: ::std::string::String) {
+        self.originChain = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_originChain(&mut self) -> &mut ::std::string::String {
+        &mut self.originChain
+    }
+
+    // Take field
+    pub fn take_originChain(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.originChain, ::std::string::String::new())
+    }
+
+    // uint32 verificationType = 4;
+
+
+    pub fn get_verificationType(&self) -> u32 {
+        self.verificationType
+    }
+    pub fn clear_verificationType(&mut self) {
+        self.verificationType = 0;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_verificationType(&mut self, v: u32) {
+        self.verificationType = v;
+    }
+
+    // uint32 issuanceTimestamp = 5;
+
+
+    pub fn get_issuanceTimestamp(&self) -> u32 {
+        self.issuanceTimestamp
+    }
+    pub fn clear_issuanceTimestamp(&mut self) {
+        self.issuanceTimestamp = 0;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_issuanceTimestamp(&mut self, v: u32) {
+        self.issuanceTimestamp = v;
+    }
+
+    // uint32 expirationTimestamp = 6;
+
+
+    pub fn get_expirationTimestamp(&self) -> u32 {
+        self.expirationTimestamp
+    }
+    pub fn clear_expirationTimestamp(&mut self) {
+        self.expirationTimestamp = 0;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_expirationTimestamp(&mut self, v: u32) {
+        self.expirationTimestamp = v;
+    }
+
+    // bytes proofData = 7;
+
+
+    pub fn get_proofData(&self) -> &[u8] {
+        &self.proofData
+    }
+    pub fn clear_proofData(&mut self) {
+        self.proofData.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_proofData(&mut self, v: ::std::vec::Vec<u8>) {
+        self.proofData = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_proofData(&mut self) -> &mut ::std::vec::Vec<u8> {
+        &mut self.proofData
+    }
+
+    // Take field
+    pub fn take_proofData(&mut self) -> ::std::vec::Vec<u8> {
+        ::std::mem::replace(&mut self.proofData, ::std::vec::Vec::new())
+    }
+
+    // string schema = 8;
+
+
+    pub fn get_schema(&self) -> &str {
+        &self.schema
+    }
+    pub fn clear_schema(&mut self) {
+        self.schema.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_schema(&mut self, v: ::std::string::String) {
+        self.schema = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_schema(&mut self) -> &mut ::std::string::String {
+        &mut self.schema
+    }
+
+    // Take field
+    pub fn take_schema(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.schema, ::std::string::String::new())
+    }
+
+    // string issuerVerificationId = 9;
+
+
+    pub fn get_issuerVerificationId(&self) -> &str {
+        &self.issuerVerificationId
+    }
+    pub fn clear_issuerVerificationId(&mut self) {
+        self.issuerVerificationId.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_issuerVerificationId(&mut self, v: ::std::string::String) {
+        self.issuerVerificationId = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_issuerVerificationId(&mut self) -> &mut ::std::string::String {
+        &mut self.issuerVerificationId
+    }
+
+    // Take field
+    pub fn take_issuerVerificationId(&mut self) -> ::std::string::String {
+        ::std::mem::replace(&mut self.issuerVerificationId, ::std::string::String::new())
+    }
+
+    // uint32 version = 10;
+
+
+    pub fn get_version(&self) -> u32 {
+        self.version
+    }
+    pub fn clear_version(&mut self) {
+        self.version = 0;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_version(&mut self, v: u32) {
+        self.version = v;
+    }
+
+    // bytes userPublicKey = 11;
+
+
+    pub fn get_userPublicKey(&self) -> &[u8] {
+        &self.userPublicKey
+    }
+    pub fn clear_userPublicKey(&mut self) {
+        self.userPublicKey.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_userPublicKey(&mut self, v: ::std::vec::Vec<u8>) {
+        self.userPublicKey = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_userPublicKey(&mut self) -> &mut ::std::vec::Vec<u8> {
+        &mut self.userPublicKey
+    }
+
+    // Take field
+    pub fn take_userPublicKey(&mut self) -> ::std::vec::Vec<u8> {
+        ::std::mem::replace(&mut self.userPublicKey, ::std::vec::Vec::new())
+    }
+}
+
+impl ::protobuf::Message for QueryAddVerificationDetailsV2 {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                1 => {
+                    ::protobuf::rt::read_singular_proto3_bytes_into(wire_type, is, &mut self.userAddress)?;
+                },
+                2 => {
+                    ::protobuf::rt::read_singular_proto3_bytes_into(wire_type, is, &mut self.issuerAddress)?;
+                },
+                3 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.originChain)?;
+                },
+                4 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint32()?;
+                    self.verificationType = tmp;
+                },
+                5 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint32()?;
+                    self.issuanceTimestamp = tmp;
+                },
+                6 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint32()?;
+                    self.expirationTimestamp = tmp;
+                },
+                7 => {
+                    ::protobuf::rt::read_singular_proto3_bytes_into(wire_type, is, &mut self.proofData)?;
+                },
+                8 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.schema)?;
+                },
+                9 => {
+                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.issuerVerificationId)?;
+                },
+                10 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint32()?;
+                    self.version = tmp;
+                },
+                11 => {
+                    ::protobuf::rt::read_singular_proto3_bytes_into(wire_type, is, &mut self.userPublicKey)?;
+                },
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        if !self.userAddress.is_empty() {
+            my_size += ::protobuf::rt::bytes_size(1, &self.userAddress);
+        }
+        if !self.issuerAddress.is_empty() {
+            my_size += ::protobuf::rt::bytes_size(2, &self.issuerAddress);
+        }
+        if !self.originChain.is_empty() {
+            my_size += ::protobuf::rt::string_size(3, &self.originChain);
+        }
+        if self.verificationType != 0 {
+            my_size += ::protobuf::rt::value_size(4, self.verificationType, ::protobuf::wire_format::WireTypeVarint);
+        }
+        if self.issuanceTimestamp != 0 {
+            my_size += ::protobuf::rt::value_size(5, self.issuanceTimestamp, ::protobuf::wire_format::WireTypeVarint);
+        }
+        if self.expirationTimestamp != 0 {
+            my_size += ::protobuf::rt::value_size(6, self.expirationTimestamp, ::protobuf::wire_format::WireTypeVarint);
+        }
+        if !self.proofData.is_empty() {
+            my_size += ::protobuf::rt::bytes_size(7, &self.proofData);
+        }
+        if !self.schema.is_empty() {
+            my_size += ::protobuf::rt::string_size(8, &self.schema);
+        }
+        if !self.issuerVerificationId.is_empty() {
+            my_size += ::protobuf::rt::string_size(9, &self.issuerVerificationId);
+        }
+        if self.version != 0 {
+            my_size += ::protobuf::rt::value_size(10, self.version, ::protobuf::wire_format::WireTypeVarint);
+        }
+        if !self.userPublicKey.is_empty() {
+            my_size += ::protobuf::rt::bytes_size(11, &self.userPublicKey);
+        }
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        if !self.userAddress.is_empty() {
+            os.write_bytes(1, &self.userAddress)?;
+        }
+        if !self.issuerAddress.is_empty() {
+            os.write_bytes(2, &self.issuerAddress)?;
+        }
+        if !self.originChain.is_empty() {
+            os.write_string(3, &self.originChain)?;
+        }
+        if self.verificationType != 0 {
+            os.write_uint32(4, self.verificationType)?;
+        }
+        if self.issuanceTimestamp != 0 {
+            os.write_uint32(5, self.issuanceTimestamp)?;
+        }
+        if self.expirationTimestamp != 0 {
+            os.write_uint32(6, self.expirationTimestamp)?;
+        }
+        if !self.proofData.is_empty() {
+            os.write_bytes(7, &self.proofData)?;
+        }
+        if !self.schema.is_empty() {
+            os.write_string(8, &self.schema)?;
+        }
+        if !self.issuerVerificationId.is_empty() {
+            os.write_string(9, &self.issuerVerificationId)?;
+        }
+        if self.version != 0 {
+            os.write_uint32(10, self.version)?;
+        }
+        if !self.userPublicKey.is_empty() {
+            os.write_bytes(11, &self.userPublicKey)?;
+        }
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &dyn (::std::any::Any) {
+        self as &dyn (::std::any::Any)
+    }
+    fn as_any_mut(&mut self) -> &mut dyn (::std::any::Any) {
+        self as &mut dyn (::std::any::Any)
+    }
+    fn into_any(self: Box<Self>) -> ::std::boxed::Box<dyn (::std::any::Any)> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> QueryAddVerificationDetailsV2 {
+        QueryAddVerificationDetailsV2::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
+        };
+        unsafe {
+            descriptor.get(|| {
+                let mut fields = ::std::vec::Vec::new();
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
+                    "userAddress",
+                    |m: &QueryAddVerificationDetailsV2| { &m.userAddress },
+                    |m: &mut QueryAddVerificationDetailsV2| { &mut m.userAddress },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
+                    "issuerAddress",
+                    |m: &QueryAddVerificationDetailsV2| { &m.issuerAddress },
+                    |m: &mut QueryAddVerificationDetailsV2| { &mut m.issuerAddress },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "originChain",
+                    |m: &QueryAddVerificationDetailsV2| { &m.originChain },
+                    |m: &mut QueryAddVerificationDetailsV2| { &mut m.originChain },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint32>(
+                    "verificationType",
+                    |m: &QueryAddVerificationDetailsV2| { &m.verificationType },
+                    |m: &mut QueryAddVerificationDetailsV2| { &mut m.verificationType },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint32>(
+                    "issuanceTimestamp",
+                    |m: &QueryAddVerificationDetailsV2| { &m.issuanceTimestamp },
+                    |m: &mut QueryAddVerificationDetailsV2| { &mut m.issuanceTimestamp },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint32>(
+                    "expirationTimestamp",
+                    |m: &QueryAddVerificationDetailsV2| { &m.expirationTimestamp },
+                    |m: &mut QueryAddVerificationDetailsV2| { &mut m.expirationTimestamp },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
+                    "proofData",
+                    |m: &QueryAddVerificationDetailsV2| { &m.proofData },
+                    |m: &mut QueryAddVerificationDetailsV2| { &mut m.proofData },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "schema",
+                    |m: &QueryAddVerificationDetailsV2| { &m.schema },
+                    |m: &mut QueryAddVerificationDetailsV2| { &mut m.schema },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                    "issuerVerificationId",
+                    |m: &QueryAddVerificationDetailsV2| { &m.issuerVerificationId },
+                    |m: &mut QueryAddVerificationDetailsV2| { &mut m.issuerVerificationId },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint32>(
+                    "version",
+                    |m: &QueryAddVerificationDetailsV2| { &m.version },
+                    |m: &mut QueryAddVerificationDetailsV2| { &mut m.version },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
+                    "userPublicKey",
+                    |m: &QueryAddVerificationDetailsV2| { &m.userPublicKey },
+                    |m: &mut QueryAddVerificationDetailsV2| { &mut m.userPublicKey },
+                ));
+                ::protobuf::reflect::MessageDescriptor::new::<QueryAddVerificationDetailsV2>(
+                    "QueryAddVerificationDetailsV2",
+                    fields,
+                    file_descriptor_proto()
+                )
+            })
+        }
+    }
+
+    fn default_instance() -> &'static QueryAddVerificationDetailsV2 {
+        static mut instance: ::protobuf::lazy::Lazy<QueryAddVerificationDetailsV2> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const QueryAddVerificationDetailsV2,
+        };
+        unsafe {
+            instance.get(QueryAddVerificationDetailsV2::new)
+        }
+    }
+}
+
+impl ::protobuf::Clear for QueryAddVerificationDetailsV2 {
+    fn clear(&mut self) {
+        self.userAddress.clear();
+        self.issuerAddress.clear();
+        self.originChain.clear();
+        self.verificationType = 0;
+        self.issuanceTimestamp = 0;
+        self.expirationTimestamp = 0;
+        self.proofData.clear();
+        self.schema.clear();
+        self.issuerVerificationId.clear();
+        self.version = 0;
+        self.userPublicKey.clear();
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for QueryAddVerificationDetailsV2 {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for QueryAddVerificationDetailsV2 {
+    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
+        ::protobuf::reflect::ProtobufValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
+pub struct QueryAddVerificationDetailsV2Response {
+    // message fields
+    pub verificationId: ::std::vec::Vec<u8>,
+    // special fields
+    pub unknown_fields: ::protobuf::UnknownFields,
+    pub cached_size: ::protobuf::CachedSize,
+}
+
+impl<'a> ::std::default::Default for &'a QueryAddVerificationDetailsV2Response {
+    fn default() -> &'a QueryAddVerificationDetailsV2Response {
+        <QueryAddVerificationDetailsV2Response as ::protobuf::Message>::default_instance()
+    }
+}
+
+impl QueryAddVerificationDetailsV2Response {
+    pub fn new() -> QueryAddVerificationDetailsV2Response {
+        ::std::default::Default::default()
+    }
+
+    // bytes verificationId = 1;
+
+
+    pub fn get_verificationId(&self) -> &[u8] {
+        &self.verificationId
+    }
+    pub fn clear_verificationId(&mut self) {
+        self.verificationId.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_verificationId(&mut self, v: ::std::vec::Vec<u8>) {
+        self.verificationId = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_verificationId(&mut self) -> &mut ::std::vec::Vec<u8> {
+        &mut self.verificationId
+    }
+
+    // Take field
+    pub fn take_verificationId(&mut self) -> ::std::vec::Vec<u8> {
+        ::std::mem::replace(&mut self.verificationId, ::std::vec::Vec::new())
+    }
+}
+
+impl ::protobuf::Message for QueryAddVerificationDetailsV2Response {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                1 => {
+                    ::protobuf::rt::read_singular_proto3_bytes_into(wire_type, is, &mut self.verificationId)?;
+                },
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        if !self.verificationId.is_empty() {
+            my_size += ::protobuf::rt::bytes_size(1, &self.verificationId);
+        }
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        if !self.verificationId.is_empty() {
+            os.write_bytes(1, &self.verificationId)?;
+        }
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &dyn (::std::any::Any) {
+        self as &dyn (::std::any::Any)
+    }
+    fn as_any_mut(&mut self) -> &mut dyn (::std::any::Any) {
+        self as &mut dyn (::std::any::Any)
+    }
+    fn into_any(self: Box<Self>) -> ::std::boxed::Box<dyn (::std::any::Any)> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> QueryAddVerificationDetailsV2Response {
+        QueryAddVerificationDetailsV2Response::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
+        };
+        unsafe {
+            descriptor.get(|| {
+                let mut fields = ::std::vec::Vec::new();
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
+                    "verificationId",
+                    |m: &QueryAddVerificationDetailsV2Response| { &m.verificationId },
+                    |m: &mut QueryAddVerificationDetailsV2Response| { &mut m.verificationId },
+                ));
+                ::protobuf::reflect::MessageDescriptor::new::<QueryAddVerificationDetailsV2Response>(
+                    "QueryAddVerificationDetailsV2Response",
+                    fields,
+                    file_descriptor_proto()
+                )
+            })
+        }
+    }
+
+    fn default_instance() -> &'static QueryAddVerificationDetailsV2Response {
+        static mut instance: ::protobuf::lazy::Lazy<QueryAddVerificationDetailsV2Response> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const QueryAddVerificationDetailsV2Response,
+        };
+        unsafe {
+            instance.get(QueryAddVerificationDetailsV2Response::new)
+        }
+    }
+}
+
+impl ::protobuf::Clear for QueryAddVerificationDetailsV2Response {
+    fn clear(&mut self) {
+        self.verificationId.clear();
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for QueryAddVerificationDetailsV2Response {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for QueryAddVerificationDetailsV2Response {
     fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
         ::protobuf::reflect::ProtobufValueRef::Message(self)
     }
@@ -8785,6 +10105,9 @@ pub enum CosmosRequest_oneof_req {
     getVerificationData(QueryGetVerificationData),
     insertAccountBalance(QueryInsertAccountBalance),
     insertAccountNonce(QueryInsertAccountNonce),
+    issuanceTreeRoot(QueryIssuanceTreeRoot),
+    revocationTreeRoot(QueryRevocationTreeRoot),
+    addVerificationDetailsV2(QueryAddVerificationDetailsV2),
 }
 
 impl CosmosRequest {
@@ -9624,6 +10947,153 @@ impl CosmosRequest {
             QueryInsertAccountNonce::new()
         }
     }
+
+    // .ffi.ffi.QueryIssuanceTreeRoot issuanceTreeRoot = 18;
+
+
+    pub fn get_issuanceTreeRoot(&self) -> &QueryIssuanceTreeRoot {
+        match self.req {
+            ::std::option::Option::Some(CosmosRequest_oneof_req::issuanceTreeRoot(ref v)) => v,
+            _ => QueryIssuanceTreeRoot::default_instance(),
+        }
+    }
+    pub fn clear_issuanceTreeRoot(&mut self) {
+        self.req = ::std::option::Option::None;
+    }
+
+    pub fn has_issuanceTreeRoot(&self) -> bool {
+        match self.req {
+            ::std::option::Option::Some(CosmosRequest_oneof_req::issuanceTreeRoot(..)) => true,
+            _ => false,
+        }
+    }
+
+    // Param is passed by value, moved
+    pub fn set_issuanceTreeRoot(&mut self, v: QueryIssuanceTreeRoot) {
+        self.req = ::std::option::Option::Some(CosmosRequest_oneof_req::issuanceTreeRoot(v))
+    }
+
+    // Mutable pointer to the field.
+    pub fn mut_issuanceTreeRoot(&mut self) -> &mut QueryIssuanceTreeRoot {
+        if let ::std::option::Option::Some(CosmosRequest_oneof_req::issuanceTreeRoot(_)) = self.req {
+        } else {
+            self.req = ::std::option::Option::Some(CosmosRequest_oneof_req::issuanceTreeRoot(QueryIssuanceTreeRoot::new()));
+        }
+        match self.req {
+            ::std::option::Option::Some(CosmosRequest_oneof_req::issuanceTreeRoot(ref mut v)) => v,
+            _ => panic!(),
+        }
+    }
+
+    // Take field
+    pub fn take_issuanceTreeRoot(&mut self) -> QueryIssuanceTreeRoot {
+        if self.has_issuanceTreeRoot() {
+            match self.req.take() {
+                ::std::option::Option::Some(CosmosRequest_oneof_req::issuanceTreeRoot(v)) => v,
+                _ => panic!(),
+            }
+        } else {
+            QueryIssuanceTreeRoot::new()
+        }
+    }
+
+    // .ffi.ffi.QueryRevocationTreeRoot revocationTreeRoot = 19;
+
+
+    pub fn get_revocationTreeRoot(&self) -> &QueryRevocationTreeRoot {
+        match self.req {
+            ::std::option::Option::Some(CosmosRequest_oneof_req::revocationTreeRoot(ref v)) => v,
+            _ => QueryRevocationTreeRoot::default_instance(),
+        }
+    }
+    pub fn clear_revocationTreeRoot(&mut self) {
+        self.req = ::std::option::Option::None;
+    }
+
+    pub fn has_revocationTreeRoot(&self) -> bool {
+        match self.req {
+            ::std::option::Option::Some(CosmosRequest_oneof_req::revocationTreeRoot(..)) => true,
+            _ => false,
+        }
+    }
+
+    // Param is passed by value, moved
+    pub fn set_revocationTreeRoot(&mut self, v: QueryRevocationTreeRoot) {
+        self.req = ::std::option::Option::Some(CosmosRequest_oneof_req::revocationTreeRoot(v))
+    }
+
+    // Mutable pointer to the field.
+    pub fn mut_revocationTreeRoot(&mut self) -> &mut QueryRevocationTreeRoot {
+        if let ::std::option::Option::Some(CosmosRequest_oneof_req::revocationTreeRoot(_)) = self.req {
+        } else {
+            self.req = ::std::option::Option::Some(CosmosRequest_oneof_req::revocationTreeRoot(QueryRevocationTreeRoot::new()));
+        }
+        match self.req {
+            ::std::option::Option::Some(CosmosRequest_oneof_req::revocationTreeRoot(ref mut v)) => v,
+            _ => panic!(),
+        }
+    }
+
+    // Take field
+    pub fn take_revocationTreeRoot(&mut self) -> QueryRevocationTreeRoot {
+        if self.has_revocationTreeRoot() {
+            match self.req.take() {
+                ::std::option::Option::Some(CosmosRequest_oneof_req::revocationTreeRoot(v)) => v,
+                _ => panic!(),
+            }
+        } else {
+            QueryRevocationTreeRoot::new()
+        }
+    }
+
+    // .ffi.ffi.QueryAddVerificationDetailsV2 addVerificationDetailsV2 = 20;
+
+
+    pub fn get_addVerificationDetailsV2(&self) -> &QueryAddVerificationDetailsV2 {
+        match self.req {
+            ::std::option::Option::Some(CosmosRequest_oneof_req::addVerificationDetailsV2(ref v)) => v,
+            _ => QueryAddVerificationDetailsV2::default_instance(),
+        }
+    }
+    pub fn clear_addVerificationDetailsV2(&mut self) {
+        self.req = ::std::option::Option::None;
+    }
+
+    pub fn has_addVerificationDetailsV2(&self) -> bool {
+        match self.req {
+            ::std::option::Option::Some(CosmosRequest_oneof_req::addVerificationDetailsV2(..)) => true,
+            _ => false,
+        }
+    }
+
+    // Param is passed by value, moved
+    pub fn set_addVerificationDetailsV2(&mut self, v: QueryAddVerificationDetailsV2) {
+        self.req = ::std::option::Option::Some(CosmosRequest_oneof_req::addVerificationDetailsV2(v))
+    }
+
+    // Mutable pointer to the field.
+    pub fn mut_addVerificationDetailsV2(&mut self) -> &mut QueryAddVerificationDetailsV2 {
+        if let ::std::option::Option::Some(CosmosRequest_oneof_req::addVerificationDetailsV2(_)) = self.req {
+        } else {
+            self.req = ::std::option::Option::Some(CosmosRequest_oneof_req::addVerificationDetailsV2(QueryAddVerificationDetailsV2::new()));
+        }
+        match self.req {
+            ::std::option::Option::Some(CosmosRequest_oneof_req::addVerificationDetailsV2(ref mut v)) => v,
+            _ => panic!(),
+        }
+    }
+
+    // Take field
+    pub fn take_addVerificationDetailsV2(&mut self) -> QueryAddVerificationDetailsV2 {
+        if self.has_addVerificationDetailsV2() {
+            match self.req.take() {
+                ::std::option::Option::Some(CosmosRequest_oneof_req::addVerificationDetailsV2(v)) => v,
+                _ => panic!(),
+            }
+        } else {
+            QueryAddVerificationDetailsV2::new()
+        }
+    }
 }
 
 impl ::protobuf::Message for CosmosRequest {
@@ -9709,6 +11179,21 @@ impl ::protobuf::Message for CosmosRequest {
             }
         }
         if let Some(CosmosRequest_oneof_req::insertAccountNonce(ref v)) = self.req {
+            if !v.is_initialized() {
+                return false;
+            }
+        }
+        if let Some(CosmosRequest_oneof_req::issuanceTreeRoot(ref v)) = self.req {
+            if !v.is_initialized() {
+                return false;
+            }
+        }
+        if let Some(CosmosRequest_oneof_req::revocationTreeRoot(ref v)) = self.req {
+            if !v.is_initialized() {
+                return false;
+            }
+        }
+        if let Some(CosmosRequest_oneof_req::addVerificationDetailsV2(ref v)) = self.req {
             if !v.is_initialized() {
                 return false;
             }
@@ -9822,6 +11307,24 @@ impl ::protobuf::Message for CosmosRequest {
                     }
                     self.req = ::std::option::Option::Some(CosmosRequest_oneof_req::insertAccountNonce(is.read_message()?));
                 },
+                18 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeLengthDelimited {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    self.req = ::std::option::Option::Some(CosmosRequest_oneof_req::issuanceTreeRoot(is.read_message()?));
+                },
+                19 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeLengthDelimited {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    self.req = ::std::option::Option::Some(CosmosRequest_oneof_req::revocationTreeRoot(is.read_message()?));
+                },
+                20 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeLengthDelimited {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    self.req = ::std::option::Option::Some(CosmosRequest_oneof_req::addVerificationDetailsV2(is.read_message()?));
+                },
                 _ => {
                     ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
                 },
@@ -9901,6 +11404,18 @@ impl ::protobuf::Message for CosmosRequest {
                     my_size += 2 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
                 },
                 &CosmosRequest_oneof_req::insertAccountNonce(ref v) => {
+                    let len = v.compute_size();
+                    my_size += 2 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
+                },
+                &CosmosRequest_oneof_req::issuanceTreeRoot(ref v) => {
+                    let len = v.compute_size();
+                    my_size += 2 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
+                },
+                &CosmosRequest_oneof_req::revocationTreeRoot(ref v) => {
+                    let len = v.compute_size();
+                    my_size += 2 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
+                },
+                &CosmosRequest_oneof_req::addVerificationDetailsV2(ref v) => {
                     let len = v.compute_size();
                     my_size += 2 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
                 },
@@ -9996,6 +11511,21 @@ impl ::protobuf::Message for CosmosRequest {
                 },
                 &CosmosRequest_oneof_req::insertAccountNonce(ref v) => {
                     os.write_tag(17, ::protobuf::wire_format::WireTypeLengthDelimited)?;
+                    os.write_raw_varint32(v.get_cached_size())?;
+                    v.write_to_with_cached_sizes(os)?;
+                },
+                &CosmosRequest_oneof_req::issuanceTreeRoot(ref v) => {
+                    os.write_tag(18, ::protobuf::wire_format::WireTypeLengthDelimited)?;
+                    os.write_raw_varint32(v.get_cached_size())?;
+                    v.write_to_with_cached_sizes(os)?;
+                },
+                &CosmosRequest_oneof_req::revocationTreeRoot(ref v) => {
+                    os.write_tag(19, ::protobuf::wire_format::WireTypeLengthDelimited)?;
+                    os.write_raw_varint32(v.get_cached_size())?;
+                    v.write_to_with_cached_sizes(os)?;
+                },
+                &CosmosRequest_oneof_req::addVerificationDetailsV2(ref v) => {
+                    os.write_tag(20, ::protobuf::wire_format::WireTypeLengthDelimited)?;
                     os.write_raw_varint32(v.get_cached_size())?;
                     v.write_to_with_cached_sizes(os)?;
                 },
@@ -10128,6 +11658,21 @@ impl ::protobuf::Message for CosmosRequest {
                     CosmosRequest::has_insertAccountNonce,
                     CosmosRequest::get_insertAccountNonce,
                 ));
+                fields.push(::protobuf::reflect::accessor::make_singular_message_accessor::<_, QueryIssuanceTreeRoot>(
+                    "issuanceTreeRoot",
+                    CosmosRequest::has_issuanceTreeRoot,
+                    CosmosRequest::get_issuanceTreeRoot,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_singular_message_accessor::<_, QueryRevocationTreeRoot>(
+                    "revocationTreeRoot",
+                    CosmosRequest::has_revocationTreeRoot,
+                    CosmosRequest::get_revocationTreeRoot,
+                ));
+                fields.push(::protobuf::reflect::accessor::make_singular_message_accessor::<_, QueryAddVerificationDetailsV2>(
+                    "addVerificationDetailsV2",
+                    CosmosRequest::has_addVerificationDetailsV2,
+                    CosmosRequest::get_addVerificationDetailsV2,
+                ));
                 ::protobuf::reflect::MessageDescriptor::new::<CosmosRequest>(
                     "CosmosRequest",
                     fields,
@@ -10150,6 +11695,9 @@ impl ::protobuf::Message for CosmosRequest {
 
 impl ::protobuf::Clear for CosmosRequest {
     fn clear(&mut self) {
+        self.req = ::std::option::Option::None;
+        self.req = ::std::option::Option::None;
+        self.req = ::std::option::Option::None;
         self.req = ::std::option::Option::None;
         self.req = ::std::option::Option::None;
         self.req = ::std::option::Option::None;
@@ -12813,17 +14361,32 @@ static file_descriptor_proto_data: &'static [u8] = b"\
     \x01\x20\x01(\x0cR\x07address\"\x1c\n\x1aQueryRemoveStorageResponse\"(\n\
     \x0eQueryBlockHash\x12\x16\n\x06number\x18\x01\x20\x01(\x0cR\x06number\"\
     ,\n\x16QueryBlockHashResponse\x12\x12\n\x04hash\x18\x01\x20\x01(\x0cR\
-    \x04hash\"\x97\x03\n\x1bQueryAddVerificationDetails\x12\x20\n\x0buserAdd\
-    ress\x18\x01\x20\x01(\x0cR\x0buserAddress\x12$\n\rissuerAddress\x18\x02\
-    \x20\x01(\x0cR\rissuerAddress\x12\x20\n\x0boriginChain\x18\x03\x20\x01(\
-    \tR\x0boriginChain\x12*\n\x10verificationType\x18\x04\x20\x01(\rR\x10ver\
-    ificationType\x12,\n\x11issuanceTimestamp\x18\x05\x20\x01(\rR\x11issuanc\
-    eTimestamp\x120\n\x13expirationTimestamp\x18\x06\x20\x01(\rR\x13expirati\
-    onTimestamp\x12\x1c\n\tproofData\x18\x07\x20\x01(\x0cR\tproofData\x12\
-    \x16\n\x06schema\x18\x08\x20\x01(\tR\x06schema\x122\n\x14issuerVerificat\
-    ionId\x18\t\x20\x01(\tR\x14issuerVerificationId\x12\x18\n\x07version\x18\
-    \n\x20\x01(\rR\x07version\"M\n#QueryAddVerificationDetailsResponse\x12&\
-    \n\x0everificationId\x18\x01\x20\x01(\x0cR\x0everificationId\"\xbe\x01\n\
+    \x04hash\"\x17\n\x15QueryIssuanceTreeRoot\"3\n\x1dQueryIssuanceTreeRootR\
+    esponse\x12\x12\n\x04root\x18\x01\x20\x01(\x0cR\x04root\"\x19\n\x17Query\
+    RevocationTreeRoot\"5\n\x1fQueryRevocationTreeRootResponse\x12\x12\n\x04\
+    root\x18\x01\x20\x01(\x0cR\x04root\"\x97\x03\n\x1bQueryAddVerificationDe\
+    tails\x12\x20\n\x0buserAddress\x18\x01\x20\x01(\x0cR\x0buserAddress\x12$\
+    \n\rissuerAddress\x18\x02\x20\x01(\x0cR\rissuerAddress\x12\x20\n\x0borig\
+    inChain\x18\x03\x20\x01(\tR\x0boriginChain\x12*\n\x10verificationType\
+    \x18\x04\x20\x01(\rR\x10verificationType\x12,\n\x11issuanceTimestamp\x18\
+    \x05\x20\x01(\rR\x11issuanceTimestamp\x120\n\x13expirationTimestamp\x18\
+    \x06\x20\x01(\rR\x13expirationTimestamp\x12\x1c\n\tproofData\x18\x07\x20\
+    \x01(\x0cR\tproofData\x12\x16\n\x06schema\x18\x08\x20\x01(\tR\x06schema\
+    \x122\n\x14issuerVerificationId\x18\t\x20\x01(\tR\x14issuerVerificationI\
+    d\x12\x18\n\x07version\x18\n\x20\x01(\rR\x07version\"M\n#QueryAddVerific\
+    ationDetailsResponse\x12&\n\x0everificationId\x18\x01\x20\x01(\x0cR\x0ev\
+    erificationId\"\xbf\x03\n\x1dQueryAddVerificationDetailsV2\x12\x20\n\x0b\
+    userAddress\x18\x01\x20\x01(\x0cR\x0buserAddress\x12$\n\rissuerAddress\
+    \x18\x02\x20\x01(\x0cR\rissuerAddress\x12\x20\n\x0boriginChain\x18\x03\
+    \x20\x01(\tR\x0boriginChain\x12*\n\x10verificationType\x18\x04\x20\x01(\
+    \rR\x10verificationType\x12,\n\x11issuanceTimestamp\x18\x05\x20\x01(\rR\
+    \x11issuanceTimestamp\x120\n\x13expirationTimestamp\x18\x06\x20\x01(\rR\
+    \x13expirationTimestamp\x12\x1c\n\tproofData\x18\x07\x20\x01(\x0cR\tproo\
+    fData\x12\x16\n\x06schema\x18\x08\x20\x01(\tR\x06schema\x122\n\x14issuer\
+    VerificationId\x18\t\x20\x01(\tR\x14issuerVerificationId\x12\x18\n\x07ve\
+    rsion\x18\n\x20\x01(\rR\x07version\x12$\n\ruserPublicKey\x18\x0b\x20\x01\
+    (\x0cR\ruserPublicKey\"O\n%QueryAddVerificationDetailsV2Response\x12&\n\
+    \x0everificationId\x18\x01\x20\x01(\x0cR\x0everificationId\"\xbe\x01\n\
     \x14QueryHasVerification\x12\x20\n\x0buserAddress\x18\x01\x20\x01(\x0cR\
     \x0buserAddress\x12*\n\x10verificationType\x18\x02\x20\x01(\rR\x10verifi\
     cationType\x120\n\x13expirationTimestamp\x18\x03\x20\x01(\rR\x13expirati\
@@ -12842,23 +14405,23 @@ static file_descriptor_proto_data: &'static [u8] = b"\
     \x01(\tR\x06schema\x122\n\x14issuerVerificationId\x18\t\x20\x01(\tR\x14i\
     ssuerVerificationId\x12\x18\n\x07version\x18\n\x20\x01(\rR\x07version\"T\
     \n\x20QueryGetVerificationDataResponse\x120\n\x04data\x18\x01\x20\x03(\
-    \x0b2\x1c.ffi.ffi.VerificationDetailsR\x04data\"\xed\t\n\rCosmosRequest\
-    \x12:\n\ngetAccount\x18\x01\x20\x01(\x0b2\x18.ffi.ffi.QueryGetAccountH\0\
-    R\ngetAccount\x12=\n\x0bcontainsKey\x18\x02\x20\x01(\x0b2\x19.ffi.ffi.Qu\
-    eryContainsKeyH\0R\x0bcontainsKey\x12@\n\x0baccountCode\x18\x03\x20\x01(\
-    \x0b2\x1c.ffi.ffi.QueryGetAccountCodeH\0R\x0baccountCode\x12>\n\x08codeH\
-    ash\x18\x04\x20\x01(\x0b2\x20.ffi.ffi.QueryGetAccountCodeHashH\0R\x08cod\
-    eHash\x12>\n\x08codeSize\x18\x05\x20\x01(\x0b2\x20.ffi.ffi.QueryGetAccou\
-    ntCodeSizeH\0R\x08codeSize\x12G\n\x0bstorageCell\x18\x06\x20\x01(\x0b2#.\
-    ffi.ffi.QueryGetAccountStorageCellH\0R\x0bstorageCell\x12O\n\x11insertAc\
-    countCode\x18\x07\x20\x01(\x0b2\x1f.ffi.ffi.QueryInsertAccountCodeH\0R\
-    \x11insertAccountCode\x12O\n\x11insertStorageCell\x18\x08\x20\x01(\x0b2\
-    \x1f.ffi.ffi.QueryInsertStorageCellH\0R\x11insertStorageCell\x12.\n\x06r\
-    emove\x18\t\x20\x01(\x0b2\x14.ffi.ffi.QueryRemoveH\0R\x06remove\x12O\n\
-    \x11removeStorageCell\x18\n\x20\x01(\x0b2\x1f.ffi.ffi.QueryRemoveStorage\
-    CellH\0R\x11removeStorageCell\x12C\n\rremoveStorage\x18\x0b\x20\x01(\x0b\
-    2\x1b.ffi.ffi.QueryRemoveStorageH\0R\rremoveStorage\x127\n\tblockHash\
-    \x18\x0c\x20\x01(\x0b2\x17.ffi.ffi.QueryBlockHashH\0R\tblockHash\x12^\n\
+    \x0b2\x1c.ffi.ffi.VerificationDetailsR\x04data\"\xf5\x0b\n\rCosmosReques\
+    t\x12:\n\ngetAccount\x18\x01\x20\x01(\x0b2\x18.ffi.ffi.QueryGetAccountH\
+    \0R\ngetAccount\x12=\n\x0bcontainsKey\x18\x02\x20\x01(\x0b2\x19.ffi.ffi.\
+    QueryContainsKeyH\0R\x0bcontainsKey\x12@\n\x0baccountCode\x18\x03\x20\
+    \x01(\x0b2\x1c.ffi.ffi.QueryGetAccountCodeH\0R\x0baccountCode\x12>\n\x08\
+    codeHash\x18\x04\x20\x01(\x0b2\x20.ffi.ffi.QueryGetAccountCodeHashH\0R\
+    \x08codeHash\x12>\n\x08codeSize\x18\x05\x20\x01(\x0b2\x20.ffi.ffi.QueryG\
+    etAccountCodeSizeH\0R\x08codeSize\x12G\n\x0bstorageCell\x18\x06\x20\x01(\
+    \x0b2#.ffi.ffi.QueryGetAccountStorageCellH\0R\x0bstorageCell\x12O\n\x11i\
+    nsertAccountCode\x18\x07\x20\x01(\x0b2\x1f.ffi.ffi.QueryInsertAccountCod\
+    eH\0R\x11insertAccountCode\x12O\n\x11insertStorageCell\x18\x08\x20\x01(\
+    \x0b2\x1f.ffi.ffi.QueryInsertStorageCellH\0R\x11insertStorageCell\x12.\n\
+    \x06remove\x18\t\x20\x01(\x0b2\x14.ffi.ffi.QueryRemoveH\0R\x06remove\x12\
+    O\n\x11removeStorageCell\x18\n\x20\x01(\x0b2\x1f.ffi.ffi.QueryRemoveStor\
+    ageCellH\0R\x11removeStorageCell\x12C\n\rremoveStorage\x18\x0b\x20\x01(\
+    \x0b2\x1b.ffi.ffi.QueryRemoveStorageH\0R\rremoveStorage\x127\n\tblockHas\
+    h\x18\x0c\x20\x01(\x0b2\x17.ffi.ffi.QueryBlockHashH\0R\tblockHash\x12^\n\
     \x16addVerificationDetails\x18\r\x20\x01(\x0b2$.ffi.ffi.QueryAddVerifica\
     tionDetailsH\0R\x16addVerificationDetails\x12I\n\x0fhasVerification\x18\
     \x0e\x20\x01(\x0b2\x1d.ffi.ffi.QueryHasVerificationH\0R\x0fhasVerificati\
@@ -12866,40 +14429,45 @@ static file_descriptor_proto_data: &'static [u8] = b"\
     VerificationDataH\0R\x13getVerificationData\x12X\n\x14insertAccountBalan\
     ce\x18\x10\x20\x01(\x0b2\".ffi.ffi.QueryInsertAccountBalanceH\0R\x14inse\
     rtAccountBalance\x12R\n\x12insertAccountNonce\x18\x11\x20\x01(\x0b2\x20.\
-    ffi.ffi.QueryInsertAccountNonceH\0R\x12insertAccountNonceB\x05\n\x03req\
-    \"\xa0\x02\n\x0fSGXVMCallParams\x12\x12\n\x04from\x18\x01\x20\x01(\x0cR\
-    \x04from\x12\x0e\n\x02to\x18\x02\x20\x01(\x0cR\x02to\x12\x12\n\x04data\
-    \x18\x03\x20\x01(\x0cR\x04data\x12\x1a\n\x08gasLimit\x18\x04\x20\x01(\
-    \x04R\x08gasLimit\x12\x1a\n\x08gasPrice\x18\x05\x20\x01(\x0cR\x08gasPric\
-    e\x12\x14\n\x05value\x18\x06\x20\x01(\x0cR\x05value\x127\n\naccessList\
-    \x18\x07\x20\x03(\x0b2\x17.ffi.ffi.AccessListItemR\naccessList\x12\x16\n\
-    \x06commit\x18\x08\x20\x01(\x08R\x06commit\x12\x14\n\x05nonce\x18\t\x20\
-    \x01(\x04R\x05nonce\x12\x20\n\x0bunencrypted\x18\n\x20\x01(\x08R\x0bunen\
-    crypted\"\xf0\x01\n\x11SGXVMCreateParams\x12\x12\n\x04from\x18\x01\x20\
-    \x01(\x0cR\x04from\x12\x12\n\x04data\x18\x02\x20\x01(\x0cR\x04data\x12\
-    \x1a\n\x08gasLimit\x18\x03\x20\x01(\x04R\x08gasLimit\x12\x1a\n\x08gasPri\
-    ce\x18\x04\x20\x01(\x0cR\x08gasPrice\x12\x14\n\x05value\x18\x05\x20\x01(\
-    \x0cR\x05value\x127\n\naccessList\x18\x06\x20\x03(\x0b2\x17.ffi.ffi.Acce\
-    ssListItemR\naccessList\x12\x16\n\x06commit\x18\x07\x20\x01(\x08R\x06com\
-    mit\x12\x14\n\x05nonce\x18\x08\x20\x01(\x04R\x05nonce\"{\n\x10SGXVMCallR\
-    equest\x120\n\x06params\x18\x01\x20\x01(\x0b2\x18.ffi.ffi.SGXVMCallParam\
-    sR\x06params\x125\n\x07context\x18\x02\x20\x01(\x0b2\x1b.ffi.ffi.Transac\
-    tionContextR\x07context\"\x7f\n\x12SGXVMCreateRequest\x122\n\x06params\
-    \x18\x01\x20\x01(\x0b2\x1a.ffi.ffi.SGXVMCreateParamsR\x06params\x125\n\
-    \x07context\x18\x02\x20\x01(\x0b2\x1b.ffi.ffi.TransactionContextR\x07con\
-    text\"8\n\x14NodePublicKeyRequest\x12\x20\n\x0bblockNumber\x18\x01\x20\
-    \x01(\x04R\x0bblockNumber\"5\n\x15NodePublicKeyResponse\x12\x1c\n\tpubli\
-    cKey\x18\x01\x20\x01(\x0cR\tpublicKey\"y\n\tEpochData\x12\x20\n\x0bepoch\
-    Number\x18\x01\x20\x01(\rR\x0bepochNumber\x12$\n\rstartingBlock\x18\x02\
-    \x20\x01(\x04R\rstartingBlock\x12$\n\rnodePublicKey\x18\x03\x20\x01(\x0c\
-    R\rnodePublicKey\"@\n\x12ListEpochsResponse\x12*\n\x06epochs\x18\x01\x20\
-    \x03(\x0b2\x12.ffi.ffi.EpochDataR\x06epochs\"\xe4\x01\n\nFFIRequest\x12=\
-    \n\x0bcallRequest\x18\x01\x20\x01(\x0b2\x19.ffi.ffi.SGXVMCallRequestH\0R\
+    ffi.ffi.QueryInsertAccountNonceH\0R\x12insertAccountNonce\x12L\n\x10issu\
+    anceTreeRoot\x18\x12\x20\x01(\x0b2\x1e.ffi.ffi.QueryIssuanceTreeRootH\0R\
+    \x10issuanceTreeRoot\x12R\n\x12revocationTreeRoot\x18\x13\x20\x01(\x0b2\
+    \x20.ffi.ffi.QueryRevocationTreeRootH\0R\x12revocationTreeRoot\x12d\n\
+    \x18addVerificationDetailsV2\x18\x14\x20\x01(\x0b2&.ffi.ffi.QueryAddVeri\
+    ficationDetailsV2H\0R\x18addVerificationDetailsV2B\x05\n\x03req\"\xa0\
+    \x02\n\x0fSGXVMCallParams\x12\x12\n\x04from\x18\x01\x20\x01(\x0cR\x04fro\
+    m\x12\x0e\n\x02to\x18\x02\x20\x01(\x0cR\x02to\x12\x12\n\x04data\x18\x03\
+    \x20\x01(\x0cR\x04data\x12\x1a\n\x08gasLimit\x18\x04\x20\x01(\x04R\x08ga\
+    sLimit\x12\x1a\n\x08gasPrice\x18\x05\x20\x01(\x0cR\x08gasPrice\x12\x14\n\
+    \x05value\x18\x06\x20\x01(\x0cR\x05value\x127\n\naccessList\x18\x07\x20\
+    \x03(\x0b2\x17.ffi.ffi.AccessListItemR\naccessList\x12\x16\n\x06commit\
+    \x18\x08\x20\x01(\x08R\x06commit\x12\x14\n\x05nonce\x18\t\x20\x01(\x04R\
+    \x05nonce\x12\x20\n\x0bunencrypted\x18\n\x20\x01(\x08R\x0bunencrypted\"\
+    \xf0\x01\n\x11SGXVMCreateParams\x12\x12\n\x04from\x18\x01\x20\x01(\x0cR\
+    \x04from\x12\x12\n\x04data\x18\x02\x20\x01(\x0cR\x04data\x12\x1a\n\x08ga\
+    sLimit\x18\x03\x20\x01(\x04R\x08gasLimit\x12\x1a\n\x08gasPrice\x18\x04\
+    \x20\x01(\x0cR\x08gasPrice\x12\x14\n\x05value\x18\x05\x20\x01(\x0cR\x05v\
+    alue\x127\n\naccessList\x18\x06\x20\x03(\x0b2\x17.ffi.ffi.AccessListItem\
+    R\naccessList\x12\x16\n\x06commit\x18\x07\x20\x01(\x08R\x06commit\x12\
+    \x14\n\x05nonce\x18\x08\x20\x01(\x04R\x05nonce\"{\n\x10SGXVMCallRequest\
+    \x120\n\x06params\x18\x01\x20\x01(\x0b2\x18.ffi.ffi.SGXVMCallParamsR\x06\
+    params\x125\n\x07context\x18\x02\x20\x01(\x0b2\x1b.ffi.ffi.TransactionCo\
+    ntextR\x07context\"\x7f\n\x12SGXVMCreateRequest\x122\n\x06params\x18\x01\
+    \x20\x01(\x0b2\x1a.ffi.ffi.SGXVMCreateParamsR\x06params\x125\n\x07contex\
+    t\x18\x02\x20\x01(\x0b2\x1b.ffi.ffi.TransactionContextR\x07context\"8\n\
+    \x14NodePublicKeyRequest\x12\x20\n\x0bblockNumber\x18\x01\x20\x01(\x04R\
+    \x0bblockNumber\"5\n\x15NodePublicKeyResponse\x12\x1c\n\tpublicKey\x18\
+    \x01\x20\x01(\x0cR\tpublicKey\"y\n\tEpochData\x12\x20\n\x0bepochNumber\
+    \x18\x01\x20\x01(\rR\x0bepochNumber\x12$\n\rstartingBlock\x18\x02\x20\
+    \x01(\x04R\rstartingBlock\x12$\n\rnodePublicKey\x18\x03\x20\x01(\x0cR\rn\
+    odePublicKey\"@\n\x12ListEpochsResponse\x12*\n\x06epochs\x18\x01\x20\x03\
+    (\x0b2\x12.ffi.ffi.EpochDataR\x06epochs\"\xe4\x01\n\nFFIRequest\x12=\n\
+    \x0bcallRequest\x18\x01\x20\x01(\x0b2\x19.ffi.ffi.SGXVMCallRequestH\0R\
     \x0bcallRequest\x12C\n\rcreateRequest\x18\x02\x20\x01(\x0b2\x1b.ffi.ffi.\
     SGXVMCreateRequestH\0R\rcreateRequest\x12K\n\x10publicKeyRequest\x18\x03\
     \x20\x01(\x0b2\x1d.ffi.ffi.NodePublicKeyRequestH\0R\x10publicKeyRequestB\
-    \x05\n\x03reqB&Z$github.com/SigmaGmbH/librustgo/typesJ\xebS\n\x07\x12\
-    \x05\0\0\xa0\x02\x01\n\x08\n\x01\x0c\x12\x03\0\0\x12\n\x08\n\x01\x02\x12\
+    \x05\n\x03reqB&Z$github.com/SigmaGmbH/librustgo/typesJ\xf4\\\n\x07\x12\
+    \x05\0\0\xbe\x02\x01\n\x08\n\x01\x0c\x12\x03\0\0\x12\n\x08\n\x01\x02\x12\
     \x03\x02\0\x10\n\x08\n\x01\x08\x12\x03\x04\0;\n\t\n\x02\x08\x0b\x12\x03\
     \x04\0;\n\x1d\n\x02\x04\0\x12\x04\x08\0\x0b\x012\x11\x20General\x20reque\
     st\n\n\n\n\x03\x04\0\x01\x12\x03\x08\x08\x16\n\x0b\n\x04\x04\0\x02\0\x12\
@@ -13099,264 +14667,318 @@ static file_descriptor_proto_data: &'static [u8] = b"\
     \x01()\n\n\n\x02\x04\"\x12\x04\x90\x01\02\n\x0b\n\x03\x04\"\x01\x12\x04\
     \x90\x01\x08\x1e\n\x0c\n\x04\x04\"\x02\0\x12\x04\x90\x01!0\n\r\n\x05\x04\
     \"\x02\0\x05\x12\x04\x90\x01!&\n\r\n\x05\x04\"\x02\0\x01\x12\x04\x90\x01\
-    '+\n\r\n\x05\x04\"\x02\0\x03\x12\x04\x90\x01./\n\x0c\n\x02\x04#\x12\x06\
-    \x92\x01\0\x9d\x01\x01\n\x0b\n\x03\x04#\x01\x12\x04\x92\x01\x08#\n\x0c\n\
-    \x04\x04#\x02\0\x12\x04\x93\x01\x02\x18\n\r\n\x05\x04#\x02\0\x05\x12\x04\
-    \x93\x01\x02\x07\n\r\n\x05\x04#\x02\0\x01\x12\x04\x93\x01\x08\x13\n\r\n\
-    \x05\x04#\x02\0\x03\x12\x04\x93\x01\x16\x17\n\x0c\n\x04\x04#\x02\x01\x12\
-    \x04\x94\x01\x02\x1a\n\r\n\x05\x04#\x02\x01\x05\x12\x04\x94\x01\x02\x07\
-    \n\r\n\x05\x04#\x02\x01\x01\x12\x04\x94\x01\x08\x15\n\r\n\x05\x04#\x02\
-    \x01\x03\x12\x04\x94\x01\x18\x19\n\x0c\n\x04\x04#\x02\x02\x12\x04\x95\
-    \x01\x02\x19\n\r\n\x05\x04#\x02\x02\x05\x12\x04\x95\x01\x02\x08\n\r\n\
-    \x05\x04#\x02\x02\x01\x12\x04\x95\x01\t\x14\n\r\n\x05\x04#\x02\x02\x03\
-    \x12\x04\x95\x01\x17\x18\n\x0c\n\x04\x04#\x02\x03\x12\x04\x96\x01\x02\
-    \x1e\n\r\n\x05\x04#\x02\x03\x05\x12\x04\x96\x01\x02\x08\n\r\n\x05\x04#\
-    \x02\x03\x01\x12\x04\x96\x01\t\x19\n\r\n\x05\x04#\x02\x03\x03\x12\x04\
-    \x96\x01\x1c\x1d\n\x0c\n\x04\x04#\x02\x04\x12\x04\x97\x01\x02\x1f\n\r\n\
-    \x05\x04#\x02\x04\x05\x12\x04\x97\x01\x02\x08\n\r\n\x05\x04#\x02\x04\x01\
-    \x12\x04\x97\x01\t\x1a\n\r\n\x05\x04#\x02\x04\x03\x12\x04\x97\x01\x1d\
-    \x1e\n\x0c\n\x04\x04#\x02\x05\x12\x04\x98\x01\x02!\n\r\n\x05\x04#\x02\
-    \x05\x05\x12\x04\x98\x01\x02\x08\n\r\n\x05\x04#\x02\x05\x01\x12\x04\x98\
-    \x01\t\x1c\n\r\n\x05\x04#\x02\x05\x03\x12\x04\x98\x01\x1f\x20\n\x0c\n\
-    \x04\x04#\x02\x06\x12\x04\x99\x01\x02\x16\n\r\n\x05\x04#\x02\x06\x05\x12\
-    \x04\x99\x01\x02\x07\n\r\n\x05\x04#\x02\x06\x01\x12\x04\x99\x01\x08\x11\
-    \n\r\n\x05\x04#\x02\x06\x03\x12\x04\x99\x01\x14\x15\n\x0c\n\x04\x04#\x02\
-    \x07\x12\x04\x9a\x01\x02\x14\n\r\n\x05\x04#\x02\x07\x05\x12\x04\x9a\x01\
-    \x02\x08\n\r\n\x05\x04#\x02\x07\x01\x12\x04\x9a\x01\t\x0f\n\r\n\x05\x04#\
-    \x02\x07\x03\x12\x04\x9a\x01\x12\x13\n\x0c\n\x04\x04#\x02\x08\x12\x04\
-    \x9b\x01\x02\"\n\r\n\x05\x04#\x02\x08\x05\x12\x04\x9b\x01\x02\x08\n\r\n\
-    \x05\x04#\x02\x08\x01\x12\x04\x9b\x01\t\x1d\n\r\n\x05\x04#\x02\x08\x03\
-    \x12\x04\x9b\x01\x20!\n\x0c\n\x04\x04#\x02\t\x12\x04\x9c\x01\x02\x16\n\r\
-    \n\x05\x04#\x02\t\x05\x12\x04\x9c\x01\x02\x08\n\r\n\x05\x04#\x02\t\x01\
-    \x12\x04\x9c\x01\t\x10\n\r\n\x05\x04#\x02\t\x03\x12\x04\x9c\x01\x13\x15\
-    \n\x0c\n\x02\x04$\x12\x06\x9e\x01\0\xa0\x01\x01\n\x0b\n\x03\x04$\x01\x12\
-    \x04\x9e\x01\x08+\n\x0c\n\x04\x04$\x02\0\x12\x04\x9f\x01\x02\x1b\n\r\n\
-    \x05\x04$\x02\0\x05\x12\x04\x9f\x01\x02\x07\n\r\n\x05\x04$\x02\0\x01\x12\
-    \x04\x9f\x01\x08\x16\n\r\n\x05\x04$\x02\0\x03\x12\x04\x9f\x01\x19\x1a\n\
-    \x0c\n\x02\x04%\x12\x06\xa2\x01\0\xa7\x01\x01\n\x0b\n\x03\x04%\x01\x12\
-    \x04\xa2\x01\x08\x1c\n\x0c\n\x04\x04%\x02\0\x12\x04\xa3\x01\x02\x18\n\r\
-    \n\x05\x04%\x02\0\x05\x12\x04\xa3\x01\x02\x07\n\r\n\x05\x04%\x02\0\x01\
-    \x12\x04\xa3\x01\x08\x13\n\r\n\x05\x04%\x02\0\x03\x12\x04\xa3\x01\x16\
-    \x17\n\x0c\n\x04\x04%\x02\x01\x12\x04\xa4\x01\x02\x1e\n\r\n\x05\x04%\x02\
-    \x01\x05\x12\x04\xa4\x01\x02\x08\n\r\n\x05\x04%\x02\x01\x01\x12\x04\xa4\
-    \x01\t\x19\n\r\n\x05\x04%\x02\x01\x03\x12\x04\xa4\x01\x1c\x1d\n\x0c\n\
-    \x04\x04%\x02\x02\x12\x04\xa5\x01\x02!\n\r\n\x05\x04%\x02\x02\x05\x12\
-    \x04\xa5\x01\x02\x08\n\r\n\x05\x04%\x02\x02\x01\x12\x04\xa5\x01\t\x1c\n\
-    \r\n\x05\x04%\x02\x02\x03\x12\x04\xa5\x01\x1f\x20\n\x0c\n\x04\x04%\x02\
-    \x03\x12\x04\xa6\x01\x02$\n\r\n\x05\x04%\x02\x03\x04\x12\x04\xa6\x01\x02\
-    \n\n\r\n\x05\x04%\x02\x03\x05\x12\x04\xa6\x01\x0b\x10\n\r\n\x05\x04%\x02\
-    \x03\x01\x12\x04\xa6\x01\x11\x1f\n\r\n\x05\x04%\x02\x03\x03\x12\x04\xa6\
-    \x01\"#\n\x0c\n\x02\x04&\x12\x06\xa8\x01\0\xaa\x01\x01\n\x0b\n\x03\x04&\
-    \x01\x12\x04\xa8\x01\x08$\n\x0c\n\x04\x04&\x02\0\x12\x04\xa9\x01\x02\x1b\
-    \n\r\n\x05\x04&\x02\0\x05\x12\x04\xa9\x01\x02\x06\n\r\n\x05\x04&\x02\0\
-    \x01\x12\x04\xa9\x01\x07\x16\n\r\n\x05\x04&\x02\0\x03\x12\x04\xa9\x01\
-    \x19\x1a\n\x0c\n\x02\x04'\x12\x06\xac\x01\0\xaf\x01\x01\n\x0b\n\x03\x04'\
-    \x01\x12\x04\xac\x01\x08\x20\n\x0c\n\x04\x04'\x02\0\x12\x04\xad\x01\x02\
-    \x18\n\r\n\x05\x04'\x02\0\x05\x12\x04\xad\x01\x02\x07\n\r\n\x05\x04'\x02\
-    \0\x01\x12\x04\xad\x01\x08\x13\n\r\n\x05\x04'\x02\0\x03\x12\x04\xad\x01\
-    \x16\x17\n\x0c\n\x04\x04'\x02\x01\x12\x04\xae\x01\x02\x1a\n\r\n\x05\x04'\
-    \x02\x01\x05\x12\x04\xae\x01\x02\x07\n\r\n\x05\x04'\x02\x01\x01\x12\x04\
-    \xae\x01\x08\x15\n\r\n\x05\x04'\x02\x01\x03\x12\x04\xae\x01\x18\x19\n\
-    \xf1\x01\n\x02\x04(\x12\x06\xb3\x01\0\xc8\x01\x01\x1a\xe2\x01\x20Verific\
+    '+\n\r\n\x05\x04\"\x02\0\x03\x12\x04\x90\x01./\n\n\n\x02\x04#\x12\x04\
+    \x92\x01\0\x20\n\x0b\n\x03\x04#\x01\x12\x04\x92\x01\x08\x1d\n\x0c\n\x02\
+    \x04$\x12\x06\x93\x01\0\x95\x01\x01\n\x0b\n\x03\x04$\x01\x12\x04\x93\x01\
+    \x08%\n\x0c\n\x04\x04$\x02\0\x12\x04\x94\x01\x02\x11\n\r\n\x05\x04$\x02\
+    \0\x05\x12\x04\x94\x01\x02\x07\n\r\n\x05\x04$\x02\0\x01\x12\x04\x94\x01\
+    \x08\x0c\n\r\n\x05\x04$\x02\0\x03\x12\x04\x94\x01\x0f\x10\n\n\n\x02\x04%\
+    \x12\x04\x97\x01\0\"\n\x0b\n\x03\x04%\x01\x12\x04\x97\x01\x08\x1f\n\x0c\
+    \n\x02\x04&\x12\x06\x98\x01\0\x9a\x01\x01\n\x0b\n\x03\x04&\x01\x12\x04\
+    \x98\x01\x08'\n\x0c\n\x04\x04&\x02\0\x12\x04\x99\x01\x02\x11\n\r\n\x05\
+    \x04&\x02\0\x05\x12\x04\x99\x01\x02\x07\n\r\n\x05\x04&\x02\0\x01\x12\x04\
+    \x99\x01\x08\x0c\n\r\n\x05\x04&\x02\0\x03\x12\x04\x99\x01\x0f\x10\n\x0c\
+    \n\x02\x04'\x12\x06\x9c\x01\0\xa7\x01\x01\n\x0b\n\x03\x04'\x01\x12\x04\
+    \x9c\x01\x08#\n\x0c\n\x04\x04'\x02\0\x12\x04\x9d\x01\x02\x18\n\r\n\x05\
+    \x04'\x02\0\x05\x12\x04\x9d\x01\x02\x07\n\r\n\x05\x04'\x02\0\x01\x12\x04\
+    \x9d\x01\x08\x13\n\r\n\x05\x04'\x02\0\x03\x12\x04\x9d\x01\x16\x17\n\x0c\
+    \n\x04\x04'\x02\x01\x12\x04\x9e\x01\x02\x1a\n\r\n\x05\x04'\x02\x01\x05\
+    \x12\x04\x9e\x01\x02\x07\n\r\n\x05\x04'\x02\x01\x01\x12\x04\x9e\x01\x08\
+    \x15\n\r\n\x05\x04'\x02\x01\x03\x12\x04\x9e\x01\x18\x19\n\x0c\n\x04\x04'\
+    \x02\x02\x12\x04\x9f\x01\x02\x19\n\r\n\x05\x04'\x02\x02\x05\x12\x04\x9f\
+    \x01\x02\x08\n\r\n\x05\x04'\x02\x02\x01\x12\x04\x9f\x01\t\x14\n\r\n\x05\
+    \x04'\x02\x02\x03\x12\x04\x9f\x01\x17\x18\n\x0c\n\x04\x04'\x02\x03\x12\
+    \x04\xa0\x01\x02\x1e\n\r\n\x05\x04'\x02\x03\x05\x12\x04\xa0\x01\x02\x08\
+    \n\r\n\x05\x04'\x02\x03\x01\x12\x04\xa0\x01\t\x19\n\r\n\x05\x04'\x02\x03\
+    \x03\x12\x04\xa0\x01\x1c\x1d\n\x0c\n\x04\x04'\x02\x04\x12\x04\xa1\x01\
+    \x02\x1f\n\r\n\x05\x04'\x02\x04\x05\x12\x04\xa1\x01\x02\x08\n\r\n\x05\
+    \x04'\x02\x04\x01\x12\x04\xa1\x01\t\x1a\n\r\n\x05\x04'\x02\x04\x03\x12\
+    \x04\xa1\x01\x1d\x1e\n\x0c\n\x04\x04'\x02\x05\x12\x04\xa2\x01\x02!\n\r\n\
+    \x05\x04'\x02\x05\x05\x12\x04\xa2\x01\x02\x08\n\r\n\x05\x04'\x02\x05\x01\
+    \x12\x04\xa2\x01\t\x1c\n\r\n\x05\x04'\x02\x05\x03\x12\x04\xa2\x01\x1f\
+    \x20\n\x0c\n\x04\x04'\x02\x06\x12\x04\xa3\x01\x02\x16\n\r\n\x05\x04'\x02\
+    \x06\x05\x12\x04\xa3\x01\x02\x07\n\r\n\x05\x04'\x02\x06\x01\x12\x04\xa3\
+    \x01\x08\x11\n\r\n\x05\x04'\x02\x06\x03\x12\x04\xa3\x01\x14\x15\n\x0c\n\
+    \x04\x04'\x02\x07\x12\x04\xa4\x01\x02\x14\n\r\n\x05\x04'\x02\x07\x05\x12\
+    \x04\xa4\x01\x02\x08\n\r\n\x05\x04'\x02\x07\x01\x12\x04\xa4\x01\t\x0f\n\
+    \r\n\x05\x04'\x02\x07\x03\x12\x04\xa4\x01\x12\x13\n\x0c\n\x04\x04'\x02\
+    \x08\x12\x04\xa5\x01\x02\"\n\r\n\x05\x04'\x02\x08\x05\x12\x04\xa5\x01\
+    \x02\x08\n\r\n\x05\x04'\x02\x08\x01\x12\x04\xa5\x01\t\x1d\n\r\n\x05\x04'\
+    \x02\x08\x03\x12\x04\xa5\x01\x20!\n\x0c\n\x04\x04'\x02\t\x12\x04\xa6\x01\
+    \x02\x16\n\r\n\x05\x04'\x02\t\x05\x12\x04\xa6\x01\x02\x08\n\r\n\x05\x04'\
+    \x02\t\x01\x12\x04\xa6\x01\t\x10\n\r\n\x05\x04'\x02\t\x03\x12\x04\xa6\
+    \x01\x13\x15\n\x0c\n\x02\x04(\x12\x06\xa8\x01\0\xaa\x01\x01\n\x0b\n\x03\
+    \x04(\x01\x12\x04\xa8\x01\x08+\n\x0c\n\x04\x04(\x02\0\x12\x04\xa9\x01\
+    \x02\x1b\n\r\n\x05\x04(\x02\0\x05\x12\x04\xa9\x01\x02\x07\n\r\n\x05\x04(\
+    \x02\0\x01\x12\x04\xa9\x01\x08\x16\n\r\n\x05\x04(\x02\0\x03\x12\x04\xa9\
+    \x01\x19\x1a\n\x0c\n\x02\x04)\x12\x06\xac\x01\0\xb8\x01\x01\n\x0b\n\x03\
+    \x04)\x01\x12\x04\xac\x01\x08%\n\x0c\n\x04\x04)\x02\0\x12\x04\xad\x01\
+    \x02\x18\n\r\n\x05\x04)\x02\0\x05\x12\x04\xad\x01\x02\x07\n\r\n\x05\x04)\
+    \x02\0\x01\x12\x04\xad\x01\x08\x13\n\r\n\x05\x04)\x02\0\x03\x12\x04\xad\
+    \x01\x16\x17\n\x0c\n\x04\x04)\x02\x01\x12\x04\xae\x01\x02\x1a\n\r\n\x05\
+    \x04)\x02\x01\x05\x12\x04\xae\x01\x02\x07\n\r\n\x05\x04)\x02\x01\x01\x12\
+    \x04\xae\x01\x08\x15\n\r\n\x05\x04)\x02\x01\x03\x12\x04\xae\x01\x18\x19\
+    \n\x0c\n\x04\x04)\x02\x02\x12\x04\xaf\x01\x02\x19\n\r\n\x05\x04)\x02\x02\
+    \x05\x12\x04\xaf\x01\x02\x08\n\r\n\x05\x04)\x02\x02\x01\x12\x04\xaf\x01\
+    \t\x14\n\r\n\x05\x04)\x02\x02\x03\x12\x04\xaf\x01\x17\x18\n\x0c\n\x04\
+    \x04)\x02\x03\x12\x04\xb0\x01\x02\x1e\n\r\n\x05\x04)\x02\x03\x05\x12\x04\
+    \xb0\x01\x02\x08\n\r\n\x05\x04)\x02\x03\x01\x12\x04\xb0\x01\t\x19\n\r\n\
+    \x05\x04)\x02\x03\x03\x12\x04\xb0\x01\x1c\x1d\n\x0c\n\x04\x04)\x02\x04\
+    \x12\x04\xb1\x01\x02\x1f\n\r\n\x05\x04)\x02\x04\x05\x12\x04\xb1\x01\x02\
+    \x08\n\r\n\x05\x04)\x02\x04\x01\x12\x04\xb1\x01\t\x1a\n\r\n\x05\x04)\x02\
+    \x04\x03\x12\x04\xb1\x01\x1d\x1e\n\x0c\n\x04\x04)\x02\x05\x12\x04\xb2\
+    \x01\x02!\n\r\n\x05\x04)\x02\x05\x05\x12\x04\xb2\x01\x02\x08\n\r\n\x05\
+    \x04)\x02\x05\x01\x12\x04\xb2\x01\t\x1c\n\r\n\x05\x04)\x02\x05\x03\x12\
+    \x04\xb2\x01\x1f\x20\n\x0c\n\x04\x04)\x02\x06\x12\x04\xb3\x01\x02\x16\n\
+    \r\n\x05\x04)\x02\x06\x05\x12\x04\xb3\x01\x02\x07\n\r\n\x05\x04)\x02\x06\
+    \x01\x12\x04\xb3\x01\x08\x11\n\r\n\x05\x04)\x02\x06\x03\x12\x04\xb3\x01\
+    \x14\x15\n\x0c\n\x04\x04)\x02\x07\x12\x04\xb4\x01\x02\x14\n\r\n\x05\x04)\
+    \x02\x07\x05\x12\x04\xb4\x01\x02\x08\n\r\n\x05\x04)\x02\x07\x01\x12\x04\
+    \xb4\x01\t\x0f\n\r\n\x05\x04)\x02\x07\x03\x12\x04\xb4\x01\x12\x13\n\x0c\
+    \n\x04\x04)\x02\x08\x12\x04\xb5\x01\x02\"\n\r\n\x05\x04)\x02\x08\x05\x12\
+    \x04\xb5\x01\x02\x08\n\r\n\x05\x04)\x02\x08\x01\x12\x04\xb5\x01\t\x1d\n\
+    \r\n\x05\x04)\x02\x08\x03\x12\x04\xb5\x01\x20!\n\x0c\n\x04\x04)\x02\t\
+    \x12\x04\xb6\x01\x02\x16\n\r\n\x05\x04)\x02\t\x05\x12\x04\xb6\x01\x02\
+    \x08\n\r\n\x05\x04)\x02\t\x01\x12\x04\xb6\x01\t\x10\n\r\n\x05\x04)\x02\t\
+    \x03\x12\x04\xb6\x01\x13\x15\n\x0c\n\x04\x04)\x02\n\x12\x04\xb7\x01\x02\
+    \x1b\n\r\n\x05\x04)\x02\n\x05\x12\x04\xb7\x01\x02\x07\n\r\n\x05\x04)\x02\
+    \n\x01\x12\x04\xb7\x01\x08\x15\n\r\n\x05\x04)\x02\n\x03\x12\x04\xb7\x01\
+    \x18\x1a\n\x0c\n\x02\x04*\x12\x06\xb9\x01\0\xbb\x01\x01\n\x0b\n\x03\x04*\
+    \x01\x12\x04\xb9\x01\x08-\n\x0c\n\x04\x04*\x02\0\x12\x04\xba\x01\x02\x1b\
+    \n\r\n\x05\x04*\x02\0\x05\x12\x04\xba\x01\x02\x07\n\r\n\x05\x04*\x02\0\
+    \x01\x12\x04\xba\x01\x08\x16\n\r\n\x05\x04*\x02\0\x03\x12\x04\xba\x01\
+    \x19\x1a\n\x0c\n\x02\x04+\x12\x06\xbd\x01\0\xc2\x01\x01\n\x0b\n\x03\x04+\
+    \x01\x12\x04\xbd\x01\x08\x1c\n\x0c\n\x04\x04+\x02\0\x12\x04\xbe\x01\x02\
+    \x18\n\r\n\x05\x04+\x02\0\x05\x12\x04\xbe\x01\x02\x07\n\r\n\x05\x04+\x02\
+    \0\x01\x12\x04\xbe\x01\x08\x13\n\r\n\x05\x04+\x02\0\x03\x12\x04\xbe\x01\
+    \x16\x17\n\x0c\n\x04\x04+\x02\x01\x12\x04\xbf\x01\x02\x1e\n\r\n\x05\x04+\
+    \x02\x01\x05\x12\x04\xbf\x01\x02\x08\n\r\n\x05\x04+\x02\x01\x01\x12\x04\
+    \xbf\x01\t\x19\n\r\n\x05\x04+\x02\x01\x03\x12\x04\xbf\x01\x1c\x1d\n\x0c\
+    \n\x04\x04+\x02\x02\x12\x04\xc0\x01\x02!\n\r\n\x05\x04+\x02\x02\x05\x12\
+    \x04\xc0\x01\x02\x08\n\r\n\x05\x04+\x02\x02\x01\x12\x04\xc0\x01\t\x1c\n\
+    \r\n\x05\x04+\x02\x02\x03\x12\x04\xc0\x01\x1f\x20\n\x0c\n\x04\x04+\x02\
+    \x03\x12\x04\xc1\x01\x02$\n\r\n\x05\x04+\x02\x03\x04\x12\x04\xc1\x01\x02\
+    \n\n\r\n\x05\x04+\x02\x03\x05\x12\x04\xc1\x01\x0b\x10\n\r\n\x05\x04+\x02\
+    \x03\x01\x12\x04\xc1\x01\x11\x1f\n\r\n\x05\x04+\x02\x03\x03\x12\x04\xc1\
+    \x01\"#\n\x0c\n\x02\x04,\x12\x06\xc3\x01\0\xc5\x01\x01\n\x0b\n\x03\x04,\
+    \x01\x12\x04\xc3\x01\x08$\n\x0c\n\x04\x04,\x02\0\x12\x04\xc4\x01\x02\x1b\
+    \n\r\n\x05\x04,\x02\0\x05\x12\x04\xc4\x01\x02\x06\n\r\n\x05\x04,\x02\0\
+    \x01\x12\x04\xc4\x01\x07\x16\n\r\n\x05\x04,\x02\0\x03\x12\x04\xc4\x01\
+    \x19\x1a\n\x0c\n\x02\x04-\x12\x06\xc7\x01\0\xca\x01\x01\n\x0b\n\x03\x04-\
+    \x01\x12\x04\xc7\x01\x08\x20\n\x0c\n\x04\x04-\x02\0\x12\x04\xc8\x01\x02\
+    \x18\n\r\n\x05\x04-\x02\0\x05\x12\x04\xc8\x01\x02\x07\n\r\n\x05\x04-\x02\
+    \0\x01\x12\x04\xc8\x01\x08\x13\n\r\n\x05\x04-\x02\0\x03\x12\x04\xc8\x01\
+    \x16\x17\n\x0c\n\x04\x04-\x02\x01\x12\x04\xc9\x01\x02\x1a\n\r\n\x05\x04-\
+    \x02\x01\x05\x12\x04\xc9\x01\x02\x07\n\r\n\x05\x04-\x02\x01\x01\x12\x04\
+    \xc9\x01\x08\x15\n\r\n\x05\x04-\x02\x01\x03\x12\x04\xc9\x01\x18\x19\n\
+    \xf1\x01\n\x02\x04.\x12\x06\xce\x01\0\xe3\x01\x01\x1a\xe2\x01\x20Verific\
     ationDetails\x20must\x20have\x20same\x20members\x20with\x20VerificationD\
     etails\x20in\x20\"sgxvm/proto/ffi.proto\"\n\x20including\x20verification\
     \x20type\x20and\x20verification\x20id\x20as\x20key.\n\x20But\x20the\x20m\
     ember\x20types\x20can\x20be\x20different,\x20such\x20as\x20string(addres\
-    s)\x20to\x20bytes\n\n\x0b\n\x03\x04(\x01\x12\x04\xb3\x01\x08\x1b\n!\n\
-    \x04\x04(\x02\0\x12\x04\xb5\x01\x02\x1e\x1a\x13\x20Verification\x20type\
-    \n\n\r\n\x05\x04(\x02\0\x05\x12\x04\xb5\x01\x02\x08\n\r\n\x05\x04(\x02\0\
-    \x01\x12\x04\xb5\x01\t\x19\n\r\n\x05\x04(\x02\0\x03\x12\x04\xb5\x01\x1c\
-    \x1d\n\x1f\n\x04\x04(\x02\x01\x12\x04\xb7\x01\x02\x1b\x1a\x11\x20Verific\
-    ation\x20Id\n\n\r\n\x05\x04(\x02\x01\x05\x12\x04\xb7\x01\x02\x07\n\r\n\
-    \x05\x04(\x02\x01\x01\x12\x04\xb7\x01\x08\x16\n\r\n\x05\x04(\x02\x01\x03\
-    \x12\x04\xb7\x01\x19\x1a\n+\n\x04\x04(\x02\x02\x12\x04\xb9\x01\x02\x1a\
-    \x1a\x1d\x20Verification\x20issuer\x20address\n\n\r\n\x05\x04(\x02\x02\
-    \x05\x12\x04\xb9\x01\x02\x07\n\r\n\x05\x04(\x02\x02\x01\x12\x04\xb9\x01\
-    \x08\x15\n\r\n\x05\x04(\x02\x02\x03\x12\x04\xb9\x01\x18\x19\n6\n\x04\x04\
-    (\x02\x03\x12\x04\xbb\x01\x02\x19\x1a(\x20From\x20which\x20chain\x20proo\
-    f\x20was\x20transferred\n\n\r\n\x05\x04(\x02\x03\x05\x12\x04\xbb\x01\x02\
-    \x08\n\r\n\x05\x04(\x02\x03\x01\x12\x04\xbb\x01\t\x14\n\r\n\x05\x04(\x02\
-    \x03\x03\x12\x04\xbb\x01\x17\x18\n+\n\x04\x04(\x02\x04\x12\x04\xbd\x01\
-    \x02\x1f\x1a\x1d\x20Original\x20issuance\x20timestamp\n\n\r\n\x05\x04(\
-    \x02\x04\x05\x12\x04\xbd\x01\x02\x08\n\r\n\x05\x04(\x02\x04\x01\x12\x04\
-    \xbd\x01\t\x1a\n\r\n\x05\x04(\x02\x04\x03\x12\x04\xbd\x01\x1d\x1e\n-\n\
-    \x04\x04(\x02\x05\x12\x04\xbf\x01\x02!\x1a\x1f\x20Original\x20expiration\
-    \x20timestamp\n\n\r\n\x05\x04(\x02\x05\x05\x12\x04\xbf\x01\x02\x08\n\r\n\
-    \x05\x04(\x02\x05\x01\x12\x04\xbf\x01\t\x1c\n\r\n\x05\x04(\x02\x05\x03\
-    \x12\x04\xbf\x01\x1f\x20\n.\n\x04\x04(\x02\x06\x12\x04\xc1\x01\x02\x19\
-    \x1a\x20\x20Original\x20proof\x20data\x20(ZK-proof)\n\n\r\n\x05\x04(\x02\
-    \x06\x05\x12\x04\xc1\x01\x02\x07\n\r\n\x05\x04(\x02\x06\x01\x12\x04\xc1\
-    \x01\x08\x14\n\r\n\x05\x04(\x02\x06\x03\x12\x04\xc1\x01\x17\x18\n(\n\x04\
-    \x04(\x02\x07\x12\x04\xc3\x01\x02\x14\x1a\x1a\x20ZK-proof\x20original\
-    \x20schema\n\n\r\n\x05\x04(\x02\x07\x05\x12\x04\xc3\x01\x02\x08\n\r\n\
-    \x05\x04(\x02\x07\x01\x12\x04\xc3\x01\t\x0f\n\r\n\x05\x04(\x02\x07\x03\
-    \x12\x04\xc3\x01\x12\x13\nN\n\x04\x04(\x02\x08\x12\x04\xc5\x01\x02\"\x1a\
+    s)\x20to\x20bytes\n\n\x0b\n\x03\x04.\x01\x12\x04\xce\x01\x08\x1b\n!\n\
+    \x04\x04.\x02\0\x12\x04\xd0\x01\x02\x1e\x1a\x13\x20Verification\x20type\
+    \n\n\r\n\x05\x04.\x02\0\x05\x12\x04\xd0\x01\x02\x08\n\r\n\x05\x04.\x02\0\
+    \x01\x12\x04\xd0\x01\t\x19\n\r\n\x05\x04.\x02\0\x03\x12\x04\xd0\x01\x1c\
+    \x1d\n\x1f\n\x04\x04.\x02\x01\x12\x04\xd2\x01\x02\x1b\x1a\x11\x20Verific\
+    ation\x20Id\n\n\r\n\x05\x04.\x02\x01\x05\x12\x04\xd2\x01\x02\x07\n\r\n\
+    \x05\x04.\x02\x01\x01\x12\x04\xd2\x01\x08\x16\n\r\n\x05\x04.\x02\x01\x03\
+    \x12\x04\xd2\x01\x19\x1a\n+\n\x04\x04.\x02\x02\x12\x04\xd4\x01\x02\x1a\
+    \x1a\x1d\x20Verification\x20issuer\x20address\n\n\r\n\x05\x04.\x02\x02\
+    \x05\x12\x04\xd4\x01\x02\x07\n\r\n\x05\x04.\x02\x02\x01\x12\x04\xd4\x01\
+    \x08\x15\n\r\n\x05\x04.\x02\x02\x03\x12\x04\xd4\x01\x18\x19\n6\n\x04\x04\
+    .\x02\x03\x12\x04\xd6\x01\x02\x19\x1a(\x20From\x20which\x20chain\x20proo\
+    f\x20was\x20transferred\n\n\r\n\x05\x04.\x02\x03\x05\x12\x04\xd6\x01\x02\
+    \x08\n\r\n\x05\x04.\x02\x03\x01\x12\x04\xd6\x01\t\x14\n\r\n\x05\x04.\x02\
+    \x03\x03\x12\x04\xd6\x01\x17\x18\n+\n\x04\x04.\x02\x04\x12\x04\xd8\x01\
+    \x02\x1f\x1a\x1d\x20Original\x20issuance\x20timestamp\n\n\r\n\x05\x04.\
+    \x02\x04\x05\x12\x04\xd8\x01\x02\x08\n\r\n\x05\x04.\x02\x04\x01\x12\x04\
+    \xd8\x01\t\x1a\n\r\n\x05\x04.\x02\x04\x03\x12\x04\xd8\x01\x1d\x1e\n-\n\
+    \x04\x04.\x02\x05\x12\x04\xda\x01\x02!\x1a\x1f\x20Original\x20expiration\
+    \x20timestamp\n\n\r\n\x05\x04.\x02\x05\x05\x12\x04\xda\x01\x02\x08\n\r\n\
+    \x05\x04.\x02\x05\x01\x12\x04\xda\x01\t\x1c\n\r\n\x05\x04.\x02\x05\x03\
+    \x12\x04\xda\x01\x1f\x20\n.\n\x04\x04.\x02\x06\x12\x04\xdc\x01\x02\x19\
+    \x1a\x20\x20Original\x20proof\x20data\x20(ZK-proof)\n\n\r\n\x05\x04.\x02\
+    \x06\x05\x12\x04\xdc\x01\x02\x07\n\r\n\x05\x04.\x02\x06\x01\x12\x04\xdc\
+    \x01\x08\x14\n\r\n\x05\x04.\x02\x06\x03\x12\x04\xdc\x01\x17\x18\n(\n\x04\
+    \x04.\x02\x07\x12\x04\xde\x01\x02\x14\x1a\x1a\x20ZK-proof\x20original\
+    \x20schema\n\n\r\n\x05\x04.\x02\x07\x05\x12\x04\xde\x01\x02\x08\n\r\n\
+    \x05\x04.\x02\x07\x01\x12\x04\xde\x01\t\x0f\n\r\n\x05\x04.\x02\x07\x03\
+    \x12\x04\xde\x01\x12\x13\nN\n\x04\x04.\x02\x08\x12\x04\xe0\x01\x02\"\x1a\
     @\x20Verification\x20id\x20for\x20checking(KYC/KYB/AML\x20etc)\x20from\
-    \x20issuer\x20side\n\n\r\n\x05\x04(\x02\x08\x05\x12\x04\xc5\x01\x02\x08\
-    \n\r\n\x05\x04(\x02\x08\x01\x12\x04\xc5\x01\t\x1d\n\r\n\x05\x04(\x02\x08\
-    \x03\x12\x04\xc5\x01\x20!\n\x17\n\x04\x04(\x02\t\x12\x04\xc7\x01\x02\x16\
-    \x1a\t\x20Version\n\n\r\n\x05\x04(\x02\t\x05\x12\x04\xc7\x01\x02\x08\n\r\
-    \n\x05\x04(\x02\t\x01\x12\x04\xc7\x01\t\x10\n\r\n\x05\x04(\x02\t\x03\x12\
-    \x04\xc7\x01\x13\x15\n\x0c\n\x02\x04)\x12\x06\xc9\x01\0\xcb\x01\x01\n\
-    \x0b\n\x03\x04)\x01\x12\x04\xc9\x01\x08(\n\x0c\n\x04\x04)\x02\0\x12\x04\
-    \xca\x01\x02(\n\r\n\x05\x04)\x02\0\x04\x12\x04\xca\x01\x02\n\n\r\n\x05\
-    \x04)\x02\0\x06\x12\x04\xca\x01\x0b\x1e\n\r\n\x05\x04)\x02\0\x01\x12\x04\
-    \xca\x01\x1f#\n\r\n\x05\x04)\x02\0\x03\x12\x04\xca\x01&'\n\x0c\n\x02\x04\
-    *\x12\x06\xcd\x01\0\xe1\x01\x01\n\x0b\n\x03\x04*\x01\x12\x04\xcd\x01\x08\
-    \x15\n\x0e\n\x04\x04*\x08\0\x12\x06\xce\x01\x02\xe0\x01\x03\n\r\n\x05\
-    \x04*\x08\0\x01\x12\x04\xce\x01\x08\x0b\n\x0c\n\x04\x04*\x02\0\x12\x04\
-    \xcf\x01\x04#\n\r\n\x05\x04*\x02\0\x06\x12\x04\xcf\x01\x04\x13\n\r\n\x05\
-    \x04*\x02\0\x01\x12\x04\xcf\x01\x14\x1e\n\r\n\x05\x04*\x02\0\x03\x12\x04\
-    \xcf\x01!\"\n\x0c\n\x04\x04*\x02\x01\x12\x04\xd0\x01\x04%\n\r\n\x05\x04*\
-    \x02\x01\x06\x12\x04\xd0\x01\x04\x14\n\r\n\x05\x04*\x02\x01\x01\x12\x04\
-    \xd0\x01\x15\x20\n\r\n\x05\x04*\x02\x01\x03\x12\x04\xd0\x01#$\n\x0c\n\
-    \x04\x04*\x02\x02\x12\x04\xd1\x01\x04(\n\r\n\x05\x04*\x02\x02\x06\x12\
-    \x04\xd1\x01\x04\x17\n\r\n\x05\x04*\x02\x02\x01\x12\x04\xd1\x01\x18#\n\r\
-    \n\x05\x04*\x02\x02\x03\x12\x04\xd1\x01&'\n\x0c\n\x04\x04*\x02\x03\x12\
-    \x04\xd2\x01\x04)\n\r\n\x05\x04*\x02\x03\x06\x12\x04\xd2\x01\x04\x1b\n\r\
-    \n\x05\x04*\x02\x03\x01\x12\x04\xd2\x01\x1c$\n\r\n\x05\x04*\x02\x03\x03\
-    \x12\x04\xd2\x01'(\n\x0c\n\x04\x04*\x02\x04\x12\x04\xd3\x01\x04)\n\r\n\
-    \x05\x04*\x02\x04\x06\x12\x04\xd3\x01\x04\x1b\n\r\n\x05\x04*\x02\x04\x01\
-    \x12\x04\xd3\x01\x1c$\n\r\n\x05\x04*\x02\x04\x03\x12\x04\xd3\x01'(\n\x0c\
-    \n\x04\x04*\x02\x05\x12\x04\xd4\x01\x04/\n\r\n\x05\x04*\x02\x05\x06\x12\
-    \x04\xd4\x01\x04\x1e\n\r\n\x05\x04*\x02\x05\x01\x12\x04\xd4\x01\x1f*\n\r\
-    \n\x05\x04*\x02\x05\x03\x12\x04\xd4\x01-.\n\x0c\n\x04\x04*\x02\x06\x12\
-    \x04\xd5\x01\x041\n\r\n\x05\x04*\x02\x06\x06\x12\x04\xd5\x01\x04\x1a\n\r\
-    \n\x05\x04*\x02\x06\x01\x12\x04\xd5\x01\x1b,\n\r\n\x05\x04*\x02\x06\x03\
-    \x12\x04\xd5\x01/0\n\x0c\n\x04\x04*\x02\x07\x12\x04\xd6\x01\x041\n\r\n\
-    \x05\x04*\x02\x07\x06\x12\x04\xd6\x01\x04\x1a\n\r\n\x05\x04*\x02\x07\x01\
-    \x12\x04\xd6\x01\x1b,\n\r\n\x05\x04*\x02\x07\x03\x12\x04\xd6\x01/0\n\x0c\
-    \n\x04\x04*\x02\x08\x12\x04\xd7\x01\x04\x1b\n\r\n\x05\x04*\x02\x08\x06\
-    \x12\x04\xd7\x01\x04\x0f\n\r\n\x05\x04*\x02\x08\x01\x12\x04\xd7\x01\x10\
-    \x16\n\r\n\x05\x04*\x02\x08\x03\x12\x04\xd7\x01\x19\x1a\n\x0c\n\x04\x04*\
-    \x02\t\x12\x04\xd8\x01\x042\n\r\n\x05\x04*\x02\t\x06\x12\x04\xd8\x01\x04\
-    \x1a\n\r\n\x05\x04*\x02\t\x01\x12\x04\xd8\x01\x1b,\n\r\n\x05\x04*\x02\t\
-    \x03\x12\x04\xd8\x01/1\n\x0c\n\x04\x04*\x02\n\x12\x04\xd9\x01\x04*\n\r\n\
-    \x05\x04*\x02\n\x06\x12\x04\xd9\x01\x04\x16\n\r\n\x05\x04*\x02\n\x01\x12\
-    \x04\xd9\x01\x17$\n\r\n\x05\x04*\x02\n\x03\x12\x04\xd9\x01')\n\x0c\n\x04\
-    \x04*\x02\x0b\x12\x04\xda\x01\x04\"\n\r\n\x05\x04*\x02\x0b\x06\x12\x04\
-    \xda\x01\x04\x12\n\r\n\x05\x04*\x02\x0b\x01\x12\x04\xda\x01\x13\x1c\n\r\
-    \n\x05\x04*\x02\x0b\x03\x12\x04\xda\x01\x1f!\n\x0c\n\x04\x04*\x02\x0c\
-    \x12\x04\xdb\x01\x04<\n\r\n\x05\x04*\x02\x0c\x06\x12\x04\xdb\x01\x04\x1f\
-    \n\r\n\x05\x04*\x02\x0c\x01\x12\x04\xdb\x01\x206\n\r\n\x05\x04*\x02\x0c\
-    \x03\x12\x04\xdb\x019;\n\x0c\n\x04\x04*\x02\r\x12\x04\xdc\x01\x04.\n\r\n\
-    \x05\x04*\x02\r\x06\x12\x04\xdc\x01\x04\x18\n\r\n\x05\x04*\x02\r\x01\x12\
-    \x04\xdc\x01\x19(\n\r\n\x05\x04*\x02\r\x03\x12\x04\xdc\x01+-\n\x0c\n\x04\
-    \x04*\x02\x0e\x12\x04\xdd\x01\x046\n\r\n\x05\x04*\x02\x0e\x06\x12\x04\
-    \xdd\x01\x04\x1c\n\r\n\x05\x04*\x02\x0e\x01\x12\x04\xdd\x01\x1d0\n\r\n\
-    \x05\x04*\x02\x0e\x03\x12\x04\xdd\x0135\n\x0c\n\x04\x04*\x02\x0f\x12\x04\
-    \xde\x01\x048\n\r\n\x05\x04*\x02\x0f\x06\x12\x04\xde\x01\x04\x1d\n\r\n\
-    \x05\x04*\x02\x0f\x01\x12\x04\xde\x01\x1e2\n\r\n\x05\x04*\x02\x0f\x03\
-    \x12\x04\xde\x0157\n\x0c\n\x04\x04*\x02\x10\x12\x04\xdf\x01\x044\n\r\n\
-    \x05\x04*\x02\x10\x06\x12\x04\xdf\x01\x04\x1b\n\r\n\x05\x04*\x02\x10\x01\
-    \x12\x04\xdf\x01\x1c.\n\r\n\x05\x04*\x02\x10\x03\x12\x04\xdf\x0113\nF\n\
-    \x02\x04+\x12\x06\xe4\x01\0\xef\x01\x01\x1a8\x20Message\x20with\x20data\
-    \x20required\x20to\x20execute\x20`call`\x20operation\n\n\x0b\n\x03\x04+\
-    \x01\x12\x04\xe4\x01\x08\x17\n\x0c\n\x04\x04+\x02\0\x12\x04\xe5\x01\x02\
-    \x11\n\r\n\x05\x04+\x02\0\x05\x12\x04\xe5\x01\x02\x07\n\r\n\x05\x04+\x02\
-    \0\x01\x12\x04\xe5\x01\x08\x0c\n\r\n\x05\x04+\x02\0\x03\x12\x04\xe5\x01\
-    \x0f\x10\n\x0c\n\x04\x04+\x02\x01\x12\x04\xe6\x01\x02\x0f\n\r\n\x05\x04+\
-    \x02\x01\x05\x12\x04\xe6\x01\x02\x07\n\r\n\x05\x04+\x02\x01\x01\x12\x04\
-    \xe6\x01\x08\n\n\r\n\x05\x04+\x02\x01\x03\x12\x04\xe6\x01\r\x0e\n\x0c\n\
-    \x04\x04+\x02\x02\x12\x04\xe7\x01\x02\x11\n\r\n\x05\x04+\x02\x02\x05\x12\
-    \x04\xe7\x01\x02\x07\n\r\n\x05\x04+\x02\x02\x01\x12\x04\xe7\x01\x08\x0c\
-    \n\r\n\x05\x04+\x02\x02\x03\x12\x04\xe7\x01\x0f\x10\n\x0c\n\x04\x04+\x02\
-    \x03\x12\x04\xe8\x01\x02\x16\n\r\n\x05\x04+\x02\x03\x05\x12\x04\xe8\x01\
-    \x02\x08\n\r\n\x05\x04+\x02\x03\x01\x12\x04\xe8\x01\t\x11\n\r\n\x05\x04+\
-    \x02\x03\x03\x12\x04\xe8\x01\x14\x15\n\x0c\n\x04\x04+\x02\x04\x12\x04\
-    \xe9\x01\x02\x15\n\r\n\x05\x04+\x02\x04\x05\x12\x04\xe9\x01\x02\x07\n\r\
-    \n\x05\x04+\x02\x04\x01\x12\x04\xe9\x01\x08\x10\n\r\n\x05\x04+\x02\x04\
-    \x03\x12\x04\xe9\x01\x13\x14\n\x0c\n\x04\x04+\x02\x05\x12\x04\xea\x01\
-    \x02\x12\n\r\n\x05\x04+\x02\x05\x05\x12\x04\xea\x01\x02\x07\n\r\n\x05\
-    \x04+\x02\x05\x01\x12\x04\xea\x01\x08\r\n\r\n\x05\x04+\x02\x05\x03\x12\
-    \x04\xea\x01\x10\x11\n\x0c\n\x04\x04+\x02\x06\x12\x04\xeb\x01\x02)\n\r\n\
-    \x05\x04+\x02\x06\x04\x12\x04\xeb\x01\x02\n\n\r\n\x05\x04+\x02\x06\x06\
-    \x12\x04\xeb\x01\x0b\x19\n\r\n\x05\x04+\x02\x06\x01\x12\x04\xeb\x01\x1a$\
-    \n\r\n\x05\x04+\x02\x06\x03\x12\x04\xeb\x01'(\n\x0c\n\x04\x04+\x02\x07\
-    \x12\x04\xec\x01\x02\x12\n\r\n\x05\x04+\x02\x07\x05\x12\x04\xec\x01\x02\
-    \x06\n\r\n\x05\x04+\x02\x07\x01\x12\x04\xec\x01\x07\r\n\r\n\x05\x04+\x02\
-    \x07\x03\x12\x04\xec\x01\x10\x11\n\x0c\n\x04\x04+\x02\x08\x12\x04\xed\
-    \x01\x02\x13\n\r\n\x05\x04+\x02\x08\x05\x12\x04\xed\x01\x02\x08\n\r\n\
-    \x05\x04+\x02\x08\x01\x12\x04\xed\x01\t\x0e\n\r\n\x05\x04+\x02\x08\x03\
-    \x12\x04\xed\x01\x11\x12\n\x0c\n\x04\x04+\x02\t\x12\x04\xee\x01\x02\x18\
-    \n\r\n\x05\x04+\x02\t\x05\x12\x04\xee\x01\x02\x06\n\r\n\x05\x04+\x02\t\
-    \x01\x12\x04\xee\x01\x07\x12\n\r\n\x05\x04+\x02\t\x03\x12\x04\xee\x01\
-    \x15\x17\nH\n\x02\x04,\x12\x06\xf2\x01\0\xfb\x01\x01\x1a:\x20Message\x20\
+    \x20issuer\x20side\n\n\r\n\x05\x04.\x02\x08\x05\x12\x04\xe0\x01\x02\x08\
+    \n\r\n\x05\x04.\x02\x08\x01\x12\x04\xe0\x01\t\x1d\n\r\n\x05\x04.\x02\x08\
+    \x03\x12\x04\xe0\x01\x20!\n\x17\n\x04\x04.\x02\t\x12\x04\xe2\x01\x02\x16\
+    \x1a\t\x20Version\n\n\r\n\x05\x04.\x02\t\x05\x12\x04\xe2\x01\x02\x08\n\r\
+    \n\x05\x04.\x02\t\x01\x12\x04\xe2\x01\t\x10\n\r\n\x05\x04.\x02\t\x03\x12\
+    \x04\xe2\x01\x13\x15\n\x0c\n\x02\x04/\x12\x06\xe4\x01\0\xe6\x01\x01\n\
+    \x0b\n\x03\x04/\x01\x12\x04\xe4\x01\x08(\n\x0c\n\x04\x04/\x02\0\x12\x04\
+    \xe5\x01\x02(\n\r\n\x05\x04/\x02\0\x04\x12\x04\xe5\x01\x02\n\n\r\n\x05\
+    \x04/\x02\0\x06\x12\x04\xe5\x01\x0b\x1e\n\r\n\x05\x04/\x02\0\x01\x12\x04\
+    \xe5\x01\x1f#\n\r\n\x05\x04/\x02\0\x03\x12\x04\xe5\x01&'\n\x0c\n\x02\x04\
+    0\x12\x06\xe8\x01\0\xff\x01\x01\n\x0b\n\x03\x040\x01\x12\x04\xe8\x01\x08\
+    \x15\n\x0e\n\x04\x040\x08\0\x12\x06\xe9\x01\x02\xfe\x01\x03\n\r\n\x05\
+    \x040\x08\0\x01\x12\x04\xe9\x01\x08\x0b\n\x0c\n\x04\x040\x02\0\x12\x04\
+    \xea\x01\x04#\n\r\n\x05\x040\x02\0\x06\x12\x04\xea\x01\x04\x13\n\r\n\x05\
+    \x040\x02\0\x01\x12\x04\xea\x01\x14\x1e\n\r\n\x05\x040\x02\0\x03\x12\x04\
+    \xea\x01!\"\n\x0c\n\x04\x040\x02\x01\x12\x04\xeb\x01\x04%\n\r\n\x05\x040\
+    \x02\x01\x06\x12\x04\xeb\x01\x04\x14\n\r\n\x05\x040\x02\x01\x01\x12\x04\
+    \xeb\x01\x15\x20\n\r\n\x05\x040\x02\x01\x03\x12\x04\xeb\x01#$\n\x0c\n\
+    \x04\x040\x02\x02\x12\x04\xec\x01\x04(\n\r\n\x05\x040\x02\x02\x06\x12\
+    \x04\xec\x01\x04\x17\n\r\n\x05\x040\x02\x02\x01\x12\x04\xec\x01\x18#\n\r\
+    \n\x05\x040\x02\x02\x03\x12\x04\xec\x01&'\n\x0c\n\x04\x040\x02\x03\x12\
+    \x04\xed\x01\x04)\n\r\n\x05\x040\x02\x03\x06\x12\x04\xed\x01\x04\x1b\n\r\
+    \n\x05\x040\x02\x03\x01\x12\x04\xed\x01\x1c$\n\r\n\x05\x040\x02\x03\x03\
+    \x12\x04\xed\x01'(\n\x0c\n\x04\x040\x02\x04\x12\x04\xee\x01\x04)\n\r\n\
+    \x05\x040\x02\x04\x06\x12\x04\xee\x01\x04\x1b\n\r\n\x05\x040\x02\x04\x01\
+    \x12\x04\xee\x01\x1c$\n\r\n\x05\x040\x02\x04\x03\x12\x04\xee\x01'(\n\x0c\
+    \n\x04\x040\x02\x05\x12\x04\xef\x01\x04/\n\r\n\x05\x040\x02\x05\x06\x12\
+    \x04\xef\x01\x04\x1e\n\r\n\x05\x040\x02\x05\x01\x12\x04\xef\x01\x1f*\n\r\
+    \n\x05\x040\x02\x05\x03\x12\x04\xef\x01-.\n\x0c\n\x04\x040\x02\x06\x12\
+    \x04\xf0\x01\x041\n\r\n\x05\x040\x02\x06\x06\x12\x04\xf0\x01\x04\x1a\n\r\
+    \n\x05\x040\x02\x06\x01\x12\x04\xf0\x01\x1b,\n\r\n\x05\x040\x02\x06\x03\
+    \x12\x04\xf0\x01/0\n\x0c\n\x04\x040\x02\x07\x12\x04\xf1\x01\x041\n\r\n\
+    \x05\x040\x02\x07\x06\x12\x04\xf1\x01\x04\x1a\n\r\n\x05\x040\x02\x07\x01\
+    \x12\x04\xf1\x01\x1b,\n\r\n\x05\x040\x02\x07\x03\x12\x04\xf1\x01/0\n\x0c\
+    \n\x04\x040\x02\x08\x12\x04\xf2\x01\x04\x1b\n\r\n\x05\x040\x02\x08\x06\
+    \x12\x04\xf2\x01\x04\x0f\n\r\n\x05\x040\x02\x08\x01\x12\x04\xf2\x01\x10\
+    \x16\n\r\n\x05\x040\x02\x08\x03\x12\x04\xf2\x01\x19\x1a\n\x0c\n\x04\x040\
+    \x02\t\x12\x04\xf3\x01\x042\n\r\n\x05\x040\x02\t\x06\x12\x04\xf3\x01\x04\
+    \x1a\n\r\n\x05\x040\x02\t\x01\x12\x04\xf3\x01\x1b,\n\r\n\x05\x040\x02\t\
+    \x03\x12\x04\xf3\x01/1\n\x0c\n\x04\x040\x02\n\x12\x04\xf4\x01\x04*\n\r\n\
+    \x05\x040\x02\n\x06\x12\x04\xf4\x01\x04\x16\n\r\n\x05\x040\x02\n\x01\x12\
+    \x04\xf4\x01\x17$\n\r\n\x05\x040\x02\n\x03\x12\x04\xf4\x01')\n\x0c\n\x04\
+    \x040\x02\x0b\x12\x04\xf5\x01\x04\"\n\r\n\x05\x040\x02\x0b\x06\x12\x04\
+    \xf5\x01\x04\x12\n\r\n\x05\x040\x02\x0b\x01\x12\x04\xf5\x01\x13\x1c\n\r\
+    \n\x05\x040\x02\x0b\x03\x12\x04\xf5\x01\x1f!\n\x0c\n\x04\x040\x02\x0c\
+    \x12\x04\xf6\x01\x04<\n\r\n\x05\x040\x02\x0c\x06\x12\x04\xf6\x01\x04\x1f\
+    \n\r\n\x05\x040\x02\x0c\x01\x12\x04\xf6\x01\x206\n\r\n\x05\x040\x02\x0c\
+    \x03\x12\x04\xf6\x019;\n\x0c\n\x04\x040\x02\r\x12\x04\xf7\x01\x04.\n\r\n\
+    \x05\x040\x02\r\x06\x12\x04\xf7\x01\x04\x18\n\r\n\x05\x040\x02\r\x01\x12\
+    \x04\xf7\x01\x19(\n\r\n\x05\x040\x02\r\x03\x12\x04\xf7\x01+-\n\x0c\n\x04\
+    \x040\x02\x0e\x12\x04\xf8\x01\x046\n\r\n\x05\x040\x02\x0e\x06\x12\x04\
+    \xf8\x01\x04\x1c\n\r\n\x05\x040\x02\x0e\x01\x12\x04\xf8\x01\x1d0\n\r\n\
+    \x05\x040\x02\x0e\x03\x12\x04\xf8\x0135\n\x0c\n\x04\x040\x02\x0f\x12\x04\
+    \xf9\x01\x048\n\r\n\x05\x040\x02\x0f\x06\x12\x04\xf9\x01\x04\x1d\n\r\n\
+    \x05\x040\x02\x0f\x01\x12\x04\xf9\x01\x1e2\n\r\n\x05\x040\x02\x0f\x03\
+    \x12\x04\xf9\x0157\n\x0c\n\x04\x040\x02\x10\x12\x04\xfa\x01\x044\n\r\n\
+    \x05\x040\x02\x10\x06\x12\x04\xfa\x01\x04\x1b\n\r\n\x05\x040\x02\x10\x01\
+    \x12\x04\xfa\x01\x1c.\n\r\n\x05\x040\x02\x10\x03\x12\x04\xfa\x0113\n\x0c\
+    \n\x04\x040\x02\x11\x12\x04\xfb\x01\x040\n\r\n\x05\x040\x02\x11\x06\x12\
+    \x04\xfb\x01\x04\x19\n\r\n\x05\x040\x02\x11\x01\x12\x04\xfb\x01\x1a*\n\r\
+    \n\x05\x040\x02\x11\x03\x12\x04\xfb\x01-/\n\x0c\n\x04\x040\x02\x12\x12\
+    \x04\xfc\x01\x044\n\r\n\x05\x040\x02\x12\x06\x12\x04\xfc\x01\x04\x1b\n\r\
+    \n\x05\x040\x02\x12\x01\x12\x04\xfc\x01\x1c.\n\r\n\x05\x040\x02\x12\x03\
+    \x12\x04\xfc\x0113\n\x0c\n\x04\x040\x02\x13\x12\x04\xfd\x01\x04@\n\r\n\
+    \x05\x040\x02\x13\x06\x12\x04\xfd\x01\x04!\n\r\n\x05\x040\x02\x13\x01\
+    \x12\x04\xfd\x01\":\n\r\n\x05\x040\x02\x13\x03\x12\x04\xfd\x01=?\nF\n\
+    \x02\x041\x12\x06\x82\x02\0\x8d\x02\x01\x1a8\x20Message\x20with\x20data\
+    \x20required\x20to\x20execute\x20`call`\x20operation\n\n\x0b\n\x03\x041\
+    \x01\x12\x04\x82\x02\x08\x17\n\x0c\n\x04\x041\x02\0\x12\x04\x83\x02\x02\
+    \x11\n\r\n\x05\x041\x02\0\x05\x12\x04\x83\x02\x02\x07\n\r\n\x05\x041\x02\
+    \0\x01\x12\x04\x83\x02\x08\x0c\n\r\n\x05\x041\x02\0\x03\x12\x04\x83\x02\
+    \x0f\x10\n\x0c\n\x04\x041\x02\x01\x12\x04\x84\x02\x02\x0f\n\r\n\x05\x041\
+    \x02\x01\x05\x12\x04\x84\x02\x02\x07\n\r\n\x05\x041\x02\x01\x01\x12\x04\
+    \x84\x02\x08\n\n\r\n\x05\x041\x02\x01\x03\x12\x04\x84\x02\r\x0e\n\x0c\n\
+    \x04\x041\x02\x02\x12\x04\x85\x02\x02\x11\n\r\n\x05\x041\x02\x02\x05\x12\
+    \x04\x85\x02\x02\x07\n\r\n\x05\x041\x02\x02\x01\x12\x04\x85\x02\x08\x0c\
+    \n\r\n\x05\x041\x02\x02\x03\x12\x04\x85\x02\x0f\x10\n\x0c\n\x04\x041\x02\
+    \x03\x12\x04\x86\x02\x02\x16\n\r\n\x05\x041\x02\x03\x05\x12\x04\x86\x02\
+    \x02\x08\n\r\n\x05\x041\x02\x03\x01\x12\x04\x86\x02\t\x11\n\r\n\x05\x041\
+    \x02\x03\x03\x12\x04\x86\x02\x14\x15\n\x0c\n\x04\x041\x02\x04\x12\x04\
+    \x87\x02\x02\x15\n\r\n\x05\x041\x02\x04\x05\x12\x04\x87\x02\x02\x07\n\r\
+    \n\x05\x041\x02\x04\x01\x12\x04\x87\x02\x08\x10\n\r\n\x05\x041\x02\x04\
+    \x03\x12\x04\x87\x02\x13\x14\n\x0c\n\x04\x041\x02\x05\x12\x04\x88\x02\
+    \x02\x12\n\r\n\x05\x041\x02\x05\x05\x12\x04\x88\x02\x02\x07\n\r\n\x05\
+    \x041\x02\x05\x01\x12\x04\x88\x02\x08\r\n\r\n\x05\x041\x02\x05\x03\x12\
+    \x04\x88\x02\x10\x11\n\x0c\n\x04\x041\x02\x06\x12\x04\x89\x02\x02)\n\r\n\
+    \x05\x041\x02\x06\x04\x12\x04\x89\x02\x02\n\n\r\n\x05\x041\x02\x06\x06\
+    \x12\x04\x89\x02\x0b\x19\n\r\n\x05\x041\x02\x06\x01\x12\x04\x89\x02\x1a$\
+    \n\r\n\x05\x041\x02\x06\x03\x12\x04\x89\x02'(\n\x0c\n\x04\x041\x02\x07\
+    \x12\x04\x8a\x02\x02\x12\n\r\n\x05\x041\x02\x07\x05\x12\x04\x8a\x02\x02\
+    \x06\n\r\n\x05\x041\x02\x07\x01\x12\x04\x8a\x02\x07\r\n\r\n\x05\x041\x02\
+    \x07\x03\x12\x04\x8a\x02\x10\x11\n\x0c\n\x04\x041\x02\x08\x12\x04\x8b\
+    \x02\x02\x13\n\r\n\x05\x041\x02\x08\x05\x12\x04\x8b\x02\x02\x08\n\r\n\
+    \x05\x041\x02\x08\x01\x12\x04\x8b\x02\t\x0e\n\r\n\x05\x041\x02\x08\x03\
+    \x12\x04\x8b\x02\x11\x12\n\x0c\n\x04\x041\x02\t\x12\x04\x8c\x02\x02\x18\
+    \n\r\n\x05\x041\x02\t\x05\x12\x04\x8c\x02\x02\x06\n\r\n\x05\x041\x02\t\
+    \x01\x12\x04\x8c\x02\x07\x12\n\r\n\x05\x041\x02\t\x03\x12\x04\x8c\x02\
+    \x15\x17\nH\n\x02\x042\x12\x06\x90\x02\0\x99\x02\x01\x1a:\x20Message\x20\
     with\x20data\x20required\x20to\x20execute\x20`create`\x20operation\n\n\
-    \x0b\n\x03\x04,\x01\x12\x04\xf2\x01\x08\x19\n\x0c\n\x04\x04,\x02\0\x12\
-    \x04\xf3\x01\x02\x11\n\r\n\x05\x04,\x02\0\x05\x12\x04\xf3\x01\x02\x07\n\
-    \r\n\x05\x04,\x02\0\x01\x12\x04\xf3\x01\x08\x0c\n\r\n\x05\x04,\x02\0\x03\
-    \x12\x04\xf3\x01\x0f\x10\n\x0c\n\x04\x04,\x02\x01\x12\x04\xf4\x01\x02\
-    \x11\n\r\n\x05\x04,\x02\x01\x05\x12\x04\xf4\x01\x02\x07\n\r\n\x05\x04,\
-    \x02\x01\x01\x12\x04\xf4\x01\x08\x0c\n\r\n\x05\x04,\x02\x01\x03\x12\x04\
-    \xf4\x01\x0f\x10\n\x0c\n\x04\x04,\x02\x02\x12\x04\xf5\x01\x02\x16\n\r\n\
-    \x05\x04,\x02\x02\x05\x12\x04\xf5\x01\x02\x08\n\r\n\x05\x04,\x02\x02\x01\
-    \x12\x04\xf5\x01\t\x11\n\r\n\x05\x04,\x02\x02\x03\x12\x04\xf5\x01\x14\
-    \x15\n\x0c\n\x04\x04,\x02\x03\x12\x04\xf6\x01\x02\x15\n\r\n\x05\x04,\x02\
-    \x03\x05\x12\x04\xf6\x01\x02\x07\n\r\n\x05\x04,\x02\x03\x01\x12\x04\xf6\
-    \x01\x08\x10\n\r\n\x05\x04,\x02\x03\x03\x12\x04\xf6\x01\x13\x14\n\x0c\n\
-    \x04\x04,\x02\x04\x12\x04\xf7\x01\x02\x12\n\r\n\x05\x04,\x02\x04\x05\x12\
-    \x04\xf7\x01\x02\x07\n\r\n\x05\x04,\x02\x04\x01\x12\x04\xf7\x01\x08\r\n\
-    \r\n\x05\x04,\x02\x04\x03\x12\x04\xf7\x01\x10\x11\n\x0c\n\x04\x04,\x02\
-    \x05\x12\x04\xf8\x01\x02)\n\r\n\x05\x04,\x02\x05\x04\x12\x04\xf8\x01\x02\
-    \n\n\r\n\x05\x04,\x02\x05\x06\x12\x04\xf8\x01\x0b\x19\n\r\n\x05\x04,\x02\
-    \x05\x01\x12\x04\xf8\x01\x1a$\n\r\n\x05\x04,\x02\x05\x03\x12\x04\xf8\x01\
-    '(\n\x0c\n\x04\x04,\x02\x06\x12\x04\xf9\x01\x02\x12\n\r\n\x05\x04,\x02\
-    \x06\x05\x12\x04\xf9\x01\x02\x06\n\r\n\x05\x04,\x02\x06\x01\x12\x04\xf9\
-    \x01\x07\r\n\r\n\x05\x04,\x02\x06\x03\x12\x04\xf9\x01\x10\x11\n\x0c\n\
-    \x04\x04,\x02\x07\x12\x04\xfa\x01\x02\x13\n\r\n\x05\x04,\x02\x07\x05\x12\
-    \x04\xfa\x01\x02\x08\n\r\n\x05\x04,\x02\x07\x01\x12\x04\xfa\x01\t\x0e\n\
-    \r\n\x05\x04,\x02\x07\x03\x12\x04\xfa\x01\x11\x12\n3\n\x02\x04-\x12\x06\
-    \xfe\x01\0\x81\x02\x01\x1a%\x20Request\x20to\x20execute\x20`call`\x20ope\
-    ration\n\n\x0b\n\x03\x04-\x01\x12\x04\xfe\x01\x08\x18\n\x0c\n\x04\x04-\
-    \x02\0\x12\x04\xff\x01\x02\x1d\n\r\n\x05\x04-\x02\0\x06\x12\x04\xff\x01\
-    \x02\x11\n\r\n\x05\x04-\x02\0\x01\x12\x04\xff\x01\x12\x18\n\r\n\x05\x04-\
-    \x02\0\x03\x12\x04\xff\x01\x1b\x1c\n\x0c\n\x04\x04-\x02\x01\x12\x04\x80\
-    \x02\x02!\n\r\n\x05\x04-\x02\x01\x06\x12\x04\x80\x02\x02\x14\n\r\n\x05\
-    \x04-\x02\x01\x01\x12\x04\x80\x02\x15\x1c\n\r\n\x05\x04-\x02\x01\x03\x12\
-    \x04\x80\x02\x1f\x20\n5\n\x02\x04.\x12\x06\x84\x02\0\x87\x02\x01\x1a'\
-    \x20Request\x20to\x20execute\x20`create`\x20operation\n\n\x0b\n\x03\x04.\
-    \x01\x12\x04\x84\x02\x08\x1a\n\x0c\n\x04\x04.\x02\0\x12\x04\x85\x02\x02\
-    \x1f\n\r\n\x05\x04.\x02\0\x06\x12\x04\x85\x02\x02\x13\n\r\n\x05\x04.\x02\
-    \0\x01\x12\x04\x85\x02\x14\x1a\n\r\n\x05\x04.\x02\0\x03\x12\x04\x85\x02\
-    \x1d\x1e\n\x0c\n\x04\x04.\x02\x01\x12\x04\x86\x02\x02!\n\r\n\x05\x04.\
-    \x02\x01\x06\x12\x04\x86\x02\x02\x14\n\r\n\x05\x04.\x02\x01\x01\x12\x04\
-    \x86\x02\x15\x1c\n\r\n\x05\x04.\x02\x01\x03\x12\x04\x86\x02\x1f\x20\n1\n\
-    \x02\x04/\x12\x06\x8a\x02\0\x8c\x02\x01\x1a#\x20Request\x20to\x20obtain\
-    \x20node\x20public\x20key\n\n\x0b\n\x03\x04/\x01\x12\x04\x8a\x02\x08\x1c\
-    \n\x0c\n\x04\x04/\x02\0\x12\x04\x8b\x02\x02\x19\n\r\n\x05\x04/\x02\0\x05\
-    \x12\x04\x8b\x02\x02\x08\n\r\n\x05\x04/\x02\0\x01\x12\x04\x8b\x02\t\x14\
-    \n\r\n\x05\x04/\x02\0\x03\x12\x04\x8b\x02\x17\x18\n+\n\x02\x040\x12\x04\
-    \x8f\x02\06\x1a\x1f\x20Response\x20with\x20node\x20public\x20key\n\n\x0b\
-    \n\x03\x040\x01\x12\x04\x8f\x02\x08\x1d\n\x0c\n\x04\x040\x02\0\x12\x04\
-    \x8f\x02\x204\n\r\n\x05\x040\x02\0\x05\x12\x04\x8f\x02\x20%\n\r\n\x05\
-    \x040\x02\0\x01\x12\x04\x8f\x02&/\n\r\n\x05\x040\x02\0\x03\x12\x04\x8f\
-    \x0223\n\x0c\n\x02\x041\x12\x06\x91\x02\0\x95\x02\x01\n\x0b\n\x03\x041\
-    \x01\x12\x04\x91\x02\x08\x11\n\x0c\n\x04\x041\x02\0\x12\x04\x92\x02\x02\
-    \x19\n\r\n\x05\x041\x02\0\x05\x12\x04\x92\x02\x02\x08\n\r\n\x05\x041\x02\
-    \0\x01\x12\x04\x92\x02\t\x14\n\r\n\x05\x041\x02\0\x03\x12\x04\x92\x02\
-    \x17\x18\n\x0c\n\x04\x041\x02\x01\x12\x04\x93\x02\x02\x1b\n\r\n\x05\x041\
-    \x02\x01\x05\x12\x04\x93\x02\x02\x08\n\r\n\x05\x041\x02\x01\x01\x12\x04\
-    \x93\x02\t\x16\n\r\n\x05\x041\x02\x01\x03\x12\x04\x93\x02\x19\x1a\n\x0c\
-    \n\x04\x041\x02\x02\x12\x04\x94\x02\x02\x1a\n\r\n\x05\x041\x02\x02\x05\
-    \x12\x04\x94\x02\x02\x07\n\r\n\x05\x041\x02\x02\x01\x12\x04\x94\x02\x08\
-    \x15\n\r\n\x05\x041\x02\x02\x03\x12\x04\x94\x02\x18\x19\n\x0c\n\x02\x042\
-    \x12\x06\x96\x02\0\x98\x02\x01\n\x0b\n\x03\x042\x01\x12\x04\x96\x02\x08\
-    \x1a\n\x0c\n\x04\x042\x02\0\x12\x04\x97\x02\x02\x20\n\r\n\x05\x042\x02\0\
-    \x04\x12\x04\x97\x02\x02\n\n\r\n\x05\x042\x02\0\x06\x12\x04\x97\x02\x0b\
-    \x14\n\r\n\x05\x042\x02\0\x01\x12\x04\x97\x02\x15\x1b\n\r\n\x05\x042\x02\
-    \0\x03\x12\x04\x97\x02\x1e\x1f\n\x0c\n\x02\x043\x12\x06\x9a\x02\0\xa0\
-    \x02\x01\n\x0b\n\x03\x043\x01\x12\x04\x9a\x02\x08\x12\n\x0e\n\x04\x043\
-    \x08\0\x12\x06\x9b\x02\x02\x9f\x02\x03\n\r\n\x05\x043\x08\0\x01\x12\x04\
-    \x9b\x02\x08\x0b\n\x0c\n\x04\x043\x02\0\x12\x04\x9c\x02\x04%\n\r\n\x05\
-    \x043\x02\0\x06\x12\x04\x9c\x02\x04\x14\n\r\n\x05\x043\x02\0\x01\x12\x04\
-    \x9c\x02\x15\x20\n\r\n\x05\x043\x02\0\x03\x12\x04\x9c\x02#$\n\x0c\n\x04\
-    \x043\x02\x01\x12\x04\x9d\x02\x04)\n\r\n\x05\x043\x02\x01\x06\x12\x04\
-    \x9d\x02\x04\x16\n\r\n\x05\x043\x02\x01\x01\x12\x04\x9d\x02\x17$\n\r\n\
-    \x05\x043\x02\x01\x03\x12\x04\x9d\x02'(\n\x0c\n\x04\x043\x02\x02\x12\x04\
-    \x9e\x02\x04.\n\r\n\x05\x043\x02\x02\x06\x12\x04\x9e\x02\x04\x18\n\r\n\
-    \x05\x043\x02\x02\x01\x12\x04\x9e\x02\x19)\n\r\n\x05\x043\x02\x02\x03\
-    \x12\x04\x9e\x02,-b\x06proto3\
+    \x0b\n\x03\x042\x01\x12\x04\x90\x02\x08\x19\n\x0c\n\x04\x042\x02\0\x12\
+    \x04\x91\x02\x02\x11\n\r\n\x05\x042\x02\0\x05\x12\x04\x91\x02\x02\x07\n\
+    \r\n\x05\x042\x02\0\x01\x12\x04\x91\x02\x08\x0c\n\r\n\x05\x042\x02\0\x03\
+    \x12\x04\x91\x02\x0f\x10\n\x0c\n\x04\x042\x02\x01\x12\x04\x92\x02\x02\
+    \x11\n\r\n\x05\x042\x02\x01\x05\x12\x04\x92\x02\x02\x07\n\r\n\x05\x042\
+    \x02\x01\x01\x12\x04\x92\x02\x08\x0c\n\r\n\x05\x042\x02\x01\x03\x12\x04\
+    \x92\x02\x0f\x10\n\x0c\n\x04\x042\x02\x02\x12\x04\x93\x02\x02\x16\n\r\n\
+    \x05\x042\x02\x02\x05\x12\x04\x93\x02\x02\x08\n\r\n\x05\x042\x02\x02\x01\
+    \x12\x04\x93\x02\t\x11\n\r\n\x05\x042\x02\x02\x03\x12\x04\x93\x02\x14\
+    \x15\n\x0c\n\x04\x042\x02\x03\x12\x04\x94\x02\x02\x15\n\r\n\x05\x042\x02\
+    \x03\x05\x12\x04\x94\x02\x02\x07\n\r\n\x05\x042\x02\x03\x01\x12\x04\x94\
+    \x02\x08\x10\n\r\n\x05\x042\x02\x03\x03\x12\x04\x94\x02\x13\x14\n\x0c\n\
+    \x04\x042\x02\x04\x12\x04\x95\x02\x02\x12\n\r\n\x05\x042\x02\x04\x05\x12\
+    \x04\x95\x02\x02\x07\n\r\n\x05\x042\x02\x04\x01\x12\x04\x95\x02\x08\r\n\
+    \r\n\x05\x042\x02\x04\x03\x12\x04\x95\x02\x10\x11\n\x0c\n\x04\x042\x02\
+    \x05\x12\x04\x96\x02\x02)\n\r\n\x05\x042\x02\x05\x04\x12\x04\x96\x02\x02\
+    \n\n\r\n\x05\x042\x02\x05\x06\x12\x04\x96\x02\x0b\x19\n\r\n\x05\x042\x02\
+    \x05\x01\x12\x04\x96\x02\x1a$\n\r\n\x05\x042\x02\x05\x03\x12\x04\x96\x02\
+    '(\n\x0c\n\x04\x042\x02\x06\x12\x04\x97\x02\x02\x12\n\r\n\x05\x042\x02\
+    \x06\x05\x12\x04\x97\x02\x02\x06\n\r\n\x05\x042\x02\x06\x01\x12\x04\x97\
+    \x02\x07\r\n\r\n\x05\x042\x02\x06\x03\x12\x04\x97\x02\x10\x11\n\x0c\n\
+    \x04\x042\x02\x07\x12\x04\x98\x02\x02\x13\n\r\n\x05\x042\x02\x07\x05\x12\
+    \x04\x98\x02\x02\x08\n\r\n\x05\x042\x02\x07\x01\x12\x04\x98\x02\t\x0e\n\
+    \r\n\x05\x042\x02\x07\x03\x12\x04\x98\x02\x11\x12\n3\n\x02\x043\x12\x06\
+    \x9c\x02\0\x9f\x02\x01\x1a%\x20Request\x20to\x20execute\x20`call`\x20ope\
+    ration\n\n\x0b\n\x03\x043\x01\x12\x04\x9c\x02\x08\x18\n\x0c\n\x04\x043\
+    \x02\0\x12\x04\x9d\x02\x02\x1d\n\r\n\x05\x043\x02\0\x06\x12\x04\x9d\x02\
+    \x02\x11\n\r\n\x05\x043\x02\0\x01\x12\x04\x9d\x02\x12\x18\n\r\n\x05\x043\
+    \x02\0\x03\x12\x04\x9d\x02\x1b\x1c\n\x0c\n\x04\x043\x02\x01\x12\x04\x9e\
+    \x02\x02!\n\r\n\x05\x043\x02\x01\x06\x12\x04\x9e\x02\x02\x14\n\r\n\x05\
+    \x043\x02\x01\x01\x12\x04\x9e\x02\x15\x1c\n\r\n\x05\x043\x02\x01\x03\x12\
+    \x04\x9e\x02\x1f\x20\n5\n\x02\x044\x12\x06\xa2\x02\0\xa5\x02\x01\x1a'\
+    \x20Request\x20to\x20execute\x20`create`\x20operation\n\n\x0b\n\x03\x044\
+    \x01\x12\x04\xa2\x02\x08\x1a\n\x0c\n\x04\x044\x02\0\x12\x04\xa3\x02\x02\
+    \x1f\n\r\n\x05\x044\x02\0\x06\x12\x04\xa3\x02\x02\x13\n\r\n\x05\x044\x02\
+    \0\x01\x12\x04\xa3\x02\x14\x1a\n\r\n\x05\x044\x02\0\x03\x12\x04\xa3\x02\
+    \x1d\x1e\n\x0c\n\x04\x044\x02\x01\x12\x04\xa4\x02\x02!\n\r\n\x05\x044\
+    \x02\x01\x06\x12\x04\xa4\x02\x02\x14\n\r\n\x05\x044\x02\x01\x01\x12\x04\
+    \xa4\x02\x15\x1c\n\r\n\x05\x044\x02\x01\x03\x12\x04\xa4\x02\x1f\x20\n1\n\
+    \x02\x045\x12\x06\xa8\x02\0\xaa\x02\x01\x1a#\x20Request\x20to\x20obtain\
+    \x20node\x20public\x20key\n\n\x0b\n\x03\x045\x01\x12\x04\xa8\x02\x08\x1c\
+    \n\x0c\n\x04\x045\x02\0\x12\x04\xa9\x02\x02\x19\n\r\n\x05\x045\x02\0\x05\
+    \x12\x04\xa9\x02\x02\x08\n\r\n\x05\x045\x02\0\x01\x12\x04\xa9\x02\t\x14\
+    \n\r\n\x05\x045\x02\0\x03\x12\x04\xa9\x02\x17\x18\n+\n\x02\x046\x12\x04\
+    \xad\x02\06\x1a\x1f\x20Response\x20with\x20node\x20public\x20key\n\n\x0b\
+    \n\x03\x046\x01\x12\x04\xad\x02\x08\x1d\n\x0c\n\x04\x046\x02\0\x12\x04\
+    \xad\x02\x204\n\r\n\x05\x046\x02\0\x05\x12\x04\xad\x02\x20%\n\r\n\x05\
+    \x046\x02\0\x01\x12\x04\xad\x02&/\n\r\n\x05\x046\x02\0\x03\x12\x04\xad\
+    \x0223\n\x0c\n\x02\x047\x12\x06\xaf\x02\0\xb3\x02\x01\n\x0b\n\x03\x047\
+    \x01\x12\x04\xaf\x02\x08\x11\n\x0c\n\x04\x047\x02\0\x12\x04\xb0\x02\x02\
+    \x19\n\r\n\x05\x047\x02\0\x05\x12\x04\xb0\x02\x02\x08\n\r\n\x05\x047\x02\
+    \0\x01\x12\x04\xb0\x02\t\x14\n\r\n\x05\x047\x02\0\x03\x12\x04\xb0\x02\
+    \x17\x18\n\x0c\n\x04\x047\x02\x01\x12\x04\xb1\x02\x02\x1b\n\r\n\x05\x047\
+    \x02\x01\x05\x12\x04\xb1\x02\x02\x08\n\r\n\x05\x047\x02\x01\x01\x12\x04\
+    \xb1\x02\t\x16\n\r\n\x05\x047\x02\x01\x03\x12\x04\xb1\x02\x19\x1a\n\x0c\
+    \n\x04\x047\x02\x02\x12\x04\xb2\x02\x02\x1a\n\r\n\x05\x047\x02\x02\x05\
+    \x12\x04\xb2\x02\x02\x07\n\r\n\x05\x047\x02\x02\x01\x12\x04\xb2\x02\x08\
+    \x15\n\r\n\x05\x047\x02\x02\x03\x12\x04\xb2\x02\x18\x19\n\x0c\n\x02\x048\
+    \x12\x06\xb4\x02\0\xb6\x02\x01\n\x0b\n\x03\x048\x01\x12\x04\xb4\x02\x08\
+    \x1a\n\x0c\n\x04\x048\x02\0\x12\x04\xb5\x02\x02\x20\n\r\n\x05\x048\x02\0\
+    \x04\x12\x04\xb5\x02\x02\n\n\r\n\x05\x048\x02\0\x06\x12\x04\xb5\x02\x0b\
+    \x14\n\r\n\x05\x048\x02\0\x01\x12\x04\xb5\x02\x15\x1b\n\r\n\x05\x048\x02\
+    \0\x03\x12\x04\xb5\x02\x1e\x1f\n\x0c\n\x02\x049\x12\x06\xb8\x02\0\xbe\
+    \x02\x01\n\x0b\n\x03\x049\x01\x12\x04\xb8\x02\x08\x12\n\x0e\n\x04\x049\
+    \x08\0\x12\x06\xb9\x02\x02\xbd\x02\x03\n\r\n\x05\x049\x08\0\x01\x12\x04\
+    \xb9\x02\x08\x0b\n\x0c\n\x04\x049\x02\0\x12\x04\xba\x02\x04%\n\r\n\x05\
+    \x049\x02\0\x06\x12\x04\xba\x02\x04\x14\n\r\n\x05\x049\x02\0\x01\x12\x04\
+    \xba\x02\x15\x20\n\r\n\x05\x049\x02\0\x03\x12\x04\xba\x02#$\n\x0c\n\x04\
+    \x049\x02\x01\x12\x04\xbb\x02\x04)\n\r\n\x05\x049\x02\x01\x06\x12\x04\
+    \xbb\x02\x04\x16\n\r\n\x05\x049\x02\x01\x01\x12\x04\xbb\x02\x17$\n\r\n\
+    \x05\x049\x02\x01\x03\x12\x04\xbb\x02'(\n\x0c\n\x04\x049\x02\x02\x12\x04\
+    \xbc\x02\x04.\n\r\n\x05\x049\x02\x02\x06\x12\x04\xbc\x02\x04\x18\n\r\n\
+    \x05\x049\x02\x02\x01\x12\x04\xbc\x02\x19)\n\r\n\x05\x049\x02\x02\x03\
+    \x12\x04\xbc\x02,-b\x06proto3\
 ";
 
 static mut file_descriptor_proto_lazy: ::protobuf::lazy::Lazy<::protobuf::descriptor::FileDescriptorProto> = ::protobuf::lazy::Lazy {

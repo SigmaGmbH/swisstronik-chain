@@ -103,7 +103,8 @@ describe('ComplianceBridge', () => {
         const tx = await sendShieldedTransaction(
             signer,
             contract.address,
-            contract.interface.encodeFunctionData('markUserAsVerified', [signer.address])
+            contract.interface.encodeFunctionData('markUserAsVerified', [signer.address]),
+            0, true
         )
         const res = await tx.wait()
         const parsedLog = contract.interface.parseLog(res.logs[0])
@@ -120,6 +121,47 @@ describe('ComplianceBridge', () => {
         expect(isVerifiedAfterTx[0]).to.be.true
     })
 
+    it('Should be able to add verification details V2', async () => {
+        const [signer] = await ethers.getSigners()
+        const userPublicKey = ethers.constants.HashZero // [0; 32] is valid BJJ public key
+
+        const rootBeforeResp = await sendShieldedQuery(
+            signer.provider,
+            contract.address,
+            contract.interface.encodeFunctionData('getIssuanceRoot')
+        )
+        const rootBefore = contract.interface.decodeFunctionResult('getIssuanceRoot', rootBeforeResp)
+
+        const tx = await sendShieldedTransaction(
+            signer,
+            contract.address,
+            contract.interface.encodeFunctionData('markUserAsVerifiedV2', [signer.address, userPublicKey]),
+            0, true
+        )
+        const res = await tx.wait()
+        const parsedLog = contract.interface.parseLog(res.logs[0])
+        expect(parsedLog.args.success).to.be.true
+        expect(parsedLog.args.data.length).to.be.greaterThan(0)
+
+        // Confirm that verified status was changed after tx confirmation
+        const isVerifiedRespAfterTx = await sendShieldedQuery(
+            signer.provider,
+            contract.address,
+            contract.interface.encodeFunctionData('isUserVerified', [signer.address])
+        )
+        const isVerifiedAfterTx = contract.interface.decodeFunctionResult('isUserVerified', isVerifiedRespAfterTx)
+        expect(isVerifiedAfterTx[0]).to.be.true
+
+        // Confirm that issuance SMT was updated
+        const rootAfterResp = await sendShieldedQuery(
+            signer.provider,
+            contract.address,
+            contract.interface.encodeFunctionData('getIssuanceRoot')
+        )
+        const rootAfter = contract.interface.decodeFunctionResult('getIssuanceRoot', rootAfterResp)
+        expect(rootAfter).to.be.not.equal(rootBefore)
+    })
+
     describe('With verified user', async () => {
         let verified
         beforeEach(async () => {
@@ -129,7 +171,8 @@ describe('ComplianceBridge', () => {
             const tx = await sendShieldedTransaction(
                 signer,
                 contract.address,
-                contract.interface.encodeFunctionData('markUserAsVerified', [waitingForVerified.address])
+                contract.interface.encodeFunctionData('markUserAsVerified', [waitingForVerified.address]),
+                0, true
             )
             await tx.wait()
 

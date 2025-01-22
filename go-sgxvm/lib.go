@@ -52,6 +52,12 @@ type QueryInsertAccountNonce = types.QueryInsertAccountNonce
 type QueryInsertAccountNonceResponse = types.QueryInsertAccountNonceResponse
 type QueryInsertAccountBalance = types.QueryInsertAccountBalance
 type QueryInsertAccountBalanceResponse = types.QueryInsertAccountBalanceResponse
+type QueryIssuanceTreeRoot = types.QueryIssuanceTreeRoot
+type QueryIssuanceTreeRootResponse = types.QueryIssuanceTreeRootResponse
+type QueryRevocationTreeRoot = types.QueryRevocationTreeRoot
+type QueryRevocationTreeRootResponse = types.QueryRevocationTreeRootResponse
+type QueryAddVerificationDetailsV2 = types.QueryAddVerificationDetailsV2
+type QueryAddVerificationDetailsV2Response = types.QueryAddVerificationDetailsV2Response
 
 // Storage requests
 type CosmosRequest_GetAccount = types.CosmosRequest_GetAccount
@@ -69,6 +75,9 @@ type CosmosRequest_GetAccountCodeSize = types.CosmosRequest_CodeSize
 type CosmosRequest_GetAccountCodeHash = types.CosmosRequest_CodeHash
 type CosmosRequest_InsertAccountBalance = types.CosmosRequest_InsertAccountBalance
 type CosmosRequest_InsertAccountNonce = types.CosmosRequest_InsertAccountNonce
+type CosmosRequest_IssuanceTreeRoot = types.CosmosRequest_IssuanceTreeRoot
+type CosmosRequest_RevocationTreeRoot = types.CosmosRequest_RevocationTreeRoot
+type CosmosRequest_AddVerificationDetailsV2 = types.CosmosRequest_AddVerificationDetailsV2
 
 // Backend requests
 type CosmosRequest_BlockHash = types.CosmosRequest_BlockHash

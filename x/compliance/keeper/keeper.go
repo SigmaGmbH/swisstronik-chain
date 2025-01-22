@@ -1,7 +1,10 @@
 package keeper
 
 import (
+	"bytes"
 	"fmt"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"slices"
 
 	"cosmossdk.io/errors"
@@ -178,7 +181,50 @@ func (k Keeper) SetAddressVerificationStatus(ctx sdk.Context, address sdk.AccAdd
 	return nil
 }
 
+// AddVerificationDetailsV2 writes details of passed verification by provided address. It writes credential to ZK-SDI
+// even if user has no attached public key
+func (k Keeper) AddVerificationDetailsV2(ctx sdk.Context, userAddress sdk.AccAddress, verificationType types.VerificationType, details *types.VerificationDetails, userPublicKeyCompressed []byte) ([]byte, error) {
+	// Check if issuer is verified and not banned
+	issuerAddress, err := sdk.AccAddressFromBech32(details.IssuerAddress)
+	if err != nil {
+		return nil, err
+	}
+
+	verificationDetailsID, err := k.addVerificationDetailsInternal(ctx, userAddress, issuerAddress, verificationType, details)
+	if err != nil {
+		return nil, err
+	}
+
+	xPublicKey, err := types.ExtractXCoordinate(userPublicKeyCompressed, false)
+	if err != nil {
+		return nil, errors.Wrap(types.ErrBadRequest, err.Error())
+	}
+
+	if err = k.LinkVerificationIdToPubKey(ctx, xPublicKey.Bytes(), verificationDetailsID); err != nil {
+		return nil, errors.Wrap(types.ErrBadRequest, err.Error())
+	}
+	credentialValue := &types.ZKCredential{
+		Type:                verificationType,
+		IssuerAddress:       issuerAddress.Bytes(),
+		HolderPublicKey:     xPublicKey.Bytes(),
+		ExpirationTimestamp: details.ExpirationTimestamp,
+		IssuanceTimestamp:   details.IssuanceTimestamp,
+	}
+	credentialHash, err := credentialValue.Hash()
+	if err != nil {
+		return nil, errors.Wrap(types.ErrBadRequest, err.Error())
+	}
+
+	err = k.AddCredentialHashToIssued(ctx, credentialHash)
+	if err != nil {
+		return nil, errors.Wrap(types.ErrBadRequest, err.Error())
+	}
+
+	return verificationDetailsID, nil
+}
+
 // AddVerificationDetails writes details of passed verification by provided address.
+// It writes to ZK-SDI only if user has attached public key
 func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.AccAddress, verificationType types.VerificationType, details *types.VerificationDetails) ([]byte, error) {
 	// Check if issuer is verified and not banned
 	issuerAddress, err := sdk.AccAddressFromBech32(details.IssuerAddress)
@@ -186,6 +232,39 @@ func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.AccAddre
 		return nil, err
 	}
 
+	verificationDetailsID, err := k.addVerificationDetailsInternal(ctx, userAddress, issuerAddress, verificationType, details)
+	if err != nil {
+		return nil, err
+	}
+
+	// If user has attached public key, add to ZK-SDI
+	userPublicKey := k.GetHolderPublicKey(ctx, userAddress)
+	if userPublicKey != nil {
+		if err = k.LinkVerificationIdToPubKey(ctx, userPublicKey, verificationDetailsID); err != nil {
+			return nil, err
+		}
+
+		credentialValue := &types.ZKCredential{
+			Type:                verificationType,
+			IssuerAddress:       issuerAddress.Bytes(),
+			HolderPublicKey:     userPublicKey,
+			ExpirationTimestamp: details.ExpirationTimestamp,
+			IssuanceTimestamp:   details.IssuanceTimestamp,
+		}
+		credentialHash, err := credentialValue.Hash()
+		if err != nil {
+			return nil, errors.Wrap(types.ErrBadRequest, err.Error())
+		}
+		err = k.AddCredentialHashToIssued(ctx, credentialHash)
+		if err != nil {
+			return nil, errors.Wrap(types.ErrBadRequest, err.Error())
+		}
+	}
+
+	return verificationDetailsID, nil
+}
+
+func (k Keeper) addVerificationDetailsInternal(ctx sdk.Context, userAddress sdk.AccAddress, issuerAddress sdk.AccAddress, verificationType types.VerificationType, details *types.VerificationDetails) ([]byte, error) {
 	isAddressVerified, err := k.IsAddressVerified(ctx, issuerAddress)
 	if err != nil {
 		return nil, err
@@ -216,7 +295,11 @@ func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.AccAddre
 	verificationDetailsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationDetails)
 
 	if verificationDetailsStore.Has(verificationDetailsID) {
-		return nil, errors.Wrap(types.ErrInvalidParam, "provided verification details already in storage")
+		return nil, errors.Wrapf(
+			types.ErrInvalidParam,
+			"provided verification details already in storage. Verification ID: (%s)",
+			hexutil.Encode(verificationDetailsID),
+		)
 	}
 
 	// If there is no such verification details associated with provided address, write them to the table
@@ -242,11 +325,21 @@ func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.AccAddre
 		return nil, err
 	}
 
+	if err = k.LinkVerificationToHolder(ctx, userAddress, verificationDetailsID); err != nil {
+		return nil, err
+	}
+
 	return verificationDetailsID, nil
 }
 
-// SetVerificationDetails writes verification details
-func (k Keeper) SetVerificationDetails(ctx sdk.Context, verificationDetailsId []byte, details *types.VerificationDetails) error {
+// SetVerificationDetails writes verification details. Since this function writes directly to the storage,
+// it should be used only in genesis.go or in tests
+func (k Keeper) SetVerificationDetails(
+	ctx sdk.Context,
+	userAddress sdk.AccAddress,
+	verificationDetailsId []byte,
+	details *types.VerificationDetails,
+) error {
 	verificationDetailsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationDetails)
 	if verificationDetailsStore.Has(verificationDetailsId) {
 		return errors.Wrap(types.ErrInvalidParam, "provided verification details already in storage")
@@ -259,16 +352,115 @@ func (k Keeper) SetVerificationDetails(ctx sdk.Context, verificationDetailsId []
 
 	// If there is no such verification details associated with provided address, write them to the table
 	verificationDetailsStore.Set(verificationDetailsId, detailsBytes)
+
+	issuerAddress, err := sdk.AccAddressFromBech32(details.IssuerAddress)
+	if err != nil {
+		return err
+	}
+
+	if err = k.LinkVerificationToHolder(ctx, userAddress, verificationDetailsId); err != nil {
+		return err
+	}
+
+	// If user has linked public key or self-attached public key, add to ZK-SDI
+	var userPublicKey []byte
+	userPublicKey = k.GetPubKeyByVerificationId(ctx, verificationDetailsId)
+	if userPublicKey == nil {
+		userPublicKey = k.GetHolderPublicKey(ctx, userAddress)
+	}
+
+	// If there is no public key, skip adding to issuance tree
+	if userPublicKey != nil {
+		if err = k.LinkVerificationIdToPubKey(ctx, userPublicKey, verificationDetailsId); err != nil {
+			return err
+		}
+
+		credentialValue := &types.ZKCredential{
+			Type:                details.Type,
+			IssuerAddress:       issuerAddress.Bytes(),
+			HolderPublicKey:     userPublicKey,
+			ExpirationTimestamp: details.ExpirationTimestamp,
+			IssuanceTimestamp:   details.IssuanceTimestamp,
+		}
+		credentialHash, err := credentialValue.Hash()
+		if err != nil {
+			return err
+		}
+		err = k.AddCredentialHashToIssued(ctx, credentialHash)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
-// RemoveVerificationDetails removes verification details for provided ID
-func (k Keeper) RemoveVerificationDetails(ctx sdk.Context, verificationDetailsId []byte) {
-	if verificationDetailsId == nil {
-		return
-	}
+func (k Keeper) MarkVerificationDetailsAsRevoked(
+	ctx sdk.Context,
+	verificationDetailsId []byte,
+) error {
 	verificationDetailsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationDetails)
-	verificationDetailsStore.Delete(verificationDetailsId)
+	if !verificationDetailsStore.Has(verificationDetailsId) {
+		return errors.Wrap(types.ErrInvalidParam, "there is no such verification with provided ID")
+	}
+
+	prevVerificationDetailsBytes := verificationDetailsStore.Get(verificationDetailsId)
+	if prevVerificationDetailsBytes == nil {
+		return errors.Wrap(types.ErrInvalidParam, "verification with provided ID is empty")
+	}
+
+	prevVerificationDetails := &types.VerificationDetails{}
+	err := proto.Unmarshal(prevVerificationDetailsBytes, prevVerificationDetails)
+	if err != nil {
+		return err
+	}
+
+	prevVerificationDetails.IsRevoked = true
+
+	detailsBytes, err := prevVerificationDetails.Marshal()
+	if err != nil {
+		return err
+	}
+
+	// If there is no such verification details associated with provided address, write them to the table
+	verificationDetailsStore.Set(verificationDetailsId, detailsBytes)
+
+	issuerAddress, err := sdk.AccAddressFromBech32(prevVerificationDetails.IssuerAddress)
+	if err != nil {
+		return err
+	}
+
+	userAddress := k.getHolderByVerificationId(ctx, verificationDetailsId)
+	if userAddress.Empty() {
+		return errors.Wrap(
+			types.ErrBadRequest,
+			"cannot find associated user address. Please create a ticket if you see this error",
+		)
+	}
+
+	var attachedPublicKey []byte
+	attachedPublicKey = k.GetPubKeyByVerificationId(ctx, verificationDetailsId)
+	if attachedPublicKey == nil {
+		attachedPublicKey = k.GetHolderPublicKey(ctx, userAddress)
+	}
+	if attachedPublicKey != nil {
+		// Update revocation tree with provided credential
+		credential := &types.ZKCredential{
+			Type:                prevVerificationDetails.Type,
+			IssuerAddress:       issuerAddress.Bytes(),
+			HolderPublicKey:     attachedPublicKey,
+			ExpirationTimestamp: prevVerificationDetails.ExpirationTimestamp,
+			IssuanceTimestamp:   prevVerificationDetails.IssuanceTimestamp,
+		}
+		credentialHash, err := credential.Hash()
+		if err != nil {
+			return err
+		}
+
+		return k.MarkCredentialHashAsRevoked(ctx, common.BigToHash(credentialHash))
+	}
+
+	return nil
 }
 
 // GetVerificationDetails returns verification details for provided ID
@@ -322,6 +514,43 @@ func (k Keeper) GetVerificationDetailsByIssuer(ctx sdk.Context, userAddress sdk.
 		filteredVerificationDetails = append(filteredVerificationDetails, verificationDetails)
 	}
 	return filteredVerifications, filteredVerificationDetails, nil
+}
+
+func (k Keeper) GetCredentialHashByVerificationId(ctx sdk.Context, verificationId []byte) ([]byte, error) {
+	details, err := k.GetVerificationDetails(ctx, verificationId)
+	if err != nil {
+		return nil, err
+	}
+
+	issuerAddress, err := sdk.AccAddressFromBech32(details.IssuerAddress)
+	if err != nil {
+		return nil, err
+	}
+
+	holder := k.getHolderByVerificationId(ctx, verificationId)
+	var userPublicKey []byte
+	userPublicKey = k.GetPubKeyByVerificationId(ctx, verificationId)
+	if userPublicKey == nil {
+		userPublicKey = k.GetHolderPublicKey(ctx, holder)
+	}
+
+	if userPublicKey == nil {
+		return nil, errors.Wrap(types.ErrInvalidParam, "verification with provided ID has no public key to attach")
+	}
+
+	credentialValue := &types.ZKCredential{
+		Type:                details.Type,
+		IssuerAddress:       issuerAddress.Bytes(),
+		HolderPublicKey:     userPublicKey,
+		ExpirationTimestamp: details.ExpirationTimestamp,
+		IssuanceTimestamp:   details.IssuanceTimestamp,
+	}
+	credentialHash, err := credentialValue.Hash()
+	if err != nil {
+		return nil, err
+	}
+
+	return credentialHash.Bytes(), nil
 }
 
 // HasVerificationOfType checks if user has verifications of specific type (for example, passed KYC) from provided issuers.
@@ -525,6 +754,45 @@ func (k Keeper) IterateIssuerDetails(ctx sdk.Context, callback func(address sdk.
 	}
 }
 
+func (k Keeper) IterateHolderPublicKeys(ctx sdk.Context, callback func(address sdk.AccAddress) (continue_ bool)) {
+	latestVersionIterator := sdk.KVStorePrefixIterator(ctx.KVStore(k.storeKey), types.KeyPrefixHolderPublicKeys)
+	defer closeIteratorOrPanic(latestVersionIterator)
+
+	for ; latestVersionIterator.Valid(); latestVersionIterator.Next() {
+		key := latestVersionIterator.Key()
+		address := types.AccAddressFromKey(key)
+		if !callback(address) {
+			break
+		}
+	}
+}
+
+func (k Keeper) IterateLinksToHolder(ctx sdk.Context, callback func(verificationId []byte) (continue_ bool)) {
+	latestVersionIterator := sdk.KVStorePrefixIterator(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationToHolder)
+	defer closeIteratorOrPanic(latestVersionIterator)
+
+	for ; latestVersionIterator.Valid(); latestVersionIterator.Next() {
+		key := latestVersionIterator.Key()
+		id := types.VerificationIdFromKey(key)
+		if !callback(id) {
+			break
+		}
+	}
+}
+
+func (k Keeper) IterateLinksToPublicKey(ctx sdk.Context, callback func(verificationId []byte) (continue_ bool)) {
+	latestVersionIterator := sdk.KVStorePrefixIterator(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationToPubKey)
+	defer closeIteratorOrPanic(latestVersionIterator)
+
+	for ; latestVersionIterator.Valid(); latestVersionIterator.Next() {
+		key := latestVersionIterator.Key()
+		id := types.VerificationIdFromKey(key)
+		if !callback(id) {
+			break
+		}
+	}
+}
+
 func (k Keeper) ExportOperators(ctx sdk.Context) ([]*types.OperatorDetails, error) {
 	var (
 		allDetails []*types.OperatorDetails
@@ -614,6 +882,125 @@ func (k Keeper) ExportIssuerDetails(ctx sdk.Context) ([]*types.GenesisIssuerDeta
 	}
 
 	return issuerDetails, nil
+}
+
+func (k Keeper) ExportHolderPublicKeys(ctx sdk.Context) ([]*types.GenesisHolderPublicKeys, error) {
+	var (
+		holderPublicKeys []*types.GenesisHolderPublicKeys
+	)
+
+	k.IterateHolderPublicKeys(ctx, func(holder sdk.AccAddress) bool {
+		publicKey := k.GetHolderPublicKey(ctx, holder)
+		if publicKey != nil {
+			holderPublicKeys = append(holderPublicKeys, &types.GenesisHolderPublicKeys{
+				Address:   holder.String(),
+				PublicKey: publicKey,
+			})
+		}
+		return true
+	})
+
+	return holderPublicKeys, nil
+}
+
+func (k Keeper) ExportLinksVerificationIdToPublicKey(ctx sdk.Context) ([]*types.GenesisLinkVerificationIdToPublicKey, error) {
+	var (
+		links []*types.GenesisLinkVerificationIdToPublicKey
+	)
+
+	k.IterateLinksToPublicKey(ctx, func(verificationId []byte) bool {
+		publicKey := k.GetPubKeyByVerificationId(ctx, verificationId)
+		if publicKey != nil {
+			links = append(links, &types.GenesisLinkVerificationIdToPublicKey{
+				Id:        verificationId,
+				PublicKey: publicKey,
+			})
+		}
+		return true
+	})
+
+	return links, nil
+}
+
+// GetHolderPublicKey returns the compressed holder public key
+func (k Keeper) GetHolderPublicKey(ctx sdk.Context, user sdk.AccAddress) []byte {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixHolderPublicKeys)
+
+	publicKeyBytes := store.Get(user.Bytes())
+	if publicKeyBytes == nil {
+		return nil
+	}
+
+	return publicKeyBytes
+}
+
+// SetHolderPublicKey returns the compressed holder public key
+func (k Keeper) SetHolderPublicKey(ctx sdk.Context, user sdk.AccAddress, publicKey []byte) error {
+	// Check if there is no public key
+	currentPublicKeyBytes := k.GetHolderPublicKey(ctx, user)
+	if currentPublicKeyBytes != nil {
+		return errors.Wrap(types.ErrInvalidParam, "public key already set")
+	}
+
+	xCoordPublicKey, err := types.ExtractXCoordinate(publicKey, false)
+	if err != nil {
+		return errors.Wrapf(types.ErrInvalidParam, "cannot parse provided public key: (%s)", err)
+	}
+
+	k.SetHolderPublicKeyBytes(ctx, user, xCoordPublicKey.Bytes())
+
+	return nil
+}
+
+func (k Keeper) SetHolderPublicKeyBytes(ctx sdk.Context, user sdk.AccAddress, xCoordinateBytes []byte) {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixHolderPublicKeys)
+	store.Set(user.Bytes(), xCoordinateBytes)
+}
+
+func (k Keeper) LinkVerificationToHolder(ctx sdk.Context, userAddress sdk.AccAddress, verificationId []byte) error {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationToHolder)
+
+	// Check if there is already linked user
+	linkedUserBytes := store.Get(verificationId)
+	if linkedUserBytes != nil {
+		if bytes.Equal(linkedUserBytes, userAddress.Bytes()) {
+			// This user is already linked
+			return nil
+		}
+
+		return errors.Wrap(types.ErrBadRequest, "provided verification id is already linked to another user")
+	}
+
+	store.Set(verificationId, userAddress.Bytes())
+	return nil
+}
+
+func (k Keeper) getHolderByVerificationId(ctx sdk.Context, verificationId []byte) sdk.AccAddress {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationToHolder)
+	return store.Get(verificationId)
+}
+
+func (k Keeper) LinkVerificationIdToPubKey(ctx sdk.Context, publicKey []byte, verificationId []byte) error {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationToPubKey)
+
+	// Check if there is already linked user
+	currentPublicKey := store.Get(verificationId)
+	if currentPublicKey != nil {
+		if bytes.Equal(currentPublicKey, publicKey) {
+			// This user is already linked
+			return nil
+		}
+
+		return errors.Wrap(types.ErrBadRequest, "provided verification id is already linked to another public key")
+	}
+
+	store.Set(verificationId, publicKey)
+	return nil
+}
+
+func (k Keeper) GetPubKeyByVerificationId(ctx sdk.Context, verificationId []byte) []byte {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationToPubKey)
+	return store.Get(verificationId)
 }
 
 func closeIteratorOrPanic(iterator sdk.Iterator) {
