@@ -30,6 +30,7 @@ func GetQueryCmd() *cobra.Command {
 		CmdGetIssuersDetails(),
 		CmdGetVerificationDetails(),
 		CmdGetVerificationsDetails(),
+		CmdGetHolderByVerificationId(),
 	)
 
 	return cmd
@@ -240,6 +241,33 @@ func CmdGetVerificationsDetails() *cobra.Command {
 			}
 
 			resp, err := queryClient.VerificationsDetails(context.Background(), req)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(resp)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+	flags.AddPaginationFlagsToCmd(cmd, "verification details")
+
+	return cmd
+}
+
+func CmdGetHolderByVerificationId() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "get-verification-holder [hex-verification-id]",
+		Short: "Returns holder by verification id",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx := client.GetClientContextFromCmd(cmd)
+			queryClient := types.NewQueryClient(clientCtx)
+
+			req := &types.QueryHolderByVerificationIdRequest{
+				VerificationId: args[0],
+			}
+
+			resp, err := queryClient.VerificationHolder(context.Background(), req)
 			if err != nil {
 				return err
 			}

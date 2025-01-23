@@ -339,3 +339,19 @@ func (k Querier) CredentialHash(goCtx context.Context, req *types.QueryCredentia
 
 	return &types.QueryCredentialHashResponse{CredentialHash: credentialHashBytes}, nil
 }
+
+func (k Querier) VerificationHolder(goCtx context.Context, req *types.QueryHolderByVerificationIdRequest) (*types.QueryHolderByVerificationIdResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	id, err := base64.StdEncoding.DecodeString(req.VerificationId)
+	if err != nil {
+		return nil, err
+	}
+
+	holder := k.getHolderByVerificationId(ctx, id)
+
+	return &types.QueryHolderByVerificationIdResponse{Address: holder.String()}, nil
+}
