@@ -279,7 +279,7 @@ func (k Keeper) addVerificationDetailsInternal(ctx sdk.Context, userAddress sdk.
 	}
 	details.Type = verificationType
 	if details.IssuanceTimestamp < 1 || (details.ExpirationTimestamp > 0 && details.IssuanceTimestamp >= details.ExpirationTimestamp) {
-		return nil, errors.Wrap(types.ErrInvalidParam, "invalid issuance timestamp")
+		return nil, errors.Wrap(types.ErrInvalidParam, "invalid issuance timestamp. Should be less than expiration timestamp.")
 	}
 	if len(details.OriginalData) < 1 {
 		return nil, errors.Wrap(types.ErrInvalidParam, "empty proof data")
