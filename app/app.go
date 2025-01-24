@@ -1092,7 +1092,9 @@ func (app *App) setupUpgradeHandlers() {
 	app.UpgradeKeeper.SetUpgradeHandler(
 		v1_0_7.UpgradeName,
 		v1_0_7.CreateUpgradeHandler(
-			app.ModuleManager, app.configurator,
+			app.ModuleManager,
+			app.ComplianceKeeper,
+			app.configurator,
 		),
 	)
 
