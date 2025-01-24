@@ -1094,6 +1094,7 @@ func (app *App) setupUpgradeHandlers() {
 		v1_0_7.CreateUpgradeHandler(
 			app.ModuleManager,
 			app.ComplianceKeeper,
+			app.EvmKeeper,
 			app.configurator,
 		),
 	)

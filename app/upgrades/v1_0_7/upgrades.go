@@ -13,7 +13,7 @@ import (
 func CreateUpgradeHandler(
 	mm *module.Manager,
 	complianceKeeper compliancemoduletypes.ComplianceKeeper,
-	evmkeeper evmkeeper.Keeper,
+	evmkeeper *evmkeeper.Keeper,
 	configurator module.Configurator,
 ) upgradetypes.UpgradeHandler {
 	return func(ctx sdk.Context, _ upgradetypes.Plan, vm module.VersionMap) (module.VersionMap, error) {
