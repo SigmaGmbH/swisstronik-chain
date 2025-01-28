@@ -142,7 +142,6 @@ func (k msgServer) HandleRevokeVerification(goCtx context.Context, msg *types.Ms
 		}
 	}
 
-	verificationDetails.IsRevoked = true
 	if err = k.MarkVerificationDetailsAsRevoked(ctx, msg.VerificationId); err != nil {
 		return nil, err
 	}
