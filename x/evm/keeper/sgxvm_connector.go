@@ -318,13 +318,19 @@ func (q Connector) GetVerificationData(req *librustgo.CosmosRequest_GetVerificat
 
 	var resData []*librustgo.VerificationDetails
 	for i, v := range verifications {
-		issuerAccount, err := sdk.AccAddressFromBech32(v.IssuerAddress)
+		details := verificationsDetails[i]
+
+		isVerificationRevoked, err := q.EVMKeeper.ComplianceKeeper.IsVerificationRevoked(q.Context, verifications[i].VerificationId)
 		if err != nil {
 			return nil, err
 		}
-		details := verificationsDetails[i]
 
-		if !details.IsRevoked {
+		if !isVerificationRevoked {
+			issuerAccount, err := sdk.AccAddressFromBech32(v.IssuerAddress)
+			if err != nil {
+				return nil, err
+			}
+
 			// Addresses from Query requests are Ethereum Addresses
 			resData = append(resData, &librustgo.VerificationDetails{
 				VerificationType:     uint32(v.Type),
