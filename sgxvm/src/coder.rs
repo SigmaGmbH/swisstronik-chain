@@ -239,3 +239,13 @@ pub fn encode_get_account_code_size(address: &H160) -> Vec<u8> {
     cosmos_request.set_codeSize(request);
     cosmos_request.write_to_bytes().unwrap()
 }
+
+pub fn encode_revoke_verification(verification_id: Vec<u8>) -> Vec<u8> {
+    let mut cosmos_request = ffi::CosmosRequest::new();
+    let mut request = ffi::QueryRevokeVerification::new();
+
+    request.set_verificationId(verification_id);
+
+    cosmos_request.set_revokeVerification(request);
+    cosmos_request.write_to_bytes().unwrap()
+}

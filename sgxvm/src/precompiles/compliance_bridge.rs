@@ -10,7 +10,7 @@ use std::vec::Vec;
 
 use crate::precompiles::LinearCostPrecompileWithQuerier;
 use crate::{coder, querier, GoQuerier};
-use crate::protobuf_generated::ffi::{QueryAddVerificationDetailsResponse, QueryAddVerificationDetailsV2, QueryAddVerificationDetailsV2Response, QueryGetVerificationDataResponse, QueryHasVerificationResponse, QueryIssuanceTreeRoot, QueryIssuanceTreeRootResponse, QueryRevocationTreeRootResponse};
+use crate::protobuf_generated::ffi::{QueryAddVerificationDetailsResponse, QueryAddVerificationDetailsV2, QueryAddVerificationDetailsV2Response, QueryGetVerificationDataResponse, QueryHasVerificationResponse, QueryIssuanceTreeRoot, QueryIssuanceTreeRootResponse, QueryRevocationTreeRootResponse, QueryRevokeVerification, QueryRevokeVerificationResponse};
 
 // Selector of `addVerificationDetails` function
 const ADD_VERIFICATION_FN_SELECTOR: &str = "e62364ab";
@@ -24,6 +24,7 @@ const GET_VERIFICATION_DATA_FN_SELECTOR: &str = "cc8995ec";
 const GET_REVOCATION_TREE_ROOT_FN_SELECTOR: &str = "3db94a04";
 // Selector of `getIssuanceTreeRoot` function
 const GET_ISSUANCE_TREE_ROOT_FN_SELECTOR: &str = "d0376bd2";
+const REVOKE_VERIFICATION_FN_SELECTOR: &str = "e711d86d";
 
 /// Precompile for interactions with x/compliance module.
 pub struct ComplianceBridge;
@@ -60,6 +61,35 @@ fn route(
 
     let input_signature = hex::encode(data[..4].to_vec());
     match input_signature.as_str() {
+        REVOKE_VERIFICATION_FN_SELECTOR => {
+            // TODO: Provide caller with request
+            let revoke_verification_params = vec![
+                ParamType::Bytes,
+            ];
+
+            let decoded_params = match decode_input(revoke_verification_params, &data[4..]) {
+                Ok(params) => params,
+                Err(_) => return (ExitError::Reverted.into(), encode(&vec![AbiToken::String("failed to decode input parameters".into())]))
+            };
+
+            let verification_id = match decoded_params[0].clone().into_bytes() {
+                Some(id) => id,
+                None => return (ExitError::Reverted.into(), encode(&vec![AbiToken::String("cannot parse verification id".into())]))
+            };
+
+            let encoded_request = coder::encode_revoke_verification(verification_id);
+            match querier::make_request(querier, encoded_request) {
+                Some(result) => {
+                    let _: QueryRevokeVerificationResponse = match protobuf::parse_from_bytes(&result) {
+                        Ok(response) => response,
+                        Err(_) => return (ExitError::Reverted.into(), encode(&[AbiToken::String("cannot decode protobuf response".into())]))
+                    };
+
+                    (ExitSucceed::Returned.into(), Vec::new())
+                }
+                None => (ExitError::Reverted.into(), encode(&[AbiToken::String("call to revokeVerification function to x/compliance failed".into())]))
+            }
+        }
         GET_REVOCATION_TREE_ROOT_FN_SELECTOR => {
             let encoded_request = coder::encode_get_revocation_tree_root_request();
             match querier::make_request(querier, encoded_request) {

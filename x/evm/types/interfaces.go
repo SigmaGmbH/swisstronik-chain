@@ -75,6 +75,7 @@ type ComplianceKeeper interface {
 	GetRevocationTreeRoot(ctx sdk.Context) (*big.Int, error)
 	SetTreeRoot(context sdk.Context, treeKey []byte, root *merkletree.Hash) error
 	IsVerificationRevoked(ctx sdk.Context, verificationId []byte) (bool, error)
+	MarkVerificationDetailsAsRevoked(ctx sdk.Context, verificationDetailsId []byte) error
 }
 
 // Event Hooks

@@ -76,6 +76,8 @@ func (q Connector) Query(req []byte) ([]byte, error) {
 		return q.GetRevocationTreeRoot()
 	case *librustgo.CosmosRequest_AddVerificationDetailsV2:
 		return q.AddVerificationDetailsV2(request)
+	case *librustgo.CosmosRequest_RevokeVerification:
+		return q.RevokeVerification(request)
 	}
 
 	return nil, errors.New("wrong query received")
@@ -379,4 +381,13 @@ func (q Connector) GetRevocationTreeRoot() ([]byte, error) {
 	return proto.Marshal(&librustgo.QueryRevocationTreeRootResponse{
 		Root: root.Bytes(),
 	})
+}
+
+func (q Connector) RevokeVerification(req *librustgo.CosmosRequest_RevokeVerification) ([]byte, error) {
+	err := q.EVMKeeper.ComplianceKeeper.MarkVerificationDetailsAsRevoked(q.Context, req.RevokeVerification.VerificationId)
+	if err != nil {
+		return nil, err
+	}
+
+	return proto.Marshal(&librustgo.QueryRevokeVerificationResponse{})
 }
