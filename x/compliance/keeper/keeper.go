@@ -1003,6 +1003,31 @@ func (k Keeper) GetPubKeyByVerificationId(ctx sdk.Context, verificationId []byte
 	return store.Get(verificationId)
 }
 
+// IsVerificationRevoked checks if verification with provided verification id is revoked or its issuer
+// was not verified or was removed.
+func (k Keeper) IsVerificationRevoked(ctx sdk.Context, verificationId []byte) (bool, error) {
+	verificationDetails, err := k.GetVerificationDetails(ctx, verificationId)
+	if err != nil {
+		return false, err
+	}
+
+	if verificationDetails.IsRevoked {
+		return true, nil
+	}
+
+	issuerAddress, err := sdk.AccAddressFromBech32(verificationDetails.IssuerAddress)
+	addressDetails, err := k.GetAddressDetails(ctx, issuerAddress)
+	if err != nil {
+		return false, err
+	}
+
+	if addressDetails.IsRevoked || !addressDetails.IsVerified {
+		return true, nil
+	}
+
+	return false, nil
+}
+
 func closeIteratorOrPanic(iterator sdk.Iterator) {
 	err := iterator.Close()
 	if err != nil {

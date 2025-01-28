@@ -1508,6 +1508,15 @@ func (suite *KeeperTestSuite) TestConvertCredential() {
 				err = suite.keeper.SetIssuerDetails(suite.ctx, issuer, details)
 				suite.Require().NoError(err)
 
+				err = suite.keeper.SetAddressDetails(
+					suite.ctx,
+					issuer,
+					&types.AddressDetails{
+						IsVerified: true,
+						IsRevoked:  false,
+					})
+				suite.Require().NoError(err)
+
 				verificationDetails := &types.VerificationDetails{
 					Type:                 types.VerificationType_VT_KYC,
 					IssuerAddress:        issuer.String(),
