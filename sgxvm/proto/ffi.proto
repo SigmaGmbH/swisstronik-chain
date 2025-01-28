@@ -187,6 +187,11 @@ message QueryAddVerificationDetailsV2Response {
   bytes verificationId = 1;
 }
 
+message QueryRevokeVerification {
+  bytes verificationId = 1;
+}
+message QueryRevokeVerificationResponse {}
+
 message QueryHasVerification {
   bytes userAddress = 1;
   uint32 verificationType = 2;
@@ -252,6 +257,7 @@ message CosmosRequest {
     QueryIssuanceTreeRoot issuanceTreeRoot = 18;
     QueryRevocationTreeRoot revocationTreeRoot = 19;
     QueryAddVerificationDetailsV2 addVerificationDetailsV2 = 20;
+    QueryRevokeVerification revokeVerification = 21;
   }
 }
 
