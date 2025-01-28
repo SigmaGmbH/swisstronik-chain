@@ -197,6 +197,7 @@ message QueryVerificationsDetailsResponse {
     string schema = 8;
     string issuer_verification_id = 9;
     uint32 version = 10;
+    bool is_revoked = 11;
   }
 
   // verifications is a slice of registered verifications for the compliance module

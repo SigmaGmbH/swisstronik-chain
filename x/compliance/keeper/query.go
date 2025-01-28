@@ -252,6 +252,7 @@ func (k Querier) VerificationsDetails(goCtx context.Context, req *types.QueryVer
 			Schema:               verificationDetails.Schema,
 			IssuerVerificationId: verificationDetails.IssuerVerificationId,
 			Version:              verificationDetails.Version,
+			IsRevoked:            verificationDetails.IsRevoked,
 		})
 		return nil
 	})
