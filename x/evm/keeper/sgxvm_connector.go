@@ -323,19 +323,22 @@ func (q Connector) GetVerificationData(req *librustgo.CosmosRequest_GetVerificat
 			return nil, err
 		}
 		details := verificationsDetails[i]
-		// Addresses from Query requests are Ethereum Addresses
-		resData = append(resData, &librustgo.VerificationDetails{
-			VerificationType:     uint32(v.Type),
-			VerificationID:       v.VerificationId,
-			IssuerAddress:        common.Address(issuerAccount.Bytes()).Bytes(),
-			OriginChain:          details.OriginChain,
-			IssuanceTimestamp:    details.IssuanceTimestamp,
-			ExpirationTimestamp:  details.ExpirationTimestamp,
-			OriginalData:         details.OriginalData,
-			Schema:               details.Schema,
-			IssuerVerificationId: details.IssuerVerificationId,
-			Version:              details.Version,
-		})
+
+		if !details.IsRevoked {
+			// Addresses from Query requests are Ethereum Addresses
+			resData = append(resData, &librustgo.VerificationDetails{
+				VerificationType:     uint32(v.Type),
+				VerificationID:       v.VerificationId,
+				IssuerAddress:        common.Address(issuerAccount.Bytes()).Bytes(),
+				OriginChain:          details.OriginChain,
+				IssuanceTimestamp:    details.IssuanceTimestamp,
+				ExpirationTimestamp:  details.ExpirationTimestamp,
+				OriginalData:         details.OriginalData,
+				Schema:               details.Schema,
+				IssuerVerificationId: details.IssuerVerificationId,
+				Version:              details.Version,
+			})
+		}
 	}
 	return proto.Marshal(&librustgo.QueryGetVerificationDataResponse{
 		Data: resData,
