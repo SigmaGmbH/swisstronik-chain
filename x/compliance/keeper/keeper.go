@@ -395,6 +395,23 @@ func (k Keeper) SetVerificationDetails(
 	return nil
 }
 
+func (k Keeper) RevokeVerification(ctx sdk.Context, verificationDetailsId []byte, issuerAddress sdk.AccAddress) error {
+	verificationDetails, err := k.GetVerificationDetails(ctx, verificationDetailsId)
+	if err != nil {
+		return err
+	}
+
+	if verificationDetails.IsRevoked {
+		return errors.Wrap(types.ErrInvalidParam, "verification was already revoked")
+	}
+
+	if verificationDetails.IssuerAddress != issuerAddress.String() {
+		return errors.Wrap(types.ErrInvalidParam, "caller is not verification issuer")
+	}
+
+	return k.MarkVerificationDetailsAsRevoked(ctx, verificationDetailsId)
+}
+
 func (k Keeper) MarkVerificationDetailsAsRevoked(
 	ctx sdk.Context,
 	verificationDetailsId []byte,

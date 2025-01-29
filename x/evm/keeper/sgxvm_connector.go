@@ -384,7 +384,9 @@ func (q Connector) GetRevocationTreeRoot() ([]byte, error) {
 }
 
 func (q Connector) RevokeVerification(req *librustgo.CosmosRequest_RevokeVerification) ([]byte, error) {
-	err := q.EVMKeeper.ComplianceKeeper.MarkVerificationDetailsAsRevoked(q.Context, req.RevokeVerification.VerificationId)
+	issuerAddress := sdk.AccAddress(req.RevokeVerification.Issuer)
+
+	err := q.EVMKeeper.ComplianceKeeper.RevokeVerification(q.Context, req.RevokeVerification.VerificationId, issuerAddress)
 	if err != nil {
 		return nil, err
 	}
