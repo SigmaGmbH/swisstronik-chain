@@ -162,6 +162,64 @@ describe('ComplianceBridge', () => {
         expect(rootAfter).to.be.not.equal(rootBefore)
     })
 
+    it('Should be able to revoke verification', async () => {
+        const [signer] = await ethers.getSigners()
+        const userPublicKey = ethers.constants.HashZero // [0; 32] is valid BJJ public key
+
+        const tx = await sendShieldedTransaction(
+            signer,
+            contract.address,
+            contract.interface.encodeFunctionData('markUserAsVerifiedV2', [signer.address, userPublicKey]),
+            0, true
+        )
+        const res = await tx.wait()
+        const parsedLog = contract.interface.parseLog(res.logs[0])
+        const issuedVerificationId = parsedLog.args.data
+        expect(parsedLog.args.success).to.be.true
+        expect(issuedVerificationId.length).to.be.greaterThan(0)
+
+        const issuanceRootBeforeResp = await sendShieldedQuery(
+            signer.provider,
+            contract.address,
+            contract.interface.encodeFunctionData('getIssuanceRoot')
+        )
+        const issuanceRootBefore = contract.interface.decodeFunctionResult('getIssuanceRoot', issuanceRootBeforeResp)[0]
+
+        const revocationRootBeforeResp = await sendShieldedQuery(
+            signer.provider,
+            contract.address,
+            contract.interface.encodeFunctionData('getRevocationRoot')
+        )
+        const revocationRootBefore = contract.interface.decodeFunctionResult('getIssuanceRoot', revocationRootBeforeResp)[0]
+
+        const revokeTx = await sendShieldedTransaction(
+            signer,
+            contract.address,
+            contract.interface.encodeFunctionData('revokeVerification', [issuedVerificationId]),
+            0, true
+        )
+        const revokeRes = await revokeTx.wait()
+        const revokeLog = contract.interface.parseLog(revokeRes.logs[0])
+        expect(revokeLog.args.success).to.be.true
+
+        const issuanceRootAfterResp = await sendShieldedQuery(
+            signer.provider,
+            contract.address,
+            contract.interface.encodeFunctionData('getIssuanceRoot')
+        )
+        const issuanceRootAfter = contract.interface.decodeFunctionResult('getIssuanceRoot', issuanceRootAfterResp)[0]
+
+        const revocationRootAfterResp = await sendShieldedQuery(
+            signer.provider,
+            contract.address,
+            contract.interface.encodeFunctionData('getRevocationRoot')
+        )
+        const revocationRootAfter = contract.interface.decodeFunctionResult('getIssuanceRoot', revocationRootAfterResp)[0]
+
+        expect(issuanceRootAfter).to.be.equal(issuanceRootBefore)
+        expect(revocationRootAfter).to.be.not.equal(revocationRootBefore)
+    })
+
     describe('With verified user', async () => {
         let verified
         beforeEach(async () => {
