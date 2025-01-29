@@ -62,7 +62,6 @@ fn route(
     let input_signature = hex::encode(data[..4].to_vec());
     match input_signature.as_str() {
         REVOKE_VERIFICATION_FN_SELECTOR => {
-            // TODO: Provide caller with request
             let revoke_verification_params = vec![
                 ParamType::Bytes,
             ];
@@ -77,7 +76,7 @@ fn route(
                 None => return (ExitError::Reverted.into(), encode(&vec![AbiToken::String("cannot parse verification id".into())]))
             };
 
-            let encoded_request = coder::encode_revoke_verification(verification_id);
+            let encoded_request = coder::encode_revoke_verification(verification_id, &caller);
             match querier::make_request(querier, encoded_request) {
                 Some(result) => {
                     let _: QueryRevokeVerificationResponse = match protobuf::parse_from_bytes(&result) {

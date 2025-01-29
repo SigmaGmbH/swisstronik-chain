@@ -189,6 +189,7 @@ message QueryAddVerificationDetailsV2Response {
 
 message QueryRevokeVerification {
   bytes verificationId = 1;
+  bytes issuer = 2;
 }
 message QueryRevokeVerificationResponse {}
 
