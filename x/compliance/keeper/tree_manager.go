@@ -79,9 +79,15 @@ func (k Keeper) addZeroElementToRevocationTree(ctx sdk.Context) error {
 	}
 
 	// We add zero element to revocation tree to make it work correctly
-	zero := big.NewInt(0)
-	if _, _, _, err = tree.Get(sdk.WrapSDKContext(ctx), zero); err != nil {
-		if err = tree.Add(sdk.WrapSDKContext(ctx), zero, zero); err != nil {
+	// value = MiMC7(0)
+	// key = MiMC7(value)
+	zeroElementKey := new(big.Int)
+	zeroElementKey.SetString("20479787315037141259873752832946319094807983372697723108173353219959612477980", 10)
+	zeroElementValue := new(big.Int)
+	zeroElementValue.SetString("11730251359286723731141466095709901450170369094578288842486979042586033922425", 10)
+
+	if _, _, _, err = tree.Get(sdk.WrapSDKContext(ctx), zeroElementKey); err != nil {
+		if err = tree.Add(sdk.WrapSDKContext(ctx), zeroElementKey, zeroElementValue); err != nil {
 			return err
 		}
 	}
