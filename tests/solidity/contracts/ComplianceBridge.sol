@@ -66,6 +66,8 @@ interface IComplianceBridge {
     function getIssuanceTreeRoot() external returns (bytes memory);
 
     function revokeVerification(bytes memory verificationId) external;
+
+    function convertCredential(bytes memory verificationId, bytes memory publicKey) external returns (bytes memory);
 }
 
 contract ComplianceProxy {
