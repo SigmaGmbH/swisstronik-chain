@@ -10,7 +10,7 @@ use std::vec::Vec;
 
 use crate::precompiles::LinearCostPrecompileWithQuerier;
 use crate::{coder, querier, GoQuerier};
-use crate::protobuf_generated::ffi::{QueryAddVerificationDetailsResponse, QueryAddVerificationDetailsV2, QueryAddVerificationDetailsV2Response, QueryGetVerificationDataResponse, QueryHasVerificationResponse, QueryIssuanceTreeRoot, QueryIssuanceTreeRootResponse, QueryRevocationTreeRootResponse, QueryRevokeVerification, QueryRevokeVerificationResponse};
+use crate::protobuf_generated::ffi::{QueryAddVerificationDetailsResponse, QueryAddVerificationDetailsV2, QueryAddVerificationDetailsV2Response, QueryConvertCredentialResponse, QueryGetVerificationDataResponse, QueryHasVerificationResponse, QueryIssuanceTreeRoot, QueryIssuanceTreeRootResponse, QueryRevocationTreeRootResponse, QueryRevokeVerification, QueryRevokeVerificationResponse};
 
 // Selector of `addVerificationDetails` function
 const ADD_VERIFICATION_FN_SELECTOR: &str = "e62364ab";
@@ -62,6 +62,40 @@ fn route(
 
     let input_signature = hex::encode(data[..4].to_vec());
     match input_signature.as_str() {
+        CONVERT_CREDENTIAL_FN_SELECTOR => {
+            let revoke_verification_params = vec![
+                ParamType::Bytes,
+                ParamType::Bytes,
+            ];
+
+            let decoded_params = match decode_input(revoke_verification_params, &data[4..]) {
+                Ok(params) => params,
+                Err(_) => return (ExitError::Reverted.into(), encode(&vec![AbiToken::String("failed to decode input parameters".into())]))
+            };
+
+            let verification_id = match decoded_params[0].clone().into_bytes() {
+                Some(id) => id,
+                None => return (ExitError::Reverted.into(), encode(&vec![AbiToken::String("cannot parse verification id".into())]))
+            };
+
+            let holder_public_key = match decoded_params[1].clone().into_bytes() {
+                Some(id) => id,
+                None => return (ExitError::Reverted.into(), encode(&vec![AbiToken::String("cannot parse holder public key".into())]))
+            };
+
+            let encoded_request = coder::encode_convert_credential(verification_id, holder_public_key, &caller);
+            match querier::make_request(querier, encoded_request) {
+                Some(result) => {
+                    let _: QueryConvertCredentialResponse = match protobuf::parse_from_bytes(&result) {
+                        Ok(response) => response,
+                        Err(_) => return (ExitError::Reverted.into(), encode(&[AbiToken::String("cannot decode protobuf response".into())]))
+                    };
+
+                    (ExitSucceed::Returned.into(), Vec::new())
+                }
+                None => (ExitError::Reverted.into(), encode(&[AbiToken::String("call to convertCredential function to x/compliance failed".into())]))
+            }
+        }
         REVOKE_VERIFICATION_FN_SELECTOR => {
             let revoke_verification_params = vec![
                 ParamType::Bytes,
