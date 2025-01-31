@@ -236,6 +236,13 @@ message QueryGetVerificationDataResponse {
   repeated VerificationDetails data = 1;
 }
 
+message QueryConvertCredential {
+  bytes verificationId = 1;
+  bytes holderPublicKey = 2;
+  bytes caller = 3;
+}
+message QueryConvertCredentialResponse {}
+
 message CosmosRequest {
   oneof req {
     QueryGetAccount getAccount = 1;
@@ -259,6 +266,7 @@ message CosmosRequest {
     QueryRevocationTreeRoot revocationTreeRoot = 19;
     QueryAddVerificationDetailsV2 addVerificationDetailsV2 = 20;
     QueryRevokeVerification revokeVerification = 21;
+    QueryConvertCredential convertCredential = 22;
   }
 }
 

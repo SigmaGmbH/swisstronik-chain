@@ -250,3 +250,15 @@ pub fn encode_revoke_verification(verification_id: Vec<u8>, issuer: &H160) -> Ve
     cosmos_request.set_revokeVerification(request);
     cosmos_request.write_to_bytes().unwrap()
 }
+
+pub fn encode_convert_credential(verification_id: Vec<u8>, holder_public_key: Vec<u8>, caller: &H160) -> Vec<u8> {
+    let mut cosmos_request = ffi::CosmosRequest::new();
+    let mut request = ffi::QueryConvertCredential::new();
+
+    request.set_holderPublicKey(holder_public_key);
+    request.set_verificationId(verification_id);
+    request.set_caller(caller.as_bytes().to_vec());
+
+    cosmos_request.set_convertCredential(request);
+    cosmos_request.write_to_bytes().unwrap()
+}
