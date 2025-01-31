@@ -78,6 +78,8 @@ func (q Connector) Query(req []byte) ([]byte, error) {
 		return q.AddVerificationDetailsV2(request)
 	case *librustgo.CosmosRequest_RevokeVerification:
 		return q.RevokeVerification(request)
+	case *librustgo.CosmosRequest_ConvertCredential:
+		return q.ConvertCredential(request)
 	}
 
 	return nil, errors.New("wrong query received")
@@ -392,4 +394,29 @@ func (q Connector) RevokeVerification(req *librustgo.CosmosRequest_RevokeVerific
 	}
 
 	return proto.Marshal(&librustgo.QueryRevokeVerificationResponse{})
+}
+
+func (q Connector) ConvertCredential(req *librustgo.CosmosRequest_ConvertCredential) ([]byte, error) {
+	println("ConvertCredential called")
+	caller := sdk.AccAddress(req.ConvertCredential.Caller)
+
+	if req.ConvertCredential.VerificationId == nil {
+		return nil, errors.New("invalid verification id")
+	}
+
+	if req.ConvertCredential.HolderPublicKey == nil {
+		return nil, errors.New("invalid holder public key")
+	}
+
+	err := q.EVMKeeper.ComplianceKeeper.ConvertCredential(
+		q.Context,
+		req.ConvertCredential.VerificationId,
+		req.ConvertCredential.HolderPublicKey,
+		caller,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return proto.Marshal(&librustgo.QueryConvertCredentialResponse{})
 }

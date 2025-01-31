@@ -1045,6 +1045,68 @@ func (k Keeper) IsVerificationRevoked(ctx sdk.Context, verificationId []byte) (b
 	return false, nil
 }
 
+func (k Keeper) ConvertCredential(ctx sdk.Context, verificationId []byte, publicKeyToSet []byte, caller sdk.AccAddress) error {
+	// Check if signer is owner of credential
+	credentialOwner := k.getHolderByVerificationId(ctx, verificationId)
+	if !credentialOwner.Equals(caller) {
+		return errors.Wrap(types.ErrBadRequest, "signer is not credential holder")
+	}
+
+	var holderPublicKey []byte
+	holderPublicKey = k.GetHolderPublicKey(ctx, caller)
+	if holderPublicKey == nil {
+		// validate provided public key
+		xCoordPublicKey, err := types.ExtractXCoordinate(publicKeyToSet, false)
+		if err != nil {
+			return errors.Wrapf(types.ErrInvalidParam, "cannot parse provided public key: (%s)", err)
+		}
+		holderPublicKey = xCoordPublicKey.Bytes()
+	}
+
+	isVerificationRevoked, err := k.IsVerificationRevoked(ctx, verificationId)
+	if err != nil {
+		return err
+	}
+	if isVerificationRevoked {
+		return errors.Wrap(types.ErrBadRequest, "credential was revoked")
+	}
+
+	details, err := k.GetVerificationDetails(ctx, verificationId)
+	if err != nil {
+		return err
+	}
+
+	issuerAddress, err := sdk.AccAddressFromBech32(details.IssuerAddress)
+	if err != nil {
+		return err
+	}
+
+	credentialValue := &types.ZKCredential{
+		Type:                details.Type,
+		IssuerAddress:       issuerAddress.Bytes(),
+		HolderPublicKey:     holderPublicKey,
+		ExpirationTimestamp: details.ExpirationTimestamp,
+		IssuanceTimestamp:   details.IssuanceTimestamp,
+	}
+	credentialHash, err := credentialValue.Hash()
+	if err != nil {
+		return err
+	}
+
+	isIncluded, err := k.IsIncludedInIssuanceTree(ctx, credentialHash)
+	if err != nil {
+		return err
+	}
+
+	if !isIncluded {
+		if err = k.AddCredentialHashToIssued(ctx, credentialHash); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func closeIteratorOrPanic(iterator sdk.Iterator) {
 	err := iterator.Close()
 	if err != nil {
