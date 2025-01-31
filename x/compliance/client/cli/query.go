@@ -31,6 +31,7 @@ func GetQueryCmd() *cobra.Command {
 		CmdGetVerificationDetails(),
 		CmdGetVerificationsDetails(),
 		CmdGetHolderByVerificationId(),
+		CmdGetHolderPublicKey(),
 	)
 
 	return cmd
@@ -268,6 +269,33 @@ func CmdGetHolderByVerificationId() *cobra.Command {
 			}
 
 			resp, err := queryClient.VerificationHolder(context.Background(), req)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(resp)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+	flags.AddPaginationFlagsToCmd(cmd, "verification details")
+
+	return cmd
+}
+
+func CmdGetHolderPublicKey() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "get-holder-public-key [userAddress]",
+		Short: "Returns holder by verification id",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx := client.GetClientContextFromCmd(cmd)
+			queryClient := types.NewQueryClient(clientCtx)
+
+			req := &types.QueryAttachedHolderPublicKeyRequest{
+				Address: args[0],
+			}
+
+			resp, err := queryClient.AttachedHolderPublicKey(context.Background(), req)
 			if err != nil {
 				return err
 			}
