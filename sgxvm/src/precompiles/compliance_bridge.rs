@@ -25,6 +25,7 @@ const GET_REVOCATION_TREE_ROOT_FN_SELECTOR: &str = "3db94a04";
 // Selector of `getIssuanceTreeRoot` function
 const GET_ISSUANCE_TREE_ROOT_FN_SELECTOR: &str = "d0376bd2";
 const REVOKE_VERIFICATION_FN_SELECTOR: &str = "e711d86d";
+const CONVERT_CREDENTIAL_FN_SELECTOR: &str = "0x460c4841";
 
 /// Precompile for interactions with x/compliance module.
 pub struct ComplianceBridge;
