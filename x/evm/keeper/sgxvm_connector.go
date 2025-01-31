@@ -397,7 +397,6 @@ func (q Connector) RevokeVerification(req *librustgo.CosmosRequest_RevokeVerific
 }
 
 func (q Connector) ConvertCredential(req *librustgo.CosmosRequest_ConvertCredential) ([]byte, error) {
-	println("ConvertCredential called")
 	caller := sdk.AccAddress(req.ConvertCredential.Caller)
 
 	if req.ConvertCredential.VerificationId == nil {

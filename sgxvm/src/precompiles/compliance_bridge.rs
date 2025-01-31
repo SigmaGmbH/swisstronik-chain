@@ -60,8 +60,6 @@ fn route(
         return (ExitError::Reverted.into(), encode(&[AbiToken::String("cannot decode input".into())]));
     }
 
-    println!("DEBUG: Input data: {:?}", hex::encode(&data));
-
     let input_signature = hex::encode(data[..4].to_vec());
     match input_signature.as_str() {
         CONVERT_CREDENTIAL_FN_SELECTOR => {
