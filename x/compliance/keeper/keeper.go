@@ -1061,11 +1061,11 @@ func (k Keeper) ConvertCredential(ctx sdk.Context, verificationId []byte, public
 			return errors.Wrapf(types.ErrInvalidParam, "cannot parse provided public key: (%s)", err)
 		}
 		holderPublicKey = xCoordPublicKey.Bytes()
+	}
 
-		println("DEBUG: Adding pub key for verification: ", hexutil.Encode(verificationId), hexutil.Encode(xCoordPublicKey.Bytes()))
-		if err = k.LinkVerificationIdToPubKey(ctx, xCoordPublicKey.Bytes(), verificationId); err != nil {
-			return err
-		}
+	err := k.LinkVerificationIdToPubKey(ctx, holderPublicKey, verificationId)
+	if err != nil {
+		return err
 	}
 
 	isVerificationRevoked, err := k.IsVerificationRevoked(ctx, verificationId)
