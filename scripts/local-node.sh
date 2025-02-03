@@ -7,6 +7,12 @@ KEYALGO="eth_secp256k1"
 HOMEDIR="$HOME/.swisstronik"
 BINARY="./build/swisstronikd"
 
+if [[ -z "$SWTR_BINARY" ]]; then
+  BINARY="./build/swisstronikd"
+else
+  BINARY="${SWTR_BINARY}"
+fi
+
 # Path variables
 CONFIG=$HOMEDIR/config/config.toml
 APP_TOML=$HOMEDIR/config/app.toml
