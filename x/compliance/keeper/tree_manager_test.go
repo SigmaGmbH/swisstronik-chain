@@ -52,3 +52,19 @@ func (suite *KeeperTestSuite) TestNonInclusionProof() {
 
 	suite.Require().NotNil(res)
 }
+
+func (suite *KeeperTestSuite) TestNonRevocationProof() {
+	suite.Setup(suite.T())
+
+	storage := keeper.NewTreeStorage(suite.ctx, &suite.keeper, types.KeyPrefixRevocationTree)
+
+	revocationTree, err := merkletree.NewMerkleTree(suite.ctx, &storage, 32)
+	suite.Require().NoError(err)
+
+	nonExistingKey := big.NewInt(123)
+	proof, _, err := revocationTree.GenerateProof(suite.ctx, nonExistingKey, revocationTree.Root())
+	suite.Require().NoError(err)
+
+	isVerified := merkletree.VerifyProof(revocationTree.Root(), proof, nonExistingKey, big.NewInt(0))
+	suite.Require().True(isVerified)
+}
