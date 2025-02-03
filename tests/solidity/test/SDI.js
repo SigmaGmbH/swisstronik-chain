@@ -140,13 +140,14 @@ describe('SDI tests', () => {
         const nonRevocationProof = await getNonRevocationProofInput(provider, credentialHash);
 
         const verificationData = await frontendContract.getVerificationData(userSigner.address);
-        const encodedIssuer = BigInt(verificationData[0].issuerAddress);
+        const index = verificationData.length - 1;
+        const encodedIssuer = BigInt(verificationData[index].issuerAddress);
 
         const credentialElements = [
-            `${verificationData[0].verificationType}`,
+            `${verificationData[index].verificationType}`,
             encodedIssuer.toString(),
-            `${verificationData[0].expirationTimestamp}`,
-            `${verificationData[0].issuanceTimestamp}`,
+            `${verificationData[index].expirationTimestamp}`,
+            `${verificationData[index].issuanceTimestamp}`,
         ];
 
         const holderSignature = await signMiMC(userKeypair.seed, BigInt(credentialHash));
@@ -217,13 +218,14 @@ describe('SDI tests', () => {
         const nonRevocationProof = await getNonRevocationProofInput(provider, credentialHash);
 
         const verificationData = await frontendContract.getVerificationData(userSigner.address);
-        const encodedIssuer = BigInt(verificationData[0].issuerAddress);
+        const index = verificationData.length - 1;
+        const encodedIssuer = BigInt(verificationData[index].issuerAddress);
 
         const credentialElements = [
-            `${verificationData[1].verificationType}`,
+            `${verificationData[index].verificationType}`,
             encodedIssuer.toString(),
-            `${verificationData[1].expirationTimestamp}`,
-            `${verificationData[1].issuanceTimestamp}`,
+            `${verificationData[index].expirationTimestamp}`,
+            `${verificationData[index].issuanceTimestamp}`,
         ];
 
         const holderSignature = await signMiMC(userKeypair.seed, BigInt(credentialHash));
