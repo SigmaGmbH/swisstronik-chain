@@ -6,9 +6,7 @@ const {packPoint, inCurve} = require("@zk-kit/baby-jubjub")
 const snarkjs = require('snarkjs')
 const {buildEddsa} = require('circomlibjs')
 const path = require('path');
-const {sendShieldedTransaction, sendShieldedQuery} = require("./testUtils");
 
-const CONTRACT_ADDRESS = '0x2fc0b35e41a9a2ea248a275269af1c8b3a061167'
 const DEFAULT_PROXY_CONTRACT_ADDRESS = '0x2fc0b35e41a9a2ea248a275269af1c8b3a061167'
 // WARNING: This private key is publicly available
 const DEFAULT_PK = "D5DA6D43250C8EB630C1AB8A80F19C673267A6B210C10C41065D5C34FC369DCB";
