@@ -27,6 +27,12 @@ const GET_ISSUANCE_TREE_ROOT_FN_SELECTOR: &str = "d0376bd2";
 const REVOKE_VERIFICATION_FN_SELECTOR: &str = "e711d86d";
 const CONVERT_CREDENTIAL_FN_SELECTOR: &str = "460c4841";
 
+const MAX_ISSUER_VERIFICATION_ID_SIZE: usize = 256;
+const MAX_PROOF_DATA_SIZE: usize = 4096;
+const MAX_SCHEMA_SIZE: usize = 1028;
+const MAX_ORIGIN_CHAIN_SIZE: usize = 96;
+const USER_PUBLIC_KEY_SIZE: usize = 32;
+
 /// Precompile for interactions with x/compliance module.
 pub struct ComplianceBridge;
 
@@ -302,6 +308,30 @@ fn route(
                 )
             };
 
+            if schema.len() > MAX_SCHEMA_SIZE {
+                return (
+                    ExitError::Reverted.into(), encode(&[AbiToken::String("schema size exceeds limit".into())]),
+                );
+            }
+
+            if proof_data.len() > MAX_PROOF_DATA_SIZE {
+                return (
+                    ExitError::Reverted.into(), encode(&[AbiToken::String("proof data size exceeds limit".into())]),
+                );
+            }
+
+            if issuer_verification_id.len() > MAX_ISSUER_VERIFICATION_ID_SIZE {
+                return (
+                    ExitError::Reverted.into(), encode(&[AbiToken::String("proof data size exceeds limit".into())]),
+                );
+            }
+
+            if origin_chain.len() > MAX_ORIGIN_CHAIN_SIZE {
+                return (
+                    ExitError::Reverted.into(), encode(&[AbiToken::String("origin chain size exceeds limit".into())]),
+                );
+            }
+
             let encoded_request = coder::encode_add_verification_details_request(
                 user_address,
                 caller,
@@ -412,6 +442,36 @@ fn route(
                     );
                 }
             };
+
+            if schema.len() > MAX_SCHEMA_SIZE {
+                return (
+                    ExitError::Reverted.into(), encode(&[AbiToken::String("schema size exceeds limit".into())]),
+                );
+            }
+
+            if proof_data.len() > MAX_PROOF_DATA_SIZE {
+                return (
+                    ExitError::Reverted.into(), encode(&[AbiToken::String("proof data size exceeds limit".into())]),
+                );
+            }
+
+            if issuer_verification_id.len() > MAX_ISSUER_VERIFICATION_ID_SIZE {
+                return (
+                    ExitError::Reverted.into(), encode(&[AbiToken::String("proof data size exceeds limit".into())]),
+                );
+            }
+
+            if origin_chain.len() > MAX_ORIGIN_CHAIN_SIZE {
+                return (
+                    ExitError::Reverted.into(), encode(&[AbiToken::String("origin chain size exceeds limit".into())]),
+                );
+            }
+
+            if user_public_key.len() != USER_PUBLIC_KEY_SIZE {
+                return (
+                    ExitError::Reverted.into(), encode(&[AbiToken::String("user public key should be 32 byte long".into())]),
+                );
+            }
 
             let encoded_request = coder::encode_add_verification_details_v2_request(
                 user_address,
