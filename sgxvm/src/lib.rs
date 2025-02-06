@@ -86,9 +86,10 @@ pub extern "C" fn ecall_status(
     qe_target_info: &sgx_target_info_t,
     quote_size: u32,
 ) -> sgx_status_t {
-    // attestation::self_attestation::self_attest()
-    println!("[Enclave] ECALL status");
-    sgx_status_t::SGX_SUCCESS
+    match attestation::self_attestation::self_attest(qe_target_info, quote_size) {
+        Ok(_) => sgx_status_t::SGX_SUCCESS,
+        Err(err) => err,
+    }
 }
 
 #[no_mangle]

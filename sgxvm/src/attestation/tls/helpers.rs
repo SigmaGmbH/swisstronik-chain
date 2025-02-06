@@ -120,7 +120,7 @@ pub(super) fn decrypt_and_seal_master_key(
 }
 
 /// Creates keys and certificate for TLS connection
-pub(super) fn create_tls_cert_and_keys(
+pub fn create_tls_cert_and_keys(
     qe_target_info: Option<&sgx_target_info_t>,
     quote_size: Option<u32>,
 ) -> SgxResult<(Vec<u8>, Vec<u8>)> {
