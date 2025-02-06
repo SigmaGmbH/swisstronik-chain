@@ -66,7 +66,12 @@ extern "C" {
         socket_fd: c_int,
     ) -> sgx_status_t;
 
-    pub fn ecall_status(eid: sgx_enclave_id_t, retval: *mut sgx_status_t) -> sgx_status_t;
+    pub fn ecall_status(
+        eid: sgx_enclave_id_t,
+        retval: *mut sgx_status_t,
+        qe_target_info: &sgx_target_info_t,
+        quote_size: u32,
+    ) -> sgx_status_t;
 
     pub fn ecall_request_epoch_keys_dcap(
         eid: sgx_enclave_id_t,
@@ -151,6 +156,7 @@ pub unsafe extern "C" fn handle_initialization_request(
         let result = match request.req {
             Some(req) => {
                 match req {
+                    #[cfg(feature = "hardware_mode")]
                     node::SetupRequest_oneof_req::nodeStatus(_req) => {
                         enclave_api::EnclaveApi::check_node_status(evm_enclave.geteid())?;
                         let response = node::NodeStatusResponse::new();

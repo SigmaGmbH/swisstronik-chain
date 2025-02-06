@@ -65,7 +65,10 @@ enclave {
             size_t len
         );
 
-        public sgx_status_t ecall_status();
+        public sgx_status_t ecall_status(
+            [in] const sgx_target_info_t* qe_target_info,
+        	uint32_t quote_size
+        );
 
         public ResultWithAllocation ecall_dump_dcap_quote(
             [in] const sgx_target_info_t* qe_target_info,
