@@ -10,7 +10,16 @@ use std::vec::Vec;
 
 use crate::precompiles::LinearCostPrecompileWithQuerier;
 use crate::{coder, querier, GoQuerier};
-use crate::protobuf_generated::ffi::{QueryAddVerificationDetailsResponse, QueryAddVerificationDetailsV2, QueryAddVerificationDetailsV2Response, QueryConvertCredentialResponse, QueryGetVerificationDataResponse, QueryHasVerificationResponse, QueryIssuanceTreeRoot, QueryIssuanceTreeRootResponse, QueryRevocationTreeRootResponse, QueryRevokeVerification, QueryRevokeVerificationResponse};
+use crate::protobuf_generated::ffi::{
+    QueryAddVerificationDetailsResponse,
+    QueryAddVerificationDetailsV2Response,
+    QueryConvertCredentialResponse,
+    QueryGetVerificationDataResponse,
+    QueryHasVerificationResponse,
+    QueryIssuanceTreeRootResponse,
+    QueryRevocationTreeRootResponse,
+    QueryRevokeVerificationResponse
+};
 
 // Selector of `addVerificationDetails` function
 const ADD_VERIFICATION_FN_SELECTOR: &str = "e62364ab";
