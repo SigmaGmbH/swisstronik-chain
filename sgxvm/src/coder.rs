@@ -203,7 +203,7 @@ pub fn encode_insert_account_balance(address: &H160, balance: &U256) -> Vec<u8> 
     let mut request = ffi::QueryInsertAccountBalance::new();
 
     request.set_address(address.as_bytes().to_vec());
-    request.set_balance(u256_to_vec(&balance));
+    request.set_balance(u256_to_vec(balance));
 
     cosmos_request.set_insertAccountBalance(request);
     cosmos_request.write_to_bytes().unwrap()

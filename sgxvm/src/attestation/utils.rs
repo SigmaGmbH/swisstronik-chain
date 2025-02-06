@@ -85,8 +85,8 @@ fn parse_response_attn_report(resp: &[u8]) -> SgxResult<(String, Vec<u8>, Vec<u8
         attn_report = str::from_utf8(resp_body).unwrap().to_string();
     }
 
-    let sig_bytes = base64::decode(&sig).unwrap();
-    let sig_cert_bytes = base64::decode(&sig_cert).unwrap();
+    let sig_bytes = base64::decode(sig).unwrap();
+    let sig_cert_bytes = base64::decode(sig_cert).unwrap();
 
     Ok((attn_report, sig_bytes, sig_cert_bytes))
 }
@@ -199,7 +199,7 @@ pub fn get_report_from_intel(fd: c_int, quote: Vec<u8>) -> SgxResult<(String, Ve
 }
 
 fn as_u32_le(array: &[u8; 4]) -> u32 {
-    ((array[0] as u32) << 0)
+    (array[0] as u32)
         + ((array[1] as u32) << 8)
         + ((array[2] as u32) << 16)
         + ((array[3] as u32) << 24)

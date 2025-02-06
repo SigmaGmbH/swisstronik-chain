@@ -75,7 +75,7 @@ fn route(
         return (ExitError::Reverted.into(), encode(&[AbiToken::String("cannot decode input".into())]));
     }
 
-    let input_signature = hex::encode(data[..4].to_vec());
+    let input_signature = hex::encode(&data[..4]);
     match input_signature.as_str() {
         CONVERT_CREDENTIAL_FN_SELECTOR => {
             let revoke_verification_params = vec![
@@ -85,17 +85,17 @@ fn route(
 
             let decoded_params = match decode_input(revoke_verification_params, &data[4..]) {
                 Ok(params) => params,
-                Err(_) => return (ExitError::Reverted.into(), encode(&vec![AbiToken::String("failed to decode input parameters".into())]))
+                Err(_) => return (ExitError::Reverted.into(), encode(&[AbiToken::String("failed to decode input parameters".into())]))
             };
 
             let verification_id = match decoded_params[0].clone().into_bytes() {
                 Some(id) => id,
-                None => return (ExitError::Reverted.into(), encode(&vec![AbiToken::String("cannot parse verification id".into())]))
+                None => return (ExitError::Reverted.into(), encode(&[AbiToken::String("cannot parse verification id".into())]))
             };
 
             let holder_public_key = match decoded_params[1].clone().into_bytes() {
                 Some(id) => id,
-                None => return (ExitError::Reverted.into(), encode(&vec![AbiToken::String("cannot parse holder public key".into())]))
+                None => return (ExitError::Reverted.into(), encode(&[AbiToken::String("cannot parse holder public key".into())]))
             };
 
             let encoded_request = coder::encode_convert_credential(verification_id, holder_public_key, &caller);
@@ -118,12 +118,12 @@ fn route(
 
             let decoded_params = match decode_input(revoke_verification_params, &data[4..]) {
                 Ok(params) => params,
-                Err(_) => return (ExitError::Reverted.into(), encode(&vec![AbiToken::String("failed to decode input parameters".into())]))
+                Err(_) => return (ExitError::Reverted.into(), encode(&[AbiToken::String("failed to decode input parameters".into())]))
             };
 
             let verification_id = match decoded_params[0].clone().into_bytes() {
                 Some(id) => id,
-                None => return (ExitError::Reverted.into(), encode(&vec![AbiToken::String("cannot parse verification id".into())]))
+                None => return (ExitError::Reverted.into(), encode(&[AbiToken::String("cannot parse verification id".into())]))
             };
 
             let encoded_request = coder::encode_revoke_verification(verification_id, &caller);
@@ -185,12 +185,12 @@ fn route(
 
             let decoded_params = match decode_input(has_verification_params, &data[4..]) {
                 Ok(params) => params,
-                Err(_) => return (ExitError::Reverted.into(), encode(&vec![AbiToken::String("failed to decode input parameters".into())]))
+                Err(_) => return (ExitError::Reverted.into(), encode(&[AbiToken::String("failed to decode input parameters".into())]))
             };
 
             let user_address = match decoded_params[0].clone().into_address() {
                 Some(addr) => addr,
-                None => return (ExitError::Reverted.into(), encode(&vec![AbiToken::String("invalid user address".into())]))
+                None => return (ExitError::Reverted.into(), encode(&[AbiToken::String("invalid user address".into())]))
             };
 
             let verification_type = match decoded_params[1].clone().into_uint() {
@@ -362,7 +362,7 @@ fn route(
                     };
 
                     let token = vec![AbiToken::Bytes(
-                        added_verification.verificationId.into(),
+                        added_verification.verificationId,
                     )];
                     let encoded_response = encode(&token);
 
@@ -504,7 +504,7 @@ fn route(
                     };
 
                     let token = vec![AbiToken::Bytes(
-                        added_verification.verificationId.into(),
+                        added_verification.verificationId,
                     )];
                     let encoded_response = encode(&token);
 
@@ -558,12 +558,12 @@ fn route(
                             let issuer_address = Address::from_slice(&log.issuerAddress);
                             let tokens = vec![AbiToken::Tuple(vec![
                                 AbiToken::Uint(log.verificationType.into()),
-                                AbiToken::Bytes(log.verificationID.clone().into()),
-                                AbiToken::Address(issuer_address.clone()),
+                                AbiToken::Bytes(log.verificationID.clone()),
+                                AbiToken::Address(issuer_address),
                                 AbiToken::String(log.originChain.clone()),
                                 AbiToken::Uint(log.issuanceTimestamp.into()),
                                 AbiToken::Uint(log.expirationTimestamp.into()),
-                                AbiToken::Bytes(log.originalData.clone().into()),
+                                AbiToken::Bytes(log.originalData.clone()),
                                 AbiToken::String(log.schema.clone()),
                                 AbiToken::String(log.issuerVerificationId.clone()),
                                 AbiToken::Uint(log.version.into()),
@@ -579,7 +579,7 @@ fn route(
                 None => (ExitError::Reverted.into(), encode(&[AbiToken::String("call to getVerificationData failed to x/compliance failed".into())]))
             }
         },
-        _ => (ExitError::Reverted.into(), encode(&vec![AbiToken::String("incorrect request".into())]))
+        _ => (ExitError::Reverted.into(), encode(&[AbiToken::String("incorrect request".into())]))
     }
 }
 
@@ -589,12 +589,12 @@ fn decode_input(
 ) -> Result<Vec<Token>, (ExitError, Vec<u8>)> {
     let decoded_params =
         ethabi::decode(&param_types, input).map_err(|err| (
-            ExitError::Reverted.into(),
-            encode(&[AbiToken::String(format!("cannot decode params: {:?}", err).into())])
+            ExitError::Reverted,
+            encode(&[AbiToken::String(format!("cannot decode params: {:?}", err))])
         ))?;
 
     if decoded_params.len() != param_types.len() {
-        return Err((ExitError::Reverted.into(), encode(&[AbiToken::String("incorrect decoded params len".into())])));
+        return Err((ExitError::Reverted, encode(&[AbiToken::String("incorrect decoded params len".into())])));
     }
 
     Ok(decoded_params)

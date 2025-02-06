@@ -66,31 +66,19 @@ impl KeyManager {
     }
 
     pub fn get_state_key_by_epoch(&self, epoch: u16) -> Option<StateEncryptionKey> {
-        match self.epoch_manager.get_epoch(epoch) {
-            Some(epoch) => Some(epoch.get_state_key()),
-            None => None
-        }
+        self.epoch_manager.get_epoch(epoch).map(|epoch| epoch.get_state_key())
     }
 
     pub fn get_state_key_by_block(&self, block_number: u64) -> Option<(u16, StateEncryptionKey)> {
-        match self.epoch_manager.get_current_epoch(block_number) {
-            Some(epoch) => Some((epoch.epoch_number, epoch.get_state_key())),
-            None => None
-        }
+        self.epoch_manager.get_current_epoch(block_number).map(|epoch| (epoch.epoch_number, epoch.get_state_key()))
     }
 
     pub fn get_tx_key_by_epoch(&self, epoch: u16) -> Option<TransactionEncryptionKey> {
-        match self.epoch_manager.get_epoch(epoch) {
-            Some(epoch) => Some(epoch.get_tx_key()),
-            None => None
-        }
+        self.epoch_manager.get_epoch(epoch).map(|epoch| epoch.get_tx_key())
     }
 
     pub fn get_tx_key_by_block(&self, block_number: u64) -> Option<(u16, TransactionEncryptionKey)> {
-        match self.epoch_manager.get_current_epoch(block_number) {
-            Some(epoch) => Some((epoch.epoch_number, epoch.get_tx_key())),
-            None => None
-        }
+        self.epoch_manager.get_current_epoch(block_number).map(|epoch| (epoch.epoch_number, epoch.get_tx_key()))
     }
 
     /// Checks if file with sealed master key exists

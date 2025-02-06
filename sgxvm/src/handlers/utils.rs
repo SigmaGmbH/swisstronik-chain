@@ -6,30 +6,30 @@ use protobuf::RepeatedField;
 use std::vec::Vec;
 use crate::protobuf_generated::ffi::{AccessListItem, SGXVMCallParams, SGXVMCreateParams};
 
-impl Into<TransactArgs> for SGXVMCallParams {
-    fn into(self) -> TransactArgs {
+impl From<SGXVMCallParams> for TransactArgs {
+    fn from(val: SGXVMCallParams) -> Self {
         TransactArgs::Call {
-            caller: H160::from_slice(&self.from),
-            address: H160::from_slice(&self.to),
-            value: U256::from_big_endian(&self.value),
-            data: self.data,
-            gas_limit: U256::from(self.gasLimit),
-            gas_price: U256::from_big_endian(&self.gasPrice),
-            access_list: parse_access_list(self.accessList),
+            caller: H160::from_slice(&val.from),
+            address: H160::from_slice(&val.to),
+            value: U256::from_big_endian(&val.value),
+            data: val.data,
+            gas_limit: U256::from(val.gasLimit),
+            gas_price: U256::from_big_endian(&val.gasPrice),
+            access_list: parse_access_list(val.accessList),
         }
     }
 }
 
-impl Into<TransactArgs> for SGXVMCreateParams {
-    fn into(self) -> TransactArgs {
+impl From<SGXVMCreateParams> for TransactArgs {
+    fn from(val: SGXVMCreateParams) -> Self {
         TransactArgs::Create {
-            caller: H160::from_slice(&self.from),
-            value: U256::from_big_endian(&self.value),
-            init_code: self.data,
+            caller: H160::from_slice(&val.from),
+            value: U256::from_big_endian(&val.value),
+            init_code: val.data,
             salt: None,
-            gas_limit: U256::from(self.gasLimit),
-            gas_price: U256::from_big_endian(&self.gasPrice),
-            access_list: parse_access_list(self.accessList),
+            gas_limit: U256::from(val.gasLimit),
+            gas_price: U256::from_big_endian(&val.gasPrice),
+            access_list: parse_access_list(val.accessList),
         }
     }
 }

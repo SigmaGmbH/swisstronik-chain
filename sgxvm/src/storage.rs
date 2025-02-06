@@ -217,7 +217,7 @@ impl Storage for FFIStorage {
     }
 
     fn get_account_code_hash(&self, address: &H160) -> Result<H256, Error> {
-        let encoded_request = coder::encode_get_account_code_hash(&address);
+        let encoded_request = coder::encode_get_account_code_hash(address);
         if let Some(result) = querier::make_request(self.querier, encoded_request) {
             match protobuf::parse_from_bytes::<ffi::QueryGetAccountCodeHashResponse>(result.as_slice()) {
                 Err(err) => {
