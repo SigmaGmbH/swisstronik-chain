@@ -265,6 +265,10 @@ func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.AccAddre
 }
 
 func (k Keeper) addVerificationDetailsInternal(ctx sdk.Context, userAddress sdk.AccAddress, issuerAddress sdk.AccAddress, verificationType types.VerificationType, details *types.VerificationDetails) ([]byte, error) {
+	if err := details.ValidateSize(); err != nil {
+		return nil, errors.Wrap(types.ErrInvalidParam, err.Error())
+	}
+
 	isAddressVerified, err := k.IsAddressVerified(ctx, issuerAddress)
 	if err != nil {
 		return nil, err
@@ -340,6 +344,10 @@ func (k Keeper) SetVerificationDetails(
 	verificationDetailsId []byte,
 	details *types.VerificationDetails,
 ) error {
+	if err := details.ValidateSize(); err != nil {
+		return errors.Wrap(types.ErrInvalidParam, err.Error())
+	}
+
 	verificationDetailsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationDetails)
 	if verificationDetailsStore.Has(verificationDetailsId) {
 		return errors.Wrap(types.ErrInvalidParam, "provided verification details already in storage")
