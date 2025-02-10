@@ -2,7 +2,7 @@ name: Build Deb
 
 on:
   push:
-    branches: [ develop, '**-release', 'release-**' ]
+    branches: [ develop, '**-release', 'release-**', 'fix/fix-deb-pipeline' ]
   workflow_dispatch:
 env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
@@ -12,10 +12,10 @@ jobs:
     runs-on: ubuntu-22.04
     env:
       SGX_MODE: HW
-      VERSION: "1.0.5"
+      VERSION: "1.0.7"
       PRODUCTION_MODE: true
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
       - name: Retrieve the secret and decode it to a file
@@ -57,7 +57,7 @@ jobs:
         run: |
           docker run -e VERSION=${{ env.VERSION }} -v $GITHUB_WORKSPACE/build:/build deb_build
           cp build/swisstronik_${{ env.VERSION }}_amd64.deb swisstronik_${{ env.VERSION }}_amd64.deb
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: swisstronik_${{ env.VERSION }}_amd64.deb
           path: swisstronik_${{ env.VERSION }}_amd64.deb
