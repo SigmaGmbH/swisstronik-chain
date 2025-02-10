@@ -58,6 +58,10 @@ type QueryRevocationTreeRoot = types.QueryRevocationTreeRoot
 type QueryRevocationTreeRootResponse = types.QueryRevocationTreeRootResponse
 type QueryAddVerificationDetailsV2 = types.QueryAddVerificationDetailsV2
 type QueryAddVerificationDetailsV2Response = types.QueryAddVerificationDetailsV2Response
+type QueryRevokeVerification = types.QueryRevokeVerification
+type QueryRevokeVerificationResponse = types.QueryRevokeVerificationResponse
+type QueryConvertCredential = types.QueryConvertCredential
+type QueryConvertCredentialResponse = types.QueryConvertCredentialResponse
 
 // Storage requests
 type CosmosRequest_GetAccount = types.CosmosRequest_GetAccount
@@ -78,6 +82,8 @@ type CosmosRequest_InsertAccountNonce = types.CosmosRequest_InsertAccountNonce
 type CosmosRequest_IssuanceTreeRoot = types.CosmosRequest_IssuanceTreeRoot
 type CosmosRequest_RevocationTreeRoot = types.CosmosRequest_RevocationTreeRoot
 type CosmosRequest_AddVerificationDetailsV2 = types.CosmosRequest_AddVerificationDetailsV2
+type CosmosRequest_RevokeVerification = types.CosmosRequest_RevokeVerification
+type CosmosRequest_ConvertCredential = types.CosmosRequest_ConvertCredential
 
 // Backend requests
 type CosmosRequest_BlockHash = types.CosmosRequest_BlockHash

@@ -947,3 +947,23 @@ func (suite *KeeperTestSuite) TestAddVerificationDetailsV2() {
 		})
 	}
 }
+
+func (suite *KeeperTestSuite) TestHugeOriginalData() {
+	user := tests.RandomAccAddress()
+	issuer := tests.RandomAccAddress()
+	issuerDetails := &types.IssuerDetails{Creator: tests.RandomAccAddress().String(), Name: "testIssuer"}
+	err := suite.keeper.SetIssuerDetails(suite.ctx, issuer, issuerDetails)
+	suite.Require().NoError(err)
+
+	verificationDetails := &types.VerificationDetails{
+		IssuerAddress:       issuer.String(),
+		OriginChain:         "test chain",
+		IssuanceTimestamp:   1712018692,
+		ExpirationTimestamp: 1715018692,
+		OriginalData:        make([]byte, 10000000),
+	}
+	verificationId := hexutils.HexToBytes("83456ef3b8ea6777da69d1509cf51861985e2b4e24cf7f5d4c5080996bf8cf4e")
+	err = suite.keeper.SetVerificationDetails(suite.ctx, user, verificationId, verificationDetails)
+	suite.Require().Error(err)
+	suite.Require().ErrorContains(err, "original data too long")
+}

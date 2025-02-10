@@ -118,6 +118,7 @@ import (
 	"swisstronik/app/upgrades/v1_0_4"
 	"swisstronik/app/upgrades/v1_0_5"
 	"swisstronik/app/upgrades/v1_0_6"
+	"swisstronik/app/upgrades/v1_0_7"
 	"swisstronik/docs"
 	"swisstronik/encoding"
 	srvflags "swisstronik/server/flags"
@@ -1085,6 +1086,16 @@ func (app *App) setupUpgradeHandlers() {
 		v1_0_6.UpgradeName,
 		v1_0_6.CreateUpgradeHandler(
 			app.ModuleManager, app.configurator,
+		),
+	)
+
+	app.UpgradeKeeper.SetUpgradeHandler(
+		v1_0_7.UpgradeName,
+		v1_0_7.CreateUpgradeHandler(
+			app.ModuleManager,
+			app.ComplianceKeeper,
+			app.EvmKeeper,
+			app.configurator,
 		),
 	)
 

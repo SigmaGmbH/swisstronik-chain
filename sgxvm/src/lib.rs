@@ -82,8 +82,14 @@ pub extern "C" fn ecall_allocate(data: *const u8, len: usize) -> crate::types::A
 #[no_mangle]
 /// Performes self attestation and outputs if system was configured
 /// properly and node can pass Remote Attestation.
-pub extern "C" fn ecall_status() -> sgx_status_t {
-    attestation::self_attestation::self_attest()
+pub extern "C" fn ecall_status(
+    qe_target_info: &sgx_target_info_t,
+    quote_size: u32,
+) -> sgx_status_t {
+    match attestation::self_attestation::self_attest(qe_target_info, quote_size) {
+        Ok(_) => sgx_status_t::SGX_SUCCESS,
+        Err(err) => err,
+    }
 }
 
 #[no_mangle]

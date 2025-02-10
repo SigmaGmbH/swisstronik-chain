@@ -17,6 +17,7 @@ enum VerificationType {
     VT_ADDRESS = 6;
     VT_CUSTOM = 7;
     VT_CREDIT_SCORE = 8;
+    VT_BIOMETRIC = 9; // Biometric Passports and other types of biometric verification
 }
 
 /// V1 ///

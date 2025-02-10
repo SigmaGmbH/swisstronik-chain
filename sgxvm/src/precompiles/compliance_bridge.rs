@@ -10,7 +10,16 @@ use std::vec::Vec;
 
 use crate::precompiles::LinearCostPrecompileWithQuerier;
 use crate::{coder, querier, GoQuerier};
-use crate::protobuf_generated::ffi::{QueryAddVerificationDetailsResponse, QueryAddVerificationDetailsV2, QueryAddVerificationDetailsV2Response, QueryGetVerificationDataResponse, QueryHasVerificationResponse, QueryIssuanceTreeRoot, QueryIssuanceTreeRootResponse, QueryRevocationTreeRootResponse};
+use crate::protobuf_generated::ffi::{
+    QueryAddVerificationDetailsResponse,
+    QueryAddVerificationDetailsV2Response,
+    QueryConvertCredentialResponse,
+    QueryGetVerificationDataResponse,
+    QueryHasVerificationResponse,
+    QueryIssuanceTreeRootResponse,
+    QueryRevocationTreeRootResponse,
+    QueryRevokeVerificationResponse
+};
 
 // Selector of `addVerificationDetails` function
 const ADD_VERIFICATION_FN_SELECTOR: &str = "e62364ab";
@@ -24,6 +33,14 @@ const GET_VERIFICATION_DATA_FN_SELECTOR: &str = "cc8995ec";
 const GET_REVOCATION_TREE_ROOT_FN_SELECTOR: &str = "3db94a04";
 // Selector of `getIssuanceTreeRoot` function
 const GET_ISSUANCE_TREE_ROOT_FN_SELECTOR: &str = "d0376bd2";
+const REVOKE_VERIFICATION_FN_SELECTOR: &str = "e711d86d";
+const CONVERT_CREDENTIAL_FN_SELECTOR: &str = "460c4841";
+
+const MAX_ISSUER_VERIFICATION_ID_SIZE: usize = 256;
+const MAX_PROOF_DATA_SIZE: usize = 4096;
+const MAX_SCHEMA_SIZE: usize = 1028;
+const MAX_ORIGIN_CHAIN_SIZE: usize = 96;
+const USER_PUBLIC_KEY_SIZE: usize = 32;
 
 /// Precompile for interactions with x/compliance module.
 pub struct ComplianceBridge;
@@ -58,8 +75,70 @@ fn route(
         return (ExitError::Reverted.into(), encode(&[AbiToken::String("cannot decode input".into())]));
     }
 
-    let input_signature = hex::encode(data[..4].to_vec());
+    let input_signature = hex::encode(&data[..4]);
     match input_signature.as_str() {
+        CONVERT_CREDENTIAL_FN_SELECTOR => {
+            let revoke_verification_params = vec![
+                ParamType::Bytes,
+                ParamType::Bytes,
+            ];
+
+            let decoded_params = match decode_input(revoke_verification_params, &data[4..]) {
+                Ok(params) => params,
+                Err(_) => return (ExitError::Reverted.into(), encode(&[AbiToken::String("failed to decode input parameters".into())]))
+            };
+
+            let verification_id = match decoded_params[0].clone().into_bytes() {
+                Some(id) => id,
+                None => return (ExitError::Reverted.into(), encode(&[AbiToken::String("cannot parse verification id".into())]))
+            };
+
+            let holder_public_key = match decoded_params[1].clone().into_bytes() {
+                Some(id) => id,
+                None => return (ExitError::Reverted.into(), encode(&[AbiToken::String("cannot parse holder public key".into())]))
+            };
+
+            let encoded_request = coder::encode_convert_credential(verification_id, holder_public_key, &caller);
+            match querier::make_request(querier, encoded_request) {
+                Some(result) => {
+                    let _: QueryConvertCredentialResponse = match protobuf::parse_from_bytes(&result) {
+                        Ok(response) => response,
+                        Err(_) => return (ExitError::Reverted.into(), encode(&[AbiToken::String("cannot decode protobuf response".into())]))
+                    };
+
+                    (ExitSucceed::Returned.into(), Vec::new())
+                }
+                None => (ExitError::Reverted.into(), encode(&[AbiToken::String("call to convertCredential function to x/compliance failed".into())]))
+            }
+        }
+        REVOKE_VERIFICATION_FN_SELECTOR => {
+            let revoke_verification_params = vec![
+                ParamType::Bytes,
+            ];
+
+            let decoded_params = match decode_input(revoke_verification_params, &data[4..]) {
+                Ok(params) => params,
+                Err(_) => return (ExitError::Reverted.into(), encode(&[AbiToken::String("failed to decode input parameters".into())]))
+            };
+
+            let verification_id = match decoded_params[0].clone().into_bytes() {
+                Some(id) => id,
+                None => return (ExitError::Reverted.into(), encode(&[AbiToken::String("cannot parse verification id".into())]))
+            };
+
+            let encoded_request = coder::encode_revoke_verification(verification_id, &caller);
+            match querier::make_request(querier, encoded_request) {
+                Some(result) => {
+                    let _: QueryRevokeVerificationResponse = match protobuf::parse_from_bytes(&result) {
+                        Ok(response) => response,
+                        Err(_) => return (ExitError::Reverted.into(), encode(&[AbiToken::String("cannot decode protobuf response".into())]))
+                    };
+
+                    (ExitSucceed::Returned.into(), Vec::new())
+                }
+                None => (ExitError::Reverted.into(), encode(&[AbiToken::String("call to revokeVerification function to x/compliance failed".into())]))
+            }
+        }
         GET_REVOCATION_TREE_ROOT_FN_SELECTOR => {
             let encoded_request = coder::encode_get_revocation_tree_root_request();
             match querier::make_request(querier, encoded_request) {
@@ -106,12 +185,12 @@ fn route(
 
             let decoded_params = match decode_input(has_verification_params, &data[4..]) {
                 Ok(params) => params,
-                Err(_) => return (ExitError::Reverted.into(), encode(&vec![AbiToken::String("failed to decode input parameters".into())]))
+                Err(_) => return (ExitError::Reverted.into(), encode(&[AbiToken::String("failed to decode input parameters".into())]))
             };
 
             let user_address = match decoded_params[0].clone().into_address() {
                 Some(addr) => addr,
-                None => return (ExitError::Reverted.into(), encode(&vec![AbiToken::String("invalid user address".into())]))
+                None => return (ExitError::Reverted.into(), encode(&[AbiToken::String("invalid user address".into())]))
             };
 
             let verification_type = match decoded_params[1].clone().into_uint() {
@@ -238,6 +317,30 @@ fn route(
                 )
             };
 
+            if schema.len() > MAX_SCHEMA_SIZE {
+                return (
+                    ExitError::Reverted.into(), encode(&[AbiToken::String("schema size exceeds limit".into())]),
+                );
+            }
+
+            if proof_data.len() > MAX_PROOF_DATA_SIZE {
+                return (
+                    ExitError::Reverted.into(), encode(&[AbiToken::String("proof data size exceeds limit".into())]),
+                );
+            }
+
+            if issuer_verification_id.len() > MAX_ISSUER_VERIFICATION_ID_SIZE {
+                return (
+                    ExitError::Reverted.into(), encode(&[AbiToken::String("proof data size exceeds limit".into())]),
+                );
+            }
+
+            if origin_chain.len() > MAX_ORIGIN_CHAIN_SIZE {
+                return (
+                    ExitError::Reverted.into(), encode(&[AbiToken::String("origin chain size exceeds limit".into())]),
+                );
+            }
+
             let encoded_request = coder::encode_add_verification_details_request(
                 user_address,
                 caller,
@@ -259,7 +362,7 @@ fn route(
                     };
 
                     let token = vec![AbiToken::Bytes(
-                        added_verification.verificationId.into(),
+                        added_verification.verificationId,
                     )];
                     let encoded_response = encode(&token);
 
@@ -349,6 +452,36 @@ fn route(
                 }
             };
 
+            if schema.len() > MAX_SCHEMA_SIZE {
+                return (
+                    ExitError::Reverted.into(), encode(&[AbiToken::String("schema size exceeds limit".into())]),
+                );
+            }
+
+            if proof_data.len() > MAX_PROOF_DATA_SIZE {
+                return (
+                    ExitError::Reverted.into(), encode(&[AbiToken::String("proof data size exceeds limit".into())]),
+                );
+            }
+
+            if issuer_verification_id.len() > MAX_ISSUER_VERIFICATION_ID_SIZE {
+                return (
+                    ExitError::Reverted.into(), encode(&[AbiToken::String("proof data size exceeds limit".into())]),
+                );
+            }
+
+            if origin_chain.len() > MAX_ORIGIN_CHAIN_SIZE {
+                return (
+                    ExitError::Reverted.into(), encode(&[AbiToken::String("origin chain size exceeds limit".into())]),
+                );
+            }
+
+            if user_public_key.len() != USER_PUBLIC_KEY_SIZE {
+                return (
+                    ExitError::Reverted.into(), encode(&[AbiToken::String("user public key should be 32 byte long".into())]),
+                );
+            }
+
             let encoded_request = coder::encode_add_verification_details_v2_request(
                 user_address,
                 caller,
@@ -371,7 +504,7 @@ fn route(
                     };
 
                     let token = vec![AbiToken::Bytes(
-                        added_verification.verificationId.into(),
+                        added_verification.verificationId,
                     )];
                     let encoded_response = encode(&token);
 
@@ -425,12 +558,12 @@ fn route(
                             let issuer_address = Address::from_slice(&log.issuerAddress);
                             let tokens = vec![AbiToken::Tuple(vec![
                                 AbiToken::Uint(log.verificationType.into()),
-                                AbiToken::Bytes(log.verificationID.clone().into()),
-                                AbiToken::Address(issuer_address.clone()),
+                                AbiToken::Bytes(log.verificationID.clone()),
+                                AbiToken::Address(issuer_address),
                                 AbiToken::String(log.originChain.clone()),
                                 AbiToken::Uint(log.issuanceTimestamp.into()),
                                 AbiToken::Uint(log.expirationTimestamp.into()),
-                                AbiToken::Bytes(log.originalData.clone().into()),
+                                AbiToken::Bytes(log.originalData.clone()),
                                 AbiToken::String(log.schema.clone()),
                                 AbiToken::String(log.issuerVerificationId.clone()),
                                 AbiToken::Uint(log.version.into()),
@@ -446,7 +579,7 @@ fn route(
                 None => (ExitError::Reverted.into(), encode(&[AbiToken::String("call to getVerificationData failed to x/compliance failed".into())]))
             }
         },
-        _ => (ExitError::Reverted.into(), encode(&vec![AbiToken::String("incorrect request".into())]))
+        _ => (ExitError::Reverted.into(), encode(&[AbiToken::String("incorrect request".into())]))
     }
 }
 
@@ -456,12 +589,12 @@ fn decode_input(
 ) -> Result<Vec<Token>, (ExitError, Vec<u8>)> {
     let decoded_params =
         ethabi::decode(&param_types, input).map_err(|err| (
-            ExitError::Reverted.into(),
-            encode(&[AbiToken::String(format!("cannot decode params: {:?}", err).into())])
+            ExitError::Reverted,
+            encode(&[AbiToken::String(format!("cannot decode params: {:?}", err))])
         ))?;
 
     if decoded_params.len() != param_types.len() {
-        return Err((ExitError::Reverted.into(), encode(&[AbiToken::String("incorrect decoded params len".into())])));
+        return Err((ExitError::Reverted, encode(&[AbiToken::String("incorrect decoded params len".into())])));
     }
 
     Ok(decoded_params)

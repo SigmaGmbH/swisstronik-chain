@@ -187,6 +187,12 @@ message QueryAddVerificationDetailsV2Response {
   bytes verificationId = 1;
 }
 
+message QueryRevokeVerification {
+  bytes verificationId = 1;
+  bytes issuer = 2;
+}
+message QueryRevokeVerificationResponse {}
+
 message QueryHasVerification {
   bytes userAddress = 1;
   uint32 verificationType = 2;
@@ -230,6 +236,13 @@ message QueryGetVerificationDataResponse {
   repeated VerificationDetails data = 1;
 }
 
+message QueryConvertCredential {
+  bytes verificationId = 1;
+  bytes holderPublicKey = 2;
+  bytes caller = 3;
+}
+message QueryConvertCredentialResponse {}
+
 message CosmosRequest {
   oneof req {
     QueryGetAccount getAccount = 1;
@@ -252,6 +265,8 @@ message CosmosRequest {
     QueryIssuanceTreeRoot issuanceTreeRoot = 18;
     QueryRevocationTreeRoot revocationTreeRoot = 19;
     QueryAddVerificationDetailsV2 addVerificationDetailsV2 = 20;
+    QueryRevokeVerification revokeVerification = 21;
+    QueryConvertCredential convertCredential = 22;
   }
 }
 

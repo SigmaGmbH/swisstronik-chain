@@ -76,6 +76,10 @@ func (q Connector) Query(req []byte) ([]byte, error) {
 		return q.GetRevocationTreeRoot()
 	case *librustgo.CosmosRequest_AddVerificationDetailsV2:
 		return q.AddVerificationDetailsV2(request)
+	case *librustgo.CosmosRequest_RevokeVerification:
+		return q.RevokeVerification(request)
+	case *librustgo.CosmosRequest_ConvertCredential:
+		return q.ConvertCredential(request)
 	}
 
 	return nil, errors.New("wrong query received")
@@ -318,24 +322,33 @@ func (q Connector) GetVerificationData(req *librustgo.CosmosRequest_GetVerificat
 
 	var resData []*librustgo.VerificationDetails
 	for i, v := range verifications {
-		issuerAccount, err := sdk.AccAddressFromBech32(v.IssuerAddress)
+		details := verificationsDetails[i]
+
+		isVerificationRevoked, err := q.EVMKeeper.ComplianceKeeper.IsVerificationRevoked(q.Context, verifications[i].VerificationId)
 		if err != nil {
 			return nil, err
 		}
-		details := verificationsDetails[i]
-		// Addresses from Query requests are Ethereum Addresses
-		resData = append(resData, &librustgo.VerificationDetails{
-			VerificationType:     uint32(v.Type),
-			VerificationID:       v.VerificationId,
-			IssuerAddress:        common.Address(issuerAccount.Bytes()).Bytes(),
-			OriginChain:          details.OriginChain,
-			IssuanceTimestamp:    details.IssuanceTimestamp,
-			ExpirationTimestamp:  details.ExpirationTimestamp,
-			OriginalData:         details.OriginalData,
-			Schema:               details.Schema,
-			IssuerVerificationId: details.IssuerVerificationId,
-			Version:              details.Version,
-		})
+
+		if !isVerificationRevoked {
+			issuerAccount, err := sdk.AccAddressFromBech32(v.IssuerAddress)
+			if err != nil {
+				return nil, err
+			}
+
+			// Addresses from Query requests are Ethereum Addresses
+			resData = append(resData, &librustgo.VerificationDetails{
+				VerificationType:     uint32(v.Type),
+				VerificationID:       v.VerificationId,
+				IssuerAddress:        common.Address(issuerAccount.Bytes()).Bytes(),
+				OriginChain:          details.OriginChain,
+				IssuanceTimestamp:    details.IssuanceTimestamp,
+				ExpirationTimestamp:  details.ExpirationTimestamp,
+				OriginalData:         details.OriginalData,
+				Schema:               details.Schema,
+				IssuerVerificationId: details.IssuerVerificationId,
+				Version:              details.Version,
+			})
+		}
 	}
 	return proto.Marshal(&librustgo.QueryGetVerificationDataResponse{
 		Data: resData,
@@ -370,4 +383,39 @@ func (q Connector) GetRevocationTreeRoot() ([]byte, error) {
 	return proto.Marshal(&librustgo.QueryRevocationTreeRootResponse{
 		Root: root.Bytes(),
 	})
+}
+
+func (q Connector) RevokeVerification(req *librustgo.CosmosRequest_RevokeVerification) ([]byte, error) {
+	issuerAddress := sdk.AccAddress(req.RevokeVerification.Issuer)
+
+	err := q.EVMKeeper.ComplianceKeeper.RevokeVerification(q.Context, req.RevokeVerification.VerificationId, issuerAddress)
+	if err != nil {
+		return nil, err
+	}
+
+	return proto.Marshal(&librustgo.QueryRevokeVerificationResponse{})
+}
+
+func (q Connector) ConvertCredential(req *librustgo.CosmosRequest_ConvertCredential) ([]byte, error) {
+	caller := sdk.AccAddress(req.ConvertCredential.Caller)
+
+	if req.ConvertCredential.VerificationId == nil {
+		return nil, errors.New("invalid verification id")
+	}
+
+	if req.ConvertCredential.HolderPublicKey == nil {
+		return nil, errors.New("invalid holder public key")
+	}
+
+	err := q.EVMKeeper.ComplianceKeeper.ConvertCredential(
+		q.Context,
+		req.ConvertCredential.VerificationId,
+		req.ConvertCredential.HolderPublicKey,
+		caller,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return proto.Marshal(&librustgo.QueryConvertCredentialResponse{})
 }

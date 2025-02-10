@@ -142,7 +142,6 @@ func (k msgServer) HandleRevokeVerification(goCtx context.Context, msg *types.Ms
 		}
 	}
 
-	verificationDetails.IsRevoked = true
 	if err = k.MarkVerificationDetailsAsRevoked(ctx, msg.VerificationId); err != nil {
 		return nil, err
 	}
@@ -362,13 +361,17 @@ func (k msgServer) HandleConvertCredential(goCtx context.Context, msg *types.Msg
 		return nil, errors.Wrap(types.ErrBadRequest, "holder public key not found. Please attach it")
 	}
 
-	details, err := k.GetVerificationDetails(ctx, msg.VerificationId)
+	isVerificationRevoked, err := k.IsVerificationRevoked(ctx, msg.VerificationId)
 	if err != nil {
 		return nil, err
 	}
-
-	if details.IsRevoked {
+	if isVerificationRevoked {
 		return nil, errors.Wrap(types.ErrBadRequest, "credential was revoked")
+	}
+
+	details, err := k.GetVerificationDetails(ctx, msg.VerificationId)
+	if err != nil {
+		return nil, err
 	}
 
 	issuerAddress, err := sdk.AccAddressFromBech32(details.IssuerAddress)

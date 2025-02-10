@@ -1,7 +1,7 @@
 extern crate sgx_tstd as std;
 
 use evm::GasMutState;
-use evm::interpreter::error::{ExitError, ExitException, ExitResult};
+use evm::interpreter::error::ExitResult;
 use evm::interpreter::runtime::RuntimeState;
 use evm::standard::PrecompileSet;
 use std::vec::Vec;

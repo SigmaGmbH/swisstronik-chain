@@ -6,9 +6,13 @@ use sgx_types::*;
 pub struct EnclaveApi;
 
 impl EnclaveApi {
+    #[cfg(feature = "hardware_mode")]
     pub fn check_node_status(eid: sgx_enclave_id_t) -> Result<(), Error> {
+        let qe_target_info = dcap_utils::get_qe_target_info()?;
+        let quote_size = dcap_utils::get_quote_size()?;
+
         let mut ret_val = sgx_status_t::SGX_ERROR_UNEXPECTED;
-        let res = unsafe { super::ecall_status(eid, &mut ret_val) };
+        let res = unsafe { super::ecall_status(eid, &mut ret_val, &qe_target_info, quote_size) };
 
         match (res, ret_val) {
             (sgx_status_t::SGX_SUCCESS, sgx_status_t::SGX_SUCCESS) => Ok(()),

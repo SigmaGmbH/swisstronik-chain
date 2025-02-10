@@ -175,7 +175,7 @@ fn run_tx(
     match res {
         Ok(res) => {
             match res {
-                TransactValue::Call {succeed, retval} => {
+                TransactValue::Call {succeed: _, retval} => {
                     ExecutionResult {
                         logs: convert_logs(changeset.logs),
                         data: retval,
@@ -183,7 +183,7 @@ fn run_tx(
                         vm_error: "".to_string()
                     }
                 }
-                TransactValue::Create {succeed, address} => {
+                TransactValue::Create {succeed: _, address} => {
                     // Check if run_tx was called in context of transaction or in context of eth_call or eth_estimateGas.
                     // We commit changes only in case of transaction context.
                     if should_commit {

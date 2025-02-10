@@ -265,6 +265,10 @@ func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.AccAddre
 }
 
 func (k Keeper) addVerificationDetailsInternal(ctx sdk.Context, userAddress sdk.AccAddress, issuerAddress sdk.AccAddress, verificationType types.VerificationType, details *types.VerificationDetails) ([]byte, error) {
+	if err := details.ValidateSize(); err != nil {
+		return nil, errors.Wrap(types.ErrInvalidParam, err.Error())
+	}
+
 	isAddressVerified, err := k.IsAddressVerified(ctx, issuerAddress)
 	if err != nil {
 		return nil, err
@@ -279,7 +283,7 @@ func (k Keeper) addVerificationDetailsInternal(ctx sdk.Context, userAddress sdk.
 	}
 	details.Type = verificationType
 	if details.IssuanceTimestamp < 1 || (details.ExpirationTimestamp > 0 && details.IssuanceTimestamp >= details.ExpirationTimestamp) {
-		return nil, errors.Wrap(types.ErrInvalidParam, "invalid issuance timestamp")
+		return nil, errors.Wrap(types.ErrInvalidParam, "invalid issuance timestamp. Should be less than expiration timestamp.")
 	}
 	if len(details.OriginalData) < 1 {
 		return nil, errors.Wrap(types.ErrInvalidParam, "empty proof data")
@@ -340,6 +344,10 @@ func (k Keeper) SetVerificationDetails(
 	verificationDetailsId []byte,
 	details *types.VerificationDetails,
 ) error {
+	if err := details.ValidateSize(); err != nil {
+		return errors.Wrap(types.ErrInvalidParam, err.Error())
+	}
+
 	verificationDetailsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationDetails)
 	if verificationDetailsStore.Has(verificationDetailsId) {
 		return errors.Wrap(types.ErrInvalidParam, "provided verification details already in storage")
@@ -393,6 +401,23 @@ func (k Keeper) SetVerificationDetails(
 	}
 
 	return nil
+}
+
+func (k Keeper) RevokeVerification(ctx sdk.Context, verificationDetailsId []byte, issuerAddress sdk.AccAddress) error {
+	verificationDetails, err := k.GetVerificationDetails(ctx, verificationDetailsId)
+	if err != nil {
+		return err
+	}
+
+	if verificationDetails.IsRevoked {
+		return errors.Wrap(types.ErrInvalidParam, "verification was already revoked")
+	}
+
+	if verificationDetails.IssuerAddress != issuerAddress.String() {
+		return errors.Wrap(types.ErrInvalidParam, "caller is not verification issuer")
+	}
+
+	return k.MarkVerificationDetailsAsRevoked(ctx, verificationDetailsId)
 }
 
 func (k Keeper) MarkVerificationDetailsAsRevoked(
@@ -1001,6 +1026,98 @@ func (k Keeper) LinkVerificationIdToPubKey(ctx sdk.Context, publicKey []byte, ve
 func (k Keeper) GetPubKeyByVerificationId(ctx sdk.Context, verificationId []byte) []byte {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationToPubKey)
 	return store.Get(verificationId)
+}
+
+// IsVerificationRevoked checks if verification with provided verification id is revoked or its issuer
+// was not verified or was removed.
+func (k Keeper) IsVerificationRevoked(ctx sdk.Context, verificationId []byte) (bool, error) {
+	verificationDetails, err := k.GetVerificationDetails(ctx, verificationId)
+	if err != nil {
+		return false, err
+	}
+
+	if verificationDetails.IsRevoked {
+		return true, nil
+	}
+
+	issuerAddress, err := sdk.AccAddressFromBech32(verificationDetails.IssuerAddress)
+	addressDetails, err := k.GetAddressDetails(ctx, issuerAddress)
+	if err != nil {
+		return false, err
+	}
+
+	if addressDetails.IsRevoked || !addressDetails.IsVerified {
+		return true, nil
+	}
+
+	return false, nil
+}
+
+func (k Keeper) ConvertCredential(ctx sdk.Context, verificationId []byte, publicKeyToSet []byte, caller sdk.AccAddress) error {
+	// Check if signer is owner of credential
+	credentialOwner := k.getHolderByVerificationId(ctx, verificationId)
+	if !credentialOwner.Equals(caller) {
+		return errors.Wrap(types.ErrBadRequest, "signer is not credential holder")
+	}
+
+	var holderPublicKey []byte
+	holderPublicKey = k.GetHolderPublicKey(ctx, caller)
+	if holderPublicKey == nil {
+		// validate provided public key
+		xCoordPublicKey, err := types.ExtractXCoordinate(publicKeyToSet, false)
+		if err != nil {
+			return errors.Wrapf(types.ErrInvalidParam, "cannot parse provided public key: (%s)", err)
+		}
+		holderPublicKey = xCoordPublicKey.Bytes()
+	}
+
+	err := k.LinkVerificationIdToPubKey(ctx, holderPublicKey, verificationId)
+	if err != nil {
+		return err
+	}
+
+	isVerificationRevoked, err := k.IsVerificationRevoked(ctx, verificationId)
+	if err != nil {
+		return err
+	}
+	if isVerificationRevoked {
+		return errors.Wrap(types.ErrBadRequest, "credential was revoked")
+	}
+
+	details, err := k.GetVerificationDetails(ctx, verificationId)
+	if err != nil {
+		return err
+	}
+
+	issuerAddress, err := sdk.AccAddressFromBech32(details.IssuerAddress)
+	if err != nil {
+		return err
+	}
+
+	credentialValue := &types.ZKCredential{
+		Type:                details.Type,
+		IssuerAddress:       issuerAddress.Bytes(),
+		HolderPublicKey:     holderPublicKey,
+		ExpirationTimestamp: details.ExpirationTimestamp,
+		IssuanceTimestamp:   details.IssuanceTimestamp,
+	}
+	credentialHash, err := credentialValue.Hash()
+	if err != nil {
+		return err
+	}
+
+	isIncluded, err := k.IsIncludedInIssuanceTree(ctx, credentialHash)
+	if err != nil {
+		return err
+	}
+
+	if !isIncluded {
+		if err = k.AddCredentialHashToIssued(ctx, credentialHash); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func closeIteratorOrPanic(iterator sdk.Iterator) {

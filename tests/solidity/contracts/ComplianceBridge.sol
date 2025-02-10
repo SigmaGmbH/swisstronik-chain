@@ -64,12 +64,17 @@ interface IComplianceBridge {
     function getRevocationTreeRoot() external returns (bytes memory);
 
     function getIssuanceTreeRoot() external returns (bytes memory);
+
+    function revokeVerification(bytes memory verificationId) external;
+
+    function convertCredential(bytes memory verificationId, bytes memory publicKey) external returns (bytes memory);
 }
 
 contract ComplianceProxy {
     event VerificationResponse(bool success, bytes data);
     event HasVerificationResponse(bool success, bytes data);
     event GetVerificationDataResponse(bool success, bytes data);
+    event RevocationResponse(bool success, bytes data);
 
     uint32 public constant VERIFICATION_TYPE = 2;
 
@@ -197,5 +202,12 @@ contract ComplianceProxy {
         bytes memory payload = abi.encodeCall(IComplianceBridge.getRevocationTreeRoot, ());
         (bool success, bytes memory data) = address(1028).staticcall(payload);
         return data;
+    }
+
+    function revokeVerification(bytes memory verificationId) public{
+        bytes memory payload = abi.encodeCall(IComplianceBridge.revokeVerification,(verificationId));
+        (bool success, bytes memory data) = address(1028).call(payload);
+
+        emit RevocationResponse(success, data);
     }
 }

@@ -203,7 +203,7 @@ pub fn encode_insert_account_balance(address: &H160, balance: &U256) -> Vec<u8> 
     let mut request = ffi::QueryInsertAccountBalance::new();
 
     request.set_address(address.as_bytes().to_vec());
-    request.set_balance(u256_to_vec(&balance));
+    request.set_balance(u256_to_vec(balance));
 
     cosmos_request.set_insertAccountBalance(request);
     cosmos_request.write_to_bytes().unwrap()
@@ -237,5 +237,28 @@ pub fn encode_get_account_code_size(address: &H160) -> Vec<u8> {
     request.set_address(address.as_bytes().to_vec());
 
     cosmos_request.set_codeSize(request);
+    cosmos_request.write_to_bytes().unwrap()
+}
+
+pub fn encode_revoke_verification(verification_id: Vec<u8>, issuer: &H160) -> Vec<u8> {
+    let mut cosmos_request = ffi::CosmosRequest::new();
+    let mut request = ffi::QueryRevokeVerification::new();
+
+    request.set_verificationId(verification_id);
+    request.set_issuer(issuer.as_bytes().to_vec());
+
+    cosmos_request.set_revokeVerification(request);
+    cosmos_request.write_to_bytes().unwrap()
+}
+
+pub fn encode_convert_credential(verification_id: Vec<u8>, holder_public_key: Vec<u8>, caller: &H160) -> Vec<u8> {
+    let mut cosmos_request = ffi::CosmosRequest::new();
+    let mut request = ffi::QueryConvertCredential::new();
+
+    request.set_holderPublicKey(holder_public_key);
+    request.set_verificationId(verification_id);
+    request.set_caller(caller.as_bytes().to_vec());
+
+    cosmos_request.set_convertCredential(request);
     cosmos_request.write_to_bytes().unwrap()
 }

@@ -19,3 +19,9 @@ sgxvm/Enclave_private.pem
 # Other
 **target**
 *run.xml*
+
+# Upgrade testing
+scripts/upgrade/old/
+scripts/upgrade/pid
+scripts/upgrade/*.log
+scripts/upgrade/.swisstronik*
