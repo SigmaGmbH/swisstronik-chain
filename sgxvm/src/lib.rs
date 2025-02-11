@@ -2,6 +2,8 @@
 #![feature(slice_as_chunks)]
 #![feature(core_intrinsics)]
 
+#[cfg(all(feature="simulation_mode", feature="hardware_mode"))] compile_error!("simulation_mode and hardware_mode features are mutually exclusive.");
+
 #[macro_use]
 extern crate sgx_tstd as std;
 extern crate alloc;

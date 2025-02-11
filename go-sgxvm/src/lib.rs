@@ -1,3 +1,5 @@
+#[cfg(all(feature="simulation_mode", feature="hardware_mode"))] compile_error!("simulation_mode and hardware_mode features are mutually exclusive.");
+
 extern crate sgx_types;
 extern crate sgx_urts;
 extern crate errno;
