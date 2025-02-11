@@ -1,11 +1,11 @@
 ############ Install Intel SGX SDK & SGX PSW
-FROM ghcr.io/sigmagmbh/sgx:2.23-jammy-554238b as base
+FROM ghcr.io/sigmagmbh/sgx:2.23-jammy-554238b AS base
 RUN wget -qO - https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | apt-key add -
 RUN apt-get update
 
 
 ############ Compilation base
-FROM base as compile-base
+FROM base AS compile-base
 
 RUN apt-get install -y protobuf-compiler curl
 
@@ -26,7 +26,7 @@ RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && \
 
 
 ############ Compile enclave & chain
-FROM compile-base as compile-chain
+FROM compile-base AS compile-chain
 
 RUN apt-get install -y automake autoconf build-essential libtool git 
 
@@ -42,7 +42,7 @@ WORKDIR /root/chain
 RUN make build
 
 ############ Node binary in Hardware Mode
-FROM base as hw-node
+FROM base AS hw-node
 
 COPY --from=compile-chain /root/chain/build/swisstronikd /usr/local/bin/swisstronikd
 COPY --from=compile-chain /root/.swisstronik-enclave /root/.swisstronik-enclave
@@ -55,7 +55,7 @@ CMD ["swisstronikd"]
 
 
 ############ Node binary in Software Mode
-FROM ubuntu:22.04 as local-node
+FROM ubuntu:22.04 AS local-node
 
 RUN apt-get update && apt-get install jq -y
 RUN rm -rf /var/lib/apt/lists/* 
