@@ -16,6 +16,8 @@
 package keeper
 
 import (
+	"errors"
+	"math"
 	"math/big"
 
 	"github.com/cometbft/cometbft/libs/log"
@@ -109,7 +111,12 @@ func (k Keeper) SetTransientBlockGasWanted(ctx sdk.Context, gasWanted uint64) {
 
 // AddTransientGasWanted adds the cumulative gas wanted in the transient store
 func (k Keeper) AddTransientGasWanted(ctx sdk.Context, gasWanted uint64) (uint64, error) {
-	result := k.GetTransientGasWanted(ctx) + gasWanted
+	currentGasWanted := k.GetTransientGasWanted(ctx)
+	if currentGasWanted > math.MaxUint64-gasWanted {
+		return 0, errors.New("uint64 overflow: addition of gasWanted would exceed maximum value")
+	}
+
+	result := currentGasWanted + gasWanted
 	k.SetTransientBlockGasWanted(ctx, result)
 	return result, nil
 }
