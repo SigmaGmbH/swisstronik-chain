@@ -215,7 +215,7 @@ require (
 replace (
 	github.com/99designs/keyring => github.com/cosmos/keyring v1.2.0
 	github.com/SigmaGmbH/librustgo v0.0.2-0.20230725120829-f1a254f14ac6 => ./go-sgxvm
-	github.com/cosmos/cosmos-sdk => github.com/cosmos/cosmos-sdk v0.47.4
+	github.com/cosmos/cosmos-sdk => github.com/SigmaGmbH/cosmos-sdk v0.47.5-0.20250212134627-bcd720d992d5
 	github.com/ethereum/go-ethereum => github.com/evmos/go-ethereum v1.10.26-evmos-rc2
 	// replace broken goleveldb
 	github.com/syndtr/goleveldb => github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
