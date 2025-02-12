@@ -37,7 +37,12 @@ func (k *Keeper) UpdateParams(goCtx context.Context, req *types.MsgUpdateParams)
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	if err := k.SetParams(ctx, req.Params); err != nil {
+	previousDenom := k.GetParams(ctx).EvmDenom
+
+	paramsToSet := req.Params
+	paramsToSet.EvmDenom = previousDenom
+
+	if err := k.SetParams(ctx, paramsToSet); err != nil {
 		return nil, err
 	}
 
