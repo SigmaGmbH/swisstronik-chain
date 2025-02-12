@@ -23,7 +23,7 @@ func RandomGenesisAccounts(simState *module.SimulationState) authtypes.GenesisAc
 			continue
 		}
 
-		initialVesting := sdk.NewCoins(sdk.NewCoin(sdk.DefaultBondDenom, simState.InitialStake.Sub(sdkmath.NewInt(simState.Rand.Int63n(10000000000)))))
+		initialVesting := sdk.NewCoins(sdk.NewCoin(sdk.DefaultBondDenom, simState.InitialStake.Sub(sdkmath.NewInt(simState.Rand.Int63n(10)))))
 		var endTime int64
 
 		startTime := simState.GenTimestamp.Unix()
