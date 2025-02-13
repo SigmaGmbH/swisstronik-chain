@@ -1,3 +1,4 @@
+use evm::GasMutState;
 #[cfg(feature = "std")]
 use std::vec::Vec;
 
@@ -5,10 +6,11 @@ use std::vec::Vec;
 use sgx_tstd::vec::Vec;
 
 use evm::interpreter::error::{ExitException, ExitResult, ExitSucceed};
+use evm::interpreter::runtime::RuntimeState;
 use primitive_types::U256;
 use substrate_bn as bn;
 
-use crate::LinearCostPrecompile;
+use crate::{LinearCostPrecompile, Precompile};
 
 fn read_fr(input: &[u8], start_inx: usize) -> Result<bn::Fr, ExitException> {
 	bn::Fr::from_slice(&input[start_inx..(start_inx + 32)]).map_err(|_| ExitException::Other("Invalid field element".into()))
@@ -32,8 +34,8 @@ fn read_point(input: &[u8], start_inx: usize) -> Result<bn::G1, ExitException> {
 pub struct Bn128Add;
 
 impl LinearCostPrecompile for Bn128Add {
-	const BASE: u64 = 15;
-	const WORD: u64 = 3;
+	const BASE: u64 = 150;
+	const WORD: u64 = 0;
 
 	fn raw_execute(
 		input: &[u8],
@@ -72,8 +74,8 @@ impl LinearCostPrecompile for Bn128Add {
 pub struct Bn128Mul;
 
 impl LinearCostPrecompile for Bn128Mul {
-	const BASE: u64 = 15;
-	const WORD: u64 = 3;
+	const BASE: u64 = 6000;
+	const WORD: u64 = 0;
 
 	fn raw_execute(
 		input: &[u8],
@@ -111,21 +113,34 @@ impl LinearCostPrecompile for Bn128Mul {
 /// The Bn128Pairing builtin
 pub struct Bn128Pairing;
 
-impl LinearCostPrecompile for Bn128Pairing {
-	const BASE: u64 = 15;
-	const WORD: u64 = 3;
+const BN_128_PAIRING_GAS_COST_PER_ELEMENT: u64 = 34000;
+const BN_128_PAIRING_MIN_GAS_COST: u64 = 45000;
 
-	fn raw_execute(
+impl<G: AsRef<RuntimeState> + GasMutState> Precompile<G> for Bn128Pairing {
+	fn execute(
 		input: &[u8],
-		_: u64,
+		gasometer: &mut G,
 	) -> (ExitResult, Vec<u8>) {
 		use bn::{AffineG1, AffineG2, Fq, Fq2, pairing_batch, G1, G2, Gt, Group};
 
 		let ret_val = if input.is_empty() {
+			if let Err(e) = gasometer.record_gas(U256::from(BN_128_PAIRING_MIN_GAS_COST)) {
+				return (e.into(), Vec::new());
+			}
+
 			U256::one()
 		} else {
 			// (a, b_a, b_b - each 64-byte affine coordinates)
 			let elements = input.len() / 192;
+
+			let gas_cost_per_element = U256::from(BN_128_PAIRING_GAS_COST_PER_ELEMENT);
+			let gas_cost = U256::from(BN_128_PAIRING_GAS_COST_PER_ELEMENT)
+				.saturating_add(gas_cost_per_element * input.len() as u64);
+
+			if let Err(e) = gasometer.record_gas(gas_cost) {
+				return (e.into(), Vec::new());
+			}
+
 			let mut vals = Vec::new();
 			for idx in 0..elements {
 				let a_x = match Fq::from_slice(&input[idx*192..idx*192+32]) {
