@@ -6,8 +6,8 @@ describe('ED25519VerifyPrecompile', () => {
     let contract
 
     before(async () => {
-        const RIP7212 = await ethers.getContractFactory('ED25519VerifyPrecompile')
-        contract = await RIP7212.deploy()
+        const Ed25519Verify = await ethers.getContractFactory('ED25519VerifyPrecompile')
+        contract = await Ed25519Verify.deploy()
         await contract.deployed()
     })
 
