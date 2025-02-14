@@ -17,8 +17,8 @@ use crate::LinearCostPrecompile;
 pub struct Ed25519Verify;
 
 impl LinearCostPrecompile for Ed25519Verify {
-    const BASE: u64 = 15;
-    const WORD: u64 = 3;
+    const BASE: u64 = 2000;
+    const WORD: u64 = 0;
 
     fn raw_execute(input: &[u8], _: u64) -> (ExitResult, Vec<u8>) {
         if input.len() < 128 {
@@ -56,8 +56,8 @@ impl LinearCostPrecompile for Ed25519Verify {
 pub struct Curve25519Add;
 
 impl LinearCostPrecompile for Curve25519Add {
-    const BASE: u64 = 60;
-    const WORD: u64 = 12;
+    const BASE: u64 = 150;
+    const WORD: u64 = 0;
 
     fn raw_execute(input: &[u8], _: u64) -> (ExitResult, Vec<u8>) {
         if input.len() % 32 != 0 {
@@ -93,8 +93,8 @@ impl LinearCostPrecompile for Curve25519Add {
 pub struct Curve25519ScalarMul;
 
 impl LinearCostPrecompile for Curve25519ScalarMul {
-    const BASE: u64 = 60;
-    const WORD: u64 = 12;
+    const BASE: u64 = 6000;
+    const WORD: u64 = 0;
 
     fn raw_execute(input: &[u8], _: u64) -> (ExitResult, Vec<u8>) {
         if input.len() != 64 {

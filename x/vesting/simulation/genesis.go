@@ -1,6 +1,7 @@
 package simulation
 
 import (
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/types/simulation"
@@ -22,7 +23,7 @@ func RandomGenesisAccounts(simState *module.SimulationState) authtypes.GenesisAc
 			continue
 		}
 
-		initialVesting := sdk.NewCoins(sdk.NewInt64Coin(sdk.DefaultBondDenom, simState.Rand.Int63n(simState.InitialStake.Int64())))
+		initialVesting := sdk.NewCoins(sdk.NewCoin(sdk.DefaultBondDenom, simState.InitialStake.Sub(sdkmath.NewInt(simState.Rand.Int63n(10)))))
 		var endTime int64
 
 		startTime := simState.GenTimestamp.Unix()
@@ -43,8 +44,8 @@ func RandomGenesisAccounts(simState *module.SimulationState) authtypes.GenesisAc
 			genesisAccs[i] = vestingtypes.NewDelayedVestingAccountRaw(bva)
 		} else {
 			var (
-				cliffDays int64 = int64(simulation.RandIntBetween(simState.Rand, 0, 30))
-				months    int64 = int64(simulation.RandIntBetween(simState.Rand, 1, 12))
+				cliffDays = int64(simulation.RandIntBetween(simState.Rand, 0, 30))
+				months    = int64(simulation.RandIntBetween(simState.Rand, 1, 12))
 			)
 			genesisAccs[i] = types.NewMonthlyVestingAccount(bacc, initialVesting, startTime, cliffDays, months)
 		}

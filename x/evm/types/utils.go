@@ -16,6 +16,7 @@
 package types
 
 import (
+	sdkmath "cosmossdk.io/math"
 	"fmt"
 	"math/big"
 
@@ -31,8 +32,8 @@ import (
 
 // DefaultPriorityReduction is the default amount of price values required for 1 unit of priority.
 // Because priority is `int64` while price is `big.Int`, it's necessary to scale down the range to keep it more pratical.
-// The default value is the same as the `sdk.DefaultPowerReduction`.
-var DefaultPriorityReduction = sdk.DefaultPowerReduction
+// The default value is the same as the original `sdk.DefaultPowerReduction`.
+var DefaultPriorityReduction = sdkmath.NewIntFromUint64(1000000)
 
 var EmptyCodeHash = crypto.Keccak256(nil)
 

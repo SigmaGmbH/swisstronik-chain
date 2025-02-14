@@ -5,9 +5,11 @@ use std::vec::Vec;
 use sgx_tstd::vec::Vec;
 
 use core::mem::size_of;
+use evm::GasMutState;
 use evm::interpreter::error::{ExitException, ExitResult, ExitSucceed};
-
-use crate::LinearCostPrecompile;
+use evm::interpreter::runtime::RuntimeState;
+use primitive_types::U256;
+use crate::Precompile;
 
 const SIGMA: [[usize; 16]; 10] = [
 	[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
@@ -84,15 +86,12 @@ pub fn compress(h: &mut [u64; 8], m: [u64; 16], t: [u64; 2], f: bool, rounds: us
 
 pub struct Blake2F;
 
-impl LinearCostPrecompile for Blake2F {
-    const BASE: u64 = 15;
-    const WORD: u64 = 3;
+const BLAKE2_F_ARG_LEN: usize = 213;
 
+impl<G: AsRef<RuntimeState> + GasMutState> Precompile<G> for Blake2F {
     /// Format of `input`:
     /// [4 bytes for rounds][64 bytes for h][128 bytes for m][8 bytes for t_0][8 bytes for t_1][1 byte for f]
-    fn raw_execute(input: &[u8], _: u64) -> (ExitResult, Vec<u8>) {
-        const BLAKE2_F_ARG_LEN: usize = 213;
-
+    fn execute(input: &[u8], gasometer: &mut G) -> (ExitResult, Vec<u8>) {
         if input.len() != BLAKE2_F_ARG_LEN {
             return (ExitException::Other("input length for Blake2 F precompile should be exactly 213 bytes".into()).into(), Vec::new());
         }
@@ -100,6 +99,11 @@ impl LinearCostPrecompile for Blake2F {
         let mut rounds_buf: [u8; 4] = [0; 4];
         rounds_buf.copy_from_slice(&input[0..4]);
         let rounds: u32 = u32::from_be_bytes(rounds_buf);
+
+        // consume gas (1 gas * rounds according to EIP-152)
+        if let Err(e) = gasometer.record_gas(U256::from(rounds)) {
+            return (e.into(), Vec::new());
+        }
 
         let mut h_buf: [u8; 64] = [0; 64];
         h_buf.copy_from_slice(&input[4..68]);

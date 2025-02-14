@@ -143,8 +143,6 @@ const (
 	Name                 = "swisstronik"
 )
 
-// this line is used by starport scaffolding # stargate/wasm/app/enabledProposals
-
 func getGovProposalHandlers() []govclient.ProposalHandler {
 	var govProposalHandlers []govclient.ProposalHandler
 	// this line is used by starport scaffolding # stargate/app/govProposalHandlers
@@ -227,6 +225,8 @@ func init() {
 
 	DefaultNodeHome = filepath.Join(userHomeDir, "."+Name)
 	RegisterCoinDenominations()
+
+	sdk.DefaultPowerReduction = evmcommontypes.PowerReduction
 }
 
 // App extends an ABCI application, but with most of its parameters exported.

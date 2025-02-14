@@ -73,6 +73,9 @@ func NewDynamicFeeChecker(k DynamicFeeEVMKeeper) authante.TxFeeChecker {
 		}
 
 		gas := feeTx.GetGas()
+		if gas == 0 {
+			return nil, 0, errorsmod.Wrapf(errortypes.ErrOutOfGas, "gas in feeTx cannot be 0")
+		}
 
 		feeCoins := feeTx.GetFee()
 		fee := feeCoins.AmountOfNoDenomValidation(denom)
