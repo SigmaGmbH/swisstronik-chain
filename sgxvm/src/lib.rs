@@ -166,44 +166,10 @@ pub unsafe extern "C" fn ecall_attest_peer_dcap(
 }
 
 #[no_mangle]
-/// Handles incoming request for sharing master key with new node using EPID attestation
-pub unsafe extern "C" fn ecall_attest_peer_epid(socket_fd: c_int) -> sgx_status_t {
-    match attestation::tls::perform_epoch_keys_provisioning(socket_fd, None, None, false) {
-        Ok(_) => sgx_status_t::SGX_SUCCESS,
-        Err(err) => err,
-    }
-}
-
-#[no_mangle]
 /// Handles initialization of a new seed node by creating and sealing master key to seed file
 /// If `reset_flag` was set to `true`, it will rewrite existing seed file
 pub unsafe extern "C" fn ecall_initialize_enclave(reset_flag: i32) -> sgx_status_t {
     key_manager::init_enclave_inner(reset_flag)
-}
-
-#[no_mangle]
-/// Handles incoming request for EPID Remote Attestation
-pub unsafe extern "C" fn ecall_request_epoch_keys_epid(
-    hostname: *const u8,
-    data_len: usize,
-    socket_fd: c_int,
-) -> sgx_status_t {
-    let hostname = slice::from_raw_parts(hostname, data_len);
-    let hostname = match String::from_utf8(hostname.to_vec()) {
-        Ok(hostname) => hostname,
-        Err(err) => {
-            println!(
-                "[Enclave] Seed Client. Cannot decode hostname. Reason: {:?}",
-                err
-            );
-            return sgx_status_t::SGX_ERROR_UNEXPECTED;
-        }
-    };
-
-    match attestation::tls::perform_master_key_request(hostname, socket_fd, None, None, false) {
-        Ok(_) => sgx_status_t::SGX_SUCCESS,
-        Err(err) => err,
-    }
 }
 
 #[no_mangle]

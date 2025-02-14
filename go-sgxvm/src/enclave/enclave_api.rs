@@ -45,11 +45,8 @@ impl EnclaveApi {
     }
 
     #[cfg(feature = "hardware_mode")]
-    pub fn attest_peer(eid: sgx_enclave_id_t, fd: i32, is_dcap: bool) -> Result<(), Error> {
-        match is_dcap {
-            true => EnclaveApi::attest_peer_dcap(eid, fd),
-            false => EnclaveApi::attest_peer_epid(eid, fd),
-        }
+    pub fn attest_peer(eid: sgx_enclave_id_t, fd: i32) -> Result<(), Error> {
+         EnclaveApi::attest_peer_dcap(eid, fd)
     }
 
     #[cfg(feature = "hardware_mode")]
@@ -92,80 +89,12 @@ impl EnclaveApi {
     }
 
     #[cfg(feature = "hardware_mode")]
-    fn attest_peer_epid(eid: sgx_enclave_id_t, fd: i32) -> Result<(), Error> {
-        let mut retval = sgx_status_t::SGX_ERROR_UNEXPECTED;
-        let res = unsafe { super::ecall_attest_peer_epid(eid, &mut retval, fd) };
-
-        if res != sgx_status_t::SGX_SUCCESS {
-            println!(
-                "[Enclave Wrapper] Cannot call `ecall_attest_peer_epid`. Reason: {:?}",
-                res
-            );
-            return Err(Error::enclave_error(res));
-        }
-
-        if retval != sgx_status_t::SGX_SUCCESS {
-            println!(
-                "[Enclave Wrapper] `ecall_attest_peer_epid` failed. Reason: {:?}",
-                retval
-            );
-            return Err(Error::enclave_error(retval));
-        }
-
-        Ok(())
-    }
-
-    #[cfg(feature = "hardware_mode")]
     pub fn request_remote_attestation(
         eid: sgx_enclave_id_t,
         hostname: String,
-        fd: i32,
-        is_dcap: bool,
+        fd: i32
     ) -> Result<(), Error> {
-        match is_dcap {
-            true => EnclaveApi::perform_dcap_attestation(eid, hostname, fd),
-            false => EnclaveApi::perform_epid_attestation(eid, hostname, fd),
-        }
-    }
-
-    #[cfg(feature = "hardware_mode")]
-    pub fn perform_epid_attestation(
-        eid: sgx_enclave_id_t,
-        hostname: String,
-        fd: i32,
-    ) -> Result<(), Error> {
-        if hostname.is_empty() {
-            return Err(Error::unset_arg("Hostname was not set"));
-        }
-
-        let mut ret_val = sgx_status_t::SGX_ERROR_UNEXPECTED;
-        let res = unsafe {
-            super::ecall_request_epoch_keys_epid(
-                eid,
-                &mut ret_val,
-                hostname.as_ptr() as *const u8,
-                hostname.len(),
-                fd,
-            )
-        };
-
-        if res != sgx_status_t::SGX_SUCCESS {
-            println!(
-                "[Enclave] Call to `ecall_request_epoch_keys_epid` failed. Status code: {:?}",
-                res
-            );
-            return Err(Error::enclave_error(res));
-        }
-
-        if ret_val != sgx_status_t::SGX_SUCCESS {
-            println!(
-                "[Enclave] `ecall_request_epoch_keys_epid` returned error: {:?}",
-                ret_val
-            );
-            return Err(Error::enclave_error(ret_val));
-        }
-
-        Ok(())
+        EnclaveApi::perform_dcap_attestation(eid, hostname, fd)
     }
 
     #[cfg(feature = "hardware_mode")]

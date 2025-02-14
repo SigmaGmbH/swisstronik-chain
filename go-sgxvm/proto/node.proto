@@ -10,7 +10,6 @@ message InitializeEnclaveResponse {}
 // Attestation server messages
 message PeerAttestationRequest {
   int32 fd = 1;
-  bool isDCAP = 2;
 }
 message PeerAttestationResponse {}
 
@@ -26,7 +25,6 @@ message RemoveLatestEpochResponse {}
 message RemoteAttestationRequest {
   int32 fd = 1;
   string hostname = 2;
-  bool isDCAP = 3;
 }
 message RemoteAttestationResponse {}
 

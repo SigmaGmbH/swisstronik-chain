@@ -147,14 +147,14 @@ func InitializeEnclave(shouldReset bool) error {
 
 // StartAttestationServer handles incoming request for starting attestation server
 // to share epoch keys with new nodes which passed Remote Attestation.
-func StartAttestationServer(epidAddress, dcapAddress string) error {
-	return api.StartAttestationServer(epidAddress, dcapAddress)
+func StartAttestationServer(dcapAddress string) error {
+	return api.StartAttestationServer(dcapAddress)
 }
 
-// RequestSeed handles requesting seed and passing Remote Attestation.
+// RequestEpochKeys handles requesting seed and passing Remote Attestation.
 // Returns error if Remote Attestation was not passed or provided seed server address is not accessible
-func RequestEpochKeys(host string, port int, isDCAP bool) error {
-	return api.RequestEpochKeys(host, port, isDCAP)
+func RequestEpochKeys(host string, port int) error {
+	return api.RequestEpochKeys(host, port)
 }
 
 // GetNodePublicKey handles request for node public key

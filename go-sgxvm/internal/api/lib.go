@@ -128,7 +128,7 @@ func InitializeEnclave(shouldReset bool) error {
 }
 
 // RequestEpochKeys handles request of epoch keys from attestation server
-func RequestEpochKeys(hostname string, port int, isDCAP bool) error {
+func RequestEpochKeys(hostname string, port int) error {
 	address := fmt.Sprintf("%s:%d", hostname, port)
 	conn, err := net.Dial("tcp", address)
 	if err != nil {
@@ -148,7 +148,6 @@ func RequestEpochKeys(hostname string, port int, isDCAP bool) error {
 		RemoteAttestationRequest: &types.RemoteAttestationRequest{
 			Fd:       int32(file.Fd()),
 			Hostname: hostname,
-			IsDCAP:   isDCAP,
 		},
 	}}
 	reqBytes, err := proto.Marshal(&req)

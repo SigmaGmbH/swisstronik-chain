@@ -36,7 +36,7 @@ type Connector = types.Connector
 func CheckNodeStatus() error {
 	return nil
 }
-func RequestEpochKeys(host string, port int, isDCAP bool) error {
+func RequestEpochKeys(host string, port int) error {
 	return nil
 }
 
@@ -56,11 +56,6 @@ func StartSeedServer(addr string) error {
 }
 
 func attestPeer(connection net.Conn) error {
-	return nil
-}
-
-// RequestSeed handles request of seed from attestation server
-func RequestSeed(hostname string, port int) error {
 	return nil
 }
 
