@@ -22,6 +22,7 @@ endif
 
 ifeq ($(CHECKER_MODE), true)
 	Wrapper_lib := libsgx_checker_wrapper_$(VERSION).x86_64.so
+	Wrapper_build_feature += checker_mode
 endif
 
 ifeq ($(SGX_MODE), HW)

@@ -22,6 +22,7 @@ sgx_urts = { git = "https://github.com/apache/teaclave-sgx-sdk.git", rev = "3c90
 attestation_server = ["hardware_mode"]
 hardware_mode = []
 simulation_mode = []
+checker_mode = ["hardware_mode"]
 
 [build-dependencies]
 cbindgen = "0.24.3"
