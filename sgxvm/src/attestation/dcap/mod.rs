@@ -307,10 +307,20 @@ pub fn verify_dcap_quote(quote: Vec<u8>, collateral: Vec<u8>) -> SgxResult<Vec<u
         return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
     }
 
+    if collateral_expiration_status != 0 {
+        println!("[Enclave] DCAP Collateral expired");
+        return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+    }
+
     // Check quote verification result
     check_quote_verification_result(quote_verification_result, collateral_expiration_status)?;
 
     // Inspect quote
+    if quote.len() < std::mem::size_of::<sgx_quote_t>() {
+        println!("[Enclave] Quote too small");
+        return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
+    }
+
     let p_quote3: *const sgx_quote3_t = quote.as_ptr() as *const sgx_quote3_t;
     let quote3: sgx_quote3_t = unsafe { *p_quote3 };
 
@@ -325,6 +335,26 @@ pub fn verify_dcap_quote(quote: Vec<u8>, collateral: Vec<u8>) -> SgxResult<Vec<u
         println!("[Enclave] Quote received from outdated enclave");
         return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
     }
+
+    // if supplemental_data_size >= std::mem::size_of::<sgx_ql_qv_supplemental_t>() as u32 {
+    //     let p_supp_fmt = supplemental_data.as_ptr() as *const sgx_ql_qv_supplemental_t;
+    //     let supp = unsafe { *p_supp_fmt };
+
+    //     println!("supp.ver = {}", supp.version);
+    //     println!("supp.earliest_issue_date = {}", supp.earliest_issue_date);
+    //     println!("supp.latest_issue_date = {}", supp.latest_issue_date);
+    //     println!(
+    //         "supp.earliest_expiration_date = {}",
+    //         supp.earliest_expiration_date
+    //     );
+    //     println!("supp.tcb_level_date_tag = {}", supp.tcb_level_date_tag);
+    //     println!("supp.pck_crl_num = {}", supp.pck_crl_num);
+    //     println!("supp.root_ca_crl_num = {}", supp.root_ca_crl_num);
+    //     println!("supp.tcb_eval_ref_num = {}", supp.tcb_eval_ref_num);
+    //     println!("supp.tcb_cpusvn = {:?}", supp.tcb_cpusvn.svn);
+    //     println!("supp.tcb_pce_isvsvn = {}", supp.tcb_pce_isvsvn);
+    //     println!("supp.pce_id = {}", supp.pce_id);
+    // }
 
     // Check for debug mode
     #[cfg(feature = "production")]
