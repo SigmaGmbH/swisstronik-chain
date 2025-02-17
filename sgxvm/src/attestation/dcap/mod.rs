@@ -389,7 +389,7 @@ fn check_quote_verification_result(
         sgx_ql_qv_result_t::SGX_QL_QV_RESULT_OK
         | sgx_ql_qv_result_t::SGX_QL_QV_RESULT_SW_HARDENING_NEEDED => {
             if 0u32 == collateral_expiration_status {
-                println!("[Enclave] Quote was verified successfully");
+                println!("[Enclave] Quote was verified successfully. Status: {:?}", quote_verification_result);
                 Ok(())
             } else {
                 println!("[Enclave] Quote was verified, but collateral is out of date");

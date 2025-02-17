@@ -97,6 +97,10 @@ build_attestation_server: go.sum
 build_attestation_server_d: go.sum
 	AS_MODE=true $(MAKE) -C go-sgxvm build_AS_d
 
+build_checker: go.sum
+	CHECKER_MODE=true MAINNET_MODE=true $(MAKE) -C go-sgxvm build
+	go build -mod=mod $(BUILD_FLAGS)  -tags osusergo,netgo,checker -o build/swisstronikd_checker ./cmd/swisstronikd
+
 ###############################################################################
 ### 		          Build commands for CLI (without SGX support) 			###
 ###############################################################################

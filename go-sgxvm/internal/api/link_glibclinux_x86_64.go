@@ -1,4 +1,4 @@
-//go:build linux && !muslc && amd64 && !sys_sgx_wrapper && !nosgx && !attestationServer
+//go:build linux && !muslc && amd64 && !sys_sgx_wrapper && !nosgx && !attestationServer && !checker
 
 package api
 

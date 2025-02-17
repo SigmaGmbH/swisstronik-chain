@@ -5,10 +5,10 @@ use std::env;
 use std::ops::Deref;
 use std::time::Duration;
 
-#[cfg(feature = "checker")]
+#[cfg(feature = "checker_mode")]
 static ENCLAVE_FILE: &'static str = "v1.0.7_checker_enclave.signed.so";
 
-#[cfg(all(not(feature = "attestation_server"), not(feature = "checker")))]
+#[cfg(all(not(feature = "attestation_server"), not(feature = "checker_mode")))]
 static ENCLAVE_FILE: &'static str = "v1.0.7_enclave.signed.so";
 
 #[cfg(feature = "attestation_server")]
