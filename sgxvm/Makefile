@@ -8,6 +8,8 @@ SGX_MODE ?= HW
 AS_MODE ?= false
 ENCLAVE_HOME ?= $(HOME)/.swisstronik-enclave
 PRODUCTION_MODE ?= false
+MAINNET_MODE ?= false
+CHECKER_MODE ?= false
 
 Trts_Library_Name = sgx_trts
 Service_Library_Name = sgx_tservice
@@ -33,6 +35,14 @@ endif
 ifeq ($(AS_MODE), true)
 	Enclave_build_feature += attestation_server
 	Enclave_signed_file := attestation_enclave.signed.so
+endif
+
+ifeq ($(MAINNET_MODE), true)
+	Enclave_build_feature += mainnet
+endif
+
+ifeq ($(CHECKER_MODE), true)
+	Enclave_signed_file := checker_enclave.signed.so
 endif
 
 ifneq ($(PRODUCTION_MODE), true) 

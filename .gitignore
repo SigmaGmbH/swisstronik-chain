@@ -15,6 +15,7 @@ sgxvm/Enclave_private.pem
 # Dynamic libraries
 **libsgx_wrapper**
 **libsgx_attestation_wrapper**
+**libsgx_checker_wrapper**
 
 # Other
 **target**
