@@ -12,10 +12,17 @@ AS_MODE ?= false
 VERSION := v1.0.7
 Wrapper_build_feature := ""
 
+CHECKER_MODE ?= false
+
 Wrapper_lib := libsgx_wrapper_$(VERSION).x86_64.so
 ifeq ($(AS_MODE), true)
 	Wrapper_lib := libsgx_attestation_wrapper_$(VERSION).x86_64.so
 	Wrapper_build_feature += attestation_server
+endif
+
+ifeq ($(CHECKER_MODE), true)
+	Wrapper_lib := libsgx_checker_wrapper_$(VERSION).x86_64.so
+	Wrapper_build_feature += checker_mode
 endif
 
 ifeq ($(SGX_MODE), HW)
