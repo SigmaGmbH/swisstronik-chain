@@ -9,7 +9,7 @@ SGX_MODE ?= HW
 ENCLAVE_HOME ?= $(HOME)/.swisstronik-enclave
 PRODUCTION_MODE ?= false
 AS_MODE ?= false
-VERSION := v1.0.7
+VERSION := v1.0.8
 Wrapper_build_feature := ""
 
 CHECKER_MODE ?= false
