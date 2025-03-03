@@ -115,5 +115,5 @@ KEYMANAGER_HOME=$KEYMANAGER_HOME ENCLAVE_HOME=$ENCLAVE_HOME $BINARY testnet init
 DAEMON_HOME=$DAEMON_HOME DAEMON_NAME=$DAEMON_NAME cosmovisor init $BINARY
 
 # add binary for upgrade
-mkdir -p $HOMEDIR/cosmovisor/upgrades/v1.0.7/bin
-cp $NEW_BINARY $HOMEDIR/cosmovisor/upgrades/v1.0.7/bin
+mkdir -p $HOMEDIR/cosmovisor/upgrades/v1.0.8/bin
+cp $NEW_BINARY $HOMEDIR/cosmovisor/upgrades/v1.0.8/bin

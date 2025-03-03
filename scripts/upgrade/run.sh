@@ -1,12 +1,12 @@
 #!/bin/bash
 
 REPO_URL="https://github.com/SigmaGmbH/swisstronik-chain.git"
-OLD_TAG="testnet-v1.0.6"
+OLD_TAG="testnet-v1.0.7"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 OLD_SOURCES="$SCRIPT_DIR/old"
 NEW_SOURCES="$SCRIPT_DIR/../.."
 
-SGX_MODE=SW
+SGX_MODE=HW
 PID_FILE="$SCRIPT_DIR/pid"
 
 OLD_BINARY="$SCRIPT_DIR/old/build/swisstronikd"
