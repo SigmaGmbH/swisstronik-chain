@@ -27,7 +27,7 @@ describe("ECRecover Test", function () {
 
     it("should recover different address from an invalid signature", async function () {
         const message = "Hello, Ethereum!";
-        const invalidMessageHash = ethers.utils.hashMessage("Invalid message рфыр");
+        const invalidMessageHash = ethers.utils.hashMessage("Invalid message");
         const signature = await signer.signMessage(message);
 
         const r = signature.slice(0, 66);
