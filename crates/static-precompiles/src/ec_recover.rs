@@ -49,10 +49,6 @@ impl LinearCostPrecompile for ECRecover {
             }
         };
 
-        if signature.s().is_high().into() {
-            return (ExitSucceed::Returned.into(), [0u8; 0].to_vec());
-        }
-
         let result = match signature.recover_verifying_key_from_digest_bytes(&msg.into()) {
             Ok(recovered_key) => {
                 // Convert Ethereum style address
