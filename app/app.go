@@ -1104,6 +1104,8 @@ func (app *App) setupUpgradeHandlers() {
 		v1_0_8.UpgradeName,
 		v1_0_8.CreateUpgradeHandler(
 			app.ModuleManager,
+			app.StakingKeeper,
+			app.GetKey(stakingtypes.StoreKey),
 			app.configurator,
 		),
 	)
