@@ -352,11 +352,7 @@ func (k msgServer) HandleConvertCredential(goCtx context.Context, msg *types.Msg
 		return nil, errors.Wrap(types.ErrBadRequest, "signer is not credential holder")
 	}
 
-	var holderPublicKey []byte
-	holderPublicKey = k.GetPubKeyByVerificationId(ctx, msg.VerificationId)
-	if holderPublicKey == nil {
-		holderPublicKey = k.GetHolderPublicKey(ctx, holderAddress)
-	}
+	holderPublicKey := k.GetHolderPublicKey(ctx, holderAddress)
 	if holderPublicKey == nil {
 		return nil, errors.Wrap(types.ErrBadRequest, "holder public key not found. Please attach it")
 	}
@@ -372,6 +368,10 @@ func (k msgServer) HandleConvertCredential(goCtx context.Context, msg *types.Msg
 	details, err := k.GetVerificationDetails(ctx, msg.VerificationId)
 	if err != nil {
 		return nil, err
+	}
+
+	if details.Type == types.VerificationType_VT_UNSPECIFIED {
+		return nil, errors.Wrap(types.ErrBadRequest, "verification not found")
 	}
 
 	issuerAddress, err := sdk.AccAddressFromBech32(details.IssuerAddress)
@@ -396,10 +396,16 @@ func (k msgServer) HandleConvertCredential(goCtx context.Context, msg *types.Msg
 		return nil, err
 	}
 
-	if !isIncluded {
-		if err = k.AddCredentialHashToIssued(ctx, credentialHash); err != nil {
-			return nil, err
-		}
+	if isIncluded {
+		return nil, errors.Wrap(types.ErrBadRequest, "credential is already included in issuance tree")
+	}
+
+	if err = k.AddCredentialHashToIssued(ctx, credentialHash); err != nil {
+		return nil, err
+	}
+
+	if err = k.LinkVerificationIdToPubKey(ctx, holderPublicKey, msg.VerificationId); err != nil {
+		return nil, err
 	}
 
 	return &types.MsgConvertCredentialResponse{}, nil

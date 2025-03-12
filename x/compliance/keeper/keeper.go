@@ -916,13 +916,11 @@ func (k Keeper) ConvertCredential(ctx sdk.Context, verificationId []byte, public
 		return err
 	}
 
-	if !isIncluded {
-		if err = k.AddCredentialHashToIssued(ctx, credentialHash); err != nil {
-			return err
-		}
+	if isIncluded {
+		return errors.Wrap(types.ErrBadRequest, "credential is already included in issuance tree")
 	}
 
-	return nil
+	return k.AddCredentialHashToIssued(ctx, credentialHash)
 }
 
 // TODO: Create fn to obtain all verified issuers with their aliases
