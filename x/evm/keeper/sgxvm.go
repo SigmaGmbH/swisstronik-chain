@@ -334,7 +334,7 @@ func (k *Keeper) ApplyMessageWithConfig(
 	// refund gas
 	temporaryGasUsed := msg.Gas() - leftoverGas
 	refundQuotient := params.RefundQuotientEIP3529
-	leftoverGas += GasToRefund(0, temporaryGasUsed, refundQuotient) // TODO: SGXVM should return gas to refund
+	leftoverGas += GasToRefund(0, temporaryGasUsed, refundQuotient)
 
 	logs := SGXVMLogsToEthereum(res.Logs, txConfig, txContext.BlockNumber)
 	return &types.MsgEthereumTxResponse{
