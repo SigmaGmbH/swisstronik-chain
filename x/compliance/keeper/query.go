@@ -364,3 +364,44 @@ func (k Querier) VerificationHolder(goCtx context.Context, req *types.QueryHolde
 
 	return &types.QueryHolderByVerificationIdResponse{Address: holder.String()}, nil
 }
+
+func (k Querier) AllVerificationDetailsByAddress(goCtx context.Context, req *types.QueryAllVerificationDetailsByAddressRequest) (*types.QueryAllVerificationDetailsByAddressResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	address, err := sdk.AccAddressFromBech32(req.Address)
+	if err != nil {
+		return nil, err
+	}
+
+	var addressDetails *types.AddressDetails
+	if req.OnlyWithExistingIssuer {
+		addressDetails, err = k.GetAddressDetails(ctx, address)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		addressDetails, err = k.GetFullAddressDetails(ctx, address)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if len(addressDetails.Verifications) == 0 {
+		return &types.QueryAllVerificationDetailsByAddressResponse{}, nil
+	}
+
+	var result []*types.VerificationDetails
+	for _, verification := range addressDetails.Verifications {
+		verificationDetails, err := k.GetRawVerificationDetails(ctx, verification.VerificationId)
+		if err != nil {
+			return nil, err
+		}
+
+		result = append(result, verificationDetails)
+	}
+
+	return &types.QueryAllVerificationDetailsByAddressResponse{Details: result}, nil
+}

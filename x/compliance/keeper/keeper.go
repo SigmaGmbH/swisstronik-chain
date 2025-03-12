@@ -499,15 +499,9 @@ func (k Keeper) MarkVerificationDetailsAsRevoked(
 }
 
 // GetVerificationDetails returns verification details for provided ID
-func (k Keeper) GetVerificationDetails(ctx sdk.Context, verificationDetailsId []byte) (*types.VerificationDetails, error) {
-	verificationDetailsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationDetails)
-	verificationDetailsBytes := verificationDetailsStore.Get(verificationDetailsId)
-	if verificationDetailsBytes == nil {
-		return &types.VerificationDetails{}, nil
-	}
-
-	var verificationDetails types.VerificationDetails
-	if err := proto.Unmarshal(verificationDetailsBytes, &verificationDetails); err != nil {
+func (k Keeper) GetVerificationDetails(ctx sdk.Context, verificationId []byte) (*types.VerificationDetails, error) {
+	verificationDetails, err := k.GetRawVerificationDetails(ctx, verificationId)
+	if err != nil {
 		return nil, err
 	}
 
@@ -522,6 +516,22 @@ func (k Keeper) GetVerificationDetails(ctx sdk.Context, verificationDetailsId []
 	}
 	if !exists {
 		return &types.VerificationDetails{}, nil
+	}
+
+	return verificationDetails, nil
+}
+
+// GetVerificationDetails returns verification details for provided ID
+func (k Keeper) GetRawVerificationDetails(ctx sdk.Context, verificationId []byte) (*types.VerificationDetails, error) {
+	verificationDetailsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationDetails)
+	verificationDetailsBytes := verificationDetailsStore.Get(verificationId)
+	if verificationDetailsBytes == nil {
+		return &types.VerificationDetails{}, nil
+	}
+
+	var verificationDetails types.VerificationDetails
+	if err := proto.Unmarshal(verificationDetailsBytes, &verificationDetails); err != nil {
+		return nil, err
 	}
 
 	return &verificationDetails, nil
