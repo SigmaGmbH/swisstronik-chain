@@ -33,7 +33,7 @@ impl LinearCostPrecompile for ECRecover {
 
         // EIP-155
         sig[64] = if input[63] > 26 {
-            input[63] - 27
+            input[63] - 27 // FIXME: probably a typo: 63 -> 64
         } else {
             input[63]
         };
