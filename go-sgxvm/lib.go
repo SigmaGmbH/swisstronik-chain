@@ -151,7 +151,7 @@ func StartAttestationServer(epidAddress, dcapAddress string) error {
 	return api.StartAttestationServer(epidAddress, dcapAddress)
 }
 
-// RequestSeed handles requesting seed and passing Remote Attestation.
+// RequestEpochKeys handles requesting seed and passing Remote Attestation.
 // Returns error if Remote Attestation was not passed or provided seed server address is not accessible
 func RequestEpochKeys(host string, port int, isDCAP bool) error {
 	return api.RequestEpochKeys(host, port, isDCAP)
