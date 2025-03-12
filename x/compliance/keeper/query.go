@@ -107,9 +107,17 @@ func (k Querier) AddressDetails(goCtx context.Context, req *types.QueryAddressDe
 		return nil, err
 	}
 
-	details, err := k.GetAddressDetails(ctx, address)
-	if err != nil {
-		return nil, err
+	var details *types.AddressDetails
+	if req.OnlyWithExistingIssuer {
+		details, err = k.GetAddressDetails(ctx, address)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		details, err = k.GetFullAddressDetails(ctx, address)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &types.QueryAddressDetailsResponse{Data: details}, nil

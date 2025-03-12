@@ -99,6 +99,7 @@ message QueryOperatorDetailsResponse {
 // QueryAddressDetailsRequest is request type for the Query/AddressDetails RPC method.
 message QueryAddressDetailsRequest {
   string address = 1;
+  bool onlyWithExistingIssuer = 2;
 }
 
 // QueryAddressDetailsResponse is response type for the Query/AddressDetails RPC method.

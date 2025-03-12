@@ -99,17 +99,10 @@ func (k Keeper) IssuerExists(ctx sdk.Context, issuerAddress sdk.AccAddress) (boo
 	return len(res.Name) > 0, nil
 }
 
-// GetAddressDetails returns address details
+// GetAddressDetails returns actual address details (without non-existent issuers)
 func (k Keeper) GetAddressDetails(ctx sdk.Context, address sdk.AccAddress) (*types.AddressDetails, error) {
-	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixAddressDetails)
-
-	addressDetailsBytes := store.Get(address.Bytes())
-	if addressDetailsBytes == nil {
-		return &types.AddressDetails{}, nil
-	}
-
-	var addressDetails types.AddressDetails
-	if err := proto.Unmarshal(addressDetailsBytes, &addressDetails); err != nil {
+	addressDetails, err := k.GetFullAddressDetails(ctx, address);
+	if err != nil {
 		return nil, err
 	}
 
@@ -129,6 +122,23 @@ func (k Keeper) GetAddressDetails(ctx sdk.Context, address sdk.AccAddress) (*typ
 		}
 	}
 	addressDetails.Verifications = newVerifications
+
+	return addressDetails, nil
+}
+
+// GetFullAddressDetails returns address details with all verifications
+func (k Keeper) GetFullAddressDetails(ctx sdk.Context, address sdk.AccAddress) (*types.AddressDetails, error) {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixAddressDetails)
+
+	addressDetailsBytes := store.Get(address.Bytes())
+	if addressDetailsBytes == nil {
+		return &types.AddressDetails{}, nil
+	}
+
+	var addressDetails types.AddressDetails
+	if err := proto.Unmarshal(addressDetailsBytes, &addressDetails); err != nil {
+		return nil, err
+	}
 
 	return &addressDetails, nil
 }
