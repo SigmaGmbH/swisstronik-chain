@@ -44,6 +44,7 @@ mod querier;
 mod storage;
 mod types;
 mod invoker;
+mod helpers;
 
 #[no_mangle]
 /// Checks if there is already sealed master key
