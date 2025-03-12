@@ -62,23 +62,27 @@ func (suite *QuerierTestSuite) SetupTest() {
 		&types.AddressDetails{
 			IsVerified: true,
 			IsRevoked:  false,
-		})
-
-	// Add verification details and address details
-	verificationId, err := suite.keeper.AddVerificationDetails(
-		suite.ctx,
-		suite.user,
-		types.VerificationType_VT_KYC,
-		&types.VerificationDetails{
-			IssuerAddress:       suite.issuer.String(),
-			OriginChain:         "test chain",
-			IssuanceTimestamp:   1712018692,
-			ExpirationTimestamp: 1715018692,
-			OriginalData:        hexutils.HexToBytes("B639DF194671CDE06EFAA368A404F72E3306DF0359117AC7E78EC2BE04B7629D"),
 		},
 	)
 	suite.Require().NoError(err)
-	suite.Require().NotNil(verificationId)
+
+	// Add multiple verification details
+	for i:=0; i<5; i++ {
+		verificationId, err := suite.keeper.AddVerificationDetails(
+			suite.ctx,
+			suite.user,
+			types.VerificationType_VT_KYC,
+			&types.VerificationDetails{
+				IssuerAddress:       suite.issuer.String(),
+				OriginChain:         "test chain",
+				IssuanceTimestamp:   1712018692 + uint32(i),
+				ExpirationTimestamp: 1715018692 + uint32(i),
+				OriginalData:        hexutils.HexToBytes("B639DF194671CDE06EFAA368A404F72E3306DF0359117AC7E78EC2BE04B7629D"),
+			},
+		)
+		suite.Require().NoError(err)
+		suite.Require().NotNil(verificationId)
+	}
 }
 
 func (suite *QuerierTestSuite) TestSuccess() {
@@ -120,13 +124,13 @@ func (suite *QuerierTestSuite) TestFailed() {
 	issuerRequest := &types.QueryIssuerDetailsRequest{
 		IssuerAddress: "invalid issuer",
 	}
-	issuerDetails, err := suite.querier.IssuerDetails(suite.goCtx, issuerRequest)
+	_, err := suite.querier.IssuerDetails(suite.goCtx, issuerRequest)
 	suite.Require().Error(err) // Failed in parsing acc address
 
 	issuerRequest = &types.QueryIssuerDetailsRequest{
 		IssuerAddress: anyUser.String(),
 	}
-	issuerDetails, err = suite.querier.IssuerDetails(suite.goCtx, issuerRequest)
+	issuerDetails, err := suite.querier.IssuerDetails(suite.goCtx, issuerRequest)
 	suite.Require().NoError(err)
 	suite.Require().Equal(issuerDetails.Details, &types.IssuerDetails{}) // Empty details, not found
 
@@ -134,13 +138,13 @@ func (suite *QuerierTestSuite) TestFailed() {
 	addressRequest := &types.QueryAddressDetailsRequest{
 		Address: "invalid address",
 	}
-	addressDetails, err := suite.querier.AddressDetails(suite.goCtx, addressRequest)
+	_, err = suite.querier.AddressDetails(suite.goCtx, addressRequest)
 	suite.Require().Error(err) // Failed in parsing acc address
 
 	addressRequest = &types.QueryAddressDetailsRequest{
 		Address: anyUser.String(),
 	}
-	addressDetails, err = suite.querier.AddressDetails(suite.goCtx, addressRequest)
+	addressDetails, err := suite.querier.AddressDetails(suite.goCtx, addressRequest)
 	suite.Require().NoError(err)
 	suite.Require().Equal(addressDetails.Data, &types.AddressDetails{})
 
@@ -148,14 +152,24 @@ func (suite *QuerierTestSuite) TestFailed() {
 	verificationRequest := &types.QueryVerificationDetailsRequest{
 		VerificationID: "invalid verification id",
 	}
-	verificationDetails, err := suite.querier.VerificationDetails(suite.goCtx, verificationRequest)
+	_, err = suite.querier.VerificationDetails(suite.goCtx, verificationRequest)
 	suite.Require().Error(err)
 	suite.Require().Contains(err.Error(), "base64")
 
 	verificationRequest = &types.QueryVerificationDetailsRequest{
 		VerificationID: "7xeEYWEV2Krw4ikPFHcJZIdiJNk5AtcbTX7QqNhY7hQ=", // random verification id
 	}
-	verificationDetails, err = suite.querier.VerificationDetails(suite.goCtx, verificationRequest)
+	verificationDetails, err := suite.querier.VerificationDetails(suite.goCtx, verificationRequest)
 	suite.Require().NoError(err)
 	suite.Require().Equal(verificationDetails.Details, &types.VerificationDetails{})
+}
+
+func (suite *QuerierTestSuite) TestQueryAllVerificationDetails() {
+	allVerificationDetailsRequest := &types.QueryAllVerificationDetailsByAddressRequest{
+		Address: suite.user.String(),
+	}
+
+	allVerificationDetails, err := suite.querier.AllVerificationDetailsByAddress(suite.goCtx, allVerificationDetailsRequest)
+	suite.Require().NoError(err)
+	suite.Require().Equal(5, len(allVerificationDetails.Details))
 }
