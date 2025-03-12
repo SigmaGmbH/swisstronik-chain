@@ -101,7 +101,7 @@ func (k Keeper) IssuerExists(ctx sdk.Context, issuerAddress sdk.AccAddress) (boo
 
 // GetAddressDetails returns actual address details (without non-existent issuers)
 func (k Keeper) GetAddressDetails(ctx sdk.Context, address sdk.AccAddress) (*types.AddressDetails, error) {
-	addressDetails, err := k.GetFullAddressDetails(ctx, address);
+	addressDetails, err := k.GetFullAddressDetails(ctx, address)
 	if err != nil {
 		return nil, err
 	}
@@ -505,7 +505,12 @@ func (k Keeper) GetVerificationDetails(ctx sdk.Context, verificationId []byte) (
 		return nil, err
 	}
 
-	// Check if issuer exists. If removed, delete verification data from store
+	// Check if verification details exist, return empty struct if not
+	if verificationDetails.Type == types.VerificationType_VT_UNSPECIFIED {
+		return &types.VerificationDetails{}, nil
+	}
+
+	// Check if issuer exists
 	issuerAddress, err := sdk.AccAddressFromBech32(verificationDetails.IssuerAddress)
 	if err != nil {
 		return nil, err
@@ -521,7 +526,7 @@ func (k Keeper) GetVerificationDetails(ctx sdk.Context, verificationId []byte) (
 	return verificationDetails, nil
 }
 
-// GetVerificationDetails returns verification details for provided ID
+// GetRawVerificationDetails returns verification details for provided ID
 func (k Keeper) GetRawVerificationDetails(ctx sdk.Context, verificationId []byte) (*types.VerificationDetails, error) {
 	verificationDetailsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationDetails)
 	verificationDetailsBytes := verificationDetailsStore.Get(verificationId)
