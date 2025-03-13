@@ -1,12 +1,13 @@
 use sha3::{Keccak256, Digest};
 use k256::{
     ecdsa::recoverable,
-    elliptic_curve::{sec1::ToEncodedPoint, IsHigh},
+    elliptic_curve::{sec1::ToEncodedPoint},
 };
+use primitive_types::H256;
 
 pub mod tx;
 
-pub fn recover_sender(msg: &[u8; 32], sig: &[u8; 65]) -> Option<[u8; 20]> {
+pub fn recover_sender(msg: &H256, sig: &[u8; 65]) -> Option<[u8; 20]> {
     let mut sig_buf = [0u8; 65];
     sig_buf.copy_from_slice(sig);
 
@@ -14,12 +15,12 @@ pub fn recover_sender(msg: &[u8; 32], sig: &[u8; 65]) -> Option<[u8; 20]> {
         sig_buf[64] = sig[64] - 27
     }
 
-    let signature = match recoverable::Signature::try_from(&sig_buf) {
+    let signature = match recoverable::Signature::try_from(&sig_buf[..]) {
         Ok(signature) => signature,
         Err(_) => return None,
     };
 
-    let recovered_key = match signature.recover_verifying_key_from_digest_bytes(&msg.into()) {
+    let recovered_key = match signature.recover_verifying_key_from_digest_bytes(msg.as_bytes().into()) {
         Ok(key) => key,
         Err(_) => return None,
     };

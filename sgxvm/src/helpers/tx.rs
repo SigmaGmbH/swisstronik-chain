@@ -53,7 +53,7 @@ impl Transaction {
         stream.begin_list(self.access_list.len());
         for (address, storage_keys) in &self.access_list {
             stream.begin_list(2);
-            stream.append(&address);
+            stream.append(address);
 
             stream.begin_list(storage_keys.len());
             for key in storage_keys {
