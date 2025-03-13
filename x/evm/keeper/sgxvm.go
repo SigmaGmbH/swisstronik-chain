@@ -307,11 +307,13 @@ func (k *Keeper) ApplyMessageWithConfig(
 			msg.Value().Bytes(),
 			msg.AccessList(),
 			leftoverGas,
-			msg.GasPrice().Bytes(),
+			msg.GasPrice(),
 			msg.Nonce(),
 			txContext,
 			commit,
 			transactionSignature,
+			msg.GasFeeCap(),
+			msg.GasTipCap(),
 		)
 		k.SetNonce(ctx, msg.From(), msg.Nonce()+1)
 	} else {
@@ -323,12 +325,14 @@ func (k *Keeper) ApplyMessageWithConfig(
 			msg.Value().Bytes(),
 			msg.AccessList(),
 			leftoverGas,
-			msg.GasPrice().Bytes(),
+			msg.GasPrice(),
 			msg.Nonce(),
 			txContext,
 			commit,
 			isUnencrypted,
 			transactionSignature,
+			msg.GasFeeCap(),
+			msg.GasTipCap(),
 		)
 	}
 

@@ -3,6 +3,7 @@ package librustgo
 import (
 	"github.com/SigmaGmbH/librustgo/internal/api"
 	"github.com/SigmaGmbH/librustgo/types"
+	"math/big"
 
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 )
@@ -108,14 +109,16 @@ func Call(
 	from, to, data, value []byte,
 	accessList ethtypes.AccessList,
 	gasLimit uint64,
-	gasPrice []byte,
+	gasPrice *big.Int,
 	nonce uint64,
 	txContext *TransactionContext,
 	commit bool,
 	isUnencrypted bool,
 	transactionSignature []byte,
+	maxFeePerGas *big.Int,
+	maxPriorityFeePerGas *big.Int,
 ) (*types.HandleTransactionResponse, error) {
-	executionResult, err := api.Call(querier, from, to, data, value, accessList, gasLimit, gasPrice, nonce, txContext, commit, isUnencrypted, transactionSignature)
+	executionResult, err := api.Call(querier, from, to, data, value, accessList, gasLimit, gasPrice, nonce, txContext, commit, isUnencrypted, transactionSignature, maxFeePerGas, maxPriorityFeePerGas)
 	if err != nil {
 		return &types.HandleTransactionResponse{}, err
 	}
@@ -129,13 +132,15 @@ func Create(
 	from, data, value []byte,
 	accessList ethtypes.AccessList,
 	gasLimit uint64,
-	gasPrice []byte,
+	gasPrice *big.Int,
 	nonce uint64,
 	txContext *TransactionContext,
 	commit bool,
 	transactionSignature []byte,
+	maxFeePerGas *big.Int,
+	maxPriorityFeePerGas *big.Int,
 ) (*types.HandleTransactionResponse, error) {
-	executionResult, err := api.Create(querier, from, data, value, accessList, gasLimit, gasPrice, nonce, txContext, commit, transactionSignature)
+	executionResult, err := api.Create(querier, from, data, value, accessList, gasLimit, gasPrice, nonce, txContext, commit, transactionSignature, maxFeePerGas, maxPriorityFeePerGas)
 	if err != nil {
 		return &types.HandleTransactionResponse{}, err
 	}

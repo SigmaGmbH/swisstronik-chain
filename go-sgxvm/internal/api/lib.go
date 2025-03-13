@@ -12,6 +12,7 @@ import (
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"google.golang.org/protobuf/proto"
 	"log"
+	"math/big"
 	"net"
 	"runtime"
 
@@ -266,12 +267,14 @@ func Call(
 	from, to, data, value []byte,
 	accessList ethtypes.AccessList,
 	gasLimit uint64,
-	gasPrice []byte,
+	gasPrice *big.Int,
 	nonce uint64,
 	txContext *types.TransactionContext,
 	commit bool,
 	isUnencrypted bool,
 	transactionSignature []byte,
+	maxFeePerGas *big.Int,
+	maxPriorityFeePerGas *big.Int,
 ) (*types.HandleTransactionResponse, error) {
 	// Construct mocked querier
 	c := BuildConnector(connector)
@@ -282,13 +285,22 @@ func Call(
 		To:          to,
 		Data:        data,
 		GasLimit:    gasLimit,
-		GasPrice:    gasPrice,
 		Value:       value,
 		AccessList:  convertAccessList(accessList),
 		Commit:      commit,
 		Nonce:       nonce,
 		Unencrypted: isUnencrypted,
 		Signature:   transactionSignature,
+	}
+
+	if gasPrice != nil {
+		params.GasPrice = gasPrice.Bytes()
+	}
+	if maxFeePerGas != nil {
+		params.MaxFeePerGas = maxFeePerGas.Bytes()
+	}
+	if maxPriorityFeePerGas != nil {
+		params.MaxPriorityFeePerGas = maxPriorityFeePerGas.Bytes()
 	}
 
 	// Create protobuf encoded request
@@ -331,11 +343,13 @@ func Create(
 	from, data, value []byte,
 	accessList ethtypes.AccessList,
 	gasLimit uint64,
-	gasPrice []byte,
+	gasPrice *big.Int,
 	nonce uint64,
 	txContext *types.TransactionContext,
 	commit bool,
 	transactionSignature []byte,
+	maxFeePerGas *big.Int,
+	maxPriorityFeePerGas *big.Int,
 ) (*types.HandleTransactionResponse, error) {
 	// Construct mocked querier
 	c := BuildConnector(connector)
@@ -345,12 +359,20 @@ func Create(
 		From:       from,
 		Data:       data,
 		GasLimit:   gasLimit,
-		GasPrice:   gasPrice,
 		Value:      value,
 		AccessList: convertAccessList(accessList),
 		Commit:     commit,
 		Nonce:      nonce,
 		Signature:  transactionSignature,
+	}
+	if gasPrice != nil {
+		params.GasPrice = gasPrice.Bytes()
+	}
+	if maxFeePerGas != nil {
+		params.MaxFeePerGas = maxFeePerGas.Bytes()
+	}
+	if maxPriorityFeePerGas != nil {
+		params.MaxPriorityFeePerGas = maxPriorityFeePerGas.Bytes()
 	}
 
 	// Create protobuf encoded request

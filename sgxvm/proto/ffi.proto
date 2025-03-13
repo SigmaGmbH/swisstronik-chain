@@ -294,6 +294,8 @@ message SGXVMCallParams {
   uint64 nonce = 9;
   bool unencrypted = 10;
   bytes signature = 11;
+  bytes maxPriorityFeePerGas = 12;
+  bytes maxFeePerGas = 13;
 }
 
 // Message with data required to execute `create` operation
@@ -307,6 +309,8 @@ message SGXVMCreateParams {
   bool commit = 7;
   uint64 nonce = 8;
   bytes signature = 9;
+  bytes maxPriorityFeePerGas = 10;
+  bytes maxFeePerGas = 11;
 }
 
 // Request to execute `call` operation
