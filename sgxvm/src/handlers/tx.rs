@@ -65,14 +65,25 @@ pub fn handle_call_request_inner(
 ) -> ExecutionResult {
     let tx = Transaction::from(data.clone());
     let tx_hash = tx.hash();
+    println!("DEBUG: CALCULATED TX HASH: {:?}", tx_hash.to_string());
 
     let params = data.params.unwrap();
     let context = data.context.unwrap();
 
-    let tx_sender = recover_sender(&tx_hash, &params.signature);
-    if let Some(sender) = tx_sender {
-        println!("DEBUG: RECOVERED ORIGINAL SENDER: {:?}", H160::from_slice(&sender).to_string());
-        println!("DEBUG: EXPECTED SENDER: {:?}", H160::from_slice(&sender).to_string());
+    let tx_sender = if params.signature.is_empty() {
+        H160::default()
+    } else {
+        match recover_sender(&tx_hash, &params.signature) {
+            Some(sender) => H160::from_slice(&sender),
+            None => H160::default()
+        }
+    };
+
+    println!("DEBUG: RECOVERED ORIGINAL SENDER: {:?}", tx_sender.to_string());
+    println!("DEBUG: EXPECTED SENDER: {:?}", H160::from_slice(&params.from).to_string());
+
+    if tx_sender != H160::from_slice(&params.from) {
+        return ExecutionResult::from_error("Corrupted signature. Provided sender is invalid".to_string(), Vec::new(), None)
     }
 
     let should_commit = params.commit;
@@ -136,8 +147,29 @@ pub fn handle_create_request_inner(
     querier: *mut GoQuerier,
     data: SGXVMCreateRequest,
 ) -> ExecutionResult {
+    let tx = Transaction::from(data.clone());
+    let tx_hash = tx.hash();
+    println!("DEBUG: CALCULATED TX HASH: {:?}", tx_hash.to_string());
+
     let params = data.params.unwrap();
     let context = data.context.unwrap();
+
+    let tx_sender = if params.signature.is_empty() {
+        H160::default()
+    } else {
+        match recover_sender(&tx_hash, &params.signature) {
+            Some(sender) => H160::from_slice(&sender),
+            None => H160::default()
+        }
+    };
+
+    println!("DEBUG: RECOVERED ORIGINAL SENDER: {:?}", tx_sender.to_string());
+    println!("DEBUG: EXPECTED SENDER: {:?}", H160::from_slice(&params.from).to_string());
+
+    if tx_sender != H160::from_slice(&params.from) {
+        return ExecutionResult::from_error("Corrupted signature. Provided sender is invalid".to_string(), Vec::new(), None)
+    }
+
     let should_commit = params.commit;
 
     run_tx(querier, context, params.into(), should_commit)
