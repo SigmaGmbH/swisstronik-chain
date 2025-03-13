@@ -1,7 +1,9 @@
 use primitive_types::{H160, H256, U256};
+use protobuf::RepeatedField;
 use std::vec::Vec;
 use rlp::{RlpStream};
 use sha3::{Digest, Keccak256};
+use crate::protobuf_generated::ffi::{AccessListItem, SGXVMCallRequest, SGXVMCreateRequest};
 
 enum TransactionType {
     Legacy,
@@ -9,7 +11,7 @@ enum TransactionType {
     EIP1559,
 }
 
-struct Transaction {
+pub struct Transaction {
     tx_type: TransactionType,
 
     nonce: U256,
@@ -47,6 +49,8 @@ impl Transaction {
 
         // EIP-155 fields for signing
         stream.append(&U256::from(self.chain_id));
+        stream.append_empty_data();
+        stream.append_empty_data();
     }
 
     fn rlp_append_access_list(&self, stream: &mut RlpStream) {
@@ -105,7 +109,7 @@ impl Transaction {
         self.rlp_append_access_list(stream);
     }
 
-    fn hash(&self) -> H256 {
+    pub fn hash(&self) -> H256 {
         match self.tx_type {
             TransactionType::Legacy => {
                 let mut stream = RlpStream::new();
@@ -137,4 +141,107 @@ impl Transaction {
             }
         }
     }
+}
+
+impl From<SGXVMCallRequest> for Transaction {
+    fn from(request: SGXVMCallRequest) -> Transaction {
+        let params = request.params.unwrap();
+        let context = request.context.unwrap();
+
+        let tx_type = match (params.accessList.is_empty(), params.maxFeePerGas.is_empty(), params.maxPriorityFeePerGas.is_empty()) {
+            (true, true, true) => TransactionType::Legacy,
+            (false, _, _) => TransactionType::EIP2930,
+            (_, false, _) => TransactionType::EIP1559,
+            _ => TransactionType::EIP1559,
+        };
+
+        let gas_price = match params.gasPrice.is_empty() {
+            true => Some(U256::from_big_endian(&params.gasPrice)),
+            false => None,
+        };
+
+        let max_priority_fee_per_gas = match params.maxPriorityFeePerGas.is_empty() {
+            true => Some(U256::from_big_endian(&params.maxPriorityFeePerGas)),
+            false => None,
+        };
+
+        let max_fee_per_gas = match params.maxFeePerGas.is_empty() {
+            true => Some(U256::from_big_endian(&params.maxFeePerGas)),
+            false => None,
+        };
+
+        Transaction {
+            tx_type,
+            nonce: U256::from(params.nonce),
+            gas_limit: U256::from(params.gasLimit),
+            to: Some(H160::from_slice(&params.to)),
+            value: U256::from_big_endian(&params.value),
+            data: params.data,
+            chain_id: context.chain_id,
+            gas_price,
+            max_priority_fee_per_gas,
+            max_fee_per_gas,
+            access_list: parse_access_list(params.accessList),
+        }
+    }
+}
+
+impl From<SGXVMCreateRequest> for Transaction {
+    fn from(request: SGXVMCreateRequest) -> Transaction {
+        let params = request.params.unwrap();
+        let context = request.context.unwrap();
+
+        let tx_type = match (params.accessList.is_empty(), params.maxFeePerGas.is_empty(), params.maxPriorityFeePerGas.is_empty()) {
+            (true, true, true) => TransactionType::Legacy,
+            (false, _, _) => TransactionType::EIP2930,
+            (_, false, _) => TransactionType::EIP1559,
+            _ => TransactionType::EIP1559,
+        };
+
+        let gas_price = match params.gasPrice.is_empty() {
+            true => Some(U256::from_big_endian(&params.gasPrice)),
+            false => None,
+        };
+
+        let max_priority_fee_per_gas = match params.maxPriorityFeePerGas.is_empty() {
+            true => Some(U256::from_big_endian(&params.maxPriorityFeePerGas)),
+            false => None,
+        };
+
+        let max_fee_per_gas = match params.maxFeePerGas.is_empty() {
+            true => Some(U256::from_big_endian(&params.maxFeePerGas)),
+            false => None,
+        };
+
+        Transaction {
+            tx_type,
+            nonce: U256::from(params.nonce),
+            gas_limit: U256::from(params.gasLimit),
+            to: None,
+            value: U256::from_big_endian(&params.value),
+            data: params.data,
+            chain_id: context.chain_id,
+            gas_price,
+            max_priority_fee_per_gas,
+            max_fee_per_gas,
+            access_list: parse_access_list(params.accessList),
+        }
+    }
+}
+
+pub fn parse_access_list(data: RepeatedField<AccessListItem>) -> Vec<(H160, Vec<H256>)> {
+    let mut access_list = Vec::default();
+    for access_list_item in data.to_vec() {
+        let address = H160::from_slice(&access_list_item.address);
+        let slots = access_list_item
+            .storageSlot
+            .to_vec()
+            .into_iter()
+            .map(|item| H256::from_slice(&item))
+            .collect();
+
+        access_list.push((address, slots));
+    }
+
+    access_list
 }

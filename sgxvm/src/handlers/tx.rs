@@ -1,3 +1,4 @@
+use crate::helpers::tx::Transaction;
 use evm::standard::{Etable, EtableResolver, TransactArgs, TransactValue};
 use primitive_types::{H160, H256, U256};
 use protobuf::Message;
@@ -15,6 +16,7 @@ use crate::AllocationWithResult;
 use crate::GoQuerier;
 use crate::handlers::utils::{convert_logs, parse_access_list};
 use crate::backend::{TxEnvironment, Backend};
+use crate::helpers::recover_sender;
 use crate::invoker::OverlayedInvoker;
 
 /// Converts raw execution result into protobuf and returns it outside of enclave
@@ -61,8 +63,17 @@ pub fn handle_call_request_inner(
     querier: *mut GoQuerier,
     data: SGXVMCallRequest,
 ) -> ExecutionResult {
+    let tx = Transaction::from(data.clone());
+    let tx_hash = tx.hash();
+
     let params = data.params.unwrap();
     let context = data.context.unwrap();
+
+    let tx_sender = recover_sender(&tx_hash, &params.signature);
+    if let Some(sender) = tx_sender {
+        println!("DEBUG: RECOVERED ORIGINAL SENDER: {:?}", H160::from_slice(&sender).to_string());
+        println!("DEBUG: EXPECTED SENDER: {:?}", H160::from_slice(&sender).to_string());
+    }
 
     let should_commit = params.commit;
     let block_number = context.block_number;
