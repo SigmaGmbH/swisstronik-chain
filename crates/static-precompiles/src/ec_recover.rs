@@ -10,7 +10,7 @@ use k256::sha2::Digest;
 use sha3::Keccak256;
 use k256::{
     ecdsa::recoverable,
-    elliptic_curve::{sec1::ToEncodedPoint, IsHigh},
+    elliptic_curve::{sec1::ToEncodedPoint},
 };
 use crate::LinearCostPrecompile;
 
