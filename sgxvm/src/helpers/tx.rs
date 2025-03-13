@@ -1,3 +1,4 @@
+use alloc::string::ToString;
 use primitive_types::{H160, H256, U256};
 use protobuf::RepeatedField;
 use std::vec::Vec;
@@ -90,6 +91,17 @@ impl Transaction {
     fn rlp_append_eip1559(&self, stream: &mut RlpStream) {
         stream.begin_list(9);
 
+        println!("Chain id: {}", self.chain_id);
+        println!("nonce: {}", self.nonce);
+        println!("max_priority_fee_per_gas: {}", self.max_priority_fee_per_gas.unwrap_or_default().to_string());
+        println!("max_fee_per_gas: {}", self.max_fee_per_gas.unwrap_or_default().to_string());
+        println!("gas_limit: {}", self.gas_limit.to_string() );
+        println!("to: {}", self.to.unwrap_or_default().to_string() );
+        println!("value: {}", self.value.to_string());
+        println!("data: {:?}", self.data);
+        println!("access list: {:?}", self.access_list);
+        println!("gas price: {:?}", self.gas_price.unwrap_or_default().to_string());
+
         stream.append(&self.chain_id);
         stream.append(&self.nonce);
         stream.append(&self.max_priority_fee_per_gas.unwrap_or_default());
@@ -155,21 +167,6 @@ impl From<SGXVMCallRequest> for Transaction {
             _ => TransactionType::EIP1559,
         };
 
-        let gas_price = match params.gasPrice.is_empty() {
-            true => Some(U256::from_big_endian(&params.gasPrice)),
-            false => None,
-        };
-
-        let max_priority_fee_per_gas = match params.maxPriorityFeePerGas.is_empty() {
-            true => Some(U256::from_big_endian(&params.maxPriorityFeePerGas)),
-            false => None,
-        };
-
-        let max_fee_per_gas = match params.maxFeePerGas.is_empty() {
-            true => Some(U256::from_big_endian(&params.maxFeePerGas)),
-            false => None,
-        };
-
         Transaction {
             tx_type,
             nonce: U256::from(params.nonce),
@@ -178,9 +175,9 @@ impl From<SGXVMCallRequest> for Transaction {
             value: U256::from_big_endian(&params.value),
             data: params.data,
             chain_id: context.chain_id,
-            gas_price,
-            max_priority_fee_per_gas,
-            max_fee_per_gas,
+            gas_price: Some(U256::from_big_endian(&params.gasPrice)),
+            max_priority_fee_per_gas: Some(U256::from_big_endian(&params.maxPriorityFeePerGas)),
+            max_fee_per_gas: Some(U256::from_big_endian(&params.maxFeePerGas)),
             access_list: parse_access_list(params.accessList),
         }
     }
@@ -198,21 +195,6 @@ impl From<SGXVMCreateRequest> for Transaction {
             _ => TransactionType::EIP1559,
         };
 
-        let gas_price = match params.gasPrice.is_empty() {
-            true => Some(U256::from_big_endian(&params.gasPrice)),
-            false => None,
-        };
-
-        let max_priority_fee_per_gas = match params.maxPriorityFeePerGas.is_empty() {
-            true => Some(U256::from_big_endian(&params.maxPriorityFeePerGas)),
-            false => None,
-        };
-
-        let max_fee_per_gas = match params.maxFeePerGas.is_empty() {
-            true => Some(U256::from_big_endian(&params.maxFeePerGas)),
-            false => None,
-        };
-
         Transaction {
             tx_type,
             nonce: U256::from(params.nonce),
@@ -221,9 +203,9 @@ impl From<SGXVMCreateRequest> for Transaction {
             value: U256::from_big_endian(&params.value),
             data: params.data,
             chain_id: context.chain_id,
-            gas_price,
-            max_priority_fee_per_gas,
-            max_fee_per_gas,
+            gas_price: Some(U256::from_big_endian(&params.gasPrice)),
+            max_priority_fee_per_gas: Some(U256::from_big_endian(&params.maxPriorityFeePerGas)),
+            max_fee_per_gas: Some(U256::from_big_endian(&params.maxFeePerGas)),
             access_list: parse_access_list(params.accessList),
         }
     }

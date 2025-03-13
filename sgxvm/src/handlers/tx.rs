@@ -70,6 +70,8 @@ pub fn handle_call_request_inner(
     let params = data.params.unwrap();
     let context = data.context.unwrap();
 
+    println!("DEBUG: MAX FEE PER GAS: {:?}", U256::from_big_endian(&params.maxFeePerGas));
+
     let tx_sender = if params.signature.is_empty() {
         H160::default()
     } else {
