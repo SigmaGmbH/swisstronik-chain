@@ -239,10 +239,8 @@ func (k Keeper) EthCall(c context.Context, req *types.EthCallRequest) (*types.Ms
 
 	var combinedSignature []byte
 	if args.V != nil && args.S != nil && args.R != nil {
-		v := args.V.ToInt()
-		s := args.S.ToInt()
-		r := args.R.ToInt()
-		combinedSignature, err = CombineSignature(v, r, s)
+		v, s, r := args.V.ToInt(), args.S.ToInt(), args.R.ToInt()
+		combinedSignature, err = CombineSignature(v, r, s, cfg.ChainConfig.ChainID)
 		if err != nil {
 			return nil, status.Error(codes.Internal, err.Error())
 		}
