@@ -48,6 +48,17 @@ message HandleTransactionResponse {
   uint64 gas_used = 5;
 }
 
+message HandleEstimateGasRequest {
+  TransactionData tx_data = 1;
+  TransactionContext tx_context = 2;
+}
+message HandleEstimateGasResponse {
+  // vm error is the error returned by vm execution
+  string vm_error = 1;
+  // gas consumed by the transaction
+  uint64 gas_used = 2;
+}
+
 // Topic represents 32-byte words that is used to describe what’s going on in an
 // event
 message Topic { bytes inner = 1; }
