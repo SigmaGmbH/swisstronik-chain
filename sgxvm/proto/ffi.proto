@@ -293,6 +293,7 @@ message SGXVMCallParams {
   bool commit = 8;
   uint64 nonce = 9;
   bool unencrypted = 10;
+  bytes signature = 11;
 }
 
 // Message with data required to execute `create` operation
@@ -305,6 +306,7 @@ message SGXVMCreateParams {
   repeated AccessListItem accessList = 6;
   bool commit = 7;
   uint64 nonce = 8;
+  bytes signature = 9;
 }
 
 // Request to execute `call` operation

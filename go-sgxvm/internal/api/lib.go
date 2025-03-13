@@ -271,6 +271,7 @@ func Call(
 	txContext *types.TransactionContext,
 	commit bool,
 	isUnencrypted bool,
+	transactionSignature []byte,
 ) (*types.HandleTransactionResponse, error) {
 	// Construct mocked querier
 	c := BuildConnector(connector)
@@ -287,6 +288,7 @@ func Call(
 		Commit:      commit,
 		Nonce:       nonce,
 		Unencrypted: isUnencrypted,
+		Signature:   transactionSignature,
 	}
 
 	// Create protobuf encoded request
@@ -333,6 +335,7 @@ func Create(
 	nonce uint64,
 	txContext *types.TransactionContext,
 	commit bool,
+	transactionSignature []byte,
 ) (*types.HandleTransactionResponse, error) {
 	// Construct mocked querier
 	c := BuildConnector(connector)
@@ -347,6 +350,7 @@ func Create(
 		AccessList: convertAccessList(accessList),
 		Commit:     commit,
 		Nonce:      nonce,
+		Signature:  transactionSignature,
 	}
 
 	// Create protobuf encoded request

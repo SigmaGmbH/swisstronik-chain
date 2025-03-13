@@ -113,8 +113,9 @@ func Call(
 	txContext *TransactionContext,
 	commit bool,
 	isUnencrypted bool,
+	transactionSignature []byte,
 ) (*types.HandleTransactionResponse, error) {
-	executionResult, err := api.Call(querier, from, to, data, value, accessList, gasLimit, gasPrice, nonce, txContext, commit, isUnencrypted)
+	executionResult, err := api.Call(querier, from, to, data, value, accessList, gasLimit, gasPrice, nonce, txContext, commit, isUnencrypted, transactionSignature)
 	if err != nil {
 		return &types.HandleTransactionResponse{}, err
 	}
@@ -132,8 +133,9 @@ func Create(
 	nonce uint64,
 	txContext *TransactionContext,
 	commit bool,
+	transactionSignature []byte,
 ) (*types.HandleTransactionResponse, error) {
-	executionResult, err := api.Create(querier, from, data, value, accessList, gasLimit, gasPrice, nonce, txContext, commit)
+	executionResult, err := api.Create(querier, from, data, value, accessList, gasLimit, gasPrice, nonce, txContext, commit, transactionSignature)
 	if err != nil {
 		return &types.HandleTransactionResponse{}, err
 	}

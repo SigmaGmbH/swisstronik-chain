@@ -171,7 +171,13 @@ func (k *Keeper) ApplySGXVMTransaction(
 		tmpCtx, commit = ctx.CacheContext()
 	}
 
-	res, err := k.ApplyMessageWithConfig(tmpCtx, msg, true, cfg, txConfig, txContext, isUnencrypted)
+	v, r, s := tx.RawSignatureValues()
+	combinedSignature, err := CombineSignature(v, r, s)
+	if err != nil {
+		return nil, errorsmod.Wrap(err, "failed to extract signature from tx")
+	}
+
+	res, err := k.ApplyMessageWithConfig(tmpCtx, msg, true, cfg, txConfig, txContext, isUnencrypted, combinedSignature)
 	if err != nil {
 		return nil, errorsmod.Wrap(err, "failed to apply ethereum core message")
 	}
@@ -263,6 +269,7 @@ func (k *Keeper) ApplyMessageWithConfig(
 	txConfig types.TxConfig,
 	txContext *librustgo.TransactionContext,
 	isUnencrypted bool,
+	transactionSignature []byte,
 ) (*types.MsgEthereumTxResponse, error) {
 	// return error if contract creation or call are disabled through governance
 	if !cfg.Params.EnableCreate && msg.To() == nil {
@@ -304,6 +311,7 @@ func (k *Keeper) ApplyMessageWithConfig(
 			msg.Nonce(),
 			txContext,
 			commit,
+			transactionSignature,
 		)
 		k.SetNonce(ctx, msg.From(), msg.Nonce()+1)
 	} else {
@@ -320,6 +328,7 @@ func (k *Keeper) ApplyMessageWithConfig(
 			txContext,
 			commit,
 			isUnencrypted,
+			transactionSignature,
 		)
 	}
 
@@ -420,4 +429,27 @@ func SGXVMLogToEthereum(log *librustgo.Log, txConfig types.TxConfig, blockNumber
 		Index:       txConfig.LogIndex + index,
 		Removed:     false,
 	}
+}
+
+// CombineSignature combines v, r, and s into a 65-byte ABI-packed signature.
+func CombineSignature(v, r, s *big.Int) ([]byte, error) {
+	if r.BitLen() > 256 || s.BitLen() > 256 {
+		return nil, fmt.Errorf("r and s must be 32 bytes or less")
+	}
+
+	if !v.IsUint64() || v.Uint64() > 255 {
+		return nil, fmt.Errorf("v must be a valid uint8 value (0-255)")
+	}
+	vUint8 := uint8(v.Uint64())
+
+	signature := make([]byte, 65)
+
+	rBytes := common.LeftPadBytes(r.Bytes(), 32)
+	sBytes := common.LeftPadBytes(s.Bytes(), 32)
+	copy(signature[0:32], rBytes)
+	copy(signature[32:64], sBytes)
+
+	signature[64] = vUint8
+
+	return signature, nil
 }
