@@ -357,7 +357,7 @@ func EstimateGas(
 	c := BuildConnector(connector)
 
 	// Create protobuf-encoded transaction data
-	params := &types.SGXVMCallParams{
+	params := &types.SGXVMEstimateGasParams{
 		From:        from,
 		Data:        data,
 		GasLimit:    gasLimit,
@@ -385,7 +385,7 @@ func EstimateGas(
 
 	// Create protobuf encoded request
 	req := types.FFIRequest{Req: &types.FFIRequest_EstimateGasRequest{
-		EstimateGasRequest: &types.SGXVMCallRequest{
+		EstimateGasRequest: &types.SGXVMEstimateGasRequest{
 			Params:  params,
 			Context: txContext,
 		},
