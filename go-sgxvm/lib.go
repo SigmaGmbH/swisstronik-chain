@@ -136,12 +136,11 @@ func EstimateGas(
 	nonce uint64,
 	txContext *TransactionContext,
 	isUnencrypted bool,
-	transactionSignature []byte,
 	maxFeePerGas *big.Int,
 	maxPriorityFeePerGas *big.Int,
 	txType uint8,
 ) (*types.HandleTransactionResponse, error) {
-	executionResult, err := api.EstimateGas(querier, from, to, data, value, accessList, gasLimit, gasPrice, nonce, txContext, isUnencrypted, transactionSignature, maxFeePerGas, maxPriorityFeePerGas, txType)
+	executionResult, err := api.EstimateGas(querier, from, to, data, value, accessList, gasLimit, gasPrice, nonce, txContext, isUnencrypted, maxFeePerGas, maxPriorityFeePerGas, txType)
 	if err != nil {
 		return &types.HandleTransactionResponse{}, err
 	}

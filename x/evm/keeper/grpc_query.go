@@ -351,8 +351,7 @@ func (k Keeper) EstimateGas(c context.Context, req *types.EthCallRequest) (*type
 		}
 
 		// pass false to not commit StateDB
-		dummySignature := make([]byte, 65) // TODO: Use different method to estimate gas
-		rsp, err = k.ApplyMessageWithConfig(ctx, msg, false, cfg, txConfig, txContext, req.Unencrypted, dummySignature, txType)
+		rsp, err = k.EstimateGasMessageWithConfig(ctx, msg, cfg, txConfig, txContext, req.Unencrypted, txType)
 		if err != nil {
 			if errors.Is(err, core.ErrIntrinsicGas) {
 				return true, nil, nil // Special case, raise gas limit

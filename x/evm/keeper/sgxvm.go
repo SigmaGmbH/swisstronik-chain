@@ -363,6 +363,103 @@ func (k *Keeper) ApplyMessageWithConfig(
 	}, nil
 }
 
+func (k *Keeper) EstimateGasMessageWithConfig(
+	ctx sdk.Context,
+	msg core.Message,
+	cfg *types.EVMConfig,
+	txConfig types.TxConfig,
+	txContext *librustgo.TransactionContext,
+	isUnencrypted bool,
+	txType uint8,
+) (*types.MsgEthereumTxResponse, error) {
+	// return error if contract creation or call are disabled through governance
+	if !cfg.Params.EnableCreate && msg.To() == nil {
+		return nil, errorsmod.Wrap(types.ErrCreateDisabled, "failed to create new contract")
+	} else if !cfg.Params.EnableCall && msg.To() != nil {
+		return nil, errorsmod.Wrap(types.ErrCallDisabled, "failed to call contract")
+	}
+
+	leftoverGas := msg.Gas()
+	contractCreation := msg.To() == nil
+	intrinsicGas, err := k.GetEthIntrinsicGas(ctx, msg, cfg.ChainConfig, contractCreation)
+	if err != nil {
+		// should have already been checked on Ante Handler
+		return nil, errorsmod.Wrap(err, "intrinsic gas failed")
+	}
+
+	// Should check again even if it is checked on Ante Handler, because eth_call don't go through Ante Handler.
+	if leftoverGas < intrinsicGas {
+		// eth_estimateGas will check for this exact error
+		return nil, errorsmod.Wrap(core.ErrIntrinsicGas, "apply message")
+	}
+
+	connector := Connector{
+		Context:   ctx,
+		EVMKeeper: k,
+	}
+
+	var res *librustgo.HandleTransactionResponse
+	if contractCreation {
+		k.SetNonce(ctx, msg.From(), msg.Nonce())
+		res, err = librustgo.EstimateGas(
+			connector,
+			msg.From().Bytes(),
+			nil,
+			msg.Data(),
+			msg.Value().Bytes(),
+			msg.AccessList(),
+			leftoverGas,
+			msg.GasPrice(),
+			msg.Nonce(),
+			txContext,
+			isUnencrypted,
+			msg.GasFeeCap(),
+			msg.GasTipCap(),
+			txType,
+		)
+		k.SetNonce(ctx, msg.From(), msg.Nonce()+1)
+	} else {
+		res, err = librustgo.EstimateGas(
+			connector,
+			msg.From().Bytes(),
+			msg.To().Bytes(),
+			msg.Data(),
+			msg.Value().Bytes(),
+			msg.AccessList(),
+			leftoverGas,
+			msg.GasPrice(),
+			msg.Nonce(),
+			txContext,
+			isUnencrypted,
+			msg.GasFeeCap(),
+			msg.GasTipCap(),
+			txType,
+		)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	// calculate gas refund
+	if msg.Gas() < leftoverGas {
+		return nil, errorsmod.Wrap(types.ErrGasOverflow, "apply message")
+	}
+	// refund gas
+	temporaryGasUsed := msg.Gas() - leftoverGas
+	refundQuotient := params.RefundQuotientEIP3529
+	leftoverGas += GasToRefund(0, temporaryGasUsed, refundQuotient)
+
+	logs := SGXVMLogsToEthereum(res.Logs, txConfig, txContext.BlockNumber)
+	return &types.MsgEthereumTxResponse{
+		GasUsed: res.GasUsed,
+		VmError: res.VmError,
+		Ret:     res.Ret,
+		Logs:    types.NewLogsFromEth(logs),
+		Hash:    txConfig.TxHash.Hex(),
+	}, nil
+}
+
 func (k *Keeper) GetNodePublicKey(blockNumber uint64) (common.Hash, error) {
 	nodePublicKey := common.Hash{}
 	for _, epoch := range k.epochs {

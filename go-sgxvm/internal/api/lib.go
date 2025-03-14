@@ -349,7 +349,6 @@ func EstimateGas(
 	nonce uint64,
 	txContext *types.TransactionContext,
 	isUnencrypted bool,
-	transactionSignature []byte,
 	maxFeePerGas *big.Int,
 	maxPriorityFeePerGas *big.Int,
 	txType uint8,
@@ -366,7 +365,6 @@ func EstimateGas(
 		Commit:      false,
 		Nonce:       nonce,
 		Unencrypted: isUnencrypted,
-		Signature:   transactionSignature,
 		TxType:      uint32(txType),
 	}
 
