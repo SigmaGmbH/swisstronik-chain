@@ -315,6 +315,24 @@ message SGXVMCreateParams {
   uint32 txType = 12;
 }
 
+// Message with data required to execute `estimateGas` operation
+message SGXVMEstimateGasParams {
+  bytes from = 1;
+  bytes to = 2;
+  bytes data = 3;
+  uint64 gasLimit = 4;
+  bytes gasPrice = 5;
+  bytes value = 6;
+  repeated AccessListItem accessList = 7;
+  bool commit = 8;
+  uint64 nonce = 9;
+  bool unencrypted = 10;
+  bytes signature = 11;
+  bytes maxPriorityFeePerGas = 12;
+  bytes maxFeePerGas = 13;
+  uint32 txType = 14;
+}
+
 // Request to execute `call` operation
 message SGXVMCallRequest {
   SGXVMCallParams params = 1;
@@ -324,6 +342,12 @@ message SGXVMCallRequest {
 // Request to execute `create` operation
 message SGXVMCreateRequest {
   SGXVMCreateParams params = 1;
+  TransactionContext context = 2;
+}
+
+// Request to execute `estimateGas` operation
+message SGXVMEstimateGasRequest {
+  SGXVMEstimateGasParams params = 1;
   TransactionContext context = 2;
 }
 
@@ -348,6 +372,7 @@ message FFIRequest {
   oneof req {
     SGXVMCallRequest callRequest = 1;
     SGXVMCreateRequest createRequest = 2;
-    NodePublicKeyRequest publicKeyRequest = 3;
+    SGXVMEstimateGasRequest estimateGasRequest = 3;
+    NodePublicKeyRequest publicKeyRequest = 4;
   }
 }

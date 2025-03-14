@@ -14342,6 +14342,693 @@ impl ::protobuf::reflect::ProtobufValue for SGXVMCreateParams {
 }
 
 #[derive(PartialEq,Clone,Default)]
+pub struct SGXVMEstimateGasParams {
+    // message fields
+    pub from: ::std::vec::Vec<u8>,
+    pub to: ::std::vec::Vec<u8>,
+    pub data: ::std::vec::Vec<u8>,
+    pub gasLimit: u64,
+    pub gasPrice: ::std::vec::Vec<u8>,
+    pub value: ::std::vec::Vec<u8>,
+    pub accessList: ::protobuf::RepeatedField<AccessListItem>,
+    pub commit: bool,
+    pub nonce: u64,
+    pub unencrypted: bool,
+    pub signature: ::std::vec::Vec<u8>,
+    pub maxPriorityFeePerGas: ::std::vec::Vec<u8>,
+    pub maxFeePerGas: ::std::vec::Vec<u8>,
+    pub txType: u32,
+    // special fields
+    pub unknown_fields: ::protobuf::UnknownFields,
+    pub cached_size: ::protobuf::CachedSize,
+}
+
+impl<'a> ::std::default::Default for &'a SGXVMEstimateGasParams {
+    fn default() -> &'a SGXVMEstimateGasParams {
+        <SGXVMEstimateGasParams as ::protobuf::Message>::default_instance()
+    }
+}
+
+impl SGXVMEstimateGasParams {
+    pub fn new() -> SGXVMEstimateGasParams {
+        ::std::default::Default::default()
+    }
+
+    // bytes from = 1;
+
+
+    pub fn get_from(&self) -> &[u8] {
+        &self.from
+    }
+    pub fn clear_from(&mut self) {
+        self.from.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_from(&mut self, v: ::std::vec::Vec<u8>) {
+        self.from = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_from(&mut self) -> &mut ::std::vec::Vec<u8> {
+        &mut self.from
+    }
+
+    // Take field
+    pub fn take_from(&mut self) -> ::std::vec::Vec<u8> {
+        ::std::mem::replace(&mut self.from, ::std::vec::Vec::new())
+    }
+
+    // bytes to = 2;
+
+
+    pub fn get_to(&self) -> &[u8] {
+        &self.to
+    }
+    pub fn clear_to(&mut self) {
+        self.to.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_to(&mut self, v: ::std::vec::Vec<u8>) {
+        self.to = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_to(&mut self) -> &mut ::std::vec::Vec<u8> {
+        &mut self.to
+    }
+
+    // Take field
+    pub fn take_to(&mut self) -> ::std::vec::Vec<u8> {
+        ::std::mem::replace(&mut self.to, ::std::vec::Vec::new())
+    }
+
+    // bytes data = 3;
+
+
+    pub fn get_data(&self) -> &[u8] {
+        &self.data
+    }
+    pub fn clear_data(&mut self) {
+        self.data.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_data(&mut self, v: ::std::vec::Vec<u8>) {
+        self.data = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_data(&mut self) -> &mut ::std::vec::Vec<u8> {
+        &mut self.data
+    }
+
+    // Take field
+    pub fn take_data(&mut self) -> ::std::vec::Vec<u8> {
+        ::std::mem::replace(&mut self.data, ::std::vec::Vec::new())
+    }
+
+    // uint64 gasLimit = 4;
+
+
+    pub fn get_gasLimit(&self) -> u64 {
+        self.gasLimit
+    }
+    pub fn clear_gasLimit(&mut self) {
+        self.gasLimit = 0;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_gasLimit(&mut self, v: u64) {
+        self.gasLimit = v;
+    }
+
+    // bytes gasPrice = 5;
+
+
+    pub fn get_gasPrice(&self) -> &[u8] {
+        &self.gasPrice
+    }
+    pub fn clear_gasPrice(&mut self) {
+        self.gasPrice.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_gasPrice(&mut self, v: ::std::vec::Vec<u8>) {
+        self.gasPrice = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_gasPrice(&mut self) -> &mut ::std::vec::Vec<u8> {
+        &mut self.gasPrice
+    }
+
+    // Take field
+    pub fn take_gasPrice(&mut self) -> ::std::vec::Vec<u8> {
+        ::std::mem::replace(&mut self.gasPrice, ::std::vec::Vec::new())
+    }
+
+    // bytes value = 6;
+
+
+    pub fn get_value(&self) -> &[u8] {
+        &self.value
+    }
+    pub fn clear_value(&mut self) {
+        self.value.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_value(&mut self, v: ::std::vec::Vec<u8>) {
+        self.value = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_value(&mut self) -> &mut ::std::vec::Vec<u8> {
+        &mut self.value
+    }
+
+    // Take field
+    pub fn take_value(&mut self) -> ::std::vec::Vec<u8> {
+        ::std::mem::replace(&mut self.value, ::std::vec::Vec::new())
+    }
+
+    // repeated .ffi.ffi.AccessListItem accessList = 7;
+
+
+    pub fn get_accessList(&self) -> &[AccessListItem] {
+        &self.accessList
+    }
+    pub fn clear_accessList(&mut self) {
+        self.accessList.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_accessList(&mut self, v: ::protobuf::RepeatedField<AccessListItem>) {
+        self.accessList = v;
+    }
+
+    // Mutable pointer to the field.
+    pub fn mut_accessList(&mut self) -> &mut ::protobuf::RepeatedField<AccessListItem> {
+        &mut self.accessList
+    }
+
+    // Take field
+    pub fn take_accessList(&mut self) -> ::protobuf::RepeatedField<AccessListItem> {
+        ::std::mem::replace(&mut self.accessList, ::protobuf::RepeatedField::new())
+    }
+
+    // bool commit = 8;
+
+
+    pub fn get_commit(&self) -> bool {
+        self.commit
+    }
+    pub fn clear_commit(&mut self) {
+        self.commit = false;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_commit(&mut self, v: bool) {
+        self.commit = v;
+    }
+
+    // uint64 nonce = 9;
+
+
+    pub fn get_nonce(&self) -> u64 {
+        self.nonce
+    }
+    pub fn clear_nonce(&mut self) {
+        self.nonce = 0;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_nonce(&mut self, v: u64) {
+        self.nonce = v;
+    }
+
+    // bool unencrypted = 10;
+
+
+    pub fn get_unencrypted(&self) -> bool {
+        self.unencrypted
+    }
+    pub fn clear_unencrypted(&mut self) {
+        self.unencrypted = false;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_unencrypted(&mut self, v: bool) {
+        self.unencrypted = v;
+    }
+
+    // bytes signature = 11;
+
+
+    pub fn get_signature(&self) -> &[u8] {
+        &self.signature
+    }
+    pub fn clear_signature(&mut self) {
+        self.signature.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_signature(&mut self, v: ::std::vec::Vec<u8>) {
+        self.signature = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_signature(&mut self) -> &mut ::std::vec::Vec<u8> {
+        &mut self.signature
+    }
+
+    // Take field
+    pub fn take_signature(&mut self) -> ::std::vec::Vec<u8> {
+        ::std::mem::replace(&mut self.signature, ::std::vec::Vec::new())
+    }
+
+    // bytes maxPriorityFeePerGas = 12;
+
+
+    pub fn get_maxPriorityFeePerGas(&self) -> &[u8] {
+        &self.maxPriorityFeePerGas
+    }
+    pub fn clear_maxPriorityFeePerGas(&mut self) {
+        self.maxPriorityFeePerGas.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_maxPriorityFeePerGas(&mut self, v: ::std::vec::Vec<u8>) {
+        self.maxPriorityFeePerGas = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_maxPriorityFeePerGas(&mut self) -> &mut ::std::vec::Vec<u8> {
+        &mut self.maxPriorityFeePerGas
+    }
+
+    // Take field
+    pub fn take_maxPriorityFeePerGas(&mut self) -> ::std::vec::Vec<u8> {
+        ::std::mem::replace(&mut self.maxPriorityFeePerGas, ::std::vec::Vec::new())
+    }
+
+    // bytes maxFeePerGas = 13;
+
+
+    pub fn get_maxFeePerGas(&self) -> &[u8] {
+        &self.maxFeePerGas
+    }
+    pub fn clear_maxFeePerGas(&mut self) {
+        self.maxFeePerGas.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_maxFeePerGas(&mut self, v: ::std::vec::Vec<u8>) {
+        self.maxFeePerGas = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_maxFeePerGas(&mut self) -> &mut ::std::vec::Vec<u8> {
+        &mut self.maxFeePerGas
+    }
+
+    // Take field
+    pub fn take_maxFeePerGas(&mut self) -> ::std::vec::Vec<u8> {
+        ::std::mem::replace(&mut self.maxFeePerGas, ::std::vec::Vec::new())
+    }
+
+    // uint32 txType = 14;
+
+
+    pub fn get_txType(&self) -> u32 {
+        self.txType
+    }
+    pub fn clear_txType(&mut self) {
+        self.txType = 0;
+    }
+
+    // Param is passed by value, moved
+    pub fn set_txType(&mut self, v: u32) {
+        self.txType = v;
+    }
+}
+
+impl ::protobuf::Message for SGXVMEstimateGasParams {
+    fn is_initialized(&self) -> bool {
+        for v in &self.accessList {
+            if !v.is_initialized() {
+                return false;
+            }
+        };
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                1 => {
+                    ::protobuf::rt::read_singular_proto3_bytes_into(wire_type, is, &mut self.from)?;
+                },
+                2 => {
+                    ::protobuf::rt::read_singular_proto3_bytes_into(wire_type, is, &mut self.to)?;
+                },
+                3 => {
+                    ::protobuf::rt::read_singular_proto3_bytes_into(wire_type, is, &mut self.data)?;
+                },
+                4 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint64()?;
+                    self.gasLimit = tmp;
+                },
+                5 => {
+                    ::protobuf::rt::read_singular_proto3_bytes_into(wire_type, is, &mut self.gasPrice)?;
+                },
+                6 => {
+                    ::protobuf::rt::read_singular_proto3_bytes_into(wire_type, is, &mut self.value)?;
+                },
+                7 => {
+                    ::protobuf::rt::read_repeated_message_into(wire_type, is, &mut self.accessList)?;
+                },
+                8 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_bool()?;
+                    self.commit = tmp;
+                },
+                9 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint64()?;
+                    self.nonce = tmp;
+                },
+                10 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_bool()?;
+                    self.unencrypted = tmp;
+                },
+                11 => {
+                    ::protobuf::rt::read_singular_proto3_bytes_into(wire_type, is, &mut self.signature)?;
+                },
+                12 => {
+                    ::protobuf::rt::read_singular_proto3_bytes_into(wire_type, is, &mut self.maxPriorityFeePerGas)?;
+                },
+                13 => {
+                    ::protobuf::rt::read_singular_proto3_bytes_into(wire_type, is, &mut self.maxFeePerGas)?;
+                },
+                14 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint32()?;
+                    self.txType = tmp;
+                },
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        if !self.from.is_empty() {
+            my_size += ::protobuf::rt::bytes_size(1, &self.from);
+        }
+        if !self.to.is_empty() {
+            my_size += ::protobuf::rt::bytes_size(2, &self.to);
+        }
+        if !self.data.is_empty() {
+            my_size += ::protobuf::rt::bytes_size(3, &self.data);
+        }
+        if self.gasLimit != 0 {
+            my_size += ::protobuf::rt::value_size(4, self.gasLimit, ::protobuf::wire_format::WireTypeVarint);
+        }
+        if !self.gasPrice.is_empty() {
+            my_size += ::protobuf::rt::bytes_size(5, &self.gasPrice);
+        }
+        if !self.value.is_empty() {
+            my_size += ::protobuf::rt::bytes_size(6, &self.value);
+        }
+        for value in &self.accessList {
+            let len = value.compute_size();
+            my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
+        };
+        if self.commit != false {
+            my_size += 2;
+        }
+        if self.nonce != 0 {
+            my_size += ::protobuf::rt::value_size(9, self.nonce, ::protobuf::wire_format::WireTypeVarint);
+        }
+        if self.unencrypted != false {
+            my_size += 2;
+        }
+        if !self.signature.is_empty() {
+            my_size += ::protobuf::rt::bytes_size(11, &self.signature);
+        }
+        if !self.maxPriorityFeePerGas.is_empty() {
+            my_size += ::protobuf::rt::bytes_size(12, &self.maxPriorityFeePerGas);
+        }
+        if !self.maxFeePerGas.is_empty() {
+            my_size += ::protobuf::rt::bytes_size(13, &self.maxFeePerGas);
+        }
+        if self.txType != 0 {
+            my_size += ::protobuf::rt::value_size(14, self.txType, ::protobuf::wire_format::WireTypeVarint);
+        }
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        if !self.from.is_empty() {
+            os.write_bytes(1, &self.from)?;
+        }
+        if !self.to.is_empty() {
+            os.write_bytes(2, &self.to)?;
+        }
+        if !self.data.is_empty() {
+            os.write_bytes(3, &self.data)?;
+        }
+        if self.gasLimit != 0 {
+            os.write_uint64(4, self.gasLimit)?;
+        }
+        if !self.gasPrice.is_empty() {
+            os.write_bytes(5, &self.gasPrice)?;
+        }
+        if !self.value.is_empty() {
+            os.write_bytes(6, &self.value)?;
+        }
+        for v in &self.accessList {
+            os.write_tag(7, ::protobuf::wire_format::WireTypeLengthDelimited)?;
+            os.write_raw_varint32(v.get_cached_size())?;
+            v.write_to_with_cached_sizes(os)?;
+        };
+        if self.commit != false {
+            os.write_bool(8, self.commit)?;
+        }
+        if self.nonce != 0 {
+            os.write_uint64(9, self.nonce)?;
+        }
+        if self.unencrypted != false {
+            os.write_bool(10, self.unencrypted)?;
+        }
+        if !self.signature.is_empty() {
+            os.write_bytes(11, &self.signature)?;
+        }
+        if !self.maxPriorityFeePerGas.is_empty() {
+            os.write_bytes(12, &self.maxPriorityFeePerGas)?;
+        }
+        if !self.maxFeePerGas.is_empty() {
+            os.write_bytes(13, &self.maxFeePerGas)?;
+        }
+        if self.txType != 0 {
+            os.write_uint32(14, self.txType)?;
+        }
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &dyn (::std::any::Any) {
+        self as &dyn (::std::any::Any)
+    }
+    fn as_any_mut(&mut self) -> &mut dyn (::std::any::Any) {
+        self as &mut dyn (::std::any::Any)
+    }
+    fn into_any(self: Box<Self>) -> ::std::boxed::Box<dyn (::std::any::Any)> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> SGXVMEstimateGasParams {
+        SGXVMEstimateGasParams::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
+        };
+        unsafe {
+            descriptor.get(|| {
+                let mut fields = ::std::vec::Vec::new();
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
+                    "from",
+                    |m: &SGXVMEstimateGasParams| { &m.from },
+                    |m: &mut SGXVMEstimateGasParams| { &mut m.from },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
+                    "to",
+                    |m: &SGXVMEstimateGasParams| { &m.to },
+                    |m: &mut SGXVMEstimateGasParams| { &mut m.to },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
+                    "data",
+                    |m: &SGXVMEstimateGasParams| { &m.data },
+                    |m: &mut SGXVMEstimateGasParams| { &mut m.data },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint64>(
+                    "gasLimit",
+                    |m: &SGXVMEstimateGasParams| { &m.gasLimit },
+                    |m: &mut SGXVMEstimateGasParams| { &mut m.gasLimit },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
+                    "gasPrice",
+                    |m: &SGXVMEstimateGasParams| { &m.gasPrice },
+                    |m: &mut SGXVMEstimateGasParams| { &mut m.gasPrice },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
+                    "value",
+                    |m: &SGXVMEstimateGasParams| { &m.value },
+                    |m: &mut SGXVMEstimateGasParams| { &mut m.value },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_repeated_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<AccessListItem>>(
+                    "accessList",
+                    |m: &SGXVMEstimateGasParams| { &m.accessList },
+                    |m: &mut SGXVMEstimateGasParams| { &mut m.accessList },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBool>(
+                    "commit",
+                    |m: &SGXVMEstimateGasParams| { &m.commit },
+                    |m: &mut SGXVMEstimateGasParams| { &mut m.commit },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint64>(
+                    "nonce",
+                    |m: &SGXVMEstimateGasParams| { &m.nonce },
+                    |m: &mut SGXVMEstimateGasParams| { &mut m.nonce },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBool>(
+                    "unencrypted",
+                    |m: &SGXVMEstimateGasParams| { &m.unencrypted },
+                    |m: &mut SGXVMEstimateGasParams| { &mut m.unencrypted },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
+                    "signature",
+                    |m: &SGXVMEstimateGasParams| { &m.signature },
+                    |m: &mut SGXVMEstimateGasParams| { &mut m.signature },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
+                    "maxPriorityFeePerGas",
+                    |m: &SGXVMEstimateGasParams| { &m.maxPriorityFeePerGas },
+                    |m: &mut SGXVMEstimateGasParams| { &mut m.maxPriorityFeePerGas },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
+                    "maxFeePerGas",
+                    |m: &SGXVMEstimateGasParams| { &m.maxFeePerGas },
+                    |m: &mut SGXVMEstimateGasParams| { &mut m.maxFeePerGas },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeUint32>(
+                    "txType",
+                    |m: &SGXVMEstimateGasParams| { &m.txType },
+                    |m: &mut SGXVMEstimateGasParams| { &mut m.txType },
+                ));
+                ::protobuf::reflect::MessageDescriptor::new::<SGXVMEstimateGasParams>(
+                    "SGXVMEstimateGasParams",
+                    fields,
+                    file_descriptor_proto()
+                )
+            })
+        }
+    }
+
+    fn default_instance() -> &'static SGXVMEstimateGasParams {
+        static mut instance: ::protobuf::lazy::Lazy<SGXVMEstimateGasParams> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const SGXVMEstimateGasParams,
+        };
+        unsafe {
+            instance.get(SGXVMEstimateGasParams::new)
+        }
+    }
+}
+
+impl ::protobuf::Clear for SGXVMEstimateGasParams {
+    fn clear(&mut self) {
+        self.from.clear();
+        self.to.clear();
+        self.data.clear();
+        self.gasLimit = 0;
+        self.gasPrice.clear();
+        self.value.clear();
+        self.accessList.clear();
+        self.commit = false;
+        self.nonce = 0;
+        self.unencrypted = false;
+        self.signature.clear();
+        self.maxPriorityFeePerGas.clear();
+        self.maxFeePerGas.clear();
+        self.txType = 0;
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for SGXVMEstimateGasParams {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for SGXVMEstimateGasParams {
+    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
+        ::protobuf::reflect::ProtobufValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
 pub struct SGXVMCallRequest {
     // message fields
     pub params: ::protobuf::SingularPtrField<SGXVMCallParams>,
@@ -14818,6 +15505,247 @@ impl ::std::fmt::Debug for SGXVMCreateRequest {
 }
 
 impl ::protobuf::reflect::ProtobufValue for SGXVMCreateRequest {
+    fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
+        ::protobuf::reflect::ProtobufValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
+pub struct SGXVMEstimateGasRequest {
+    // message fields
+    pub params: ::protobuf::SingularPtrField<SGXVMEstimateGasParams>,
+    pub context: ::protobuf::SingularPtrField<TransactionContext>,
+    // special fields
+    pub unknown_fields: ::protobuf::UnknownFields,
+    pub cached_size: ::protobuf::CachedSize,
+}
+
+impl<'a> ::std::default::Default for &'a SGXVMEstimateGasRequest {
+    fn default() -> &'a SGXVMEstimateGasRequest {
+        <SGXVMEstimateGasRequest as ::protobuf::Message>::default_instance()
+    }
+}
+
+impl SGXVMEstimateGasRequest {
+    pub fn new() -> SGXVMEstimateGasRequest {
+        ::std::default::Default::default()
+    }
+
+    // .ffi.ffi.SGXVMEstimateGasParams params = 1;
+
+
+    pub fn get_params(&self) -> &SGXVMEstimateGasParams {
+        self.params.as_ref().unwrap_or_else(|| SGXVMEstimateGasParams::default_instance())
+    }
+    pub fn clear_params(&mut self) {
+        self.params.clear();
+    }
+
+    pub fn has_params(&self) -> bool {
+        self.params.is_some()
+    }
+
+    // Param is passed by value, moved
+    pub fn set_params(&mut self, v: SGXVMEstimateGasParams) {
+        self.params = ::protobuf::SingularPtrField::some(v);
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_params(&mut self) -> &mut SGXVMEstimateGasParams {
+        if self.params.is_none() {
+            self.params.set_default();
+        }
+        self.params.as_mut().unwrap()
+    }
+
+    // Take field
+    pub fn take_params(&mut self) -> SGXVMEstimateGasParams {
+        self.params.take().unwrap_or_else(|| SGXVMEstimateGasParams::new())
+    }
+
+    // .ffi.ffi.TransactionContext context = 2;
+
+
+    pub fn get_context(&self) -> &TransactionContext {
+        self.context.as_ref().unwrap_or_else(|| TransactionContext::default_instance())
+    }
+    pub fn clear_context(&mut self) {
+        self.context.clear();
+    }
+
+    pub fn has_context(&self) -> bool {
+        self.context.is_some()
+    }
+
+    // Param is passed by value, moved
+    pub fn set_context(&mut self, v: TransactionContext) {
+        self.context = ::protobuf::SingularPtrField::some(v);
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_context(&mut self) -> &mut TransactionContext {
+        if self.context.is_none() {
+            self.context.set_default();
+        }
+        self.context.as_mut().unwrap()
+    }
+
+    // Take field
+    pub fn take_context(&mut self) -> TransactionContext {
+        self.context.take().unwrap_or_else(|| TransactionContext::new())
+    }
+}
+
+impl ::protobuf::Message for SGXVMEstimateGasRequest {
+    fn is_initialized(&self) -> bool {
+        for v in &self.params {
+            if !v.is_initialized() {
+                return false;
+            }
+        };
+        for v in &self.context {
+            if !v.is_initialized() {
+                return false;
+            }
+        };
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                1 => {
+                    ::protobuf::rt::read_singular_message_into(wire_type, is, &mut self.params)?;
+                },
+                2 => {
+                    ::protobuf::rt::read_singular_message_into(wire_type, is, &mut self.context)?;
+                },
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        if let Some(ref v) = self.params.as_ref() {
+            let len = v.compute_size();
+            my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
+        }
+        if let Some(ref v) = self.context.as_ref() {
+            let len = v.compute_size();
+            my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
+        }
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        if let Some(ref v) = self.params.as_ref() {
+            os.write_tag(1, ::protobuf::wire_format::WireTypeLengthDelimited)?;
+            os.write_raw_varint32(v.get_cached_size())?;
+            v.write_to_with_cached_sizes(os)?;
+        }
+        if let Some(ref v) = self.context.as_ref() {
+            os.write_tag(2, ::protobuf::wire_format::WireTypeLengthDelimited)?;
+            os.write_raw_varint32(v.get_cached_size())?;
+            v.write_to_with_cached_sizes(os)?;
+        }
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &dyn (::std::any::Any) {
+        self as &dyn (::std::any::Any)
+    }
+    fn as_any_mut(&mut self) -> &mut dyn (::std::any::Any) {
+        self as &mut dyn (::std::any::Any)
+    }
+    fn into_any(self: Box<Self>) -> ::std::boxed::Box<dyn (::std::any::Any)> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> SGXVMEstimateGasRequest {
+        SGXVMEstimateGasRequest::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static mut descriptor: ::protobuf::lazy::Lazy<::protobuf::reflect::MessageDescriptor> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const ::protobuf::reflect::MessageDescriptor,
+        };
+        unsafe {
+            descriptor.get(|| {
+                let mut fields = ::std::vec::Vec::new();
+                fields.push(::protobuf::reflect::accessor::make_singular_ptr_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<SGXVMEstimateGasParams>>(
+                    "params",
+                    |m: &SGXVMEstimateGasRequest| { &m.params },
+                    |m: &mut SGXVMEstimateGasRequest| { &mut m.params },
+                ));
+                fields.push(::protobuf::reflect::accessor::make_singular_ptr_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<TransactionContext>>(
+                    "context",
+                    |m: &SGXVMEstimateGasRequest| { &m.context },
+                    |m: &mut SGXVMEstimateGasRequest| { &mut m.context },
+                ));
+                ::protobuf::reflect::MessageDescriptor::new::<SGXVMEstimateGasRequest>(
+                    "SGXVMEstimateGasRequest",
+                    fields,
+                    file_descriptor_proto()
+                )
+            })
+        }
+    }
+
+    fn default_instance() -> &'static SGXVMEstimateGasRequest {
+        static mut instance: ::protobuf::lazy::Lazy<SGXVMEstimateGasRequest> = ::protobuf::lazy::Lazy {
+            lock: ::protobuf::lazy::ONCE_INIT,
+            ptr: 0 as *const SGXVMEstimateGasRequest,
+        };
+        unsafe {
+            instance.get(SGXVMEstimateGasRequest::new)
+        }
+    }
+}
+
+impl ::protobuf::Clear for SGXVMEstimateGasRequest {
+    fn clear(&mut self) {
+        self.params.clear();
+        self.context.clear();
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for SGXVMEstimateGasRequest {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for SGXVMEstimateGasRequest {
     fn as_ref(&self) -> ::protobuf::reflect::ProtobufValueRef {
         ::protobuf::reflect::ProtobufValueRef::Message(self)
     }
@@ -15588,6 +16516,7 @@ impl<'a> ::std::default::Default for &'a FFIRequest {
 pub enum FFIRequest_oneof_req {
     callRequest(SGXVMCallRequest),
     createRequest(SGXVMCreateRequest),
+    estimateGasRequest(SGXVMEstimateGasRequest),
     publicKeyRequest(NodePublicKeyRequest),
 }
 
@@ -15694,7 +16623,56 @@ impl FFIRequest {
         }
     }
 
-    // .ffi.ffi.NodePublicKeyRequest publicKeyRequest = 3;
+    // .ffi.ffi.SGXVMEstimateGasRequest estimateGasRequest = 3;
+
+
+    pub fn get_estimateGasRequest(&self) -> &SGXVMEstimateGasRequest {
+        match self.req {
+            ::std::option::Option::Some(FFIRequest_oneof_req::estimateGasRequest(ref v)) => v,
+            _ => SGXVMEstimateGasRequest::default_instance(),
+        }
+    }
+    pub fn clear_estimateGasRequest(&mut self) {
+        self.req = ::std::option::Option::None;
+    }
+
+    pub fn has_estimateGasRequest(&self) -> bool {
+        match self.req {
+            ::std::option::Option::Some(FFIRequest_oneof_req::estimateGasRequest(..)) => true,
+            _ => false,
+        }
+    }
+
+    // Param is passed by value, moved
+    pub fn set_estimateGasRequest(&mut self, v: SGXVMEstimateGasRequest) {
+        self.req = ::std::option::Option::Some(FFIRequest_oneof_req::estimateGasRequest(v))
+    }
+
+    // Mutable pointer to the field.
+    pub fn mut_estimateGasRequest(&mut self) -> &mut SGXVMEstimateGasRequest {
+        if let ::std::option::Option::Some(FFIRequest_oneof_req::estimateGasRequest(_)) = self.req {
+        } else {
+            self.req = ::std::option::Option::Some(FFIRequest_oneof_req::estimateGasRequest(SGXVMEstimateGasRequest::new()));
+        }
+        match self.req {
+            ::std::option::Option::Some(FFIRequest_oneof_req::estimateGasRequest(ref mut v)) => v,
+            _ => panic!(),
+        }
+    }
+
+    // Take field
+    pub fn take_estimateGasRequest(&mut self) -> SGXVMEstimateGasRequest {
+        if self.has_estimateGasRequest() {
+            match self.req.take() {
+                ::std::option::Option::Some(FFIRequest_oneof_req::estimateGasRequest(v)) => v,
+                _ => panic!(),
+            }
+        } else {
+            SGXVMEstimateGasRequest::new()
+        }
+    }
+
+    // .ffi.ffi.NodePublicKeyRequest publicKeyRequest = 4;
 
 
     pub fn get_publicKeyRequest(&self) -> &NodePublicKeyRequest {
@@ -15756,6 +16734,11 @@ impl ::protobuf::Message for FFIRequest {
                 return false;
             }
         }
+        if let Some(FFIRequest_oneof_req::estimateGasRequest(ref v)) = self.req {
+            if !v.is_initialized() {
+                return false;
+            }
+        }
         if let Some(FFIRequest_oneof_req::publicKeyRequest(ref v)) = self.req {
             if !v.is_initialized() {
                 return false;
@@ -15784,6 +16767,12 @@ impl ::protobuf::Message for FFIRequest {
                     if wire_type != ::protobuf::wire_format::WireTypeLengthDelimited {
                         return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
                     }
+                    self.req = ::std::option::Option::Some(FFIRequest_oneof_req::estimateGasRequest(is.read_message()?));
+                },
+                4 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeLengthDelimited {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
                     self.req = ::std::option::Option::Some(FFIRequest_oneof_req::publicKeyRequest(is.read_message()?));
                 },
                 _ => {
@@ -15805,6 +16794,10 @@ impl ::protobuf::Message for FFIRequest {
                     my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
                 },
                 &FFIRequest_oneof_req::createRequest(ref v) => {
+                    let len = v.compute_size();
+                    my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
+                },
+                &FFIRequest_oneof_req::estimateGasRequest(ref v) => {
                     let len = v.compute_size();
                     my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
                 },
@@ -15832,8 +16825,13 @@ impl ::protobuf::Message for FFIRequest {
                     os.write_raw_varint32(v.get_cached_size())?;
                     v.write_to_with_cached_sizes(os)?;
                 },
-                &FFIRequest_oneof_req::publicKeyRequest(ref v) => {
+                &FFIRequest_oneof_req::estimateGasRequest(ref v) => {
                     os.write_tag(3, ::protobuf::wire_format::WireTypeLengthDelimited)?;
+                    os.write_raw_varint32(v.get_cached_size())?;
+                    v.write_to_with_cached_sizes(os)?;
+                },
+                &FFIRequest_oneof_req::publicKeyRequest(ref v) => {
+                    os.write_tag(4, ::protobuf::wire_format::WireTypeLengthDelimited)?;
                     os.write_raw_varint32(v.get_cached_size())?;
                     v.write_to_with_cached_sizes(os)?;
                 },
@@ -15891,6 +16889,11 @@ impl ::protobuf::Message for FFIRequest {
                     FFIRequest::has_createRequest,
                     FFIRequest::get_createRequest,
                 ));
+                fields.push(::protobuf::reflect::accessor::make_singular_message_accessor::<_, SGXVMEstimateGasRequest>(
+                    "estimateGasRequest",
+                    FFIRequest::has_estimateGasRequest,
+                    FFIRequest::get_estimateGasRequest,
+                ));
                 fields.push(::protobuf::reflect::accessor::make_singular_message_accessor::<_, NodePublicKeyRequest>(
                     "publicKeyRequest",
                     FFIRequest::has_publicKeyRequest,
@@ -15918,6 +16921,7 @@ impl ::protobuf::Message for FFIRequest {
 
 impl ::protobuf::Clear for FFIRequest {
     fn clear(&mut self) {
+        self.req = ::std::option::Option::None;
         self.req = ::std::option::Option::None;
         self.req = ::std::option::Option::None;
         self.req = ::std::option::Option::None;
@@ -16105,138 +17109,154 @@ static file_descriptor_proto_data: &'static [u8] = b"\
     \x20\x01(\x04R\x05nonce\x12\x1c\n\tsignature\x18\t\x20\x01(\x0cR\tsignat\
     ure\x122\n\x14maxPriorityFeePerGas\x18\n\x20\x01(\x0cR\x14maxPriorityFee\
     PerGas\x12\"\n\x0cmaxFeePerGas\x18\x0b\x20\x01(\x0cR\x0cmaxFeePerGas\x12\
-    \x16\n\x06txType\x18\x0c\x20\x01(\rR\x06txType\"{\n\x10SGXVMCallRequest\
-    \x120\n\x06params\x18\x01\x20\x01(\x0b2\x18.ffi.ffi.SGXVMCallParamsR\x06\
-    params\x125\n\x07context\x18\x02\x20\x01(\x0b2\x1b.ffi.ffi.TransactionCo\
-    ntextR\x07context\"\x7f\n\x12SGXVMCreateRequest\x122\n\x06params\x18\x01\
-    \x20\x01(\x0b2\x1a.ffi.ffi.SGXVMCreateParamsR\x06params\x125\n\x07contex\
-    t\x18\x02\x20\x01(\x0b2\x1b.ffi.ffi.TransactionContextR\x07context\"8\n\
-    \x14NodePublicKeyRequest\x12\x20\n\x0bblockNumber\x18\x01\x20\x01(\x04R\
-    \x0bblockNumber\"5\n\x15NodePublicKeyResponse\x12\x1c\n\tpublicKey\x18\
-    \x01\x20\x01(\x0cR\tpublicKey\"y\n\tEpochData\x12\x20\n\x0bepochNumber\
-    \x18\x01\x20\x01(\rR\x0bepochNumber\x12$\n\rstartingBlock\x18\x02\x20\
-    \x01(\x04R\rstartingBlock\x12$\n\rnodePublicKey\x18\x03\x20\x01(\x0cR\rn\
-    odePublicKey\"@\n\x12ListEpochsResponse\x12*\n\x06epochs\x18\x01\x20\x03\
-    (\x0b2\x12.ffi.ffi.EpochDataR\x06epochs\"\xe4\x01\n\nFFIRequest\x12=\n\
-    \x0bcallRequest\x18\x01\x20\x01(\x0b2\x19.ffi.ffi.SGXVMCallRequestH\0R\
-    \x0bcallRequest\x12C\n\rcreateRequest\x18\x02\x20\x01(\x0b2\x1b.ffi.ffi.\
-    SGXVMCreateRequestH\0R\rcreateRequest\x12K\n\x10publicKeyRequest\x18\x03\
-    \x20\x01(\x0b2\x1d.ffi.ffi.NodePublicKeyRequestH\0R\x10publicKeyRequestB\
-    \x05\n\x03reqB&Z$github.com/SigmaGmbH/librustgo/typesJ\xc5g\n\x07\x12\
-    \x05\0\0\xe0\x02\x01\n\x08\n\x01\x0c\x12\x03\0\0\x12\n\x08\n\x01\x02\x12\
-    \x03\x02\0\x10\n\x08\n\x01\x08\x12\x03\x04\0;\n\t\n\x02\x08\x0b\x12\x03\
-    \x04\0;\n\x1d\n\x02\x04\0\x12\x04\x08\0\x0b\x012\x11\x20General\x20reque\
-    st\n\n\n\n\x03\x04\0\x01\x12\x03\x08\x08\x16\n\x0b\n\x04\x04\0\x02\0\x12\
-    \x03\t\x02!\n\x0c\n\x05\x04\0\x02\0\x04\x12\x03\t\x02\n\n\x0c\n\x05\x04\
-    \0\x02\0\x05\x12\x03\t\x0b\x10\n\x0c\n\x05\x04\0\x02\0\x01\x12\x03\t\x11\
-    \x1c\n\x0c\n\x05\x04\0\x02\0\x03\x12\x03\t\x1f\x20\n\x0b\n\x04\x04\0\x02\
-    \x01\x12\x03\n\x02\x14\n\x0c\n\x05\x04\0\x02\x01\x05\x12\x03\n\x02\x07\n\
-    \x0c\n\x05\x04\0\x02\x01\x01\x12\x03\n\x08\x0f\n\x0c\n\x05\x04\0\x02\x01\
-    \x03\x12\x03\n\x12\x13\n\n\n\x02\x04\x01\x12\x04\r\0\x14\x01\n\n\n\x03\
-    \x04\x01\x01\x12\x03\r\x08\x17\n\x0b\n\x04\x04\x01\x02\0\x12\x03\x0e\x02\
-    \x11\n\x0c\n\x05\x04\x01\x02\0\x05\x12\x03\x0e\x02\x07\n\x0c\n\x05\x04\
-    \x01\x02\0\x01\x12\x03\x0e\x08\x0c\n\x0c\n\x05\x04\x01\x02\0\x03\x12\x03\
-    \x0e\x0f\x10\n\x0b\n\x04\x04\x01\x02\x01\x12\x03\x0f\x02\x0f\n\x0c\n\x05\
-    \x04\x01\x02\x01\x05\x12\x03\x0f\x02\x07\n\x0c\n\x05\x04\x01\x02\x01\x01\
-    \x12\x03\x0f\x08\n\n\x0c\n\x05\x04\x01\x02\x01\x03\x12\x03\x0f\r\x0e\n\
-    \x0b\n\x04\x04\x01\x02\x02\x12\x03\x10\x02\x11\n\x0c\n\x05\x04\x01\x02\
-    \x02\x05\x12\x03\x10\x02\x07\n\x0c\n\x05\x04\x01\x02\x02\x01\x12\x03\x10\
-    \x08\x0c\n\x0c\n\x05\x04\x01\x02\x02\x03\x12\x03\x10\x0f\x10\n\x0b\n\x04\
-    \x04\x01\x02\x03\x12\x03\x11\x02\x16\n\x0c\n\x05\x04\x01\x02\x03\x05\x12\
-    \x03\x11\x02\x08\n\x0c\n\x05\x04\x01\x02\x03\x01\x12\x03\x11\t\x11\n\x0c\
-    \n\x05\x04\x01\x02\x03\x03\x12\x03\x11\x14\x15\n\x0b\n\x04\x04\x01\x02\
-    \x04\x12\x03\x12\x02\x12\n\x0c\n\x05\x04\x01\x02\x04\x05\x12\x03\x12\x02\
-    \x07\n\x0c\n\x05\x04\x01\x02\x04\x01\x12\x03\x12\x08\r\n\x0c\n\x05\x04\
-    \x01\x02\x04\x03\x12\x03\x12\x10\x11\n\x0b\n\x04\x04\x01\x02\x05\x12\x03\
-    \x13\x02)\n\x0c\n\x05\x04\x01\x02\x05\x04\x12\x03\x13\x02\n\n\x0c\n\x05\
-    \x04\x01\x02\x05\x06\x12\x03\x13\x0b\x19\n\x0c\n\x05\x04\x01\x02\x05\x01\
-    \x12\x03\x13\x1a$\n\x0c\n\x05\x04\x01\x02\x05\x03\x12\x03\x13'(\n\n\n\
-    \x02\x04\x02\x12\x04\x16\0\x1e\x01\n\n\n\x03\x04\x02\x01\x12\x03\x16\x08\
-    \x1a\n\x0b\n\x04\x04\x02\x02\0\x12\x03\x17\x02\x16\n\x0c\n\x05\x04\x02\
-    \x02\0\x05\x12\x03\x17\x02\x08\n\x0c\n\x05\x04\x02\x02\0\x01\x12\x03\x17\
-    \t\x11\n\x0c\n\x05\x04\x02\x02\0\x03\x12\x03\x17\x14\x15\n\x0b\n\x04\x04\
-    \x02\x02\x01\x12\x03\x18\x02\x16\n\x0c\n\x05\x04\x02\x02\x01\x05\x12\x03\
-    \x18\x02\x07\n\x0c\n\x05\x04\x02\x02\x01\x01\x12\x03\x18\x08\x11\n\x0c\n\
-    \x05\x04\x02\x02\x01\x03\x12\x03\x18\x14\x15\n\x0b\n\x04\x04\x02\x02\x02\
-    \x12\x03\x19\x02\x17\n\x0c\n\x05\x04\x02\x02\x02\x05\x12\x03\x19\x02\x08\
-    \n\x0c\n\x05\x04\x02\x02\x02\x01\x12\x03\x19\t\x12\n\x0c\n\x05\x04\x02\
-    \x02\x02\x03\x12\x03\x19\x15\x16\n\x0b\n\x04\x04\x02\x02\x03\x12\x03\x1a\
-    \x02\x1d\n\x0c\n\x05\x04\x02\x02\x03\x05\x12\x03\x1a\x02\x08\n\x0c\n\x05\
-    \x04\x02\x02\x03\x01\x12\x03\x1a\t\x18\n\x0c\n\x05\x04\x02\x02\x03\x03\
-    \x12\x03\x1a\x1b\x1c\n\x0b\n\x04\x04\x02\x02\x04\x12\x03\x1b\x02#\n\x0c\
-    \n\x05\x04\x02\x02\x04\x05\x12\x03\x1b\x02\x07\n\x0c\n\x05\x04\x02\x02\
-    \x04\x01\x12\x03\x1b\x08\x1e\n\x0c\n\x05\x04\x02\x02\x04\x03\x12\x03\x1b\
-    !\"\n\x0b\n\x04\x04\x02\x02\x05\x12\x03\x1c\x02\x1b\n\x0c\n\x05\x04\x02\
-    \x02\x05\x05\x12\x03\x1c\x02\x07\n\x0c\n\x05\x04\x02\x02\x05\x01\x12\x03\
-    \x1c\x08\x16\n\x0c\n\x05\x04\x02\x02\x05\x03\x12\x03\x1c\x19\x1a\n\x0b\n\
-    \x04\x04\x02\x02\x06\x12\x03\x1d\x02\x1a\n\x0c\n\x05\x04\x02\x02\x06\x05\
-    \x12\x03\x1d\x02\x08\n\x0c\n\x05\x04\x02\x02\x06\x01\x12\x03\x1d\t\x15\n\
-    \x0c\n\x05\x04\x02\x02\x06\x03\x12\x03\x1d\x18\x19\n\n\n\x02\x04\x03\x12\
-    \x04\x20\0#\x01\n\n\n\x03\x04\x03\x01\x12\x03\x20\x08\x20\n\x0b\n\x04\
-    \x04\x03\x02\0\x12\x03!\x02\x1e\n\x0c\n\x05\x04\x03\x02\0\x06\x12\x03!\
-    \x02\x11\n\x0c\n\x05\x04\x03\x02\0\x01\x12\x03!\x12\x19\n\x0c\n\x05\x04\
-    \x03\x02\0\x03\x12\x03!\x1c\x1d\n\x0b\n\x04\x04\x03\x02\x01\x12\x03\"\
-    \x02$\n\x0c\n\x05\x04\x03\x02\x01\x06\x12\x03\"\x02\x14\n\x0c\n\x05\x04\
-    \x03\x02\x01\x01\x12\x03\"\x15\x1f\n\x0c\n\x05\x04\x03\x02\x01\x03\x12\
-    \x03\"\"#\n\n\n\x02\x04\x04\x12\x04%\00\x01\n\n\n\x03\x04\x04\x01\x12\
-    \x03%\x08!\nZ\n\x04\x04\x04\x02\0\x12\x03(\x02\x18\x1aM\x20logs\x20conta\
-    ins\x20the\x20transaction\x20hash\x20and\x20the\x20proto-compatible\x20e\
-    thereum\n\x20logs.\n\n\x0c\n\x05\x04\x04\x02\0\x04\x12\x03(\x02\n\n\x0c\
-    \n\x05\x04\x04\x02\0\x06\x12\x03(\x0b\x0e\n\x0c\n\x05\x04\x04\x02\0\x01\
-    \x12\x03(\x0f\x13\n\x0c\n\x05\x04\x04\x02\0\x03\x12\x03(\x16\x17\n\\\n\
-    \x04\x04\x04\x02\x01\x12\x03+\x02\x10\x1aO\x20returned\x20data\x20from\
-    \x20evm\x20function\x20(result\x20or\x20data\x20supplied\x20with\x20reve\
-    rt\n\x20opcode)\n\n\x0c\n\x05\x04\x04\x02\x01\x05\x12\x03+\x02\x07\n\x0c\
-    \n\x05\x04\x04\x02\x01\x01\x12\x03+\x08\x0b\n\x0c\n\x05\x04\x04\x02\x01\
-    \x03\x12\x03+\x0e\x0f\n=\n\x04\x04\x04\x02\x02\x12\x03-\x02\x16\x1a0\x20\
-    vm\x20error\x20is\x20the\x20error\x20returned\x20by\x20vm\x20execution\n\
-    \n\x0c\n\x05\x04\x04\x02\x02\x05\x12\x03-\x02\x08\n\x0c\n\x05\x04\x04\
-    \x02\x02\x01\x12\x03-\t\x11\n\x0c\n\x05\x04\x04\x02\x02\x03\x12\x03-\x14\
-    \x15\n.\n\x04\x04\x04\x02\x03\x12\x03/\x02\x16\x1a!\x20gas\x20consumed\
-    \x20by\x20the\x20transaction\n\n\x0c\n\x05\x04\x04\x02\x03\x05\x12\x03/\
-    \x02\x08\n\x0c\n\x05\x04\x04\x02\x03\x01\x12\x03/\t\x11\n\x0c\n\x05\x04\
-    \x04\x02\x03\x03\x12\x03/\x14\x15\n\n\n\x02\x04\x05\x12\x042\05\x01\n\n\
-    \n\x03\x04\x05\x01\x12\x032\x08\x20\n\x0b\n\x04\x04\x05\x02\0\x12\x033\
-    \x02\x1e\n\x0c\n\x05\x04\x05\x02\0\x06\x12\x033\x02\x11\n\x0c\n\x05\x04\
-    \x05\x02\0\x01\x12\x033\x12\x19\n\x0c\n\x05\x04\x05\x02\0\x03\x12\x033\
-    \x1c\x1d\n\x0b\n\x04\x04\x05\x02\x01\x12\x034\x02$\n\x0c\n\x05\x04\x05\
-    \x02\x01\x06\x12\x034\x02\x14\n\x0c\n\x05\x04\x05\x02\x01\x01\x12\x034\
-    \x15\x1f\n\x0c\n\x05\x04\x05\x02\x01\x03\x12\x034\"#\n\n\n\x02\x04\x06\
-    \x12\x046\0;\x01\n\n\n\x03\x04\x06\x01\x12\x036\x08!\n=\n\x04\x04\x06\
-    \x02\0\x12\x038\x02\x16\x1a0\x20vm\x20error\x20is\x20the\x20error\x20ret\
-    urned\x20by\x20vm\x20execution\n\n\x0c\n\x05\x04\x06\x02\0\x05\x12\x038\
-    \x02\x08\n\x0c\n\x05\x04\x06\x02\0\x01\x12\x038\t\x11\n\x0c\n\x05\x04\
-    \x06\x02\0\x03\x12\x038\x14\x15\n.\n\x04\x04\x06\x02\x01\x12\x03:\x02\
-    \x16\x1a!\x20gas\x20consumed\x20by\x20the\x20transaction\n\n\x0c\n\x05\
-    \x04\x06\x02\x01\x05\x12\x03:\x02\x08\n\x0c\n\x05\x04\x06\x02\x01\x01\
-    \x12\x03:\t\x11\n\x0c\n\x05\x04\x06\x02\x01\x03\x12\x03:\x14\x15\nc\n\
-    \x02\x04\x07\x12\x03?\0\"\x1aX\x20Topic\x20represents\x2032-byte\x20word\
-    s\x20that\x20is\x20used\x20to\x20describe\x20what\xe2\x80\x99s\x20going\
-    \x20on\x20in\x20an\n\x20event\n\n\n\n\x03\x04\x07\x01\x12\x03?\x08\r\n\
-    \x0b\n\x04\x04\x07\x02\0\x12\x03?\x10\x20\n\x0c\n\x05\x04\x07\x02\0\x05\
-    \x12\x03?\x10\x15\n\x0c\n\x05\x04\x07\x02\0\x01\x12\x03?\x16\x1b\n\x0c\n\
-    \x05\x04\x07\x02\0\x03\x12\x03?\x1e\x1f\n\x81\x01\n\x02\x04\x08\x12\x04D\
-    \0K\x01\x1au\x20Log\x20represents\x20an\x20protobuf\x20compatible\x20Eth\
-    ereum\x20Log\x20that\x20defines\x20a\x20contract\n\x20log\x20event.\n\
-    \x20Copied\x20from\x20`devnet/proto``\n\n\n\n\x03\x04\x08\x01\x12\x03D\
-    \x08\x0b\n?\n\x04\x04\x08\x02\0\x12\x03F\x02\x14\x1a2\x20address\x20of\
-    \x20the\x20contract\x20that\x20generated\x20the\x20event\n\n\x0c\n\x05\
-    \x04\x08\x02\0\x05\x12\x03F\x02\x07\n\x0c\n\x05\x04\x08\x02\0\x01\x12\
-    \x03F\x08\x0f\n\x0c\n\x05\x04\x08\x02\0\x03\x12\x03F\x12\x13\n7\n\x04\
-    \x04\x08\x02\x01\x12\x03H\x02\x1c\x1a*\x20list\x20of\x20topics\x20provid\
-    ed\x20by\x20the\x20contract.\n\n\x0c\n\x05\x04\x08\x02\x01\x04\x12\x03H\
-    \x02\n\n\x0c\n\x05\x04\x08\x02\x01\x06\x12\x03H\x0b\x10\n\x0c\n\x05\x04\
-    \x08\x02\x01\x01\x12\x03H\x11\x17\n\x0c\n\x05\x04\x08\x02\x01\x03\x12\
-    \x03H\x1a\x1b\n<\n\x04\x04\x08\x02\x02\x12\x03J\x02\x11\x1a/\x20supplied\
-    \x20by\x20the\x20contract,\x20usually\x20ABI-encoded\n\n\x0c\n\x05\x04\
-    \x08\x02\x02\x05\x12\x03J\x02\x07\n\x0c\n\x05\x04\x08\x02\x02\x01\x12\
-    \x03J\x08\x0c\n\x0c\n\x05\x04\x08\x02\x02\x03\x12\x03J\x0f\x10\nX\n\x02\
-    \x04\t\x12\x04N\0Q\x01\x1aL\x20Request\x20for\x20account\x20code\x20(sma\
-    rt\x20contract\x20deployed\x20behind\x20provided\x20address)\n\n\n\n\x03\
-    \x04\t\x01\x12\x03N\x08\x17\n*\n\x04\x04\t\x02\0\x12\x03P\x02\x14\x1a\
-    \x1d\x2020\x20bytes\x20of\x20account\x20address\n\n\x0c\n\x05\x04\t\x02\
-    \0\x05\x12\x03P\x02\x07\n\x0c\n\x05\x04\t\x02\0\x01\x12\x03P\x08\x0f\n\
-    \x0c\n\x05\x04\t\x02\0\x03\x12\x03P\x12\x13\n'\n\x02\x04\n\x12\x04T\0Y\
+    \x16\n\x06txType\x18\x0c\x20\x01(\rR\x06txType\"\xb5\x03\n\x16SGXVMEstim\
+    ateGasParams\x12\x12\n\x04from\x18\x01\x20\x01(\x0cR\x04from\x12\x0e\n\
+    \x02to\x18\x02\x20\x01(\x0cR\x02to\x12\x12\n\x04data\x18\x03\x20\x01(\
+    \x0cR\x04data\x12\x1a\n\x08gasLimit\x18\x04\x20\x01(\x04R\x08gasLimit\
+    \x12\x1a\n\x08gasPrice\x18\x05\x20\x01(\x0cR\x08gasPrice\x12\x14\n\x05va\
+    lue\x18\x06\x20\x01(\x0cR\x05value\x127\n\naccessList\x18\x07\x20\x03(\
+    \x0b2\x17.ffi.ffi.AccessListItemR\naccessList\x12\x16\n\x06commit\x18\
+    \x08\x20\x01(\x08R\x06commit\x12\x14\n\x05nonce\x18\t\x20\x01(\x04R\x05n\
+    once\x12\x20\n\x0bunencrypted\x18\n\x20\x01(\x08R\x0bunencrypted\x12\x1c\
+    \n\tsignature\x18\x0b\x20\x01(\x0cR\tsignature\x122\n\x14maxPriorityFeeP\
+    erGas\x18\x0c\x20\x01(\x0cR\x14maxPriorityFeePerGas\x12\"\n\x0cmaxFeePer\
+    Gas\x18\r\x20\x01(\x0cR\x0cmaxFeePerGas\x12\x16\n\x06txType\x18\x0e\x20\
+    \x01(\rR\x06txType\"{\n\x10SGXVMCallRequest\x120\n\x06params\x18\x01\x20\
+    \x01(\x0b2\x18.ffi.ffi.SGXVMCallParamsR\x06params\x125\n\x07context\x18\
+    \x02\x20\x01(\x0b2\x1b.ffi.ffi.TransactionContextR\x07context\"\x7f\n\
+    \x12SGXVMCreateRequest\x122\n\x06params\x18\x01\x20\x01(\x0b2\x1a.ffi.ff\
+    i.SGXVMCreateParamsR\x06params\x125\n\x07context\x18\x02\x20\x01(\x0b2\
+    \x1b.ffi.ffi.TransactionContextR\x07context\"\x89\x01\n\x17SGXVMEstimate\
+    GasRequest\x127\n\x06params\x18\x01\x20\x01(\x0b2\x1f.ffi.ffi.SGXVMEstim\
+    ateGasParamsR\x06params\x125\n\x07context\x18\x02\x20\x01(\x0b2\x1b.ffi.\
+    ffi.TransactionContextR\x07context\"8\n\x14NodePublicKeyRequest\x12\x20\
+    \n\x0bblockNumber\x18\x01\x20\x01(\x04R\x0bblockNumber\"5\n\x15NodePubli\
+    cKeyResponse\x12\x1c\n\tpublicKey\x18\x01\x20\x01(\x0cR\tpublicKey\"y\n\
+    \tEpochData\x12\x20\n\x0bepochNumber\x18\x01\x20\x01(\rR\x0bepochNumber\
+    \x12$\n\rstartingBlock\x18\x02\x20\x01(\x04R\rstartingBlock\x12$\n\rnode\
+    PublicKey\x18\x03\x20\x01(\x0cR\rnodePublicKey\"@\n\x12ListEpochsRespons\
+    e\x12*\n\x06epochs\x18\x01\x20\x03(\x0b2\x12.ffi.ffi.EpochDataR\x06epoch\
+    s\"\xb8\x02\n\nFFIRequest\x12=\n\x0bcallRequest\x18\x01\x20\x01(\x0b2\
+    \x19.ffi.ffi.SGXVMCallRequestH\0R\x0bcallRequest\x12C\n\rcreateRequest\
+    \x18\x02\x20\x01(\x0b2\x1b.ffi.ffi.SGXVMCreateRequestH\0R\rcreateRequest\
+    \x12R\n\x12estimateGasRequest\x18\x03\x20\x01(\x0b2\x20.ffi.ffi.SGXVMEst\
+    imateGasRequestH\0R\x12estimateGasRequest\x12K\n\x10publicKeyRequest\x18\
+    \x04\x20\x01(\x0b2\x1d.ffi.ffi.NodePublicKeyRequestH\0R\x10publicKeyRequ\
+    estB\x05\n\x03reqB&Z$github.com/SigmaGmbH/librustgo/typesJ\xe4p\n\x07\
+    \x12\x05\0\0\xf9\x02\x01\n\x08\n\x01\x0c\x12\x03\0\0\x12\n\x08\n\x01\x02\
+    \x12\x03\x02\0\x10\n\x08\n\x01\x08\x12\x03\x04\0;\n\t\n\x02\x08\x0b\x12\
+    \x03\x04\0;\n\x1d\n\x02\x04\0\x12\x04\x08\0\x0b\x012\x11\x20General\x20r\
+    equest\n\n\n\n\x03\x04\0\x01\x12\x03\x08\x08\x16\n\x0b\n\x04\x04\0\x02\0\
+    \x12\x03\t\x02!\n\x0c\n\x05\x04\0\x02\0\x04\x12\x03\t\x02\n\n\x0c\n\x05\
+    \x04\0\x02\0\x05\x12\x03\t\x0b\x10\n\x0c\n\x05\x04\0\x02\0\x01\x12\x03\t\
+    \x11\x1c\n\x0c\n\x05\x04\0\x02\0\x03\x12\x03\t\x1f\x20\n\x0b\n\x04\x04\0\
+    \x02\x01\x12\x03\n\x02\x14\n\x0c\n\x05\x04\0\x02\x01\x05\x12\x03\n\x02\
+    \x07\n\x0c\n\x05\x04\0\x02\x01\x01\x12\x03\n\x08\x0f\n\x0c\n\x05\x04\0\
+    \x02\x01\x03\x12\x03\n\x12\x13\n\n\n\x02\x04\x01\x12\x04\r\0\x14\x01\n\n\
+    \n\x03\x04\x01\x01\x12\x03\r\x08\x17\n\x0b\n\x04\x04\x01\x02\0\x12\x03\
+    \x0e\x02\x11\n\x0c\n\x05\x04\x01\x02\0\x05\x12\x03\x0e\x02\x07\n\x0c\n\
+    \x05\x04\x01\x02\0\x01\x12\x03\x0e\x08\x0c\n\x0c\n\x05\x04\x01\x02\0\x03\
+    \x12\x03\x0e\x0f\x10\n\x0b\n\x04\x04\x01\x02\x01\x12\x03\x0f\x02\x0f\n\
+    \x0c\n\x05\x04\x01\x02\x01\x05\x12\x03\x0f\x02\x07\n\x0c\n\x05\x04\x01\
+    \x02\x01\x01\x12\x03\x0f\x08\n\n\x0c\n\x05\x04\x01\x02\x01\x03\x12\x03\
+    \x0f\r\x0e\n\x0b\n\x04\x04\x01\x02\x02\x12\x03\x10\x02\x11\n\x0c\n\x05\
+    \x04\x01\x02\x02\x05\x12\x03\x10\x02\x07\n\x0c\n\x05\x04\x01\x02\x02\x01\
+    \x12\x03\x10\x08\x0c\n\x0c\n\x05\x04\x01\x02\x02\x03\x12\x03\x10\x0f\x10\
+    \n\x0b\n\x04\x04\x01\x02\x03\x12\x03\x11\x02\x16\n\x0c\n\x05\x04\x01\x02\
+    \x03\x05\x12\x03\x11\x02\x08\n\x0c\n\x05\x04\x01\x02\x03\x01\x12\x03\x11\
+    \t\x11\n\x0c\n\x05\x04\x01\x02\x03\x03\x12\x03\x11\x14\x15\n\x0b\n\x04\
+    \x04\x01\x02\x04\x12\x03\x12\x02\x12\n\x0c\n\x05\x04\x01\x02\x04\x05\x12\
+    \x03\x12\x02\x07\n\x0c\n\x05\x04\x01\x02\x04\x01\x12\x03\x12\x08\r\n\x0c\
+    \n\x05\x04\x01\x02\x04\x03\x12\x03\x12\x10\x11\n\x0b\n\x04\x04\x01\x02\
+    \x05\x12\x03\x13\x02)\n\x0c\n\x05\x04\x01\x02\x05\x04\x12\x03\x13\x02\n\
+    \n\x0c\n\x05\x04\x01\x02\x05\x06\x12\x03\x13\x0b\x19\n\x0c\n\x05\x04\x01\
+    \x02\x05\x01\x12\x03\x13\x1a$\n\x0c\n\x05\x04\x01\x02\x05\x03\x12\x03\
+    \x13'(\n\n\n\x02\x04\x02\x12\x04\x16\0\x1e\x01\n\n\n\x03\x04\x02\x01\x12\
+    \x03\x16\x08\x1a\n\x0b\n\x04\x04\x02\x02\0\x12\x03\x17\x02\x16\n\x0c\n\
+    \x05\x04\x02\x02\0\x05\x12\x03\x17\x02\x08\n\x0c\n\x05\x04\x02\x02\0\x01\
+    \x12\x03\x17\t\x11\n\x0c\n\x05\x04\x02\x02\0\x03\x12\x03\x17\x14\x15\n\
+    \x0b\n\x04\x04\x02\x02\x01\x12\x03\x18\x02\x16\n\x0c\n\x05\x04\x02\x02\
+    \x01\x05\x12\x03\x18\x02\x07\n\x0c\n\x05\x04\x02\x02\x01\x01\x12\x03\x18\
+    \x08\x11\n\x0c\n\x05\x04\x02\x02\x01\x03\x12\x03\x18\x14\x15\n\x0b\n\x04\
+    \x04\x02\x02\x02\x12\x03\x19\x02\x17\n\x0c\n\x05\x04\x02\x02\x02\x05\x12\
+    \x03\x19\x02\x08\n\x0c\n\x05\x04\x02\x02\x02\x01\x12\x03\x19\t\x12\n\x0c\
+    \n\x05\x04\x02\x02\x02\x03\x12\x03\x19\x15\x16\n\x0b\n\x04\x04\x02\x02\
+    \x03\x12\x03\x1a\x02\x1d\n\x0c\n\x05\x04\x02\x02\x03\x05\x12\x03\x1a\x02\
+    \x08\n\x0c\n\x05\x04\x02\x02\x03\x01\x12\x03\x1a\t\x18\n\x0c\n\x05\x04\
+    \x02\x02\x03\x03\x12\x03\x1a\x1b\x1c\n\x0b\n\x04\x04\x02\x02\x04\x12\x03\
+    \x1b\x02#\n\x0c\n\x05\x04\x02\x02\x04\x05\x12\x03\x1b\x02\x07\n\x0c\n\
+    \x05\x04\x02\x02\x04\x01\x12\x03\x1b\x08\x1e\n\x0c\n\x05\x04\x02\x02\x04\
+    \x03\x12\x03\x1b!\"\n\x0b\n\x04\x04\x02\x02\x05\x12\x03\x1c\x02\x1b\n\
+    \x0c\n\x05\x04\x02\x02\x05\x05\x12\x03\x1c\x02\x07\n\x0c\n\x05\x04\x02\
+    \x02\x05\x01\x12\x03\x1c\x08\x16\n\x0c\n\x05\x04\x02\x02\x05\x03\x12\x03\
+    \x1c\x19\x1a\n\x0b\n\x04\x04\x02\x02\x06\x12\x03\x1d\x02\x1a\n\x0c\n\x05\
+    \x04\x02\x02\x06\x05\x12\x03\x1d\x02\x08\n\x0c\n\x05\x04\x02\x02\x06\x01\
+    \x12\x03\x1d\t\x15\n\x0c\n\x05\x04\x02\x02\x06\x03\x12\x03\x1d\x18\x19\n\
+    \n\n\x02\x04\x03\x12\x04\x20\0#\x01\n\n\n\x03\x04\x03\x01\x12\x03\x20\
+    \x08\x20\n\x0b\n\x04\x04\x03\x02\0\x12\x03!\x02\x1e\n\x0c\n\x05\x04\x03\
+    \x02\0\x06\x12\x03!\x02\x11\n\x0c\n\x05\x04\x03\x02\0\x01\x12\x03!\x12\
+    \x19\n\x0c\n\x05\x04\x03\x02\0\x03\x12\x03!\x1c\x1d\n\x0b\n\x04\x04\x03\
+    \x02\x01\x12\x03\"\x02$\n\x0c\n\x05\x04\x03\x02\x01\x06\x12\x03\"\x02\
+    \x14\n\x0c\n\x05\x04\x03\x02\x01\x01\x12\x03\"\x15\x1f\n\x0c\n\x05\x04\
+    \x03\x02\x01\x03\x12\x03\"\"#\n\n\n\x02\x04\x04\x12\x04%\00\x01\n\n\n\
+    \x03\x04\x04\x01\x12\x03%\x08!\nZ\n\x04\x04\x04\x02\0\x12\x03(\x02\x18\
+    \x1aM\x20logs\x20contains\x20the\x20transaction\x20hash\x20and\x20the\
+    \x20proto-compatible\x20ethereum\n\x20logs.\n\n\x0c\n\x05\x04\x04\x02\0\
+    \x04\x12\x03(\x02\n\n\x0c\n\x05\x04\x04\x02\0\x06\x12\x03(\x0b\x0e\n\x0c\
+    \n\x05\x04\x04\x02\0\x01\x12\x03(\x0f\x13\n\x0c\n\x05\x04\x04\x02\0\x03\
+    \x12\x03(\x16\x17\n\\\n\x04\x04\x04\x02\x01\x12\x03+\x02\x10\x1aO\x20ret\
+    urned\x20data\x20from\x20evm\x20function\x20(result\x20or\x20data\x20sup\
+    plied\x20with\x20revert\n\x20opcode)\n\n\x0c\n\x05\x04\x04\x02\x01\x05\
+    \x12\x03+\x02\x07\n\x0c\n\x05\x04\x04\x02\x01\x01\x12\x03+\x08\x0b\n\x0c\
+    \n\x05\x04\x04\x02\x01\x03\x12\x03+\x0e\x0f\n=\n\x04\x04\x04\x02\x02\x12\
+    \x03-\x02\x16\x1a0\x20vm\x20error\x20is\x20the\x20error\x20returned\x20b\
+    y\x20vm\x20execution\n\n\x0c\n\x05\x04\x04\x02\x02\x05\x12\x03-\x02\x08\
+    \n\x0c\n\x05\x04\x04\x02\x02\x01\x12\x03-\t\x11\n\x0c\n\x05\x04\x04\x02\
+    \x02\x03\x12\x03-\x14\x15\n.\n\x04\x04\x04\x02\x03\x12\x03/\x02\x16\x1a!\
+    \x20gas\x20consumed\x20by\x20the\x20transaction\n\n\x0c\n\x05\x04\x04\
+    \x02\x03\x05\x12\x03/\x02\x08\n\x0c\n\x05\x04\x04\x02\x03\x01\x12\x03/\t\
+    \x11\n\x0c\n\x05\x04\x04\x02\x03\x03\x12\x03/\x14\x15\n\n\n\x02\x04\x05\
+    \x12\x042\05\x01\n\n\n\x03\x04\x05\x01\x12\x032\x08\x20\n\x0b\n\x04\x04\
+    \x05\x02\0\x12\x033\x02\x1e\n\x0c\n\x05\x04\x05\x02\0\x06\x12\x033\x02\
+    \x11\n\x0c\n\x05\x04\x05\x02\0\x01\x12\x033\x12\x19\n\x0c\n\x05\x04\x05\
+    \x02\0\x03\x12\x033\x1c\x1d\n\x0b\n\x04\x04\x05\x02\x01\x12\x034\x02$\n\
+    \x0c\n\x05\x04\x05\x02\x01\x06\x12\x034\x02\x14\n\x0c\n\x05\x04\x05\x02\
+    \x01\x01\x12\x034\x15\x1f\n\x0c\n\x05\x04\x05\x02\x01\x03\x12\x034\"#\n\
+    \n\n\x02\x04\x06\x12\x046\0;\x01\n\n\n\x03\x04\x06\x01\x12\x036\x08!\n=\
+    \n\x04\x04\x06\x02\0\x12\x038\x02\x16\x1a0\x20vm\x20error\x20is\x20the\
+    \x20error\x20returned\x20by\x20vm\x20execution\n\n\x0c\n\x05\x04\x06\x02\
+    \0\x05\x12\x038\x02\x08\n\x0c\n\x05\x04\x06\x02\0\x01\x12\x038\t\x11\n\
+    \x0c\n\x05\x04\x06\x02\0\x03\x12\x038\x14\x15\n.\n\x04\x04\x06\x02\x01\
+    \x12\x03:\x02\x16\x1a!\x20gas\x20consumed\x20by\x20the\x20transaction\n\
+    \n\x0c\n\x05\x04\x06\x02\x01\x05\x12\x03:\x02\x08\n\x0c\n\x05\x04\x06\
+    \x02\x01\x01\x12\x03:\t\x11\n\x0c\n\x05\x04\x06\x02\x01\x03\x12\x03:\x14\
+    \x15\nc\n\x02\x04\x07\x12\x03?\0\"\x1aX\x20Topic\x20represents\x2032-byt\
+    e\x20words\x20that\x20is\x20used\x20to\x20describe\x20what\xe2\x80\x99s\
+    \x20going\x20on\x20in\x20an\n\x20event\n\n\n\n\x03\x04\x07\x01\x12\x03?\
+    \x08\r\n\x0b\n\x04\x04\x07\x02\0\x12\x03?\x10\x20\n\x0c\n\x05\x04\x07\
+    \x02\0\x05\x12\x03?\x10\x15\n\x0c\n\x05\x04\x07\x02\0\x01\x12\x03?\x16\
+    \x1b\n\x0c\n\x05\x04\x07\x02\0\x03\x12\x03?\x1e\x1f\n\x81\x01\n\x02\x04\
+    \x08\x12\x04D\0K\x01\x1au\x20Log\x20represents\x20an\x20protobuf\x20comp\
+    atible\x20Ethereum\x20Log\x20that\x20defines\x20a\x20contract\n\x20log\
+    \x20event.\n\x20Copied\x20from\x20`devnet/proto``\n\n\n\n\x03\x04\x08\
+    \x01\x12\x03D\x08\x0b\n?\n\x04\x04\x08\x02\0\x12\x03F\x02\x14\x1a2\x20ad\
+    dress\x20of\x20the\x20contract\x20that\x20generated\x20the\x20event\n\n\
+    \x0c\n\x05\x04\x08\x02\0\x05\x12\x03F\x02\x07\n\x0c\n\x05\x04\x08\x02\0\
+    \x01\x12\x03F\x08\x0f\n\x0c\n\x05\x04\x08\x02\0\x03\x12\x03F\x12\x13\n7\
+    \n\x04\x04\x08\x02\x01\x12\x03H\x02\x1c\x1a*\x20list\x20of\x20topics\x20\
+    provided\x20by\x20the\x20contract.\n\n\x0c\n\x05\x04\x08\x02\x01\x04\x12\
+    \x03H\x02\n\n\x0c\n\x05\x04\x08\x02\x01\x06\x12\x03H\x0b\x10\n\x0c\n\x05\
+    \x04\x08\x02\x01\x01\x12\x03H\x11\x17\n\x0c\n\x05\x04\x08\x02\x01\x03\
+    \x12\x03H\x1a\x1b\n<\n\x04\x04\x08\x02\x02\x12\x03J\x02\x11\x1a/\x20supp\
+    lied\x20by\x20the\x20contract,\x20usually\x20ABI-encoded\n\n\x0c\n\x05\
+    \x04\x08\x02\x02\x05\x12\x03J\x02\x07\n\x0c\n\x05\x04\x08\x02\x02\x01\
+    \x12\x03J\x08\x0c\n\x0c\n\x05\x04\x08\x02\x02\x03\x12\x03J\x0f\x10\nX\n\
+    \x02\x04\t\x12\x04N\0Q\x01\x1aL\x20Request\x20for\x20account\x20code\x20\
+    (smart\x20contract\x20deployed\x20behind\x20provided\x20address)\n\n\n\n\
+    \x03\x04\t\x01\x12\x03N\x08\x17\n*\n\x04\x04\t\x02\0\x12\x03P\x02\x14\
+    \x1a\x1d\x2020\x20bytes\x20of\x20account\x20address\n\n\x0c\n\x05\x04\t\
+    \x02\0\x05\x12\x03P\x02\x07\n\x0c\n\x05\x04\t\x02\0\x01\x12\x03P\x08\x0f\
+    \n\x0c\n\x05\x04\t\x02\0\x03\x12\x03P\x12\x13\n'\n\x02\x04\n\x12\x04T\0Y\
     \x01\x1a\x1b\x20Response\x20for\x20account\x20code\n\n\n\n\x03\x04\n\x01\
     \x12\x03T\x08\x1f\nb\n\x04\x04\n\x02\0\x12\x03W\x02\x14\x1aU\x20Since\
     \x20both\x20fields\x20are\x20256-bit\x20unsigned\x20integer,\x20we\x20en\
@@ -16647,57 +17667,109 @@ static file_descriptor_proto_data: &'static [u8] = b"\
     \x02\n\x03\x12\x04\xb9\x02\x17\x19\n\x0c\n\x04\x048\x02\x0b\x12\x04\xba\
     \x02\x02\x15\n\r\n\x05\x048\x02\x0b\x05\x12\x04\xba\x02\x02\x08\n\r\n\
     \x05\x048\x02\x0b\x01\x12\x04\xba\x02\t\x0f\n\r\n\x05\x048\x02\x0b\x03\
-    \x12\x04\xba\x02\x12\x14\n3\n\x02\x049\x12\x06\xbe\x02\0\xc1\x02\x01\x1a\
-    %\x20Request\x20to\x20execute\x20`call`\x20operation\n\n\x0b\n\x03\x049\
-    \x01\x12\x04\xbe\x02\x08\x18\n\x0c\n\x04\x049\x02\0\x12\x04\xbf\x02\x02\
-    \x1d\n\r\n\x05\x049\x02\0\x06\x12\x04\xbf\x02\x02\x11\n\r\n\x05\x049\x02\
-    \0\x01\x12\x04\xbf\x02\x12\x18\n\r\n\x05\x049\x02\0\x03\x12\x04\xbf\x02\
-    \x1b\x1c\n\x0c\n\x04\x049\x02\x01\x12\x04\xc0\x02\x02!\n\r\n\x05\x049\
-    \x02\x01\x06\x12\x04\xc0\x02\x02\x14\n\r\n\x05\x049\x02\x01\x01\x12\x04\
-    \xc0\x02\x15\x1c\n\r\n\x05\x049\x02\x01\x03\x12\x04\xc0\x02\x1f\x20\n5\n\
-    \x02\x04:\x12\x06\xc4\x02\0\xc7\x02\x01\x1a'\x20Request\x20to\x20execute\
-    \x20`create`\x20operation\n\n\x0b\n\x03\x04:\x01\x12\x04\xc4\x02\x08\x1a\
-    \n\x0c\n\x04\x04:\x02\0\x12\x04\xc5\x02\x02\x1f\n\r\n\x05\x04:\x02\0\x06\
-    \x12\x04\xc5\x02\x02\x13\n\r\n\x05\x04:\x02\0\x01\x12\x04\xc5\x02\x14\
-    \x1a\n\r\n\x05\x04:\x02\0\x03\x12\x04\xc5\x02\x1d\x1e\n\x0c\n\x04\x04:\
-    \x02\x01\x12\x04\xc6\x02\x02!\n\r\n\x05\x04:\x02\x01\x06\x12\x04\xc6\x02\
-    \x02\x14\n\r\n\x05\x04:\x02\x01\x01\x12\x04\xc6\x02\x15\x1c\n\r\n\x05\
-    \x04:\x02\x01\x03\x12\x04\xc6\x02\x1f\x20\n1\n\x02\x04;\x12\x06\xca\x02\
-    \0\xcc\x02\x01\x1a#\x20Request\x20to\x20obtain\x20node\x20public\x20key\
-    \n\n\x0b\n\x03\x04;\x01\x12\x04\xca\x02\x08\x1c\n\x0c\n\x04\x04;\x02\0\
-    \x12\x04\xcb\x02\x02\x19\n\r\n\x05\x04;\x02\0\x05\x12\x04\xcb\x02\x02\
-    \x08\n\r\n\x05\x04;\x02\0\x01\x12\x04\xcb\x02\t\x14\n\r\n\x05\x04;\x02\0\
-    \x03\x12\x04\xcb\x02\x17\x18\n+\n\x02\x04<\x12\x04\xcf\x02\06\x1a\x1f\
-    \x20Response\x20with\x20node\x20public\x20key\n\n\x0b\n\x03\x04<\x01\x12\
-    \x04\xcf\x02\x08\x1d\n\x0c\n\x04\x04<\x02\0\x12\x04\xcf\x02\x204\n\r\n\
-    \x05\x04<\x02\0\x05\x12\x04\xcf\x02\x20%\n\r\n\x05\x04<\x02\0\x01\x12\
-    \x04\xcf\x02&/\n\r\n\x05\x04<\x02\0\x03\x12\x04\xcf\x0223\n\x0c\n\x02\
-    \x04=\x12\x06\xd1\x02\0\xd5\x02\x01\n\x0b\n\x03\x04=\x01\x12\x04\xd1\x02\
-    \x08\x11\n\x0c\n\x04\x04=\x02\0\x12\x04\xd2\x02\x02\x19\n\r\n\x05\x04=\
-    \x02\0\x05\x12\x04\xd2\x02\x02\x08\n\r\n\x05\x04=\x02\0\x01\x12\x04\xd2\
-    \x02\t\x14\n\r\n\x05\x04=\x02\0\x03\x12\x04\xd2\x02\x17\x18\n\x0c\n\x04\
-    \x04=\x02\x01\x12\x04\xd3\x02\x02\x1b\n\r\n\x05\x04=\x02\x01\x05\x12\x04\
-    \xd3\x02\x02\x08\n\r\n\x05\x04=\x02\x01\x01\x12\x04\xd3\x02\t\x16\n\r\n\
-    \x05\x04=\x02\x01\x03\x12\x04\xd3\x02\x19\x1a\n\x0c\n\x04\x04=\x02\x02\
-    \x12\x04\xd4\x02\x02\x1a\n\r\n\x05\x04=\x02\x02\x05\x12\x04\xd4\x02\x02\
-    \x07\n\r\n\x05\x04=\x02\x02\x01\x12\x04\xd4\x02\x08\x15\n\r\n\x05\x04=\
-    \x02\x02\x03\x12\x04\xd4\x02\x18\x19\n\x0c\n\x02\x04>\x12\x06\xd6\x02\0\
-    \xd8\x02\x01\n\x0b\n\x03\x04>\x01\x12\x04\xd6\x02\x08\x1a\n\x0c\n\x04\
-    \x04>\x02\0\x12\x04\xd7\x02\x02\x20\n\r\n\x05\x04>\x02\0\x04\x12\x04\xd7\
-    \x02\x02\n\n\r\n\x05\x04>\x02\0\x06\x12\x04\xd7\x02\x0b\x14\n\r\n\x05\
-    \x04>\x02\0\x01\x12\x04\xd7\x02\x15\x1b\n\r\n\x05\x04>\x02\0\x03\x12\x04\
-    \xd7\x02\x1e\x1f\n\x0c\n\x02\x04?\x12\x06\xda\x02\0\xe0\x02\x01\n\x0b\n\
-    \x03\x04?\x01\x12\x04\xda\x02\x08\x12\n\x0e\n\x04\x04?\x08\0\x12\x06\xdb\
-    \x02\x02\xdf\x02\x03\n\r\n\x05\x04?\x08\0\x01\x12\x04\xdb\x02\x08\x0b\n\
-    \x0c\n\x04\x04?\x02\0\x12\x04\xdc\x02\x04%\n\r\n\x05\x04?\x02\0\x06\x12\
-    \x04\xdc\x02\x04\x14\n\r\n\x05\x04?\x02\0\x01\x12\x04\xdc\x02\x15\x20\n\
-    \r\n\x05\x04?\x02\0\x03\x12\x04\xdc\x02#$\n\x0c\n\x04\x04?\x02\x01\x12\
-    \x04\xdd\x02\x04)\n\r\n\x05\x04?\x02\x01\x06\x12\x04\xdd\x02\x04\x16\n\r\
-    \n\x05\x04?\x02\x01\x01\x12\x04\xdd\x02\x17$\n\r\n\x05\x04?\x02\x01\x03\
-    \x12\x04\xdd\x02'(\n\x0c\n\x04\x04?\x02\x02\x12\x04\xde\x02\x04.\n\r\n\
-    \x05\x04?\x02\x02\x06\x12\x04\xde\x02\x04\x18\n\r\n\x05\x04?\x02\x02\x01\
-    \x12\x04\xde\x02\x19)\n\r\n\x05\x04?\x02\x02\x03\x12\x04\xde\x02,-b\x06p\
-    roto3\
+    \x12\x04\xba\x02\x12\x14\nM\n\x02\x049\x12\x06\xbe\x02\0\xcd\x02\x01\x1a\
+    ?\x20Message\x20with\x20data\x20required\x20to\x20execute\x20`estimateGa\
+    s`\x20operation\n\n\x0b\n\x03\x049\x01\x12\x04\xbe\x02\x08\x1e\n\x0c\n\
+    \x04\x049\x02\0\x12\x04\xbf\x02\x02\x11\n\r\n\x05\x049\x02\0\x05\x12\x04\
+    \xbf\x02\x02\x07\n\r\n\x05\x049\x02\0\x01\x12\x04\xbf\x02\x08\x0c\n\r\n\
+    \x05\x049\x02\0\x03\x12\x04\xbf\x02\x0f\x10\n\x0c\n\x04\x049\x02\x01\x12\
+    \x04\xc0\x02\x02\x0f\n\r\n\x05\x049\x02\x01\x05\x12\x04\xc0\x02\x02\x07\
+    \n\r\n\x05\x049\x02\x01\x01\x12\x04\xc0\x02\x08\n\n\r\n\x05\x049\x02\x01\
+    \x03\x12\x04\xc0\x02\r\x0e\n\x0c\n\x04\x049\x02\x02\x12\x04\xc1\x02\x02\
+    \x11\n\r\n\x05\x049\x02\x02\x05\x12\x04\xc1\x02\x02\x07\n\r\n\x05\x049\
+    \x02\x02\x01\x12\x04\xc1\x02\x08\x0c\n\r\n\x05\x049\x02\x02\x03\x12\x04\
+    \xc1\x02\x0f\x10\n\x0c\n\x04\x049\x02\x03\x12\x04\xc2\x02\x02\x16\n\r\n\
+    \x05\x049\x02\x03\x05\x12\x04\xc2\x02\x02\x08\n\r\n\x05\x049\x02\x03\x01\
+    \x12\x04\xc2\x02\t\x11\n\r\n\x05\x049\x02\x03\x03\x12\x04\xc2\x02\x14\
+    \x15\n\x0c\n\x04\x049\x02\x04\x12\x04\xc3\x02\x02\x15\n\r\n\x05\x049\x02\
+    \x04\x05\x12\x04\xc3\x02\x02\x07\n\r\n\x05\x049\x02\x04\x01\x12\x04\xc3\
+    \x02\x08\x10\n\r\n\x05\x049\x02\x04\x03\x12\x04\xc3\x02\x13\x14\n\x0c\n\
+    \x04\x049\x02\x05\x12\x04\xc4\x02\x02\x12\n\r\n\x05\x049\x02\x05\x05\x12\
+    \x04\xc4\x02\x02\x07\n\r\n\x05\x049\x02\x05\x01\x12\x04\xc4\x02\x08\r\n\
+    \r\n\x05\x049\x02\x05\x03\x12\x04\xc4\x02\x10\x11\n\x0c\n\x04\x049\x02\
+    \x06\x12\x04\xc5\x02\x02)\n\r\n\x05\x049\x02\x06\x04\x12\x04\xc5\x02\x02\
+    \n\n\r\n\x05\x049\x02\x06\x06\x12\x04\xc5\x02\x0b\x19\n\r\n\x05\x049\x02\
+    \x06\x01\x12\x04\xc5\x02\x1a$\n\r\n\x05\x049\x02\x06\x03\x12\x04\xc5\x02\
+    '(\n\x0c\n\x04\x049\x02\x07\x12\x04\xc6\x02\x02\x12\n\r\n\x05\x049\x02\
+    \x07\x05\x12\x04\xc6\x02\x02\x06\n\r\n\x05\x049\x02\x07\x01\x12\x04\xc6\
+    \x02\x07\r\n\r\n\x05\x049\x02\x07\x03\x12\x04\xc6\x02\x10\x11\n\x0c\n\
+    \x04\x049\x02\x08\x12\x04\xc7\x02\x02\x13\n\r\n\x05\x049\x02\x08\x05\x12\
+    \x04\xc7\x02\x02\x08\n\r\n\x05\x049\x02\x08\x01\x12\x04\xc7\x02\t\x0e\n\
+    \r\n\x05\x049\x02\x08\x03\x12\x04\xc7\x02\x11\x12\n\x0c\n\x04\x049\x02\t\
+    \x12\x04\xc8\x02\x02\x18\n\r\n\x05\x049\x02\t\x05\x12\x04\xc8\x02\x02\
+    \x06\n\r\n\x05\x049\x02\t\x01\x12\x04\xc8\x02\x07\x12\n\r\n\x05\x049\x02\
+    \t\x03\x12\x04\xc8\x02\x15\x17\n\x0c\n\x04\x049\x02\n\x12\x04\xc9\x02\
+    \x02\x17\n\r\n\x05\x049\x02\n\x05\x12\x04\xc9\x02\x02\x07\n\r\n\x05\x049\
+    \x02\n\x01\x12\x04\xc9\x02\x08\x11\n\r\n\x05\x049\x02\n\x03\x12\x04\xc9\
+    \x02\x14\x16\n\x0c\n\x04\x049\x02\x0b\x12\x04\xca\x02\x02\"\n\r\n\x05\
+    \x049\x02\x0b\x05\x12\x04\xca\x02\x02\x07\n\r\n\x05\x049\x02\x0b\x01\x12\
+    \x04\xca\x02\x08\x1c\n\r\n\x05\x049\x02\x0b\x03\x12\x04\xca\x02\x1f!\n\
+    \x0c\n\x04\x049\x02\x0c\x12\x04\xcb\x02\x02\x1a\n\r\n\x05\x049\x02\x0c\
+    \x05\x12\x04\xcb\x02\x02\x07\n\r\n\x05\x049\x02\x0c\x01\x12\x04\xcb\x02\
+    \x08\x14\n\r\n\x05\x049\x02\x0c\x03\x12\x04\xcb\x02\x17\x19\n\x0c\n\x04\
+    \x049\x02\r\x12\x04\xcc\x02\x02\x15\n\r\n\x05\x049\x02\r\x05\x12\x04\xcc\
+    \x02\x02\x08\n\r\n\x05\x049\x02\r\x01\x12\x04\xcc\x02\t\x0f\n\r\n\x05\
+    \x049\x02\r\x03\x12\x04\xcc\x02\x12\x14\n3\n\x02\x04:\x12\x06\xd0\x02\0\
+    \xd3\x02\x01\x1a%\x20Request\x20to\x20execute\x20`call`\x20operation\n\n\
+    \x0b\n\x03\x04:\x01\x12\x04\xd0\x02\x08\x18\n\x0c\n\x04\x04:\x02\0\x12\
+    \x04\xd1\x02\x02\x1d\n\r\n\x05\x04:\x02\0\x06\x12\x04\xd1\x02\x02\x11\n\
+    \r\n\x05\x04:\x02\0\x01\x12\x04\xd1\x02\x12\x18\n\r\n\x05\x04:\x02\0\x03\
+    \x12\x04\xd1\x02\x1b\x1c\n\x0c\n\x04\x04:\x02\x01\x12\x04\xd2\x02\x02!\n\
+    \r\n\x05\x04:\x02\x01\x06\x12\x04\xd2\x02\x02\x14\n\r\n\x05\x04:\x02\x01\
+    \x01\x12\x04\xd2\x02\x15\x1c\n\r\n\x05\x04:\x02\x01\x03\x12\x04\xd2\x02\
+    \x1f\x20\n5\n\x02\x04;\x12\x06\xd6\x02\0\xd9\x02\x01\x1a'\x20Request\x20\
+    to\x20execute\x20`create`\x20operation\n\n\x0b\n\x03\x04;\x01\x12\x04\
+    \xd6\x02\x08\x1a\n\x0c\n\x04\x04;\x02\0\x12\x04\xd7\x02\x02\x1f\n\r\n\
+    \x05\x04;\x02\0\x06\x12\x04\xd7\x02\x02\x13\n\r\n\x05\x04;\x02\0\x01\x12\
+    \x04\xd7\x02\x14\x1a\n\r\n\x05\x04;\x02\0\x03\x12\x04\xd7\x02\x1d\x1e\n\
+    \x0c\n\x04\x04;\x02\x01\x12\x04\xd8\x02\x02!\n\r\n\x05\x04;\x02\x01\x06\
+    \x12\x04\xd8\x02\x02\x14\n\r\n\x05\x04;\x02\x01\x01\x12\x04\xd8\x02\x15\
+    \x1c\n\r\n\x05\x04;\x02\x01\x03\x12\x04\xd8\x02\x1f\x20\n:\n\x02\x04<\
+    \x12\x06\xdc\x02\0\xdf\x02\x01\x1a,\x20Request\x20to\x20execute\x20`esti\
+    mateGas`\x20operation\n\n\x0b\n\x03\x04<\x01\x12\x04\xdc\x02\x08\x1f\n\
+    \x0c\n\x04\x04<\x02\0\x12\x04\xdd\x02\x02$\n\r\n\x05\x04<\x02\0\x06\x12\
+    \x04\xdd\x02\x02\x18\n\r\n\x05\x04<\x02\0\x01\x12\x04\xdd\x02\x19\x1f\n\
+    \r\n\x05\x04<\x02\0\x03\x12\x04\xdd\x02\"#\n\x0c\n\x04\x04<\x02\x01\x12\
+    \x04\xde\x02\x02!\n\r\n\x05\x04<\x02\x01\x06\x12\x04\xde\x02\x02\x14\n\r\
+    \n\x05\x04<\x02\x01\x01\x12\x04\xde\x02\x15\x1c\n\r\n\x05\x04<\x02\x01\
+    \x03\x12\x04\xde\x02\x1f\x20\n1\n\x02\x04=\x12\x06\xe2\x02\0\xe4\x02\x01\
+    \x1a#\x20Request\x20to\x20obtain\x20node\x20public\x20key\n\n\x0b\n\x03\
+    \x04=\x01\x12\x04\xe2\x02\x08\x1c\n\x0c\n\x04\x04=\x02\0\x12\x04\xe3\x02\
+    \x02\x19\n\r\n\x05\x04=\x02\0\x05\x12\x04\xe3\x02\x02\x08\n\r\n\x05\x04=\
+    \x02\0\x01\x12\x04\xe3\x02\t\x14\n\r\n\x05\x04=\x02\0\x03\x12\x04\xe3\
+    \x02\x17\x18\n+\n\x02\x04>\x12\x04\xe7\x02\06\x1a\x1f\x20Response\x20wit\
+    h\x20node\x20public\x20key\n\n\x0b\n\x03\x04>\x01\x12\x04\xe7\x02\x08\
+    \x1d\n\x0c\n\x04\x04>\x02\0\x12\x04\xe7\x02\x204\n\r\n\x05\x04>\x02\0\
+    \x05\x12\x04\xe7\x02\x20%\n\r\n\x05\x04>\x02\0\x01\x12\x04\xe7\x02&/\n\r\
+    \n\x05\x04>\x02\0\x03\x12\x04\xe7\x0223\n\x0c\n\x02\x04?\x12\x06\xe9\x02\
+    \0\xed\x02\x01\n\x0b\n\x03\x04?\x01\x12\x04\xe9\x02\x08\x11\n\x0c\n\x04\
+    \x04?\x02\0\x12\x04\xea\x02\x02\x19\n\r\n\x05\x04?\x02\0\x05\x12\x04\xea\
+    \x02\x02\x08\n\r\n\x05\x04?\x02\0\x01\x12\x04\xea\x02\t\x14\n\r\n\x05\
+    \x04?\x02\0\x03\x12\x04\xea\x02\x17\x18\n\x0c\n\x04\x04?\x02\x01\x12\x04\
+    \xeb\x02\x02\x1b\n\r\n\x05\x04?\x02\x01\x05\x12\x04\xeb\x02\x02\x08\n\r\
+    \n\x05\x04?\x02\x01\x01\x12\x04\xeb\x02\t\x16\n\r\n\x05\x04?\x02\x01\x03\
+    \x12\x04\xeb\x02\x19\x1a\n\x0c\n\x04\x04?\x02\x02\x12\x04\xec\x02\x02\
+    \x1a\n\r\n\x05\x04?\x02\x02\x05\x12\x04\xec\x02\x02\x07\n\r\n\x05\x04?\
+    \x02\x02\x01\x12\x04\xec\x02\x08\x15\n\r\n\x05\x04?\x02\x02\x03\x12\x04\
+    \xec\x02\x18\x19\n\x0c\n\x02\x04@\x12\x06\xee\x02\0\xf0\x02\x01\n\x0b\n\
+    \x03\x04@\x01\x12\x04\xee\x02\x08\x1a\n\x0c\n\x04\x04@\x02\0\x12\x04\xef\
+    \x02\x02\x20\n\r\n\x05\x04@\x02\0\x04\x12\x04\xef\x02\x02\n\n\r\n\x05\
+    \x04@\x02\0\x06\x12\x04\xef\x02\x0b\x14\n\r\n\x05\x04@\x02\0\x01\x12\x04\
+    \xef\x02\x15\x1b\n\r\n\x05\x04@\x02\0\x03\x12\x04\xef\x02\x1e\x1f\n\x0c\
+    \n\x02\x04A\x12\x06\xf2\x02\0\xf9\x02\x01\n\x0b\n\x03\x04A\x01\x12\x04\
+    \xf2\x02\x08\x12\n\x0e\n\x04\x04A\x08\0\x12\x06\xf3\x02\x02\xf8\x02\x03\
+    \n\r\n\x05\x04A\x08\0\x01\x12\x04\xf3\x02\x08\x0b\n\x0c\n\x04\x04A\x02\0\
+    \x12\x04\xf4\x02\x04%\n\r\n\x05\x04A\x02\0\x06\x12\x04\xf4\x02\x04\x14\n\
+    \r\n\x05\x04A\x02\0\x01\x12\x04\xf4\x02\x15\x20\n\r\n\x05\x04A\x02\0\x03\
+    \x12\x04\xf4\x02#$\n\x0c\n\x04\x04A\x02\x01\x12\x04\xf5\x02\x04)\n\r\n\
+    \x05\x04A\x02\x01\x06\x12\x04\xf5\x02\x04\x16\n\r\n\x05\x04A\x02\x01\x01\
+    \x12\x04\xf5\x02\x17$\n\r\n\x05\x04A\x02\x01\x03\x12\x04\xf5\x02'(\n\x0c\
+    \n\x04\x04A\x02\x02\x12\x04\xf6\x02\x043\n\r\n\x05\x04A\x02\x02\x06\x12\
+    \x04\xf6\x02\x04\x1b\n\r\n\x05\x04A\x02\x02\x01\x12\x04\xf6\x02\x1c.\n\r\
+    \n\x05\x04A\x02\x02\x03\x12\x04\xf6\x0212\n\x0c\n\x04\x04A\x02\x03\x12\
+    \x04\xf7\x02\x04.\n\r\n\x05\x04A\x02\x03\x06\x12\x04\xf7\x02\x04\x18\n\r\
+    \n\x05\x04A\x02\x03\x01\x12\x04\xf7\x02\x19)\n\r\n\x05\x04A\x02\x03\x03\
+    \x12\x04\xf7\x02,-b\x06proto3\
 ";
 
 static mut file_descriptor_proto_lazy: ::protobuf::lazy::Lazy<::protobuf::descriptor::FileDescriptorProto> = ::protobuf::lazy::Lazy {
