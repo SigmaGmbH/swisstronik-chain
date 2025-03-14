@@ -275,6 +275,7 @@ func Call(
 	transactionSignature []byte,
 	maxFeePerGas *big.Int,
 	maxPriorityFeePerGas *big.Int,
+	txType uint8,
 ) (*types.HandleTransactionResponse, error) {
 	// Construct mocked querier
 	c := BuildConnector(connector)
@@ -291,6 +292,7 @@ func Call(
 		Nonce:       nonce,
 		Unencrypted: isUnencrypted,
 		Signature:   transactionSignature,
+		TxType:      uint32(txType),
 	}
 
 	if gasPrice != nil {
@@ -350,6 +352,7 @@ func Create(
 	transactionSignature []byte,
 	maxFeePerGas *big.Int,
 	maxPriorityFeePerGas *big.Int,
+	txType uint8,
 ) (*types.HandleTransactionResponse, error) {
 	// Construct mocked querier
 	c := BuildConnector(connector)
@@ -364,6 +367,7 @@ func Create(
 		Commit:     commit,
 		Nonce:      nonce,
 		Signature:  transactionSignature,
+		TxType:     uint32(txType),
 	}
 	if gasPrice != nil {
 		params.GasPrice = gasPrice.Bytes()

@@ -296,6 +296,7 @@ message SGXVMCallParams {
   bytes signature = 11;
   bytes maxPriorityFeePerGas = 12;
   bytes maxFeePerGas = 13;
+  uint32 txType = 14;
 }
 
 // Message with data required to execute `create` operation
@@ -311,6 +312,7 @@ message SGXVMCreateParams {
   bytes signature = 9;
   bytes maxPriorityFeePerGas = 10;
   bytes maxFeePerGas = 11;
+  uint32 txType = 12;
 }
 
 // Request to execute `call` operation

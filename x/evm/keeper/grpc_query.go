@@ -225,6 +225,7 @@ func (k Keeper) EthCall(c context.Context, req *types.EthCallRequest) (*types.Ms
 	nonce := k.GetNonce(ctx, args.GetFrom())
 	args.Nonce = (*hexutil.Uint64)(&nonce)
 
+	txType := args.ToTransaction().AsTransaction().Type()
 	msg, err := args.ToMessage(req.GasCap, cfg.BaseFee)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -249,7 +250,7 @@ func (k Keeper) EthCall(c context.Context, req *types.EthCallRequest) (*types.Ms
 	}
 
 	// pass false to not commit StateDB
-	res, err := k.ApplyMessageWithConfig(ctx, msg, false, cfg, txConfig, txContext, req.Unencrypted, combinedSignature)
+	res, err := k.ApplyMessageWithConfig(ctx, msg, false, cfg, txConfig, txContext, req.Unencrypted, combinedSignature, txType)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -316,6 +317,7 @@ func (k Keeper) EstimateGas(c context.Context, req *types.EthCallRequest) (*type
 	args.Nonce = (*hexutil.Uint64)(&nonce)
 
 	txConfig := types.NewEmptyTxConfig(common.BytesToHash(ctx.HeaderHash().Bytes()))
+	txType := args.ToTransaction().AsTransaction().Type()
 
 	// convert the tx args to an ethereum message
 	msg, err := args.ToMessage(req.GasCap, cfg.BaseFee)
@@ -350,7 +352,7 @@ func (k Keeper) EstimateGas(c context.Context, req *types.EthCallRequest) (*type
 
 		// pass false to not commit StateDB
 		dummySignature := make([]byte, 65) // TODO: Use different method to estimate gas
-		rsp, err = k.ApplyMessageWithConfig(ctx, msg, false, cfg, txConfig, txContext, req.Unencrypted, dummySignature)
+		rsp, err = k.ApplyMessageWithConfig(ctx, msg, false, cfg, txConfig, txContext, req.Unencrypted, dummySignature, txType)
 		if err != nil {
 			if errors.Is(err, core.ErrIntrinsicGas) {
 				return true, nil, nil // Special case, raise gas limit

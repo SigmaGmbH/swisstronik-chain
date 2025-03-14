@@ -172,12 +172,13 @@ func (k *Keeper) ApplySGXVMTransaction(
 	}
 
 	v, r, s := tx.RawSignatureValues()
+	println("DEBUG HAHS IN GO: ", tx.Hash().String())
 	combinedSignature, err := CombineSignature(v, r, s, cfg.ChainConfig.ChainID)
 	if err != nil {
 		return nil, errorsmod.Wrap(err, "failed to extract signature from tx")
 	}
 
-	res, err := k.ApplyMessageWithConfig(tmpCtx, msg, true, cfg, txConfig, txContext, isUnencrypted, combinedSignature)
+	res, err := k.ApplyMessageWithConfig(tmpCtx, msg, true, cfg, txConfig, txContext, isUnencrypted, combinedSignature, tx.Type())
 	if err != nil {
 		return nil, errorsmod.Wrap(err, "failed to apply ethereum core message")
 	}
@@ -270,6 +271,7 @@ func (k *Keeper) ApplyMessageWithConfig(
 	txContext *librustgo.TransactionContext,
 	isUnencrypted bool,
 	transactionSignature []byte,
+	txType uint8,
 ) (*types.MsgEthereumTxResponse, error) {
 	// return error if contract creation or call are disabled through governance
 	if !cfg.Params.EnableCreate && msg.To() == nil {
@@ -314,6 +316,7 @@ func (k *Keeper) ApplyMessageWithConfig(
 			transactionSignature,
 			msg.GasFeeCap(),
 			msg.GasTipCap(),
+			txType,
 		)
 		k.SetNonce(ctx, msg.From(), msg.Nonce()+1)
 	} else {
@@ -333,6 +336,7 @@ func (k *Keeper) ApplyMessageWithConfig(
 			transactionSignature,
 			msg.GasFeeCap(),
 			msg.GasTipCap(),
+			txType,
 		)
 	}
 
@@ -437,32 +441,64 @@ func SGXVMLogToEthereum(log *librustgo.Log, txConfig types.TxConfig, blockNumber
 
 // CombineSignature combines v, r, and s into a 65-byte ABI-packed signature.
 func CombineSignature(v, r, s, chainId *big.Int) ([]byte, error) {
-	if r.BitLen() > 256 || s.BitLen() > 256 {
-		return nil, fmt.Errorf("r and s must be 32 bytes or less")
-	}
+	//if r.BitLen() > 256 || s.BitLen() > 256 {
+	//	return nil, fmt.Errorf("r and s must be 32 bytes or less")
+	//}
+	//
+	//var V byte
+	//if v.BitLen() > 8 {
+	//	// Try to normalize V
+	//	chainIdMul := new(big.Int).Mul(chainId, big.NewInt(2))
+	//	correctedV := new(big.Int).Sub(v, chainIdMul)
+	//	//correctedV.Sub(correctedV, big.NewInt(8))
+	//
+	//	// Failed to normalize
+	//	if correctedV.BitLen() > 8 {
+	//		return nil, fmt.Errorf("v must be a valid uint8 value")
+	//	}
+	//
+	//	V = byte(v.Uint64())
+	//}
+	//
+	//signature := make([]byte, 65)
+	//
+	//rBytes, sBytes := r.Bytes(), s.Bytes()
+	//
+	//copy(signature[32-len(rBytes):32], rBytes)
+	//copy(signature[64-len(sBytes):64], sBytes)
+	//signature[64] = V
+	//
+	//return signature, nil
 
-	var V byte
+	var V *big.Int
 	if v.BitLen() > 8 {
 		// Try to normalize V
 		chainIdMul := new(big.Int).Mul(chainId, big.NewInt(2))
 		correctedV := new(big.Int).Sub(v, chainIdMul)
 		correctedV.Sub(correctedV, big.NewInt(8))
 
-		// Failed to normalize
-		if correctedV.BitLen() > 8 {
-			return nil, fmt.Errorf("v must be a valid uint8 value")
-		}
-
-		V = byte(v.Uint64() - 27)
+		V = correctedV
+	} else {
+		V = v
 	}
+
+	if r.BitLen() > 256 || s.BitLen() > 256 {
+		return nil, fmt.Errorf("r and s must be 32 bytes or less")
+	}
+
+	if !V.IsUint64() || V.Uint64() > 255 {
+		return nil, fmt.Errorf("v must be a valid uint8 value (0-255)")
+	}
+	vUint8 := uint8(V.Uint64())
 
 	signature := make([]byte, 65)
 
-	rBytes, sBytes := r.Bytes(), s.Bytes()
+	rBytes := common.LeftPadBytes(r.Bytes(), 32)
+	sBytes := common.LeftPadBytes(s.Bytes(), 32)
+	copy(signature[0:32], rBytes)
+	copy(signature[32:64], sBytes)
 
-	copy(signature[32-len(rBytes):32], rBytes)
-	copy(signature[64-len(sBytes):64], sBytes)
-	signature[64] = V
+	signature[64] = vUint8
 
 	return signature, nil
 }

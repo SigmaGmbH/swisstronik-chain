@@ -117,8 +117,9 @@ func Call(
 	transactionSignature []byte,
 	maxFeePerGas *big.Int,
 	maxPriorityFeePerGas *big.Int,
+	txType uint8,
 ) (*types.HandleTransactionResponse, error) {
-	executionResult, err := api.Call(querier, from, to, data, value, accessList, gasLimit, gasPrice, nonce, txContext, commit, isUnencrypted, transactionSignature, maxFeePerGas, maxPriorityFeePerGas)
+	executionResult, err := api.Call(querier, from, to, data, value, accessList, gasLimit, gasPrice, nonce, txContext, commit, isUnencrypted, transactionSignature, maxFeePerGas, maxPriorityFeePerGas, txType)
 	if err != nil {
 		return &types.HandleTransactionResponse{}, err
 	}
@@ -139,8 +140,9 @@ func Create(
 	transactionSignature []byte,
 	maxFeePerGas *big.Int,
 	maxPriorityFeePerGas *big.Int,
+	txType uint8,
 ) (*types.HandleTransactionResponse, error) {
-	executionResult, err := api.Create(querier, from, data, value, accessList, gasLimit, gasPrice, nonce, txContext, commit, transactionSignature, maxFeePerGas, maxPriorityFeePerGas)
+	executionResult, err := api.Create(querier, from, data, value, accessList, gasLimit, gasPrice, nonce, txContext, commit, transactionSignature, maxFeePerGas, maxPriorityFeePerGas, txType)
 	if err != nil {
 		return &types.HandleTransactionResponse{}, err
 	}

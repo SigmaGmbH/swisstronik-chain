@@ -33,6 +33,18 @@ pub struct Transaction {
 
 impl Transaction {
     fn rlp_append_legacy(&self, stream: &mut RlpStream) {
+        println!("APPEND LEGACY");
+        println!("Chain id: {}", self.chain_id);
+        println!("nonce: {}", self.nonce);
+        println!("max_priority_fee_per_gas: {}", self.max_priority_fee_per_gas.unwrap_or_default().to_string());
+        println!("max_fee_per_gas: {}", self.max_fee_per_gas.unwrap_or_default().to_string());
+        println!("gas_limit: {}", self.gas_limit.to_string() );
+        println!("to: {}", self.to.unwrap_or_default().to_string() );
+        println!("value: {}", self.value.to_string());
+        println!("data: {:?}", self.data);
+        println!("access list: {:?}", self.access_list);
+        println!("gas price: {:?}", self.gas_price.unwrap_or_default().to_string());
+
         stream.begin_list(9);
 
         stream.append(&self.nonce);
@@ -50,8 +62,8 @@ impl Transaction {
 
         // EIP-155 fields for signing
         stream.append(&U256::from(self.chain_id));
-        stream.append_empty_data();
-        stream.append_empty_data();
+        stream.append(&U256::zero());
+        stream.append(&U256::zero());
     }
 
     fn rlp_append_access_list(&self, stream: &mut RlpStream) {
@@ -68,6 +80,7 @@ impl Transaction {
     }
 
     fn rlp_append_eip2930(&self, stream: &mut RlpStream) {
+        println!("APPEND 2930");
         stream.begin_list(8);
 
         stream.append(&self.chain_id);
@@ -89,18 +102,8 @@ impl Transaction {
     }
 
     fn rlp_append_eip1559(&self, stream: &mut RlpStream) {
+        println!("APPEND 1559");
         stream.begin_list(9);
-
-        println!("Chain id: {}", self.chain_id);
-        println!("nonce: {}", self.nonce);
-        println!("max_priority_fee_per_gas: {}", self.max_priority_fee_per_gas.unwrap_or_default().to_string());
-        println!("max_fee_per_gas: {}", self.max_fee_per_gas.unwrap_or_default().to_string());
-        println!("gas_limit: {}", self.gas_limit.to_string() );
-        println!("to: {}", self.to.unwrap_or_default().to_string() );
-        println!("value: {}", self.value.to_string());
-        println!("data: {:?}", self.data);
-        println!("access list: {:?}", self.access_list);
-        println!("gas price: {:?}", self.gas_price.unwrap_or_default().to_string());
 
         stream.append(&self.chain_id);
         stream.append(&self.nonce);
@@ -166,6 +169,11 @@ impl From<SGXVMCallRequest> for Transaction {
             (_, false, _) => TransactionType::EIP1559,
             _ => TransactionType::EIP1559,
         };
+
+        println!("params gas price: {:?}", params.gasPrice);
+        println!("params max fee per gas: {:?}", params.maxFeePerGas);
+        println!("params max priority fee per gas: {:?}", params.maxPriorityFeePerGas);
+        println!("params access list: {:?}", params.accessList);
 
         Transaction {
             tx_type,

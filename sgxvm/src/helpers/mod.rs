@@ -1,3 +1,4 @@
+use alloc::string::ToString;
 use sha3::{Keccak256, Digest};
 use k256::{
     ecdsa::recoverable,
@@ -22,12 +23,18 @@ pub fn recover_sender(msg: &H256, sig: &Vec<u8>) -> Option<[u8; 20]> {
 
     let signature = match recoverable::Signature::try_from(&sig_buf[..]) {
         Ok(signature) => signature,
-        Err(_) => return None,
+        Err(err) => {
+            println!("DEBUG failed to construct recoverable signature: {:?}", err.to_string());
+            return None
+        },
     };
 
     let recovered_key = match signature.recover_verifying_key_from_digest_bytes(msg.as_bytes().into()) {
         Ok(key) => key,
-        Err(_) => return None,
+        Err(err) => {
+            println!("DEBUG failed to recover verification key: {:?}", err.to_string());
+            return None
+        },
     };
 
     let public_key = recovered_key.to_encoded_point(false);

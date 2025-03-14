@@ -84,7 +84,7 @@ pub fn handle_call_request_inner(
     println!("DEBUG: RECOVERED ORIGINAL SENDER: {:?}", tx_sender.to_string());
     println!("DEBUG: EXPECTED SENDER: {:?}", H160::from_slice(&params.from).to_string());
 
-    if tx_sender != H160::from_slice(&params.from) {
+    if !tx_sender.eq(&H160::from_slice(&params.from)) {
         return ExecutionResult::from_error("Corrupted signature. Provided sender is invalid".to_string(), Vec::new(), None)
     }
 
