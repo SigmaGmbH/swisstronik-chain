@@ -163,10 +163,10 @@ impl From<SGXVMCallRequest> for Transaction {
         let params = request.params.unwrap();
         let context = request.context.unwrap();
 
-        let tx_type = match (params.accessList.is_empty(), params.maxFeePerGas.is_empty(), params.maxPriorityFeePerGas.is_empty()) {
-            (true, true, true) => TransactionType::Legacy,
-            (false, _, _) => TransactionType::EIP2930,
-            (_, false, _) => TransactionType::EIP1559,
+        let tx_type = match params.txType {
+            0 => TransactionType::Legacy,
+            1 => TransactionType::EIP2930,
+            2 => TransactionType::EIP1559,
             _ => TransactionType::EIP1559,
         };
 
@@ -196,10 +196,10 @@ impl From<SGXVMCreateRequest> for Transaction {
         let params = request.params.unwrap();
         let context = request.context.unwrap();
 
-        let tx_type = match (params.accessList.is_empty(), params.maxFeePerGas.is_empty(), params.maxPriorityFeePerGas.is_empty()) {
-            (true, true, true) => TransactionType::Legacy,
-            (false, _, _) => TransactionType::EIP2930,
-            (_, false, _) => TransactionType::EIP1559,
+        let tx_type = match params.txType {
+            0 => TransactionType::Legacy,
+            1 => TransactionType::EIP2930,
+            2 => TransactionType::EIP1559,
             _ => TransactionType::EIP1559,
         };
 
