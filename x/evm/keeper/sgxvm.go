@@ -172,7 +172,7 @@ func (k *Keeper) ApplySGXVMTransaction(
 	}
 
 	v, r, s := tx.RawSignatureValues()
-	println("DEBUG HAHS IN GO: ", tx.Hash().String())
+	println("DEBUG HASH IN GO: ", tx.Hash().String())
 	combinedSignature, err := CombineSignature(v, r, s, cfg.ChainConfig.ChainID)
 	if err != nil {
 		return nil, errorsmod.Wrap(err, "failed to extract signature from tx")
