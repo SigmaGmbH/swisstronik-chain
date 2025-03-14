@@ -4,7 +4,7 @@ use protobuf::RepeatedField;
 use std::vec::Vec;
 use rlp::{RlpStream};
 use sha3::{Digest, Keccak256};
-use crate::protobuf_generated::ffi::{AccessListItem, SGXVMCallRequest, SGXVMCreateRequest};
+use crate::protobuf_generated::ffi::{AccessListItem, SGXVMCallRequest, SGXVMCreateRequest, SGXVMEstimateGasRequest};
 
 enum TransactionType {
     Legacy,
