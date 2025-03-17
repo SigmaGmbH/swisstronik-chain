@@ -33,8 +33,6 @@ pub struct Transaction {
 
 impl Transaction {
     fn rlp_append_legacy(&self, stream: &mut RlpStream) {
-        println!("APPEND LEGACY");
-
         stream.begin_list(9);
 
         stream.append(&self.nonce);
@@ -54,14 +52,6 @@ impl Transaction {
         stream.append(&U256::from(self.chain_id));
         stream.append(&U256::zero());
         stream.append(&U256::zero());
-
-        println!("Legacy nonce: {:?}", self.nonce.to_string());
-        println!("Legacy gas price: {:?}", self.gas_price.unwrap_or_default().to_string());
-        println!("Legacy gas limit: {:?}", self.gas_limit.to_string());
-        println!("Legacy to: {:?}", self.to.unwrap_or_default().to_string());
-        println!("Legacy value: {:?}", self.value.to_string());
-        println!("Legacy data: {:?}", self.data);
-        println!("Legacy chain_id: {:?}", self.chain_id);
     }
 
     fn rlp_append_access_list(&self, stream: &mut RlpStream) {
@@ -78,7 +68,6 @@ impl Transaction {
     }
 
     fn rlp_append_eip2930(&self, stream: &mut RlpStream) {
-        println!("APPEND 2930");
         stream.begin_list(8);
 
         stream.append(&self.chain_id);
@@ -100,7 +89,6 @@ impl Transaction {
     }
 
     fn rlp_append_eip1559(&self, stream: &mut RlpStream) {
-        println!("APPEND 1559");
         stream.begin_list(9);
 
         stream.append(&self.chain_id);

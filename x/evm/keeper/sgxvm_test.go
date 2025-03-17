@@ -179,7 +179,10 @@ func (suite *KeeperTestSuite) TestDryRun() {
 			balanceBefore := suite.app.EvmKeeper.GetBalance(suite.ctx, suite.address)
 			receiverBalanceBefore := suite.app.EvmKeeper.GetBalance(suite.ctx, common.Address{})
 
-			res, err := suite.app.EvmKeeper.ApplyMessageWithConfig(suite.ctx, ethMessage, tc.commit, cfg, txConfig, txContext, false)
+			v, r, s := tx.RawSignatureValues()
+			combinedSignature, err := keeper.CombineSignature(v, r, s, big.NewInt(int64(txContext.ChainId)))
+			suite.Require().NoError(err)
+			res, err := suite.app.EvmKeeper.ApplyMessageWithConfig(suite.ctx, ethMessage, tc.commit, cfg, txConfig, txContext, false, combinedSignature, tx.Type())
 			suite.Require().NoError(err)
 			suite.Require().Empty(res.VmError)
 
@@ -261,7 +264,10 @@ func (suite *KeeperTestSuite) TestMultipleTransfers() {
 		balanceBefore := suite.app.EvmKeeper.GetBalance(suite.ctx, suite.address)
 		receiverBalanceBefore := suite.app.EvmKeeper.GetBalance(suite.ctx, common.Address{})
 
-		res, err := suite.app.EvmKeeper.ApplyMessageWithConfig(suite.ctx, ethMessage, true, cfg, txConfig, txContext, false)
+		v, r, s := tx.RawSignatureValues()
+		combinedSignature, err := keeper.CombineSignature(v, r, s, big.NewInt(int64(txContext.ChainId)))
+		suite.Require().NoError(err)
+		res, err := suite.app.EvmKeeper.ApplyMessageWithConfig(suite.ctx, ethMessage, true, cfg, txConfig, txContext, false, combinedSignature, tx.Type())
 		suite.Require().NoError(err)
 		suite.Require().Empty(res.VmError)
 
@@ -440,7 +446,10 @@ func (suite *KeeperTestSuite) TestCallToCompliance() {
 			txContext, err := keeper.CreateSGXVMContext(suite.ctx, suite.app.EvmKeeper, tx)
 			suite.Require().NoError(err)
 
-			res, err := suite.app.EvmKeeper.ApplyMessageWithConfig(suite.ctx, ethMessage, false, cfg, txConfig, txContext, true)
+			v, r, s := tx.RawSignatureValues()
+			combinedSignature, err := keeper.CombineSignature(v, r, s, big.NewInt(int64(txContext.ChainId)))
+			suite.Require().NoError(err)
+			res, err := suite.app.EvmKeeper.ApplyMessageWithConfig(suite.ctx, ethMessage, false, cfg, txConfig, txContext, true, combinedSignature, tx.Type())
 			suite.Require().NoError(err)
 			suite.Require().Empty(res.VmError)
 			suite.Require().NotNil(res.Ret)

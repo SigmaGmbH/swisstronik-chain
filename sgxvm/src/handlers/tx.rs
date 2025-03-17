@@ -65,12 +65,9 @@ pub fn handle_call_request_inner(
 ) -> ExecutionResult {
     let tx = Transaction::from(data.clone());
     let tx_hash = tx.hash();
-    println!("DEBUG: CALCULATED TX HASH: {:?}", tx_hash.to_string());
 
     let params = data.params.unwrap();
     let context = data.context.unwrap();
-
-    println!("DEBUG: MAX FEE PER GAS: {:?}", U256::from_big_endian(&params.maxFeePerGas));
 
     let tx_sender = if params.signature.is_empty() || H160::from_slice(&params.from).eq(&H160::zero()) {
         H160::default()
@@ -80,9 +77,6 @@ pub fn handle_call_request_inner(
             None => H160::default()
         }
     };
-
-    println!("DEBUG: RECOVERED ORIGINAL SENDER: {:?}", tx_sender.to_string());
-    println!("DEBUG: EXPECTED SENDER: {:?}", H160::from_slice(&params.from).to_string());
 
     if !tx_sender.eq(&H160::from_slice(&params.from)) {
         return ExecutionResult::from_error("Corrupted signature. Provided sender is invalid".to_string(), Vec::new(), None)
@@ -151,7 +145,6 @@ pub fn handle_create_request_inner(
 ) -> ExecutionResult {
     let tx = Transaction::from(data.clone());
     let tx_hash = tx.hash();
-    println!("DEBUG: CALCULATED TX HASH: {:?}", tx_hash.to_string());
 
     let params = data.params.unwrap();
     let context = data.context.unwrap();
@@ -164,9 +157,6 @@ pub fn handle_create_request_inner(
             None => H160::default()
         }
     };
-
-    println!("DEBUG: RECOVERED ORIGINAL SENDER: {:?}", tx_sender.to_string());
-    println!("DEBUG: EXPECTED SENDER: {:?}", H160::from_slice(&params.from).to_string());
 
     if !tx_sender.eq(&H160::from_slice(&params.from)) {
         return ExecutionResult::from_error("Corrupted signature. Provided sender is invalid".to_string(), Vec::new(), None)

@@ -249,10 +249,6 @@ func (k Keeper) EthCall(c context.Context, req *types.EthCallRequest) (*types.Ms
 		combinedSignature = make([]byte, 65)
 	}
 
-	println("DEBUG GOLANG: GAS PRICE: ", msg.GasPrice().String())
-	println("DEBUG GOLANG: GAS LIMIT: ", msg.Gas())
-	println("DEBUG GOLANG: TX TYPE: ", txType)
-
 	// pass false to not commit StateDB
 	res, err := k.ApplyMessageWithConfig(ctx, msg, false, cfg, txConfig, txContext, req.Unencrypted, combinedSignature, txType)
 	if err != nil {
