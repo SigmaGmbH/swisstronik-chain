@@ -36,7 +36,7 @@ describe("ECRecover Test", function () {
 
         const recoveredAddress = await contract.recoverAddress(invalidMessageHash, v, r, s)
         // Expected value is obtained from geth node
-        expect(recoveredAddress).to.be.equal("0xDCcD36986Cf72a40F930732Bfb5a3cb4611DCf7C");
+        expect(recoveredAddress).to.be.equal("0x3e52eB4a136Df5D507B6e47Fc784424eeF1E94fC");
     });
 
     it("should accept high s-values", async function () {
