@@ -72,7 +72,7 @@ pub fn handle_call_request_inner(
 
     println!("DEBUG: MAX FEE PER GAS: {:?}", U256::from_big_endian(&params.maxFeePerGas));
 
-    let tx_sender = if params.signature.is_empty() {
+    let tx_sender = if params.signature.is_empty() || H160::from_slice(&params.from).eq(&H160::zero()) {
         H160::default()
     } else {
         match recover_sender(&tx_hash, &params.signature) {
@@ -156,7 +156,7 @@ pub fn handle_create_request_inner(
     let params = data.params.unwrap();
     let context = data.context.unwrap();
 
-    let tx_sender = if params.signature.is_empty() {
+    let tx_sender = if params.signature.is_empty() || H160::from_slice(&params.from).eq(&H160::zero()) {
         H160::default()
     } else {
         match recover_sender(&tx_hash, &params.signature) {
