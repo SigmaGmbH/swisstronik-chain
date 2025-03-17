@@ -54,6 +54,14 @@ impl Transaction {
         stream.append(&U256::from(self.chain_id));
         stream.append(&U256::zero());
         stream.append(&U256::zero());
+
+        println!("Legacy nonce: {:?}", self.nonce.to_string());
+        println!("Legacy gas price: {:?}", self.gas_price.unwrap_or_default().to_string());
+        println!("Legacy gas limit: {:?}", self.gas_limit.to_string());
+        println!("Legacy to: {:?}", self.to.unwrap_or_default().to_string());
+        println!("Legacy value: {:?}", self.value.to_string());
+        println!("Legacy data: {:?}", self.data);
+        println!("Legacy chain_id: {:?}", self.chain_id);
     }
 
     fn rlp_append_access_list(&self, stream: &mut RlpStream) {
