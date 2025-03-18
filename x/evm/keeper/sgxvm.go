@@ -537,35 +537,6 @@ func SGXVMLogToEthereum(log *librustgo.Log, txConfig types.TxConfig, blockNumber
 
 // CombineSignature combines v, r, and s into a 65-byte ABI-packed signature.
 func CombineSignature(v, r, s, chainId *big.Int) ([]byte, error) {
-	//if r.BitLen() > 256 || s.BitLen() > 256 {
-	//	return nil, fmt.Errorf("r and s must be 32 bytes or less")
-	//}
-	//
-	//var V byte
-	//if v.BitLen() > 8 {
-	//	// Try to normalize V
-	//	chainIdMul := new(big.Int).Mul(chainId, big.NewInt(2))
-	//	correctedV := new(big.Int).Sub(v, chainIdMul)
-	//	//correctedV.Sub(correctedV, big.NewInt(8))
-	//
-	//	// Failed to normalize
-	//	if correctedV.BitLen() > 8 {
-	//		return nil, fmt.Errorf("v must be a valid uint8 value")
-	//	}
-	//
-	//	V = byte(v.Uint64())
-	//}
-	//
-	//signature := make([]byte, 65)
-	//
-	//rBytes, sBytes := r.Bytes(), s.Bytes()
-	//
-	//copy(signature[32-len(rBytes):32], rBytes)
-	//copy(signature[64-len(sBytes):64], sBytes)
-	//signature[64] = V
-	//
-	//return signature, nil
-
 	var V *big.Int
 	if v.BitLen() > 8 {
 		// Try to normalize V
