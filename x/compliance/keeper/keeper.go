@@ -288,7 +288,7 @@ func (k Keeper) addVerificationDetailsInternal(ctx sdk.Context, userAddress sdk.
 		return nil, errors.Wrap(types.ErrInvalidIssuer, "issuer not verified")
 	}
 
-	if verificationType <= types.VerificationType_VT_UNSPECIFIED || verificationType > types.VerificationType_VT_CREDIT_SCORE {
+	if verificationType <= types.VerificationType_VT_UNSPECIFIED || verificationType > types.VerificationType_VT_BIOMETRIC {
 		return nil, errors.Wrap(types.ErrInvalidParam, "invalid verification type")
 	}
 	details.Type = verificationType
