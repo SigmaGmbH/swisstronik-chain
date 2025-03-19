@@ -70,6 +70,8 @@ jq --arg BYTECODE $COMPLIANCE_PROXY_BYTECODE '.app_state.evm.accounts += [{"addr
 jq '.app_state.compliance.issuerDetails += [{"address": "swtr19lqtxhjp4x3w5fy2yafxntcu3vaqvyt827e4ct", "details": {"creator": "swtr1ml2knanpk8sv94f8h9g8vaf9k3yyfva4fykyn9", "description": "d", "legalEntity": "e", "logo": "l", "name": "n", "url": "u"}}]' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
 jq '.app_state.compliance.addressDetails += [{"address": "swtr19lqtxhjp4x3w5fy2yafxntcu3vaqvyt827e4ct", "details": {"is_revoked": false, "is_verified": true, "verifications": []}}]' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
 jq --arg CODE_HASH $COMPLIANCE_PROXY_CODEHASH '.app_state.auth.accounts += [{"@type": "/ethermint.types.v1.EthAccount", "base_account": {"account_number": "5", "address": "swtr19lqtxhjp4x3w5fy2yafxntcu3vaqvyt827e4ct", "pub_key": null, "sequence": "1" }, "code_hash": $CODE_HASH}]' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
+jq '.app_state.compliance.issuerDetails += [{"address": "swtr16vgqffr8v0sh3n5qeqdksfpzdkqf3rtk49thun", "details": {"creator": "swtr1ml2knanpk8sv94f8h9g8vaf9k3yyfva4fykyn9", "description": "d", "legalEntity": "e", "logo": "l", "name": "n", "url": "u"}}]' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
+jq '.app_state.compliance.addressDetails += [{"address": "swtr16vgqffr8v0sh3n5qeqdksfpzdkqf3rtk49thun", "details": {"is_revoked": false, "is_verified": true, "verifications": []}}]' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
 
 # disable node logs. remove this line if you need all logs
 sed -i 's/info/error/g' "$CONFIG"

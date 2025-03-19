@@ -194,12 +194,24 @@ fn route(
             };
 
             let verification_type = match decoded_params[1].clone().into_uint() {
-                Some(vtype) => vtype.as_u32(),
+                Some(vtype) => {
+                    if vtype.bits() > 32 {
+                        return (ExitError::Reverted.into(), encode(&[AbiToken::String("invalid verification type. Exceeding u32 in verification type".into())]))
+                    } else {
+                        vtype.as_u32()
+                    }
+                }
                 None => return (ExitError::Reverted.into(), encode(&[AbiToken::String("invalid verification type".into())]))
             };
 
             let expiration_timestamp = match decoded_params[2].clone().into_uint() {
-                Some(timestamp) => timestamp.as_u32(),
+                Some(timestamp) => {
+                    if timestamp.bits() > 32 {
+                        return (ExitError::Reverted.into(), encode(&[AbiToken::String("invalid expiration timestamp. Exceeding u32 in expiration timestamp".into())]))
+                    } else {
+                        timestamp.as_u32()
+                    }
+                }
                 None => return (ExitError::Reverted.into(), encode(&[AbiToken::String("invalid expiration timestamp".into())]))
             };
 
@@ -275,17 +287,35 @@ fn route(
             };
 
             let verification_type = match decoded_params[2].clone().into_uint() {
-                Some(vtype) => vtype.as_u32(),
+                Some(vtype) => {
+                    if vtype.bits() > 32 {
+                        return (ExitError::Reverted.into(), encode(&[AbiToken::String("invalid verification type. Exceeding u32 in verification type".into())]))
+                    } else {
+                        vtype.as_u32()
+                    }
+                }
                 None => return (ExitError::Reverted.into(), encode(&[AbiToken::String("invalid verification type".into())]))
             };
 
             let issuance_timestamp = match decoded_params[3].clone().into_uint() {
-                Some(timestamp) => timestamp.as_u32(),
+                Some(timestamp) => {
+                    if timestamp.bits() > 32 {
+                        return (ExitError::Reverted.into(), encode(&[AbiToken::String("invalid issuance timestamp. Exceeding u32 in issuance timestamp".into())]))
+                    } else {
+                        timestamp.as_u32()
+                    }
+                }
                 None => return (ExitError::Reverted.into(), encode(&[AbiToken::String("invalid issuance timestamp".into())]))
             };
 
             let expiration_timestamp = match decoded_params[4].clone().into_uint() {
-                Some(timestamp) => timestamp.as_u32(),
+                Some(timestamp) => {
+                    if timestamp.bits() > 32 {
+                        return (ExitError::Reverted.into(), encode(&[AbiToken::String("invalid expiration timestamp. Exceeding u32 in expiration timestamp".into())]))
+                    } else {
+                        timestamp.as_u32()
+                    }
+                }
                 None => return (ExitError::Reverted.into(), encode(&[AbiToken::String("invalid expiration timestamp".into())]))
             };
 
@@ -309,7 +339,13 @@ fn route(
             };
 
             let version = match decoded_params[8].clone().into_uint() {
-                Some(ver) => ver.as_u32(),
+                Some(ver) => {
+                    if ver.bits() > 32 {
+                        return (ExitError::Reverted.into(), encode(&[AbiToken::String("invalid version. Exceeding u32 in version".into())]))
+                    } else {
+                        ver.as_u32()
+                    }
+                }
                 None => return (
                     ExitError::Reverted.into(), encode(&[AbiToken::String(
                         "invalid version".into(),
@@ -401,17 +437,35 @@ fn route(
             };
 
             let verification_type = match decoded_params[2].clone().into_uint() {
-                Some(vtype) => vtype.as_u32(),
+                Some(vtype) => {
+                    if vtype.bits() > 32 {
+                        return (ExitError::Reverted.into(), encode(&[AbiToken::String("invalid verification type. Exceeding u32 in verification type".into())]))
+                    } else {
+                        vtype.as_u32()
+                    }
+                }
                 None => return (ExitError::Reverted.into(), encode(&[AbiToken::String("invalid verification type".into())]))
             };
 
             let issuance_timestamp = match decoded_params[3].clone().into_uint() {
-                Some(timestamp) => timestamp.as_u32(),
+                Some(timestamp) => {
+                    if timestamp.bits() > 32 {
+                        return (ExitError::Reverted.into(), encode(&[AbiToken::String("invalid issuance timestamp. Exceeding u32 in issuance timestamp".into())]))
+                    } else {
+                        timestamp.as_u32()
+                    }
+                }
                 None => return (ExitError::Reverted.into(), encode(&[AbiToken::String("invalid issuance timestamp".into())]))
             };
 
             let expiration_timestamp = match decoded_params[4].clone().into_uint() {
-                Some(timestamp) => timestamp.as_u32(),
+                Some(timestamp) => {
+                    if timestamp.bits() > 32 {
+                        return (ExitError::Reverted.into(), encode(&[AbiToken::String("invalid expiration timestamp. Exceeding u32 in expiration timestamp".into())]))
+                    } else {
+                        timestamp.as_u32()
+                    }
+                }
                 None => return (ExitError::Reverted.into(), encode(&[AbiToken::String("invalid expiration timestamp".into())]))
             };
 
@@ -435,7 +489,13 @@ fn route(
             };
 
             let version = match decoded_params[8].clone().into_uint() {
-                Some(ver) => ver.as_u32(),
+                Some(ver) => {
+                    if ver.bits() > 32 {
+                        return (ExitError::Reverted.into(), encode(&[AbiToken::String("invalid version. Exceeding u32 in version".into())]))
+                    } else {
+                        ver.as_u32()
+                    }
+                }
                 None => return (
                     ExitError::Reverted.into(), encode(&[AbiToken::String(
                         "invalid version".into(),
