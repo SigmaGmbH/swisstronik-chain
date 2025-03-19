@@ -233,6 +233,16 @@ func (suite *KeeperTestSuite) TestRemovedIssuer() {
 	verificationDetailsBy, err := suite.keeper.GetVerificationDetails(suite.ctx, verificationId)
 	suite.Require().NoError(err)
 	suite.Require().Equal(verificationDetailsBy, &types.VerificationDetails{})
+
+	// In case of removed issuer, GetAddressDetails should filter user verifications
+	signerAddressDetails, err := suite.keeper.GetAddressDetails(suite.ctx, signer)
+	suite.Require().NoError(err)
+	suite.Require().Equal(0, len(signerAddressDetails.Verifications))
+
+	// In case of removed issuer, GetFullAddressDetails should
+	signerFullAddressDetails, err := suite.keeper.GetFullAddressDetails(suite.ctx, signer)
+	suite.Require().NoError(err)
+	suite.Require().Equal(1, len(signerFullAddressDetails.Verifications))
 }
 
 func (suite *KeeperTestSuite) TestAddVerificationDetails() {
@@ -388,6 +398,7 @@ func (suite *KeeperTestSuite) TestSetVerificationDetails() {
 	suite.Require().NoError(err)
 
 	verificationDetails := &types.VerificationDetails{
+		Type:                types.VerificationType_VT_KYC,
 		IssuerAddress:       issuer.String(),
 		OriginChain:         "test chain",
 		IssuanceTimestamp:   1712018692,

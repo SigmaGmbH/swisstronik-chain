@@ -364,6 +364,7 @@ func TestGenesis_Success(t *testing.T) {
 					{
 						Id: hexutils.HexToBytes("0273FBBAFFC58F732199B20833643248C213C5DBA8F4A05DF505713FD36B8CE2"),
 						Details: &types.VerificationDetails{
+							Type:                types.VerificationType_VT_KYC,
 							IssuerAddress:       "swtr199wynlfwhj6ytkvujjf6mel5z7fl0mwzqck8l6",
 							OriginChain:         "test chain",
 							IssuanceTimestamp:   1712018692,
@@ -374,6 +375,7 @@ func TestGenesis_Success(t *testing.T) {
 					{
 						Id: hexutils.HexToBytes("1075ee73240c62b820651c22f22f9371dccde1963dec74afffa493902439def2"),
 						Details: &types.VerificationDetails{
+							Type:                types.VerificationType_VT_KYC,
 							IssuerAddress:       "swtr199wynlfwhj6ytkvujjf6mel5z7fl0mwzqck8l6",
 							OriginChain:         "test chain",
 							IssuanceTimestamp:   1712022843,

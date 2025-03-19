@@ -40,6 +40,10 @@ service Query {
     option (google.api.http).get = "/swisstronik/compliance/verification/{verificationID}";
   }
 
+  rpc AllVerificationDetailsByAddress(QueryAllVerificationDetailsByAddressRequest) returns (QueryAllVerificationDetailsByAddressResponse) {
+    option (google.api.http).get = "/swisstronik/compliance/verifications_by_address/{address}";
+  }
+
   rpc VerificationsDetails(QueryVerificationsDetailsRequest) returns (QueryVerificationsDetailsResponse) {
     option (google.api.http).get = "/swisstronik/compliance/verifications";
   }
@@ -99,6 +103,7 @@ message QueryOperatorDetailsResponse {
 // QueryAddressDetailsRequest is request type for the Query/AddressDetails RPC method.
 message QueryAddressDetailsRequest {
   string address = 1;
+  bool onlyWithExistingIssuer = 2;
 }
 
 // QueryAddressDetailsResponse is response type for the Query/AddressDetails RPC method.
@@ -257,4 +262,12 @@ message QueryHolderByVerificationIdRequest {
 }
 message QueryHolderByVerificationIdResponse {
   string address = 1;
+}
+
+message QueryAllVerificationDetailsByAddressRequest {
+  string address = 1;
+  bool onlyWithExistingIssuer = 2;
+}
+message QueryAllVerificationDetailsByAddressResponse {
+  repeated VerificationDetails details = 1;
 }

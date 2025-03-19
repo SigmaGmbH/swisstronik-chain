@@ -48,6 +48,17 @@ message HandleTransactionResponse {
   uint64 gas_used = 5;
 }
 
+message HandleEstimateGasRequest {
+  TransactionData tx_data = 1;
+  TransactionContext tx_context = 2;
+}
+message HandleEstimateGasResponse {
+  // vm error is the error returned by vm execution
+  string vm_error = 1;
+  // gas consumed by the transaction
+  uint64 gas_used = 2;
+}
+
 // Topic represents 32-byte words that is used to describe what’s going on in an
 // event
 message Topic { bytes inner = 1; }
@@ -282,6 +293,10 @@ message SGXVMCallParams {
   bool commit = 8;
   uint64 nonce = 9;
   bool unencrypted = 10;
+  bytes signature = 11;
+  bytes maxPriorityFeePerGas = 12;
+  bytes maxFeePerGas = 13;
+  uint32 txType = 14;
 }
 
 // Message with data required to execute `create` operation
@@ -294,6 +309,28 @@ message SGXVMCreateParams {
   repeated AccessListItem accessList = 6;
   bool commit = 7;
   uint64 nonce = 8;
+  bytes signature = 9;
+  bytes maxPriorityFeePerGas = 10;
+  bytes maxFeePerGas = 11;
+  uint32 txType = 12;
+}
+
+// Message with data required to execute `estimateGas` operation
+message SGXVMEstimateGasParams {
+  bytes from = 1;
+  bytes to = 2;
+  bytes data = 3;
+  uint64 gasLimit = 4;
+  bytes gasPrice = 5;
+  bytes value = 6;
+  repeated AccessListItem accessList = 7;
+  bool commit = 8;
+  uint64 nonce = 9;
+  bool unencrypted = 10;
+  bytes signature = 11;
+  bytes maxPriorityFeePerGas = 12;
+  bytes maxFeePerGas = 13;
+  uint32 txType = 14;
 }
 
 // Request to execute `call` operation
@@ -305,6 +342,12 @@ message SGXVMCallRequest {
 // Request to execute `create` operation
 message SGXVMCreateRequest {
   SGXVMCreateParams params = 1;
+  TransactionContext context = 2;
+}
+
+// Request to execute `estimateGas` operation
+message SGXVMEstimateGasRequest {
+  SGXVMEstimateGasParams params = 1;
   TransactionContext context = 2;
 }
 
@@ -329,6 +372,7 @@ message FFIRequest {
   oneof req {
     SGXVMCallRequest callRequest = 1;
     SGXVMCreateRequest createRequest = 2;
-    NodePublicKeyRequest publicKeyRequest = 3;
+    SGXVMEstimateGasRequest estimateGasRequest = 3;
+    NodePublicKeyRequest publicKeyRequest = 4;
   }
 }

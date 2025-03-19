@@ -1,7 +1,7 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import "./SdiVerifier.sol";
-import "../ComplianceBridge.sol";
+import "../precompiles/ComplianceBridge.sol";
 
 error PrecompileError(bytes _data);
 

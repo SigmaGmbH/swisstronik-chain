@@ -1,3 +1,4 @@
+use crate::helpers::tx::Transaction;
 use evm::standard::{Etable, EtableResolver, TransactArgs, TransactValue};
 use primitive_types::{H160, H256, U256};
 use protobuf::Message;
@@ -8,13 +9,14 @@ use crate::encryption::{
 };
 use crate::key_manager::utils::random_nonce;
 use crate::precompiles::EVMPrecompiles;
-use crate::protobuf_generated::ffi::{HandleTransactionResponse, Log, SGXVMCallRequest, SGXVMCreateRequest, Topic, TransactionContext};
+use crate::protobuf_generated::ffi::{HandleTransactionResponse, Log, SGXVMCallRequest, SGXVMCreateRequest, SGXVMEstimateGasRequest, Topic, TransactionContext};
 use crate::std::string::ToString;
 use crate::types::{ExecutionResult, GASOMETER_CONFIG};
 use crate::AllocationWithResult;
 use crate::GoQuerier;
 use crate::handlers::utils::{convert_logs, parse_access_list};
 use crate::backend::{TxEnvironment, Backend};
+use crate::helpers::recover_sender;
 use crate::invoker::OverlayedInvoker;
 
 /// Converts raw execution result into protobuf and returns it outside of enclave
@@ -61,8 +63,24 @@ pub fn handle_call_request_inner(
     querier: *mut GoQuerier,
     data: SGXVMCallRequest,
 ) -> ExecutionResult {
+    let tx = Transaction::from(data.clone());
+    let tx_hash = tx.hash();
+
     let params = data.params.unwrap();
     let context = data.context.unwrap();
+
+    let tx_sender = if params.signature.is_empty() || H160::from_slice(&params.from).eq(&H160::zero()) {
+        H160::default()
+    } else {
+        match recover_sender(&tx_hash, &params.signature) {
+            Some(sender) => H160::from_slice(&sender),
+            None => H160::default()
+        }
+    };
+
+    if !tx_sender.eq(&H160::from_slice(&params.from)) {
+        return ExecutionResult::from_error("Corrupted signature. Provided sender is invalid".to_string(), Vec::new(), None)
+    }
 
     let should_commit = params.commit;
     let block_number = context.block_number;
@@ -125,11 +143,105 @@ pub fn handle_create_request_inner(
     querier: *mut GoQuerier,
     data: SGXVMCreateRequest,
 ) -> ExecutionResult {
+    let tx = Transaction::from(data.clone());
+    let tx_hash = tx.hash();
+
     let params = data.params.unwrap();
     let context = data.context.unwrap();
+
+    let tx_sender = if params.signature.is_empty() || H160::from_slice(&params.from).eq(&H160::zero()) {
+        H160::default()
+    } else {
+        match recover_sender(&tx_hash, &params.signature) {
+            Some(sender) => H160::from_slice(&sender),
+            None => H160::default()
+        }
+    };
+
+    if !tx_sender.eq(&H160::from_slice(&params.from)) {
+        return ExecutionResult::from_error("Corrupted signature. Provided sender is invalid".to_string(), Vec::new(), None)
+    }
+
     let should_commit = params.commit;
 
     run_tx(querier, context, params.into(), should_commit)
+}
+
+pub fn handle_estimate_gas_request_inner(
+    querier: *mut GoQuerier,
+    data: SGXVMEstimateGasRequest,
+) -> ExecutionResult {
+    let params = data.params.unwrap();
+    let context = data.context.unwrap();
+
+    let mut execution_result = match params.to.len() {
+        0 => {
+            // Handle `create`
+            let transact_args = TransactArgs::Create {
+                caller: H160::from_slice(&params.from),
+                value: U256::from_big_endian(&params.value),
+                init_code: params.data,
+                salt: None,
+                gas_limit: U256::from(params.gasLimit),
+                gas_price: U256::from_big_endian(&params.gasPrice),
+                access_list: parse_access_list(params.accessList),
+            };
+
+            run_tx(querier, context, transact_args, false)
+        },
+        _ => {
+            // Handle `call`
+            let block_number = context.block_number;
+
+            // Check if transaction is unencrypted, handle it as regular EVM transaction
+            let is_unencrypted = params.data.is_empty() || params.unencrypted;
+            if is_unencrypted {
+                let transact_args = TransactArgs::Call {
+                    caller: H160::from_slice(&params.from),
+                    address: H160::from_slice(&params.to),
+                    value: U256::from_big_endian(&params.value),
+                    data: params.data,
+                    gas_limit: U256::from(params.gasLimit),
+                    gas_price: U256::from_big_endian(&params.gasPrice),
+                    access_list: parse_access_list(params.accessList),
+                };
+                return run_tx(querier, context, transact_args, false)
+            } else {
+                // Otherwise, we should decrypt input, execute tx and encrypt output
+                let (user_public_key, data, nonce) = match extract_public_key_and_data(params.data) {
+                    Ok(res) => res,
+                    Err(err) => return ExecutionResult::from_error(err.to_string(), Vec::new(), None)
+                };
+
+                let decrypted_data = match !data.is_empty() {
+                    true => match decrypt_transaction_data(data, user_public_key.clone(), block_number) {
+                        Ok(data) => data,
+                        Err(err) => return ExecutionResult::from_error(err.to_string(), Vec::new(), None)
+                    },
+                    false => Vec::new()
+                };
+
+                let transact_args = TransactArgs::Call {
+                    caller: H160::from_slice(&params.from),
+                    address: H160::from_slice(&params.to),
+                    value: U256::from_big_endian(&params.value),
+                    data: decrypted_data,
+                    gas_limit: U256::from(params.gasLimit),
+                    gas_price: U256::from_big_endian(&params.gasPrice),
+                    access_list: parse_access_list(params.accessList),
+                };
+
+                run_tx(querier, context, transact_args, false)
+            }
+        }
+    };
+
+    if execution_result.vm_error.is_empty() {
+        execution_result.data = Vec::default();
+        execution_result.logs = Vec::default();
+    }
+
+    execution_result
 }
 
 /// Converts EVM topic into protobuf-generated `Topic

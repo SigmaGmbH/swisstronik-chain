@@ -4,9 +4,9 @@
       "@type": "/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade",
       "authority": "swtr10d07y265gmmuvt4z0w9aw880jnsr700jdrnmrz",
       "plan": {
-        "name": "v1.0.7",
+        "name": "v1.0.8",
         "time": "0001-01-01T00:00:00Z",
-        "height": "300",
+        "height": "150",
         "info": "",
         "upgraded_client_state": null
       }
@@ -14,6 +14,6 @@
   ],
   "metadata": "ipfs://CID",
   "deposit": "1000000aswtr",
-  "title": "v1.0.7",
-  "summary": "Upgrade Swisstronik Testnet to v1.0.7"
+  "title": "v1.0.8",
+  "summary": "Upgrade Swisstronik Testnet to v1.0.8"
 }

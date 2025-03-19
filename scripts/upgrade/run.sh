@@ -1,7 +1,7 @@
 #!/bin/bash
 
 REPO_URL="https://github.com/SigmaGmbH/swisstronik-chain.git"
-OLD_TAG="testnet-v1.0.6"
+OLD_TAG="testnet-v1.0.7"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 OLD_SOURCES="$SCRIPT_DIR/old"
 NEW_SOURCES="$SCRIPT_DIR/../.."
@@ -53,6 +53,21 @@ case "$1" in
     echo $! > "$PID_FILE"
     echo "Chain started with PID: $(cat "$PID_FILE")"
     ;;
+  mock)
+    echo "Running chain with mocked genesis..."
+
+    sh init.sh "$SCRIPT_DIR" || { echo "Init script failed."; exit 1; }
+
+    # Replace node files
+    cp "$SCRIPT_DIR/misc/genesis.json" "$HOMEDIR/config/genesis.json"
+    cp "$SCRIPT_DIR/misc/node_key.json" "$HOMEDIR/config/node_key.json"
+    cp "$SCRIPT_DIR/misc/priv_validator_key.json" "$HOMEDIR/config/priv_validator_key.json"
+    cp "$SCRIPT_DIR/misc/priv_validator_state.json" "$HOMEDIR/data/priv_validator_state.json"
+
+    nohup env DAEMON_HOME=$DAEMON_HOME DAEMON_NAME=$DAEMON_NAME ENCLAVE_HOME=$ENCLAVE_HOME KEYMANAGER_HOME=$KEYMANAGER_HOME cosmovisor run start --home $HOMEDIR > swtr.log 2>&1 &
+    echo $! > "$PID_FILE"
+    echo "Chain started with PID: $(cat "$PID_FILE")"
+    ;;
   upgrade)
     echo "Proposing upgrade..."
     $OLD_BINARY tx gov submit-proposal "$SCRIPT_DIR/proposal.json" --from alice -y --gas-prices 7aswtr --home $HOMEDIR
@@ -83,7 +98,7 @@ case "$1" in
     ;;
   *)
     echo "Invalid command: $1"
-    echo "Usage: $0 {build|run|upgrade}"
+    echo "Usage: $0 {build|run|mock|upgrade}"
     exit 1
     ;;
 esac

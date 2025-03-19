@@ -4,7 +4,7 @@ use evm::standard::TransactArgs;
 use primitive_types::{H160, H256, U256};
 use protobuf::RepeatedField;
 use std::vec::Vec;
-use crate::protobuf_generated::ffi::{AccessListItem, SGXVMCallParams, SGXVMCreateParams};
+use crate::protobuf_generated::ffi::{AccessListItem, SGXVMCallParams, SGXVMCreateParams, SGXVMEstimateGasRequest};
 
 impl From<SGXVMCallParams> for TransactArgs {
     fn from(val: SGXVMCallParams) -> Self {

@@ -60,6 +60,7 @@ module.exports.sendSignedShieldedQuery = async (wallet, destination, data) => {
         to: destination,
         data: encryptedData,
         chainId: networkInfo.chainId,
+        gasLimit: 2_000_000,
     }
 
     // Extract signature values
@@ -73,7 +74,8 @@ module.exports.sendSignedShieldedQuery = async (wallet, destination, data) => {
         v: ethers.utils.hexValue(decoded.v),
         r: ethers.utils.hexValue(decoded.r),
         s: ethers.utils.hexValue(decoded.s),
-        chainId: ethers.utils.hexValue(networkInfo.chainId)
+        chainId: ethers.utils.hexValue(networkInfo.chainId),
+        gasLimit: ethers.utils.hexValue(2_000_000),
     }
 
     // Do call

@@ -12,6 +12,7 @@ import (
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"google.golang.org/protobuf/proto"
 	"log"
+	"math/big"
 	"net"
 	"runtime"
 
@@ -266,11 +267,15 @@ func Call(
 	from, to, data, value []byte,
 	accessList ethtypes.AccessList,
 	gasLimit uint64,
-	gasPrice []byte,
+	gasPrice *big.Int,
 	nonce uint64,
 	txContext *types.TransactionContext,
 	commit bool,
 	isUnencrypted bool,
+	transactionSignature []byte,
+	maxFeePerGas *big.Int,
+	maxPriorityFeePerGas *big.Int,
+	txType uint8,
 ) (*types.HandleTransactionResponse, error) {
 	// Construct mocked querier
 	c := BuildConnector(connector)
@@ -281,17 +286,104 @@ func Call(
 		To:          to,
 		Data:        data,
 		GasLimit:    gasLimit,
-		GasPrice:    gasPrice,
 		Value:       value,
 		AccessList:  convertAccessList(accessList),
 		Commit:      commit,
 		Nonce:       nonce,
 		Unencrypted: isUnencrypted,
+		Signature:   transactionSignature,
+		TxType:      uint32(txType),
+	}
+
+	if gasPrice != nil {
+		params.GasPrice = gasPrice.Bytes()
+	}
+	if maxFeePerGas != nil {
+		params.MaxFeePerGas = maxFeePerGas.Bytes()
+	}
+	if maxPriorityFeePerGas != nil {
+		params.MaxPriorityFeePerGas = maxPriorityFeePerGas.Bytes()
 	}
 
 	// Create protobuf encoded request
 	req := types.FFIRequest{Req: &types.FFIRequest_CallRequest{
 		CallRequest: &types.SGXVMCallRequest{
+			Params:  params,
+			Context: txContext,
+		},
+	}}
+	reqBytes, err := proto.Marshal(&req)
+	if err != nil {
+		log.Fatalln("Failed to encode req:", err)
+		return nil, err
+	}
+
+	// Pass request to Rust
+	d := MakeView(reqBytes)
+	defer runtime.KeepAlive(reqBytes)
+
+	errmsg := NewUnmanagedVector(nil)
+	ptr, err := C.make_pb_request(c, d, &errmsg)
+	if err != nil {
+		return &types.HandleTransactionResponse{}, ErrorWithMessage(err, errmsg)
+	}
+
+	// Recover returned value
+	executionResult := CopyAndDestroyUnmanagedVector(ptr)
+	response := types.HandleTransactionResponse{}
+	if err := proto.Unmarshal(executionResult, &response); err != nil {
+		log.Fatalln("Failed to decode execution result:", err)
+		return nil, err
+	}
+
+	return &response, nil
+}
+
+// EstimateGas handles incoming call to estimateGas
+func EstimateGas(
+	connector Connector,
+	from, to, data, value []byte,
+	accessList ethtypes.AccessList,
+	gasLimit uint64,
+	gasPrice *big.Int,
+	nonce uint64,
+	txContext *types.TransactionContext,
+	isUnencrypted bool,
+	maxFeePerGas *big.Int,
+	maxPriorityFeePerGas *big.Int,
+	txType uint8,
+) (*types.HandleTransactionResponse, error) {
+	c := BuildConnector(connector)
+
+	// Create protobuf-encoded transaction data
+	params := &types.SGXVMEstimateGasParams{
+		From:        from,
+		Data:        data,
+		GasLimit:    gasLimit,
+		Value:       value,
+		AccessList:  convertAccessList(accessList),
+		Commit:      false,
+		Nonce:       nonce,
+		Unencrypted: isUnencrypted,
+		TxType:      uint32(txType),
+	}
+
+	if to != nil {
+		params.To = to
+	}
+	if gasPrice != nil {
+		params.GasPrice = gasPrice.Bytes()
+	}
+	if maxFeePerGas != nil {
+		params.MaxFeePerGas = maxFeePerGas.Bytes()
+	}
+	if maxPriorityFeePerGas != nil {
+		params.MaxPriorityFeePerGas = maxPriorityFeePerGas.Bytes()
+	}
+
+	// Create protobuf encoded request
+	req := types.FFIRequest{Req: &types.FFIRequest_EstimateGasRequest{
+		EstimateGasRequest: &types.SGXVMEstimateGasRequest{
 			Params:  params,
 			Context: txContext,
 		},
@@ -329,10 +421,14 @@ func Create(
 	from, data, value []byte,
 	accessList ethtypes.AccessList,
 	gasLimit uint64,
-	gasPrice []byte,
+	gasPrice *big.Int,
 	nonce uint64,
 	txContext *types.TransactionContext,
 	commit bool,
+	transactionSignature []byte,
+	maxFeePerGas *big.Int,
+	maxPriorityFeePerGas *big.Int,
+	txType uint8,
 ) (*types.HandleTransactionResponse, error) {
 	// Construct mocked querier
 	c := BuildConnector(connector)
@@ -342,11 +438,21 @@ func Create(
 		From:       from,
 		Data:       data,
 		GasLimit:   gasLimit,
-		GasPrice:   gasPrice,
 		Value:      value,
 		AccessList: convertAccessList(accessList),
 		Commit:     commit,
 		Nonce:      nonce,
+		Signature:  transactionSignature,
+		TxType:     uint32(txType),
+	}
+	if gasPrice != nil {
+		params.GasPrice = gasPrice.Bytes()
+	}
+	if maxFeePerGas != nil {
+		params.MaxFeePerGas = maxFeePerGas.Bytes()
+	}
+	if maxPriorityFeePerGas != nil {
+		params.MaxPriorityFeePerGas = maxPriorityFeePerGas.Bytes()
 	}
 
 	// Create protobuf encoded request

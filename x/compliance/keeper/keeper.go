@@ -99,17 +99,10 @@ func (k Keeper) IssuerExists(ctx sdk.Context, issuerAddress sdk.AccAddress) (boo
 	return len(res.Name) > 0, nil
 }
 
-// GetAddressDetails returns address details
+// GetAddressDetails returns actual address details (without non-existent issuers)
 func (k Keeper) GetAddressDetails(ctx sdk.Context, address sdk.AccAddress) (*types.AddressDetails, error) {
-	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixAddressDetails)
-
-	addressDetailsBytes := store.Get(address.Bytes())
-	if addressDetailsBytes == nil {
-		return &types.AddressDetails{}, nil
-	}
-
-	var addressDetails types.AddressDetails
-	if err := proto.Unmarshal(addressDetailsBytes, &addressDetails); err != nil {
+	addressDetails, err := k.GetFullAddressDetails(ctx, address)
+	if err != nil {
 		return nil, err
 	}
 
@@ -129,6 +122,23 @@ func (k Keeper) GetAddressDetails(ctx sdk.Context, address sdk.AccAddress) (*typ
 		}
 	}
 	addressDetails.Verifications = newVerifications
+
+	return addressDetails, nil
+}
+
+// GetFullAddressDetails returns address details with all verifications
+func (k Keeper) GetFullAddressDetails(ctx sdk.Context, address sdk.AccAddress) (*types.AddressDetails, error) {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixAddressDetails)
+
+	addressDetailsBytes := store.Get(address.Bytes())
+	if addressDetailsBytes == nil {
+		return &types.AddressDetails{}, nil
+	}
+
+	var addressDetails types.AddressDetails
+	if err := proto.Unmarshal(addressDetailsBytes, &addressDetails); err != nil {
+		return nil, err
+	}
 
 	return &addressDetails, nil
 }
@@ -489,19 +499,18 @@ func (k Keeper) MarkVerificationDetailsAsRevoked(
 }
 
 // GetVerificationDetails returns verification details for provided ID
-func (k Keeper) GetVerificationDetails(ctx sdk.Context, verificationDetailsId []byte) (*types.VerificationDetails, error) {
-	verificationDetailsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationDetails)
-	verificationDetailsBytes := verificationDetailsStore.Get(verificationDetailsId)
-	if verificationDetailsBytes == nil {
-		return &types.VerificationDetails{}, nil
-	}
-
-	var verificationDetails types.VerificationDetails
-	if err := proto.Unmarshal(verificationDetailsBytes, &verificationDetails); err != nil {
+func (k Keeper) GetVerificationDetails(ctx sdk.Context, verificationId []byte) (*types.VerificationDetails, error) {
+	verificationDetails, err := k.GetRawVerificationDetails(ctx, verificationId)
+	if err != nil {
 		return nil, err
 	}
 
-	// Check if issuer exists. If removed, delete verification data from store
+	// Check if verification details exist, return empty struct if not
+	if verificationDetails.Type == types.VerificationType_VT_UNSPECIFIED {
+		return &types.VerificationDetails{}, nil
+	}
+
+	// Check if issuer exists
 	issuerAddress, err := sdk.AccAddressFromBech32(verificationDetails.IssuerAddress)
 	if err != nil {
 		return nil, err
@@ -512,6 +521,22 @@ func (k Keeper) GetVerificationDetails(ctx sdk.Context, verificationDetailsId []
 	}
 	if !exists {
 		return &types.VerificationDetails{}, nil
+	}
+
+	return verificationDetails, nil
+}
+
+// GetRawVerificationDetails returns verification details for provided ID
+func (k Keeper) GetRawVerificationDetails(ctx sdk.Context, verificationId []byte) (*types.VerificationDetails, error) {
+	verificationDetailsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationDetails)
+	verificationDetailsBytes := verificationDetailsStore.Get(verificationId)
+	if verificationDetailsBytes == nil {
+		return &types.VerificationDetails{}, nil
+	}
+
+	var verificationDetails types.VerificationDetails
+	if err := proto.Unmarshal(verificationDetailsBytes, &verificationDetails); err != nil {
+		return nil, err
 	}
 
 	return &verificationDetails, nil
@@ -727,226 +752,6 @@ func (k Keeper) OperatorExists(ctx sdk.Context, operator sdk.AccAddress) (bool, 
 	return len(res.Operator) > 0, nil
 }
 
-func (k Keeper) IterateOperatorDetails(ctx sdk.Context, callback func(address sdk.AccAddress) (continue_ bool)) {
-	latestVersionIterator := sdk.KVStorePrefixIterator(ctx.KVStore(k.storeKey), types.KeyPrefixOperatorDetails)
-	defer closeIteratorOrPanic(latestVersionIterator)
-
-	for ; latestVersionIterator.Valid(); latestVersionIterator.Next() {
-		key := latestVersionIterator.Key()
-		address := types.AccAddressFromKey(key)
-		if !callback(address) {
-			break
-		}
-	}
-}
-
-func (k Keeper) IterateVerificationDetails(ctx sdk.Context, callback func(id []byte) (continue_ bool)) {
-	latestVersionIterator := sdk.KVStorePrefixIterator(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationDetails)
-	defer closeIteratorOrPanic(latestVersionIterator)
-
-	for ; latestVersionIterator.Valid(); latestVersionIterator.Next() {
-		key := latestVersionIterator.Key()
-		id := types.VerificationIdFromKey(key)
-		if !callback(id) {
-			break
-		}
-	}
-}
-
-func (k Keeper) IterateAddressDetails(ctx sdk.Context, callback func(address sdk.AccAddress) (continue_ bool)) {
-	latestVersionIterator := sdk.KVStorePrefixIterator(ctx.KVStore(k.storeKey), types.KeyPrefixAddressDetails)
-	defer closeIteratorOrPanic(latestVersionIterator)
-
-	for ; latestVersionIterator.Valid(); latestVersionIterator.Next() {
-		key := latestVersionIterator.Key()
-		address := types.AccAddressFromKey(key)
-		if !callback(address) {
-			break
-		}
-	}
-}
-
-func (k Keeper) IterateIssuerDetails(ctx sdk.Context, callback func(address sdk.AccAddress) (continue_ bool)) {
-	latestVersionIterator := sdk.KVStorePrefixIterator(ctx.KVStore(k.storeKey), types.KeyPrefixIssuerDetails)
-	defer closeIteratorOrPanic(latestVersionIterator)
-
-	for ; latestVersionIterator.Valid(); latestVersionIterator.Next() {
-		key := latestVersionIterator.Key()
-		address := types.AccAddressFromKey(key)
-		if !callback(address) {
-			break
-		}
-	}
-}
-
-func (k Keeper) IterateHolderPublicKeys(ctx sdk.Context, callback func(address sdk.AccAddress) (continue_ bool)) {
-	latestVersionIterator := sdk.KVStorePrefixIterator(ctx.KVStore(k.storeKey), types.KeyPrefixHolderPublicKeys)
-	defer closeIteratorOrPanic(latestVersionIterator)
-
-	for ; latestVersionIterator.Valid(); latestVersionIterator.Next() {
-		key := latestVersionIterator.Key()
-		address := types.AccAddressFromKey(key)
-		if !callback(address) {
-			break
-		}
-	}
-}
-
-func (k Keeper) IterateLinksToHolder(ctx sdk.Context, callback func(verificationId []byte) (continue_ bool)) {
-	latestVersionIterator := sdk.KVStorePrefixIterator(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationToHolder)
-	defer closeIteratorOrPanic(latestVersionIterator)
-
-	for ; latestVersionIterator.Valid(); latestVersionIterator.Next() {
-		key := latestVersionIterator.Key()
-		id := types.VerificationIdFromKey(key)
-		if !callback(id) {
-			break
-		}
-	}
-}
-
-func (k Keeper) IterateLinksToPublicKey(ctx sdk.Context, callback func(verificationId []byte) (continue_ bool)) {
-	latestVersionIterator := sdk.KVStorePrefixIterator(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationToPubKey)
-	defer closeIteratorOrPanic(latestVersionIterator)
-
-	for ; latestVersionIterator.Valid(); latestVersionIterator.Next() {
-		key := latestVersionIterator.Key()
-		id := types.VerificationIdFromKey(key)
-		if !callback(id) {
-			break
-		}
-	}
-}
-
-func (k Keeper) ExportOperators(ctx sdk.Context) ([]*types.OperatorDetails, error) {
-	var (
-		allDetails []*types.OperatorDetails
-		details    *types.OperatorDetails
-		err        error
-	)
-
-	k.IterateOperatorDetails(ctx, func(address sdk.AccAddress) (continue_ bool) {
-		details, err = k.GetOperatorDetails(ctx, address)
-		if err != nil {
-			return false
-		}
-		allDetails = append(allDetails, details)
-		return true
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return allDetails, nil
-}
-
-func (k Keeper) ExportVerificationDetails(ctx sdk.Context) ([]*types.GenesisVerificationDetails, error) {
-	var (
-		allVerificationDetails []*types.GenesisVerificationDetails
-		details                *types.VerificationDetails
-		err                    error
-	)
-
-	k.IterateVerificationDetails(ctx, func(id []byte) bool {
-		details, err = k.GetVerificationDetails(ctx, id)
-		if err != nil {
-			return false
-		}
-		allVerificationDetails = append(allVerificationDetails, &types.GenesisVerificationDetails{Id: id, Details: details})
-		return true
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return allVerificationDetails, nil
-}
-
-func (k Keeper) ExportAddressDetails(ctx sdk.Context) ([]*types.GenesisAddressDetails, error) {
-	var (
-		allAddressDetails []*types.GenesisAddressDetails
-		details           *types.AddressDetails
-		err               error
-	)
-
-	k.IterateAddressDetails(ctx, func(address sdk.AccAddress) bool {
-		details, err = k.GetAddressDetails(ctx, address)
-		if err != nil {
-			return false
-		}
-		allAddressDetails = append(allAddressDetails, &types.GenesisAddressDetails{Address: address.String(), Details: details})
-		return true
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return allAddressDetails, nil
-}
-
-func (k Keeper) ExportIssuerDetails(ctx sdk.Context) ([]*types.GenesisIssuerDetails, error) {
-	var (
-		issuerDetails []*types.GenesisIssuerDetails
-		details       *types.IssuerDetails
-		err           error
-	)
-
-	k.IterateIssuerDetails(ctx, func(address sdk.AccAddress) bool {
-		details, err = k.GetIssuerDetails(ctx, address)
-		if err != nil {
-			return false
-		}
-		issuerDetails = append(issuerDetails, &types.GenesisIssuerDetails{
-			Address: address.String(),
-			Details: details,
-		})
-		return true
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return issuerDetails, nil
-}
-
-func (k Keeper) ExportHolderPublicKeys(ctx sdk.Context) ([]*types.GenesisHolderPublicKeys, error) {
-	var (
-		holderPublicKeys []*types.GenesisHolderPublicKeys
-	)
-
-	k.IterateHolderPublicKeys(ctx, func(holder sdk.AccAddress) bool {
-		publicKey := k.GetHolderPublicKey(ctx, holder)
-		if publicKey != nil {
-			holderPublicKeys = append(holderPublicKeys, &types.GenesisHolderPublicKeys{
-				Address:   holder.String(),
-				PublicKey: publicKey,
-			})
-		}
-		return true
-	})
-
-	return holderPublicKeys, nil
-}
-
-func (k Keeper) ExportLinksVerificationIdToPublicKey(ctx sdk.Context) ([]*types.GenesisLinkVerificationIdToPublicKey, error) {
-	var (
-		links []*types.GenesisLinkVerificationIdToPublicKey
-	)
-
-	k.IterateLinksToPublicKey(ctx, func(verificationId []byte) bool {
-		publicKey := k.GetPubKeyByVerificationId(ctx, verificationId)
-		if publicKey != nil {
-			links = append(links, &types.GenesisLinkVerificationIdToPublicKey{
-				Id:        verificationId,
-				PublicKey: publicKey,
-			})
-		}
-		return true
-	})
-
-	return links, nil
-}
-
 // GetHolderPublicKey returns the compressed holder public key
 func (k Keeper) GetHolderPublicKey(ctx sdk.Context, user sdk.AccAddress) []byte {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixHolderPublicKeys)
@@ -1111,20 +916,11 @@ func (k Keeper) ConvertCredential(ctx sdk.Context, verificationId []byte, public
 		return err
 	}
 
-	if !isIncluded {
-		if err = k.AddCredentialHashToIssued(ctx, credentialHash); err != nil {
-			return err
-		}
+	if isIncluded {
+		return errors.Wrap(types.ErrBadRequest, "credential is already included in issuance tree")
 	}
 
-	return nil
-}
-
-func closeIteratorOrPanic(iterator sdk.Iterator) {
-	err := iterator.Close()
-	if err != nil {
-		panic(err.Error())
-	}
+	return k.AddCredentialHashToIssued(ctx, credentialHash)
 }
 
 // TODO: Create fn to obtain all verified issuers with their aliases

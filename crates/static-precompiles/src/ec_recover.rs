@@ -10,7 +10,7 @@ use k256::sha2::Digest;
 use sha3::Keccak256;
 use k256::{
     ecdsa::recoverable,
-    elliptic_curve::{sec1::ToEncodedPoint, IsHigh},
+    elliptic_curve::{sec1::ToEncodedPoint},
 };
 use crate::LinearCostPrecompile;
 
@@ -48,10 +48,6 @@ impl LinearCostPrecompile for ECRecover {
                 return (ExitSucceed::Returned.into(), [0u8; 0].to_vec());
             }
         };
-
-        if signature.s().is_high().into() {
-            return (ExitSucceed::Returned.into(), [0u8; 0].to_vec());
-        }
 
         let result = match signature.recover_verifying_key_from_digest_bytes(&msg.into()) {
             Ok(recovered_key) => {

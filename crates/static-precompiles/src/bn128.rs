@@ -134,7 +134,7 @@ impl<G: AsRef<RuntimeState> + GasMutState> Precompile<G> for Bn128Pairing {
 			let elements = input.len() / 192;
 
 			let gas_cost_per_element = U256::from(BN_128_PAIRING_GAS_COST_PER_ELEMENT);
-			let gas_cost = U256::from(BN_128_PAIRING_GAS_COST_PER_ELEMENT)
+			let gas_cost = U256::from(BN_128_PAIRING_MIN_GAS_COST)
 				.saturating_add(gas_cost_per_element * elements);
 
 			if let Err(e) = gasometer.record_gas(gas_cost) {

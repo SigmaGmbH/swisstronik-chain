@@ -19,7 +19,7 @@ import (
 type CallArgs struct {
 	From                 *common.Address `json:"from"`
 	To                   *common.Address `json:"to"`
-	Gas                  *hexutil.Uint64 `json:"gas"`
+	Gas                  *hexutil.Uint64 `json:"gasLimit"`
 	GasPrice             *hexutil.Big    `json:"gasPrice"`
 	MaxFeePerGas         *hexutil.Big    `json:"maxFeePerGas"`
 	MaxPriorityFeePerGas *hexutil.Big    `json:"maxPriorityFeePerGas"`
