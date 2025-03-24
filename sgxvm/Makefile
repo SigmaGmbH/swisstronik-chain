@@ -19,7 +19,7 @@ Enclave_Security_Link_Flags := -Wl,-z,relro,-z,now,-z,noexecstack
 Enclave_config_file ?= Enclave.config.development.xml
 Enclave_signing_key ?= Enclave_dev_private.pem
 Enclave_signed_file ?= enclave.signed.so
-VERSION ?= v1.0.7
+VERSION ?= v1.0.8
 
 # ENCLAVE SETTINGS
 ifneq ($(SGX_MODE), HW)
@@ -53,6 +53,8 @@ else
 	Enclave_signing_key := Enclave_private.pem
 	Enclave_build_feature += production
 endif
+
+ENCLAVE_KEY := $(CURDIR)/$(Enclave_signing_key)
 
 # DEFINEs
 
@@ -178,5 +180,21 @@ build_d:
 	$(call sgx_build_debug)
 	@echo "Intel SGX enclave built and signed with debug Rust code"
 
+build_enclave:
+	$(call sgx_clean_debug)
+	$(call compile_protobuf)
+	$(call compile_enclave_rust_debug)
+	$(call create_bridge_enclave_rust)
+	$(call compile_enclave_bridge)
+	$(call create_archive)
+	$(call copy_compiled_enclave_debug)
+	$(call compile_into_enclave_t_o)
+	$(call compile_unsigned_enclave)
+	mkdir -p $(ENCLAVE_HOME)
+	cp $(CURDIR)/enclave.unsigned.so $(ENCLAVE_HOME)
+
 clean:
 	$(call sgx_clean)
+
+sign_separate_enclave:
+	/opt/intel/sgxsdk/bin/x64/sgx_sign sign -key $(ENCLAVE_KEY) -enclave $(ENCLAVE_HOME)/enclave.unsigned.so -out $(ENCLAVE_HOME)/$(VERSION)_$(Enclave_signed_file) -config $(CURDIR)/$(Enclave_config_file)
