@@ -44,6 +44,12 @@ build:
 	@cp $(CURDIR)/target/release/libsgxvm_wrapper.so $(CURDIR)/internal/api/$(Wrapper_lib)
 	$(call proto-gen)
 
+build_with_ready_enclave:
+	@protoc --rust_out src/protobuf_generated/ proto/node.proto
+	@ENCLAVE_HOME=$(ENCLAVE_HOME) cargo build --features "$(Wrapper_build_feature)" --release
+	@cp $(CURDIR)/target/release/libsgxvm_wrapper.so $(CURDIR)/internal/api/$(Wrapper_lib)
+	$(call proto-gen)
+
 build_d:
 	@ENCLAVE_HOME=$(ENCLAVE_HOME) PRODUCTION_MODE=$(PRODUCTION_MODE) SGX_MODE=$(SGX_MODE) AS_MODE=$(AS_MODE) VERSION=$(VERSION) make build_d -C ../sgxvm/
 	@protoc --rust_out src/protobuf_generated/ proto/node.proto
