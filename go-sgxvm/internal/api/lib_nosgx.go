@@ -11,6 +11,7 @@ import (
 	"github.com/SigmaGmbH/librustgo/types"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"math/rand"
+	"math/big"
 	"net"
 )
 
@@ -77,11 +78,31 @@ func Call(
 	from, to, data, value []byte,
 	accessList ethtypes.AccessList,
 	gasLimit uint64,
-	gasPrice []byte,
+	gasPrice *big.Int,
 	nonce uint64,
 	txContext *types.TransactionContext,
 	commit bool,
 	isUnencrypted bool,
+	transactionSignature []byte,
+	maxFeePerGas *big.Int,
+	maxPriorityFeePerGas *big.Int,
+	txType uint8,
+) (*types.HandleTransactionResponse, error) {
+	return nil, nil
+}
+
+func EstimateGas(
+	connector Connector,
+	from, to, data, value []byte,
+	accessList ethtypes.AccessList,
+	gasLimit uint64,
+	gasPrice *big.Int,
+	nonce uint64,
+	txContext *types.TransactionContext,
+	isUnencrypted bool,
+	maxFeePerGas *big.Int,
+	maxPriorityFeePerGas *big.Int,
+	txType uint8,
 ) (*types.HandleTransactionResponse, error) {
 	return nil, nil
 }
@@ -92,10 +113,14 @@ func Create(
 	from, data, value []byte,
 	accessList ethtypes.AccessList,
 	gasLimit uint64,
-	gasPrice []byte,
+	gasPrice *big.Int,
 	nonce uint64,
 	txContext *types.TransactionContext,
 	commit bool,
+	transactionSignature []byte,
+	maxFeePerGas *big.Int,
+	maxPriorityFeePerGas *big.Int,
+	txType uint8,
 ) (*types.HandleTransactionResponse, error) {
 	return nil, nil
 }
