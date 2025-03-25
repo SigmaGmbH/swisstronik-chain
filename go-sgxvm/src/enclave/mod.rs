@@ -44,26 +44,12 @@ extern "C" {
 
     pub fn ecall_is_initialized(eid: sgx_enclave_id_t, retval: *mut i32) -> sgx_status_t;
 
-    pub fn ecall_attest_peer_epid(
-        eid: sgx_enclave_id_t,
-        retval: *mut sgx_status_t,
-        socket_fd: c_int,
-    ) -> sgx_status_t;
-
     pub fn ecall_attest_peer_dcap(
         eid: sgx_enclave_id_t,
         retval: *mut sgx_status_t,
         socket_fd: c_int,
         qe_target_info: &sgx_target_info_t,
         quote_size: u32,
-    ) -> sgx_status_t;
-
-    pub fn ecall_request_epoch_keys_epid(
-        eid: sgx_enclave_id_t,
-        retval: *mut sgx_status_t,
-        hostname: *const u8,
-        data_len: usize,
-        socket_fd: c_int,
     ) -> sgx_status_t;
 
     pub fn ecall_status(
@@ -171,14 +157,14 @@ pub unsafe extern "C" fn handle_initialization_request(
                     }
                     #[cfg(feature = "hardware_mode")]
                     node::SetupRequest_oneof_req::peerAttestationRequest(req) => {
-                        enclave_api::EnclaveApi::attest_peer(evm_enclave.geteid(), req.fd, req.isDCAP)?;
+                        enclave_api::EnclaveApi::attest_peer(evm_enclave.geteid(), req.fd)?;
                         let response = node::PeerAttestationResponse::new();
                         let response_bytes = response.write_to_bytes()?;
                         Ok(response_bytes)
                     }
                     #[cfg(feature = "hardware_mode")]
                     node::SetupRequest_oneof_req::remoteAttestationRequest(req) => {
-                        enclave_api::EnclaveApi::request_remote_attestation(evm_enclave.geteid(), req.hostname, req.fd, req.isDCAP)?;
+                        enclave_api::EnclaveApi::request_remote_attestation(evm_enclave.geteid(), req.hostname, req.fd)?;
                         let response = node::RemoteAttestationResponse::new();
                         let response_bytes = response.write_to_bytes()?;
                         Ok(response_bytes)

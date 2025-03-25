@@ -24,7 +24,6 @@ func EnclaveCmd() *cobra.Command {
 
 	cmd.AddCommand(
 		ListEpochs(),
-		EPIDRemoteAttestationCmd(),
 		DCAPRemoteAttestationCmd(),
 		Status(),
 	)
@@ -46,43 +45,6 @@ func ListEpochs() *cobra.Command {
 				fmt.Println("Epoch #", epoch.EpochNumber, "Starting block: ", epoch.StartingBlock, "Node PublicKey: ", common.Bytes2Hex(epoch.NodePublicKey))
 			}
 
-			return nil
-		},
-	}
-
-	return cmd
-}
-
-// EPIDRemoteAttestationCmd returns request-epoch-keys-epid cobra Command.
-func EPIDRemoteAttestationCmd() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "request-epoch-keys-epid [attestation-server-address]",
-		Short: "Requests epoch keys from attestation server using EPID",
-		Long: `Initializes SGX enclave by passing process of EPID Remote Attestation agains attestation server. 
-		If remote attestation was successful, attestation server shares encrypted epoch keys with this node. 
-		Process of Remote Attestation is performed over pure TCP protocol.`,
-		Args: cobra.ExactArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx := client.GetClientContextFromCmd(cmd)
-			serverCtx := server.GetServerContextFromCmd(cmd)
-			config := serverCtx.Config
-			config.SetRoot(clientCtx.HomeDir)
-
-			host, portString, err := net.SplitHostPort(args[0])
-			if err != nil {
-				return err
-			}
-
-			port, err := strconv.Atoi(portString)
-			if err != nil {
-				return err
-			}
-
-			if err := librustgo.RequestEpochKeys(host, port, false); err != nil {
-				return err
-			}
-
-			fmt.Println("EPID Remote Attestation passed. Node is ready for work")
 			return nil
 		},
 	}
@@ -115,7 +77,7 @@ func DCAPRemoteAttestationCmd() *cobra.Command {
 				return err
 			}
 
-			if err := librustgo.RequestEpochKeys(host, port, true); err != nil {
+			if err := librustgo.RequestEpochKeys(host, port); err != nil {
 				return err
 			}
 

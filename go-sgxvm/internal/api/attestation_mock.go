@@ -7,8 +7,8 @@ import (
 	"fmt"
 )
 
-// StartAttestationServer starts attestation server with 2 port (EPID and DCAP attestation)
-func StartAttestationServer(epidAddress, dcapAddress string) error {
+// StartAttestationServer starts attestation server
+func StartAttestationServer(dcapAddress string) error {
 	fmt.Println("[Attestation Server] Not enabled")
 	return nil
 }
