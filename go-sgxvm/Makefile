@@ -54,6 +54,9 @@ build_d:
 build_AS: build
 	go build -tags osusergo,netgo,attestationServer -o ../build/attestationServer ./cmd/attestation
 
+build_AS_with_enclave: build_with_ready_enclave
+	go build -tags osusergo,netgo,attestationServer -o ../build/attestationServer ./cmd/attestation
+
 build_AS_d: build_d
 	go build -tags osusergo,netgo,attestationServer -o ../build/attestationServer ./cmd/attestation
 
