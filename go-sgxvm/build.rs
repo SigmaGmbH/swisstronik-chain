@@ -21,6 +21,7 @@ fn main () {
             println!("cargo:rustc-link-lib=dylib=sgx_urts_sim");
             println!("cargo:rustc-link-lib=dylib=sgx_quote_ex_sim");
             println!("cargo:rustc-link-lib=dylib=sgx_launch_sim");
+            println!("cargo:rustc-link-lib=dylib=sgx_epid_sim");
         }
         "HW" | _ => {
             println!("cargo:rustc-link-lib=dylib=sgx_urts");
@@ -29,6 +30,7 @@ fn main () {
             println!("cargo:rustc-link-lib=dylib=sgx_dcap_ql");
             println!("cargo:rustc-link-lib=dylib=sgx_dcap_quoteverify");
             println!("cargo:rustc-link-lib=dylib=dcap_quoteprov");
+            println!("cargo:rustc-link-lib=dylib=sgx_epid");
         }
     }
 }
