@@ -121,7 +121,7 @@ endef
 
 define compile_into_enclave_t_o
 	@echo "Compile into Enclave_t.o"
-	@cc -m64 -O2 -fstack-protector -ffreestanding -nostdinc -fvisibility=hidden -fpie -fno-strict-overflow -fno-delete-null-pointer-checks -I$(CURDIR)/sgx-sdk/common/inc -I$(CURDIR)/sgx-sdk/edl -I/opt/intel/sgxsdk/include -I/opt/intel/sgxsdk/include/tlibc -I/opt/intel/sgxsdk/include/stlport -I/opt/intel/sgxsdk/include/epid -I $(CURDIR)/ -I$(CURDIR)/include -c $(CURDIR)/Enclave_t.c -o $(CURDIR)/Enclave_t.o
+	@cc -m64 -O2 -fstack-protector -ffreestanding -nostdinc -fvisibility=hidden -fpie -fno-strict-overflow -fno-delete-null-pointer-checks -I$(CURDIR)/sgx-sdk/common/inc -I$(CURDIR)/sgx-sdk/edl -I/opt/intel/sgxsdk/include -I/opt/intel/sgxsdk/include/tlibc -I/opt/intel/sgxsdk/include/stlport -I $(CURDIR)/ -I$(CURDIR)/include -c $(CURDIR)/Enclave_t.c -o $(CURDIR)/Enclave_t.o
 endef
 
 define compile_unsigned_enclave
