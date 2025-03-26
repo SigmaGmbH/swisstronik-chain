@@ -15,44 +15,15 @@ import (
 	"runtime"
 )
 
-// StartAttestationServer starts attestation server with 2 port (EPID and DCAP attestation)
-func StartAttestationServer(epidAddress, dcapAddress string) error {
+// StartAttestationServer starts attestation server
+func StartAttestationServer(dcapAddress string) error {
 	fmt.Println("[Attestation Server] Trying to start attestation server")
-
-	if epidAddress == dcapAddress {
-		return fmt.Errorf("[Attestation Server] Provide different addresses for DCAP and EPID attestation")
-	}
-
-	epidListener, err := net.Listen("tcp", epidAddress)
-	if err != nil {
-		fmt.Println("[Attestation Server] Cannot start listener for EPID attestation")
-		return err
-	}
 
 	dcapListener, err := net.Listen("tcp", dcapAddress)
 	if err != nil {
 		fmt.Println("[Attestation Server] Cannot start listener for DCAP attestation")
 		return err
 	}
-
-	// Wait for incoming connections to EPID listener
-	go func() {
-		for {
-			connection, err := epidListener.Accept()
-			if err != nil {
-				fmt.Println("[Attestation Server] EPID listener: Got error ", err.Error(), ", connection: ", connection.RemoteAddr().String())
-				connection.Close()
-				continue
-			}
-
-			// provide param attestation type
-			if err := handleIncomingRARequest(connection, false); err != nil {
-				fmt.Println("[Attestation Server] EPID listener: Attestation failed. Reason: ", err)
-				connection.Close()
-				continue
-			}
-		}
-	}()
 
 	// Wait for incoming connections to DCAP listener
 	go func() {
@@ -64,7 +35,7 @@ func StartAttestationServer(epidAddress, dcapAddress string) error {
 				continue
 			}
 
-			if err := handleIncomingRARequest(connection, true); err != nil {
+			if err := handleIncomingRARequest(connection); err != nil {
 				fmt.Println("[Attestation Server] DCAP listener: Attestation failed. Reason: ", err)
 				connection.Close()
 				continue
@@ -72,13 +43,13 @@ func StartAttestationServer(epidAddress, dcapAddress string) error {
 		}
 	}()
 
-	fmt.Printf("[Attestation Server] Started Attestation Server\nEPID attestation: %s\nDCAP attestation: %s", epidAddress, dcapAddress)
+	fmt.Printf("[Attestation Server] Started Attestation Server\nDCAP attestation: %s", dcapAddress)
 
 	return nil
 }
 
 // Handles incoming request for Remote Attestation
-func handleIncomingRARequest(connection net.Conn, isDCAP bool) error {
+func handleIncomingRARequest(connection net.Conn) error {
 	defer connection.Close()
 	println("[Attestation Server] Attesting peer: ", connection.RemoteAddr().String())
 

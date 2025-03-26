@@ -133,36 +133,13 @@ func TestCoinTransfer(t *testing.T) {
 	}
 }
 
-func TestSeedExchangeEPID(t *testing.T) {
-	if err := api.InitializeEnclave(true); err != nil {
-		t.Fail()
-	}
-
-	epidAddress := "localhost:8999"
-	dcapAddress := "localhost:8998"
-	err := api.StartAttestationServer(epidAddress, dcapAddress)
-	if err != nil {
-		t.Fail()
-	}
-
-	// Test EPID Attestation
-	epidHost := "localhost"
-	epidPort := 8999
-	if err := api.RequestEpochKeys(epidHost, epidPort, false); err != nil {
-		t.Fail()
-	} else {
-		println("EPID PASSED")
-	}
-}
-
 func TestSeedExchangeDCAP(t *testing.T) {
 	if err := api.InitializeEnclave(true); err != nil {
 		t.Fail()
 	}
 
-	epidAddress := "localhost:8999"
 	dcapAddress := "localhost:8998"
-	err := api.StartAttestationServer(epidAddress, dcapAddress)
+	err := api.StartAttestationServer(dcapAddress)
 	if err != nil {
 		t.Fail()
 	}

@@ -147,7 +147,7 @@ which accepts a path for the resulting pprof file.
 			}
 
 			if !nodeInitialized {
-				return errors.New("sealed key manager was not found. Initialize it by using `swisstronikd enclave request-epoch-keys-epid or request-epoch-keys-dcap`")
+				return errors.New("sealed key manager was not found. Initialize it by using `swisstronikd enclave request-epoch-keys-dcap`")
 			}
 
 			withTM, _ := cmd.Flags().GetBool(srvflags.WithTendermint)

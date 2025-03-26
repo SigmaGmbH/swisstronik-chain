@@ -37,7 +37,7 @@ type Connector = types.Connector
 func CheckNodeStatus() error {
 	return nil
 }
-func RequestEpochKeys(host string, port int, isDCAP bool) error {
+func RequestEpochKeys(host string, port int) error {
 	return nil
 }
 
@@ -125,8 +125,8 @@ func Create(
 	return nil, nil
 }
 
-// StartAttestationServer starts attestation server with 2 port (EPID and DCAP attestation)
-func StartAttestationServer(epidAddress, dcapAddress string) error {
+// StartAttestationServer starts attestation server
+func StartAttestationServer(dcapAddress string) error {
 	return nil
 }
 
