@@ -208,7 +208,7 @@ pub fn handle_estimate_gas_request_inner(
                 return run_tx(querier, context, transact_args, false)
             } else {
                 // Otherwise, we should decrypt input, execute tx and encrypt output
-                let (user_public_key, data, nonce) = match extract_public_key_and_data(params.data) {
+                let (user_public_key, data, _) = match extract_public_key_and_data(params.data) {
                     Ok(res) => res,
                     Err(err) => return ExecutionResult::from_error(err.to_string(), Vec::new(), None)
                 };

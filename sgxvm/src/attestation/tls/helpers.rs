@@ -32,7 +32,7 @@ pub(super) fn construct_client_config(key_der: Vec<u8>, cert_der: Vec<u8>, is_dc
 }
 
 /// Prepares config for server side of TLS connection
-#[cfg(feature = "hardware_mode")]
+#[cfg(feature = "attestation_server")]
 pub(super) fn construct_server_config(key_der: Vec<u8>, cert_der: Vec<u8>, is_dcap: bool) -> ServerConfig {
     let mut cfg = rustls::ServerConfig::new(Arc::new(ClientAuth::new(true, is_dcap)));
     let certs = vec![rustls::Certificate(cert_der)];
@@ -67,6 +67,7 @@ pub(super) fn create_client_session_stream(
     Ok((sess, conn))
 }
 
+#[cfg(feature = "attestation_server")]
 /// Creates TLS session stream for server
 pub(super) fn create_server_session_stream(
     socket_fd: c_int,

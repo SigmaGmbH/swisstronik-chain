@@ -1,10 +1,9 @@
-use alloc::string::ToString;
 use primitive_types::{H160, H256, U256};
 use protobuf::RepeatedField;
 use std::vec::Vec;
 use rlp::{RlpStream};
 use sha3::{Digest, Keccak256};
-use crate::protobuf_generated::ffi::{AccessListItem, SGXVMCallRequest, SGXVMCreateRequest, SGXVMEstimateGasRequest};
+use crate::protobuf_generated::ffi::{AccessListItem, SGXVMCallRequest, SGXVMCreateRequest};
 
 enum TransactionType {
     Legacy,
