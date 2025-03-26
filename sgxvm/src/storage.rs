@@ -184,8 +184,6 @@ impl Storage for FFIStorage {
     }
 
     fn insert_account_nonce(&self, address: &H160, nonce: &U256) -> Result<(), Error> {
-        // println!("DEBUG: Insert account nonce disabled");
-        // Ok(())
         let encoded_request = coder::encode_insert_account_nonce(address, nonce);
         if let Some(result) = querier::make_request(self.querier, encoded_request) {
             match protobuf::parse_from_bytes::<ffi::QueryInsertAccountNonceResponse>(result.as_slice()) {
