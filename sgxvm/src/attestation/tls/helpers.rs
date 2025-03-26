@@ -1,4 +1,4 @@
-use rustls::{ClientConfig, ClientSession, ServerConfig, ServerSession};
+use rustls::{ClientConfig, ClientSession};
 use sgx_tcrypto::*;
 use sgx_types::*;
 use std::sync::Arc;
@@ -13,8 +13,14 @@ use crate::attestation::{
     dcap::utils::encode_quote_with_collateral,
     utils::create_attestation_report,
 };
-use crate::attestation::tls::auth::{ClientAuth, ServerAuth};
+use crate::attestation::tls::auth::ServerAuth;
 use crate::key_manager::{KeyManager, keys::RegistrationKey};
+
+#[cfg(feature = "attestation_server")]
+use rustls::{ServerConfig, ServerSession};
+
+#[cfg(feature = "attestation_server")]
+use crate::attestation::tls::auth::{ClientAuth};
 
 /// Prepares config for client side of TLS connection
 #[cfg(feature = "hardware_mode")]

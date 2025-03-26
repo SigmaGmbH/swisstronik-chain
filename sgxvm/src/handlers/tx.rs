@@ -214,7 +214,7 @@ pub fn handle_estimate_gas_request_inner(
                 };
 
                 let decrypted_data = match !data.is_empty() {
-                    true => match decrypt_transaction_data(data, user_public_key.clone(), block_number) {
+                    true => match decrypt_transaction_data(data, user_public_key, block_number) {
                         Ok(data) => data,
                         Err(err) => return ExecutionResult::from_error(err.to_string(), Vec::new(), None)
                     },
