@@ -175,6 +175,15 @@ impl KeyManager {
         })
     }
 
+    /// Creates new empty KeyManager
+    pub fn random_empty() -> SgxResult<Self> {
+        let empty_epoch_manager = EpochManager::random_empty()?;
+        
+        Ok(Self {
+            epoch_manager: empty_epoch_manager,
+        })
+    }
+
     #[cfg(feature = "attestation_server")]
     /// Creates new epoch with provided starting block
     pub fn add_new_epoch(&self, starting_block: u64) -> SgxResult<()> {
