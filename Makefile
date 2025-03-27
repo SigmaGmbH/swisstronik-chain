@@ -88,7 +88,7 @@ build: go.sum
 	go build -mod=mod $(BUILD_FLAGS)  -tags osusergo,netgo -o build/swisstronikd ./cmd/swisstronikd
 
 build_with_ready_enclave: go.sum
-	$(MAKE) -C go-sgxvm build
+	$(MAKE) -C go-sgxvm build_with_ready_enclave
 	go build -mod=mod $(BUILD_FLAGS)  -tags osusergo,netgo -o build/swisstronikd ./cmd/swisstronikd	
 
 build_d: go.sum
