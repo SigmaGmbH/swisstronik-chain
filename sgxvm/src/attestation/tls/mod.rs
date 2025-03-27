@@ -134,15 +134,3 @@ pub fn perform_epoch_keys_provisioning(
 
     Ok(())
 }
-
-// #[cfg(not(feature = "attestation_server"))]
-// /// Initializes new TLS server to share master key
-// pub fn perform_epoch_keys_provisioning(
-//     _socket_fd: c_int,
-//     _qe_target_info: Option<&sgx_target_info_t>,
-//     _quote_size: Option<u32>,
-//     _is_dcap: bool,
-// ) -> SgxResult<()> {
-//     println!("[Enclave] Attestation Server is unaccessible");
-//     Err(sgx_status_t::SGX_ERROR_UNEXPECTED)
-// }
