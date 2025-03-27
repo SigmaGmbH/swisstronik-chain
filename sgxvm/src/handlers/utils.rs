@@ -4,7 +4,7 @@ use evm::standard::TransactArgs;
 use primitive_types::{H160, H256, U256};
 use protobuf::RepeatedField;
 use std::vec::Vec;
-use crate::protobuf_generated::ffi::{AccessListItem, SGXVMCallParams, SGXVMCreateParams, SGXVMEstimateGasRequest};
+use crate::protobuf_generated::ffi::{AccessListItem, SGXVMCallParams, SGXVMCreateParams};
 
 impl From<SGXVMCallParams> for TransactArgs {
     fn from(val: SGXVMCallParams) -> Self {
@@ -31,18 +31,6 @@ impl From<SGXVMCreateParams> for TransactArgs {
             gas_price: U256::from_big_endian(&val.gasPrice),
             access_list: parse_access_list(val.accessList),
         }
-    }
-}
-
-pub fn construct_call_args(params: SGXVMCallParams, data: Vec<u8>) -> TransactArgs {
-    TransactArgs::Call {
-        caller: H160::from_slice(&params.from),
-        address: H160::from_slice(&params.to),
-        value: U256::from_big_endian(&params.value),
-        data,
-        gas_limit: U256::from(params.gasLimit),
-        gas_price: U256::from_big_endian(&params.gasPrice),
-        access_list: parse_access_list(params.accessList),
     }
 }
 

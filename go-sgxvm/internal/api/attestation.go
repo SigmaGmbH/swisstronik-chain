@@ -64,7 +64,6 @@ func handleIncomingRARequest(connection net.Conn) error {
 	req := types.SetupRequest{Req: &types.SetupRequest_PeerAttestationRequest{
 		PeerAttestationRequest: &types.PeerAttestationRequest{
 			Fd:     int32(file.Fd()),
-			IsDCAP: isDCAP,
 		},
 	}}
 	reqBytes, err := proto.Marshal(&req)
