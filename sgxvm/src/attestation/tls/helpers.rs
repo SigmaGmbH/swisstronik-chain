@@ -20,7 +20,7 @@ use crate::key_manager::{KeyManager, keys::RegistrationKey};
 use rustls::{ServerConfig, ServerSession};
 
 #[cfg(feature = "attestation_server")]
-use crate::attestation::tls::auth::{ClientAuth};
+use crate::attestation::tls::auth::ClientAuth;
 
 /// Prepares config for client side of TLS connection
 #[cfg(feature = "hardware_mode")]
