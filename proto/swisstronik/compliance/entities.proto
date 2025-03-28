@@ -100,6 +100,22 @@ message VerificationDetails {
     bool is_revoked = 10;
 }
 
+// MergedVerificationDetails is merged structure of iterating key and `VerificationDetails` in `entities.proto`.
+// `verification_type` and `verification_id` are iterating keys, and the following items should be same with `VerificationDetails`.
+message MergedVerificationDetails {
+    VerificationType verificationType = 1;
+    bytes verification_id = 2;
+    string issuer_address = 3;
+    string origin_chain = 4;
+    uint32 issuance_timestamp = 5;
+    uint32 expiration_timestamp = 6;
+    bytes original_data = 7;
+    string schema = 8;
+    string issuer_verification_id = 9;
+    uint32 version = 10;
+    bool is_revoked = 11;
+}
+
 // ZKCredential contains basic information, which can be used to construct proof-of-ownership of some credential
 message ZKCredential {
     VerificationType type = 1;
