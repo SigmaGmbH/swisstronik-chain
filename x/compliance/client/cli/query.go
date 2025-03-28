@@ -200,7 +200,7 @@ func CmdGetIssuersDetails() *cobra.Command {
 func CmdGetVerificationDetails() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get-verification-details [verification-id]",
-		Short: "Returns verification details associated with provided address",
+		Short: "Returns verification details associated with provided verification id",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx := client.GetClientContextFromCmd(cmd)
@@ -287,14 +287,19 @@ func CmdGetHolderByVerificationId() *cobra.Command {
 func CmdGetHolderPublicKey() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get-holder-public-key [userAddress]",
-		Short: "Returns holder by verification id",
+		Short: "Returns holder public key by user address",
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx := client.GetClientContextFromCmd(cmd)
 			queryClient := types.NewQueryClient(clientCtx)
 
+			address, err := types.ParseAddress(args[0])
+			if err != nil {
+				return err
+			}
+
 			req := &types.QueryAttachedHolderPublicKeyRequest{
-				Address: args[0],
+				Address: address.String(),
 			}
 
 			resp, err := queryClient.AttachedHolderPublicKey(context.Background(), req)
