@@ -265,6 +265,10 @@ func (k Keeper) AddVerificationDetails(ctx sdk.Context, userAddress sdk.AccAddre
 }
 
 func (k Keeper) addVerificationDetailsInternal(ctx sdk.Context, userAddress sdk.AccAddress, issuerAddress sdk.AccAddress, verificationType types.VerificationType, details *types.VerificationDetails) ([]byte, error) {
+	if err := details.ValidateSize(); err != nil {
+		return nil, errors.Wrap(types.ErrInvalidParam, err.Error())
+	}
+	
 	isAddressVerified, err := k.IsAddressVerified(ctx, issuerAddress)
 	if err != nil {
 		return nil, err
