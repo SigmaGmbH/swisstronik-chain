@@ -129,7 +129,7 @@ func (m MonthlyVestingAccount) Validate() error {
 	if m.GetStartTime() >= m.GetEndTime() {
 		return errors.New("vesting start-time cannot be before end-time")
 	}
-	if m.GetStartTime() >= m.GetCliffTime() {
+	if m.GetStartTime() > m.GetCliffTime() {
 		return errors.New("vesting start-time cannot be after cliff-time")
 	}
 	if m.GetCliffTime() >= m.GetEndTime() {
