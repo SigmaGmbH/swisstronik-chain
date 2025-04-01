@@ -148,6 +148,10 @@ func validateMinGasPrice(i interface{}) error {
 		return fmt.Errorf("value cannot be negative: %s", i)
 	}
 
+	if !v.BigInt().IsUint64() {
+		return fmt.Errorf("value cannot be greater or equal than 2**64: %s", i)
+	}
+
 	return nil
 }
 
