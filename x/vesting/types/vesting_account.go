@@ -1,6 +1,7 @@
 package types
 
 import (
+	"fmt"
 	"errors"
 	"time"
 
@@ -143,7 +144,7 @@ func (m MonthlyVestingAccount) Validate() error {
 		originalVesting = originalVesting.Add(p.Amount...)
 	}
 	if endTime != m.EndTime {
-		return errors.New("vesting end time does not match length of all vesting periods")
+		return fmt.Errorf("vesting end time does not match length of all vesting periods. Expected: %d, Got: %d", endTime, m.EndTime)
 	}
 	if !originalVesting.IsEqual(m.OriginalVesting) {
 		return errors.New("original vesting coins does not match the sum of all coins in vesting periods")
