@@ -21,7 +21,9 @@ $BINARY config keyring-backend $KEYRING_BACKEND --home "$HOMEDIR"
 $BINARY config chain-id $CHAINID --home "$HOMEDIR"
 
 # Adding keys...
-$BINARY keys add $KEY_NAME --keyring-backend $KEYRING_BACKEND
+echo "cup hip eyebrow flock slogan filter gas tent angle purpose rose setup" | $BINARY keys add $KEY_NAME --recover --keyring-backend $KEYRING_BACKEND --home "$HOMEDIR"
+echo "offer feel open ancient relax habit field right evoke ball organ beauty" | $BINARY keys add test1 --recover  --keyring-backend $KEYRING_BACKEND --home "$HOMEDIR"
+echo "olympic such citizen any bind small neutral hidden prefer pupil trash lemon" | $BINARY keys add test2 --recover  --keyring-backend $KEYRING_BACKEND --home "$HOMEDIR"
 
 # Adding genesis account...
 $BINARY add-genesis-account $($BINARY keys show $KEY_NAME -a) $STAKE_AMOUNT
