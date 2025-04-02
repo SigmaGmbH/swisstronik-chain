@@ -6,6 +6,7 @@ CHAIN_ID="swisstronik_1291-1"
 KEYRING_BACKEND="test"
 BINARY="$(dirname "$0")/../../build/swisstronikd"
 DELEGATE_AMOUNT="100000000aswtr"
+TREASURY_KEY_NAME="treasury"
 
 # Get validator address
 VALIDATOR_ADDRESS=$($BINARY query staking validators --output json | jq -r '.validators[0].operator_address')
@@ -27,5 +28,10 @@ fi
 
 echo "Vesting account address: $VESTING_ACCOUNT"
 
+# Fund created vesting account
+$BINARY tx bank send $TREASURY_KEY_NAME $VESTING_ACCOUNT 3500000aswtr -y --gas-prices 7aswtr
+
+sleep 5
+
 # Delegate tokens
-$BINARY tx staking delegate $VALIDATOR_ADDRESS $DELEGATE_AMOUNT --from $VESTING_ACCOUNT --chain-id $CHAIN_ID --yes --keyring-backend $KEYRING_BACKEND --gas-prices 7aswtr
+$BINARY tx staking delegate $VALIDATOR_ADDRESS $DELEGATE_AMOUNT --from $VESTING_ACCOUNT --chain-id $CHAIN_ID --yes --keyring-backend $KEYRING_BACKEND --gas-prices 7aswtr --gas 500000
