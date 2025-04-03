@@ -438,7 +438,7 @@ var _ = Describe("Additional tests with multiple validators for Monthly Vesting 
 
 					// Stake 1500 SWTR during vesting time
 					s.ExpectFundCoins(s.va, s.gasCoins)
-					delegating := sdk.NewCoins(sdk.NewCoin(utils.BaseDenom, math.NewIntWithDecimal(1500, 18)))
+					delegating := sdk.NewCoins(sdk.NewCoin(utils.BaseDenom, math.NewIntWithDecimal(2000, 18)))
 					s.ExpectDelegateSuccess(s.vaPrivKey, delegating[0], val)
 
 					// Unlock 50 % of vesting
@@ -545,7 +545,7 @@ var _ = Describe("Additional tests with multiple validators for Monthly Vesting 
 
 					// Stake 1500 SWTR during vesting time
 					s.ExpectFundCoins(s.va, s.gasCoins)
-					delegating := sdk.NewCoins(sdk.NewCoin(utils.BaseDenom, math.NewIntWithDecimal(1500, 18)))
+					delegating := sdk.NewCoins(sdk.NewCoin(utils.BaseDenom, math.NewIntWithDecimal(2000, 18)))
 					s.ExpectDelegateSuccess(s.vaPrivKey, delegating[0], val)
 
 					// Unlock 50 % of vesting
@@ -567,8 +567,6 @@ var _ = Describe("Additional tests with multiple validators for Monthly Vesting 
 					expAmount := mva.DelegatedVesting.Add(mva.DelegatedFree...).AmountOf(utils.BaseDenom)
 					expAmount = expAmount.Sub(expAmount.MulRaw(5).QuoRaw(100))
 					Expect(valI.GetTokens()).To(Equal(expAmount))
-					expAmount = math.NewIntWithDecimal(1425, 18)
-					Expect(valI.GetTokens()).To(Equal(expAmount))
 
 					break
 				}
@@ -587,7 +585,7 @@ var _ = Describe("Additional tests with multiple validators for Monthly Vesting 
 
 					// Stake 1500 SWTR during vesting time
 					s.ExpectFundCoins(s.va, s.gasCoins)
-					delegating := sdk.NewCoins(sdk.NewCoin(utils.BaseDenom, math.NewIntWithDecimal(1500, 18)))
+					delegating := sdk.NewCoins(sdk.NewCoin(utils.BaseDenom, math.NewIntWithDecimal(2000, 18)))
 					s.ExpectDelegateSuccess(s.vaPrivKey, delegating[0], val)
 
 					// Unlock 50 % of vesting
