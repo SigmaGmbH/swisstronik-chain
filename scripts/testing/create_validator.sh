@@ -4,7 +4,7 @@ set -e
 
 CHAIN_ID="swisstronik_1291-1"
 MONIKER="myvalidator"
-STAKE_AMOUNT="310000swtr"
+STAKE_AMOUNT="310000000swtr"
 KEY_NAME="validator"
 HOMEDIR="$HOME/.swisstronik"
 BINARY="$(dirname "$0")/../../build/swisstronikd"
