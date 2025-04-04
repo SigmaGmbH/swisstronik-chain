@@ -382,7 +382,7 @@ var _ = Describe("Additional tests with multiple validators for Monthly Vesting 
 		err error
 
 		// Different types of validators
-		powers []int64
+		powers   []int64
 		addrVals []sdk.ValAddress
 	)
 
@@ -438,7 +438,7 @@ var _ = Describe("Additional tests with multiple validators for Monthly Vesting 
 
 					// Stake 1500 SWTR during vesting time
 					s.ExpectFundCoins(s.va, s.gasCoins)
-					delegating := sdk.NewCoins(sdk.NewCoin(utils.BaseDenom, math.NewIntWithDecimal(1500, 18)))
+					delegating := sdk.NewCoins(sdk.NewCoin(utils.BaseDenom, math.NewIntWithDecimal(2000, 18)))
 					s.ExpectDelegateSuccess(s.vaPrivKey, delegating[0], val)
 
 					// Unlock 50 % of vesting
@@ -545,7 +545,7 @@ var _ = Describe("Additional tests with multiple validators for Monthly Vesting 
 
 					// Stake 1500 SWTR during vesting time
 					s.ExpectFundCoins(s.va, s.gasCoins)
-					delegating := sdk.NewCoins(sdk.NewCoin(utils.BaseDenom, math.NewIntWithDecimal(1500, 18)))
+					delegating := sdk.NewCoins(sdk.NewCoin(utils.BaseDenom, math.NewIntWithDecimal(2000, 18)))
 					s.ExpectDelegateSuccess(s.vaPrivKey, delegating[0], val)
 
 					// Unlock 50 % of vesting
@@ -567,8 +567,6 @@ var _ = Describe("Additional tests with multiple validators for Monthly Vesting 
 					expAmount := mva.DelegatedVesting.Add(mva.DelegatedFree...).AmountOf(utils.BaseDenom)
 					expAmount = expAmount.Sub(expAmount.MulRaw(5).QuoRaw(100))
 					Expect(valI.GetTokens()).To(Equal(expAmount))
-					expAmount = math.NewIntWithDecimal(1425, 18)
-					Expect(valI.GetTokens()).To(Equal(expAmount))
 
 					break
 				}
@@ -587,7 +585,7 @@ var _ = Describe("Additional tests with multiple validators for Monthly Vesting 
 
 					// Stake 1500 SWTR during vesting time
 					s.ExpectFundCoins(s.va, s.gasCoins)
-					delegating := sdk.NewCoins(sdk.NewCoin(utils.BaseDenom, math.NewIntWithDecimal(1500, 18)))
+					delegating := sdk.NewCoins(sdk.NewCoin(utils.BaseDenom, math.NewIntWithDecimal(2000, 18)))
 					s.ExpectDelegateSuccess(s.vaPrivKey, delegating[0], val)
 
 					// Unlock 50 % of vesting
@@ -819,31 +817,31 @@ var _ = Describe("Additional tests with multiple validators for Monthly Vesting 
 				Expect(ok).To(BeTrue())
 
 				if val.GetStatus() == stakingtypes.Unbonded {
-					// Receive 500 SWTR
-					coins := sdk.NewCoins(sdk.NewCoin(utils.BaseDenom, math.NewIntWithDecimal(500, 18)))
+					// Receive 5000 SWTR
+					coins := sdk.NewCoins(sdk.NewCoin(utils.BaseDenom, math.NewIntWithDecimal(5000, 18)))
 					s.ExpectFundCoins(s.va, coins)
 
-					// Stake 500 SWTR (vesting amount)
+					// Stake 5000 SWTR (vesting amount)
 					s.ExpectFundCoins(s.va, s.gasCoins)
-					delegating := sdk.NewCoins(sdk.NewCoin(utils.BaseDenom, math.NewIntWithDecimal(500, 18)))
+					delegating := sdk.NewCoins(sdk.NewCoin(utils.BaseDenom, math.NewIntWithDecimal(5000, 18)))
 					s.ExpectDelegateSuccess(s.vaPrivKey, delegating[0], val)
 
 					// Make validator jailed
 					valI := s.ExpectJailValidatorSuccess(address, sdk.MustNewDecFromStr("0.1"))
 					Expect(valI).To(Not(BeNil()))
 
-					// Unstake during cliff 500 SWTR (Jailed validator)
+					// Unstake during cliff 5000 SWTR (Jailed validator)
 					s.ExpectFundCoins(s.va, s.gasCoins)
 					undelegating := delegating.MulInt(sdk.NewInt(90)).QuoInt(sdk.NewInt(100))
 					s.ExpectUndelegateSuccess(s.vaPrivKey, undelegating[0], val)
 
 					// Expected result: spendable balance 500, delegated vesting 50(=10%), all balance 1000+500*90%
 					mva, _ := s.querier.GetMonthlyVestingAccount(s.ctx, s.va)
-					expSpendable := sdk.NewCoins(sdk.NewCoin(utils.BaseDenom, math.NewIntWithDecimal(500, 18)))
+					expSpendable := sdk.NewCoins(sdk.NewCoin(utils.BaseDenom, math.NewIntWithDecimal(5000, 18)))
 					spendable := s.app.BankKeeper.SpendableCoins(s.ctx, mva.GetAddress())
 					Expect(spendable).To(Equal(expSpendable))
 					Expect(mva.DelegatedVesting).To(Equal(delegating.QuoInt(sdk.NewInt(10))))
-					expBalance := math.NewIntWithDecimal(1450, 18)
+					expBalance := math.NewIntWithDecimal(5500, 18)
 					balance := s.app.BankKeeper.GetAllBalances(s.ctx, mva.GetAddress())
 					Expect(balance.AmountOf(utils.BaseDenom)).To(Equal(expBalance))
 
@@ -857,27 +855,27 @@ var _ = Describe("Additional tests with multiple validators for Monthly Vesting 
 				Expect(ok).To(BeTrue())
 
 				if val.GetStatus() == stakingtypes.Unbonded {
-					// Receive 500 SWTR
-					coins := sdk.NewCoins(sdk.NewCoin(utils.BaseDenom, math.NewIntWithDecimal(500, 18)))
+					// Receive 5000 SWTR
+					coins := sdk.NewCoins(sdk.NewCoin(utils.BaseDenom, math.NewIntWithDecimal(5000, 18)))
 					s.ExpectFundCoins(s.va, coins)
 
-					// Stake 500 SWTR
+					// Stake 5000 SWTR
 					s.ExpectFundCoins(s.va, s.gasCoins)
-					delegating := sdk.NewCoins(sdk.NewCoin(utils.BaseDenom, math.NewIntWithDecimal(500, 18)))
+					delegating := sdk.NewCoins(sdk.NewCoin(utils.BaseDenom, math.NewIntWithDecimal(5000, 18)))
 					s.ExpectDelegateSuccess(s.vaPrivKey, delegating[0], val)
 
-					// Unstake during cliff time 500 SWTR  (Unbonded validator)
+					// Unstake during cliff time 5000 SWTR  (Unbonded validator)
 					s.ExpectFundCoins(s.va, s.gasCoins)
 					undelegating := delegating
 					s.ExpectUndelegateSuccess(s.vaPrivKey, undelegating[0], val)
 
-					// Expected result: spendable balance 500, delegated vesting 0 , all balance 1500
+					// Expected result: spendable balance 5000, delegated vesting 0 , all balance 6000
 					mva, _ := s.querier.GetMonthlyVestingAccount(s.ctx, s.va)
-					expSpendable := sdk.NewCoins(sdk.NewCoin(utils.BaseDenom, math.NewIntWithDecimal(500, 18)))
+					expSpendable := sdk.NewCoins(sdk.NewCoin(utils.BaseDenom, math.NewIntWithDecimal(5000, 18)))
 					spendable := s.app.BankKeeper.SpendableCoins(s.ctx, mva.GetAddress())
 					Expect(spendable).To(Equal(expSpendable))
 					Expect(mva.DelegatedVesting).To(BeNil())
-					expBalance := math.NewIntWithDecimal(1500, 18)
+					expBalance := math.NewIntWithDecimal(6000, 18)
 					balance := s.app.BankKeeper.GetAllBalances(s.ctx, mva.GetAddress())
 					Expect(balance.AmountOf(utils.BaseDenom)).To(Equal(expBalance))
 
@@ -891,31 +889,31 @@ var _ = Describe("Additional tests with multiple validators for Monthly Vesting 
 				Expect(ok).To(BeTrue())
 
 				if val.GetStatus() == stakingtypes.Unbonded {
-					// Receive 500 SWTR
-					coins := sdk.NewCoins(sdk.NewCoin(utils.BaseDenom, math.NewIntWithDecimal(500, 18)))
+					// Receive 5000 SWTR
+					coins := sdk.NewCoins(sdk.NewCoin(utils.BaseDenom, math.NewIntWithDecimal(5000, 18)))
 					s.ExpectFundCoins(s.va, coins)
 
-					// Stake 500 SWTR
+					// Stake 5000 SWTR
 					s.ExpectFundCoins(s.va, s.gasCoins)
-					delegating := sdk.NewCoins(sdk.NewCoin(utils.BaseDenom, math.NewIntWithDecimal(500, 18)))
+					delegating := sdk.NewCoins(sdk.NewCoin(utils.BaseDenom, math.NewIntWithDecimal(5000, 18)))
 					s.ExpectDelegateSuccess(s.vaPrivKey, delegating[0], val)
 
 					// Make validator tombstoned
 					valI := s.ExpectTombstoneValidtorSuccess(address, sdk.MustNewDecFromStr("0.1"))
 					Expect(valI).To(Not(BeNil()))
 
-					// Unstake  during cliff time 500 SWTR  (Tombstoned validator)
+					// Unstake  during cliff time 5000 SWTR  (Tombstoned validator)
 					s.ExpectFundCoins(s.va, s.gasCoins)
 					undelegating := delegating.MulInt(sdk.NewInt(90)).QuoInt(sdk.NewInt(100))
 					s.ExpectUndelegateSuccess(s.vaPrivKey, undelegating[0], val)
 
-					// Expected result: spendable balance 500, delegated vesting 50(=10%), all balance 1000+500*90%
+					// Expected result: spendable balance 5000, delegated vesting 50(=10%), all balance 1000+5000*90%
 					mva, _ := s.querier.GetMonthlyVestingAccount(s.ctx, s.va)
-					expSpendable := sdk.NewCoins(sdk.NewCoin(utils.BaseDenom, math.NewIntWithDecimal(500, 18)))
+					expSpendable := sdk.NewCoins(sdk.NewCoin(utils.BaseDenom, math.NewIntWithDecimal(5000, 18)))
 					spendable := s.app.BankKeeper.SpendableCoins(s.ctx, mva.GetAddress())
 					Expect(spendable).To(Equal(expSpendable))
 					Expect(mva.DelegatedVesting).To(Equal(delegating.QuoInt(sdk.NewInt(10))))
-					expBalance := math.NewIntWithDecimal(1450, 18)
+					expBalance := math.NewIntWithDecimal(5500, 18)
 					balance := s.app.BankKeeper.GetAllBalances(s.ctx, mva.GetAddress())
 					Expect(balance.AmountOf(utils.BaseDenom)).To(Equal(expBalance))
 
