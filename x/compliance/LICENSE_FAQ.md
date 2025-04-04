@@ -12,7 +12,7 @@ The right to "use" here includes forking and using SWTR-NCL-1.0 code as code dep
 The following is the specific language of the license:
 "Software" means the blockchain software developed by the Company, which is an implementation of the Swisstronik blockchain, available at "https://github.com/SigmaGmbH/swisstronik-chain", as updated from time to time.
 
-"Specified blockchain" refers to a version of the digital blockchain ledger that is recognized as canonical at a specific point in time based on blockchain consensus. The blockchain originally envisioned was the Swisstronik blockchain, identified by the Ethereum Improvement Proposal 155 (EIP-155) chain identifiers 1291-1 (testnet or "testnet") and 1291 (mainnet or "mainnet").
+"Specified blockchain" refers to a version of the digital blockchain ledger that is recognized as canonical at a specific point in time based on blockchain consensus. The blockchain originally envisioned was the Swisstronik blockchain, identified by the Ethereum Improvement Proposal 155 (EIP-155) chain identifiers 1291-1 (testnet or "testnet") and 1848 (mainnet or "mainnet").
 
 "Swisstronik Product" means any product or service provided by Company or its affiliates.
 

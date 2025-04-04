@@ -31,7 +31,7 @@ import (
 
 const (
 	// MainnetChainID defines the EIP155 chain ID for mainnet
-	MainnetChainID = "swisstronik_1290"
+	MainnetChainID = "swisstronik_1848"
 	// TestnetChainID defines the EIP155 chain ID for testnet
 	TestnetChainID = "swisstronik_1291"
 	// BaseDenom defines the denomination
