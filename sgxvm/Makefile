@@ -196,6 +196,5 @@ build_enclave:
 clean:
 	$(call sgx_clean)
 
-
 sign_separate_enclave:
 	/opt/intel/sgxsdk/bin/x64/sgx_sign sign -key $(ENCLAVE_KEY) -enclave $(ENCLAVE_HOME)/enclave.unsigned.so -out $(ENCLAVE_HOME)/$(VERSION)_$(Enclave_signed_file) -config $(CURDIR)/$(Enclave_config_file)
