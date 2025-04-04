@@ -273,10 +273,11 @@ func (suite *KeeperTestSuite) TestAddVerificationDetails() {
 	suite.Require().Error(err)
 	suite.Require().Nil(verificationId)
 
+	// Try to add verification details with non-existing verification type
 	verificationId, err = suite.keeper.AddVerificationDetails(
 		suite.ctx,
 		signer,
-		types.VerificationType_VT_CREDIT_SCORE+1,
+		types.VerificationType_VT_BIOMETRIC+1,
 		verificationDetails,
 	)
 	suite.Require().Error(err)

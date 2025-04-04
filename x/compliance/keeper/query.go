@@ -240,7 +240,7 @@ func (k Querier) VerificationsDetails(goCtx context.Context, req *types.QueryVer
 	}
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	var verifications []types.QueryVerificationsDetailsResponse_MergedVerificationDetails
+	var verifications []types.MergedVerificationDetails
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefixVerificationDetails)
 
 	pageRes, err := query.Paginate(store, req.Pagination, func(key []byte, value []byte) error {
@@ -249,9 +249,9 @@ func (k Querier) VerificationsDetails(goCtx context.Context, req *types.QueryVer
 			return err
 		}
 		// NOTE: MUST CONTAIN ALL THE MEMBERS OF `VerificationDetails` AND ITERATING KEYS
-		verifications = append(verifications, types.QueryVerificationsDetailsResponse_MergedVerificationDetails{
+		verifications = append(verifications, types.MergedVerificationDetails{
 			VerificationType:     verificationDetails.Type,
-			VerificationID:       key,
+			VerificationId:       key,
 			IssuerAddress:        verificationDetails.IssuerAddress,
 			OriginChain:          verificationDetails.OriginChain,
 			IssuanceTimestamp:    verificationDetails.IssuanceTimestamp,
@@ -393,14 +393,28 @@ func (k Querier) AllVerificationDetailsByAddress(goCtx context.Context, req *typ
 		return &types.QueryAllVerificationDetailsByAddressResponse{}, nil
 	}
 
-	var result []*types.VerificationDetails
+	var result []*types.MergedVerificationDetails
 	for _, verification := range addressDetails.Verifications {
 		verificationDetails, err := k.GetRawVerificationDetails(ctx, verification.VerificationId)
 		if err != nil {
 			return nil, err
 		}
 
-		result = append(result, verificationDetails)
+		mergedDetails := types.MergedVerificationDetails {
+			VerificationType: verificationDetails.Type,
+			VerificationId: verification.VerificationId,
+			IssuerAddress: verificationDetails.IssuerAddress,
+			OriginChain: verificationDetails.OriginChain,
+			IssuanceTimestamp: verificationDetails.IssuanceTimestamp,
+			ExpirationTimestamp: verificationDetails.ExpirationTimestamp,
+			OriginalData: verificationDetails.OriginalData,
+			Schema: verificationDetails.Schema,
+			IssuerVerificationId: verificationDetails.IssuerVerificationId,
+			Version: verificationDetails.Version,
+			IsRevoked: verificationDetails.IsRevoked,
+		}
+
+		result = append(result, &mergedDetails)
 	}
 
 	return &types.QueryAllVerificationDetailsByAddressResponse{Details: result}, nil

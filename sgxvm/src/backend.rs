@@ -395,16 +395,6 @@ impl Substate {
         }
     }
 
-    pub fn known_nonce(&self, address: H160) -> Option<U256> {
-        if let Some(nonce) = self.nonces.get(&address) {
-            Some(*nonce)
-        } else if let Some(parent) = self.parent.as_ref() {
-            parent.known_nonce(address)
-        } else {
-            None
-        }
-    }
-
     pub fn known_storage(&self, address: H160, key: H256) -> Option<H256> {
         if let Some(value) = self.storages.get(&(address, key)) {
             Some(*value)

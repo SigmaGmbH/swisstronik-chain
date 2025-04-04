@@ -166,14 +166,6 @@ pub unsafe extern "C" fn ecall_attest_peer_dcap(
     sgx_status_t::SGX_ERROR_UNEXPECTED
 }
 
-#[no_mangle]
-/// Handles incoming request for sharing master key with new node using EPID attestation
-pub unsafe extern "C" fn ecall_attest_peer_epid(socket_fd: c_int) -> sgx_status_t {
-    match attestation::tls::perform_epoch_keys_provisioning(socket_fd, None, None, false) {
-        Ok(_) => sgx_status_t::SGX_SUCCESS,
-        Err(err) => err,
-    }
-}
 
 #[no_mangle]
 /// Handles initialization of a new seed node by creating and sealing master key to seed file
@@ -182,30 +174,6 @@ pub unsafe extern "C" fn ecall_initialize_enclave(reset_flag: i32) -> sgx_status
     key_manager::init_enclave_inner(reset_flag)
 }
 
-#[no_mangle]
-/// Handles incoming request for EPID Remote Attestation
-pub unsafe extern "C" fn ecall_request_epoch_keys_epid(
-    hostname: *const u8,
-    data_len: usize,
-    socket_fd: c_int,
-) -> sgx_status_t {
-    let hostname = slice::from_raw_parts(hostname, data_len);
-    let hostname = match String::from_utf8(hostname.to_vec()) {
-        Ok(hostname) => hostname,
-        Err(err) => {
-            println!(
-                "[Enclave] Seed Client. Cannot decode hostname. Reason: {:?}",
-                err
-            );
-            return sgx_status_t::SGX_ERROR_UNEXPECTED;
-        }
-    };
-
-    match attestation::tls::perform_master_key_request(hostname, socket_fd, None, None, false) {
-        Ok(_) => sgx_status_t::SGX_SUCCESS,
-        Err(err) => err,
-    }
-}
 
 #[no_mangle]
 pub unsafe extern "C" fn ecall_dump_dcap_quote(
@@ -268,17 +236,45 @@ pub unsafe extern "C" fn ecall_verify_dcap_quote(
 pub unsafe extern "C" fn ecall_add_epoch(starting_block: u64) -> sgx_status_t {
     #[cfg(feature = "attestation_server")]
     {
-        // Unseal old key manager
-        let key_manager = match key_manager::KeyManager::unseal() {
-            Ok(km) => km,
+        // Check if sealed file exists
+        let sealed_file_exists = match key_manager::KeyManager::exists() {
+            Ok(exists) => exists,
             Err(err) => {
                 return err;
             }
         };
 
-        match key_manager.add_new_epoch(starting_block) {
-            Ok(_) => sgx_status_t::SGX_SUCCESS,
-            Err(err) => err
+        if sealed_file_exists {
+            // Unseal old key manager
+            let km = match key_manager::KeyManager::unseal() {
+                Ok(km) => km,
+                Err(err) => {
+                    return err;
+                }
+            };
+
+            match km.add_new_epoch(starting_block) {
+                Ok(_) => sgx_status_t::SGX_SUCCESS,
+                Err(err) => err
+            }
+        } else {
+            // Create empty key manager if does not exist
+            let km = match key_manager::KeyManager::random_empty() {
+                Ok(km) => km,
+                Err(err) => {
+                    return err;
+                }
+            };
+
+            if starting_block != 0 {
+                println!("[KeyManager] No epochs found. New epoch should start from 0 block");
+                return sgx_status_t::SGX_ERROR_UNEXPECTED;
+            }
+            
+            match km.add_new_epoch(starting_block) {
+                Ok(_) => sgx_status_t::SGX_SUCCESS,
+                Err(err) => err
+            }
         }
     }
 
