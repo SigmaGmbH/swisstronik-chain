@@ -57,12 +57,6 @@ build_d:
 	@cp $(CURDIR)/target/release/libsgxvm_wrapper.so $(CURDIR)/internal/api/$(Wrapper_lib)
 	$(call proto-gen)
 
-build_with_ready_enclave:
-	@protoc --rust_out src/protobuf_generated/ proto/node.proto
-	@ENCLAVE_HOME=$(ENCLAVE_HOME) cargo build --features "$(Wrapper_build_feature)" --release
-	@cp $(CURDIR)/target/release/libsgxvm_wrapper.so $(CURDIR)/internal/api/$(Wrapper_lib)
-	$(call proto-gen)
-
 build_AS: build
 	go build -tags osusergo,netgo,attestationServer -o ../build/attestationServer ./cmd/attestation
 
