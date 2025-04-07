@@ -24,6 +24,15 @@ import (
 	errorsmod "cosmossdk.io/errors"
 )
 
+const (
+	// ChainID defines the Cascadia EIP155 chain ID
+	ChainID = "swisstronik_1848"
+	// PrefixedChainID defines the Cascadia EIP155 chain ID with a prefix
+	PrefixedChainID = "swisstronik_1848-1"
+	// EvmChainID defines the EIP155 chain ID
+	EvmChainID = 1848
+)
+
 var (
 	regexChainID         = `[a-z]{1,}`
 	regexEIP155Separator = `_{1}`

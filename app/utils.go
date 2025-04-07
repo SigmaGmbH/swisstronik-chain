@@ -44,13 +44,11 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
+
+	commontypes "swisstronik/types"
 )
 
 const (
-	// MainnetChainID defines the Cascadia EIP155 chain ID for mainnet
-	MainnetChainID = "swisstronik_1848"
-	// TestnetChainID defines the Cascadia EIP155 chain ID for testnet
-	TestnetChainID = "swisstronik_1291"
 	// BaseDenom defines the Cascadia mainnet denomination
 	BaseDenom = "aswtr"
 )
@@ -80,7 +78,7 @@ func Setup(patchGenesis func(*App, simapp.GenesisState) simapp.GenesisState) *Ap
 
 // SetupWithDB initializes a new App. A Nop logger is set in App.
 func SetupWithDB(patchGenesis func(*App, simapp.GenesisState) simapp.GenesisState, db dbm.DB) *App {
-	chainID := TestnetChainID + "-1"
+	chainID := commontypes.ChainID + "-1"
 	app := New(log.NewNopLogger(),
 		db,
 		nil,

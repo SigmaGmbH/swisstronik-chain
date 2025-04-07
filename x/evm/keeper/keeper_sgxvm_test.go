@@ -123,7 +123,7 @@ func (suite *KeeperTestSuite) SetupSGXVMAppWithT(t require.TestingT) {
 		// Initialize the chain
 		suite.app.InitChain(
 			abci.RequestInitChain{
-				ChainId:         "swisstronik_1291-1",
+				ChainId:         evmcommontypes.PrefixedChainID,
 				Validators:      []abci.ValidatorUpdate{},
 				ConsensusParams: app.DefaultConsensusParams,
 				AppStateBytes:   stateBytes,
@@ -133,7 +133,7 @@ func (suite *KeeperTestSuite) SetupSGXVMAppWithT(t require.TestingT) {
 
 	suite.ctx = suite.app.BaseApp.NewContext(false, tmproto.Header{
 		Height:          1,
-		ChainID:         "swisstronik_1291-1",
+		ChainID:         evmcommontypes.PrefixedChainID,
 		Time:            time.Now().UTC(),
 		ProposerAddress: suite.consAddress.Bytes(),
 		Version: tmversion.Consensus{

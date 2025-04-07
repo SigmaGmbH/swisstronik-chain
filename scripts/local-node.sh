@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CHAINID="swisstronik_1291-1"
+CHAINID="swisstronik_1848-1"
 MONIKER="localtestnet"
 KEYRING="test"
 KEYALGO="eth_secp256k1"

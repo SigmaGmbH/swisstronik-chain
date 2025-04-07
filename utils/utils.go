@@ -30,23 +30,11 @@ import (
 )
 
 const (
-	// MainnetChainID defines the EIP155 chain ID for mainnet
-	MainnetChainID = "swisstronik_1848"
 	// TestnetChainID defines the EIP155 chain ID for testnet
-	TestnetChainID = "swisstronik_1291"
+	TestnetChainID = "swisstronik_1848"
 	// BaseDenom defines the denomination
 	BaseDenom = "aswtr"
 )
-
-// IsMainnet returns true if the chain-id has the mainnet EIP155 chain prefix.
-func IsMainnet(chainID string) bool {
-	return strings.HasPrefix(chainID, MainnetChainID)
-}
-
-// IsTestnet returns true if the chain-id has the testnet EIP155 chain prefix.
-func IsTestnet(chainID string) bool {
-	return strings.HasPrefix(chainID, TestnetChainID)
-}
 
 // IsSupportedKey returns true if the pubkey type is supported by the chain
 // (i.e eth_secp256k1, amino multisig, ed25519).

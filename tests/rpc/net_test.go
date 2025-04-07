@@ -13,7 +13,7 @@ func TestNet_Version(t *testing.T) {
 	var res string
 	err := json.Unmarshal(rpcRes.Result, &res)
 	require.NoError(t, err)
-	require.Equal(t, "1291", res)
+	require.Equal(t, "1848", res)
 }
 
 func TestNet_Listening(t *testing.T) {

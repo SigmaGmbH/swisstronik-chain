@@ -21,7 +21,7 @@ services:
     - "--home"
     - "/swisstronikd"
     - "--chain-id"
-    - "swisstronik_1291-1"
+    - "swisstronik_1848-1"
     networks:
       localnet:
         ipv4_address: 192.167.10.1      
@@ -46,7 +46,7 @@ services:
       - "--home"
       - "/swisstronikd"
       - "--chain-id"
-      - "swisstronik_1291-1"
+      - "swisstronik_1848-1"
     networks:
       localnet:
         ipv4_address: 192.167.10.2
@@ -71,7 +71,7 @@ services:
       - "--home"
       - "/swisstronikd"
       - "--chain-id"
-      - "swisstronik_1291-1"
+      - "swisstronik_1848-1"
     networks:
       localnet:
         ipv4_address: 192.167.10.3
@@ -96,7 +96,7 @@ services:
       - "--home"
       - "/swisstronikd"
       - "--chain-id"
-      - "swisstronik_1291-1"
+      - "swisstronik_1848-1"
     networks:
       localnet:
         ipv4_address: 192.167.10.4
