@@ -3,6 +3,7 @@ package librustgo
 import (
 	"github.com/SigmaGmbH/librustgo/internal/api"
 	"github.com/SigmaGmbH/librustgo/types"
+	"math/big"
 
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 )
@@ -21,8 +22,6 @@ type TransactionData = types.TransactionData
 type QueryGetAccount = types.QueryGetAccount
 type QueryGetAccountResponse = types.QueryGetAccountResponse
 type CosmosRequest = types.CosmosRequest
-type QueryInsertAccount = types.QueryInsertAccount
-type QueryInsertAccountResponse = types.QueryInsertAccountResponse
 type QueryContainsKey = types.QueryContainsKey
 type QueryContainsKeyResponse = types.QueryContainsKeyResponse
 type QueryGetAccountStorageCell = types.QueryGetAccountStorageCell
@@ -46,10 +45,27 @@ type QueryHasVerificationResponse = types.QueryHasVerificationResponse
 type QueryGetVerificationData = types.QueryGetVerificationData
 type VerificationDetails = types.VerificationDetails
 type QueryGetVerificationDataResponse = types.QueryGetVerificationDataResponse
+type QueryAccountCodeSize = types.QueryGetAccountCodeSize
+type QueryAccountCodeSizeResponse = types.QueryGetAccountCodeSizeResponse
+type QueryAccountCodeHash = types.QueryGetAccountCodeHash
+type QueryAccountCodeHashResponse = types.QueryGetAccountCodeHashResponse
+type QueryInsertAccountNonce = types.QueryInsertAccountNonce
+type QueryInsertAccountNonceResponse = types.QueryInsertAccountNonceResponse
+type QueryInsertAccountBalance = types.QueryInsertAccountBalance
+type QueryInsertAccountBalanceResponse = types.QueryInsertAccountBalanceResponse
+type QueryIssuanceTreeRoot = types.QueryIssuanceTreeRoot
+type QueryIssuanceTreeRootResponse = types.QueryIssuanceTreeRootResponse
+type QueryRevocationTreeRoot = types.QueryRevocationTreeRoot
+type QueryRevocationTreeRootResponse = types.QueryRevocationTreeRootResponse
+type QueryAddVerificationDetailsV2 = types.QueryAddVerificationDetailsV2
+type QueryAddVerificationDetailsV2Response = types.QueryAddVerificationDetailsV2Response
+type QueryRevokeVerification = types.QueryRevokeVerification
+type QueryRevokeVerificationResponse = types.QueryRevokeVerificationResponse
+type QueryConvertCredential = types.QueryConvertCredential
+type QueryConvertCredentialResponse = types.QueryConvertCredentialResponse
 
 // Storage requests
 type CosmosRequest_GetAccount = types.CosmosRequest_GetAccount
-type CosmosRequest_InsertAccount = types.CosmosRequest_InsertAccount
 type CosmosRequest_ContainsKey = types.CosmosRequest_ContainsKey
 type CosmosRequest_AccountCode = types.CosmosRequest_AccountCode
 type CosmosRequest_StorageCell = types.CosmosRequest_StorageCell
@@ -60,6 +76,15 @@ type CosmosRequest_RemoveStorageCell = types.CosmosRequest_RemoveStorageCell
 type CosmosRequest_AddVerificationDetails = types.CosmosRequest_AddVerificationDetails
 type CosmosRequest_HasVerification = types.CosmosRequest_HasVerification
 type CosmosRequest_GetVerificationData = types.CosmosRequest_GetVerificationData
+type CosmosRequest_GetAccountCodeSize = types.CosmosRequest_CodeSize
+type CosmosRequest_GetAccountCodeHash = types.CosmosRequest_CodeHash
+type CosmosRequest_InsertAccountBalance = types.CosmosRequest_InsertAccountBalance
+type CosmosRequest_InsertAccountNonce = types.CosmosRequest_InsertAccountNonce
+type CosmosRequest_IssuanceTreeRoot = types.CosmosRequest_IssuanceTreeRoot
+type CosmosRequest_RevocationTreeRoot = types.CosmosRequest_RevocationTreeRoot
+type CosmosRequest_AddVerificationDetailsV2 = types.CosmosRequest_AddVerificationDetailsV2
+type CosmosRequest_RevokeVerification = types.CosmosRequest_RevokeVerification
+type CosmosRequest_ConvertCredential = types.CosmosRequest_ConvertCredential
 
 // Backend requests
 type CosmosRequest_BlockHash = types.CosmosRequest_BlockHash
@@ -83,12 +108,39 @@ func Call(
 	querier types.Connector,
 	from, to, data, value []byte,
 	accessList ethtypes.AccessList,
-	gasLimit, nonce uint64,
+	gasLimit uint64,
+	gasPrice *big.Int,
+	nonce uint64,
 	txContext *TransactionContext,
 	commit bool,
 	isUnencrypted bool,
+	transactionSignature []byte,
+	maxFeePerGas *big.Int,
+	maxPriorityFeePerGas *big.Int,
+	txType uint8,
 ) (*types.HandleTransactionResponse, error) {
-	executionResult, err := api.Call(querier, from, to, data, value, accessList, gasLimit, nonce, txContext, commit, isUnencrypted)
+	executionResult, err := api.Call(querier, from, to, data, value, accessList, gasLimit, gasPrice, nonce, txContext, commit, isUnencrypted, transactionSignature, maxFeePerGas, maxPriorityFeePerGas, txType)
+	if err != nil {
+		return &types.HandleTransactionResponse{}, err
+	}
+
+	return executionResult, nil
+}
+
+func EstimateGas(
+	querier types.Connector,
+	from, to, data, value []byte,
+	accessList ethtypes.AccessList,
+	gasLimit uint64,
+	gasPrice *big.Int,
+	nonce uint64,
+	txContext *TransactionContext,
+	isUnencrypted bool,
+	maxFeePerGas *big.Int,
+	maxPriorityFeePerGas *big.Int,
+	txType uint8,
+) (*types.HandleTransactionResponse, error) {
+	executionResult, err := api.EstimateGas(querier, from, to, data, value, accessList, gasLimit, gasPrice, nonce, txContext, isUnencrypted, maxFeePerGas, maxPriorityFeePerGas, txType)
 	if err != nil {
 		return &types.HandleTransactionResponse{}, err
 	}
@@ -101,11 +153,17 @@ func Create(
 	querier types.Connector,
 	from, data, value []byte,
 	accessList ethtypes.AccessList,
-	gasLimit, nonce uint64,
+	gasLimit uint64,
+	gasPrice *big.Int,
+	nonce uint64,
 	txContext *TransactionContext,
 	commit bool,
+	transactionSignature []byte,
+	maxFeePerGas *big.Int,
+	maxPriorityFeePerGas *big.Int,
+	txType uint8,
 ) (*types.HandleTransactionResponse, error) {
-	executionResult, err := api.Create(querier, from, data, value, accessList, gasLimit, nonce, txContext, commit)
+	executionResult, err := api.Create(querier, from, data, value, accessList, gasLimit, gasPrice, nonce, txContext, commit, transactionSignature, maxFeePerGas, maxPriorityFeePerGas, txType)
 	if err != nil {
 		return &types.HandleTransactionResponse{}, err
 	}
@@ -119,14 +177,14 @@ func InitializeEnclave(shouldReset bool) error {
 
 // StartAttestationServer handles incoming request for starting attestation server
 // to share epoch keys with new nodes which passed Remote Attestation.
-func StartAttestationServer(epidAddress, dcapAddress string) error {
-	return api.StartAttestationServer(epidAddress, dcapAddress)
+func StartAttestationServer(dcapAddress string) error {
+	return api.StartAttestationServer(dcapAddress)
 }
 
-// RequestSeed handles requesting seed and passing Remote Attestation.
+// RequestEpochKeys handles requesting seed and passing Remote Attestation.
 // Returns error if Remote Attestation was not passed or provided seed server address is not accessible
-func RequestEpochKeys(host string, port int, isDCAP bool) error {
-	return api.RequestEpochKeys(host, port, isDCAP)
+func RequestEpochKeys(host string, port int) error {
+	return api.RequestEpochKeys(host, port)
 }
 
 // GetNodePublicKey handles request for node public key

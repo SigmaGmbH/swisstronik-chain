@@ -14,6 +14,8 @@ message GenesisState {
   repeated GenesisAddressDetails addressDetails = 3;
   repeated GenesisVerificationDetails verificationDetails = 4;
   repeated OperatorDetails operators = 5;
+  repeated GenesisHolderPublicKeys publicKeys = 6;
+  repeated GenesisLinkVerificationIdToPublicKey linksToPublicKey = 7;
 }
 
 message GenesisIssuerDetails {
@@ -29,4 +31,14 @@ message GenesisAddressDetails {
 message GenesisVerificationDetails {
   bytes id = 1;
   VerificationDetails details = 2;
+}
+
+message GenesisHolderPublicKeys {
+  string address = 1;
+  bytes publicKey = 2;
+}
+
+message GenesisLinkVerificationIdToPublicKey {
+  bytes id = 1;
+  bytes publicKey = 2;
 }

@@ -36,6 +36,7 @@ const (
 	VerificationType_VT_ADDRESS      VerificationType = 6
 	VerificationType_VT_CUSTOM       VerificationType = 7
 	VerificationType_VT_CREDIT_SCORE VerificationType = 8
+	VerificationType_VT_BIOMETRIC    VerificationType = 9
 )
 
 var VerificationType_name = map[int32]string{
@@ -48,6 +49,7 @@ var VerificationType_name = map[int32]string{
 	6: "VT_ADDRESS",
 	7: "VT_CUSTOM",
 	8: "VT_CREDIT_SCORE",
+	9: "VT_BIOMETRIC",
 }
 
 var VerificationType_value = map[string]int32{
@@ -60,6 +62,7 @@ var VerificationType_value = map[string]int32{
 	"VT_ADDRESS":      6,
 	"VT_CUSTOM":       7,
 	"VT_CREDIT_SCORE": 8,
+	"VT_BIOMETRIC":    9,
 }
 
 func (x VerificationType) String() string {
@@ -396,6 +399,8 @@ type VerificationDetails struct {
 	IssuerVerificationId string `protobuf:"bytes,8,opt,name=issuer_verification_id,json=issuerVerificationId,proto3" json:"issuer_verification_id,omitempty"`
 	// Version
 	Version uint32 `protobuf:"varint,9,opt,name=version,proto3" json:"version,omitempty"`
+	// Is revoked
+	IsRevoked bool `protobuf:"varint,10,opt,name=is_revoked,json=isRevoked,proto3" json:"is_revoked,omitempty"`
 }
 
 func (m *VerificationDetails) Reset()         { *m = VerificationDetails{} }
@@ -494,6 +499,216 @@ func (m *VerificationDetails) GetVersion() uint32 {
 	return 0
 }
 
+func (m *VerificationDetails) GetIsRevoked() bool {
+	if m != nil {
+		return m.IsRevoked
+	}
+	return false
+}
+
+// MergedVerificationDetails is merged structure of iterating key and `VerificationDetails` in `entities.proto`.
+// `verification_type` and `verification_id` are iterating keys, and the following items should be same with `VerificationDetails`.
+type MergedVerificationDetails struct {
+	VerificationType     VerificationType `protobuf:"varint,1,opt,name=verificationType,proto3,enum=swisstronik.compliance.VerificationType" json:"verificationType,omitempty"`
+	VerificationId       []byte           `protobuf:"bytes,2,opt,name=verification_id,json=verificationId,proto3" json:"verification_id,omitempty"`
+	IssuerAddress        string           `protobuf:"bytes,3,opt,name=issuer_address,json=issuerAddress,proto3" json:"issuer_address,omitempty"`
+	OriginChain          string           `protobuf:"bytes,4,opt,name=origin_chain,json=originChain,proto3" json:"origin_chain,omitempty"`
+	IssuanceTimestamp    uint32           `protobuf:"varint,5,opt,name=issuance_timestamp,json=issuanceTimestamp,proto3" json:"issuance_timestamp,omitempty"`
+	ExpirationTimestamp  uint32           `protobuf:"varint,6,opt,name=expiration_timestamp,json=expirationTimestamp,proto3" json:"expiration_timestamp,omitempty"`
+	OriginalData         []byte           `protobuf:"bytes,7,opt,name=original_data,json=originalData,proto3" json:"original_data,omitempty"`
+	Schema               string           `protobuf:"bytes,8,opt,name=schema,proto3" json:"schema,omitempty"`
+	IssuerVerificationId string           `protobuf:"bytes,9,opt,name=issuer_verification_id,json=issuerVerificationId,proto3" json:"issuer_verification_id,omitempty"`
+	Version              uint32           `protobuf:"varint,10,opt,name=version,proto3" json:"version,omitempty"`
+	IsRevoked            bool             `protobuf:"varint,11,opt,name=is_revoked,json=isRevoked,proto3" json:"is_revoked,omitempty"`
+}
+
+func (m *MergedVerificationDetails) Reset()         { *m = MergedVerificationDetails{} }
+func (m *MergedVerificationDetails) String() string { return proto.CompactTextString(m) }
+func (*MergedVerificationDetails) ProtoMessage()    {}
+func (*MergedVerificationDetails) Descriptor() ([]byte, []int) {
+	return fileDescriptor_a6b6c3ec8e3c39ee, []int{5}
+}
+func (m *MergedVerificationDetails) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MergedVerificationDetails) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MergedVerificationDetails.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MergedVerificationDetails) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MergedVerificationDetails.Merge(m, src)
+}
+func (m *MergedVerificationDetails) XXX_Size() int {
+	return m.Size()
+}
+func (m *MergedVerificationDetails) XXX_DiscardUnknown() {
+	xxx_messageInfo_MergedVerificationDetails.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MergedVerificationDetails proto.InternalMessageInfo
+
+func (m *MergedVerificationDetails) GetVerificationType() VerificationType {
+	if m != nil {
+		return m.VerificationType
+	}
+	return VerificationType_VT_UNSPECIFIED
+}
+
+func (m *MergedVerificationDetails) GetVerificationId() []byte {
+	if m != nil {
+		return m.VerificationId
+	}
+	return nil
+}
+
+func (m *MergedVerificationDetails) GetIssuerAddress() string {
+	if m != nil {
+		return m.IssuerAddress
+	}
+	return ""
+}
+
+func (m *MergedVerificationDetails) GetOriginChain() string {
+	if m != nil {
+		return m.OriginChain
+	}
+	return ""
+}
+
+func (m *MergedVerificationDetails) GetIssuanceTimestamp() uint32 {
+	if m != nil {
+		return m.IssuanceTimestamp
+	}
+	return 0
+}
+
+func (m *MergedVerificationDetails) GetExpirationTimestamp() uint32 {
+	if m != nil {
+		return m.ExpirationTimestamp
+	}
+	return 0
+}
+
+func (m *MergedVerificationDetails) GetOriginalData() []byte {
+	if m != nil {
+		return m.OriginalData
+	}
+	return nil
+}
+
+func (m *MergedVerificationDetails) GetSchema() string {
+	if m != nil {
+		return m.Schema
+	}
+	return ""
+}
+
+func (m *MergedVerificationDetails) GetIssuerVerificationId() string {
+	if m != nil {
+		return m.IssuerVerificationId
+	}
+	return ""
+}
+
+func (m *MergedVerificationDetails) GetVersion() uint32 {
+	if m != nil {
+		return m.Version
+	}
+	return 0
+}
+
+func (m *MergedVerificationDetails) GetIsRevoked() bool {
+	if m != nil {
+		return m.IsRevoked
+	}
+	return false
+}
+
+// ZKCredential contains basic information, which can be used to construct proof-of-ownership of some credential
+type ZKCredential struct {
+	Type                VerificationType `protobuf:"varint,1,opt,name=type,proto3,enum=swisstronik.compliance.VerificationType" json:"type,omitempty"`
+	IssuerAddress       []byte           `protobuf:"bytes,2,opt,name=issuer_address,json=issuerAddress,proto3" json:"issuer_address,omitempty"`
+	HolderPublicKey     []byte           `protobuf:"bytes,3,opt,name=holder_public_key,json=holderPublicKey,proto3" json:"holder_public_key,omitempty"`
+	ExpirationTimestamp uint32           `protobuf:"varint,4,opt,name=expiration_timestamp,json=expirationTimestamp,proto3" json:"expiration_timestamp,omitempty"`
+	IssuanceTimestamp   uint32           `protobuf:"varint,5,opt,name=issuance_timestamp,json=issuanceTimestamp,proto3" json:"issuance_timestamp,omitempty"`
+}
+
+func (m *ZKCredential) Reset()         { *m = ZKCredential{} }
+func (m *ZKCredential) String() string { return proto.CompactTextString(m) }
+func (*ZKCredential) ProtoMessage()    {}
+func (*ZKCredential) Descriptor() ([]byte, []int) {
+	return fileDescriptor_a6b6c3ec8e3c39ee, []int{6}
+}
+func (m *ZKCredential) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ZKCredential) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ZKCredential.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ZKCredential) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ZKCredential.Merge(m, src)
+}
+func (m *ZKCredential) XXX_Size() int {
+	return m.Size()
+}
+func (m *ZKCredential) XXX_DiscardUnknown() {
+	xxx_messageInfo_ZKCredential.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ZKCredential proto.InternalMessageInfo
+
+func (m *ZKCredential) GetType() VerificationType {
+	if m != nil {
+		return m.Type
+	}
+	return VerificationType_VT_UNSPECIFIED
+}
+
+func (m *ZKCredential) GetIssuerAddress() []byte {
+	if m != nil {
+		return m.IssuerAddress
+	}
+	return nil
+}
+
+func (m *ZKCredential) GetHolderPublicKey() []byte {
+	if m != nil {
+		return m.HolderPublicKey
+	}
+	return nil
+}
+
+func (m *ZKCredential) GetExpirationTimestamp() uint32 {
+	if m != nil {
+		return m.ExpirationTimestamp
+	}
+	return 0
+}
+
+func (m *ZKCredential) GetIssuanceTimestamp() uint32 {
+	if m != nil {
+		return m.IssuanceTimestamp
+	}
+	return 0
+}
+
 func init() {
 	proto.RegisterEnum("swisstronik.compliance.VerificationType", VerificationType_name, VerificationType_value)
 	proto.RegisterEnum("swisstronik.compliance.OperatorType", OperatorType_name, OperatorType_value)
@@ -502,6 +717,8 @@ func init() {
 	proto.RegisterType((*AddressDetails)(nil), "swisstronik.compliance.AddressDetails")
 	proto.RegisterType((*Verification)(nil), "swisstronik.compliance.Verification")
 	proto.RegisterType((*VerificationDetails)(nil), "swisstronik.compliance.VerificationDetails")
+	proto.RegisterType((*MergedVerificationDetails)(nil), "swisstronik.compliance.MergedVerificationDetails")
+	proto.RegisterType((*ZKCredential)(nil), "swisstronik.compliance.ZKCredential")
 }
 
 func init() {
@@ -509,52 +726,61 @@ func init() {
 }
 
 var fileDescriptor_a6b6c3ec8e3c39ee = []byte{
-	// 718 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x54, 0x4d, 0x6f, 0xd3, 0x4c,
-	0x10, 0x8e, 0x93, 0x34, 0x1f, 0x93, 0x2f, 0xbf, 0xdb, 0xaa, 0xb2, 0x2a, 0xbd, 0x79, 0xf3, 0xa6,
-	0x54, 0x44, 0x95, 0x48, 0xc5, 0xc7, 0x81, 0x03, 0x97, 0x34, 0x09, 0x60, 0x68, 0x1b, 0xb4, 0x71,
-	0x82, 0xca, 0xc5, 0x5a, 0x92, 0x25, 0x5d, 0x35, 0xc9, 0x5a, 0xbb, 0x6e, 0x69, 0xff, 0x03, 0x07,
-	0xee, 0x70, 0xe7, 0xaf, 0x70, 0xec, 0x91, 0x23, 0x6a, 0xff, 0x08, 0xda, 0xb5, 0x9d, 0xb8, 0xa5,
-	0x95, 0x90, 0xb8, 0xcd, 0x3c, 0x33, 0xf3, 0xcc, 0xe3, 0x99, 0xf5, 0xc0, 0x96, 0xfc, 0xc8, 0xa4,
-	0xf4, 0x05, 0x9f, 0xb3, 0xe3, 0x9d, 0x11, 0x9f, 0x79, 0x53, 0x46, 0xe6, 0x23, 0xba, 0x43, 0xe7,
-	0x3e, 0xf3, 0x19, 0x95, 0x4d, 0x4f, 0x70, 0x9f, 0xa3, 0xf5, 0x58, 0x5a, 0x73, 0x99, 0xb6, 0xb1,
-	0x36, 0xe1, 0x13, 0xae, 0x53, 0x76, 0x94, 0x15, 0x64, 0x6f, 0x6c, 0xde, 0x41, 0xea, 0x11, 0x41,
-	0x66, 0x21, 0x65, 0xfd, 0x0c, 0x2a, 0x3d, 0x8f, 0x0a, 0xe2, 0x73, 0xd1, 0xa1, 0x3e, 0x61, 0x53,
-	0x89, 0x36, 0x20, 0xc7, 0x43, 0xc8, 0x32, 0x6a, 0x46, 0x23, 0x8f, 0x17, 0x3e, 0xb2, 0xa1, 0x14,
-	0xd9, 0xae, 0x7f, 0xee, 0x51, 0x2b, 0x59, 0x33, 0x1a, 0xe5, 0x47, 0xf7, 0x9a, 0xb7, 0x2b, 0x6b,
-	0x46, 0xdc, 0xce, 0xb9, 0x47, 0x71, 0x91, 0xc7, 0xbc, 0xfa, 0x37, 0x03, 0x4a, 0xb6, 0x94, 0x27,
-	0x74, 0xd1, 0x18, 0x41, 0x7a, 0x4e, 0x66, 0x34, 0x6c, 0xaa, 0x6d, 0x54, 0x83, 0xc2, 0x98, 0xca,
-	0x91, 0x60, 0x9e, 0xcf, 0xf8, 0x5c, 0xb7, 0xcb, 0xe3, 0x38, 0x84, 0x4c, 0x48, 0x9d, 0x88, 0xa9,
-	0x95, 0xd2, 0x11, 0x65, 0x2a, 0x9e, 0x29, 0x9f, 0x70, 0x2b, 0x1d, 0xf0, 0x28, 0x5b, 0xf1, 0x4c,
-	0xe9, 0x84, 0x4c, 0xbb, 0x6a, 0xa2, 0xe7, 0xd6, 0x4a, 0xc0, 0x13, 0x83, 0x90, 0x05, 0xd9, 0x91,
-	0xa0, 0xfa, 0xab, 0x33, 0x3a, 0x1a, 0xb9, 0xf5, 0xaf, 0x06, 0x94, 0x5b, 0xe3, 0xb1, 0xa0, 0x52,
-	0x46, 0x52, 0xff, 0x83, 0x02, 0x93, 0xee, 0x29, 0x15, 0xec, 0x03, 0xa3, 0x63, 0xad, 0x38, 0x87,
-	0x81, 0xc9, 0x61, 0x88, 0xa0, 0x7f, 0x01, 0x98, 0x74, 0x05, 0x3d, 0xe5, 0xc7, 0x74, 0xac, 0x65,
-	0xe7, 0x70, 0x9e, 0x49, 0x1c, 0x00, 0xe8, 0x15, 0x94, 0x82, 0xe2, 0x11, 0x51, 0x1f, 0x21, 0xad,
-	0x54, 0x2d, 0xd5, 0x28, 0xdc, 0x3d, 0xc7, 0x61, 0x2c, 0x19, 0x5f, 0x2f, 0x55, 0xf2, 0x8a, 0xf1,
-	0x38, 0x7a, 0x06, 0x69, 0xbd, 0x1b, 0x43, 0xef, 0xa6, 0xf1, 0x27, 0x9c, 0x7a, 0x3f, 0xba, 0x0a,
-	0xdd, 0x87, 0x4a, 0x9c, 0xdf, 0x65, 0x81, 0xfc, 0x22, 0x2e, 0xc7, 0x61, 0x7b, 0x8c, 0xb6, 0xa0,
-	0xcc, 0xf4, 0xfe, 0x5c, 0x12, 0x0c, 0x27, 0xdc, 0x41, 0x29, 0x40, 0xc3, 0x89, 0xd5, 0x3f, 0xa5,
-	0x60, 0x35, 0xde, 0x2a, 0x1a, 0xe1, 0xdf, 0xa9, 0xfc, 0xbd, 0x79, 0xf2, 0x96, 0xe6, 0xe8, 0x7f,
-	0x28, 0x72, 0xc1, 0x26, 0x6c, 0xee, 0x8e, 0x8e, 0x08, 0x9b, 0x87, 0x0a, 0x0b, 0x01, 0xd6, 0x56,
-	0x10, 0x7a, 0x00, 0x48, 0xd5, 0xa8, 0x66, 0xae, 0xcf, 0x66, 0x54, 0xfa, 0x64, 0xe6, 0xe9, 0xb7,
-	0x53, 0xc2, 0xff, 0x44, 0x11, 0x27, 0x0a, 0xa0, 0x87, 0xb0, 0x46, 0xcf, 0x3c, 0x26, 0x82, 0xe1,
-	0x2c, 0x0b, 0x56, 0x74, 0xc1, 0xea, 0x32, 0xb6, 0x2c, 0xd9, 0x84, 0x52, 0xd0, 0x90, 0x4c, 0xdd,
-	0x31, 0xf1, 0x89, 0x7e, 0x5f, 0x45, 0x5c, 0x8c, 0xc0, 0x0e, 0xf1, 0x09, 0x5a, 0x87, 0x8c, 0x1c,
-	0x1d, 0xd1, 0x19, 0xb1, 0xb2, 0x5a, 0x63, 0xe8, 0xa1, 0x27, 0xb0, 0x1e, 0x7e, 0xe8, 0xcd, 0xad,
-	0xe4, 0x74, 0xde, 0x5a, 0x10, 0x1d, 0x5e, 0xdf, 0x8d, 0x05, 0xd9, 0x53, 0x2a, 0xa4, 0xfa, 0x65,
-	0xf2, 0x5a, 0x58, 0xe4, 0x6e, 0x7f, 0x31, 0xc0, 0xbc, 0x39, 0x53, 0x84, 0xa0, 0x3c, 0x74, 0xdc,
-	0xc1, 0x41, 0xff, 0x4d, 0xb7, 0x6d, 0x3f, 0xb7, 0xbb, 0x1d, 0x33, 0x81, 0x00, 0x32, 0x43, 0xc7,
-	0x7d, 0x7d, 0xd8, 0x36, 0x8d, 0x85, 0xbd, 0x6b, 0x26, 0x17, 0xf6, 0x5b, 0x33, 0x85, 0x2a, 0x50,
-	0x18, 0x3a, 0xee, 0xcb, 0xc1, 0x7e, 0xeb, 0xc0, 0x76, 0x0e, 0xcd, 0x74, 0x18, 0x6c, 0xed, 0xef,
-	0x99, 0x2b, 0xa8, 0x0c, 0xa0, 0xec, 0x4e, 0x07, 0x77, 0xfb, 0x7d, 0x33, 0x83, 0x4a, 0x90, 0x1f,
-	0x3a, 0x6e, 0x7b, 0xd0, 0x77, 0x7a, 0xfb, 0x66, 0x16, 0xad, 0x42, 0x45, 0xb9, 0xb8, 0xdb, 0xb1,
-	0x1d, 0xb7, 0xdf, 0xee, 0xe1, 0xae, 0x99, 0xdb, 0xde, 0x85, 0x62, 0xfc, 0x64, 0x28, 0x61, 0xbd,
-	0x9b, 0xc2, 0xca, 0x00, 0x3d, 0xc7, 0xb5, 0x0f, 0x6c, 0xc7, 0x6e, 0xed, 0x99, 0x46, 0xe8, 0xe3,
-	0xee, 0x8b, 0xc1, 0x5e, 0x0b, 0x9b, 0xc9, 0xdd, 0xa7, 0xdf, 0x2f, 0xab, 0xc6, 0xc5, 0x65, 0xd5,
-	0xf8, 0x79, 0x59, 0x35, 0x3e, 0x5f, 0x55, 0x13, 0x17, 0x57, 0xd5, 0xc4, 0x8f, 0xab, 0x6a, 0xe2,
-	0x5d, 0x35, 0x7e, 0x11, 0xcf, 0xe2, 0x37, 0x51, 0xbd, 0x29, 0xf9, 0x3e, 0xa3, 0x6f, 0xe2, 0xe3,
-	0x5f, 0x01, 0x00, 0x00, 0xff, 0xff, 0x27, 0x51, 0x2e, 0x1d, 0x8f, 0x05, 0x00, 0x00,
+	// 856 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x96, 0xcd, 0x6e, 0xeb, 0x44,
+	0x14, 0xc7, 0xeb, 0x24, 0xcd, 0xc7, 0x89, 0x93, 0xf8, 0x4e, 0xab, 0xca, 0x54, 0x22, 0x94, 0x5c,
+	0xae, 0xa8, 0x2a, 0xd1, 0x8a, 0x8f, 0x05, 0x0b, 0x36, 0x69, 0x12, 0xc0, 0xb4, 0x69, 0xae, 0x26,
+	0x6e, 0xd0, 0xbd, 0x9b, 0xd1, 0xdc, 0x78, 0x48, 0x47, 0x75, 0x62, 0x6b, 0xc6, 0x2d, 0xcd, 0x92,
+	0x37, 0xe0, 0x01, 0xd8, 0xb3, 0x40, 0xbc, 0x07, 0xcb, 0xbb, 0x64, 0x89, 0xda, 0x37, 0xe0, 0x09,
+	0xd0, 0x8c, 0xed, 0xd6, 0xd7, 0xfd, 0x50, 0x2b, 0x60, 0x77, 0x3e, 0xe6, 0x9c, 0xf3, 0x9f, 0xf9,
+	0x8d, 0xe5, 0x81, 0x17, 0xf2, 0x47, 0x2e, 0x65, 0x24, 0x82, 0x05, 0x3f, 0xdd, 0x9b, 0x06, 0xf3,
+	0xd0, 0xe7, 0x74, 0x31, 0x65, 0x7b, 0x6c, 0x11, 0xf1, 0x88, 0x33, 0xb9, 0x1b, 0x8a, 0x20, 0x0a,
+	0xd0, 0x46, 0x66, 0xd9, 0xee, 0xcd, 0xb2, 0xcd, 0xf5, 0x59, 0x30, 0x0b, 0xf4, 0x92, 0x3d, 0x65,
+	0xc5, 0xab, 0x37, 0x9f, 0xdf, 0xd3, 0x34, 0xa4, 0x82, 0xce, 0x93, 0x96, 0x9d, 0x0b, 0x68, 0x8d,
+	0x42, 0x26, 0x68, 0x14, 0x88, 0x3e, 0x8b, 0x28, 0xf7, 0x25, 0xda, 0x84, 0x6a, 0x90, 0x84, 0x6c,
+	0x63, 0xcb, 0xd8, 0xae, 0xe1, 0x6b, 0x1f, 0x39, 0xd0, 0x48, 0x6d, 0x12, 0x2d, 0x43, 0x66, 0x17,
+	0xb6, 0x8c, 0xed, 0xe6, 0x67, 0x1f, 0xed, 0xde, 0xad, 0x6c, 0x37, 0xed, 0xed, 0x2e, 0x43, 0x86,
+	0xcd, 0x20, 0xe3, 0x75, 0x7e, 0x35, 0xa0, 0xe1, 0x48, 0x79, 0xc6, 0xae, 0x07, 0x23, 0x28, 0x2d,
+	0xe8, 0x9c, 0x25, 0x43, 0xb5, 0x8d, 0xb6, 0xa0, 0xee, 0x31, 0x39, 0x15, 0x3c, 0x8c, 0x78, 0xb0,
+	0xd0, 0xe3, 0x6a, 0x38, 0x1b, 0x42, 0x16, 0x14, 0xcf, 0x84, 0x6f, 0x17, 0x75, 0x46, 0x99, 0xaa,
+	0x8f, 0x1f, 0xcc, 0x02, 0xbb, 0x14, 0xf7, 0x51, 0xb6, 0xea, 0xe3, 0xb3, 0x19, 0xf5, 0x07, 0xea,
+	0x44, 0x97, 0xf6, 0x6a, 0xdc, 0x27, 0x13, 0x42, 0x36, 0x54, 0xa6, 0x82, 0xe9, 0x5d, 0x97, 0x75,
+	0x36, 0x75, 0x3b, 0xbf, 0x18, 0xd0, 0xec, 0x7a, 0x9e, 0x60, 0x52, 0xa6, 0x52, 0x3f, 0x80, 0x3a,
+	0x97, 0xe4, 0x9c, 0x09, 0xfe, 0x03, 0x67, 0x9e, 0x56, 0x5c, 0xc5, 0xc0, 0xe5, 0x24, 0x89, 0xa0,
+	0xf7, 0x01, 0xb8, 0x24, 0x82, 0x9d, 0x07, 0xa7, 0xcc, 0xd3, 0xb2, 0xab, 0xb8, 0xc6, 0x25, 0x8e,
+	0x03, 0xe8, 0x3b, 0x68, 0xc4, 0xc5, 0x53, 0xaa, 0x36, 0x21, 0xed, 0xe2, 0x56, 0x71, 0xbb, 0x7e,
+	0xff, 0x39, 0x4e, 0x32, 0x8b, 0xf1, 0xbb, 0xa5, 0x4a, 0x9e, 0x99, 0xcd, 0xa3, 0xaf, 0xa0, 0xa4,
+	0xd9, 0x18, 0x9a, 0xcd, 0xf6, 0x63, 0x7a, 0x6a, 0x3e, 0xba, 0x0a, 0x7d, 0x0c, 0xad, 0x6c, 0x7f,
+	0xc2, 0x63, 0xf9, 0x26, 0x6e, 0x66, 0xc3, 0x8e, 0x87, 0x5e, 0x40, 0x93, 0x6b, 0x7e, 0x84, 0xc6,
+	0x87, 0x93, 0x30, 0x68, 0xc4, 0xd1, 0xe4, 0xc4, 0x3a, 0xbf, 0x15, 0x61, 0x2d, 0x3b, 0x2a, 0x3d,
+	0xc2, 0x7f, 0xa7, 0xf2, 0xf6, 0xf0, 0xc2, 0x1d, 0xc3, 0xd1, 0x87, 0x60, 0x06, 0x82, 0xcf, 0xf8,
+	0x82, 0x4c, 0x4f, 0x28, 0x5f, 0x24, 0x0a, 0xeb, 0x71, 0xac, 0xa7, 0x42, 0xe8, 0x13, 0x40, 0xaa,
+	0x46, 0x0d, 0x23, 0x11, 0x9f, 0x33, 0x19, 0xd1, 0x79, 0xa8, 0xef, 0x4e, 0x03, 0x3f, 0x4b, 0x33,
+	0x6e, 0x9a, 0x40, 0x9f, 0xc2, 0x3a, 0xbb, 0x08, 0xb9, 0x88, 0x0f, 0xe7, 0xa6, 0x60, 0x55, 0x17,
+	0xac, 0xdd, 0xe4, 0x6e, 0x4a, 0x9e, 0x43, 0x23, 0x1e, 0x48, 0x7d, 0xe2, 0xd1, 0x88, 0xea, 0xfb,
+	0x65, 0x62, 0x33, 0x0d, 0xf6, 0x69, 0x44, 0xd1, 0x06, 0x94, 0xe5, 0xf4, 0x84, 0xcd, 0xa9, 0x5d,
+	0xd1, 0x1a, 0x13, 0x0f, 0x7d, 0x01, 0x1b, 0xc9, 0x46, 0xf3, 0x54, 0xaa, 0x7a, 0xdd, 0x7a, 0x9c,
+	0x9d, 0xbc, 0xcb, 0xc6, 0x86, 0xca, 0x39, 0x13, 0x52, 0x7d, 0x32, 0x35, 0x2d, 0x2c, 0x75, 0x73,
+	0x17, 0x13, 0x72, 0x17, 0xb3, 0xf3, 0x77, 0x11, 0xde, 0x1b, 0x32, 0x31, 0x63, 0xde, 0x5d, 0xcc,
+	0x5c, 0xb0, 0xce, 0x73, 0x3c, 0x9e, 0xcc, 0xef, 0x56, 0x87, 0xff, 0xfa, 0xc6, 0xdd, 0x82, 0x5e,
+	0x7a, 0x2c, 0xf4, 0xd5, 0xa7, 0x42, 0x2f, 0x3f, 0x01, 0x7a, 0xe5, 0x41, 0xe8, 0xd5, 0x47, 0x42,
+	0xaf, 0x3d, 0x0e, 0x3a, 0x3c, 0x04, 0xbd, 0x9e, 0x87, 0xfe, 0x53, 0x01, 0xcc, 0xd7, 0x07, 0x3d,
+	0xc1, 0x3c, 0xf5, 0xc3, 0xa1, 0xfe, 0xff, 0xf2, 0x6d, 0x9a, 0x79, 0x4c, 0x3b, 0xf0, 0xec, 0x24,
+	0xf0, 0x3d, 0x26, 0x48, 0x78, 0xf6, 0xc6, 0xe7, 0x53, 0x72, 0xca, 0x96, 0x1a, 0xa8, 0x89, 0x5b,
+	0x71, 0xe2, 0xa5, 0x8e, 0x1f, 0xb0, 0xe5, 0xbd, 0x00, 0x4a, 0xf7, 0x03, 0x78, 0x1a, 0xe2, 0x9d,
+	0xdf, 0x0d, 0xb0, 0xf2, 0xfb, 0x41, 0x08, 0x9a, 0x13, 0x97, 0x1c, 0x1f, 0x8d, 0x5f, 0x0e, 0x7a,
+	0xce, 0xd7, 0xce, 0xa0, 0x6f, 0xad, 0x20, 0x80, 0xf2, 0xc4, 0x25, 0x07, 0xaf, 0x7a, 0x96, 0x71,
+	0x6d, 0xef, 0x5b, 0x85, 0x6b, 0xfb, 0x7b, 0xab, 0x88, 0x5a, 0x50, 0x9f, 0xb8, 0xe4, 0xdb, 0xe3,
+	0x61, 0xf7, 0xc8, 0x71, 0x5f, 0x59, 0xa5, 0x24, 0xd9, 0x1d, 0x1e, 0x5a, 0xab, 0xa8, 0x09, 0xa0,
+	0xec, 0x7e, 0x1f, 0x0f, 0xc6, 0x63, 0xab, 0x8c, 0x1a, 0x50, 0x9b, 0xb8, 0xa4, 0x77, 0x3c, 0x76,
+	0x47, 0x43, 0xab, 0x82, 0xd6, 0xa0, 0xa5, 0x5c, 0x3c, 0xe8, 0x3b, 0x2e, 0x19, 0xf7, 0x46, 0x78,
+	0x60, 0x55, 0x91, 0x05, 0xe6, 0xc4, 0x25, 0xfb, 0xce, 0x68, 0x38, 0x70, 0xb1, 0xd3, 0xb3, 0x6a,
+	0x3b, 0xfb, 0x60, 0x66, 0x7f, 0xae, 0x4a, 0xea, 0x28, 0x2f, 0xb5, 0x09, 0x30, 0x72, 0x89, 0x73,
+	0xe4, 0xb8, 0x4e, 0xf7, 0xd0, 0x32, 0x12, 0x1f, 0x0f, 0xbe, 0x39, 0x3e, 0xec, 0x62, 0xab, 0xb0,
+	0xff, 0xe5, 0x1f, 0x97, 0x6d, 0xe3, 0xed, 0x65, 0xdb, 0xf8, 0xeb, 0xb2, 0x6d, 0xfc, 0x7c, 0xd5,
+	0x5e, 0x79, 0x7b, 0xd5, 0x5e, 0xf9, 0xf3, 0xaa, 0xbd, 0xf2, 0xba, 0x9d, 0x7d, 0x3b, 0x5c, 0x64,
+	0x5f, 0x0f, 0x8a, 0xb0, 0x7c, 0x53, 0xd6, 0xaf, 0x87, 0xcf, 0xff, 0x09, 0x00, 0x00, 0xff, 0xff,
+	0xe2, 0x25, 0x58, 0x77, 0xb9, 0x08, 0x00, 0x00,
 }
 
 func (m *OperatorDetails) Marshal() (dAtA []byte, err error) {
@@ -776,6 +1002,16 @@ func (m *VerificationDetails) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.IsRevoked {
+		i--
+		if m.IsRevoked {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x50
+	}
 	if m.Version != 0 {
 		i = encodeVarintEntities(dAtA, i, uint64(m.Version))
 		i--
@@ -816,6 +1052,153 @@ func (m *VerificationDetails) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i -= len(m.OriginChain)
 		copy(dAtA[i:], m.OriginChain)
 		i = encodeVarintEntities(dAtA, i, uint64(len(m.OriginChain)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.IssuerAddress) > 0 {
+		i -= len(m.IssuerAddress)
+		copy(dAtA[i:], m.IssuerAddress)
+		i = encodeVarintEntities(dAtA, i, uint64(len(m.IssuerAddress)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.Type != 0 {
+		i = encodeVarintEntities(dAtA, i, uint64(m.Type))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MergedVerificationDetails) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MergedVerificationDetails) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MergedVerificationDetails) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.IsRevoked {
+		i--
+		if m.IsRevoked {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x58
+	}
+	if m.Version != 0 {
+		i = encodeVarintEntities(dAtA, i, uint64(m.Version))
+		i--
+		dAtA[i] = 0x50
+	}
+	if len(m.IssuerVerificationId) > 0 {
+		i -= len(m.IssuerVerificationId)
+		copy(dAtA[i:], m.IssuerVerificationId)
+		i = encodeVarintEntities(dAtA, i, uint64(len(m.IssuerVerificationId)))
+		i--
+		dAtA[i] = 0x4a
+	}
+	if len(m.Schema) > 0 {
+		i -= len(m.Schema)
+		copy(dAtA[i:], m.Schema)
+		i = encodeVarintEntities(dAtA, i, uint64(len(m.Schema)))
+		i--
+		dAtA[i] = 0x42
+	}
+	if len(m.OriginalData) > 0 {
+		i -= len(m.OriginalData)
+		copy(dAtA[i:], m.OriginalData)
+		i = encodeVarintEntities(dAtA, i, uint64(len(m.OriginalData)))
+		i--
+		dAtA[i] = 0x3a
+	}
+	if m.ExpirationTimestamp != 0 {
+		i = encodeVarintEntities(dAtA, i, uint64(m.ExpirationTimestamp))
+		i--
+		dAtA[i] = 0x30
+	}
+	if m.IssuanceTimestamp != 0 {
+		i = encodeVarintEntities(dAtA, i, uint64(m.IssuanceTimestamp))
+		i--
+		dAtA[i] = 0x28
+	}
+	if len(m.OriginChain) > 0 {
+		i -= len(m.OriginChain)
+		copy(dAtA[i:], m.OriginChain)
+		i = encodeVarintEntities(dAtA, i, uint64(len(m.OriginChain)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if len(m.IssuerAddress) > 0 {
+		i -= len(m.IssuerAddress)
+		copy(dAtA[i:], m.IssuerAddress)
+		i = encodeVarintEntities(dAtA, i, uint64(len(m.IssuerAddress)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.VerificationId) > 0 {
+		i -= len(m.VerificationId)
+		copy(dAtA[i:], m.VerificationId)
+		i = encodeVarintEntities(dAtA, i, uint64(len(m.VerificationId)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.VerificationType != 0 {
+		i = encodeVarintEntities(dAtA, i, uint64(m.VerificationType))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ZKCredential) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ZKCredential) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ZKCredential) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.IssuanceTimestamp != 0 {
+		i = encodeVarintEntities(dAtA, i, uint64(m.IssuanceTimestamp))
+		i--
+		dAtA[i] = 0x28
+	}
+	if m.ExpirationTimestamp != 0 {
+		i = encodeVarintEntities(dAtA, i, uint64(m.ExpirationTimestamp))
+		i--
+		dAtA[i] = 0x20
+	}
+	if len(m.HolderPublicKey) > 0 {
+		i -= len(m.HolderPublicKey)
+		copy(dAtA[i:], m.HolderPublicKey)
+		i = encodeVarintEntities(dAtA, i, uint64(len(m.HolderPublicKey)))
 		i--
 		dAtA[i] = 0x1a
 	}
@@ -972,6 +1355,83 @@ func (m *VerificationDetails) Size() (n int) {
 	}
 	if m.Version != 0 {
 		n += 1 + sovEntities(uint64(m.Version))
+	}
+	if m.IsRevoked {
+		n += 2
+	}
+	return n
+}
+
+func (m *MergedVerificationDetails) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.VerificationType != 0 {
+		n += 1 + sovEntities(uint64(m.VerificationType))
+	}
+	l = len(m.VerificationId)
+	if l > 0 {
+		n += 1 + l + sovEntities(uint64(l))
+	}
+	l = len(m.IssuerAddress)
+	if l > 0 {
+		n += 1 + l + sovEntities(uint64(l))
+	}
+	l = len(m.OriginChain)
+	if l > 0 {
+		n += 1 + l + sovEntities(uint64(l))
+	}
+	if m.IssuanceTimestamp != 0 {
+		n += 1 + sovEntities(uint64(m.IssuanceTimestamp))
+	}
+	if m.ExpirationTimestamp != 0 {
+		n += 1 + sovEntities(uint64(m.ExpirationTimestamp))
+	}
+	l = len(m.OriginalData)
+	if l > 0 {
+		n += 1 + l + sovEntities(uint64(l))
+	}
+	l = len(m.Schema)
+	if l > 0 {
+		n += 1 + l + sovEntities(uint64(l))
+	}
+	l = len(m.IssuerVerificationId)
+	if l > 0 {
+		n += 1 + l + sovEntities(uint64(l))
+	}
+	if m.Version != 0 {
+		n += 1 + sovEntities(uint64(m.Version))
+	}
+	if m.IsRevoked {
+		n += 2
+	}
+	return n
+}
+
+func (m *ZKCredential) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Type != 0 {
+		n += 1 + sovEntities(uint64(m.Type))
+	}
+	l = len(m.IssuerAddress)
+	if l > 0 {
+		n += 1 + l + sovEntities(uint64(l))
+	}
+	l = len(m.HolderPublicKey)
+	if l > 0 {
+		n += 1 + l + sovEntities(uint64(l))
+	}
+	if m.ExpirationTimestamp != 0 {
+		n += 1 + sovEntities(uint64(m.ExpirationTimestamp))
+	}
+	if m.IssuanceTimestamp != 0 {
+		n += 1 + sovEntities(uint64(m.IssuanceTimestamp))
 	}
 	return n
 }
@@ -1847,6 +2307,543 @@ func (m *VerificationDetails) Unmarshal(dAtA []byte) error {
 				b := dAtA[iNdEx]
 				iNdEx++
 				m.Version |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 10:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field IsRevoked", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEntities
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.IsRevoked = bool(v != 0)
+		default:
+			iNdEx = preIndex
+			skippy, err := skipEntities(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthEntities
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MergedVerificationDetails) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowEntities
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MergedVerificationDetails: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MergedVerificationDetails: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field VerificationType", wireType)
+			}
+			m.VerificationType = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEntities
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.VerificationType |= VerificationType(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field VerificationId", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEntities
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthEntities
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthEntities
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.VerificationId = append(m.VerificationId[:0], dAtA[iNdEx:postIndex]...)
+			if m.VerificationId == nil {
+				m.VerificationId = []byte{}
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field IssuerAddress", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEntities
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthEntities
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthEntities
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.IssuerAddress = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field OriginChain", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEntities
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthEntities
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthEntities
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.OriginChain = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 5:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field IssuanceTimestamp", wireType)
+			}
+			m.IssuanceTimestamp = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEntities
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.IssuanceTimestamp |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 6:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ExpirationTimestamp", wireType)
+			}
+			m.ExpirationTimestamp = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEntities
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.ExpirationTimestamp |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field OriginalData", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEntities
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthEntities
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthEntities
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.OriginalData = append(m.OriginalData[:0], dAtA[iNdEx:postIndex]...)
+			if m.OriginalData == nil {
+				m.OriginalData = []byte{}
+			}
+			iNdEx = postIndex
+		case 8:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Schema", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEntities
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthEntities
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthEntities
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Schema = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 9:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field IssuerVerificationId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEntities
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthEntities
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthEntities
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.IssuerVerificationId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 10:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Version", wireType)
+			}
+			m.Version = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEntities
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Version |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 11:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field IsRevoked", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEntities
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.IsRevoked = bool(v != 0)
+		default:
+			iNdEx = preIndex
+			skippy, err := skipEntities(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthEntities
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ZKCredential) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowEntities
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ZKCredential: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ZKCredential: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Type", wireType)
+			}
+			m.Type = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEntities
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Type |= VerificationType(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field IssuerAddress", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEntities
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthEntities
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthEntities
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.IssuerAddress = append(m.IssuerAddress[:0], dAtA[iNdEx:postIndex]...)
+			if m.IssuerAddress == nil {
+				m.IssuerAddress = []byte{}
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field HolderPublicKey", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEntities
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthEntities
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthEntities
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.HolderPublicKey = append(m.HolderPublicKey[:0], dAtA[iNdEx:postIndex]...)
+			if m.HolderPublicKey == nil {
+				m.HolderPublicKey = []byte{}
+			}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ExpirationTimestamp", wireType)
+			}
+			m.ExpirationTimestamp = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEntities
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.ExpirationTimestamp |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 5:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field IssuanceTimestamp", wireType)
+			}
+			m.IssuanceTimestamp = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEntities
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.IssuanceTimestamp |= uint32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}

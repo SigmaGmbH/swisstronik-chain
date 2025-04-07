@@ -19,7 +19,10 @@ sgx_types = { git = "https://github.com/apache/teaclave-sgx-sdk.git", rev = "3c9
 sgx_urts = { git = "https://github.com/apache/teaclave-sgx-sdk.git", rev = "3c903bda" }
 
 [features]
-attestation_server = []
+attestation_server = ["hardware_mode"]
+hardware_mode = []
+simulation_mode = []
+checker_mode = ["hardware_mode"]
 
 [build-dependencies]
 cbindgen = "0.24.3"

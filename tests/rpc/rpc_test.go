@@ -43,7 +43,7 @@ func TestMain(m *testing.M) {
 	}
 
 	if HOST == "" {
-		HOST = "http://localhost:8545"
+		HOST = "http://localhost:8547"
 	}
 
 	var err error
@@ -345,6 +345,28 @@ func TestEth_IncompleteSendTransaction(t *testing.T) {
 	// require well-formatted error (should not be "method handler crashed")
 	require.Error(t, err)
 	require.NotEqual(t, err.Error(), "method handler crashed", "no from field dealt with incorrectly")
+}
+
+func TestEth_UnsafeEndpoints(t *testing.T) {
+	// eth_sendTransaction
+	gasPrice := GetGasPrice(t)
+	param := make([]map[string]string, 1)
+	param[0] = make(map[string]string)
+	param[0]["from"] = "0x1122334455667788990011223344556677889900"
+	param[0]["to"] = "0x1122334455667788990011223344556677889900"
+	param[0]["value"] = "0x1"
+	param[0]["gasPrice"] = gasPrice
+	_, err := callWithError("eth_sendTransaction", param)
+
+	// require well-formatted error (should not be "method handler crashed")
+	require.Error(t, err)
+	require.Equal(t, "eth_sendTransaction not enabled", err.Error(), "unsafe endpoint still enabled")
+
+	// eth_sign
+	signParam := []string{"0x9b2055d370f73ec7d8a03e965129118dc8f5bf83", "0xdeadbeaf"}
+	_, err = callWithError("eth_sign", signParam)
+	require.Error(t, err)
+	require.Equal(t, "eth_sign not enabled", err.Error(), "unsafe endpoint still enabled")
 }
 
 func TestEth_GetFilterChanges_NoTopics(t *testing.T) {

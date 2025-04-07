@@ -5,11 +5,14 @@ use std::env;
 use std::ops::Deref;
 use std::time::Duration;
 
-#[cfg(not(feature = "attestation_server"))]
-static ENCLAVE_FILE: &'static str = "v1.0.3_enclave.signed.so";
+#[cfg(feature = "checker_mode")]
+static ENCLAVE_FILE: &'static str = "v1.0.0_checker_enclave.signed.so";
+
+#[cfg(all(not(feature = "attestation_server"), not(feature = "checker_mode")))]
+static ENCLAVE_FILE: &'static str = "v1.0.0_enclave.signed.so";
 
 #[cfg(feature = "attestation_server")]
-static ENCLAVE_FILE: &'static str = "v1.0.3_attestation_enclave.signed.so";
+static ENCLAVE_FILE: &'static str = "v1.0.0_attestation_enclave.signed.so";
 
 #[cfg(feature = "attestation_server")]
 const ENCLAVE_LOCK_TIMEOUT: u64 = 6 * 50;
@@ -35,7 +38,7 @@ impl EnclaveDoorbell {
             secs_attr: sgx_attributes_t { flags: 0, xfrm: 0 },
             misc_select: 0,
         };
-    
+
         let enclave_home = env::var("ENCLAVE_HOME").unwrap_or_else(|_| {
             let dir_path = String::from(
                 std::env::home_dir()
@@ -46,12 +49,12 @@ impl EnclaveDoorbell {
             format!("{}/.swisstronik-enclave", dir_path)
         });
         let enclave_path = format!("{}/{}", enclave_home, ENCLAVE_FILE);
-    
+
         println!(
             "[Enclave Doorbell] Creating enclave. Enclave location: {:?}",
             enclave_path
         );
-    
+
         let enclave = SgxEnclave::create(
             enclave_path,
             debug,

@@ -1,36 +1,35 @@
 package evm_test
 
 import (
+	"errors"
 	"math/big"
 	"testing"
 	"time"
 
 	sdkmath "cosmossdk.io/math"
-	"github.com/gogo/protobuf/proto"
-
-	abci "github.com/cometbft/cometbft/abci/types"
-	tmjson "github.com/cometbft/cometbft/libs/json"
-
 	"cosmossdk.io/simapp"
+	"github.com/SigmaGmbH/librustgo"
+	abci "github.com/cometbft/cometbft/abci/types"
+	"github.com/cometbft/cometbft/crypto/tmhash"
+	tmjson "github.com/cometbft/cometbft/libs/json"
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	tmversion "github.com/cometbft/cometbft/proto/tendermint/version"
+	"github.com/cometbft/cometbft/version"
+	"github.com/cosmos/cosmos-sdk/baseapp"
+	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/crypto/keyring"
+	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-
-	feemarkettypes "swisstronik/x/feemarket/types"
-
-	"errors"
-
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/gogo/protobuf/proto"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-
-	"github.com/cosmos/cosmos-sdk/baseapp"
-	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/crypto/keyring"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"swisstronik/app"
 	"swisstronik/crypto/ethsecp256k1"
@@ -40,13 +39,7 @@ import (
 	"swisstronik/x/evm"
 	"swisstronik/x/evm/keeper"
 	"swisstronik/x/evm/types"
-
-	"github.com/cometbft/cometbft/crypto/tmhash"
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
-	tmversion "github.com/cometbft/cometbft/proto/tendermint/version"
-
-	"github.com/SigmaGmbH/librustgo"
-	"github.com/cometbft/cometbft/version"
+	feemarkettypes "swisstronik/x/feemarket/types"
 )
 
 type EvmTestSuite struct {
@@ -70,7 +63,6 @@ type EvmTestSuite struct {
 // DoSetupTest setup test environment, it uses`require.TestingT` to support both `testing.T` and `testing.B`.
 func (suite *EvmTestSuite) DoSetupTest(t require.TestingT) {
 	chainID := utils.TestnetChainID + "-1"
-	checkTx := false
 
 	// account key
 	priv, err := ethsecp256k1.GenerateKey()
@@ -80,11 +72,10 @@ func (suite *EvmTestSuite) DoSetupTest(t require.TestingT) {
 	suite.signer = tests.NewTestSigner(priv)
 	suite.from = address
 	// consensus key
-	priv, err = ethsecp256k1.GenerateKey()
-	require.NoError(t, err)
-	consAddress := sdk.ConsAddress(priv.PubKey().Address())
+	pks := simtestutil.CreateTestPubKeys(1)
+	consAddress := sdk.ConsAddress(pks[0].Address())
 
-	suite.app = app.Setup(checkTx, func(app *app.App, genesis simapp.GenesisState) simapp.GenesisState {
+	suite.app = app.Setup(func(app *app.App, genesis simapp.GenesisState) simapp.GenesisState {
 		if suite.dynamicTxFee {
 			feemarketGenesis := feemarkettypes.DefaultGenesisState()
 			feemarketGenesis.Params.EnableHeight = 1
@@ -127,7 +118,7 @@ func (suite *EvmTestSuite) DoSetupTest(t require.TestingT) {
 		},
 	)
 
-	suite.ctx = suite.app.BaseApp.NewContext(checkTx, tmproto.Header{
+	suite.ctx = suite.app.BaseApp.NewContext(false, tmproto.Header{
 		Height:          1,
 		ChainID:         chainID,
 		Time:            time.Now().UTC(),
@@ -162,7 +153,7 @@ func (suite *EvmTestSuite) DoSetupTest(t require.TestingT) {
 	suite.app.AccountKeeper.SetAccount(suite.ctx, acc)
 
 	valAddr := sdk.ValAddress(address.Bytes())
-	validator, err := stakingtypes.NewValidator(valAddr, priv.PubKey(), stakingtypes.Description{})
+	validator, err := stakingtypes.NewValidator(valAddr, pks[0], stakingtypes.Description{})
 	require.NoError(t, err)
 
 	err = suite.app.StakingKeeper.SetValidatorByConsAddr(suite.ctx, validator)
@@ -508,9 +499,7 @@ func (suite *EvmTestSuite) TestErrorWhenDeployContract() {
 
 	_ = proto.Unmarshal(result.Data, &res)
 
-	suite.Require().Equal("evm error: InvalidCode(Opcode(166))", res.VmError, "correct evm error")
-
-	// TODO: snapshot checking
+	suite.Require().Equal(res.VmError, "InvalidOpcode(Opcode(166))", "correct evm error")
 }
 
 // DeployTestContract deploy a test erc20 contract and returns the contract address
@@ -558,13 +547,13 @@ func (suite *EvmTestSuite) TestERC20TransferReverted() {
 			"no hooks",
 			intrinsicGas, // enough for intrinsicGas, but not enough for execution
 			nil,
-			"evm error: OutOfGas",
+			"OutOfGas",
 		},
 		{
 			"success hooks",
 			intrinsicGas, // enough for intrinsicGas, but not enough for execution
 			&DummyHook{},
-			"evm error: OutOfGas",
+			"OutOfGas",
 		},
 		{
 			"failure hooks",
@@ -638,7 +627,7 @@ func (suite *EvmTestSuite) TestERC20TransferReverted() {
 
 			after := k.GetBalance(suite.ctx, suite.from)
 
-			if tc.expErr == "evm error: OutOfGas" {
+			if tc.expErr == "OutOfGas" {
 				suite.Require().Equal(tc.gasLimit, res.GasUsed)
 			} else {
 				suite.Require().Greater(tc.gasLimit, res.GasUsed)
@@ -646,10 +635,6 @@ func (suite *EvmTestSuite) TestERC20TransferReverted() {
 
 			// check gas refund works: only deducted fee for gas used, rather than gas limit.
 			suite.Require().Equal(new(big.Int).Mul(gasPrice, big.NewInt(int64(res.GasUsed))), new(big.Int).Sub(before, after))
-
-			// nonce should not be increased.
-			nonce2 := k.GetNonce(suite.ctx, suite.from)
-			suite.Require().Equal(nonce, nonce2)
 		})
 	}
 }

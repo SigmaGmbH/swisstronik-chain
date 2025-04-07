@@ -37,12 +37,14 @@ const (
 	// 1 photon = 1x10^{BaseDenomUnit} aswtr
 	BaseDenomUnit = 18
 
+	PowerReductionDenomUnit = 21
+
 	// DefaultGasPrice is default gas price for evm transactions
 	DefaultGasPrice = 20
 )
 
 // PowerReduction defines the default power reduction value for staking
-var PowerReduction = sdkmath.NewIntFromBigInt(new(big.Int).Exp(big.NewInt(10), big.NewInt(BaseDenomUnit), nil))
+var PowerReduction = sdkmath.NewIntFromBigInt(new(big.Int).Exp(big.NewInt(10), big.NewInt(PowerReductionDenomUnit), nil))
 
 // NewPhotonCoin is a utility function that returns an "aswtr" coin with the given sdkmath.Int amount.
 // The function will panic if the provided amount is negative.

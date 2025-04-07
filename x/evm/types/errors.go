@@ -16,13 +16,12 @@
 package types
 
 import (
+	errorsmod "cosmossdk.io/errors"
 	"errors"
 	"fmt"
-
-	errorsmod "cosmossdk.io/errors"
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/vm"
 )

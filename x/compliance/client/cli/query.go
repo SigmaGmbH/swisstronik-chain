@@ -30,6 +30,8 @@ func GetQueryCmd() *cobra.Command {
 		CmdGetIssuersDetails(),
 		CmdGetVerificationDetails(),
 		CmdGetVerificationsDetails(),
+		CmdGetHolderByVerificationId(),
+		CmdGetHolderPublicKey(),
 	)
 
 	return cmd
@@ -198,7 +200,7 @@ func CmdGetIssuersDetails() *cobra.Command {
 func CmdGetVerificationDetails() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get-verification-details [verification-id]",
-		Short: "Returns verification details associated with provided address",
+		Short: "Returns verification details associated with provided verification id",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx := client.GetClientContextFromCmd(cmd)
@@ -240,6 +242,67 @@ func CmdGetVerificationsDetails() *cobra.Command {
 			}
 
 			resp, err := queryClient.VerificationsDetails(context.Background(), req)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(resp)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+	flags.AddPaginationFlagsToCmd(cmd, "verification details")
+
+	return cmd
+}
+
+func CmdGetHolderByVerificationId() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "get-verification-holder [verification-id]",
+		Short: "Returns holder by verification id",
+		Args: cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx := client.GetClientContextFromCmd(cmd)
+			queryClient := types.NewQueryClient(clientCtx)
+
+			req := &types.QueryHolderByVerificationIdRequest{
+				VerificationId: args[0],
+			}
+
+			resp, err := queryClient.VerificationHolder(context.Background(), req)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(resp)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+	flags.AddPaginationFlagsToCmd(cmd, "verification details")
+
+	return cmd
+}
+
+func CmdGetHolderPublicKey() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "get-holder-public-key [userAddress]",
+		Short: "Returns holder public key by user address",
+		Args: cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx := client.GetClientContextFromCmd(cmd)
+			queryClient := types.NewQueryClient(clientCtx)
+
+			address, err := types.ParseAddress(args[0])
+			if err != nil {
+				return err
+			}
+
+			req := &types.QueryAttachedHolderPublicKeyRequest{
+				Address: address.String(),
+			}
+
+			resp, err := queryClient.AttachedHolderPublicKey(context.Background(), req)
 			if err != nil {
 				return err
 			}

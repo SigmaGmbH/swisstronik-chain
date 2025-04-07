@@ -8,7 +8,7 @@ then
     export SUDO_USER=root
 fi
 
-cat <<EOF > /etc/systemd/system/swisstronik-node-v1.0.3.service
+cat <<EOF > /etc/systemd/system/swisstronik-node.service
 [Unit]
 Description=Swisstronik node service
 After=network.target
@@ -16,7 +16,7 @@ After=network.target
 [Service]
 Type=simple
 WorkingDirectory=$(eval echo ~"$SUDO_USER")
-ExecStart=/usr/local/bin/swisstronikd_v1.0.3 start --rpc.laddr "tcp://0.0.0.0:26657"  --json-rpc.address 0.0.0.0:8545 --json-rpc.ws-address 0.0.0.0:8546 --home /opt/swisstronik/.swisstronik
+ExecStart=/usr/local/bin/swisstronikd start --rpc.laddr "tcp://0.0.0.0:26657"  --json-rpc.address 0.0.0.0:8545 --json-rpc.ws-address 0.0.0.0:8546 --home /opt/swisstronik/.swisstronik
 User=$SUDO_USER
 Restart=on-failure
 StartLimitInterval=0

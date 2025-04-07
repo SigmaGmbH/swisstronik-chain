@@ -31,8 +31,6 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/rpc"
-	"github.com/ethereum/go-ethereum/signer/core/apitypes"
-
 	rpctypes "swisstronik/rpc/types"
 	"swisstronik/server/config"
 	ethermint "swisstronik/types"
@@ -43,6 +41,11 @@ import (
 type BackendI interface { //nolint: revive
 	CosmosBackend
 	EVMBackend
+}
+
+type UtilsBackend interface {
+	IssuanceProof(credentialHash hexutil.Bytes) (string, error)
+	NonRevocationProof(credentialHash hexutil.Bytes) (string, error)
 }
 
 // CosmosBackend implements the functionality shared within cosmos namespaces
@@ -75,7 +78,6 @@ type EVMBackend interface {
 	// Sign Tx
 	Sign(address common.Address, data hexutil.Bytes) (hexutil.Bytes, error)
 	SendTransaction(args evmtypes.TransactionArgs) (common.Hash, error)
-	SignTypedData(address common.Address, typedData apitypes.TypedData) (hexutil.Bytes, error)
 
 	// Blocks Info
 	BlockNumber() (hexutil.Uint64, error)
@@ -103,6 +105,9 @@ type EVMBackend interface {
 	GetProof(address common.Address, storageKeys []string, blockNrOrHash rpctypes.BlockNumberOrHash) (*rpctypes.AccountResult, error)
 	GetTransactionCount(address common.Address, blockNum rpctypes.BlockNumber) (*hexutil.Uint64, error)
 	GetNodePublicKey(blockNum rpctypes.BlockNumber) (string, error)
+	GetIssuanceProof(credentialHash hexutil.Bytes) (string, error)
+	GetNonRevocationProof(credentialHash hexutil.Bytes) (string, error)
+	GetCredentialHash(verificationId hexutil.Bytes) (hexutil.Bytes, error)
 
 	// Chain Info
 	ChainID() (*hexutil.Big, error)

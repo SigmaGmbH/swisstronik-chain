@@ -36,7 +36,6 @@ import (
 	ante "swisstronik/app/ante"
 	"swisstronik/crypto/ethsecp256k1"
 	"swisstronik/encoding"
-	"swisstronik/ethereum/eip712"
 	"swisstronik/tests"
 	"swisstronik/types"
 	"swisstronik/utils"
@@ -56,9 +55,6 @@ type AnteTestSuite struct {
 	enableLondonHF  bool
 	evmParamsOption func(*evmtypes.Params)
 	priv            *ethsecp256k1.PrivKey
-
-	useLegacyEIP712Extension bool
-	useLegacyEIP712TypedData bool
 }
 
 const TestGasLimit uint64 = 100000
@@ -69,14 +65,13 @@ func init() {
 }
 
 func (suite *AnteTestSuite) SetupTest() {
-	checkTx := false
-	chainID := utils.TestnetChainID + "-1"
+	chainID := types.ChainID + "-1"
 
 	priv, err := ethsecp256k1.GenerateKey()
 	suite.Require().NoError(err)
 	suite.priv = priv
 
-	suite.app = app.Setup(checkTx, func(app *app.App, genesis simapp.GenesisState) simapp.GenesisState {
+	suite.app = app.Setup(func(app *app.App, genesis simapp.GenesisState) simapp.GenesisState {
 		if suite.enableFeemarket {
 			// setup feemarketGenesis params
 			feemarketGenesis := feemarkettypes.DefaultGenesisState()
@@ -105,7 +100,7 @@ func (suite *AnteTestSuite) SetupTest() {
 		return genesis
 	})
 
-	suite.ctx = suite.app.BaseApp.NewContext(checkTx, tmproto.Header{Height: 2, ChainID: chainID, Time: time.Now().UTC()})
+	suite.ctx = suite.app.BaseApp.NewContext(false, tmproto.Header{Height: 2, ChainID: chainID, Time: time.Now().UTC()})
 	suite.ctx = suite.ctx.WithMinGasPrices(sdk.NewDecCoins(sdk.NewDecCoin(evmtypes.DefaultEVMDenom, sdk.OneInt())))
 	suite.ctx = suite.ctx.WithBlockGasMeter(sdk.NewGasMeter(1000000000000000000))
 
@@ -122,7 +117,6 @@ func (suite *AnteTestSuite) SetupTest() {
 	encodingConfig := encoding.MakeConfig(app.ModuleBasics)
 	// We're using TestMsg amino encoding in some tests, so register it here.
 	encodingConfig.Amino.RegisterConcrete(&testdata.TestMsg{}, "testdata.TestMsg", nil)
-	eip712.SetEncodingConfig(encodingConfig)
 
 	suite.clientCtx = client.Context{}.WithTxConfig(encodingConfig.TxConfig)
 	suite.Require().NotNil(suite.app.AppCodec())
@@ -332,17 +326,9 @@ func (suite *AnteTestSuite) GenerateMultipleKeys(n int) ([]cryptotypes.PrivKey, 
 
 // generateSingleSignature signs the given sign doc bytes using the given signType (EIP-712 or Standard)
 func (suite *AnteTestSuite) generateSingleSignature(signMode signing.SignMode, privKey cryptotypes.PrivKey, signDocBytes []byte, signType string) (signature signing.SignatureV2) {
-	var (
-		msg []byte
-		err error
-	)
+	var msg []byte
 
 	msg = signDocBytes
-
-	if signType == "EIP-712" {
-		msg, err = eip712.GetEIP712BytesForMsg(signDocBytes)
-		suite.Require().NoError(err)
-	}
 
 	sigBytes, _ := privKey.Sign(msg)
 	sigData := &signing.SingleSignatureData{
@@ -565,7 +551,7 @@ func createTx(priv cryptotypes.PrivKey, msgs ...sdk.Msg) (sdk.Tx, error) {
 	}
 
 	signerData := authsigning.SignerData{
-		ChainID:       ChainID,
+		ChainID:       types.PrefixedChainID,
 		AccountNumber: 0,
 		Sequence:      0,
 	}

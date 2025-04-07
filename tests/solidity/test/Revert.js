@@ -13,20 +13,14 @@ describe('Revert / Error', () => {
         await revertContract.deployed()
     })
 
-    it('testRevert: should revert if provided value < 10', async () => {     
-        let reason = ""
-        try {
-            const tx = await sendShieldedTransaction(
+    it('testRevert: should revert if provided value < 10', async () => {
+        await expect(
+            sendShieldedTransaction(
                 signer,
                 revertContract.address,
                 revertContract.interface.encodeFunctionData("testRevert", [5])
             )
-            await tx.wait()
-        } catch (e) {
-            reason = e.reason
-        }
-
-        expect(reason).to.contain("Expected value >= 10")
+        ).to.be.rejectedWith("Expected value >= 10")
     })
 
     it('testRevert: should not revert if provided value >= 10', async () => {

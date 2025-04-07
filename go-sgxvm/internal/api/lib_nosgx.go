@@ -11,6 +11,7 @@ import (
 	"github.com/SigmaGmbH/librustgo/types"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"math/rand"
+	"math/big"
 	"net"
 )
 
@@ -36,7 +37,7 @@ type Connector = types.Connector
 func CheckNodeStatus() error {
 	return nil
 }
-func RequestEpochKeys(host string, port int, isDCAP bool) error {
+func RequestEpochKeys(host string, port int) error {
 	return nil
 }
 
@@ -76,10 +77,32 @@ func Call(
 	connector Connector,
 	from, to, data, value []byte,
 	accessList ethtypes.AccessList,
-	gasLimit, nonce uint64,
+	gasLimit uint64,
+	gasPrice *big.Int,
+	nonce uint64,
 	txContext *types.TransactionContext,
 	commit bool,
 	isUnencrypted bool,
+	transactionSignature []byte,
+	maxFeePerGas *big.Int,
+	maxPriorityFeePerGas *big.Int,
+	txType uint8,
+) (*types.HandleTransactionResponse, error) {
+	return nil, nil
+}
+
+func EstimateGas(
+	connector Connector,
+	from, to, data, value []byte,
+	accessList ethtypes.AccessList,
+	gasLimit uint64,
+	gasPrice *big.Int,
+	nonce uint64,
+	txContext *types.TransactionContext,
+	isUnencrypted bool,
+	maxFeePerGas *big.Int,
+	maxPriorityFeePerGas *big.Int,
+	txType uint8,
 ) (*types.HandleTransactionResponse, error) {
 	return nil, nil
 }
@@ -89,15 +112,21 @@ func Create(
 	connector Connector,
 	from, data, value []byte,
 	accessList ethtypes.AccessList,
-	gasLimit, nonce uint64,
+	gasLimit uint64,
+	gasPrice *big.Int,
+	nonce uint64,
 	txContext *types.TransactionContext,
 	commit bool,
+	transactionSignature []byte,
+	maxFeePerGas *big.Int,
+	maxPriorityFeePerGas *big.Int,
+	txType uint8,
 ) (*types.HandleTransactionResponse, error) {
 	return nil, nil
 }
 
-// StartAttestationServer starts attestation server with 2 port (EPID and DCAP attestation)
-func StartAttestationServer(epidAddress, dcapAddress string) error {
+// StartAttestationServer starts attestation server
+func StartAttestationServer(dcapAddress string) error {
 	return nil
 }
 

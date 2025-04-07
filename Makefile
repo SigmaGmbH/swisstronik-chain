@@ -1,4 +1,4 @@
-VERSION := v1.0.3
+VERSION := v1.0.0
 COMMIT := $(shell git log -1 --format='%H')
 ENCLAVE_HOME ?= $(HOME)/.swisstronik-enclave
 PRODUCTION_MODE ?= false
@@ -87,6 +87,10 @@ build: go.sum
 	$(MAKE) -C go-sgxvm build
 	go build -mod=mod $(BUILD_FLAGS)  -tags osusergo,netgo -o build/swisstronikd ./cmd/swisstronikd
 
+build_with_ready_enclave: go.sum
+	$(MAKE) -C go-sgxvm build_with_ready_enclave
+	go build -mod=mod $(BUILD_FLAGS)  -tags osusergo,netgo -o build/swisstronikd ./cmd/swisstronikd	
+
 build_d: go.sum
 	$(MAKE) -C go-sgxvm build_d
 	go build -mod=mod $(BUILD_FLAGS)  -tags osusergo,netgo -o build/swisstronikd ./cmd/swisstronikd
@@ -94,8 +98,16 @@ build_d: go.sum
 build_attestation_server: go.sum
 	AS_MODE=true $(MAKE) -C go-sgxvm build_AS
 
+
+build_attestation_server_with_ready_enclave: go.sum
+	AS_MODE=true $(MAKE) -C go-sgxvm build_AS_with_enclave
+
 build_attestation_server_d: go.sum
 	AS_MODE=true $(MAKE) -C go-sgxvm build_AS_d
+
+build_checker: go.sum
+	CHECKER_MODE=true MAINNET_MODE=true $(MAKE) -C go-sgxvm build
+	go build -mod=mod $(BUILD_FLAGS)  -tags osusergo,netgo,checker -o build/swisstronikd_checker ./cmd/swisstronikd
 
 ###############################################################################
 ### 		          Build commands for CLI (without SGX support) 			###
@@ -150,7 +162,7 @@ TEST_TARGETS := test-unit test-unit-cover test-race
 # Test runs-specific rules. To add a new test target, just add
 # a new rule, customise ARGS or TEST_PACKAGES ad libitum, and
 # append the new rule to the TEST_TARGETS list.
-test-unit: ARGS=-timeout=10m -race
+test-unit: ARGS=-timeout=20m -race
 test-unit: TEST_PACKAGES=$(PACKAGES_UNIT)
 
 test-race: ARGS=-race

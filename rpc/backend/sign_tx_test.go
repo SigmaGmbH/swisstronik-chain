@@ -9,7 +9,6 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	goethcrypto "github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/signer/core/apitypes"
 	"google.golang.org/grpc/metadata"
 
 	"swisstronik/crypto/ethsecp256k1"
@@ -218,55 +217,6 @@ func (suite *BackendTestSuite) TestSign() {
 			responseBz, err := suite.backend.Sign(tc.fromAddr, tc.inputBz)
 			if tc.expPass {
 				signature, _, err := suite.backend.clientCtx.Keyring.SignByAddress((sdk.AccAddress)(from.Bytes()), tc.inputBz)
-				signature[goethcrypto.RecoveryIDOffset] += 27
-				suite.Require().NoError(err)
-				suite.Require().Equal((hexutil.Bytes)(signature), responseBz)
-			} else {
-				suite.Require().Error(err)
-			}
-		})
-	}
-}
-
-func (suite *BackendTestSuite) TestSignTypedData() {
-	from, priv := tests.RandomEthAddressWithPrivateKey()
-	testCases := []struct {
-		name           string
-		registerMock   func()
-		fromAddr       common.Address
-		inputTypedData apitypes.TypedData
-		expPass        bool
-	}{
-		{
-			"fail - can't find key in Keyring",
-			func() {},
-			from,
-			apitypes.TypedData{},
-			false,
-		},
-		{
-			"fail - empty TypeData",
-			func() {
-				armor := crypto.EncryptArmorPrivKey(priv, "", "eth_secp256k1")
-				err := suite.backend.clientCtx.Keyring.ImportPrivKey("test_key", armor, "")
-				suite.Require().NoError(err)
-			},
-			from,
-			apitypes.TypedData{},
-			false,
-		},
-	}
-
-	for _, tc := range testCases {
-		suite.Run(fmt.Sprintf("case %s", tc.name), func() {
-			suite.SetupTest() // reset test and queries
-			tc.registerMock()
-
-			responseBz, err := suite.backend.SignTypedData(tc.fromAddr, tc.inputTypedData)
-
-			if tc.expPass {
-				sigHash, _, err := apitypes.TypedDataAndHash(tc.inputTypedData)
-				signature, _, err := suite.backend.clientCtx.Keyring.SignByAddress((sdk.AccAddress)(from.Bytes()), sigHash)
 				signature[goethcrypto.RecoveryIDOffset] += 27
 				suite.Require().NoError(err)
 				suite.Require().Equal((hexutil.Bytes)(signature), responseBz)

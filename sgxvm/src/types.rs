@@ -1,11 +1,8 @@
-use evm::Config;
-use evm::backend::{
-    Apply,
-    Backend as EvmBackend,
-    Basic,
-    Log
-};
+use alloc::string::ToString;
+use evm::standard::Config;
 use primitive_types::{H160, H256, U256};
+use ethereum::Log;
+use evm::interpreter::error::{ExitError};
 use std::{
     vec::Vec,
     string::String,
@@ -14,26 +11,7 @@ use std::boxed::Box;
 use sgx_types::*;
 use crate::error::Error;
 
-pub static GASOMETER_CONFIG: Config = Config::london();
-
-/// Information required by the evm
-#[derive(Clone, Default, PartialEq, Eq)]
-pub struct Vicinity {
-    pub origin: H160,
-    pub nonce: U256,
-}
-
-/// Supertrait for our version of EVM Backend
-pub trait ExtendedBackend: EvmBackend {
-    fn get_logs(&self) -> Vec<Log>;
-
-    /// Apply given values and logs at backend.
-	fn apply<A, I, L>(&mut self, values: A, logs: L, delete_empty: bool) -> Result<(), Error>
-	where
-		A: IntoIterator<Item = Apply<I>>,
-		I: IntoIterator<Item = (H256, H256)>,
-		L: IntoIterator<Item = Log>;
-}
+pub static GASOMETER_CONFIG: Config = Config::cancun();
 
 /// A key-value storage trait
 pub trait Storage {
@@ -47,25 +25,30 @@ pub trait Storage {
     fn get_account_code(&self, key: &H160) -> Option<Vec<u8>>;
 
     /// Returns account basic data (balance and nonce)
-    fn get_account(&self, account: &H160) -> Basic;
-
-    /// Updates account balance and nonce
-    fn insert_account(&mut self, key: H160, data: Basic) -> Result<(), Error>;
+    fn get_account(&self, account: &H160) -> (U256, U256);
 
     /// Updates contract bytecode
-    fn insert_account_code(&mut self, key: H160, code: Vec<u8>) -> Result<(), Error>;
+    fn insert_account_code(&self, key: H160, code: Vec<u8>) -> Result<(), Error>;
 
     /// Update storage cell value
-    fn insert_storage_cell(&mut self, key: H160, index: H256, value: H256) -> Result<(), Error>;
+    fn insert_storage_cell(&self, key: H160, index: H256, value: H256) -> Result<(), Error>;
 
     /// Removes account (selfdestruct)
-    fn remove(&mut self, key: &H160) -> Result<(), Error>;
+    fn remove(&self, key: &H160) -> Result<(), Error>;
 
     /// Removes storage cell value
-    fn remove_storage_cell(&mut self, key: &H160, index: &H256) -> Result<(), Error>;
+    fn remove_storage_cell(&self, key: &H160, index: &H256) -> Result<(), Error>;
+
+    fn insert_account_balance(&self, address: &H160, balance: &U256) -> Result<(), Error>;
+
+    fn insert_account_nonce(&self, address: &H160, nonce: &U256) -> Result<(), Error>;
+
+    fn get_account_code_size(&self, address: &H160) -> Result<U256, Error>;
+
+    fn get_account_code_hash(&self, address: &H160) -> Result<H256, Error>;
 }
 
-// Struct for allocated buffer outside of SGX Enclave
+// Struct for allocated buffer outside SGX Enclave
 #[repr(C)]
 #[allow(dead_code)]
 pub struct AllocatedBuffer {
@@ -99,6 +82,20 @@ impl ExecutionResult {
             vm_error: reason,
             data,
         }
+    }
+
+    pub fn from_exit_error(error: ExitError, data: Vec<u8>, gas_used: u64) -> Self {
+        let vm_error = match error {
+            ExitError::Reverted => "reverted".to_string(),
+            ExitError::Fatal(fatal) => {
+                format!("{:?}", fatal)
+            },
+            ExitError::Exception(exit) => {
+                format!("{:?}", exit)
+            }
+        };
+
+        ExecutionResult { logs: vec![], data, gas_used, vm_error }
     }
 }
 

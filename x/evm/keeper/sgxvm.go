@@ -171,7 +171,13 @@ func (k *Keeper) ApplySGXVMTransaction(
 		tmpCtx, commit = ctx.CacheContext()
 	}
 
-	res, err := k.ApplyMessageWithConfig(tmpCtx, msg, true, cfg, txConfig, txContext, isUnencrypted)
+	v, r, s := tx.RawSignatureValues()
+	combinedSignature, err := CombineSignature(v, r, s, cfg.ChainConfig.ChainID)
+	if err != nil {
+		return nil, errorsmod.Wrap(err, "failed to extract signature from tx")
+	}
+
+	res, err := k.ApplyMessageWithConfig(tmpCtx, msg, true, cfg, txConfig, txContext, isUnencrypted, combinedSignature, tx.Type())
 	if err != nil {
 		return nil, errorsmod.Wrap(err, "failed to apply ethereum core message")
 	}
@@ -263,6 +269,8 @@ func (k *Keeper) ApplyMessageWithConfig(
 	txConfig types.TxConfig,
 	txContext *librustgo.TransactionContext,
 	isUnencrypted bool,
+	transactionSignature []byte,
+	txType uint8,
 ) (*types.MsgEthereumTxResponse, error) {
 	// return error if contract creation or call are disabled through governance
 	if !cfg.Params.EnableCreate && msg.To() == nil {
@@ -292,6 +300,7 @@ func (k *Keeper) ApplyMessageWithConfig(
 
 	var res *librustgo.HandleTransactionResponse
 	if contractCreation {
+		k.SetNonce(ctx, msg.From(), msg.Nonce())
 		res, err = librustgo.Create(
 			connector,
 			msg.From().Bytes(),
@@ -299,10 +308,16 @@ func (k *Keeper) ApplyMessageWithConfig(
 			msg.Value().Bytes(),
 			msg.AccessList(),
 			leftoverGas,
+			msg.GasPrice(),
 			msg.Nonce(),
 			txContext,
 			commit,
+			transactionSignature,
+			msg.GasFeeCap(),
+			msg.GasTipCap(),
+			txType,
 		)
+		k.SetNonce(ctx, msg.From(), msg.Nonce()+1)
 	} else {
 		res, err = librustgo.Call(
 			connector,
@@ -312,10 +327,15 @@ func (k *Keeper) ApplyMessageWithConfig(
 			msg.Value().Bytes(),
 			msg.AccessList(),
 			leftoverGas,
+			msg.GasPrice(),
 			msg.Nonce(),
 			txContext,
 			commit,
 			isUnencrypted,
+			transactionSignature,
+			msg.GasFeeCap(),
+			msg.GasTipCap(),
+			txType,
 		)
 	}
 
@@ -330,7 +350,104 @@ func (k *Keeper) ApplyMessageWithConfig(
 	// refund gas
 	temporaryGasUsed := msg.Gas() - leftoverGas
 	refundQuotient := params.RefundQuotientEIP3529
-	leftoverGas += GasToRefund(0, temporaryGasUsed, refundQuotient) // TODO: SGXVM should return gas to refund
+	leftoverGas += GasToRefund(0, temporaryGasUsed, refundQuotient)
+
+	logs := SGXVMLogsToEthereum(res.Logs, txConfig, txContext.BlockNumber)
+	return &types.MsgEthereumTxResponse{
+		GasUsed: res.GasUsed,
+		VmError: res.VmError,
+		Ret:     res.Ret,
+		Logs:    types.NewLogsFromEth(logs),
+		Hash:    txConfig.TxHash.Hex(),
+	}, nil
+}
+
+func (k *Keeper) EstimateGasMessageWithConfig(
+	ctx sdk.Context,
+	msg core.Message,
+	cfg *types.EVMConfig,
+	txConfig types.TxConfig,
+	txContext *librustgo.TransactionContext,
+	isUnencrypted bool,
+	txType uint8,
+) (*types.MsgEthereumTxResponse, error) {
+	// return error if contract creation or call are disabled through governance
+	if !cfg.Params.EnableCreate && msg.To() == nil {
+		return nil, errorsmod.Wrap(types.ErrCreateDisabled, "failed to create new contract")
+	} else if !cfg.Params.EnableCall && msg.To() != nil {
+		return nil, errorsmod.Wrap(types.ErrCallDisabled, "failed to call contract")
+	}
+
+	leftoverGas := msg.Gas()
+	contractCreation := msg.To() == nil
+	intrinsicGas, err := k.GetEthIntrinsicGas(ctx, msg, cfg.ChainConfig, contractCreation)
+	if err != nil {
+		// should have already been checked on Ante Handler
+		return nil, errorsmod.Wrap(err, "intrinsic gas failed")
+	}
+
+	// Should check again even if it is checked on Ante Handler, because eth_call don't go through Ante Handler.
+	if leftoverGas < intrinsicGas {
+		// eth_estimateGas will check for this exact error
+		return nil, errorsmod.Wrap(core.ErrIntrinsicGas, "apply message")
+	}
+
+	connector := Connector{
+		Context:   ctx,
+		EVMKeeper: k,
+	}
+
+	var res *librustgo.HandleTransactionResponse
+	if contractCreation {
+		k.SetNonce(ctx, msg.From(), msg.Nonce())
+		res, err = librustgo.EstimateGas(
+			connector,
+			msg.From().Bytes(),
+			nil,
+			msg.Data(),
+			msg.Value().Bytes(),
+			msg.AccessList(),
+			leftoverGas,
+			msg.GasPrice(),
+			msg.Nonce(),
+			txContext,
+			isUnencrypted,
+			msg.GasFeeCap(),
+			msg.GasTipCap(),
+			txType,
+		)
+		k.SetNonce(ctx, msg.From(), msg.Nonce()+1)
+	} else {
+		res, err = librustgo.EstimateGas(
+			connector,
+			msg.From().Bytes(),
+			msg.To().Bytes(),
+			msg.Data(),
+			msg.Value().Bytes(),
+			msg.AccessList(),
+			leftoverGas,
+			msg.GasPrice(),
+			msg.Nonce(),
+			txContext,
+			isUnencrypted,
+			msg.GasFeeCap(),
+			msg.GasTipCap(),
+			txType,
+		)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	// calculate gas refund
+	if msg.Gas() < leftoverGas {
+		return nil, errorsmod.Wrap(types.ErrGasOverflow, "apply message")
+	}
+	// refund gas
+	temporaryGasUsed := msg.Gas() - leftoverGas
+	refundQuotient := params.RefundQuotientEIP3529
+	leftoverGas += GasToRefund(0, temporaryGasUsed, refundQuotient)
 
 	logs := SGXVMLogsToEthereum(res.Logs, txConfig, txContext.BlockNumber)
 	return &types.MsgEthereumTxResponse{
@@ -394,12 +511,12 @@ func CreateSGXVMContextFromMessage(ctx sdk.Context, k *Keeper, msg core.Message)
 func SGXVMLogsToEthereum(logs []*librustgo.Log, txConfig types.TxConfig, blockNumber uint64) []*ethtypes.Log {
 	var ethLogs []*ethtypes.Log
 	for i := range logs {
-		ethLogs = append(ethLogs, SGXVMLogToEthereum(logs[i], txConfig, blockNumber))
+		ethLogs = append(ethLogs, SGXVMLogToEthereum(logs[i], txConfig, blockNumber, uint(i)))
 	}
 	return ethLogs
 }
 
-func SGXVMLogToEthereum(log *librustgo.Log, txConfig types.TxConfig, blockNumber uint64) *ethtypes.Log {
+func SGXVMLogToEthereum(log *librustgo.Log, txConfig types.TxConfig, blockNumber uint64, index uint) *ethtypes.Log {
 	var topics []common.Hash
 	for _, topic := range log.Topics {
 		topics = append(topics, common.BytesToHash(topic.Inner))
@@ -413,7 +530,42 @@ func SGXVMLogToEthereum(log *librustgo.Log, txConfig types.TxConfig, blockNumber
 		TxHash:      txConfig.TxHash,
 		TxIndex:     txConfig.TxIndex,
 		BlockHash:   txConfig.BlockHash,
-		Index:       txConfig.LogIndex,
+		Index:       txConfig.LogIndex + index,
 		Removed:     false,
 	}
+}
+
+// CombineSignature combines v, r, and s into a 65-byte ABI-packed signature.
+func CombineSignature(v, r, s, chainId *big.Int) ([]byte, error) {
+	var V *big.Int
+	if v.BitLen() > 8 {
+		// Try to normalize V
+		chainIdMul := new(big.Int).Mul(chainId, big.NewInt(2))
+		correctedV := new(big.Int).Sub(v, chainIdMul)
+		correctedV.Sub(correctedV, big.NewInt(8))
+
+		V = correctedV
+	} else {
+		V = v
+	}
+
+	if r.BitLen() > 256 || s.BitLen() > 256 {
+		return nil, fmt.Errorf("r and s must be 32 bytes or less")
+	}
+
+	if !V.IsUint64() || V.Uint64() > 255 {
+		return nil, fmt.Errorf("v must be a valid uint8 value (0-255)")
+	}
+	vUint8 := uint8(V.Uint64())
+
+	signature := make([]byte, 65)
+
+	rBytes := common.LeftPadBytes(r.Bytes(), 32)
+	sBytes := common.LeftPadBytes(s.Bytes(), 32)
+	copy(signature[0:32], rBytes)
+	copy(signature[32:64], sBytes)
+
+	signature[64] = vUint8
+
+	return signature, nil
 }

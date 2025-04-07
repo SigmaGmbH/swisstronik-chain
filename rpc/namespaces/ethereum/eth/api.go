@@ -18,8 +18,6 @@ package eth
 import (
 	"context"
 
-	"github.com/ethereum/go-ethereum/signer/core/apitypes"
-
 	"github.com/ethereum/go-ethereum/rpc"
 
 	"github.com/cometbft/cometbft/libs/log"
@@ -113,7 +111,6 @@ type EthereumAPI interface {
 	Coinbase() (string, error)
 	Sign(address common.Address, data hexutil.Bytes) (hexutil.Bytes, error)
 	GetTransactionLogs(txHash common.Hash) ([]*ethtypes.Log, error)
-	SignTypedData(address common.Address, typedData apitypes.TypedData) (hexutil.Bytes, error)
 	FillTransaction(args evmtypes.TransactionArgs) (*rpctypes.SignTransactionResult, error)
 	Resend(ctx context.Context, args evmtypes.TransactionArgs, gasPrice *hexutil.Big, gasLimit *hexutil.Uint64) (common.Hash, error)
 	GetPendingTransactions() ([]*rpctypes.RPCTransaction, error)
@@ -302,6 +299,24 @@ func (e *PublicAPI) GetNodePublicKey(blockNum rpctypes.BlockNumber) (string, err
 	return e.backend.GetNodePublicKey(blockNum)
 }
 
+// IssuanceProof returns issuance proof for ZK-sdi
+func (e *PublicAPI) IssuanceProof(credentialHash hexutil.Bytes) (string, error) {
+	e.logger.Debug("eth_issuanceProof", "hash", credentialHash.String())
+	return e.backend.GetIssuanceProof(credentialHash)
+}
+
+// NonRevocationProof returns non-revocation proof for ZK-sdi
+func (e *PublicAPI) NonRevocationProof(credentialHash hexutil.Bytes) (string, error) {
+	e.logger.Debug("eth_nonRevocationProof", "hash", credentialHash.String())
+	return e.backend.GetNonRevocationProof(credentialHash)
+}
+
+// CredentialHash returns credential hash for ZK-sdi
+func (e *PublicAPI) CredentialHash(verificationId hexutil.Bytes) (hexutil.Bytes, error) {
+	e.logger.Debug("eth_credentialHash", "id", verificationId.String())
+	return e.backend.GetCredentialHash(verificationId)
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///                           Event Logs													          ///
 ///////////////////////////////////////////////////////////////////////////////
@@ -452,12 +467,6 @@ func (e *PublicAPI) GetTransactionLogs(txHash common.Hash) ([]*ethtypes.Log, err
 
 	// parse tx logs from events
 	return backend.TxLogsFromEvents(resBlockResult.TxsResults[res.TxIndex].Events, int(res.MsgIndex))
-}
-
-// SignTypedData signs EIP-712 conformant typed data
-func (e *PublicAPI) SignTypedData(address common.Address, typedData apitypes.TypedData) (hexutil.Bytes, error) {
-	e.logger.Debug("eth_signTypedData", "address", address.Hex(), "data", typedData)
-	return e.backend.SignTypedData(address, typedData)
 }
 
 // FillTransaction fills the defaults (nonce, gas, gasPrice or 1559 fields)

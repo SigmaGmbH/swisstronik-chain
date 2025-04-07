@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8;
 
 contract RIP7212 {
     /// @dev The address of the pre-compiled p256 verifier contract (following RIP-7212)

@@ -20,7 +20,7 @@ var (
 
 func init() {
 	if HOST_WS == "" {
-		HOST_WS = "localhost:8542"
+		HOST_WS = "localhost:8548"
 	}
 
 	u := url.URL{Scheme: "ws", Host: HOST_WS, Path: ""}
@@ -43,7 +43,7 @@ func TestWsSingleRequest(t *testing.T) {
 	msg := jsonUnmarshal(t, mb)
 	result, ok := msg["result"].(string)
 	require.True(t, ok)
-	require.Equal(t, "1291", result)
+	require.Equal(t, "1848", result)
 }
 
 func TestWsBatchRequest(t *testing.T) {
@@ -69,7 +69,7 @@ func TestWsBatchRequest(t *testing.T) {
 	resNetVersion := msg[0]
 	result, ok := resNetVersion["result"].(string)
 	require.True(t, ok)
-	require.Equal(t, "1291", result)
+	require.Equal(t, "1848", result)
 	id, ok := resNetVersion["id"].(float64)
 	require.True(t, ok)
 	require.Equal(t, 1, int(id))

@@ -101,6 +101,9 @@ metrics-address = "{{ .JSONRPC.MetricsAddress }}"
 # Upgrade height for fix of revert gas refund logic when transaction reverted.
 fix-revert-gas-refund-height = {{ .JSONRPC.FixRevertGasRefundHeight }}
 
+# UnsafeEthEndpointsEnabled enables eth_sendTransaction, eth_sign, eth_signTypedData. Enable it only if you are really need those endpoint
+unsafe-eth-endpoints-enabled = {{ .JSONRPC.UnsafeEthEndpointsEnabled }}
+
 ###############################################################################
 ###                             TLS Configuration                           ###
 ###############################################################################

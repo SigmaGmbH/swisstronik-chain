@@ -1,9 +1,9 @@
 package compliance
 
 import (
+	"bytes"
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
 	"swisstronik/x/compliance/keeper"
 	"swisstronik/x/compliance/types"
 )
@@ -41,6 +41,34 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 		}
 	}
 
+	// Restore linked public keys to verification id
+	for _, verificationToPublicKeyData := range genState.LinksToPublicKey {
+		if verificationToPublicKeyData.Id == nil {
+			panic(errors.Wrap(types.ErrInvalidParam, "given verification id is empty"))
+		}
+		if verificationToPublicKeyData.PublicKey == nil {
+			panic(errors.Wrap(types.ErrInvalidParam, "given public key is nil"))
+		}
+
+		if err := k.LinkVerificationIdToPubKey(ctx, verificationToPublicKeyData.PublicKey, verificationToPublicKeyData.Id); err != nil {
+			panic(err)
+		}
+	}
+
+	// Restore holders public keys
+	for _, publicKeyData := range genState.PublicKeys {
+		address, err := sdk.AccAddressFromBech32(publicKeyData.Address)
+		if err != nil {
+			panic(err)
+		}
+
+		if publicKeyData.PublicKey == nil {
+			panic(errors.Wrap(types.ErrInvalidParam, "public key is nil"))
+		}
+
+		k.SetHolderPublicKeyBytes(ctx, address, publicKeyData.PublicKey)
+	}
+
 	// Restore verification data
 	for _, verificationData := range genState.VerificationDetails {
 		// Check if issuer address is valid
@@ -60,8 +88,28 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 			panic(errors.Wrap(types.ErrInvalidParam, "empty proof data"))
 		}
 
-		if err = k.SetVerificationDetails(ctx, verificationData.Id, verificationData.Details); err != nil {
+		// Not the most efficient implementation, but it will not destroy genesis state
+		var userAddress sdk.AccAddress
+		for _, addressData := range genState.AddressDetails {
+			for _, addressVerification := range addressData.Details.Verifications {
+				if bytes.Equal(verificationData.Id, addressVerification.VerificationId) {
+					userAddress, err = sdk.AccAddressFromBech32(addressData.Address)
+					if err != nil {
+						panic(err)
+					}
+					break
+				}
+			}
+		}
+
+		if err = k.SetVerificationDetails(ctx, userAddress, verificationData.Id, verificationData.Details); err != nil {
 			panic(err)
+		}
+
+		if verificationData.Details.IsRevoked {
+			if err = k.MarkVerificationDetailsAsRevoked(ctx, verificationData.Id); err != nil {
+				panic(err)
+			}
 		}
 	}
 
@@ -128,6 +176,18 @@ func ExportGenesis(ctx sdk.Context, k keeper.Keeper) *types.GenesisState {
 		panic(err)
 	}
 	genesis.VerificationDetails = verificationDetails
+
+	holderPublicKeys, err := k.ExportHolderPublicKeys(ctx)
+	if err != nil {
+		panic(err)
+	}
+	genesis.PublicKeys = holderPublicKeys
+
+	linksToPublicKey, err := k.ExportLinksVerificationIdToPublicKey(ctx)
+	if err != nil {
+		panic(err)
+	}
+	genesis.LinksToPublicKey = linksToPublicKey
 
 	return genesis
 }

@@ -3,7 +3,7 @@ use std::slice;
 use sgx_types::sgx_status_t;
 use protobuf::Message;
 
-use crate::protobuf_generated::ffi::{FFIRequest, FFIRequest_oneof_req};
+use crate::protobuf_generated::ffi::{FFIRequest, FFIRequest_oneof_req, SGXVMEstimateGasRequest};
 use crate::{AllocationWithResult, Allocation};
 use crate::ocall;
 use crate::key_manager::KeyManager;
@@ -15,6 +15,7 @@ use crate::protobuf_generated::ffi::{
 use crate::GoQuerier;
 
 pub mod tx;
+mod utils;
 
 /// Handles incoming protobuf-encoded request
 pub fn handle_protobuf_request_inner(
@@ -43,6 +44,9 @@ pub fn handle_protobuf_request_inner(
                 },
                 FFIRequest_oneof_req::publicKeyRequest(data) => {
                     handle_public_key_request(data.blockNumber)
+                },
+                FFIRequest_oneof_req::estimateGasRequest(data) => {
+                    handle_evm_estimate_gas_request(querier, data)
                 }
             }
         }
@@ -129,5 +133,10 @@ pub fn handle_evm_call_request(querier: *mut GoQuerier, data: SGXVMCallRequest) 
 /// * data - EVM call data (value, tx.data, etc.)
 pub fn handle_evm_create_request(querier: *mut GoQuerier, data: SGXVMCreateRequest) -> AllocationWithResult {
     let res = tx::handle_create_request_inner(querier, data);
+    tx::convert_and_allocate_transaction_result(res)
+}
+
+pub fn handle_evm_estimate_gas_request(querier: *mut GoQuerier, data: SGXVMEstimateGasRequest) -> AllocationWithResult {
+    let res = tx::handle_estimate_gas_request_inner(querier, data);
     tx::convert_and_allocate_transaction_result(res)
 }

@@ -93,7 +93,7 @@ func (suite *KeeperTestSuite) TestNativeCurrencyTransfer() {
 
 			res, err := suite.app.EvmKeeper.HandleTx(suite.ctx, msg)
 			if tc.expErr {
-				suite.Require().Equal(res.VmError, "evm error: OutOfFund")
+				suite.Require().Equal("OutOfFund", res.VmError)
 				suite.Require().NoError(err)
 				return
 			} else {
@@ -179,7 +179,10 @@ func (suite *KeeperTestSuite) TestDryRun() {
 			balanceBefore := suite.app.EvmKeeper.GetBalance(suite.ctx, suite.address)
 			receiverBalanceBefore := suite.app.EvmKeeper.GetBalance(suite.ctx, common.Address{})
 
-			res, err := suite.app.EvmKeeper.ApplyMessageWithConfig(suite.ctx, ethMessage, tc.commit, cfg, txConfig, txContext, false)
+			v, r, s := tx.RawSignatureValues()
+			combinedSignature, err := keeper.CombineSignature(v, r, s, big.NewInt(int64(txContext.ChainId)))
+			suite.Require().NoError(err)
+			res, err := suite.app.EvmKeeper.ApplyMessageWithConfig(suite.ctx, ethMessage, tc.commit, cfg, txConfig, txContext, false, combinedSignature, tx.Type())
 			suite.Require().NoError(err)
 			suite.Require().Empty(res.VmError)
 
@@ -261,7 +264,10 @@ func (suite *KeeperTestSuite) TestMultipleTransfers() {
 		balanceBefore := suite.app.EvmKeeper.GetBalance(suite.ctx, suite.address)
 		receiverBalanceBefore := suite.app.EvmKeeper.GetBalance(suite.ctx, common.Address{})
 
-		res, err := suite.app.EvmKeeper.ApplyMessageWithConfig(suite.ctx, ethMessage, true, cfg, txConfig, txContext, false)
+		v, r, s := tx.RawSignatureValues()
+		combinedSignature, err := keeper.CombineSignature(v, r, s, big.NewInt(int64(txContext.ChainId)))
+		suite.Require().NoError(err)
+		res, err := suite.app.EvmKeeper.ApplyMessageWithConfig(suite.ctx, ethMessage, true, cfg, txConfig, txContext, false, combinedSignature, tx.Type())
 		suite.Require().NoError(err)
 		suite.Require().Empty(res.VmError)
 
@@ -384,4 +390,69 @@ func (suite *KeeperTestSuite) TestEmptyDataWithPublicKey() {
 	suite.Require().NoError(err)
 	suite.Require().Empty(rsp.VmError)
 	suite.Require().True(len(rsp.Ret) != 0)
+}
+
+func (suite *KeeperTestSuite) TestCallToCompliance() {
+	var (
+		signer ethtypes.Signer
+	)
+
+	testCases := []struct {
+		name      string
+		txDataHex string
+		expected  *big.Int
+	}{
+		{
+			"Request issuance tree root",
+			"0xd0376bd2",
+			big.NewInt(123),
+		},
+		{
+			"Request revocation tree root",
+			"0x3db94a04",
+			big.NewInt(321),
+		},
+	}
+
+	for _, tc := range testCases {
+		suite.Run(tc.name, func() {
+			suite.SetupSGXVMTest()
+
+			signer = ethtypes.LatestSignerForChainID(suite.app.EvmKeeper.ChainID())
+
+			cfg, err := suite.app.EvmKeeper.EVMConfig(suite.ctx, suite.ctx.BlockHeader().ProposerAddress, suite.app.EvmKeeper.ChainID())
+			suite.Require().NoError(err)
+
+			nonce := suite.app.EvmKeeper.GetNonce(suite.ctx, suite.address)
+			to := common.BigToAddress(big.NewInt(1028))
+
+			templateLegacyTx.To = &to
+			templateLegacyTx.Nonce = nonce
+			templateLegacyTx.Gas = 100_000
+			templateLegacyTx.Data = hexutil.MustDecode(tc.txDataHex)
+			ethTx := ethtypes.NewTx(templateLegacyTx)
+			msg := &types.MsgHandleTx{}
+			err = msg.FromEthereumTx(ethTx)
+			suite.Require().NoError(err)
+			msg.From = suite.address.Hex()
+			err = msg.Sign(signer, suite.signer)
+			suite.Require().NoError(err)
+
+			tx := msg.AsTransaction()
+			ethMessage, err := tx.AsMessage(signer, big.NewInt(0))
+			suite.Require().NoError(err)
+
+			txConfig := suite.app.EvmKeeper.TxConfig(suite.ctx, tx.Hash())
+			txContext, err := keeper.CreateSGXVMContext(suite.ctx, suite.app.EvmKeeper, tx)
+			suite.Require().NoError(err)
+
+			v, r, s := tx.RawSignatureValues()
+			combinedSignature, err := keeper.CombineSignature(v, r, s, big.NewInt(int64(txContext.ChainId)))
+			suite.Require().NoError(err)
+			res, err := suite.app.EvmKeeper.ApplyMessageWithConfig(suite.ctx, ethMessage, false, cfg, txConfig, txContext, true, combinedSignature, tx.Type())
+			suite.Require().NoError(err)
+			suite.Require().Empty(res.VmError)
+			suite.Require().NotNil(res.Ret)
+		})
+	}
 }

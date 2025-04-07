@@ -10,31 +10,38 @@ import (
 	"testing"
 	"time"
 
-	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
-	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
-	"github.com/cosmos/cosmos-sdk/store/prefix"
-	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
-	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
-
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-
 	sdkmath "cosmossdk.io/math"
-	"github.com/stretchr/testify/require"
-	"github.com/stretchr/testify/suite"
-
-	feemarkettypes "swisstronik/x/feemarket/types"
-
 	"cosmossdk.io/simapp"
+	"github.com/SigmaGmbH/librustgo"
+	abci "github.com/cometbft/cometbft/abci/types"
+	"github.com/cometbft/cometbft/crypto/tmhash"
 	tmjson "github.com/cometbft/cometbft/libs/json"
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	tmversion "github.com/cometbft/cometbft/proto/tendermint/version"
+	"github.com/cometbft/cometbft/version"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
+	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
+	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
+	"github.com/cosmos/cosmos-sdk/store/prefix"
+	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
+	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/params"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/suite"
 
 	"swisstronik/app"
 	"swisstronik/crypto/ethsecp256k1"
@@ -42,22 +49,9 @@ import (
 	"swisstronik/server/config"
 	"swisstronik/tests"
 	evmcommontypes "swisstronik/types"
-	evmtypes "swisstronik/x/evm/types"
-
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/params"
-
 	"swisstronik/utils"
-
-	"github.com/SigmaGmbH/librustgo"
-	abci "github.com/cometbft/cometbft/abci/types"
-	"github.com/cometbft/cometbft/crypto/tmhash"
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
-	tmversion "github.com/cometbft/cometbft/proto/tendermint/version"
-	"github.com/cometbft/cometbft/version"
+	evmtypes "swisstronik/x/evm/types"
+	feemarkettypes "swisstronik/x/feemarket/types"
 )
 
 type KeeperTestSuite struct {
@@ -102,30 +96,28 @@ func TestKeeperTestSuite(t *testing.T) {
 }
 
 func (suite *KeeperTestSuite) SetupTest() {
-	checkTx := false
 	chainID := utils.TestnetChainID + "-1"
-	suite.app, _ = app.SetupSwissApp(checkTx, nil, chainID)
-	suite.SetupApp(checkTx)
+	suite.app, _ = app.SetupSwissApp(nil, chainID)
+	suite.SetupApp()
 }
 
 func (suite *KeeperTestSuite) SetupTestWithT(t require.TestingT) {
-	checkTx := false
 	chainID := utils.TestnetChainID + "-1"
-	suite.app, _ = app.SetupSwissApp(checkTx, nil, chainID)
-	suite.SetupAppWithT(checkTx, t, chainID)
+	suite.app, _ = app.SetupSwissApp(nil, chainID)
+	suite.SetupAppWithT(t, chainID)
 }
 
-func (suite *KeeperTestSuite) SetupApp(checkTx bool) {
+func (suite *KeeperTestSuite) SetupApp() {
 	chainID := utils.TestnetChainID + "-1"
 	// Initialize enclave
 	err := librustgo.InitializeEnclave(false)
 	require.NoError(suite.T(), err)
 
-	suite.SetupAppWithT(checkTx, suite.T(), chainID)
+	suite.SetupAppWithT(suite.T(), chainID)
 }
 
 // SetupApp setup test environment, it uses`require.TestingT` to support both `testing.T` and `testing.B`.
-func (suite *KeeperTestSuite) SetupAppWithT(checkTx bool, t require.TestingT, chainID string) {
+func (suite *KeeperTestSuite) SetupAppWithT(t require.TestingT, chainID string) {
 	// obtain node public key
 	res, err := librustgo.GetNodePublicKey(0)
 	suite.Require().NoError(err)
@@ -143,11 +135,10 @@ func (suite *KeeperTestSuite) SetupAppWithT(checkTx bool, t require.TestingT, ch
 	suite.signer = tests.NewTestSigner(priv)
 
 	// consensus key
-	priv, err = ethsecp256k1.GenerateKey()
-	require.NoError(t, err)
-	suite.consAddress = sdk.ConsAddress(priv.PubKey().Address())
+	pks := simtestutil.CreateTestPubKeys(1)
+	suite.consAddress = sdk.ConsAddress(pks[0].Address())
 
-	suite.app = app.Setup(checkTx, func(app *app.App, genesis simapp.GenesisState) simapp.GenesisState {
+	suite.app = app.Setup(func(app *app.App, genesis simapp.GenesisState) simapp.GenesisState {
 		feemarketGenesis := feemarkettypes.DefaultGenesisState()
 		if suite.enableFeemarket {
 			feemarketGenesis.Params.EnableHeight = 1
@@ -227,7 +218,7 @@ func (suite *KeeperTestSuite) SetupAppWithT(checkTx bool, t require.TestingT, ch
 		EvidenceHash:       tmhash.Sum([]byte("evidence")),
 	}
 
-	suite.ctx = suite.app.NewContext(checkTx, header)
+	suite.ctx = suite.app.NewContext(false, header)
 
 	queryHelper := baseapp.NewQueryServerTestHelper(suite.ctx, suite.app.InterfaceRegistry())
 	evmtypes.RegisterQueryServer(queryHelper, suite.app.EvmKeeper)
@@ -241,7 +232,7 @@ func (suite *KeeperTestSuite) SetupAppWithT(checkTx bool, t require.TestingT, ch
 	suite.app.AccountKeeper.SetAccount(suite.ctx, acc)
 
 	valAddr := sdk.ValAddress(suite.address.Bytes())
-	validator, err := stakingtypes.NewValidator(valAddr, priv.PubKey(), stakingtypes.Description{})
+	validator, err := stakingtypes.NewValidator(valAddr, pks[0], stakingtypes.Description{})
 	require.NoError(t, err)
 	err = suite.app.StakingKeeper.SetValidatorByConsAddr(suite.ctx, validator)
 	require.NoError(t, err)

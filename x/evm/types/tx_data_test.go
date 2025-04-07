@@ -67,7 +67,7 @@ func TestTxData_DeriveChainID(t *testing.T) {
 			"Ethereum mainnet", &LegacyTx{V: big.NewInt(37).Bytes()}, big.NewInt(1),
 		},
 		{
-			"chain ID 1291", &LegacyTx{V: big.NewInt(2617).Bytes()}, big.NewInt(1291),
+			"chain ID 1848", &LegacyTx{V: big.NewInt(3731).Bytes()}, big.NewInt(1848),
 		},
 		{
 			"bit len 64", &LegacyTx{V: bitLen64.Bytes()}, big.NewInt(4611686018427387886),

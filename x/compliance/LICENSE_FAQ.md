@@ -12,7 +12,7 @@ The right to "use" here includes forking and using SWTR-NCL-1.0 code as code dep
 The following is the specific language of the license:
 "Software" means the blockchain software developed by the Company, which is an implementation of the Swisstronik blockchain, available at "https://github.com/SigmaGmbH/swisstronik-chain", as updated from time to time.
 
-"Specified blockchain" refers to a version of the digital blockchain ledger that is recognized as canonical at a specific point in time based on blockchain consensus. The blockchain originally envisioned was the Swisstronik blockchain, identified by the Ethereum Improvement Proposal 155 (EIP-155) chain identifiers 1291-1 (testnet or "testnet") and 1291 (mainnet or "mainnet").
+"Specified blockchain" refers to a version of the digital blockchain ledger that is recognized as canonical at a specific point in time based on blockchain consensus. The blockchain originally envisioned was the Swisstronik blockchain, identified by the Ethereum Improvement Proposal 155 (EIP-155) chain identifiers 1291-1 (testnet or "testnet") and 1848 (mainnet or "mainnet").
 
 "Swisstronik Product" means any product or service provided by Company or its affiliates.
 
@@ -27,7 +27,8 @@ A: Create a license that strikes a balance between maintaining sustainable softw
 Q:How can I ask questions about the terms of this license, get alternate licensing terms, or apply for a commercial use permit?
 A: Point of contact for all legal inquiries is: legal@swisstronik.com. They can help you to clarify software usage or resolve any issues related to SWTR-NCL-1.0.
 Q: What if I am currently using Swisstronik code commercially in my business/project?
-You are allowed to continue using the code from older versions (<v1.0.7) of Swisstronik repository under LGPL 3.0, however, you must obtain a commercial permit from the licensor for commercial use not allowed under SWTR-NCL-1.0, for version v1.0.7 and onward.
+You are allowed to continue using the code from older versions (until `25145998adb8a3c1b257ab77b601c91dbf84e136
+` commit) of Swisstronik repository under LGPL 3.0, however, you must obtain a commercial permit from the licensor for commercial use not allowed under SWTR-NCL-1.0, for version v1.0.6 and onward.
 Q: What is a License and Copyright Notice?
 A: You have to include the license and copyright notice with the software when you distribute it. This duty applies to everyone who obtains a copy of the software from you, not just the licensee. This is required to ensure that the license terms of the program are understood by all receivers. Eliminating copyright or licensing notices is a major offense and a breach of the agreement. This means that in addition to the software, you have to make sure that anyone who obtains a copy from you also gets a copy of the licensing terms or a link to the license, along with any plain-text lines that start with "Required Notice" that were supplied by the licensor.
 For example:

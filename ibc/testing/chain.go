@@ -40,11 +40,8 @@ import (
 	evmtypes "swisstronik/x/evm/types"
 )
 
-// ChainIDPrefix defines the default chain ID prefix for test chains
-var ChainIDPrefix = "swisstronik_1291-"
-
 func init() {
-	ibcgotesting.ChainIDPrefix = ChainIDPrefix
+	ibcgotesting.ChainIDPrefix = types.ChainID + "-"
 }
 
 // NewTestChain initializes a new TestChain instance with a single validator set using a

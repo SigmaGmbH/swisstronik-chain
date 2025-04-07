@@ -168,12 +168,12 @@ pub fn encrypt_deoxys(
     encryption_salt: Option<Vec<u8>>,
 ) -> Result<Vec<u8>, Error> {
     // Derive encryption salt if provided
-    let encryption_salt = encryption_salt.and_then(|salt| {
+    let encryption_salt = encryption_salt.map(|salt| {
         let mut hasher = kSha256::new();
         hasher.update(salt);
         let mut encryption_salt = [0u8; 32];
         encryption_salt.copy_from_slice(&hasher.finalize());
-        Some(encryption_salt)
+        encryption_salt
     });
 
     let nonce = match encryption_salt {

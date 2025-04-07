@@ -15,3 +15,14 @@ sgxvm/Enclave_private.pem
 # Dynamic libraries
 **libsgx_wrapper**
 **libsgx_attestation_wrapper**
+**libsgx_checker_wrapper**
+
+# Other
+**target**
+*run.xml*
+
+# Upgrade testing
+scripts/upgrade/old/
+scripts/upgrade/pid
+scripts/upgrade/*.log
+scripts/upgrade/.swisstronik*

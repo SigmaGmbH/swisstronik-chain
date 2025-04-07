@@ -17,6 +17,8 @@ make init
 
 ### Build `swisstronikd` to run the node
 
+Before build, please ensure that you're installed required Intel SGX SDK and other required libraries. You can read about installation process in our docs: https://docs.swisstronik.com/swisstronik-docs/node-setup/setup-sgx/setup-intel-sgx
+
 To build `swisstronikd` binary, which can be used to run node and interact with SGX-dependent functionality, use the following command:
 ```sh
 make build
@@ -52,6 +54,38 @@ Below you can see table with build commands for each OS / CPU
 | macos with Intel chip | `make build-macos-cli-amd`  |
 | windows               | `make build-windows-cli`    |
 
+## Testing
+
+### Unit-tests
+To run chain unit-tests use the following command:
+```sh
+make test-all
+```
+
+### Solidity tests
+To run solidity tests on local testnet, you should do the following:
+
+#### Start local chain
+First, you should initialize your local chain by running:
+```sh
+./scripts/local-node.sh
+```
+
+Once node is initialized, start it:
+```sh
+./build/swisstronikd start
+```
+
+#### Run solidity tests
+In separate terminal, go to `/tests/solidity`. There you should install required npm packages:
+```sh
+npm install
+```
+
+Then you're ready to run solidity tests:
+```sh
+npm run test
+```
 
 ## Docker
 
@@ -69,17 +103,6 @@ This will create an image with the name `swisstronik` and `latest` version tag. 
 e.g. checking stored keys:
 ```sh
 docker run -it --rm swisstronik swisstronikd keys list
-```
-
-### Local testnet
-To setup local test network with multiple validators, run:
-```sh
-swisstronikd testnet init-config --starting-ip-address 192.167.10.1 --chain-id swisstronik_1291-1
-```
-
-Then run:
-```sh
-docker-compose -f local-network.yml up
 ```
 
 ### Monitoring

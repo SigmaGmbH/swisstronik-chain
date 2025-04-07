@@ -28,13 +28,15 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/signer/core/apitypes"
-
 	evmtypes "swisstronik/x/evm/types"
 )
 
 // SendTransaction sends transaction based on received args using Node's key to sign it
 func (b *Backend) SendTransaction(args evmtypes.TransactionArgs) (common.Hash, error) {
+	if !b.cfg.JSONRPC.UnsafeEthEndpointsEnabled {
+		return common.Hash{}, fmt.Errorf("eth_sendTransaction not enabled")
+	}
+
 	// Look up the wallet containing the requested signer
 	_, err := b.clientCtx.Keyring.KeyByAddress(sdk.AccAddress(args.GetFrom().Bytes()))
 	if err != nil {
@@ -121,6 +123,10 @@ func (b *Backend) SendTransaction(args evmtypes.TransactionArgs) (common.Hash, e
 
 // Sign signs the provided data using the private key of address via Geth's signature standard.
 func (b *Backend) Sign(address common.Address, data hexutil.Bytes) (hexutil.Bytes, error) {
+	if !b.cfg.JSONRPC.UnsafeEthEndpointsEnabled {
+		return nil, fmt.Errorf("eth_sign not enabled")
+	}
+
 	from := sdk.AccAddress(address.Bytes())
 
 	_, err := b.clientCtx.Keyring.KeyByAddress(from)
@@ -131,32 +137,6 @@ func (b *Backend) Sign(address common.Address, data hexutil.Bytes) (hexutil.Byte
 
 	// Sign the requested hash with the wallet
 	signature, _, err := b.clientCtx.Keyring.SignByAddress(from, data)
-	if err != nil {
-		b.logger.Error("keyring.SignByAddress failed", "address", address.Hex())
-		return nil, err
-	}
-
-	signature[crypto.RecoveryIDOffset] += 27 // Transform V from 0/1 to 27/28 according to the yellow paper
-	return signature, nil
-}
-
-// SignTypedData signs EIP-712 conformant typed data
-func (b *Backend) SignTypedData(address common.Address, typedData apitypes.TypedData) (hexutil.Bytes, error) {
-	from := sdk.AccAddress(address.Bytes())
-
-	_, err := b.clientCtx.Keyring.KeyByAddress(from)
-	if err != nil {
-		b.logger.Error("failed to find key in keyring", "address", address.String())
-		return nil, fmt.Errorf("%s; %s", keystore.ErrNoMatch, err.Error())
-	}
-
-	sigHash, _, err := apitypes.TypedDataAndHash(typedData)
-	if err != nil {
-		return nil, err
-	}
-
-	// Sign the requested hash with the wallet
-	signature, _, err := b.clientCtx.Keyring.SignByAddress(from, sigHash)
 	if err != nil {
 		b.logger.Error("keyring.SignByAddress failed", "address", address.Hex())
 		return nil, err

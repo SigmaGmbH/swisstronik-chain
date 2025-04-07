@@ -1,6 +1,8 @@
 use sgx_types::sgx_quote_sign_type_t;
 
-#[cfg(feature = "production")]
+#[cfg(all(feature = "production", feature = "mainnet"))]
+pub const MRSIGNER: [u8; 32] = [52, 239, 150, 239, 69, 40, 214, 35, 150, 141, 140, 167, 211, 202, 139, 184, 0, 34, 4, 27, 186, 203, 32, 246, 29, 62, 249, 101, 161, 231, 110, 61];
+#[cfg(all(feature = "production", not(feature = "mainnet")))]
 pub const MRSIGNER: [u8; 32] = [117, 49, 209, 78, 24, 190, 212, 85, 43, 93, 191, 167, 37, 107, 46, 128, 149, 149, 220, 14, 137, 80, 163, 203, 250, 68, 219, 58, 99, 217, 42, 59];
 #[cfg(not(feature = "production"))]
 pub const MRSIGNER: [u8; 32] = [131, 215, 25, 231, 125, 234, 202, 20, 112, 246, 186, 246, 42, 77, 119, 67, 3, 200, 153, 219, 105, 2, 15, 156, 112, 238, 29, 252, 8, 199, 206, 158];

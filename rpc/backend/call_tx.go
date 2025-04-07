@@ -29,7 +29,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -345,6 +344,11 @@ func (b *Backend) EstimateGas(args evmtypes.TransactionArgs, blockNrOptional *rp
 	if err != nil {
 		return 0, err
 	}
+
+	if res.Failed {
+		err = evmtypes.NewExecErrorWithReason(res.ReturnValue)
+		return 0, err
+	}
 	return hexutil.Uint64(res.Gas), nil
 }
 
@@ -396,7 +400,7 @@ func (b *Backend) DoCall(
 	}
 
 	if res.Failed() {
-		if !strings.Contains(res.VmError, vm.ErrExecutionReverted.Error()) {
+		if !strings.Contains(res.VmError, "reverted") {
 			return nil, status.Error(codes.Internal, res.VmError)
 		}
 		return nil, evmtypes.NewExecErrorWithReason(res.Ret)

@@ -30,6 +30,7 @@ import (
 	"github.com/pkg/errors"
 
 	rpctypes "swisstronik/rpc/types"
+	compliancetypes "swisstronik/x/compliance/types"
 	evmtypes "swisstronik/x/evm/types"
 )
 
@@ -230,4 +231,40 @@ func (b *Backend) GetNodePublicKey(blockNum rpctypes.BlockNumber) (string, error
 	}
 
 	return res.NodePublicKey, nil
+}
+
+func (b *Backend) GetIssuanceProof(credentialHash hexutil.Bytes) (string, error) {
+	req := &compliancetypes.QueryIssuanceProofRequest{
+		CredentialHash: credentialHash,
+	}
+	res, err := b.queryClient.ComplianceClient.IssuanceProof(rpctypes.ContextWithHeight(0), req)
+	if err != nil {
+		return "", err
+	}
+
+	return string(res.EncodedProof), nil
+}
+
+func (b *Backend) GetNonRevocationProof(credentialHash hexutil.Bytes) (string, error) {
+	req := &compliancetypes.QueryRevocationProofRequest{
+		CredentialHash: credentialHash,
+	}
+	res, err := b.queryClient.ComplianceClient.RevocationProof(rpctypes.ContextWithHeight(0), req)
+	if err != nil {
+		return "", err
+	}
+
+	return string(res.EncodedProof), nil
+}
+
+func (b *Backend) GetCredentialHash(verificationId hexutil.Bytes) (hexutil.Bytes, error) {
+	req := &compliancetypes.QueryCredentialHashRequest{
+		VerificationId: verificationId,
+	}
+	res, err := b.queryClient.ComplianceClient.CredentialHash(rpctypes.ContextWithHeight(0), req)
+	if err != nil {
+		return nil, err
+	}
+
+	return res.CredentialHash, nil
 }

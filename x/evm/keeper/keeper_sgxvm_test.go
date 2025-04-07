@@ -7,19 +7,27 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/SigmaGmbH/librustgo"
-
-	feemarkettypes "swisstronik/x/feemarket/types"
-
 	sdkmath "cosmossdk.io/math"
 	"cosmossdk.io/simapp"
+	"github.com/SigmaGmbH/librustgo"
+	abci "github.com/cometbft/cometbft/abci/types"
+	"github.com/cometbft/cometbft/crypto/tmhash"
 	tmjson "github.com/cometbft/cometbft/libs/json"
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	tmversion "github.com/cometbft/cometbft/proto/tendermint/version"
+	"github.com/cometbft/cometbft/version"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
+	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/params"
 	"github.com/stretchr/testify/require"
 
 	"swisstronik/app"
@@ -30,38 +38,25 @@ import (
 	evmcommontypes "swisstronik/types"
 	"swisstronik/x/evm/types"
 	evmtypes "swisstronik/x/evm/types"
-
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/params"
-
-	abci "github.com/cometbft/cometbft/abci/types"
-	"github.com/cometbft/cometbft/crypto/tmhash"
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
-	tmversion "github.com/cometbft/cometbft/proto/tendermint/version"
-	"github.com/cometbft/cometbft/version"
+	feemarkettypes "swisstronik/x/feemarket/types"
 )
 
 func (suite *KeeperTestSuite) SetupSGXVMTest() {
-	checkTx := false
-	suite.app = app.Setup(checkTx, nil)
-	suite.SetupSGXVMApp(checkTx)
+	suite.app = app.Setup(nil)
+	suite.SetupSGXVMApp()
 }
 
 func (suite *KeeperTestSuite) SetupSGXVMTestWithT(t require.TestingT) {
-	checkTx := false
-	suite.app = app.Setup(checkTx, nil)
-	suite.SetupSGXVMAppWithT(checkTx, t)
+	suite.app = app.Setup(nil)
+	suite.SetupSGXVMAppWithT(t)
 }
 
-func (suite *KeeperTestSuite) SetupSGXVMApp(checkTx bool) {
-	suite.SetupSGXVMAppWithT(checkTx, suite.T())
+func (suite *KeeperTestSuite) SetupSGXVMApp() {
+	suite.SetupSGXVMAppWithT(suite.T())
 }
 
 // SetupApp setup test environment, it uses`require.TestingT` to support both `testing.T` and `testing.B`.
-func (suite *KeeperTestSuite) SetupSGXVMAppWithT(checkTx bool, t require.TestingT) {
+func (suite *KeeperTestSuite) SetupSGXVMAppWithT(t require.TestingT) {
 	// obtain node public key
 	res, err := librustgo.GetNodePublicKey(0)
 	require.NoError(t, err)
@@ -78,11 +73,10 @@ func (suite *KeeperTestSuite) SetupSGXVMAppWithT(checkTx bool, t require.Testing
 	suite.signer = tests.NewTestSigner(priv)
 
 	// consensus key
-	priv, err = ethsecp256k1.GenerateKey()
-	require.NoError(t, err)
-	suite.consAddress = sdk.ConsAddress(priv.PubKey().Address())
+	pks := simtestutil.CreateTestPubKeys(1)
+	suite.consAddress = sdk.ConsAddress(pks[0].Address())
 
-	suite.app = app.Setup(checkTx, func(app *app.App, genesis simapp.GenesisState) simapp.GenesisState {
+	suite.app = app.Setup(func(app *app.App, genesis simapp.GenesisState) simapp.GenesisState {
 		feemarketGenesis := feemarkettypes.DefaultGenesisState()
 		if suite.enableFeemarket {
 			feemarketGenesis.Params.EnableHeight = 1
@@ -129,7 +123,7 @@ func (suite *KeeperTestSuite) SetupSGXVMAppWithT(checkTx bool, t require.Testing
 		// Initialize the chain
 		suite.app.InitChain(
 			abci.RequestInitChain{
-				ChainId:         "swisstronik_1291-1",
+				ChainId:         evmcommontypes.PrefixedChainID,
 				Validators:      []abci.ValidatorUpdate{},
 				ConsensusParams: app.DefaultConsensusParams,
 				AppStateBytes:   stateBytes,
@@ -137,9 +131,9 @@ func (suite *KeeperTestSuite) SetupSGXVMAppWithT(checkTx bool, t require.Testing
 		)
 	}
 
-	suite.ctx = suite.app.BaseApp.NewContext(checkTx, tmproto.Header{
+	suite.ctx = suite.app.BaseApp.NewContext(false, tmproto.Header{
 		Height:          1,
-		ChainID:         "swisstronik_1291-1",
+		ChainID:         evmcommontypes.PrefixedChainID,
 		Time:            time.Now().UTC(),
 		ProposerAddress: suite.consAddress.Bytes(),
 		Version: tmversion.Consensus{
@@ -173,7 +167,7 @@ func (suite *KeeperTestSuite) SetupSGXVMAppWithT(checkTx bool, t require.Testing
 	suite.app.AccountKeeper.SetAccount(suite.ctx, acc)
 
 	valAddr := sdk.ValAddress(suite.address.Bytes())
-	validator, err := stakingtypes.NewValidator(valAddr, priv.PubKey(), stakingtypes.Description{})
+	validator, err := stakingtypes.NewValidator(valAddr, pks[0], stakingtypes.Description{})
 	require.NoError(t, err)
 	err = suite.app.StakingKeeper.SetValidatorByConsAddr(suite.ctx, validator)
 	require.NoError(t, err)

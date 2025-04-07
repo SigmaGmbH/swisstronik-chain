@@ -49,10 +49,7 @@ impl EpochManager {
         // Get number of latest epoch
         let latest_epoch_number = match updated_epoch_manager.epochs.iter().max_by_key(|epoch| epoch.epoch_number) {
             Some(epoch) => epoch.epoch_number,
-            None => {
-                println!("[EpochManager] There are no epochs");
-                return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);
-            }
+            None => 0,
         };
 
         let epoch_key = utils::random_bytes32().map_err(|err| {
@@ -184,6 +181,10 @@ impl EpochManager {
         Ok(Self {
             epochs: vec![epoch],
         })
+    }
+
+    pub fn random_empty() -> SgxResult<Self> {
+        Ok(Self { epochs: vec![]})
     }
 
     pub fn from_seed(input: [u8; 32]) -> Self {

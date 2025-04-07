@@ -14,6 +14,7 @@ import (
 	"swisstronik/rpc/backend/mocks"
 	rpc "swisstronik/rpc/types"
 	"swisstronik/tests"
+	commontypes "swisstronik/types"
 	evmtypes "swisstronik/x/evm/types"
 	feemarkettypes "swisstronik/x/feemarket/types"
 )
@@ -151,7 +152,7 @@ func (suite *BackendTestSuite) TestBaseFee() {
 }
 
 func (suite *BackendTestSuite) TestChainId() {
-	expChainId := (*hexutil.Big)(big.NewInt(1291))
+	expChainId := (*hexutil.Big)(big.NewInt(commontypes.EvmChainID))
 	testCases := []struct {
 		name         string
 		registerMock func()

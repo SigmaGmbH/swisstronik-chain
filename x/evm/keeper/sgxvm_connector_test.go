@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	"github.com/SigmaGmbH/go-merkletree-sql/v2"
 	"math/big"
 	"math/rand"
 	"time"
@@ -23,29 +24,33 @@ func insertAccount(
 	balance, nonce *big.Int,
 ) error {
 	// Encode request
-	request, encodeErr := proto.Marshal(&librustgo.CosmosRequest{
-		Req: &librustgo.CosmosRequest_InsertAccount{
-			InsertAccount: &librustgo.QueryInsertAccount{
+	requestInsertBalance, _ := proto.Marshal(&librustgo.CosmosRequest{
+		Req: &librustgo.CosmosRequest_InsertAccountBalance{
+			InsertAccountBalance: &librustgo.QueryInsertAccountBalance{
 				Address: address.Bytes(),
 				Balance: balance.Bytes(),
+			},
+		},
+	})
+
+	// Encode request
+	requestInsertNonce, _ := proto.Marshal(&librustgo.CosmosRequest{
+		Req: &librustgo.CosmosRequest_InsertAccountNonce{
+			InsertAccountNonce: &librustgo.QueryInsertAccountNonce{
+				Address: address.Bytes(),
 				Nonce:   nonce.Uint64(),
 			},
 		},
 	})
 
-	if encodeErr != nil {
-		return encodeErr
-	}
-
-	responseBytes, queryErr := connector.Query(request)
+	_, queryErr := connector.Query(requestInsertBalance)
 	if queryErr != nil {
 		return queryErr
 	}
 
-	response := &librustgo.QueryInsertAccountResponse{}
-	decodingError := proto.Unmarshal(responseBytes, response)
-	if decodingError != nil {
-		return decodingError
+	_, queryErr = connector.Query(requestInsertNonce)
+	if queryErr != nil {
+		return queryErr
 	}
 
 	return nil
@@ -526,71 +531,22 @@ func (suite *KeeperTestSuite) TestSingleVerificationDetails() {
 	}
 }
 
-func (suite *KeeperTestSuite) TestMultipleVerificationDetails() {
-	// Add multiple verification details
-
-	var (
-		userAddress   = tests.RandomEthAddress()
-		issuerCreator = tests.RandomAccAddress()
-		issuerAddress = tests.RandomEthAddress()
-		issuerAccount = sdk.AccAddress(issuerAddress.Bytes())
-
-		expected []*types.VerificationDetails
-
-		verificationType = compliancetypes.VerificationType_VT_KYC
-	)
-
-	// Verify issuer to add verification details which are verified by issuer
-	_ = suite.app.ComplianceKeeper.SetIssuerDetails(suite.ctx, issuerAccount, &compliancetypes.IssuerDetails{
-		Creator: issuerCreator.String(),
-		Name:    "test issuer",
-	})
-	_ = suite.app.ComplianceKeeper.SetAddressVerificationStatus(suite.ctx, issuerAccount, true)
+func (suite *KeeperTestSuite) TestIssuanceRoot() {
+	expectedRootValue := big.NewInt(123)
+	expectedRoot, err := merkletree.NewHashFromBigInt(expectedRootValue)
+	suite.Require().NoError(err)
 
 	connector := evmkeeper.Connector{
 		Context:   suite.ctx,
 		EVMKeeper: suite.app.EvmKeeper,
 	}
 
-	numOfRetry := 10
-	for i := 0; i < numOfRetry; i++ {
-		// Addresses before making Query request should be Ethereum Addresses
-		verificationDetails := &types.VerificationDetails{
-			VerificationType:     uint32(verificationType),
-			IssuerAddress:        issuerAddress.Bytes(),
-			OriginChain:          "samplechain",
-			IssuanceTimestamp:    uint32(suite.ctx.BlockTime().Unix()),
-			ExpirationTimestamp:  uint32(0),
-			OriginalData:         big.NewInt(rand.Int63n(100000)).Bytes(),
-			Schema:               "HelloWorld",
-			IssuerVerificationId: "HelloIssuer",
-			Version:              uint32(0),
-		}
-		verificationID, err := requestAddVerificationDetails(
-			&connector,
-			userAddress,
-			issuerAddress,
-			verificationType,
-			verificationDetails.OriginChain,
-			verificationDetails.IssuanceTimestamp,
-			verificationDetails.ExpirationTimestamp,
-			verificationDetails.OriginalData,
-			verificationDetails.Schema,
-			verificationDetails.IssuerVerificationId,
-			0,
-		)
-		verificationDetails.VerificationID = verificationID
-		expected = append(expected, verificationDetails)
-		suite.Require().NoError(err)
-		suite.Require().NotNil(verificationID)
-	}
+	err = connector.EVMKeeper.ComplianceKeeper.SetTreeRoot(suite.ctx, compliancetypes.KeyPrefixIssuanceTree, expectedRoot)
+	suite.Require().NoError(err)
 
 	request, encodeErr := proto.Marshal(&librustgo.CosmosRequest{
-		Req: &librustgo.CosmosRequest_GetVerificationData{
-			GetVerificationData: &librustgo.QueryGetVerificationData{
-				UserAddress:   userAddress.Bytes(),
-				IssuerAddress: issuerAccount.Bytes(),
-			},
+		Req: &librustgo.CosmosRequest_IssuanceTreeRoot{
+			IssuanceTreeRoot: &librustgo.QueryIssuanceTreeRoot{},
 		},
 	})
 	suite.Require().NoError(encodeErr)
@@ -598,20 +554,45 @@ func (suite *KeeperTestSuite) TestMultipleVerificationDetails() {
 	respBytes, queryErr := connector.Query(request)
 	suite.Require().NoError(queryErr)
 
-	resp := &librustgo.QueryGetVerificationDataResponse{}
+	resp := &librustgo.QueryIssuanceTreeRootResponse{}
 	decodeErr := proto.Unmarshal(respBytes, resp)
 	suite.Require().NoError(decodeErr)
-	suite.Require().Equal(numOfRetry, len(resp.Data))
-	for i, details := range resp.Data {
-		suite.Require().Equal(expected[i].VerificationType, details.VerificationType)
-		suite.Require().Equal(expected[i].VerificationID, details.VerificationID)
-		suite.Require().Equal(expected[i].IssuerAddress, details.IssuerAddress)
-		suite.Require().Equal(expected[i].OriginChain, details.OriginChain)
-		suite.Require().Equal(expected[i].IssuanceTimestamp, details.IssuanceTimestamp)
-		suite.Require().Equal(expected[i].ExpirationTimestamp, details.ExpirationTimestamp)
-		suite.Require().Equal(expected[i].OriginalData, details.OriginalData)
-		suite.Require().Equal(expected[i].Schema, details.Schema)
-		suite.Require().Equal(expected[i].IssuerVerificationId, details.IssuerVerificationId)
-		suite.Require().Equal(expected[i].Version, details.Version)
+
+	decodedRootValue := new(big.Int)
+	decodedRootValue.SetBytes(resp.Root)
+
+	suite.Require().Equal(expectedRootValue, decodedRootValue)
+}
+
+func (suite *KeeperTestSuite) TestRevocationRoot() {
+	expectedRootValue := big.NewInt(321)
+	expectedRoot, err := merkletree.NewHashFromBigInt(expectedRootValue)
+	suite.Require().NoError(err)
+
+	connector := evmkeeper.Connector{
+		Context:   suite.ctx,
+		EVMKeeper: suite.app.EvmKeeper,
 	}
+
+	err = connector.EVMKeeper.ComplianceKeeper.SetTreeRoot(suite.ctx, compliancetypes.KeyPrefixRevocationTree, expectedRoot)
+	suite.Require().NoError(err)
+
+	request, encodeErr := proto.Marshal(&librustgo.CosmosRequest{
+		Req: &librustgo.CosmosRequest_RevocationTreeRoot{
+			RevocationTreeRoot: &librustgo.QueryRevocationTreeRoot{},
+		},
+	})
+	suite.Require().NoError(encodeErr)
+
+	respBytes, queryErr := connector.Query(request)
+	suite.Require().NoError(queryErr)
+
+	resp := &librustgo.QueryRevocationTreeRootResponse{}
+	decodeErr := proto.Unmarshal(respBytes, resp)
+	suite.Require().NoError(decodeErr)
+
+	decodedRootValue := new(big.Int)
+	decodedRootValue.SetBytes(resp.Root)
+
+	suite.Require().Equal(expectedRootValue, decodedRootValue)
 }

@@ -1,19 +1,19 @@
-use ethereum::Log;
-use evm::backend::{Apply, Backend as EvmBackend, Basic};
+use alloc::boxed::Box;
+use alloc::collections::{BTreeMap, BTreeSet};
+use alloc::string::ToString;
+use alloc::vec::Vec;
+use core::mem;
+use evm::backend::{OverlayedChangeSet, RuntimeBackend, RuntimeBaseBackend, RuntimeEnvironment};
+use evm::interpreter::error::{ExitError, ExitException, ExitResult, ExitSucceed};
+use evm::interpreter::runtime::{Log, SetCodeOrigin};
+use evm::{MergeStrategy, TransactionalBackend};
 use primitive_types::{H160, H256, U256};
-use std::vec::Vec;
+use crate::{coder, querier};
+use crate::protobuf_generated::ffi;
+use crate::storage::FFIStorage;
+use crate::types::{Storage};
 
-use crate::{
-    coder,
-    error::Error,
-    protobuf_generated::ffi,
-    querier,
-    storage::FFIStorage,
-    types::{ExtendedBackend, Storage, Vicinity},
-};
-
-/// Contains context of the transaction such as gas price, block hash, block timestamp, etc.
-pub struct TxContext {
+pub struct TxEnvironment {
     pub chain_id: U256,
     pub gas_price: U256,
     pub block_number: U256,
@@ -23,7 +23,7 @@ pub struct TxContext {
     pub block_coinbase: H160,
 }
 
-impl From<ffi::TransactionContext> for TxContext {
+impl From<ffi::TransactionContext> for TxEnvironment {
     fn from(context: ffi::TransactionContext) -> Self {
         Self {
             chain_id: U256::from(context.chain_id),
@@ -37,103 +37,70 @@ impl From<ffi::TransactionContext> for TxContext {
     }
 }
 
-pub struct FFIBackend<'state> {
-    // We keep GoQuerier to make it accessible for `OCALL` handlers
-    pub querier: *mut querier::GoQuerier,
-    // Contains gas price and original sender
-    pub vicinity: Vicinity,
-    // Accounts state
-    pub state: &'state mut FFIStorage,
-    // Emitted events
-    pub logs: Vec<Log>,
-    // Transaction context
-    pub tx_context: TxContext,
+pub struct Backend<'state> {
+    querier: *mut querier::GoQuerier,
+    storage: &'state FFIStorage,
+    environment: TxEnvironment,
+    substate: Box<Substate>,
+    accessed: BTreeSet<(H160, Option<H256>)>,
 }
 
-impl<'state> ExtendedBackend for FFIBackend<'state> {
-    fn get_logs(&self) -> Vec<Log> {
-        self.logs.clone()
+impl<'state> Backend<'state> {
+    pub fn new(
+        querier: *mut querier::GoQuerier,
+        storage: &'state FFIStorage,
+        environment: TxEnvironment,
+    ) -> Self {
+        Self {
+            querier,
+            storage,
+            substate: Box::new(Substate::new()),
+            environment,
+            accessed: BTreeSet::new(),
+        }
     }
 
-    fn apply<A, I, L>(&mut self, values: A, logs: L, _delete_empty: bool) -> Result<(), Error>
-    where
-        A: IntoIterator<Item = Apply<I>>,
-        I: IntoIterator<Item = (H256, H256)>,
-        L: IntoIterator<Item = Log>,
-    {
-        let mut total_supply_add = U256::zero();
-        let mut total_supply_sub = U256::zero();
-
-        for apply in values {
-            match apply {
-                Apply::Modify {
-                    address,
-                    basic,
-                    code,
-                    storage,
-                    ..
-                } => {
-                    // Update account balance and nonce
-                    let previous_account_data = self.state.get_account(&address);
-
-                    if basic.balance > previous_account_data.balance {
-                        total_supply_add = total_supply_add
-                            .checked_add(basic.balance - previous_account_data.balance)
-                            .unwrap();
-                    } else {
-                        total_supply_sub = total_supply_sub
-                            .checked_add(previous_account_data.balance - basic.balance)
-                            .unwrap();
-                    }
-                    self.state.insert_account(address, basic)?;
-
-                    // Handle contract updates
-                    if let Some(code) = code {
-                        self.state.insert_account_code(address, code)?;
-                    }
-
-                    // Handle storage updates
-                    for (index, value) in storage {
-                        if value == H256::default() {
-                            self.state.remove_storage_cell(&address, &index)?;
-                        } else {
-                            self.state.insert_storage_cell(address, index, value)?;
-                        }
-                    }
-                }
-                // Used by `SELFDESTRUCT` opcode
-                Apply::Delete { address } => {
-                    self.state.remove(&address)?;
-                }
-            }
+    pub fn apply_changeset(storage: &'state FFIStorage, changeset: &OverlayedChangeSet) -> ExitResult {
+        for (address, balance) in changeset.balances.clone() {
+            storage.insert_account_balance(&address, &balance).map_err(|err| ExitException::Other(err.to_string().into()))?
         }
 
-        // Used to avoid corrupting state via invariant violation
-        assert_eq!(
-            total_supply_add, total_supply_sub,
-            "evm execution would lead to invariant violation ({} != {})",
-            total_supply_add, total_supply_sub
-        );
-
-        for log in logs {
-            self.logs.push(log);
+        for (address, nonce) in changeset.nonces.clone() {
+            storage.insert_account_nonce(&address, &nonce).map_err(|err| ExitException::Other(err.to_string().into()))?
         }
 
-        Ok(())
+        for (address, code) in changeset.codes.clone() {
+            storage.insert_account_code(address, code).map_err(|err| ExitException::Other(err.to_string().into()))?
+        }
+
+        for ((address, key), value) in changeset.storages.clone() {
+            storage.insert_storage_cell(address, key, value).map_err(|err| ExitException::Other(err.to_string().into()))?;
+        }
+
+        for address in changeset.deletes.clone() {
+            storage.remove(&address).map_err(|err| ExitException::Other(err.to_string().into()))?;
+        }
+
+        Ok(ExitSucceed::Returned)
+    }
+
+    pub fn deconstruct(self) -> OverlayedChangeSet {
+        OverlayedChangeSet {
+                logs: self.substate.logs,
+                balances: self.substate.balances,
+                codes: self.substate.codes,
+                nonces: self.substate.nonces,
+                storage_resets: self.substate.storage_resets,
+                storages: self.substate.storages,
+                transient_storage: self.substate.transient_storage,
+                deletes: self.substate.deletes,
+        }
     }
 }
 
-impl<'state> EvmBackend for FFIBackend<'state> {
-    fn gas_price(&self) -> U256 {
-        self.tx_context.gas_price
-    }
-
-    fn origin(&self) -> H160 {
-        self.vicinity.origin
-    }
-
+impl<'state> RuntimeEnvironment for Backend<'state> {
     fn block_hash(&self, number: U256) -> H256 {
-        let encoded_request = coder::encode_query_block_hash(number);
+        let encoded_request = coder::encode_query_block_hash(&number);
         match querier::make_request(self.querier, encoded_request) {
             Some(result) => {
                 // Decode protobuf
@@ -156,19 +123,19 @@ impl<'state> EvmBackend for FFIBackend<'state> {
     }
 
     fn block_number(&self) -> U256 {
-        self.tx_context.block_number
+        self.environment.block_number
     }
 
     fn block_coinbase(&self) -> H160 {
-        self.tx_context.block_coinbase
+        self.environment.block_coinbase
     }
 
     fn block_timestamp(&self) -> U256 {
-        self.tx_context.timestamp
+        self.environment.timestamp
     }
 
     fn block_difficulty(&self) -> U256 {
-        U256::zero() // Only applicable for PoW
+        U256::zero()
     }
 
     fn block_randomness(&self) -> Option<H256> {
@@ -176,68 +143,300 @@ impl<'state> EvmBackend for FFIBackend<'state> {
     }
 
     fn block_gas_limit(&self) -> U256 {
-        self.tx_context.block_gas_limit
+        self.environment.block_gas_limit
     }
 
     fn block_base_fee_per_gas(&self) -> U256 {
-        self.tx_context.block_base_fee_per_gas
+        self.environment.block_base_fee_per_gas
     }
 
     fn chain_id(&self) -> U256 {
-        self.tx_context.chain_id
-    }
-
-    fn exists(&self, address: H160) -> bool {
-        self.state.contains_key(&address)
-    }
-
-    fn basic(&self, address: H160) -> Basic {
-        if address == self.vicinity.origin {
-            let mut account_data = self.state.get_account(&address);
-            let updated_nonce = account_data
-                .nonce
-                .checked_sub(U256::from(1u8))
-                .unwrap_or(U256::zero());
-            if updated_nonce > self.vicinity.nonce {
-                account_data.nonce = updated_nonce;
-            } else {
-                account_data.nonce = self.vicinity.nonce;
-            }
-
-            account_data
-        } else {
-            self.state.get_account(&address)
-        }
-    }
-
-    fn code(&self, address: H160) -> Vec<u8> {
-        self.state.get_account_code(&address).unwrap_or_default()
-    }
-
-    fn storage(&self, address: H160, index: H256) -> H256 {
-        self.state
-            .get_account_storage_cell(&address, &index)
-            .unwrap_or_default()
-    }
-
-    fn original_storage(&self, _address: H160, _index: H256) -> Option<H256> {
-        None
+        self.environment.chain_id
     }
 }
 
-impl<'state> FFIBackend<'state> {
-    pub fn new(
-        querier: *mut querier::GoQuerier,
-        storage: &'state mut FFIStorage,
-        vicinity: Vicinity,
-        tx_context: TxContext,
-    ) -> Self {
+impl<'state> RuntimeBaseBackend for Backend<'state> {
+    fn balance(&self, address: H160) -> U256 {
+        if let Some(balance) = self.substate.known_balance(address) {
+            balance
+        } else {
+            self.storage.get_account(&address).0
+        }
+    }
+
+    fn code_size(&self, address: H160) -> U256 {
+        self.storage.get_account_code_size(&address).unwrap_or(U256::zero())
+    }
+
+    fn code_hash(&self, address: H160) -> H256 {
+        self.storage.get_account_code_hash(&address).unwrap_or(H256::default())
+    }
+
+    fn code(&self, address: H160) -> Vec<u8> {
+        if let Some(code) = self.substate.known_code(address) {
+            code
+        } else {
+            self.storage.get_account_code(&address).unwrap_or(Vec::new())
+        }
+    }
+
+    fn storage(&self, address: H160, index: H256) -> H256 {
+        if let Some(value) = self.substate.known_storage(address, index) {
+            value
+        } else {
+            self.storage.get_account_storage_cell(&address, &index).unwrap_or(H256::default())
+        }
+    }
+
+    fn transient_storage(&self, address: H160, index: H256) -> H256 {
+        if let Some(value) = self.substate.known_transient_storage(address, index) {
+            value
+        } else {
+            H256::default()
+        }
+    }
+
+    fn exists(&self, address: H160) -> bool {
+        if let Some(exists) = self.substate.known_exists(address) {
+            exists
+        } else {
+            self.storage.contains_key(&address)
+        }
+    }
+
+    fn nonce(&self, address: H160) -> U256 {
+        self.storage.get_account(&address).1
+    }
+}
+
+impl<'state> RuntimeBackend for Backend<'state> {
+    fn original_storage(&self, address: H160, index: H256) -> H256 {
+        self.storage(address, index)
+    }
+
+    fn deleted(&self, address: H160) -> bool {
+        self.substate.deleted(address)
+    }
+
+    fn is_cold(&self, address: H160, index: Option<H256>) -> bool {
+        !self.accessed.contains(&(address, index))
+    }
+
+    fn mark_hot(&mut self, address: H160, index: Option<H256>) {
+        self.accessed.insert((address, index));
+    }
+
+    fn set_storage(&mut self, address: H160, index: H256, value: H256) -> Result<(), ExitError> {
+        self.substate.storages.insert((address, index), value);
+        Ok(())
+    }
+
+    fn set_transient_storage(
+        &mut self,
+        address: H160,
+        index: H256,
+        value: H256,
+    ) -> Result<(), ExitError> {
+        self.substate
+            .transient_storage
+            .insert((address, index), value);
+        Ok(())
+    }
+
+    fn log(&mut self, log: Log) -> Result<(), ExitError> {
+        self.substate.logs.push(log);
+        Ok(())
+    }
+
+    fn mark_delete(&mut self, address: H160) {
+        self.substate.deletes.insert(address);
+    }
+
+    fn reset_storage(&mut self, address: H160) {
+        self.substate.storage_resets.insert(address);
+    }
+
+    fn set_code(
+        &mut self,
+        address: H160,
+        code: Vec<u8>,
+        _origin: SetCodeOrigin,
+    ) -> Result<(), ExitError> {
+        self.substate.codes.insert(address, code);
+        Ok(())
+    }
+
+    fn reset_balance(&mut self, address: H160) {
+        self.substate.balances.insert(address, U256::zero());
+    }
+
+    fn deposit(&mut self, target: H160, value: U256) {
+        if value == U256::zero() {
+            return;
+        }
+
+        let current_balance = self.balance(target);
+        self.substate
+            .balances
+            .insert(target, current_balance.saturating_add(value));
+    }
+
+    fn withdrawal(&mut self, source: H160, value: U256) -> Result<(), ExitError> {
+        if value == U256::zero() {
+            return Ok(());
+        }
+
+        let current_balance = self.balance(source);
+        if current_balance < value {
+            return Err(ExitException::OutOfFund.into());
+        }
+        let new_balance = current_balance - value;
+        self.substate.balances.insert(source, new_balance);
+        Ok(())
+    }
+
+    fn inc_nonce(&mut self, address: H160) -> Result<(), ExitError> {
+        let new_nonce = self.nonce(address).saturating_add(U256::from(1));
+        self.substate.nonces.insert(address, new_nonce);
+        Ok(())
+    }
+}
+
+impl<'state> TransactionalBackend for Backend<'state> {
+    fn push_substate(&mut self) {
+        let mut parent = Box::new(Substate::new());
+        mem::swap(&mut parent, &mut self.substate);
+        self.substate.parent = Some(parent);
+    }
+
+    fn pop_substate(&mut self, strategy: MergeStrategy) {
+        let mut child = self.substate.parent.take().expect("uneven substate pop");
+        mem::swap(&mut child, &mut self.substate);
+        let child = child;
+
+        match strategy {
+            MergeStrategy::Commit => {
+                for log in child.logs {
+                    self.substate.logs.push(log);
+                }
+                for (address, balance) in child.balances {
+                    self.substate.balances.insert(address, balance);
+                }
+                for (address, code) in child.codes {
+                    self.substate.codes.insert(address, code);
+                }
+                for (address, nonce) in child.nonces {
+                    self.substate.nonces.insert(address, nonce);
+                }
+                for address in child.storage_resets {
+                    self.substate.storage_resets.insert(address);
+                }
+                for ((address, key), value) in child.storages {
+                    self.substate.storages.insert((address, key), value);
+                }
+                for ((address, key), value) in child.transient_storage {
+                    self.substate
+                        .transient_storage
+                        .insert((address, key), value);
+                }
+                for address in child.deletes {
+                    self.substate.deletes.insert(address);
+                }
+            }
+            MergeStrategy::Revert | MergeStrategy::Discard => {}
+        }
+    }
+}
+
+struct Substate {
+    parent: Option<Box<Substate>>,
+    logs: Vec<Log>,
+    balances: BTreeMap<H160, U256>,
+    codes: BTreeMap<H160, Vec<u8>>,
+    nonces: BTreeMap<H160, U256>,
+    storage_resets: BTreeSet<H160>,
+    storages: BTreeMap<(H160, H256), H256>,
+    transient_storage: BTreeMap<(H160, H256), H256>,
+    deletes: BTreeSet<H160>,
+}
+
+impl Substate {
+    pub fn new() -> Self {
         Self {
-            querier,
-            vicinity,
-            state: storage,
-            logs: vec![],
-            tx_context,
+            parent: None,
+            logs: Vec::new(),
+            balances: Default::default(),
+            codes: Default::default(),
+            nonces: Default::default(),
+            storage_resets: Default::default(),
+            storages: Default::default(),
+            transient_storage: Default::default(),
+            deletes: Default::default(),
+        }
+    }
+
+    pub fn known_balance(&self, address: H160) -> Option<U256> {
+        if let Some(balance) = self.balances.get(&address) {
+            Some(*balance)
+        } else if let Some(parent) = self.parent.as_ref() {
+            parent.known_balance(address)
+        } else {
+            None
+        }
+    }
+
+    pub fn known_code(&self, address: H160) -> Option<Vec<u8>> {
+        if let Some(code) = self.codes.get(&address) {
+            Some(code.clone())
+        } else if let Some(parent) = self.parent.as_ref() {
+            parent.known_code(address)
+        } else {
+            None
+        }
+    }
+
+    pub fn known_storage(&self, address: H160, key: H256) -> Option<H256> {
+        if let Some(value) = self.storages.get(&(address, key)) {
+            Some(*value)
+        } else if self.storage_resets.contains(&address) {
+            Some(H256::default())
+        } else if let Some(parent) = self.parent.as_ref() {
+            parent.known_storage(address, key)
+        } else {
+            None
+        }
+    }
+
+    pub fn known_transient_storage(&self, address: H160, key: H256) -> Option<H256> {
+        if let Some(value) = self.transient_storage.get(&(address, key)) {
+            Some(*value)
+        } else if let Some(parent) = self.parent.as_ref() {
+            parent.known_transient_storage(address, key)
+        } else {
+            None
+        }
+    }
+
+    pub fn known_exists(&self, address: H160) -> Option<bool> {
+        if self.balances.contains_key(&address)
+            || self.nonces.contains_key(&address)
+            || self.codes.contains_key(&address)
+        {
+            Some(true)
+        } else if let Some(parent) = self.parent.as_ref() {
+            parent.known_exists(address)
+        } else {
+            None
+        }
+    }
+
+    pub fn deleted(&self, address: H160) -> bool {
+        if self.deletes.contains(&address) {
+            true
+        } else if let Some(parent) = self.parent.as_ref() {
+            parent.deleted(address)
+        } else {
+            false
         }
     }
 }

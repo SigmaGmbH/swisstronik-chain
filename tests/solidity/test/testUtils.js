@@ -1,6 +1,6 @@
 const { encryptDataField, decryptNodeResponse } = require('@swisstronik/swisstronik.js')
 
-module.exports.sendShieldedTransaction = async (signer, destination, data, value) => {
+module.exports.sendShieldedTransaction = async (signer, destination, data, value, constantGasLimit) => {
     // Encrypt transaction data
     const [encryptedData] = await encryptDataField(
         signer.provider.connection.url,
@@ -13,7 +13,7 @@ module.exports.sendShieldedTransaction = async (signer, destination, data, value
         to: destination,
         data: encryptedData,
         value,
-        // gasLimit: 200_000,
+        gasLimit: constantGasLimit ? 500_000 : undefined,
         // gasPrice: 0 // We're using 0 gas price in tests. Comment it, if you're running tests on actual network
     })
 }
@@ -60,6 +60,7 @@ module.exports.sendSignedShieldedQuery = async (wallet, destination, data) => {
         to: destination,
         data: encryptedData,
         chainId: networkInfo.chainId,
+        gasLimit: 2_000_000,
     }
 
     // Extract signature values
@@ -73,7 +74,8 @@ module.exports.sendSignedShieldedQuery = async (wallet, destination, data) => {
         v: ethers.utils.hexValue(decoded.v),
         r: ethers.utils.hexValue(decoded.r),
         s: ethers.utils.hexValue(decoded.s),
-        chainId: ethers.utils.hexValue(networkInfo.chainId)
+        chainId: ethers.utils.hexValue(networkInfo.chainId),
+        gasLimit: ethers.utils.hexValue(2_000_000),
     }
 
     // Do call

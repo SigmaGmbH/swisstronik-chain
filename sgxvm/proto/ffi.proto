@@ -48,6 +48,17 @@ message HandleTransactionResponse {
   uint64 gas_used = 5;
 }
 
+message HandleEstimateGasRequest {
+  TransactionData tx_data = 1;
+  TransactionContext tx_context = 2;
+}
+message HandleEstimateGasResponse {
+  // vm error is the error returned by vm execution
+  string vm_error = 1;
+  // gas consumed by the transaction
+  uint64 gas_used = 2;
+}
+
 // Topic represents 32-byte words that is used to describe what’s going on in an
 // event
 message Topic { bytes inner = 1; }
@@ -78,15 +89,17 @@ message QueryGetAccountResponse {
   uint64 nonce = 2;
 }
 
-// Request to insert account data such as balance and nonce
-message QueryInsertAccount {
+message QueryInsertAccountBalance {
   bytes address = 1;
   bytes balance = 2;
-  uint64 nonce = 3;
 }
+message QueryInsertAccountBalanceResponse {}
 
-// Response for account insertion
-message QueryInsertAccountResponse {}
+message QueryInsertAccountNonce {
+  bytes address = 1;
+  uint64 nonce = 2;
+}
+message QueryInsertAccountNonceResponse{}
 
 message QueryContainsKey { bytes key = 1; }
 
@@ -102,6 +115,12 @@ message QueryGetAccountStorageCellResponse { bytes value = 1; }
 message QueryGetAccountCode { bytes address = 1; }
 
 message QueryGetAccountCodeResponse { bytes code = 1; }
+
+message QueryGetAccountCodeSize { bytes address = 1; }
+message QueryGetAccountCodeSizeResponse { uint32 size = 1; }
+
+message QueryGetAccountCodeHash { bytes address = 1; }
+message QueryGetAccountCodeHashResponse { bytes hash = 1; }
 
 message QueryInsertAccountCode {
   bytes address = 1;
@@ -136,6 +155,16 @@ message QueryRemoveStorageResponse {}
 message QueryBlockHash { bytes number = 1; }
 message QueryBlockHashResponse { bytes hash = 1; }
 
+message QueryIssuanceTreeRoot {}
+message QueryIssuanceTreeRootResponse {
+  bytes root = 1;
+}
+
+message QueryRevocationTreeRoot {}
+message QueryRevocationTreeRootResponse {
+  bytes root = 1;
+}
+
 message QueryAddVerificationDetails {
   bytes userAddress = 1;
   bytes issuerAddress = 2;
@@ -151,6 +180,29 @@ message QueryAddVerificationDetails {
 message QueryAddVerificationDetailsResponse {
   bytes verificationId = 1;
 }
+
+message QueryAddVerificationDetailsV2 {
+  bytes userAddress = 1;
+  bytes issuerAddress = 2;
+  string originChain = 3;
+  uint32 verificationType = 4;
+  uint32 issuanceTimestamp = 5;
+  uint32 expirationTimestamp = 6;
+  bytes proofData = 7;
+  string schema = 8;
+  string issuerVerificationId = 9;
+  uint32 version = 10;
+  bytes userPublicKey = 11;
+}
+message QueryAddVerificationDetailsV2Response {
+  bytes verificationId = 1;
+}
+
+message QueryRevokeVerification {
+  bytes verificationId = 1;
+  bytes issuer = 2;
+}
+message QueryRevokeVerificationResponse {}
 
 message QueryHasVerification {
   bytes userAddress = 1;
@@ -195,22 +247,37 @@ message QueryGetVerificationDataResponse {
   repeated VerificationDetails data = 1;
 }
 
+message QueryConvertCredential {
+  bytes verificationId = 1;
+  bytes holderPublicKey = 2;
+  bytes caller = 3;
+}
+message QueryConvertCredentialResponse {}
+
 message CosmosRequest {
   oneof req {
     QueryGetAccount getAccount = 1;
-    QueryInsertAccount insertAccount = 2;
-    QueryContainsKey containsKey = 3;
-    QueryGetAccountCode accountCode = 4;
-    QueryGetAccountStorageCell storageCell = 5;
-    QueryInsertAccountCode insertAccountCode = 6;
-    QueryInsertStorageCell insertStorageCell = 7;
-    QueryRemove remove = 8;
-    QueryRemoveStorageCell removeStorageCell = 9;
-    QueryRemoveStorage removeStorage = 10;
-    QueryBlockHash blockHash = 11;
-    QueryAddVerificationDetails addVerificationDetails = 12;
-    QueryHasVerification hasVerification = 13;
-    QueryGetVerificationData getVerificationData = 14;
+    QueryContainsKey containsKey = 2;
+    QueryGetAccountCode accountCode = 3;
+    QueryGetAccountCodeHash codeHash = 4;
+    QueryGetAccountCodeSize codeSize = 5;
+    QueryGetAccountStorageCell storageCell = 6;
+    QueryInsertAccountCode insertAccountCode = 7;
+    QueryInsertStorageCell insertStorageCell = 8;
+    QueryRemove remove = 9;
+    QueryRemoveStorageCell removeStorageCell = 10;
+    QueryRemoveStorage removeStorage = 11;
+    QueryBlockHash blockHash = 12;
+    QueryAddVerificationDetails addVerificationDetails = 13;
+    QueryHasVerification hasVerification = 14;
+    QueryGetVerificationData getVerificationData = 15;
+    QueryInsertAccountBalance insertAccountBalance = 16;
+    QueryInsertAccountNonce insertAccountNonce = 17;
+    QueryIssuanceTreeRoot issuanceTreeRoot = 18;
+    QueryRevocationTreeRoot revocationTreeRoot = 19;
+    QueryAddVerificationDetailsV2 addVerificationDetailsV2 = 20;
+    QueryRevokeVerification revokeVerification = 21;
+    QueryConvertCredential convertCredential = 22;
   }
 }
 
@@ -220,11 +287,16 @@ message SGXVMCallParams {
   bytes to = 2;
   bytes data = 3;
   uint64 gasLimit = 4;
-  bytes value = 5;
-  repeated AccessListItem accessList = 6;
-  bool commit = 7;
-  uint64 nonce = 8;
-  bool unencrypted = 9;
+  bytes gasPrice = 5;
+  bytes value = 6;
+  repeated AccessListItem accessList = 7;
+  bool commit = 8;
+  uint64 nonce = 9;
+  bool unencrypted = 10;
+  bytes signature = 11;
+  bytes maxPriorityFeePerGas = 12;
+  bytes maxFeePerGas = 13;
+  uint32 txType = 14;
 }
 
 // Message with data required to execute `create` operation
@@ -232,10 +304,33 @@ message SGXVMCreateParams {
   bytes from = 1;
   bytes data = 2;
   uint64 gasLimit = 3;
-  bytes value = 4;
-  repeated AccessListItem accessList = 5;
-  bool commit = 6;
-  uint64 nonce = 7;
+  bytes gasPrice = 4;
+  bytes value = 5;
+  repeated AccessListItem accessList = 6;
+  bool commit = 7;
+  uint64 nonce = 8;
+  bytes signature = 9;
+  bytes maxPriorityFeePerGas = 10;
+  bytes maxFeePerGas = 11;
+  uint32 txType = 12;
+}
+
+// Message with data required to execute `estimateGas` operation
+message SGXVMEstimateGasParams {
+  bytes from = 1;
+  bytes to = 2;
+  bytes data = 3;
+  uint64 gasLimit = 4;
+  bytes gasPrice = 5;
+  bytes value = 6;
+  repeated AccessListItem accessList = 7;
+  bool commit = 8;
+  uint64 nonce = 9;
+  bool unencrypted = 10;
+  bytes signature = 11;
+  bytes maxPriorityFeePerGas = 12;
+  bytes maxFeePerGas = 13;
+  uint32 txType = 14;
 }
 
 // Request to execute `call` operation
@@ -247,6 +342,12 @@ message SGXVMCallRequest {
 // Request to execute `create` operation
 message SGXVMCreateRequest {
   SGXVMCreateParams params = 1;
+  TransactionContext context = 2;
+}
+
+// Request to execute `estimateGas` operation
+message SGXVMEstimateGasRequest {
+  SGXVMEstimateGasParams params = 1;
   TransactionContext context = 2;
 }
 
@@ -271,6 +372,7 @@ message FFIRequest {
   oneof req {
     SGXVMCallRequest callRequest = 1;
     SGXVMCreateRequest createRequest = 2;
-    NodePublicKeyRequest publicKeyRequest = 3;
+    SGXVMEstimateGasRequest estimateGasRequest = 3;
+    NodePublicKeyRequest publicKeyRequest = 4;
   }
 }

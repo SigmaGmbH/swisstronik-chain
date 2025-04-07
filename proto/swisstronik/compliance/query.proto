@@ -40,8 +40,44 @@ service Query {
     option (google.api.http).get = "/swisstronik/compliance/verification/{verificationID}";
   }
 
+  rpc AllVerificationDetailsByAddress(QueryAllVerificationDetailsByAddressRequest) returns (QueryAllVerificationDetailsByAddressResponse) {
+    option (google.api.http).get = "/swisstronik/compliance/verifications_by_address/{address}";
+  }
+
   rpc VerificationsDetails(QueryVerificationsDetailsRequest) returns (QueryVerificationsDetailsResponse) {
     option (google.api.http).get = "/swisstronik/compliance/verifications";
+  }
+
+  rpc IssuanceTreeRoot(QueryIssuanceTreeRootRequest) returns (QueryIssuanceTreeRootResponse) {
+    option (google.api.http).get = "/swisstronik/compliance/issuance/root";
+  }
+
+  rpc IssuanceProof(QueryIssuanceProofRequest) returns (QueryIssuanceProofResponse) {
+    option (google.api.http).get = "/swisstronik/compliance/issuance/proof/{credentialHash}";
+  }
+
+  rpc RevocationTreeRoot(QueryRevocationTreeRootRequest) returns (QueryRevocationTreeRootResponse) {
+    option (google.api.http).get = "/swisstronik/compliance/revocation/root";
+  }
+
+  rpc RevocationProof(QueryRevocationProofRequest) returns (QueryRevocationProofResponse) {
+    option (google.api.http).get = "/swisstronik/compliance/revocation/proof/{credentialHash}";
+  }
+
+  rpc AttachedHolderPublicKey(QueryAttachedHolderPublicKeyRequest) returns (QueryAttachedHolderPublicKeyResponse) {
+    option (google.api.http).get = "/swisstronik/compliance/publicKey/{address}";
+  }
+
+  rpc IsSuitableForZK(QueryIsCredentialInZKSDIRequest) returns (QueryIsCredentialInZKSDIResponse) {
+    option (google.api.http).get = "/swisstronik/compliance/zk/isSuitable/{address}/{verificationID}";
+  }
+
+  rpc CredentialHash(QueryCredentialHashRequest) returns (QueryCredentialHashResponse) {
+    option (google.api.http).get = "/swisstronik/compliance/zk/credentialHash/{verificationId}";
+  }
+
+  rpc VerificationHolder(QueryHolderByVerificationIdRequest) returns (QueryHolderByVerificationIdResponse) {
+    option (google.api.http).get = "/swisstronik/compliance/holder/{verificationId}";
   }
 }
 
@@ -67,6 +103,7 @@ message QueryOperatorDetailsResponse {
 // QueryAddressDetailsRequest is request type for the Query/AddressDetails RPC method.
 message QueryAddressDetailsRequest {
   string address = 1;
+  bool onlyWithExistingIssuer = 2;
 }
 
 // QueryAddressDetailsResponse is response type for the Query/AddressDetails RPC method.
@@ -152,23 +189,69 @@ message QueryVerificationsDetailsRequest {
 
 // QueryVerificationsDetailsResponse is response type for the Query/VerificationsDetails RPC method.
 message QueryVerificationsDetailsResponse {
-  // MergedVerificationDetails is merged structure of iterating key and `VerificationDetails` in `entities.proto`.
-  // `verification_type` and `verification_id` are iterating keys, and the following items should be same with `VerificationDetails`.
-  message MergedVerificationDetails {
-    VerificationType verificationType = 1;
-    bytes verificationID = 2;
-    string issuer_address = 3;
-    string origin_chain = 4;
-    uint32 issuance_timestamp = 5;
-    uint32 expiration_timestamp = 6;
-    bytes original_data = 7;
-    string schema = 8;
-    string issuer_verification_id = 9;
-    uint32 version = 10;
-  }
-
   // verifications is a slice of registered verifications for the compliance module
   repeated MergedVerificationDetails verifications = 1 [(gogoproto.nullable) = false];
   // pagination defines the pagination in the response.
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+message QueryIssuanceTreeRootRequest {}
+message QueryIssuanceTreeRootResponse {
+  bytes root = 1;
+}
+
+message QueryRevocationTreeRootRequest {}
+message QueryRevocationTreeRootResponse {
+  bytes root = 1;
+}
+
+message QueryIssuanceProofRequest {
+  bytes credentialHash = 1;
+}
+message QueryIssuanceProofResponse {
+  bytes encodedProof = 1;
+}
+
+message QueryRevocationProofRequest {
+  bytes credentialHash = 1;
+}
+message QueryRevocationProofResponse {
+  bytes encodedProof = 1;
+}
+
+message QueryAttachedHolderPublicKeyRequest {
+  string address = 1;
+}
+message QueryAttachedHolderPublicKeyResponse {
+  bytes pubKey = 1;
+}
+
+message QueryIsCredentialInZKSDIRequest {
+  string address = 1;
+  bytes verificationID = 2;
+}
+message QueryIsCredentialInZKSDIResponse {
+  bool included = 1;
+}
+
+message QueryCredentialHashRequest {
+  bytes verificationId = 1;
+}
+message QueryCredentialHashResponse {
+  bytes credentialHash = 1;
+}
+
+message QueryHolderByVerificationIdRequest {
+  string verificationId = 1;
+}
+message QueryHolderByVerificationIdResponse {
+  string address = 1;
+}
+
+message QueryAllVerificationDetailsByAddressRequest {
+  string address = 1;
+  bool onlyWithExistingIssuer = 2;
+}
+message QueryAllVerificationDetailsByAddressResponse {
+  repeated MergedVerificationDetails details = 1;
 }

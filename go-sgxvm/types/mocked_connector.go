@@ -36,14 +36,20 @@ func (c MockedConnector) Query(request []byte) ([]byte, error) {
 			Balance: acct.Balance,
 			Nonce:   acct.Nonce,
 		})
-	case *CosmosRequest_InsertAccount:
-		data := request.InsertAccount
-		ethAddress := common.BytesToAddress(request.InsertAccount.Address)
-		println("[Go:Query] Insert/Update account: ", ethAddress.String())
-		if err := c.DB.InsertAccount(ethAddress, data.Balance, data.Nonce); err != nil {
+	case *CosmosRequest_InsertAccountBalance:
+		data := request.InsertAccountBalance
+		ethAddress := common.BytesToAddress(request.InsertAccountBalance.Address)
+		if err := c.DB.InsertAccountBalance(ethAddress, data.Balance); err != nil {
 			return nil, err
 		}
-		return proto.Marshal(&QueryInsertAccountResponse{})
+		return proto.Marshal(&QueryInsertAccountBalanceResponse{})
+	case *CosmosRequest_InsertAccountNonce:
+		data := request.InsertAccountNonce
+		ethAddress := common.BytesToAddress(request.InsertAccountNonce.Address)
+		if err := c.DB.InsertAccountNonce(ethAddress, data.Nonce); err != nil {
+			return nil, err
+		}
+		return proto.Marshal(&QueryInsertAccountNonceResponse{})	
 	case *CosmosRequest_ContainsKey:
 		ethAddress := common.BytesToAddress(request.ContainsKey.Key)
 		println("[Go:Query] Contains key for: ", ethAddress.String())

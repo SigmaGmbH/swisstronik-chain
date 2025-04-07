@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"swisstronik/encoding"
-	ethermint "swisstronik/types"
+	commontypes "swisstronik/types"
 	"swisstronik/utils"
 	"swisstronik/x/evm/types"
 	evmtypes "swisstronik/x/evm/types"
@@ -39,7 +39,7 @@ func (m MockEVMKeeper) GetParams(ctx sdk.Context) evmtypes.Params {
 }
 
 func (m MockEVMKeeper) ChainID() *big.Int {
-	return big.NewInt(1291)
+	return big.NewInt(commontypes.EvmChainID)
 }
 
 func TestSDKTxFeeChecker(t *testing.T) {
@@ -173,7 +173,7 @@ func TestSDKTxFeeChecker(t *testing.T) {
 				txBuilder.SetGasLimit(1)
 				txBuilder.SetFeeAmount(sdk.NewCoins(sdk.NewCoin(utils.BaseDenom, sdk.NewInt(10).Mul(types.DefaultPriorityReduction))))
 
-				option, err := codectypes.NewAnyWithValue(&ethermint.ExtensionOptionDynamicFeeTx{})
+				option, err := codectypes.NewAnyWithValue(&commontypes.ExtensionOptionDynamicFeeTx{})
 				require.NoError(t, err)
 				txBuilder.SetExtensionOptions(option)
 				return txBuilder.GetTx()
@@ -193,7 +193,7 @@ func TestSDKTxFeeChecker(t *testing.T) {
 				txBuilder.SetGasLimit(1)
 				txBuilder.SetFeeAmount(sdk.NewCoins(sdk.NewCoin(utils.BaseDenom, sdk.NewInt(10).Mul(types.DefaultPriorityReduction).Add(sdk.NewInt(10)))))
 
-				option, err := codectypes.NewAnyWithValue(&ethermint.ExtensionOptionDynamicFeeTx{
+				option, err := codectypes.NewAnyWithValue(&commontypes.ExtensionOptionDynamicFeeTx{
 					MaxPriorityPrice: sdk.NewInt(5).Mul(types.DefaultPriorityReduction),
 				})
 				require.NoError(t, err)
