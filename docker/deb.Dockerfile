@@ -47,7 +47,7 @@ RUN make build
 ############ Node binary for deb package
 FROM compile-base AS build-deb
 
-ARG BUILD_VERSION="v1.0.8"
+ARG BUILD_VERSION="v1.0.0"
 ENV VERSION=${BUILD_VERSION}
 ARG DEB_BIN_DIR=/usr/local/bin
 ENV DEB_BIN_DIR=${DEB_BIN_DIR}
@@ -61,7 +61,7 @@ WORKDIR /root
 # Copy over binaries from the build-env
 COPY --from=compile-chain /root/chain/build/swisstronikd swisstronikd
 COPY --from=compile-chain /root/.swisstronik-enclave /usr/lib/.swisstronik-enclave
-COPY --from=compile-chain /root/chain/go-sgxvm/internal/api/libsgx_wrapper_v1.0.8.x86_64.so /usr/lib/.swisstronik-enclave/libsgx_wrapper_v1.0.5.x86_64.so
+COPY --from=compile-chain /root/chain/go-sgxvm/internal/api/libsgx_wrapper.x86_64.so /usr/lib/.swisstronik-enclave/libsgx_wrapper.x86_64.so
 
 COPY ./deb ./deb
 COPY ./scripts/build_deb.sh .

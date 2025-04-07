@@ -22,6 +22,7 @@ import (
 	"swisstronik/crypto/hd"
 	"swisstronik/encoding"
 	"swisstronik/indexer"
+	"swisstronik/types"
 	"swisstronik/rpc/backend/mocks"
 	rpctypes "swisstronik/rpc/types"
 	"swisstronik/tests"
@@ -40,7 +41,7 @@ func TestBackendTestSuite(t *testing.T) {
 	suite.Run(t, new(BackendTestSuite))
 }
 
-const ChainID = "swisstronik_1291-1"
+const ChainID = types.PrefixedChainID
 
 // SetupTest is executed before every BackendTestSuite test
 func (suite *BackendTestSuite) SetupTest() {

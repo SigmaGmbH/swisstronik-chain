@@ -83,7 +83,7 @@ contract ComplianceProxy {
     ) public returns (bytes memory) {
         // Use empty payload data for proof, schema, issuer's verification id and version for testing
         bytes memory proofData = new bytes(1);
-        string memory originChain = "chain_1291-1";
+        string memory originChain = "chain_1848-1";
         string memory schema = "schema";
         string memory issuerVerificationId = "issuerVerificationId";
         uint32 version;
@@ -120,7 +120,7 @@ contract ComplianceProxy {
             IComplianceBridge.addVerificationDetailsV2,
             (
                 userAddress, // user address
-                "chain_1291-1",
+                "chain_1848-1",
                 VERIFICATION_TYPE, // verification type
                 uint32(block.timestamp % 2 ** 32), // issuance timestamp
                 0, // expiration timestamp

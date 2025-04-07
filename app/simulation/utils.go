@@ -6,9 +6,6 @@ import (
 	simcli "github.com/cosmos/cosmos-sdk/x/simulation/client/cli"
 )
 
-// SwtrAppChainID hardcoded chainID for simulation
-const SwtrAppChainID = "swisstronik_1291-1"
-
 // Get flags every time the simulator is run
 func init() {
 	simcli.GetSimulatorFlags()

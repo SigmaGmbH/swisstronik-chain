@@ -32,6 +32,7 @@ import (
 	swtrapp "swisstronik/app"
 	"swisstronik/encoding"
 	"swisstronik/tests"
+	"swisstronik/types"
 	compliancetypes "swisstronik/x/compliance/types"
 	evmtypes "swisstronik/x/evm/types"
 	feemarkettypes "swisstronik/x/feemarket/types"
@@ -40,7 +41,7 @@ import (
 
 func TestAppImportExport(t *testing.T) {
 	config := simcli.NewConfigFromFlags()
-	config.ChainID = SwtrAppChainID
+	config.ChainID = types.PrefixedChainID
 	config.Commit = true
 	config.NumBlocks = 5 // default value is 500
 

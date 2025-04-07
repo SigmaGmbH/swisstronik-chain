@@ -15,11 +15,13 @@ import (
 	swtrapp "swisstronik/app"
 	"swisstronik/encoding"
 	"swisstronik/tests"
+
+	commontypes "swisstronik/types"
 )
 
 func TestFullAppSimulation(t *testing.T) {
 	config := simcli.NewConfigFromFlags()
-	config.ChainID = SwtrAppChainID
+	config.ChainID = commontypes.PrefixedChainID
 	config.Commit = true // commit by default
 	config.NumBlocks = 5 // default value is 500
 

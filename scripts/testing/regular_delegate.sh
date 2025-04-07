@@ -2,7 +2,7 @@
 
 set -e
 
-CHAIN_ID="swisstronik_1291-1"
+CHAIN_ID="swisstronik_1848-1"
 KEYRING_BACKEND="test"
 BINARY="$(dirname "$0")/../../build/swisstronikd"
 DELEGATE_AMOUNT="1swtr"

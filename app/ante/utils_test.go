@@ -65,7 +65,7 @@ func init() {
 }
 
 func (suite *AnteTestSuite) SetupTest() {
-	chainID := utils.TestnetChainID + "-1"
+	chainID := types.ChainID + "-1"
 
 	priv, err := ethsecp256k1.GenerateKey()
 	suite.Require().NoError(err)
@@ -551,7 +551,7 @@ func createTx(priv cryptotypes.PrivKey, msgs ...sdk.Msg) (sdk.Tx, error) {
 	}
 
 	signerData := authsigning.SignerData{
-		ChainID:       ChainID,
+		ChainID:       types.PrefixedChainID,
 		AccountNumber: 0,
 		Sequence:      0,
 	}

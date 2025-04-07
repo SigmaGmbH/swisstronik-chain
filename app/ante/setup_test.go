@@ -10,8 +10,6 @@ import (
 	evmtypes "swisstronik/x/evm/types"
 )
 
-const ChainID string = "swisstronik_1291-1"
-
 func (suite *AnteTestSuite) TestEthSetupContextDecorator() {
 	dec := ante.NewEthSetUpContextDecorator(suite.app.EvmKeeper)
 	tx := evmtypes.NewTxContract(suite.app.EvmKeeper.ChainID(), 1, big.NewInt(10), 1000, big.NewInt(1), nil, nil, nil, nil)

@@ -2,7 +2,7 @@
 
 set -e
 
-CHAIN_ID="swisstronik_1291-1"
+CHAIN_ID="swisstronik_1848-1"
 MONIKER="myvalidator"
 STAKE_AMOUNT="310000000swtr"
 KEY_NAME="validator"

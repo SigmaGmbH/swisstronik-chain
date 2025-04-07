@@ -20,6 +20,7 @@ import (
 	swtrapp "swisstronik/app"
 	"swisstronik/encoding"
 	"swisstronik/tests"
+	"swisstronik/types"
 )
 
 func TestAppStateDeterminism(t *testing.T) {
@@ -28,7 +29,7 @@ func TestAppStateDeterminism(t *testing.T) {
 	config.ExportParamsPath = ""
 	config.OnOperation = false
 	config.AllInvariants = false
-	config.ChainID = SwtrAppChainID
+	config.ChainID = types.PrefixedChainID
 	config.Commit = true
 	config.NumBlocks = 5 // default value is 500
 
