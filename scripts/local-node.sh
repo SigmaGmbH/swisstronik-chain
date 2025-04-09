@@ -118,4 +118,4 @@ $BINARY collect-gentxs --home "$HOMEDIR"
 $BINARY validate-genesis --home "$HOMEDIR"
 
 # Initialize epoch keys for local testnet
-$BINARY testnet init-testnet-enclave
+# $BINARY testnet init-testnet-enclave

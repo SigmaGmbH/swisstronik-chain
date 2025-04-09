@@ -73,3 +73,20 @@ jq --arg CODE_HASH $ARACHNID_CODEHASH '.app_state.auth.accounts += [{"@type": "/
 # Add vesting accounts
 CURRENT_TIMESTAMP=$(date +%s)
 ./$(dirname "$0")/add_vesting_accounts.sh $CURRENT_TIMESTAMP
+
+# Add issuer and operators
+jq '.app_state.compliance.issuerDetails += [{"address": "swtr1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqpe55507", "details": {"creator": "swtr1ml2knanpk8sv94f8h9g8vaf9k3yyfva4fykyn9", "description": "World ID is privacy preserving proof of personhood, which allow for Proof of Humanity verifications", "legalEntity": "Worldcoin Foundation, World Assets Ltd.", "logo": "https://ipfs.io/ipfs/bafkreibi3idudk5wyvnjr7qrfyrpshg3bikpfte4o33wpmbia6o5tovpxe", "name": "Worldcoin Adapter", "url": "https://worldcoin.org"}}]' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
+jq '.app_state.compliance.addressDetails += [{"address": "swtr1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqpe55507", "details": {"is_revoked": false, "is_verified": true, "verifications": []}}]' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
+# TODO: Add operators
+# TODO: Set operator as issuer creator
+# TODO: Add genesis accounts for operators
+
+ADDRESS_DETAILS_JSON="$(dirname $0)"/misc/address_details.json
+jq --slurpfile input "$ADDRESS_DETAILS_JSON" \
+   '.app_state.compliance.addressDetails += $input[0]' \
+   "$GENESIS" > "$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
+
+VERIFICATION_DETAILS_JSON="$(dirname $0)"/misc/verification_details.json
+jq --slurpfile input "$VERIFICATION_DETAILS_JSON" \
+   '.app_state.compliance.verificationDetails += $input[0]' \
+   "$GENESIS" > "$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"   
