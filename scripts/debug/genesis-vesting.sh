@@ -1,6 +1,6 @@
 #!/bin/bash
 
-HOMEDIR="$HOME/.swisstronik"
+HOMEDIR="/home/mikkysnow/chain/debug"
 
 CSV_FILE="vesting.csv"
 GENESIS_FILE=$HOMEDIR/config/genesis.json
@@ -55,7 +55,7 @@ while IFS=, read -r address original_vesting cliff_days months; do
     cliff_time=$(($START_TIME + $cliff_days * 60 * 60 * 24))
 
     # Calculate end time (start time + months * 30 days in seconds)
-    end_time=$(($START_TIME + $months * 30 * 24 * 60 * 60))
+    end_time=$(($cliff_time + $months * 30 * 24 * 60 * 60))
 
 		# Calculate vesting amount per period using bc for large numbers
 		vesting_amount=$(echo "$original_amount / $months" | bc)
