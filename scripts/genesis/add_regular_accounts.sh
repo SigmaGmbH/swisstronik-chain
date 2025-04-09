@@ -38,36 +38,6 @@ while IFS=, read -r address balance; do
         continue
     fi
 
-    # Get the current max account number from genesis
-    START_ACCOUNT_NUM=$(jq '[.app_state.auth.accounts[]?.account_number | select(type == "string") | select(test("^[0-9]+$")) | tonumber] | max // 0' "$GENESIS")
-    echo "START ACCOUNT NUM: $START_ACCOUNT_NUM"
-
-    if [[ "$START_ACCOUNT_NUM" == "null" ]]; then
-      START_ACCOUNT_NUM=0
-    fi
-
-    ACCOUNT_NUM=$((START_ACCOUNT_NUM + 1))
-
-    # Extract amount and denom from balance
-    amount=$(echo "$balance" | sed -E 's/^([0-9]+).*/\1/')
-    denom=$(echo "$balance" | sed -E 's/^[0-9]+([a-zA-Z]+)$/\1/')
-
-    jq --arg addr "$address" --arg amt "$amount" --arg denom "$denom" \
-      '.app_state.bank.balances += [{
-        "address": $addr,
-        "coins": [{"denom": $denom, "amount": $amt}]
-    }]' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
-
-
-    jq --arg addr "$address" --argjson acctnum "$ACCOUNT_NUM" \
-      '.app_state.auth.accounts += [{
-        "@type": "/cosmos.auth.v1beta1.BaseAccount",
-        "address": $addr,
-        "pub_key": null,
-        "account_number": ($acctnum | tostring),
-        "sequence": "0"
-    }]' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
-
-    echo -e "$header_added Added regular account for address $address"
+    $BINARY add-genesis-account "$address" "$balance" --home "$HOMEDIR" --keyring-backend "$KEYRING"
 
 done < "$CSV_FILE"
