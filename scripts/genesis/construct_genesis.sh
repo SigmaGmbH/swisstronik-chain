@@ -101,6 +101,17 @@ jq --slurpfile input "$VERIFICATION_DETAILS_JSON" \
    '.app_state.compliance.verificationDetails += $input[0]' \
    "$GENESIS" > "$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"   
 
+# Add genesis validator addresses
+$BINARY add-genesis-account swtr16gd6qpsm4nvkmqel7t57n4u0vd4xg3x3u6566m 15000swtr --keyring-backend $KEYRING --home "$HOMEDIR" # Validatrium
+$BINARY add-genesis-account swtr1lw6f7039slva4mes0tu6g5mnx7q536u93gv76u 15000swtr --keyring-backend $KEYRING --home "$HOMEDIR" # Citadel
+$BINARY add-genesis-account swtr1z2207c38lx6l5yqelz4wp9mmcrz4tl2c6e36l7 10000swtr --keyring-backend $KEYRING --home "$HOMEDIR" # Enigma
+$BINARY add-genesis-account swtr1c9u4jkey0fh8k0ryptvv26ya62qkyluw36mmxk 40000swtr --keyring-backend $KEYRING --home "$HOMEDIR" # Simply Staking
+$BINARY add-genesis-account swtr1xguxy3k6x0mwvlgks6s5ew4u78wqa2cdamth2g 10000swtr --keyring-backend $KEYRING --home "$HOMEDIR" # Bware
+$BINARY add-genesis-account swtr1kaxdy9ejuun5v4smlxkc0mnve9jfyz89v859tc 10000swtr --keyring-backend $KEYRING --home "$HOMEDIR" # Lavender
+$BINARY add-genesis-account swtr1aatmwdkwfj8ka7pvp2g8vgyhdn78m3mnd2n3aw 10000swtr --keyring-backend $KEYRING --home "$HOMEDIR" # kjnodes
+$BINARY add-genesis-account swtr1dyvtr0j3927z9pqzkyn0cgg0egvju8dkpzs0zn 10000swtr --keyring-backend $KEYRING --home "$HOMEDIR" # staking cabin
+$BINARY add-genesis-account swtr1yz0d04p6hhcjzwsw95qhhqdmq8qg9epkce4x4q 10000swtr --keyring-backend $KEYRING --home "$HOMEDIR" # imperator
+
 # Test launch
 sed -i 's/minimum-gas-prices = ""/minimum-gas-prices = "0aswtr"/' "$APP_TOML"
 echo "betray theory cargo way left cricket doll room donkey wire reunion fall left surprise hamster corn village happy bulb token artist twelve whisper expire" | $BINARY keys add alice --keyring-backend $KEYRING --home $HOMEDIR --recover
