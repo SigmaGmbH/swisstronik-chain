@@ -70,12 +70,12 @@ jq '.app_state["mint"]["params"]["inflation_min"]="0.000005000000000000"' "$GENE
 jq --arg BYTECODE $ARACHNID_BYTECODE '.app_state.evm.accounts += [{"address":"0x4e59b44847b379578588920cA78FbF26c0B4956C", "code": $BYTECODE, "storage": []}]' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
 jq --arg CODE_HASH $ARACHNID_CODEHASH '.app_state.auth.accounts += [{"@type": "/ethermint.types.v1.EthAccount", "base_account": {"account_number": "0", "address": "swtr1fevmgjz8kdu40pvgjgx20ralymqtf9tvcggehm", "pub_key": null, "sequence": "1" }, "code_hash": $CODE_HASH}]' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
 
-# # Add regular accounts
-# ./$(dirname "$0")/add_regular_accounts.sh
+# Add regular accounts
+python3 ./$(dirname "$0")/add_regular_accounts.py "$GENESIS" "$(dirname "$0")/misc/g_balances.csv"
 
 # Add vesting accounts
 CURRENT_TIMESTAMP=$(date +%s)
-./$(dirname "$0")/add_vesting_accounts.sh $CURRENT_TIMESTAMP
+python3 ./$(dirname "$0")/add_vesting_accounts.py $CURRENT_TIMESTAMP "$(dirname "$0")/misc/g_vesting.csv" "$GENESIS" 
 
 # Add issuer and operators
 jq '.app_state.compliance.issuerDetails += [{"address": "swtr1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqpe55507", "details": {"creator": "swtr1025jm8yn54e09awmlzzv86vv99tctrcqquglwk", "description": "World ID is privacy preserving proof of personhood, which allow for Proof of Humanity verifications", "legalEntity": "Worldcoin Foundation, World Assets Ltd.", "logo": "https://ipfs.io/ipfs/bafkreibi3idudk5wyvnjr7qrfyrpshg3bikpfte4o33wpmbia6o5tovpxe", "name": "Worldcoin Adapter", "url": "https://worldcoin.org"}}]' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
