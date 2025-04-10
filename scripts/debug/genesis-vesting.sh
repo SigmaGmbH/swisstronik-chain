@@ -1,6 +1,6 @@
 #!/bin/bash
 
-HOMEDIR="/home/mikkysnow/chain/debug"
+HOMEDIR="$HOME/.swisstronik"
 
 CSV_FILE="vesting.csv"
 GENESIS_FILE=$HOMEDIR/config/genesis.json
