@@ -39,6 +39,7 @@ START_TIME=$1
 
 header_added="\033[32m[ADD]\033[0m"
 header_removed="\033[31m[DEL]\033[0m"
+denom="aswtr"
 
 # Read the CSV file and process each line
 while IFS=, read -r address original_vesting cliff_days months; do
@@ -48,8 +49,8 @@ while IFS=, read -r address original_vesting cliff_days months; do
     fi
 
     # Extract amount and denom from original_vesting
-    original_amount=$(echo "$original_vesting" | sed -E 's/^([0-9]+).*/\1/')
-    denom=$(echo "$original_vesting" | sed -E 's/^[0-9]+([a-zA-Z]+)$/\1/')
+    original_amount_raw=$(echo "$original_vesting" | sed -E 's/^([0-9]+).*/\1/')
+    original_amount=$(echo "$original_amount_raw * 10^18" | bc)
 
     # Calculate cliff time
     cliff_time=$(($START_TIME + $cliff_days * 60 * 60 * 24))
