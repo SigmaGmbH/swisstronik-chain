@@ -82,11 +82,6 @@ jq '.app_state.compliance.issuerDetails += [{"address": "swtr1qqqqqqqqqqqqqqqqqq
 jq '.app_state.compliance.addressDetails += [{"address": "swtr1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqpe55507", "details": {"is_revoked": false, "is_verified": true, "verifications": []}}]' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
 
 # Add operators
-# $BINARY add-genesis-account swtr1025jm8yn54e09awmlzzv86vv99tctrcqquglwk 10swtr --keyring-backend $KEYRING --home "$HOMEDIR"
-# $BINARY add-genesis-account swtr1zpcg563278rzh4l7qra62xdxrwwfpnlfv4jx58 10swtr --keyring-backend $KEYRING --home "$HOMEDIR"
-# $BINARY add-genesis-account swtr17ykcgstrqmgnlzeer3g8qjq320gkw8fl8eg0cm 10swtr --keyring-backend $KEYRING --home "$HOMEDIR"
-# $BINARY add-genesis-account swtr1ajjtvwrk47lkf9gzqmp465fx0un4k3jnxmnyeu 10swtr --keyring-backend $KEYRING --home "$HOMEDIR"
-# $BINARY add-genesis-account swtr1mgat0ddjf336469q88h4pr9uvxshuvx9n6ejq9 10swtr --keyring-backend $KEYRING --home "$HOMEDIR"
 jq '.app_state["compliance"]["operators"] += [{"operator":"swtr1025jm8yn54e09awmlzzv86vv99tctrcqquglwk", "operator_type": 1}]' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
 jq '.app_state["compliance"]["operators"] += [{"operator":"swtr1zpcg563278rzh4l7qra62xdxrwwfpnlfv4jx58", "operator_type": 1}]' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
 jq '.app_state["compliance"]["operators"] += [{"operator":"swtr17ykcgstrqmgnlzeer3g8qjq320gkw8fl8eg0cm", "operator_type": 1}]' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
@@ -103,26 +98,15 @@ jq --slurpfile input "$VERIFICATION_DETAILS_JSON" \
    '.app_state.compliance.verificationDetails += $input[0]' \
    "$GENESIS" > "$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"   
 
-# Add genesis validator addresses
-# $BINARY add-genesis-account swtr16gd6qpsm4nvkmqel7t57n4u0vd4xg3x3u6566m 15000swtr --keyring-backend $KEYRING --home "$HOMEDIR" # Validatrium
-# $BINARY add-genesis-account swtr1lw6f7039slva4mes0tu6g5mnx7q536u93gv76u 15000swtr --keyring-backend $KEYRING --home "$HOMEDIR" # Citadel
-# $BINARY add-genesis-account swtr1z2207c38lx6l5yqelz4wp9mmcrz4tl2c6e36l7 10000swtr --keyring-backend $KEYRING --home "$HOMEDIR" # Enigma
-# $BINARY add-genesis-account swtr1c9u4jkey0fh8k0ryptvv26ya62qkyluw36mmxk 40000swtr --keyring-backend $KEYRING --home "$HOMEDIR" # Simply Staking
-# $BINARY add-genesis-account swtr1xguxy3k6x0mwvlgks6s5ew4u78wqa2cdamth2g 10000swtr --keyring-backend $KEYRING --home "$HOMEDIR" # Bware
-# $BINARY add-genesis-account swtr1kaxdy9ejuun5v4smlxkc0mnve9jfyz89v859tc 10000swtr --keyring-backend $KEYRING --home "$HOMEDIR" # Lavender
-# $BINARY add-genesis-account swtr1aatmwdkwfj8ka7pvp2g8vgyhdn78m3mnd2n3aw 10000swtr --keyring-backend $KEYRING --home "$HOMEDIR" # kjnodes
-# $BINARY add-genesis-account swtr1rhcgs60hefaxu9pyyps83fxl03fm08z8kdf844 10000swtr --keyring-backend $KEYRING --home "$HOMEDIR" # staking cabin
-# $BINARY add-genesis-account swtr1yz0d04p6hhcjzwsw95qhhqdmq8qg9epkce4x4q 10000swtr --keyring-backend $KEYRING --home "$HOMEDIR" # imperator
-
 # Prod launch
-# $BINARY collect-gentxs --home "$HOMEDIR" --gentx-dir ./$(dirname "$0")/gentxs
-# $BINARY validate-genesis --home "$HOMEDIR"
-# $BINARY start --home "$HOMEDIR"
-
-# Test launch
-echo "betray theory cargo way left cricket doll room donkey wire reunion fall left surprise hamster corn village happy bulb token artist twelve whisper expire" | $BINARY keys add alice --keyring-backend $KEYRING --home $HOMEDIR --recover
-$BINARY add-genesis-account alice 100000000swtr --keyring-backend $KEYRING --home "$HOMEDIR"
-$BINARY gentx alice 1000000000000000000000aswtr --keyring-backend $KEYRING --chain-id $CHAINID --home "$HOMEDIR"
-$BINARY collect-gentxs --home "$HOMEDIR"
+$BINARY collect-gentxs --home "$HOMEDIR" --gentx-dir ./$(dirname "$0")/gentxs
 $BINARY validate-genesis --home "$HOMEDIR"
 $BINARY start --home "$HOMEDIR"
+
+# Test launch
+# echo "betray theory cargo way left cricket doll room donkey wire reunion fall left surprise hamster corn village happy bulb token artist twelve whisper expire" | $BINARY keys add alice --keyring-backend $KEYRING --home $HOMEDIR --recover
+# $BINARY add-genesis-account alice 1000swtr --keyring-backend $KEYRING --home "$HOMEDIR"
+# $BINARY gentx alice 1000swtr --keyring-backend $KEYRING --chain-id $CHAINID --home "$HOMEDIR"
+# $BINARY collect-gentxs --home "$HOMEDIR"
+# $BINARY validate-genesis --home "$HOMEDIR"
+# $BINARY start --home "$HOMEDIR"

@@ -82,20 +82,6 @@ def add_accounts_to_genesis(genesis_path, csv_path):
         total_new_balance += int(bal)
         added += 1
 
-    # Update total supply
-    supply = genesis['app_state']['bank'].get('supply', [])
-    for coin in supply:
-        if coin['denom'] == DENOM:
-            coin['amount'] = str(int(coin['amount']) + total_new_balance)
-            break
-    else:
-        # Denom not found, add new
-        supply.append({
-            "denom": DENOM,
-            "amount": str(total_new_balance)
-        })
-    genesis['app_state']['bank']['supply'] = supply
-
     with open(genesis_path, 'w') as f:
         json.dump(genesis, f, indent=2)
 
