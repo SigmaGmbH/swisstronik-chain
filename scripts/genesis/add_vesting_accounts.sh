@@ -2,7 +2,7 @@
 
 HOMEDIR="$HOME/.swisstronik"
 
-CSV_FILE="$(dirname "$0")/misc/vesting.csv"
+CSV_FILE="$(dirname "$0")/misc/g_vesting.csv"
 GENESIS_FILE=$HOMEDIR/config/genesis.json
 TEMP_GENESIS=$HOMEDIR/config/tmp_genesis.json
 
@@ -52,20 +52,21 @@ while IFS=, read -r address original_vesting cliff_days months spendable; do
     original_amount_raw=$(echo "$original_vesting" | sed -E 's/^([0-9]+).*/\1/')
     original_amount=$(echo "$original_amount_raw * 10^18" | bc)
 
+    # Calculate vesting amount per period using bc for large numbers
+	vesting_amount=$(echo "$original_amount / $months" | bc)
+    corrected_vesting_amount=$(echo "$vesting_amount * $months" | bc)
+
     # Extract spendable balance
     spendable_amount_raw=$(echo "$spendable" | sed -E 's/^([0-9]+).*/\1/')
     spendable_amount=$(echo "$spendable_amount_raw * 10^18" | bc)
 
-    bank_amount=$(echo "$original_amount + $spendable_amount" | bc)
+    bank_amount=$(echo "$corrected_vesting_amount + $spendable_amount" | bc)
 
     # Calculate cliff time
     cliff_time=$(($START_TIME + $cliff_days * 60 * 60 * 24))
 
     # Calculate end time (start time + months * 30 days in seconds)
     end_time=$(($cliff_time + $months * 30 * 24 * 60 * 60))
-
-	# Calculate vesting amount per period using bc for large numbers
-	vesting_amount=$(echo "$original_amount / $months" | bc)
 
     # Create vesting periods (1 month = 30 days in seconds)
     vesting_periods=()
@@ -75,7 +76,7 @@ while IFS=, read -r address original_vesting cliff_days months spendable; do
     vesting_periods_json=$(IFS=,; echo "[${vesting_periods[*]}]")
 
     # Create MonthlyVestingAccount entry
-    vesting_entry=$(jq -n --arg addr "$address" --arg amount "$original_amount" --arg denom "$denom" --arg start "$START_TIME" --arg cliff "$cliff_time" --arg r_end "$end_time" --argjson periods "$vesting_periods_json" '{
+    vesting_entry=$(jq -n --arg addr "$address" --arg amount "$corrected_vesting_amount" --arg denom "$denom" --arg start "$START_TIME" --arg cliff "$cliff_time" --arg r_end "$end_time" --argjson periods "$vesting_periods_json" '{
         "@type": "/swisstronik.vesting.MonthlyVestingAccount",
         "base_vesting_account": {
             "base_account": {
