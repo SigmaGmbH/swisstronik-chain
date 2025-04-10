@@ -10,6 +10,7 @@ HOMEDIR="$HOME/.swisstronik"
 BINARY="./build/swisstronikd"
 GENESIS=$HOMEDIR/config/genesis.json
 TMP_GENESIS=$HOMEDIR/config/tmp_genesis.json
+APP_TOML=$HOMEDIR/config/app.toml
 
 if [[ -z "$SWTR_BINARY" ]]; then
   BINARY="./build/swisstronikd"
@@ -75,11 +76,20 @@ CURRENT_TIMESTAMP=$(date +%s)
 ./$(dirname "$0")/add_vesting_accounts.sh $CURRENT_TIMESTAMP
 
 # Add issuer and operators
-jq '.app_state.compliance.issuerDetails += [{"address": "swtr1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqpe55507", "details": {"creator": "swtr1ml2knanpk8sv94f8h9g8vaf9k3yyfva4fykyn9", "description": "World ID is privacy preserving proof of personhood, which allow for Proof of Humanity verifications", "legalEntity": "Worldcoin Foundation, World Assets Ltd.", "logo": "https://ipfs.io/ipfs/bafkreibi3idudk5wyvnjr7qrfyrpshg3bikpfte4o33wpmbia6o5tovpxe", "name": "Worldcoin Adapter", "url": "https://worldcoin.org"}}]' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
+jq '.app_state.compliance.issuerDetails += [{"address": "swtr1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqpe55507", "details": {"creator": "swtr1025jm8yn54e09awmlzzv86vv99tctrcqquglwk", "description": "World ID is privacy preserving proof of personhood, which allow for Proof of Humanity verifications", "legalEntity": "Worldcoin Foundation, World Assets Ltd.", "logo": "https://ipfs.io/ipfs/bafkreibi3idudk5wyvnjr7qrfyrpshg3bikpfte4o33wpmbia6o5tovpxe", "name": "Worldcoin Adapter", "url": "https://worldcoin.org"}}]' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
 jq '.app_state.compliance.addressDetails += [{"address": "swtr1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqpe55507", "details": {"is_revoked": false, "is_verified": true, "verifications": []}}]' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
-# TODO: Add operators
-# TODO: Set operator as issuer creator
-# TODO: Add genesis accounts for operators
+
+# Add operators
+$BINARY add-genesis-account swtr1025jm8yn54e09awmlzzv86vv99tctrcqquglwk 10swtr --keyring-backend $KEYRING --home "$HOMEDIR"
+$BINARY add-genesis-account swtr1zpcg563278rzh4l7qra62xdxrwwfpnlfv4jx58 10swtr --keyring-backend $KEYRING --home "$HOMEDIR"
+$BINARY add-genesis-account swtr17ykcgstrqmgnlzeer3g8qjq320gkw8fl8eg0cm 10swtr --keyring-backend $KEYRING --home "$HOMEDIR"
+$BINARY add-genesis-account swtr1ajjtvwrk47lkf9gzqmp465fx0un4k3jnxmnyeu 10swtr --keyring-backend $KEYRING --home "$HOMEDIR"
+$BINARY add-genesis-account swtr1mgat0ddjf336469q88h4pr9uvxshuvx9n6ejq9 10swtr --keyring-backend $KEYRING --home "$HOMEDIR"
+jq '.app_state["compliance"]["operators"] += [{"operator":"swtr1025jm8yn54e09awmlzzv86vv99tctrcqquglwk", "operator_type": 1}]' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
+jq '.app_state["compliance"]["operators"] += [{"operator":"swtr1zpcg563278rzh4l7qra62xdxrwwfpnlfv4jx58", "operator_type": 1}]' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
+jq '.app_state["compliance"]["operators"] += [{"operator":"swtr17ykcgstrqmgnlzeer3g8qjq320gkw8fl8eg0cm", "operator_type": 1}]' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
+jq '.app_state["compliance"]["operators"] += [{"operator":"swtr1ajjtvwrk47lkf9gzqmp465fx0un4k3jnxmnyeu", "operator_type": 1}]' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
+jq '.app_state["compliance"]["operators"] += [{"operator":"swtr1mgat0ddjf336469q88h4pr9uvxshuvx9n6ejq9", "operator_type": 1}]' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
 
 ADDRESS_DETAILS_JSON="$(dirname $0)"/misc/address_details.json
 jq --slurpfile input "$ADDRESS_DETAILS_JSON" \
@@ -90,3 +100,12 @@ VERIFICATION_DETAILS_JSON="$(dirname $0)"/misc/verification_details.json
 jq --slurpfile input "$VERIFICATION_DETAILS_JSON" \
    '.app_state.compliance.verificationDetails += $input[0]' \
    "$GENESIS" > "$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"   
+
+# Test launch
+sed -i 's/minimum-gas-prices = ""/minimum-gas-prices = "0aswtr"/' "$APP_TOML"
+echo "betray theory cargo way left cricket doll room donkey wire reunion fall left surprise hamster corn village happy bulb token artist twelve whisper expire" | $BINARY keys add alice --keyring-backend $KEYRING --home $HOMEDIR --recover
+$BINARY add-genesis-account alice 100000000swtr --keyring-backend $KEYRING --home "$HOMEDIR"
+$BINARY gentx alice 1000000000000000000000aswtr --keyring-backend $KEYRING --chain-id $CHAINID --home "$HOMEDIR"
+$BINARY collect-gentxs --home "$HOMEDIR" > /dev/null
+$BINARY validate-genesis --home "$HOMEDIR"
+$BINARY start --home "$HOMEDIR"
