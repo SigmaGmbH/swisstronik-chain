@@ -9,7 +9,7 @@ KEYALGO="eth_secp256k1"
 HOMEDIR="$HOME/.swisstronik"
 BINARY="./build/swisstronikd"
 
-CSV_FILE="$(dirname "$0")/misc/balances.csv"
+CSV_FILE="$(dirname "$0")/misc/g_balances.csv"
 GENESIS=$HOMEDIR/config/genesis.json
 TMP_GENESIS=$HOMEDIR/config/tmp_genesis.json
 
@@ -40,6 +40,7 @@ while IFS=, read -r address balance; do
         continue
     fi
 
+    echo Add genesis account "$address" ${balance}${denom}
     $BINARY add-genesis-account "$address" "${balance}${DENOM}" --home "$HOMEDIR" --keyring-backend "$KEYRING"
 
 done < "$CSV_FILE"
