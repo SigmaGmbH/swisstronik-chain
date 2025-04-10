@@ -42,15 +42,19 @@ header_removed="\033[31m[DEL]\033[0m"
 denom="aswtr"
 
 # Read the CSV file and process each line
-while IFS=, read -r address original_vesting cliff_days months; do
+while IFS=, read -r address original_vesting cliff_days months spendable; do
     # Skip the header line
     if [ "$address" == "address" ]; then
         continue
     fi
 
-    # Extract amount and denom from original_vesting
+    # Extract amount from original_vesting
     original_amount_raw=$(echo "$original_vesting" | sed -E 's/^([0-9]+).*/\1/')
     original_amount=$(echo "$original_amount_raw * 10^18" | bc)
+
+    # Extract spendable balance
+    spendable_amount_raw=$(echo "$spendable" | sed -E 's/^([0-9]+).*/\1/')
+    spendable_amount=$(echo "$spendable_amount_raw * 10^18" | bc)
 
     # Calculate cliff time
     cliff_time=$(($START_TIME + $cliff_days * 60 * 60 * 24))
@@ -90,6 +94,15 @@ while IFS=, read -r address original_vesting cliff_days months; do
         "vesting_periods": $periods
     }')
 
+    # Add spendable balance
+    if [ "$spendable_amount_raw" -ne 0 ]; then
+        balance_entry=$(jq -n --arg addr "$address" --arg denom "$denom" --arg amount "$spendable_amount" '{
+            "address": $addr,
+            "coins": [{"denom": $denom, "amount": $amount}]
+        }')
+        jq --argjson balance "$balance_entry" '.app_state.bank.balances += [$balance]' "$GENESIS_FILE" > "$TEMP_GENESIS" && mv "$TEMP_GENESIS" "$GENESIS_FILE"
+    fi
+
 	# Check if the address already exists in genesis.json
     address_exists=$(jq --arg addr "$address" '.app_state.auth.accounts[] | select(.base_vesting_account.base_account.address == $addr)' "$GENESIS_FILE")
 
@@ -101,8 +114,7 @@ while IFS=, read -r address original_vesting cliff_days months; do
     fi
 
     # Add the vesting entry to the genesis file
-    jq --argjson vesting "$vesting_entry" '.app_state.auth.accounts += [$vesting]' "$GENESIS_FILE" > "$TEMP_GENESIS"
-    mv "$TEMP_GENESIS" "$GENESIS_FILE"
+    jq --argjson vesting "$vesting_entry" '.app_state.auth.accounts += [$vesting]' "$GENESIS_FILE" > "$TEMP_GENESIS" && mv "$TEMP_GENESIS" "$GENESIS_FILE"
     echo -e "$header_added Added vesting account for address $address"
 
 done < "$CSV_FILE"

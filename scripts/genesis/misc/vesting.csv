@@ -1,5 +1,5 @@
-address,original_vesting,cliff_days,months
-swtr1k994w6syjtvcdhdyl9hvmatp6cedwsns7gyw4m,3000,10,3
-swtr1zpjdwmpumcwajwz6w3ujh0laxq3gage297hff3,300000,10,3
-swtr140s4tgyc7d9ua47f3sk2dkgqcks235uzhe43lw,600000,30,6
-swtr1u0l99lamh7rjcpldm4p94xxssxmxtfty9mgvuu,12000000,30,10
+address,original_vesting,cliff_days,months,spendable
+swtr1k994w6syjtvcdhdyl9hvmatp6cedwsns7gyw4m,3000,10,3,0
+swtr1zpjdwmpumcwajwz6w3ujh0laxq3gage297hff3,300000,10,3,1
+swtr140s4tgyc7d9ua47f3sk2dkgqcks235uzhe43lw,600000,30,6,1000
+swtr1u0l99lamh7rjcpldm4p94xxssxmxtfty9mgvuu,12000000,30,10,5
