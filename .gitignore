@@ -26,3 +26,6 @@ scripts/upgrade/old/
 scripts/upgrade/pid
 scripts/upgrade/*.log
 scripts/upgrade/.swisstronik*
+
+# Test files
+enclaves/*

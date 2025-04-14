@@ -313,8 +313,12 @@ pub unsafe extern "C" fn ocall_get_qve_report(
     }
 
     let res = unsafe { sgx_qv_set_enclave_load_policy(sgx_ql_request_policy_t::SGX_QL_EPHEMERAL) };
-    if res != sgx_quote3_error_t::SGX_QL_SUCCESS {
-        println!("[Enclave Wrapper] cannot set qv enclave load policy. Status code: {:?}", res);
+    if res == sgx_quote3_error_t::SGX_QL_UNSUPPORTED_LOADING_POLICY {
+        // This error can mean that the policy is already set. Since we're using policy
+        // from sgx_types we can be pretty sure that we're using supported policy.
+        println!("[Enclave Wrapper] Using already set policy"); 
+    } else if res != sgx_quote3_error_t::SGX_QL_SUCCESS {
+        println!("[Enclave Wrapper] Cannot set qv enclave load policy. Status code: {:?}", res);
         return sgx_status_t::SGX_ERROR_UNEXPECTED;
     }
 

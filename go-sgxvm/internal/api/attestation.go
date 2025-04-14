@@ -13,59 +13,73 @@ import (
 	"google.golang.org/protobuf/proto"
 	"net"
 	"runtime"
+	"sync"
 )
 
-// StartAttestationServer starts attestation server
+// StartAttestationServer starts attestation server on provided address
 func StartAttestationServer(dcapAddress string) error {
 	fmt.Println("[Attestation Server] Trying to start attestation server")
 
-	dcapListener, err := net.Listen("tcp", dcapAddress)
+	listener, err := net.Listen("tcp", dcapAddress)
 	if err != nil {
 		fmt.Println("[Attestation Server] Cannot start listener for DCAP attestation")
 		return err
 	}
 
-	// Wait for incoming connections to DCAP listener
-	go func() {
-		for {
-			connection, err := dcapListener.Accept()
-			if err != nil {
-				fmt.Println("[Attestation Server] DCAP listener: Got error ", err.Error(), ", connection: ", connection.RemoteAddr().String())
-				connection.Close()
-				continue
-			}
+	var mutex sync.Mutex
 
-			if err := handleIncomingRARequest(connection); err != nil {
-				fmt.Println("[Attestation Server] DCAP listener: Attestation failed. Reason: ", err)
-				connection.Close()
-				continue
-			}
-		}
-	}()
+	go handleConnections(listener, &mutex)
 
 	fmt.Printf("[Attestation Server] Started Attestation Server\nDCAP attestation: %s", dcapAddress)
-
 	return nil
 }
 
+func handleConnections(listener net.Listener, mutex *sync.Mutex) {
+	for {
+		connection, err := listener.Accept()
+		if err != nil {
+			fmt.Println("[Attestation Server] DCAP listener: Got error ", err.Error(), ", connection: ", connection.RemoteAddr().String())
+			connection.Close()
+			continue
+		}
+
+		if err := handleIncomingRARequest(connection, mutex); err != nil {
+			fmt.Println("[Attestation Server] DCAP listener: Attestation failed. Reason: ", err)
+			connection.Close()
+			continue
+		}
+	}
+}
+
 // Handles incoming request for Remote Attestation
-func handleIncomingRARequest(connection net.Conn) error {
+func handleIncomingRARequest(connection net.Conn, mutex *sync.Mutex) error {
+	mutex.Lock()
+	defer mutex.Unlock()
 	defer connection.Close()
+
 	println("[Attestation Server] Attesting peer: ", connection.RemoteAddr().String())
 
+	tcpConn, ok := connection.(*net.TCPConn)
+	if !ok {
+		return fmt.Errorf("[Attestation Server] connection is not a TCP connection")
+	}
+
 	// Extract file descriptor for socket
-	file, err := connection.(*net.TCPConn).File()
+	file, err := tcpConn.File()
 	if err != nil {
 		fmt.Println("[Attestation Server] Cannot get access to the connection. Reason: ", err.Error())
 		return err
 	}
 
-	// Create protobuf encoded request
-	req := types.SetupRequest{Req: &types.SetupRequest_PeerAttestationRequest{
-		PeerAttestationRequest: &types.PeerAttestationRequest{
-			Fd:     int32(file.Fd()),
+	// Create protobuf encoded request and send it to Rust side
+	req := types.SetupRequest{
+		Req: &types.SetupRequest_PeerAttestationRequest{
+			PeerAttestationRequest: &types.PeerAttestationRequest{
+				Fd: int32(file.Fd()),
+			},
 		},
-	}}
+	}
+
 	reqBytes, err := proto.Marshal(&req)
 	if err != nil {
 		fmt.Println("[Attestation Server] Failed to encode req:", err)
