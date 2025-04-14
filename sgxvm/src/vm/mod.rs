@@ -1,5 +1,5 @@
 use evm::standard::{Etable, EtableResolver, TransactArgs, TransactValue};
-use primitive_types::{H160, H256, U256};
+use primitive_types::{H160, U256};
 use std::vec::Vec;
 use std::string::ToString;
 
@@ -8,12 +8,9 @@ use crate::encryption::{
 };
 use crate::key_manager::utils::random_nonce;
 use crate::protobuf_generated::ffi::{
-    HandleTransactionResponse, 
-    Log, 
     SGXVMCallRequest, 
     SGXVMCreateRequest, 
     SGXVMEstimateGasRequest, 
-    Topic, 
     TransactionContext
 };
 use crate::GoQuerier;
