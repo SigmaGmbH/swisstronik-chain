@@ -86,7 +86,7 @@ def add_vesting_account(genesis, address, start_time, cliff_time, end_time, tota
 
     genesis['app_state']['auth']['accounts'].append(account)
     print(f"\033[32m[ADD]\033[0m Added vesting account for address: {address}")
-    return str(int(corrected_total_vesting) + int(spendable))  # total for bank
+    return str(int(corrected_total_vesting) + int(spendable) + remainder)  # total for bank
 
 def main():
     if len(sys.argv) != 4:
