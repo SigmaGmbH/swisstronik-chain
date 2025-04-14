@@ -9,7 +9,7 @@ use evm::interpreter::runtime::Log as RuntimeLog;
 use ethereum::Log;
 use primitive_types::{H160, H256};
 use protobuf::RepeatedField;
-use crate::protobuf_generated::ffi::AccessListItem;
+use crate::protobuf_generated::ffi::{AccessListItem, Topic};
 
 pub fn recover_sender(msg: &H256, sig: &Vec<u8>) -> Option<[u8; 20]> {
     if sig.len() != 65 {
@@ -75,4 +75,12 @@ pub fn convert_logs(input: Vec<RuntimeLog>) -> Vec<Log> {
             data: rl.data,
         })
         .collect()
+}
+
+/// Converts EVM topic into protobuf-generated `Topic`
+pub fn convert_topic_to_proto(topic: H256) -> Topic {
+    let mut protobuf_topic = Topic::new();
+    protobuf_topic.set_inner(topic.as_fixed_bytes().to_vec());
+
+    protobuf_topic
 }
