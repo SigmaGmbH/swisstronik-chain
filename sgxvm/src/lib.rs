@@ -17,6 +17,7 @@ use sgx_types::*;
 use std::slice;
 use std::string::String;
 use std::vec::Vec;
+use protobuf::Message;
 
 use crate::attestation::dcap::{
     get_qe_quote, 
@@ -29,16 +30,14 @@ use crate::protobuf_generated::ffi::{
     FFIRequest, FFIRequest_oneof_req,
     NodePublicKeyResponse,
 };
-use crate::utils::allocate_inner;
+use crate::utils::{allocate_inner, convert_and_allocate_transaction_result};
 use crate::key_manager::KeyManager;
-use protobuf::Message;
 
 mod attestation;
 mod vm;
 mod coder;
 mod encryption;
 mod error;
-mod handlers;
 mod key_manager;
 mod memory;
 mod ocall;
@@ -118,16 +117,19 @@ pub extern "C" fn handle_request(
         Some(req) => {
             match req {
                 FFIRequest_oneof_req::callRequest(data) => {
-                    crate::handlers::handle_evm_call_request(querier, data)
+                    let res = vm::handle_call_request_inner(querier, data);
+                    convert_and_allocate_transaction_result(res)
                 },
                 FFIRequest_oneof_req::createRequest(data) => {
-                    crate::handlers::handle_evm_create_request(querier, data)
+                    let res = vm::handle_create_request_inner(querier, data);
+                    convert_and_allocate_transaction_result(res)
                 },
                 FFIRequest_oneof_req::publicKeyRequest(data) => {
                     handle_public_key_request(data.blockNumber)
                 },
                 FFIRequest_oneof_req::estimateGasRequest(data) => {
-                    crate::handlers::handle_evm_estimate_gas_request(querier, data)
+                    let res = vm::handle_estimate_gas_request_inner(querier, data);
+                    convert_and_allocate_transaction_result(res)
                 }
             }
         }

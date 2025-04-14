@@ -153,20 +153,6 @@ impl StorageWithQuerier {
         }
     }
 
-    pub fn remove_storage_cell(&self, key: &H160, index: &H256) -> Result<(), Error>  {
-        let encoded_request = coder::encode_remove_storage_cell(key, index);
-        if let Some(result) = querier::make_request(self.querier, encoded_request) {
-            match protobuf::parse_from_bytes::<ffi::QueryRemoveStorageCellResponse>(result.as_slice()) {
-                Err(err) => {
-                    Err(err.into())
-                },
-                _ => Ok(())
-            }
-        } else {
-            Err(Error::enclave_err("Remove storage cell failed. Empty response"))
-        }
-    }
-
     pub fn insert_account_balance(&self, address: &H160, balance: &U256) -> Result<(), Error> {
         let encoded_request = coder::encode_insert_account_balance(address, balance);
         if let Some(result) = querier::make_request(self.querier, encoded_request) {

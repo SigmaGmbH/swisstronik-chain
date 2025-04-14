@@ -6,7 +6,7 @@ use crate::ocall;
 use crate::types::{Allocation, AllocationWithResult};
 use crate::vm::{
     utils::convert_topic_to_proto,
-    vm::types::ExecutionResult,
+    types::ExecutionResult,
 };
 use crate::protobuf_generated::ffi::{HandleTransactionResponse, Topic, Log};
 

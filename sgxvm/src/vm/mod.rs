@@ -1,7 +1,7 @@
 use evm::standard::{Etable, EtableResolver, TransactArgs, TransactValue};
 use primitive_types::{H160, H256, U256};
-use protobuf::Message;
 use std::vec::Vec;
+use std::string::ToString;
 
 use crate::encryption::{
     decrypt_transaction_data, encrypt_transaction_data, extract_public_key_and_data,
@@ -16,11 +16,7 @@ use crate::protobuf_generated::ffi::{
     Topic, 
     TransactionContext
 };
-use crate::utils::allocate_inner;
-use crate::std::string::ToString;
-use crate::AllocationWithResult;
 use crate::GoQuerier;
-
 use crate::vm::{
     precompiles::EVMPrecompiles,
     invoker::OverlayedInvoker,
