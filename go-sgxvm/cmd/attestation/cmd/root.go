@@ -2,9 +2,11 @@ package cmd
 
 import (
 	"fmt"
+	"log"
+	"strconv"
+
 	"github.com/SigmaGmbH/librustgo/internal/api"
 	"github.com/spf13/cobra"
-	"strconv"
 )
 
 func RootCmd() *cobra.Command {
@@ -55,7 +57,7 @@ func AddNewEpoch() *cobra.Command {
 			}
 
 			if err := api.AddEpoch(startingBlock); err != nil {
-				panic(err)
+				log.Fatal("[Attestation Server] Cannot add epoch: ", err)
 			}
 		},
 	}
@@ -73,7 +75,7 @@ func ListEpochs() *cobra.Command {
 			res, err := api.ListEpochs()
 
 			if err != nil {
-				panic(err)
+				log.Fatal("[Attestation Server] Cannot list epochs: ", err)
 			}
 
 			for _, epoch := range res {
@@ -93,7 +95,7 @@ func RemoveLatestEpoch() *cobra.Command {
 		Long:  "Allows to remove latest epoch, for example in case, if epoch starting block was set incorrectly",
 		Run: func(_ *cobra.Command, args []string) {
 			if err := api.RemoveLatestEpoch(); err != nil {
-				panic(err)
+				log.Fatal("[Attestation Server] Cannot remote latest epoch: ", err)
 			}
 		},
 	}
