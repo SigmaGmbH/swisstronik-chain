@@ -1,13 +1,15 @@
 use alloc::string::ToString;
+use std::vec::Vec;
 use sha3::{Keccak256, Digest};
 use k256::{
     ecdsa::recoverable,
-    elliptic_curve::{sec1::ToEncodedPoint},
+    elliptic_curve::sec1::ToEncodedPoint,
 };
-use primitive_types::H256;
-use std::vec::Vec;
-
-pub mod tx;
+use evm::interpreter::runtime::Log as RuntimeLog;
+use ethereum::Log;
+use primitive_types::{H160, H256};
+use protobuf::RepeatedField;
+use crate::protobuf_generated::ffi::AccessListItem;
 
 pub fn recover_sender(msg: &H256, sig: &Vec<u8>) -> Option<[u8; 20]> {
     if sig.len() != 65 {
@@ -45,4 +47,32 @@ pub fn recover_sender(msg: &H256, sig: &Vec<u8>) -> Option<[u8; 20]> {
     let mut address = [0u8; 20];
     address.copy_from_slice(&hash[12..32]);
     Some(address)
+}
+
+pub fn parse_access_list(data: RepeatedField<AccessListItem>) -> Vec<(H160, Vec<H256>)> {
+    let mut access_list = Vec::default();
+    for access_list_item in data.to_vec() {
+        let address = H160::from_slice(&access_list_item.address);
+        let slots = access_list_item
+            .storageSlot
+            .to_vec()
+            .into_iter()
+            .map(|item| H256::from_slice(&item))
+            .collect();
+
+        access_list.push((address, slots));
+    }
+
+    access_list
+}
+
+pub fn convert_logs(input: Vec<RuntimeLog>) -> Vec<Log> {
+    input
+        .into_iter()
+        .map(|rl| Log {
+            address: rl.address,
+            topics: rl.topics,
+            data: rl.data,
+        })
+        .collect()
 }

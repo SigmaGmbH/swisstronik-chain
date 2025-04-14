@@ -8,7 +8,7 @@ use primitive_types::{H160, U256};
 use std::prelude::v1::*;
 use std::vec::Vec;
 
-use crate::precompiles::LinearCostPrecompileWithQuerier;
+use crate::vm::precompiles::LinearCostPrecompileWithQuerier;
 use crate::{coder, querier, GoQuerier};
 use crate::protobuf_generated::ffi::{
     QueryAddVerificationDetailsResponse,

@@ -10,8 +10,7 @@ use evm::{MergeStrategy, TransactionalBackend};
 use primitive_types::{H160, H256, U256};
 use crate::{coder, querier};
 use crate::protobuf_generated::ffi;
-use crate::storage::FFIStorage;
-use crate::types::{Storage};
+use crate::vm::storage::StorageWithQuerier;
 
 pub struct TxEnvironment {
     pub chain_id: U256,
@@ -39,7 +38,7 @@ impl From<ffi::TransactionContext> for TxEnvironment {
 
 pub struct Backend<'state> {
     querier: *mut querier::GoQuerier,
-    storage: &'state FFIStorage,
+    storage: &'state StorageWithQuerier,
     environment: TxEnvironment,
     substate: Box<Substate>,
     accessed: BTreeSet<(H160, Option<H256>)>,
@@ -48,7 +47,7 @@ pub struct Backend<'state> {
 impl<'state> Backend<'state> {
     pub fn new(
         querier: *mut querier::GoQuerier,
-        storage: &'state FFIStorage,
+        storage: &'state StorageWithQuerier,
         environment: TxEnvironment,
     ) -> Self {
         Self {
@@ -60,7 +59,7 @@ impl<'state> Backend<'state> {
         }
     }
 
-    pub fn apply_changeset(storage: &'state FFIStorage, changeset: &OverlayedChangeSet) -> ExitResult {
+    pub fn apply_changeset(storage: &'state StorageWithQuerier, changeset: &OverlayedChangeSet) -> ExitResult {
         for (address, balance) in changeset.balances.clone() {
             storage.insert_account_balance(&address, &balance).map_err(|err| ExitException::Other(err.to_string().into()))?
         }

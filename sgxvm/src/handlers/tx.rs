@@ -1,4 +1,3 @@
-use crate::helpers::tx::Transaction;
 use evm::standard::{Etable, EtableResolver, TransactArgs, TransactValue};
 use primitive_types::{H160, H256, U256};
 use protobuf::Message;
@@ -8,16 +7,28 @@ use crate::encryption::{
     decrypt_transaction_data, encrypt_transaction_data, extract_public_key_and_data,
 };
 use crate::key_manager::utils::random_nonce;
-use crate::precompiles::EVMPrecompiles;
-use crate::protobuf_generated::ffi::{HandleTransactionResponse, Log, SGXVMCallRequest, SGXVMCreateRequest, SGXVMEstimateGasRequest, Topic, TransactionContext};
+use crate::protobuf_generated::ffi::{
+    HandleTransactionResponse, 
+    Log, 
+    SGXVMCallRequest, 
+    SGXVMCreateRequest, 
+    SGXVMEstimateGasRequest, 
+    Topic, 
+    TransactionContext
+};
+use crate::utils::allocate_inner;
 use crate::std::string::ToString;
-use crate::types::{ExecutionResult, GASOMETER_CONFIG};
 use crate::AllocationWithResult;
 use crate::GoQuerier;
-use crate::handlers::utils::{convert_logs, parse_access_list};
-use crate::backend::{TxEnvironment, Backend};
-use crate::helpers::recover_sender;
-use crate::invoker::OverlayedInvoker;
+
+use crate::vm::{
+    precompiles::EVMPrecompiles,
+    invoker::OverlayedInvoker,
+    backend::{TxEnvironment, Backend},
+    storage::StorageWithQuerier,
+    types::{ExecutionResult, GASOMETER_CONFIG, Transaction},
+    utils::{recover_sender, parse_access_list, convert_logs},
+};
 
 /// Converts raw execution result into protobuf and returns it outside of enclave
 pub fn convert_and_allocate_transaction_result(
@@ -55,7 +66,7 @@ pub fn convert_and_allocate_transaction_result(
         }
     };
 
-    super::allocate_inner(encoded_response)
+    allocate_inner(encoded_response)
 }
 
 /// Inner handler for EVM call request
@@ -265,7 +276,7 @@ fn run_tx(
     let resolver = EtableResolver::new(&GASOMETER_CONFIG, &precompiles, &etable);
     let invoker = OverlayedInvoker::new(&GASOMETER_CONFIG, &resolver);
 
-    let storage = crate::storage::FFIStorage::new(querier, context.timestamp, context.block_number);
+    let storage = StorageWithQuerier::new(querier, context.timestamp, context.block_number);
     let tx_environment = TxEnvironment::from(context);
     let mut backend = Backend::new(querier, &storage, tx_environment);
 

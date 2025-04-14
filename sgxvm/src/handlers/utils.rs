@@ -1,10 +1,7 @@
-use ethereum::Log;
-use evm::interpreter::runtime::Log as RuntimeLog;
 use evm::standard::TransactArgs;
-use primitive_types::{H160, H256, U256};
-use protobuf::RepeatedField;
-use std::vec::Vec;
-use crate::protobuf_generated::ffi::{AccessListItem, SGXVMCallParams, SGXVMCreateParams};
+use primitive_types::{H160, U256};
+use crate::protobuf_generated::ffi::{SGXVMCallParams, SGXVMCreateParams};
+use crate::vm::utils::parse_access_list;
 
 impl From<SGXVMCallParams> for TransactArgs {
     fn from(val: SGXVMCallParams) -> Self {
@@ -32,32 +29,4 @@ impl From<SGXVMCreateParams> for TransactArgs {
             access_list: parse_access_list(val.accessList),
         }
     }
-}
-
-pub fn parse_access_list(data: RepeatedField<AccessListItem>) -> Vec<(H160, Vec<H256>)> {
-    let mut access_list = Vec::default();
-    for access_list_item in data.to_vec() {
-        let address = H160::from_slice(&access_list_item.address);
-        let slots = access_list_item
-            .storageSlot
-            .to_vec()
-            .into_iter()
-            .map(|item| H256::from_slice(&item))
-            .collect();
-
-        access_list.push((address, slots));
-    }
-
-    access_list
-}
-
-pub fn convert_logs(input: Vec<RuntimeLog>) -> Vec<Log> {
-    input
-        .into_iter()
-        .map(|rl| Log {
-            address: rl.address,
-            topics: rl.topics,
-            data: rl.data,
-        })
-        .collect()
 }

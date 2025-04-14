@@ -1,9 +1,57 @@
+use alloc::string::ToString;
+use std::{
+    vec::Vec,
+    string::String,
+};
+use ethereum::Log;
+use evm::{
+    standard::Config,
+    interpreter::error::ExitError,
+};
 use primitive_types::{H160, H256, U256};
-use protobuf::RepeatedField;
-use std::vec::Vec;
-use rlp::{RlpStream};
+use rlp::RlpStream;
 use sha3::{Digest, Keccak256};
-use crate::protobuf_generated::ffi::{AccessListItem, SGXVMCallRequest, SGXVMCreateRequest};
+use crate::protobuf_generated::ffi::{SGXVMCallRequest, SGXVMCreateRequest};
+use crate::vm::utils::parse_access_list;
+
+/// Current gasometer configuration. Was set to Cancun
+pub static GASOMETER_CONFIG: Config = Config::cancun();
+
+#[derive(Clone, Debug, PartialEq)]
+/// Represents the result of a transaction or call execution.
+/// Contains logs, data, gas used and error message
+pub struct ExecutionResult {
+    pub logs: Vec<Log>,
+    pub data: Vec<u8>,
+    pub gas_used: u64,
+    pub vm_error: String
+}
+
+impl ExecutionResult {
+    /// Creates execution result that only contains error reason and possible amount of used gas
+    pub fn from_error(reason: String, data: Vec<u8>, gas_used: Option<u64>) -> Self {
+        Self {
+            logs: Vec::default(),
+            gas_used: gas_used.unwrap_or(21000), // This is minimum gas fee to apply the transaction
+            vm_error: reason,
+            data,
+        }
+    }
+
+    pub fn from_exit_error(error: ExitError, data: Vec<u8>, gas_used: u64) -> Self {
+        let vm_error = match error {
+            ExitError::Reverted => "reverted".to_string(),
+            ExitError::Fatal(fatal) => {
+                format!("{:?}", fatal)
+            },
+            ExitError::Exception(exit) => {
+                format!("{:?}", exit)
+            }
+        };
+
+        ExecutionResult { logs: vec![], data, gas_used, vm_error }
+    }
+}
 
 enum TransactionType {
     Legacy,
@@ -197,21 +245,4 @@ impl From<SGXVMCreateRequest> for Transaction {
             access_list: parse_access_list(params.accessList),
         }
     }
-}
-
-pub fn parse_access_list(data: RepeatedField<AccessListItem>) -> Vec<(H160, Vec<H256>)> {
-    let mut access_list = Vec::default();
-    for access_list_item in data.to_vec() {
-        let address = H160::from_slice(&access_list_item.address);
-        let slots = access_list_item
-            .storageSlot
-            .to_vec()
-            .into_iter()
-            .map(|item| H256::from_slice(&item))
-            .collect();
-
-        access_list.push((address, slots));
-    }
-
-    access_list
 }
