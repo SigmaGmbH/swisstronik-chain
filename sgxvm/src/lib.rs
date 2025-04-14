@@ -26,10 +26,8 @@ use crate::querier::GoQuerier;
 use crate::types::{Allocation, AllocationWithResult};
 use crate::protobuf_generated::ffi::{
     ListEpochsResponse, EpochData,
-    FFIRequest, FFIRequest_oneof_req, SGXVMEstimateGasRequest,
+    FFIRequest, FFIRequest_oneof_req,
     NodePublicKeyResponse,
-    SGXVMCallRequest, 
-    SGXVMCreateRequest,
 };
 use crate::utils::allocate_inner;
 use crate::key_manager::KeyManager;

@@ -1,14 +1,6 @@
-use std::vec::Vec;
-use std::slice;
-use sgx_types::sgx_status_t;
-use protobuf::Message;
-
-use crate::protobuf_generated::ffi::{FFIRequest, FFIRequest_oneof_req, SGXVMEstimateGasRequest};
-use crate::{AllocationWithResult, Allocation};
-use crate::ocall;
-use crate::key_manager::KeyManager;
+use crate::protobuf_generated::ffi::SGXVMEstimateGasRequest;
+use crate::AllocationWithResult;
 use crate::protobuf_generated::ffi::{
-    NodePublicKeyResponse,
     SGXVMCallRequest, 
     SGXVMCreateRequest,
 };
