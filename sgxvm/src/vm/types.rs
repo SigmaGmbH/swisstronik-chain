@@ -5,13 +5,16 @@ use std::{
 };
 use ethereum::Log;
 use evm::{
-    standard::Config,
+    standard::{Config, TransactArgs},
     interpreter::error::ExitError,
 };
 use primitive_types::{H160, H256, U256};
 use rlp::RlpStream;
 use sha3::{Digest, Keccak256};
-use crate::protobuf_generated::ffi::{SGXVMCallRequest, SGXVMCreateRequest};
+use crate::protobuf_generated::ffi::{
+    SGXVMCallRequest, SGXVMCreateRequest,
+    SGXVMCallParams, SGXVMCreateParams,
+};
 use crate::vm::utils::parse_access_list;
 
 /// Current gasometer configuration. Was set to Cancun
@@ -243,6 +246,34 @@ impl From<SGXVMCreateRequest> for Transaction {
             max_priority_fee_per_gas: Some(U256::from_big_endian(&params.maxPriorityFeePerGas)),
             max_fee_per_gas: Some(U256::from_big_endian(&params.maxFeePerGas)),
             access_list: parse_access_list(params.accessList),
+        }
+    }
+}
+
+impl From<SGXVMCallParams> for TransactArgs {
+    fn from(val: SGXVMCallParams) -> Self {
+        TransactArgs::Call {
+            caller: H160::from_slice(&val.from),
+            address: H160::from_slice(&val.to),
+            value: U256::from_big_endian(&val.value),
+            data: val.data,
+            gas_limit: U256::from(val.gasLimit),
+            gas_price: U256::from_big_endian(&val.gasPrice),
+            access_list: parse_access_list(val.accessList),
+        }
+    }
+}
+
+impl From<SGXVMCreateParams> for TransactArgs {
+    fn from(val: SGXVMCreateParams) -> Self {
+        TransactArgs::Create {
+            caller: H160::from_slice(&val.from),
+            value: U256::from_big_endian(&val.value),
+            init_code: val.data,
+            salt: None,
+            gas_limit: U256::from(val.gasLimit),
+            gas_price: U256::from_big_endian(&val.gasPrice),
+            access_list: parse_access_list(val.accessList),
         }
     }
 }

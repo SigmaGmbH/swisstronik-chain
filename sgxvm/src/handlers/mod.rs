@@ -7,7 +7,6 @@ use crate::protobuf_generated::ffi::{
 use crate::GoQuerier;
 
 pub mod tx;
-mod utils;
 
 /// Handles incoming request for calling contract or transferring value
 /// * querier - GoQuerier which is used to interact with Go (Cosmos) from SGX Enclave
