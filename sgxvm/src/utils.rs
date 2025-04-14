@@ -1,15 +1,14 @@
 use std::vec::Vec;
+use sgx_types::sgx_status_t;
+use protobuf::Message;
+
 use crate::ocall;
 use crate::types::{Allocation, AllocationWithResult};
-use sgx_types::sgx_status_t;
-
-use crate::vm::utils::convert_topic_to_proto;
-use crate::protobuf_generated::ffi::HandleTransactionResponse;
-use crate::vm::types::ExecutionResult;
-use crate::protobuf_generated::ffi::Topic;
-use crate::protobuf_generated::ffi::Log;
-
-use protobuf::Message;
+use crate::vm::{
+    utils::convert_topic_to_proto,
+    vm::types::ExecutionResult,
+};
+use crate::protobuf_generated::ffi::{HandleTransactionResponse, Topic, Log};
 
 /// Allocates provided data outside of enclave
 /// * data - bytes to allocate outside of enclave
