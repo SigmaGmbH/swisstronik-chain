@@ -17,6 +17,7 @@ use sgx_types::*;
 use std::slice;
 use std::string::String;
 use std::vec::Vec;
+use protobuf::Message;
 
 use crate::attestation::dcap::{
     get_qe_quote, 
@@ -25,26 +26,25 @@ use crate::attestation::dcap::{
 use crate::querier::GoQuerier;
 use crate::types::{Allocation, AllocationWithResult};
 use crate::protobuf_generated::ffi::{
-    ListEpochsResponse, EpochData
+    ListEpochsResponse, EpochData,
+    FFIRequest, FFIRequest_oneof_req,
+    NodePublicKeyResponse,
 };
-use protobuf::Message;
+use crate::utils::{allocate_inner, convert_and_allocate_transaction_result};
+use crate::key_manager::KeyManager;
 
 mod attestation;
-mod backend;
+mod vm;
 mod coder;
 mod encryption;
 mod error;
-mod handlers;
 mod key_manager;
 mod memory;
 mod ocall;
-mod precompiles;
 mod protobuf_generated;
 mod querier;
-mod storage;
 mod types;
-mod invoker;
-mod helpers;
+mod utils;
 
 #[no_mangle]
 /// Checks if there is already sealed master key
@@ -102,7 +102,73 @@ pub extern "C" fn handle_request(
     request_data: *const u8,
     len: usize,
 ) -> AllocationWithResult {
-    handlers::handle_protobuf_request_inner(querier, request_data, len)
+    // todo: move selection of appropriate handler here
+    let request_slice = unsafe { slice::from_raw_parts(request_data, len) };
+
+    let ffi_request = match protobuf::parse_from_bytes::<FFIRequest>(request_slice) {
+        Ok(ffi_request) => ffi_request,
+        Err(err) => {
+            println!("Got error during protobuf decoding: {:?}", err);
+            return AllocationWithResult::default();
+        }
+    };
+
+    match ffi_request.req {
+        Some(req) => {
+            match req {
+                FFIRequest_oneof_req::callRequest(data) => {
+                    let res = vm::handle_call_request_inner(querier, data);
+                    convert_and_allocate_transaction_result(res)
+                },
+                FFIRequest_oneof_req::createRequest(data) => {
+                    let res = vm::handle_create_request_inner(querier, data);
+                    convert_and_allocate_transaction_result(res)
+                },
+                FFIRequest_oneof_req::publicKeyRequest(data) => {
+                    handle_public_key_request(data.blockNumber)
+                },
+                FFIRequest_oneof_req::estimateGasRequest(data) => {
+                    let res = vm::handle_estimate_gas_request_inner(querier, data);
+                    convert_and_allocate_transaction_result(res)
+                }
+            }
+        }
+        None => {
+            println!("Got empty request during protobuf decoding");
+            AllocationWithResult::default()
+        }
+    }
+}
+
+fn handle_public_key_request(block_number: u64) -> AllocationWithResult {
+    let key_manager = match KeyManager::unseal() {
+        Ok(manager) => manager,
+        Err(_) => {
+            println!("Cannot unseal key manager");
+            return AllocationWithResult::default()
+        }
+    };
+
+    let public_key = match key_manager.get_public_key(block_number) {
+        Ok(public_key) => public_key,
+        Err(_) => {
+            println!("Cannot find key in Epoch Manager");
+            return AllocationWithResult::default()
+        }
+    };
+
+    let mut response = NodePublicKeyResponse::new();
+    response.set_publicKey(public_key);
+
+    let encoded_response = match response.write_to_bytes() {
+        Ok(res) => res,
+        Err(err) => {
+            println!("Cannot encode protobuf result. Reason: {:?}", err);
+            return AllocationWithResult::default();
+        }
+    };
+    
+    allocate_inner(encoded_response)
 }
 
 #[no_mangle]
@@ -174,7 +240,6 @@ pub unsafe extern "C" fn ecall_initialize_enclave(reset_flag: i32) -> sgx_status
     key_manager::init_enclave_inner(reset_flag)
 }
 
-
 #[no_mangle]
 pub unsafe extern "C" fn ecall_dump_dcap_quote(
     qe_target_info: &sgx_target_info_t,
@@ -206,7 +271,7 @@ pub unsafe extern "C" fn ecall_dump_dcap_quote(
 
     let _ = ecc_handle.close();
 
-    handlers::allocate_inner(encoded_quote)
+    allocate_inner(encoded_quote)
 }
 
 #[no_mangle]
@@ -341,7 +406,7 @@ pub unsafe extern "C" fn ecall_list_epochs() -> AllocationWithResult {
         }
     };
 
-    handlers::allocate_inner(encoded_response)
+    allocate_inner(encoded_response)
 }
 
 // Fix https://github.com/apache/incubator-teaclave-sgx-sdk/issues/373 for debug mode

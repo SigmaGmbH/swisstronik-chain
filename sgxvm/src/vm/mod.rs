@@ -1,62 +1,34 @@
-use crate::helpers::tx::Transaction;
 use evm::standard::{Etable, EtableResolver, TransactArgs, TransactValue};
-use primitive_types::{H160, H256, U256};
-use protobuf::Message;
+use primitive_types::{H160, U256};
 use std::vec::Vec;
+use std::string::ToString;
 
 use crate::encryption::{
     decrypt_transaction_data, encrypt_transaction_data, extract_public_key_and_data,
 };
 use crate::key_manager::utils::random_nonce;
-use crate::precompiles::EVMPrecompiles;
-use crate::protobuf_generated::ffi::{HandleTransactionResponse, Log, SGXVMCallRequest, SGXVMCreateRequest, SGXVMEstimateGasRequest, Topic, TransactionContext};
-use crate::std::string::ToString;
-use crate::types::{ExecutionResult, GASOMETER_CONFIG};
-use crate::AllocationWithResult;
+use crate::protobuf_generated::ffi::{
+    SGXVMCallRequest, 
+    SGXVMCreateRequest, 
+    SGXVMEstimateGasRequest, 
+    TransactionContext
+};
 use crate::GoQuerier;
-use crate::handlers::utils::{convert_logs, parse_access_list};
-use crate::backend::{TxEnvironment, Backend};
-use crate::helpers::recover_sender;
-use crate::invoker::OverlayedInvoker;
+use crate::vm::{
+    precompiles::EVMPrecompiles,
+    invoker::OverlayedInvoker,
+    backend::{TxEnvironment, Backend},
+    storage::StorageWithQuerier,
+    types::{ExecutionResult, GASOMETER_CONFIG, Transaction},
+    utils::{recover_sender, parse_access_list, convert_logs},
+};
 
-/// Converts raw execution result into protobuf and returns it outside of enclave
-pub fn convert_and_allocate_transaction_result(
-    execution_result: ExecutionResult,
-) -> AllocationWithResult {
-    let mut response = HandleTransactionResponse::new();
-    response.set_gas_used(execution_result.gas_used);
-    response.set_vm_error(execution_result.vm_error);
-    response.set_ret(execution_result.data);
-
-    // Convert logs into proper format
-    let converted_logs = execution_result
-        .logs
-        .into_iter()
-        .map(|log| {
-            let mut proto_log = Log::new();
-            proto_log.set_address(log.address.as_fixed_bytes().to_vec());
-            proto_log.set_data(log.data);
-
-            let converted_topics: Vec<Topic> =
-                log.topics.into_iter().map(convert_topic_to_proto).collect();
-            proto_log.set_topics(converted_topics.into());
-
-            proto_log
-        })
-        .collect();
-
-    response.set_logs(converted_logs);
-
-    let encoded_response = match response.write_to_bytes() {
-        Ok(res) => res,
-        Err(err) => {
-            println!("Cannot encode protobuf result. Reason: {:?}", err);
-            return AllocationWithResult::default();
-        }
-    };
-
-    super::allocate_inner(encoded_response)
-}
+pub mod backend;
+pub mod invoker;
+pub mod storage;
+pub mod precompiles;
+pub mod types;
+pub mod utils;
 
 /// Inner handler for EVM call request
 pub fn handle_call_request_inner(
@@ -244,14 +216,6 @@ pub fn handle_estimate_gas_request_inner(
     execution_result
 }
 
-/// Converts EVM topic into protobuf-generated `Topic
-fn convert_topic_to_proto(topic: H256) -> Topic {
-    let mut protobuf_topic = Topic::new();
-    protobuf_topic.set_inner(topic.as_fixed_bytes().to_vec());
-
-    protobuf_topic
-}
-
 fn run_tx(
     querier: *mut GoQuerier,
     context: TransactionContext,
@@ -265,7 +229,7 @@ fn run_tx(
     let resolver = EtableResolver::new(&GASOMETER_CONFIG, &precompiles, &etable);
     let invoker = OverlayedInvoker::new(&GASOMETER_CONFIG, &resolver);
 
-    let storage = crate::storage::FFIStorage::new(querier, context.timestamp, context.block_number);
+    let storage = StorageWithQuerier::new(querier, context.timestamp, context.block_number);
     let tx_environment = TxEnvironment::from(context);
     let mut backend = Backend::new(querier, &storage, tx_environment);
 

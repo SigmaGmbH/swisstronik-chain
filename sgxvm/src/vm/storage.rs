@@ -1,20 +1,18 @@
 use primitive_types::{H160, H256, U256};
 use std::vec::Vec;
 
-use crate::{
-    coder, encryption, error::Error, protobuf_generated::ffi, querier, types::Storage
-};
+use crate::{coder, encryption, error::Error, protobuf_generated::ffi, querier};
 
 /// This struct allows us to obtain state from keeper
 /// that is located outside of Rust code
-pub struct FFIStorage {
+pub struct StorageWithQuerier {
     pub querier: *mut querier::GoQuerier,
     pub context_timestamp: u64,
     pub context_block_number: u64,
 }
 
-impl Storage for FFIStorage {
-    fn contains_key(&self, key: &H160) -> bool {
+impl StorageWithQuerier {
+    pub fn contains_key(&self, key: &H160) -> bool {
         let encoded_request = coder::encode_contains_key(key);
         if let Some(result) = querier::make_request(self.querier, encoded_request) {
             // Decode protobuf
@@ -32,7 +30,7 @@ impl Storage for FFIStorage {
         }
     }
 
-    fn get_account_storage_cell(&self, key: &H160, index: &H256) -> Option<H256> {
+    pub fn get_account_storage_cell(&self, key: &H160, index: &H256) -> Option<H256> {
         let encoded_request = coder::encode_get_storage_cell(key, index);
         if let Some(result) = querier::make_request(self.querier, encoded_request) {
             // Decode protobuf
@@ -64,7 +62,7 @@ impl Storage for FFIStorage {
         }
     }
 
-    fn get_account_code(&self, key: &H160) -> Option<Vec<u8>> {
+    pub fn get_account_code(&self, key: &H160) -> Option<Vec<u8>> {
         let encoded_request = coder::encode_get_account_code(key);
         if let Some(result) = querier::make_request(self.querier, encoded_request) {
             // Decode protobuf
@@ -83,7 +81,7 @@ impl Storage for FFIStorage {
         }
     }
 
-    fn get_account(&self, key: &H160) -> (U256, U256) {
+    pub fn get_account(&self, key: &H160) -> (U256, U256) {
         let encoded_request = coder::encode_get_account(key);
         if let Some(result) = querier::make_request(self.querier, encoded_request) {
             // Decode protobuf
@@ -105,7 +103,7 @@ impl Storage for FFIStorage {
         }
     }
 
-    fn insert_account_code(&self, key: H160, code: Vec<u8>) -> Result<(), Error>  {
+    pub fn insert_account_code(&self, key: H160, code: Vec<u8>) -> Result<(), Error>  {
         let encoded_request = coder::encode_insert_account_code(key, code);
         if let Some(result) = querier::make_request(self.querier, encoded_request) {
             match protobuf::parse_from_bytes::<ffi::QueryInsertAccountCodeResponse>(result.as_slice()) {
@@ -119,7 +117,7 @@ impl Storage for FFIStorage {
         }
     }
 
-    fn insert_storage_cell(&self, key: H160, index: H256, value: H256) -> Result<(), Error>  {
+    pub fn insert_storage_cell(&self, key: H160, index: H256, value: H256) -> Result<(), Error>  {
         // Encrypt value
         let encrypted_value = encryption::encrypt_storage_cell(
             key.as_bytes().to_vec(), 
@@ -141,7 +139,7 @@ impl Storage for FFIStorage {
         }
     }
 
-    fn remove(&self, key: &H160) -> Result<(), Error>  {
+    pub fn remove(&self, key: &H160) -> Result<(), Error>  {
         let encoded_request = coder::encode_remove(key);
         if let Some(result) = querier::make_request(self.querier, encoded_request) {
             match protobuf::parse_from_bytes::<ffi::QueryRemoveResponse>(result.as_slice()) {
@@ -155,21 +153,7 @@ impl Storage for FFIStorage {
         }
     }
 
-    fn remove_storage_cell(&self, key: &H160, index: &H256) -> Result<(), Error>  {
-        let encoded_request = coder::encode_remove_storage_cell(key, index);
-        if let Some(result) = querier::make_request(self.querier, encoded_request) {
-            match protobuf::parse_from_bytes::<ffi::QueryRemoveStorageCellResponse>(result.as_slice()) {
-                Err(err) => {
-                    Err(err.into())
-                },
-                _ => Ok(())
-            }
-        } else {
-            Err(Error::enclave_err("Remove storage cell failed. Empty response"))
-        }
-    }
-
-    fn insert_account_balance(&self, address: &H160, balance: &U256) -> Result<(), Error> {
+    pub fn insert_account_balance(&self, address: &H160, balance: &U256) -> Result<(), Error> {
         let encoded_request = coder::encode_insert_account_balance(address, balance);
         if let Some(result) = querier::make_request(self.querier, encoded_request) {
             match protobuf::parse_from_bytes::<ffi::QueryInsertAccountBalanceResponse>(result.as_slice()) {
@@ -183,7 +167,7 @@ impl Storage for FFIStorage {
         }
     }
 
-    fn insert_account_nonce(&self, address: &H160, nonce: &U256) -> Result<(), Error> {
+    pub fn insert_account_nonce(&self, address: &H160, nonce: &U256) -> Result<(), Error> {
         let encoded_request = coder::encode_insert_account_nonce(address, nonce);
         if let Some(result) = querier::make_request(self.querier, encoded_request) {
             match protobuf::parse_from_bytes::<ffi::QueryInsertAccountNonceResponse>(result.as_slice()) {
@@ -197,7 +181,7 @@ impl Storage for FFIStorage {
         }
     }
 
-    fn get_account_code_size(&self, address: &H160) -> Result<U256, Error> {
+    pub fn get_account_code_size(&self, address: &H160) -> Result<U256, Error> {
         let encoded_request = coder::encode_get_account_code_size(address);
         if let Some(result) = querier::make_request(self.querier, encoded_request) {
             match protobuf::parse_from_bytes::<ffi::QueryGetAccountCodeSizeResponse>(result.as_slice()) {
@@ -214,7 +198,7 @@ impl Storage for FFIStorage {
         }
     }
 
-    fn get_account_code_hash(&self, address: &H160) -> Result<H256, Error> {
+    pub fn get_account_code_hash(&self, address: &H160) -> Result<H256, Error> {
         let encoded_request = coder::encode_get_account_code_hash(address);
         if let Some(result) = querier::make_request(self.querier, encoded_request) {
             match protobuf::parse_from_bytes::<ffi::QueryGetAccountCodeHashResponse>(result.as_slice()) {
@@ -230,9 +214,7 @@ impl Storage for FFIStorage {
             Err(Error::enclave_err("Get account code size failed. Empty response"))
         }
     }
-}
 
-impl FFIStorage {
     pub fn new(querier: *mut querier::GoQuerier, context_timestamp: u64, context_block_number: u64) -> Self {
         Self { querier, context_timestamp, context_block_number }
     }
