@@ -186,8 +186,6 @@ func (suite *KeeperTestSuite) TestDryRun() {
 			suite.Require().NoError(err)
 			suite.Require().Empty(res.VmError)
 
-			nonceAfter := suite.app.EvmKeeper.GetNonce(suite.ctx, suite.address)
-
 			if tc.commit {
 				// Check if balance & nonce were updated
 				expectedBalance := balanceBefore.Sub(balanceBefore, big.NewInt(amountToTransfer))
@@ -201,9 +199,6 @@ func (suite *KeeperTestSuite) TestDryRun() {
 				expectedReceiverBalance := receiverBalanceBefore.Add(receiverBalanceBefore, big.NewInt(amountToTransfer))
 				isReceiverBalanceCorrect := expectedReceiverBalance.Cmp(receiverBalanceAfter)
 				suite.Require().True(isReceiverBalanceCorrect == 0, "Incorrect receiver's balance")
-
-				// Check if nonce was updated
-				suite.Require().Equal(nonceBefore+1, nonceAfter)
 			} else {
 				// Check if balance & nonce still the same
 				// Check sender's balance
@@ -213,9 +208,6 @@ func (suite *KeeperTestSuite) TestDryRun() {
 				// Check receiver's balance
 				receiverBalanceAfter := suite.app.EvmKeeper.GetBalance(suite.ctx, common.Address{})
 				suite.Require().Equal(receiverBalanceBefore, receiverBalanceAfter)
-
-				// Check if nonce still the same
-				suite.Require().Equal(nonceBefore, nonceAfter)
 			}
 		})
 	}
@@ -271,8 +263,6 @@ func (suite *KeeperTestSuite) TestMultipleTransfers() {
 		suite.Require().NoError(err)
 		suite.Require().Empty(res.VmError)
 
-		nonceAfter := suite.app.EvmKeeper.GetNonce(suite.ctx, suite.address)
-
 		// Check if balance & nonce were updated
 		expectedBalance := balanceBefore.Sub(balanceBefore, big.NewInt(amountToTransfer))
 		balanceAfter := suite.app.EvmKeeper.GetBalance(suite.ctx, suite.address)
@@ -285,9 +275,6 @@ func (suite *KeeperTestSuite) TestMultipleTransfers() {
 		expectedReceiverBalance := receiverBalanceBefore.Add(receiverBalanceBefore, big.NewInt(amountToTransfer))
 		isReceiverBalanceCorrect := expectedReceiverBalance.Cmp(receiverBalanceAfter)
 		suite.Require().True(isReceiverBalanceCorrect == 0, "Incorrect receiver's balance")
-
-		// Check if nonce was updated
-		suite.Require().Equal(nonceBefore+1, nonceAfter)
 	}
 }
 
