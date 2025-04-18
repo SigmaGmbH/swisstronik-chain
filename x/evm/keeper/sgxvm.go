@@ -298,12 +298,15 @@ func (k *Keeper) ApplyMessageWithConfig(
 		EVMKeeper: k,
 	}
 
+	// Cache nonce stored in DB after increment by Ante Handler.
+	// We will restore that nonce after execution of transaction
+	nonceToRestore := k.GetNonce(ctx, msg.From())
+	if err := k.SetNonce(ctx, msg.From(), msg.Nonce()); err != nil {
+		return nil, errorsmod.Wrap(err, "failed to set nonce before tx execution")
+	}
+
 	var res *librustgo.HandleTransactionResponse
 	if contractCreation {
-		nonceToRestore := k.GetNonce(ctx, msg.From())
-		if err := k.SetNonce(ctx, msg.From(), msg.Nonce()); err != nil {
-			return nil, errorsmod.Wrap(err, "failed to set nonce before creation")
-		}
 		res, err = librustgo.Create(
 			connector,
 			msg.From().Bytes(),
@@ -320,16 +323,7 @@ func (k *Keeper) ApplyMessageWithConfig(
 			msg.GasTipCap(),
 			txType,
 		)
-		if err := k.SetNonce(ctx, msg.From(), nonceToRestore); err != nil {
-			return nil, errorsmod.Wrap(err, "failed to set nonce after creation")
-		}
 	} else {
-		// Cache nonce stored in DB after increment by Ante Handler.
-		// We will restore that nonce after execution of transaction
-		nonceToRestore := k.GetNonce(ctx, msg.From())
-		if err := k.SetNonce(ctx, msg.From(), msg.Nonce()); err != nil {
-			return nil, errorsmod.Wrap(err, "failed to set nonce before call")
-		}
 		res, err = librustgo.Call(
 			connector,
 			msg.From().Bytes(),
@@ -348,13 +342,15 @@ func (k *Keeper) ApplyMessageWithConfig(
 			msg.GasTipCap(),
 			txType,
 		)
-		if err := k.SetNonce(ctx, msg.From(), nonceToRestore); err != nil {
-			return nil, errorsmod.Wrap(err, "failed to set nonce after call")
-		}
 	}
 
 	if err != nil {
-		return nil, err
+		return nil, errorsmod.Wrap(err, "failed to execute transaction")
+	}
+
+	// Restore nonce to the latest state after transaction execution
+	if err := k.SetNonce(ctx, msg.From(), nonceToRestore); err != nil {
+		return nil, errorsmod.Wrap(err, "failed to restore nonce after tx execution")
 	}
 
 	// calculate gas refund
