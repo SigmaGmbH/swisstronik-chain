@@ -240,6 +240,8 @@ func initTestnetFiles(
 	appConfig.MinGasPrices = args.minGasPrices
 	appConfig.JSONRPC.Address = "0.0.0.0:8545"
 	appConfig.JSONRPC.WsAddress = "0.0.0.0:8546"
+	appConfig.JSONRPC.UnencryptedAddress = "0.0.0.0:8547"
+	appConfig.JSONRPC.UnencryptedWsAddress = "0.0.0.0:8548"
 	appConfig.API.Enable = true
 	appConfig.Telemetry.Enabled = true
 	appConfig.Telemetry.PrometheusRetentionTime = 60

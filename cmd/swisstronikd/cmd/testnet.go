@@ -42,8 +42,8 @@ import (
 
 	"swisstronik/testutil/network"
 
-	tmtypes "github.com/cometbft/cometbft/types"
 	"github.com/SigmaGmbH/librustgo"
+	tmtypes "github.com/cometbft/cometbft/types"
 )
 
 var (
@@ -148,9 +148,9 @@ func initializeEnclave() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "init-testnet-enclave",
 		Short: "Initialize SGX Enclave for local testnet",
-		Long:  `Initializes SGX enclave with local key manager
+		Long: `Initializes SGX enclave with local key manager
 		*** WARNING: Do not use this command to setup validator node ***`,
-		Args:  cobra.ExactArgs(0),
+		Args: cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			shouldReset, err := cmd.Flags().GetBool(flagShouldReset)
 			if err != nil {
@@ -194,6 +194,8 @@ func initTestnetConfigs(
 	appConfig.MinGasPrices = args.minGasPrices
 	appConfig.JSONRPC.Address = "0.0.0.0:8545"
 	appConfig.JSONRPC.WsAddress = "0.0.0.0:8546"
+	appConfig.JSONRPC.UnencryptedAddress = "0.0.0.0:8547"
+	appConfig.JSONRPC.UnencryptedWsAddress = "0.0.0.0:8548"
 	appConfig.API.Enable = true
 	appConfig.Telemetry.Enabled = true
 	appConfig.Telemetry.PrometheusRetentionTime = 60
@@ -453,7 +455,7 @@ func collectGenFiles(
 			// set the canonical application state (they should not differ)
 			appState = nodeAppState
 		}
-		
+
 		genFile := nodeConfig.GenesisFile()
 
 		// overwrite each validator's genesis file to have a canonical genesis time
