@@ -157,7 +157,7 @@ func (k *Keeper) ApplySGXVMTransaction(
 
 	txContext, err := CreateSGXVMContext(ctx, k, tx)
 	if err != nil {
-		return nil, err
+		return nil, errorsmod.Wrap(err, "failed to create transaction context")
 	}
 
 	// snapshot to contain the tx processing and post-processing in same scope
@@ -447,7 +447,7 @@ func (k *Keeper) EstimateGasMessageWithConfig(
 	}
 
 	if err != nil {
-		return nil, err
+		return nil, errorsmod.Wrap(err, "failed to estimate gas")
 	}
 
 	// calculate gas refund
