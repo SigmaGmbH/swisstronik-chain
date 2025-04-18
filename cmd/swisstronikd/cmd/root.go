@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"swisstronik/cmd/swisstronikd/cmd/keys"
 	"time"
 
 	"swisstronik/encoding"
@@ -45,7 +46,6 @@ import (
 
 	"swisstronik/app"
 
-	evmmoduleclient "swisstronik/client"
 	evmmoduleserver "swisstronik/server"
 	evmserverconfig "swisstronik/server/config"
 	srvflags "swisstronik/server/flags"
@@ -101,7 +101,7 @@ func NewRootCmd() (*cobra.Command, simappparams.EncodingConfig) {
 
 	a := appCreator{encodingConfig}
 	rootCmd.AddCommand(
-		evmmoduleclient.ValidateChainID(
+		ValidateChainID(
 			genutilcli.InitCmd(app.ModuleBasics, app.DefaultNodeHome),
 		),
 		genutilcli.CollectGenTxsCmd(banktypes.GenesisBalancesIterator{}, app.DefaultNodeHome, genutiltypes.DefaultMessageValidator),
@@ -130,7 +130,7 @@ func NewRootCmd() (*cobra.Command, simappparams.EncodingConfig) {
 		rpc.StatusCommand(),
 		queryCommand(),
 		txCommand(),
-		evmmoduleclient.KeyCommands(app.DefaultNodeHome),
+		keys.KeyCommands(app.DefaultNodeHome),
 	)
 	rootCmd, err := srvflags.AddTxFlags(rootCmd)
 	if err != nil {

@@ -13,18 +13,18 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with the Ethermint library. If not, see https://github.com/evmos/ethermint/blob/main/LICENSE
-package client
+package keys
 
 import (
 	"bufio"
 
 	"github.com/spf13/cobra"
 
-	"swisstronik/crypto/ethsecp256k1"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/input"
 	"github.com/cosmos/cosmos-sdk/crypto"
 	"github.com/ethereum/go-ethereum/common"
+	"swisstronik/crypto/ethsecp256k1"
 
 	"swisstronik/crypto/hd"
 )

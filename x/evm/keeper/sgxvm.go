@@ -157,7 +157,7 @@ func (k *Keeper) ApplySGXVMTransaction(
 
 	txContext, err := CreateSGXVMContext(ctx, k, tx)
 	if err != nil {
-		return nil, err
+		return nil, errorsmod.Wrap(err, "failed to create transaction context")
 	}
 
 	// snapshot to contain the tx processing and post-processing in same scope
@@ -298,9 +298,15 @@ func (k *Keeper) ApplyMessageWithConfig(
 		EVMKeeper: k,
 	}
 
+	// Cache nonce stored in DB after increment by Ante Handler.
+	// We will restore that nonce after execution of transaction
+	nonceToRestore := k.GetNonce(ctx, msg.From())
+	if err := k.SetNonce(ctx, msg.From(), msg.Nonce()); err != nil {
+		return nil, errorsmod.Wrap(err, "failed to set nonce before tx execution")
+	}
+
 	var res *librustgo.HandleTransactionResponse
 	if contractCreation {
-		k.SetNonce(ctx, msg.From(), msg.Nonce())
 		res, err = librustgo.Create(
 			connector,
 			msg.From().Bytes(),
@@ -317,7 +323,6 @@ func (k *Keeper) ApplyMessageWithConfig(
 			msg.GasTipCap(),
 			txType,
 		)
-		k.SetNonce(ctx, msg.From(), msg.Nonce()+1)
 	} else {
 		res, err = librustgo.Call(
 			connector,
@@ -340,7 +345,12 @@ func (k *Keeper) ApplyMessageWithConfig(
 	}
 
 	if err != nil {
-		return nil, err
+		return nil, errorsmod.Wrap(err, "failed to execute transaction")
+	}
+
+	// Restore nonce to the latest state after transaction execution
+	if err := k.SetNonce(ctx, msg.From(), nonceToRestore); err != nil {
+		return nil, errorsmod.Wrap(err, "failed to restore nonce after tx execution")
 	}
 
 	// calculate gas refund
@@ -437,7 +447,7 @@ func (k *Keeper) EstimateGasMessageWithConfig(
 	}
 
 	if err != nil {
-		return nil, err
+		return nil, errorsmod.Wrap(err, "failed to estimate gas")
 	}
 
 	// calculate gas refund

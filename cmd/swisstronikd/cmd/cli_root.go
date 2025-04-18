@@ -7,10 +7,12 @@ import (
 	"os"
 	"strings"
 
-	"swisstronik/encoding"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/config"
+	"swisstronik/encoding"
 
+	simappparams "cosmossdk.io/simapp/params"
+	tmcfg "github.com/cometbft/cometbft/config"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/rpc"
 	"github.com/cosmos/cosmos-sdk/server"
@@ -20,12 +22,10 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/crisis"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-	tmcfg "github.com/cometbft/cometbft/config"
-	simappparams "cosmossdk.io/simapp/params"
 
 	"swisstronik/app"
 
-	evmmoduleclient "swisstronik/client"
+	"swisstronik/cmd/swisstronikd/cmd/keys"
 	evmserverconfig "swisstronik/server/config"
 	srvflags "swisstronik/server/flags"
 )
@@ -107,7 +107,7 @@ func initRootCmd(
 		rpc.StatusCommand(),
 		queryCommand(),
 		txCommand(),
-		evmmoduleclient.KeyCommands(app.DefaultNodeHome),
+		keys.KeyCommands(app.DefaultNodeHome),
 	)
 
 	rootCmd, err := srvflags.AddTxFlags(rootCmd)
@@ -217,7 +217,7 @@ func initAppConfig() (string, interface{}) {
 func convertEncodingConfig(config simappparams.EncodingConfig) simappparams.EncodingConfig {
 	return simappparams.EncodingConfig{
 		InterfaceRegistry: config.InterfaceRegistry,
-		Codec:         config.Codec,
+		Codec:             config.Codec,
 		TxConfig:          config.TxConfig,
 		Amino:             config.Amino,
 	}
