@@ -13,7 +13,7 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with the Ethermint library. If not, see https://github.com/evmos/ethermint/blob/main/LICENSE
-package client
+package keys
 
 import (
 	"bufio"
@@ -21,16 +21,15 @@ import (
 	"github.com/cometbft/cometbft/libs/cli"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/cosmos/cosmos-sdk/client/keys"
+	sdkkeys "github.com/cosmos/cosmos-sdk/client/keys"
 	"github.com/spf13/cobra"
 
-	clientkeys "swisstronik/client/keys"
 	"swisstronik/crypto/hd"
 
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 )
 
-// KeyCommands registers a sub-tree of commands to interact with
+// KeyCommands registers a subtree of commands to interact with
 // local private key storage.
 func KeyCommands(defaultNodeHome string) *cobra.Command {
 	cmd := &cobra.Command{
@@ -61,7 +60,7 @@ The pass backend requires GnuPG: https://gnupg.org/
 	}
 
 	// support adding Ethereum supported keys
-	addCmd := keys.AddKeyCommand()
+	addCmd := sdkkeys.AddKeyCommand()
 
 	// update the default signing algorithm value to "eth_secp256k1"
 	algoFlag := addCmd.Flag(flags.FlagKeyType)
@@ -74,16 +73,16 @@ The pass backend requires GnuPG: https://gnupg.org/
 	addCmd.RunE = runAddCmd
 
 	cmd.AddCommand(
-		keys.MnemonicKeyCommand(),
+		sdkkeys.MnemonicKeyCommand(),
 		addCmd,
-		keys.ExportKeyCommand(),
-		keys.ImportKeyCommand(),
-		keys.ListKeysCmd(),
-		keys.ShowKeysCmd(),
-		keys.DeleteKeyCommand(),
-		keys.RenameKeyCommand(),
-		keys.ParseKeyStringCommand(),
-		keys.MigrateCommand(),
+		sdkkeys.ExportKeyCommand(),
+		sdkkeys.ImportKeyCommand(),
+		sdkkeys.ListKeysCmd(),
+		sdkkeys.ShowKeysCmd(),
+		sdkkeys.DeleteKeyCommand(),
+		sdkkeys.RenameKeyCommand(),
+		sdkkeys.ParseKeyStringCommand(),
+		sdkkeys.MigrateCommand(),
 		flags.LineBreak,
 		UnsafeExportEthKeyCommand(),
 		UnsafeImportKeyCommand(),
@@ -103,5 +102,5 @@ func runAddCmd(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	buf := bufio.NewReader(clientCtx.Input)
-	return clientkeys.RunAddCmd(clientCtx, cmd, args, buf)
+	return RunAddCmd(clientCtx, cmd, args, buf)
 }

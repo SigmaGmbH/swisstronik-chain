@@ -13,7 +13,7 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with the Ethermint library. If not, see https://github.com/evmos/ethermint/blob/main/LICENSE
-package client
+package keys
 
 import (
 	"bufio"
@@ -27,9 +27,9 @@ import (
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/spf13/cobra"
 
+	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	"swisstronik/crypto/ethsecp256k1"
 	"swisstronik/crypto/hd"
-	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 )
 
 // UnsafeExportEthKeyCommand exports a key with the given name as a private key in hex format.
