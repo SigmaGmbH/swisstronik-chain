@@ -3,7 +3,7 @@ const { ethers } = require('hardhat')
 
 const compliancePrecompile = "0x0000000000000000000000000000000000000404";
 
-describe('ComplianceBridge', () => {
+describe('ComplianceBridge via direct call', () => {
     it('Should be able to add verification details', async () => {
         const provider = new ethers.providers.JsonRpcProvider("http://localhost:8547")
         const signer = new ethers.Wallet("D5DA6D43250C8EB630C1AB8A80F19C673267A6B210C10C41065D5C34FC369DCB", provider);
