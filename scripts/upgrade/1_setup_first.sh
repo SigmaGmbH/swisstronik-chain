@@ -55,11 +55,17 @@ jq '.app_state["mint"]["params"]["mint_denom"]="aswtr"' "$GENESIS" >"$TMP_GENESI
 jq '.consensus_params["block"]["max_gas"]="10000000"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
 jq '.app_state["compliance"]["operators"]=[{"operator":"swtr1ml2knanpk8sv94f8h9g8vaf9k3yyfva4fykyn9", "operator_type": 1}]' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
 
+# add arachnid deployment proxy
+jq --arg BYTECODE $ARACHNID_BYTECODE '.app_state.evm.accounts += [{"address":"0x4e59b44847b379578588920cA78FbF26c0B4956C", "code": $BYTECODE, "storage": []}]' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
+jq --arg CODE_HASH $ARACHNID_CODEHASH '.app_state.auth.accounts += [{"@type": "/ethermint.types.v1.EthAccount", "base_account": {"account_number": "6", "address": "swtr1fevmgjz8kdu40pvgjgx20ralymqtf9tvcggehm", "pub_key": null, "sequence": "1" }, "code_hash": $CODE_HASH}]' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
+
 # set initial issuer in genesis
 jq --arg BYTECODE $COMPLIANCE_PROXY_BYTECODE '.app_state.evm.accounts += [{"address":"0x2Fc0B35E41a9a2eA248a275269Af1c8B3a061167", "code": $BYTECODE, "storage": []}]' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
 jq '.app_state.compliance.issuerDetails += [{"address": "swtr19lqtxhjp4x3w5fy2yafxntcu3vaqvyt827e4ct", "details": {"creator": "swtr1ml2knanpk8sv94f8h9g8vaf9k3yyfva4fykyn9", "description": "d", "legalEntity": "e", "logo": "l", "name": "n", "url": "u"}}]' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
 jq '.app_state.compliance.addressDetails += [{"address": "swtr19lqtxhjp4x3w5fy2yafxntcu3vaqvyt827e4ct", "details": {"is_revoked": false, "is_verified": true, "verifications": []}}]' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
 jq --arg CODE_HASH $COMPLIANCE_PROXY_CODEHASH '.app_state.auth.accounts += [{"@type": "/ethermint.types.v1.EthAccount", "base_account": {"account_number": "5", "address": "swtr19lqtxhjp4x3w5fy2yafxntcu3vaqvyt827e4ct", "pub_key": null, "sequence": "1" }, "code_hash": $CODE_HASH}]' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
+jq '.app_state.compliance.issuerDetails += [{"address": "swtr16vgqffr8v0sh3n5qeqdksfpzdkqf3rtk49thun", "details": {"creator": "swtr1ml2knanpk8sv94f8h9g8vaf9k3yyfva4fykyn9", "description": "d", "legalEntity": "e", "logo": "l", "name": "n", "url": "u"}}]' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
+jq '.app_state.compliance.addressDetails += [{"address": "swtr16vgqffr8v0sh3n5qeqdksfpzdkqf3rtk49thun", "details": {"is_revoked": false, "is_verified": true, "verifications": []}}]' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
 
 
 # expose ports
