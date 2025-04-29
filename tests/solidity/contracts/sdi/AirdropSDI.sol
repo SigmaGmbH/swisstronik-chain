@@ -87,6 +87,15 @@ contract AirdropSDI is Ownable {
     }
 
     /**
+     * @notice Checks if a given user address is eligible for the airdrop
+     * @param user The address of the user to check eligibility for
+     * @return bool True if the user is eligible, false otherwise
+     */
+    function isUserEligible(address user) public view returns (bool) {
+        return isEligible[user];
+    }
+
+    /**
      * @notice Updates the issuance and revocation Merkle roots.
      * @dev Allows the owner to set new root hashes for the Merkle trees used in SDI verification.
      * Emits a {RootsUpdated} event upon successful update.

@@ -92,17 +92,17 @@ const signMiMC = async (privateKey, message) => {
 
 const getIssuanceRoot = async (signer) => {
     const contract = await ethers.getContractAt("ComplianceProxy", DEFAULT_ISSUER_ADDRESS, signer)
-    return await contract.getIssuanceRoot();
+    return await contract.callStatic.getIssuanceRoot();
 }
 
 const getRevocationRoot = async (signer) => {
     const contract = await ethers.getContractAt("ComplianceProxy", DEFAULT_ISSUER_ADDRESS, signer)
-    return await contract.getRevocationRoot();
+    return await contract.callStatic.getRevocationRoot();
 }
 
 const getVerificationData = async (signer, address) => {
     const contract = await ethers.getContractAt("ComplianceProxy", DEFAULT_ISSUER_ADDRESS, signer)
-    return await contract.getVerificationData(address);
+    return await contract.callStatic.getVerificationData(address);
 }
 
 const constructProof = async (
@@ -159,7 +159,6 @@ describe('SDI tests', () => {
     let userKeypair
     let userSigner;
     let verificationId;
-    let mainSigner;
 
     let provider;
 
@@ -168,7 +167,6 @@ describe('SDI tests', () => {
     before(async () => {
         provider = new ethers.providers.JsonRpcProvider('http://localhost:8547'); // Unencrypted rpc url
         const signer = new ethers.Wallet(DEFAULT_PK, provider);
-        mainSigner = signer;
         contract = await ethers.getContractAt('ComplianceProxy', DEFAULT_ISSUER_ADDRESS, signer);
 
         // Construct user signer
@@ -194,11 +192,25 @@ describe('SDI tests', () => {
         const frontendFactory = await ethers.getContractFactory("AirdropSDI", signer);
         frontendContract = await frontendFactory.deploy(verifierContract.address, [DEFAULT_ISSUER_ADDRESS]);
         await frontendContract.deployed();
+
+        // Initialize contract with roots
+        const issuanceRoot = await getIssuanceRoot(signer)
+        const revocationRoot = await getRevocationRoot(signer)
+        const updateRootsTx = await frontendContract.connect(signer).updateRoots(issuanceRoot, revocationRoot)
+        await updateRootsTx.wait()
+
+        // Fund user
+        const fundTx = await signer.sendTransaction({to: userSigner.address, value: ethers.utils.parseEther("1.0")}) 
+        await fundTx.wait()
     });
 
     it('Should be able to claim airdrop if proof is valid', async () => {
-        const [proofBytes, publicSignals] = await constructProof(userSigner, verificationId, userKeypair)
-        const isVerifiedOnChain = await verifierContract.verifyProof(proofBytes, publicSignals);
-        expect(isVerifiedOnChain).to.be.true;
+        const [proofBytes, publicSignals] = await constructProof(userSigner, verificationId, userKeypair);
+
+        const tx = await frontendContract.connect(userSigner).claimAirdrop(proofBytes, publicSignals);
+        await tx.wait();
+        
+        const isEligible = await frontendContract.isUserEligible(userSigner.address)
+        expect(isEligible).to.be.true
     });
 })
