@@ -56,6 +56,7 @@ contract AirdropSDI is Ownable {
         verifier = _verifier;
 
         require(_allowedIssuers.length != 0, "Allowed issuers cannot be empty");
+        require(_allowedIssuers.length <= 5, "Cannot add more than 5 allowed issuers");
         require(!_containsDuplicates(_allowedIssuers), "Contains duplicated issuer");
         allowedIssuers = _allowedIssuers;
     }
@@ -109,6 +110,7 @@ contract AirdropSDI is Ownable {
      * @param _issuer The address to designate as an allowed issuer.
      */
     function addAllowedIssuer(address _issuer) public onlyOwner {
+        require(allowedIssuers.length < 5, "Cannot add more than 5 allowed issuers");
         require(!_issuerExists(_issuer), "Issuer already exists");
 
         allowedIssuers.push(_issuer);
