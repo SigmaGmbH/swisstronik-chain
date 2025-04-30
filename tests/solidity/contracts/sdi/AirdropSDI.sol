@@ -72,11 +72,19 @@ contract AirdropSDI is Ownable {
      */
     function claimAirdrop(bytes calldata _proof, uint[] memory _publicSignals) public {
         require(!isEligible[msg.sender], "User was already verified");
+        require(_publicSignals.length == 8, "Incorrect public signals length. Expected 8 values");
 
         // Check if contract was initialized
         require(issuanceRoot != bytes32(0), "Issuance root not set");
         require(revocationRoot != bytes32(0), "Revocation root not set");
         require(allowedIssuers.length != 0, "Empty allowed issuers");
+
+        // Verify public inputs
+        require(bytes32(_publicSignals[0]) == issuanceRoot, "Invalid issuance root in public signals");
+        require(bytes32(_publicSignals[1]) == revocationRoot, "Invalid revocation root in public signals");
+        require(_publicSignals[2] < block.timestamp, "Incorrect current timestamp in public signals. Value is in future");
+        require(_publicSignals[2] > block.timestamp - 5 * 60, "Incorrect current timestamp in public signals. Expired value");
+        require(_containsAllowedIssuer(_publicSignals), "Credential was created by unallowed issuer");
 
         // Call verifier contract to verify user proof
         require(verifier.verifyProof(_proof, _publicSignals), "Proof verification failed");
@@ -185,7 +193,6 @@ contract AirdropSDI is Ownable {
         return false;
     }
 
-
     /**
     * @dev Checks if an address exists in an array of allowed issuers
     * @param addr The address to search for
@@ -198,6 +205,23 @@ contract AirdropSDI is Ownable {
             }
         }
         
+        return false;
+    }
+
+    /// @notice Checks whether any of the last five signal values match an allowed issuer.
+    /// @dev Converts the last five uint256 values in `signals` to addresses and compares them with `allowedIssuers`.
+    /// @param signals An array of 8 uint256 values, where the last 5 are treated as encoded addresses.
+    /// @return Returns true if any of the addresses derived from the last 5 signals match an address in `allowedIssuers`, false otherwise.
+    function _containsAllowedIssuer(uint256[] memory signals) private view returns (bool) {
+        for (uint256 i = 3; i < 8; i++) {
+            address signalAddr = address(uint160(signals[i]));
+            for (uint256 j = 0; j < allowedIssuers.length; j++) {
+                if (signalAddr == allowedIssuers[j]) {
+                    return true;
+                }
+            }
+        }
+
         return false;
     }
 }

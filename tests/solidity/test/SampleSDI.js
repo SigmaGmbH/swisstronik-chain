@@ -113,7 +113,7 @@ const constructProof = async (
     const provider = signer.provider;
 
     const allowedIssuers = [BigInt(DEFAULT_ISSUER_ADDRESS).toString(), "0", "0", "0", "0"];
-    const currentTimestamp = Date.now();
+    const currentTimestamp = Math.floor(Date.now() / 1000);
 
     const credentialHash = await recoverCredentialHash(provider, verificationId);
     const issuanceProof = await getIssuanceProofInput(provider, credentialHash);
@@ -196,6 +196,7 @@ describe('SDI tests', () => {
         // Initialize contract with roots
         const issuanceRoot = await getIssuanceRoot(signer)
         const revocationRoot = await getRevocationRoot(signer)
+        console.log(`Roots: ${BigInt(issuanceRoot).toString()} ${BigInt(revocationRoot).toString()}`)
         const updateRootsTx = await frontendContract.connect(signer).updateRoots(issuanceRoot, revocationRoot)
         await updateRootsTx.wait()
 
@@ -206,6 +207,8 @@ describe('SDI tests', () => {
 
     it('Should be able to claim airdrop if proof is valid', async () => {
         const [proofBytes, publicSignals] = await constructProof(userSigner, verificationId, userKeypair);
+
+        console.log('public signals: ', publicSignals)
 
         const tx = await frontendContract.connect(userSigner).claimAirdrop(proofBytes, publicSignals);
         await tx.wait();
