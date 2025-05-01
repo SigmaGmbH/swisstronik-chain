@@ -131,6 +131,8 @@ import (
 	vestingmodulekeeper "swisstronik/x/vesting/keeper"
 	vestingmodulesimulation "swisstronik/x/vesting/simulation"
 	vestingmoduletypes "swisstronik/x/vesting/types"
+
+	"swisstronik/app/upgrades/v1_0_1"
 )
 
 const (
@@ -1054,6 +1056,13 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 }
 
 func (app *App) setupUpgradeHandlers() {
+	app.UpgradeKeeper.SetUpgradeHandler(
+		v1_0_1.UpgradeName,
+		v1_0_1.CreateUpgradeHandler(
+			app.ModuleManager, app.configurator,
+		),
+	)
+
 	// When a planned update height is reached, the old binary will panic
 	// writing on disk the height and name of the update that triggered it
 	// This will read that value, and execute the preparations for the upgrade.

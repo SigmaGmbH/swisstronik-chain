@@ -29,3 +29,4 @@ scripts/upgrade/.swisstronik*
 
 # Test files
 enclaves/*
+debug/*

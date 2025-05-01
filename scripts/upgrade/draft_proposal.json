@@ -1,0 +1,19 @@
+{
+ "messages": [
+  {
+   "@type": "/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade",
+   "authority": "swtr10d07y265gmmuvt4z0w9aw880jnsr700jdrnmrz",
+   "plan": {
+    "name": "v1.0.1",
+    "time": "0001-01-01T00:00:00Z",
+    "height": "100",
+    "info": "",
+    "upgraded_client_state": null
+   }
+  }
+ ],
+ "metadata": "ipfs://CID",
+ "deposit": "1000swtr",
+ "title": "v1.0.1",
+ "summary": "Upgrade Swisstronik Mainnet to v1.0.1"
+}
