@@ -5,7 +5,6 @@ use std::untrusted::time::SystemTimeEx;
 use std::vec::Vec;
 
 use sgx_tcrypto::*;
-use sgx_tse::rsgx_self_report;
 use sgx_types::*;
 
 use base64;
@@ -20,8 +19,6 @@ use yasna;
 use yasna::models::ObjectIdentifier;
 
 use super::consts::*;
-use super::report::*;
-use super::types::*;
 
 extern "C" {
     #[allow(dead_code)]
@@ -41,10 +38,6 @@ pub const IAS_REPORT_CA: &[u8] = include_bytes!("../../AttestationReportSigningC
 
 const ISSUER: &str = "Swisstronik";
 const SUBJECT: &str = "Swisstronik";
-
-pub fn get_mr_enclave() -> [u8; 32] {
-    rsgx_self_report().body.mr_enclave.m
-}
 
 pub fn gen_ecc_cert(
     payload: String,
@@ -322,22 +315,4 @@ fn extract_asn1_value(cert: &[u8], oid: &[u8]) -> Result<Vec<u8>, Error> {
     let payload = cert[offset..offset + len].to_vec();
 
     Ok(payload)
-}
-
-fn check_advisories(
-    quote_status: &SgxQuoteStatus,
-    advisories: &AdvisoryIDs,
-) -> Result<(), AuthResult> {
-    // this checks if there are any vulnerabilities that are not on in the whitelisted list
-    let vulnerable = advisories.vulnerable();
-    if vulnerable.is_empty() {
-        Ok(())
-    } else {
-        println!("Platform is updated but requires further BIOS configuration");
-        println!(
-            "The following vulnerabilities must be mitigated: {:?}",
-            vulnerable
-        );
-        Err(AuthResult::from(quote_status))
-    }
 }

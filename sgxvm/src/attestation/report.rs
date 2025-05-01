@@ -1,5 +1,4 @@
 use std::array::TryFromSliceError;
-use std::collections::HashMap;
 use std::convert::TryFrom;
 use std::vec::Vec;
 use std::string::{String, ToString};
@@ -7,7 +6,6 @@ use std::string::{String, ToString};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_json::Value;
-use lazy_static::lazy_static;
 use uuid::Uuid;
 
 use super::types::{AuthResult, SUPPORTED_SIG_ALGS};
@@ -77,47 +75,8 @@ impl From<serde_json::error::Error> for Error {
     }
 }
 
-const WHITELISTED_ADVISORIES: &[&str] = &[
-    "INTEL-SA-00334",
-    "INTEL-SA-00219",
-    "INTEL-SA-00615",
-    "INTEL-SA-00657",
-    "INTEL-SA-00767",
-];
-
-lazy_static! {
-    static ref ADVISORY_DESC: HashMap<&'static str, &'static str> = [
-        (
-            "INTEL-SA-00161",
-            "You must disable hyperthreading in the BIOS"
-        ),
-        (
-            "INTEL-SA-00289",
-            "You must disable overclocking/undervolting in the BIOS"
-        ),
-    ]
-    .iter()
-    .copied()
-    .collect();
-}
-
 #[derive(Debug)]
 pub struct AdvisoryIDs(pub Vec<String>);
-
-impl AdvisoryIDs {
-    pub(crate) fn vulnerable(&self) -> Vec<String> {
-        let mut vulnerable: Vec<String> = vec![];
-        for i in self.0.iter() {
-            if !WHITELISTED_ADVISORIES.contains(&i.as_str()) {
-                vulnerable.push(i.clone());
-                if let Some(v) = ADVISORY_DESC.get(&i.as_str()) {
-                    vulnerable.push((*v).to_string())
-                }
-            }
-        }
-        vulnerable
-    }
-}
 
 /// A report that can be signed by Intel EPID (which generates
 /// `EndorsedAttestationReport`) and then sent off of the platform to be
