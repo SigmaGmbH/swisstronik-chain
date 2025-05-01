@@ -1,6 +1,5 @@
 pub mod cert;
 pub mod consts;
-pub mod hex;
 pub mod report;
 pub mod types;
 pub mod self_attestation;
