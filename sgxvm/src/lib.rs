@@ -192,8 +192,8 @@ pub unsafe extern "C" fn ecall_request_epoch_keys_dcap(
     match attestation::tls::perform_master_key_request(
         hostname,
         socket_fd,
-        Some(qe_target_info),
-        Some(quote_size),
+        qe_target_info,
+        quote_size,
     ) {
         Ok(_) => sgx_status_t::SGX_SUCCESS,
         Err(err) => err,
@@ -210,8 +210,8 @@ pub unsafe extern "C" fn ecall_attest_peer_dcap(
 ) -> sgx_status_t {
     match attestation::tls::perform_epoch_keys_provisioning(
         socket_fd,
-        Some(qe_target_info),
-        Some(quote_size),
+        qe_target_info,
+        quote_size,
     ) {
         Ok(_) => sgx_status_t::SGX_SUCCESS,
         Err(err) => err,

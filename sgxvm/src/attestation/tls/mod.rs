@@ -31,8 +31,8 @@ pub fn perform_master_key_request(
 pub fn perform_master_key_request(
     hostname: String,
     socket_fd: c_int,
-    qe_target_info: Option<&sgx_target_info_t>,
-    quote_size: Option<u32>,
+    qe_target_info: &sgx_target_info_t,
+    quote_size: u32,
 ) -> SgxResult<()> {
     let (key_der, cert_der) = helpers::create_tls_cert_and_keys(qe_target_info, quote_size)?;
     let client_config = helpers::construct_client_config(key_der, cert_der);
@@ -90,8 +90,8 @@ pub fn perform_master_key_request(
 /// Initializes new TLS server to share master key
 pub fn perform_epoch_keys_provisioning(
     socket_fd: c_int,
-    qe_target_info: Option<&sgx_target_info_t>,
-    quote_size: Option<u32>,
+    qe_target_info: &sgx_target_info_t,
+    quote_size: u32,
 ) -> SgxResult<()> {
     let (key_der, cert_der) = helpers::create_tls_cert_and_keys(qe_target_info, quote_size)?;
     let server_config = helpers::construct_server_config(key_der, cert_der);
