@@ -1,24 +1,25 @@
 use sgx_types::*;
 use std::io;
 use std::io::{Read, Write};
-use std::vec::Vec;
 use std::string::String;
+use std::vec::Vec;
 
-#[cfg(feature = "attestation_server")]
-use crate::key_manager::{keys::RegistrationKey, UNSEALED_KEY_MANAGER};
+use rustls::Session;
+
 #[cfg(not(feature = "attestation_server"))]
 use crate::key_manager::keys::RegistrationKey;
+#[cfg(feature = "attestation_server")]
+use crate::key_manager::{keys::RegistrationKey, UNSEALED_KEY_MANAGER};
 
-pub mod helpers;
 pub mod auth;
+pub mod helpers;
 
 #[cfg(feature = "simulation_mode")]
 pub fn perform_master_key_request(
     _: String,
     _: c_int,
-    _: Option<&sgx_target_info_t>,
-    _: Option<u32>,
-    _: bool
+    _: &sgx_target_info_t,
+    _: u32,
 ) -> SgxResult<()> {
     println!("perform_master_key_request disabled in Software Mode");
     Err(sgx_status_t::SGX_ERROR_UNEXPECTED)
@@ -29,16 +30,24 @@ pub fn perform_master_key_request(
 pub fn perform_master_key_request(
     hostname: String,
     socket_fd: c_int,
-    qe_target_info: Option<&sgx_target_info_t>,
-    quote_size: Option<u32>,
-    is_dcap: bool,
+    qe_target_info: &sgx_target_info_t,
+    quote_size: u32,
 ) -> SgxResult<()> {
     let (key_der, cert_der) = helpers::create_tls_cert_and_keys(qe_target_info, quote_size)?;
-    let client_config = helpers::construct_client_config(key_der, cert_der, is_dcap);
+    let client_config = helpers::construct_client_config(key_der, cert_der);
 
     // Prepare TLS connection
     let (mut sess, mut conn) =
         helpers::create_client_session_stream(hostname, socket_fd, client_config)?;
+
+    // Ensure handshake is completed
+    while sess.is_handshaking() {
+        sess.complete_io(&mut conn).map_err(|e| {
+            println!("[Enclave] TLS handshake failed: {:?}", e);
+            sgx_status_t::SGX_ERROR_UNEXPECTED
+        })?;
+    }
+
     let mut tls = rustls::Stream::new(&mut sess, &mut conn);
 
     // Generate temporary registration key used for master key encryption during transfer
@@ -80,15 +89,23 @@ pub fn perform_master_key_request(
 /// Initializes new TLS server to share master key
 pub fn perform_epoch_keys_provisioning(
     socket_fd: c_int,
-    qe_target_info: Option<&sgx_target_info_t>,
-    quote_size: Option<u32>,
-    is_dcap: bool,
+    qe_target_info: &sgx_target_info_t,
+    quote_size: u32,
 ) -> SgxResult<()> {
     let (key_der, cert_der) = helpers::create_tls_cert_and_keys(qe_target_info, quote_size)?;
-    let server_config = helpers::construct_server_config(key_der, cert_der, is_dcap);
+    let server_config = helpers::construct_server_config(key_der, cert_der);
 
     // Prepare TLS connection
     let (mut sess, mut conn) = helpers::create_server_session_stream(socket_fd, server_config)?;
+
+    // Ensure handshake is completed
+    while sess.is_handshaking() {
+        sess.complete_io(&mut conn).map_err(|e| {
+            println!("[Enclave] TLS handshake failed: {:?}", e);
+            sgx_status_t::SGX_ERROR_UNEXPECTED
+        })?;
+    }
+
     let mut tls = rustls::Stream::new(&mut sess, &mut conn);
 
     // Read client registration public key
@@ -106,17 +123,15 @@ pub fn perform_epoch_keys_provisioning(
 
     // Unseal key manager to get access to master key
     let encrypted_epoch_data = match &*UNSEALED_KEY_MANAGER {
-        Some(key_manager) => {
-            key_manager
-                .encrypt_epoch_data(&registration_key, client_public_key.to_vec())
-                .map_err(|err| {
-                    println!(
-                        "[Enclave] Cannot encrypt epoch data to share it. Reason: {:?}",
-                        err
-                    );
-                    sgx_status_t::SGX_ERROR_UNEXPECTED
-                })?
-        },
+        Some(key_manager) => key_manager
+            .encrypt_epoch_data(&registration_key, client_public_key.to_vec())
+            .map_err(|err| {
+                println!(
+                    "[Enclave] Cannot encrypt epoch data to share it. Reason: {:?}",
+                    err
+                );
+                sgx_status_t::SGX_ERROR_UNEXPECTED
+            })?,
         None => {
             println!("[Enclave] Cannot unseal key manager data");
             return Err(sgx_status_t::SGX_ERROR_UNEXPECTED);

@@ -1,5 +1,3 @@
-use sgx_types::sgx_quote_sign_type_t;
-
 #[cfg(all(feature = "production", feature = "mainnet"))]
 pub const MRSIGNER: [u8; 32] = [52, 239, 150, 239, 69, 40, 214, 35, 150, 141, 140, 167, 211, 202, 139, 184, 0, 34, 4, 27, 186, 203, 32, 246, 29, 62, 249, 101, 161, 231, 110, 61];
 #[cfg(all(feature = "production", not(feature = "mainnet")))]
@@ -12,13 +10,7 @@ pub const MIN_REQUIRED_SVN: u16 = 1;
 #[cfg(not(feature = "production"))]
 pub const MIN_REQUIRED_SVN: u16 = 0;
 
-pub const DEV_HOSTNAME: &str = "api.trustedservices.intel.com";
-pub const SIGRL_SUFFIX: &str = "/sgx/dev/attestation/v5/sigrl/";
-pub const REPORT_SUFFIX: &str = "/sgx/dev/attestation/v5/report";
 pub const CERTEXPIRYDAYS: i64 = 90i64;
 
 pub const PUBLIC_KEY_SIZE: usize = 32;
 pub const ENCRYPTED_KEY_SIZE: usize = 78;
-
-pub const QUOTE_SIGNATURE_TYPE: sgx_quote_sign_type_t = sgx_quote_sign_type_t::SGX_LINKABLE_SIGNATURE; 
-pub const MIN_REQUIRED_TCB: u64 = 16;

@@ -5,7 +5,6 @@ use std::untrusted::time::SystemTimeEx;
 use std::vec::Vec;
 
 use sgx_tcrypto::*;
-use sgx_tse::rsgx_self_report;
 use sgx_types::*;
 
 use base64;
@@ -20,8 +19,6 @@ use yasna;
 use yasna::models::ObjectIdentifier;
 
 use super::consts::*;
-use super::report::*;
-use super::types::*;
 
 extern "C" {
     #[allow(dead_code)]
@@ -41,10 +38,6 @@ pub const IAS_REPORT_CA: &[u8] = include_bytes!("../../AttestationReportSigningC
 
 const ISSUER: &str = "Swisstronik";
 const SUBJECT: &str = "Swisstronik";
-
-pub fn get_mr_enclave() -> [u8; 32] {
-    rsgx_self_report().body.mr_enclave.m
-}
 
 pub fn gen_ecc_cert(
     payload: String,
@@ -202,64 +195,6 @@ pub fn gen_ecc_cert(
     Ok((key_der, cert_der))
 }
 
-/// # Verifies remote attestation cert
-///
-/// Logic:
-/// 1. Extract public key
-/// 2. Extract netscape comment - where the attestation report is located
-/// 3. Parse the report itself (verify it is signed by intel)
-/// 4. Extract public key from report body
-/// 5. Verify enclave signature (mr enclave/signer)
-///
-pub fn verify_ra_cert(
-    cert_der: &[u8],
-    override_verify_type: Option<SigningMethod>,
-) -> Result<Vec<u8>, AuthResult> {
-    let report = AttestationReport::from_cert(cert_der).map_err(|_| AuthResult::InvalidCert)?;
-
-    // this is a small hack - override_verify_type is only used when verifying the master certificate
-    // and in that case we don't care about checking vulns etc. Master certificate will also have
-    // a bad GID in prod, so there's no reason to verify it
-    if override_verify_type.is_none() {
-        verify_quote_status(&report, &report.advisory_ids)?;
-    }
-
-    let signing_method: SigningMethod = match override_verify_type {
-        Some(method) => method,
-        None => SIGNING_METHOD,
-    };
-
-    // verify certificate
-    match signing_method {
-        SigningMethod::MRENCLAVE => {
-            let this_mr_enclave = get_mr_enclave();
-
-            if report.sgx_quote_body.isv_enclave_report.mr_enclave != this_mr_enclave {
-                println!("Got a different mr_enclave than expected. Invalid certificate");
-                println!(
-                    "received: {:?} \n expected: {:?}",
-                    report.sgx_quote_body.isv_enclave_report.mr_enclave, this_mr_enclave
-                );
-                return Err(AuthResult::MrEnclaveMismatch);
-            }
-        }
-        SigningMethod::MRSIGNER => {
-            if report.sgx_quote_body.isv_enclave_report.mr_signer != MRSIGNER {
-                println!("Got a different mrsigner than expected. Invalid certificate");
-                println!(
-                    "received: {:?} \n expected: {:?}",
-                    report.sgx_quote_body.isv_enclave_report.mr_signer, MRSIGNER
-                );
-                return Err(AuthResult::MrSignerMismatch);
-            }
-        }
-        SigningMethod::NONE => {}
-    }
-
-    let report_public_key = report.sgx_quote_body.isv_enclave_report.report_data[0..32].to_vec();
-    Ok(report_public_key)
-}
-
 pub fn verify_dcap_cert(cert_der: &[u8]) -> Result<(), crate::attestation::report::Error> {
     // Extract quote payload from cert
     let payload = get_netscape_comment(cert_der).map_err(|_| {
@@ -380,74 +315,4 @@ fn extract_asn1_value(cert: &[u8], oid: &[u8]) -> Result<Vec<u8>, Error> {
     let payload = cert[offset..offset + len].to_vec();
 
     Ok(payload)
-}
-
-#[cfg(not(feature = "mainnet"))]
-pub fn verify_quote_status(
-    report: &AttestationReport,
-    advisories: &AdvisoryIDs,
-) -> Result<AuthResult, AuthResult> {
-    match &report.sgx_quote_status {
-        SgxQuoteStatus::OK
-        | SgxQuoteStatus::GroupOutOfDate
-        | SgxQuoteStatus::SwHardeningNeeded
-        | SgxQuoteStatus::ConfigurationAndSwHardeningNeeded => {
-            let check_results = check_advisories(&report.sgx_quote_status, advisories);
-
-            if let Err(results) = check_results {
-                println!("This platform has vulnerabilities that will not be approved on mainnet");
-                return Ok(results)
-            }
-
-            Ok(AuthResult::Success)
-        }
-        _ => {
-            println!(
-                "Invalid attestation quote status - cannot verify remote node: {:?}",
-                &report.sgx_quote_status
-            );
-            Err(AuthResult::from(&report.sgx_quote_status))
-        }
-    }
-}
-
-#[cfg(feature = "mainnet")]
-pub fn verify_quote_status(
-    report: &AttestationReport,
-    advisories: &AdvisoryIDs,
-) -> Result<AuthResult, AuthResult> {
-    match &report.sgx_quote_status {
-        SgxQuoteStatus::OK
-        | SgxQuoteStatus::SwHardeningNeeded
-        | SgxQuoteStatus::ConfigurationAndSwHardeningNeeded => {
-            check_advisories(&report.sgx_quote_status, advisories)?;
-
-            Ok(AuthResult::Success)
-        }
-        _ => {
-            println!(
-                "Invalid attestation quote status - cannot verify remote node: {:?}",
-                &report.sgx_quote_status
-            );
-            Err(AuthResult::from(&report.sgx_quote_status))
-        }
-    }
-}
-
-fn check_advisories(
-    quote_status: &SgxQuoteStatus,
-    advisories: &AdvisoryIDs,
-) -> Result<(), AuthResult> {
-    // this checks if there are any vulnerabilities that are not on in the whitelisted list
-    let vulnerable = advisories.vulnerable();
-    if vulnerable.is_empty() {
-        Ok(())
-    } else {
-        println!("Platform is updated but requires further BIOS configuration");
-        println!(
-            "The following vulnerabilities must be mitigated: {:?}",
-            vulnerable
-        );
-        Err(AuthResult::from(quote_status))
-    }
 }

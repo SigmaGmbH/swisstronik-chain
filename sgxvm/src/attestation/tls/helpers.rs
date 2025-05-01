@@ -8,10 +8,8 @@ use std::{net::TcpStream, string::String};
 use crate::attestation::consts::{ENCRYPTED_KEY_SIZE, PUBLIC_KEY_SIZE};
 use crate::attestation::{
     cert::gen_ecc_cert,
-    consts::QUOTE_SIGNATURE_TYPE,
     dcap::get_qe_quote,
     dcap::utils::encode_quote_with_collateral,
-    utils::create_attestation_report,
 };
 use crate::attestation::tls::auth::ServerAuth;
 use crate::key_manager::{KeyManager, keys::RegistrationKey};
@@ -24,14 +22,14 @@ use crate::attestation::tls::auth::ClientAuth;
 
 /// Prepares config for client side of TLS connection
 #[cfg(feature = "hardware_mode")]
-pub(super) fn construct_client_config(key_der: Vec<u8>, cert_der: Vec<u8>, is_dcap: bool) -> ClientConfig {
+pub(super) fn construct_client_config(key_der: Vec<u8>, cert_der: Vec<u8>) -> ClientConfig {
     let mut cfg = rustls::ClientConfig::new();
     let certs = vec![rustls::Certificate(cert_der)];
     let privkey = rustls::PrivateKey(key_der);
 
     cfg.set_single_client_cert(certs, privkey).unwrap();
     cfg.dangerous()
-        .set_certificate_verifier(Arc::new(ServerAuth::new(true, is_dcap)));
+        .set_certificate_verifier(Arc::new(ServerAuth::new()));
     cfg.versions.clear();
     cfg.versions.push(rustls::ProtocolVersion::TLSv1_2);
     cfg
@@ -39,8 +37,8 @@ pub(super) fn construct_client_config(key_der: Vec<u8>, cert_der: Vec<u8>, is_dc
 
 /// Prepares config for server side of TLS connection
 #[cfg(feature = "attestation_server")]
-pub(super) fn construct_server_config(key_der: Vec<u8>, cert_der: Vec<u8>, is_dcap: bool) -> ServerConfig {
-    let mut cfg = rustls::ServerConfig::new(Arc::new(ClientAuth::new(true, is_dcap)));
+pub(super) fn construct_server_config(key_der: Vec<u8>, cert_der: Vec<u8>) -> ServerConfig {
+    let mut cfg = rustls::ServerConfig::new(Arc::new(ClientAuth::new()));
     let certs = vec![rustls::Certificate(cert_der)];
     let privkey = rustls::PrivateKey(key_der);
 
@@ -128,30 +126,16 @@ pub(super) fn decrypt_and_seal_master_key(
 
 /// Creates keys and certificate for TLS connection
 pub fn create_tls_cert_and_keys(
-    qe_target_info: Option<&sgx_target_info_t>,
-    quote_size: Option<u32>,
+    qe_target_info: &sgx_target_info_t,
+    quote_size: u32,
 ) -> SgxResult<(Vec<u8>, Vec<u8>)> {
     let ecc_handle = SgxEccHandle::new();
     let _ = ecc_handle.open();
     let (prv_k, pub_k) = ecc_handle.create_key_pair()?;
 
-    let payload = match (qe_target_info, quote_size) {
-        (Some(qe_target_info), Some(quote_size)) => {
-            let (qe_quote, qe_collateral) = get_qe_quote(&pub_k, qe_target_info, quote_size)?;
-            let encoded_payload = encode_quote_with_collateral(qe_quote, qe_collateral);
-            base64::encode(&encoded_payload[..])
-        }
-        _ => {
-            let signed_report = create_attestation_report(&pub_k, QUOTE_SIGNATURE_TYPE)?;
-            serde_json::to_string(&signed_report).map_err(|err| {
-                println!(
-                    "Error serializing report. May be malformed, or badly encoded: {:?}",
-                    err
-                );
-                sgx_status_t::SGX_ERROR_UNEXPECTED
-            })?
-        }
-    };
+    let (qe_quote, qe_collateral) = get_qe_quote(&pub_k, qe_target_info, quote_size)?;
+    let encoded_payload = encode_quote_with_collateral(qe_quote, qe_collateral);
+    let payload = base64::encode(&encoded_payload[..]);
 
     let (key_der, cert_der) = gen_ecc_cert(payload, &prv_k, &pub_k, &ecc_handle)?;
     let _ = ecc_handle.close();

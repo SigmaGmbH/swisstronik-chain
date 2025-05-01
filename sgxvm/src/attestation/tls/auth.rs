@@ -1,16 +1,10 @@
 use std::prelude::v1::*;
 
-pub struct ClientAuth {
-    outdated_ok: bool,
-    is_dcap: bool,
-}
+pub struct ClientAuth;
 
 impl ClientAuth {
-    pub fn new(outdated_ok: bool, is_dcap: bool) -> ClientAuth {
-        ClientAuth {
-            outdated_ok,
-            is_dcap,
-        }
+    pub fn new() -> ClientAuth {
+        ClientAuth{}
     }
 }
 
@@ -33,34 +27,14 @@ impl rustls::ClientCertVerifier for ClientAuth {
             return Err(rustls::TLSError::NoCertificatesPresented);
         }
 
-        if self.is_dcap {
-            crate::attestation::cert::verify_dcap_cert(&certs[0].0).map_err(|err| {
-                println!("[Attestastion Server] Cannot verify DCAP cert. Reason: {:?}", err);
-                rustls::TLSError::WebPKIError(
-                    webpki::Error::ExtensionValueInvalid,
-                )
-            })?;
-            return Ok(rustls::ClientCertVerified::assertion());
-        }
-
-        // This call will automatically verify cert is properly signed
-        match crate::attestation::cert::verify_ra_cert(&certs[0].0, None) {
-            Ok(_) => Ok(rustls::ClientCertVerified::assertion()),
-            Err(crate::attestation::types::AuthResult::SwHardeningAndConfigurationNeeded)
-            | Err(crate::attestation::types::AuthResult::GroupOutOfDate) => {
-                if self.outdated_ok {
-                    println!("outdated_ok is set, overriding outdated error");
-                    Ok(rustls::ClientCertVerified::assertion())
-                } else {
-                    Err(rustls::TLSError::WebPKIError(
-                        webpki::Error::ExtensionValueInvalid,
-                    ))
-                }
-            }
-            Err(_) => Err(rustls::TLSError::WebPKIError(
-                webpki::Error::ExtensionValueInvalid,
-            )),
-        }
+        crate::attestation::cert::verify_dcap_cert(&certs[0].0).map_err(|err| {
+            println!(
+                "[Attestastion Server] Cannot verify DCAP cert. Reason: {:?}",
+                err
+            );
+            rustls::TLSError::WebPKIError(webpki::Error::ExtensionValueInvalid)
+        })?;
+        Ok(rustls::ClientCertVerified::assertion())
     }
 }
 
@@ -83,41 +57,16 @@ impl rustls::ClientCertVerifier for ClientAuth {
             return Err(rustls::TLSError::NoCertificatesPresented);
         }
 
-        if self.is_dcap {
-            crate::attestation::cert::verify_dcap_cert(&certs[0].0).unwrap();
-            return Ok(rustls::ClientCertVerified::assertion());
-        }
-
-        match crate::attestation::cert::verify_ra_cert(&certs[0].0, None) {
-            Ok(_) => Ok(rustls::ClientCertVerified::assertion()),
-            Err(crate::attestation::types::AuthResult::SwHardeningAndConfigurationNeeded) => {
-                if self.outdated_ok {
-                    println!("outdated_ok is set, overriding outdated error");
-                    Ok(rustls::ClientCertVerified::assertion())
-                } else {
-                    Err(rustls::TLSError::WebPKIError(
-                        webpki::Error::ExtensionValueInvalid,
-                    ))
-                }
-            }
-            Err(_) => Err(rustls::TLSError::WebPKIError(
-                webpki::Error::ExtensionValueInvalid,
-            )),
-        }
+        crate::attestation::cert::verify_dcap_cert(&certs[0].0).unwrap();
+        Ok(rustls::ClientCertVerified::assertion())
     }
 }
 
-pub struct ServerAuth {
-    outdated_ok: bool,
-    is_dcap: bool,
-}
+pub struct ServerAuth;
 
 impl ServerAuth {
-    pub fn new(outdated_ok: bool, is_dcap: bool) -> ServerAuth {
-        ServerAuth {
-            outdated_ok,
-            is_dcap,
-        }
+    pub fn new() -> ServerAuth {
+        ServerAuth{}
     }
 }
 
@@ -131,32 +80,12 @@ impl rustls::ServerCertVerifier for ServerAuth {
         _ocsp: &[u8],
     ) -> Result<rustls::ServerCertVerified, rustls::TLSError> {
         if certs.is_empty() {
-            println!("[Enclave] No certs provided for Client Auth");
+            println!("[Enclave] No certs provided for Server Auth");
             return Err(rustls::TLSError::NoCertificatesPresented);
         }
 
-        if self.is_dcap {
-            crate::attestation::cert::verify_dcap_cert(&certs[0].0).unwrap();
-            return Ok(rustls::ServerCertVerified::assertion());
-        }
-
-        let res = crate::attestation::cert::verify_ra_cert(&certs[0].0, None);
-        match res {
-            Ok(_) => Ok(rustls::ServerCertVerified::assertion()),
-            Err(crate::attestation::types::AuthResult::SwHardeningAndConfigurationNeeded) => {
-                if self.outdated_ok {
-                    println!("outdated_ok is set, overriding outdated error");
-                    Ok(rustls::ServerCertVerified::assertion())
-                } else {
-                    Err(rustls::TLSError::WebPKIError(
-                        webpki::Error::ExtensionValueInvalid,
-                    ))
-                }
-            }
-            Err(_) => Err(rustls::TLSError::WebPKIError(
-                webpki::Error::ExtensionValueInvalid,
-            )),
-        }
+        crate::attestation::cert::verify_dcap_cert(&certs[0].0).unwrap();
+        Ok(rustls::ServerCertVerified::assertion())
     }
 }
 
@@ -174,29 +103,7 @@ impl rustls::ServerCertVerifier for ServerAuth {
             return Err(rustls::TLSError::NoCertificatesPresented);
         }
 
-        if self.is_dcap {
-            crate::attestation::cert::verify_dcap_cert(&certs[0].0).unwrap();
-            return Ok(rustls::ServerCertVerified::assertion());
-        }
-        
-        // This call will automatically verify cert is properly signed
-        let res = crate::attestation::cert::verify_ra_cert(&certs[0].0, None);
-        match res {
-            Ok(_) => Ok(rustls::ServerCertVerified::assertion()),
-            Err(crate::attestation::types::AuthResult::SwHardeningAndConfigurationNeeded)
-            | Err(crate::attestation::types::AuthResult::GroupOutOfDate) => {
-                if self.outdated_ok {
-                    println!("outdated_ok is set, overriding outdated error");
-                    Ok(rustls::ServerCertVerified::assertion())
-                } else {
-                    Err(rustls::TLSError::WebPKIError(
-                        webpki::Error::ExtensionValueInvalid,
-                    ))
-                }
-            }
-            Err(_) => Err(rustls::TLSError::WebPKIError(
-                webpki::Error::ExtensionValueInvalid,
-            )),
-        }
+        crate::attestation::cert::verify_dcap_cert(&certs[0].0).unwrap();
+        Ok(rustls::ServerCertVerified::assertion())
     }
 }

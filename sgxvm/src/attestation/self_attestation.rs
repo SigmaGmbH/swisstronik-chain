@@ -10,7 +10,7 @@ pub fn self_attest(
     qe_target_info: &sgx_target_info_t,
     quote_size: u32,
 ) -> SgxResult<()> {
-    let (_, cert_der) = helpers::create_tls_cert_and_keys(Some(qe_target_info), Some(quote_size))?;
+    let (_, cert_der) = helpers::create_tls_cert_and_keys(qe_target_info, quote_size)?;
 
     // Verify quote
     match verify_dcap_cert(&cert_der) {
