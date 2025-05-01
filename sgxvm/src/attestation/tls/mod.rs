@@ -18,9 +18,8 @@ pub mod helpers;
 pub fn perform_master_key_request(
     _: String,
     _: c_int,
-    _: Option<&sgx_target_info_t>,
-    _: Option<u32>,
-    _: bool,
+    _: &sgx_target_info_t,
+    _: u32,
 ) -> SgxResult<()> {
     println!("perform_master_key_request disabled in Software Mode");
     Err(sgx_status_t::SGX_ERROR_UNEXPECTED)
