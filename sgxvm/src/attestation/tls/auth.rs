@@ -1,12 +1,10 @@
 use std::prelude::v1::*;
 
-pub struct ClientAuth {
-    outdated_ok: bool,
-}
+pub struct ClientAuth;
 
 impl ClientAuth {
-    pub fn new(outdated_ok: bool) -> ClientAuth {
-        ClientAuth { outdated_ok }
+    pub fn new() -> ClientAuth {
+        ClientAuth{}
     }
 }
 
@@ -64,13 +62,11 @@ impl rustls::ClientCertVerifier for ClientAuth {
     }
 }
 
-pub struct ServerAuth {
-    outdated_ok: bool,
-}
+pub struct ServerAuth;
 
 impl ServerAuth {
-    pub fn new(outdated_ok: bool) -> ServerAuth {
-        ServerAuth { outdated_ok }
+    pub fn new() -> ServerAuth {
+        ServerAuth{}
     }
 }
 

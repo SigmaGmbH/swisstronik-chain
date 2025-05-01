@@ -31,7 +31,7 @@ pub(super) fn construct_client_config(key_der: Vec<u8>, cert_der: Vec<u8>) -> Cl
 
     cfg.set_single_client_cert(certs, privkey).unwrap();
     cfg.dangerous()
-        .set_certificate_verifier(Arc::new(ServerAuth::new(true)));
+        .set_certificate_verifier(Arc::new(ServerAuth::new()));
     cfg.versions.clear();
     cfg.versions.push(rustls::ProtocolVersion::TLSv1_2);
     cfg
@@ -40,7 +40,7 @@ pub(super) fn construct_client_config(key_der: Vec<u8>, cert_der: Vec<u8>) -> Cl
 /// Prepares config for server side of TLS connection
 #[cfg(feature = "attestation_server")]
 pub(super) fn construct_server_config(key_der: Vec<u8>, cert_der: Vec<u8>) -> ServerConfig {
-    let mut cfg = rustls::ServerConfig::new(Arc::new(ClientAuth::new(true)));
+    let mut cfg = rustls::ServerConfig::new(Arc::new(ClientAuth::new()));
     let certs = vec![rustls::Certificate(cert_der)];
     let privkey = rustls::PrivateKey(key_der);
 
