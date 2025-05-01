@@ -139,24 +139,6 @@ pub extern "C" fn ocall_allocate(data: *const u8, len: usize) -> Allocation {
 
 #[cfg(feature = "hardware_mode")]
 #[no_mangle]
-pub extern "C" fn ocall_sgx_init_quote(
-    ret_ti: *mut sgx_target_info_t,
-    ret_gid: *mut sgx_epid_group_id_t,
-) -> sgx_status_t {
-    unsafe { sgx_init_quote(ret_ti, ret_gid) }
-}
-
-#[cfg(feature = "simulation_mode")]
-#[no_mangle]
-pub extern "C" fn ocall_sgx_init_quote(
-    ret_ti: *mut sgx_target_info_t,
-    ret_gid: *mut sgx_epid_group_id_t,
-) -> sgx_status_t {
-    sgx_status_t::SGX_ERROR_UNEXPECTED
-}
-
-#[cfg(feature = "hardware_mode")]
-#[no_mangle]
 pub extern "C" fn ocall_get_ias_socket(ret_fd: *mut c_int) -> sgx_status_t {
     let port = 443;
     let hostname = "api.trustedservices.intel.com";

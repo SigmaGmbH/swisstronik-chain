@@ -73,7 +73,6 @@ exclude = [
     "ecall_add_epoch",
     "ocall_query_raw",
     "ocall_allocate",
-    "ocall_sgx_init_quote",
     "ocall_get_ias_socket",
     "ocall_get_update_info",
     "ocall_get_quote",
