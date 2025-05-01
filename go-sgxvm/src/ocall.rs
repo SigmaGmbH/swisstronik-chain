@@ -5,7 +5,6 @@ use crate::memory::{U8SliceView, UnmanagedVector};
 use crate::types::{Allocation, AllocationWithResult, GoQuerier};
 
 use sgx_types::*;
-use std::net::SocketAddr;
 use std::slice;
 
 #[cfg(feature = "hardware_mode")]
