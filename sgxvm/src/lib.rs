@@ -194,7 +194,6 @@ pub unsafe extern "C" fn ecall_request_epoch_keys_dcap(
         socket_fd,
         Some(qe_target_info),
         Some(quote_size),
-        true,
     ) {
         Ok(_) => sgx_status_t::SGX_SUCCESS,
         Err(err) => err,
@@ -213,7 +212,6 @@ pub unsafe extern "C" fn ecall_attest_peer_dcap(
         socket_fd,
         Some(qe_target_info),
         Some(quote_size),
-        true,
     ) {
         Ok(_) => sgx_status_t::SGX_SUCCESS,
         Err(err) => err,

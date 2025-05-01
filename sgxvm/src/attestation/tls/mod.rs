@@ -33,7 +33,6 @@ pub fn perform_master_key_request(
     socket_fd: c_int,
     qe_target_info: Option<&sgx_target_info_t>,
     quote_size: Option<u32>,
-    _is_dcap: bool, // added underscore for now, will be removed soon from .edl enclave file
 ) -> SgxResult<()> {
     let (key_der, cert_der) = helpers::create_tls_cert_and_keys(qe_target_info, quote_size)?;
     let client_config = helpers::construct_client_config(key_der, cert_der);
@@ -93,7 +92,6 @@ pub fn perform_epoch_keys_provisioning(
     socket_fd: c_int,
     qe_target_info: Option<&sgx_target_info_t>,
     quote_size: Option<u32>,
-    _is_dcap: bool, // added underscore for now, will be removed soon from .edl enclave file
 ) -> SgxResult<()> {
     let (key_der, cert_der) = helpers::create_tls_cert_and_keys(qe_target_info, quote_size)?;
     let server_config = helpers::construct_server_config(key_der, cert_der);
