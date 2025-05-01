@@ -1,4 +1,4 @@
-VERSION := v1.0.0
+VERSION := v1.0.1
 COMMIT := $(shell git log -1 --format='%H')
 ENCLAVE_HOME ?= $(HOME)/.swisstronik-enclave
 PRODUCTION_MODE ?= false
