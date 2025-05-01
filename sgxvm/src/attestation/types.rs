@@ -8,8 +8,6 @@ pub enum SigningMethod {
     NONE,
 }
 
-pub const SIGNING_METHOD: SigningMethod = SigningMethod::MRSIGNER;
-
 type SignatureAlgorithms = &'static [&'static webpki::SignatureAlgorithm];
 pub static SUPPORTED_SIG_ALGS: SignatureAlgorithms = &[
     &webpki::ECDSA_P256_SHA256,

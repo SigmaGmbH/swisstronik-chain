@@ -8,7 +8,6 @@ use std::{net::TcpStream, string::String};
 use crate::attestation::consts::{ENCRYPTED_KEY_SIZE, PUBLIC_KEY_SIZE};
 use crate::attestation::{
     cert::gen_ecc_cert,
-    consts::QUOTE_SIGNATURE_TYPE,
     dcap::get_qe_quote,
     dcap::utils::encode_quote_with_collateral,
 };
