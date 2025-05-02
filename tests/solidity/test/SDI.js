@@ -7,7 +7,8 @@ const snarkjs = require('snarkjs')
 const {buildEddsa} = require('circomlibjs')
 const path = require('path');
 
-const DEFAULT_PROXY_CONTRACT_ADDRESS = '0x2fc0b35e41a9a2ea248a275269af1c8b3a061167'
+const SDI_PRECOMPILE_ADDRESS = "0x0000000000000000000000000000000000000404"
+const DEFAULT_ISSUER_ADDRESS = '0x2fc0b35e41a9a2ea248a275269af1c8b3a061167'
 // WARNING: This private key is publicly available
 const DEFAULT_PK = "D5DA6D43250C8EB630C1AB8A80F19C673267A6B210C10C41065D5C34FC369DCB";
 
@@ -90,6 +91,21 @@ const signMiMC = async (privateKey, message) => {
     };
 }
 
+const getIssuanceRoot = async (signer) => {
+    const contract = await ethers.getContractAt("ComplianceProxy", DEFAULT_ISSUER_ADDRESS, signer)
+    return await contract.getIssuanceRoot();
+}
+
+const getRevocationRoot = async (signer) => {
+    const contract = await ethers.getContractAt("ComplianceProxy", DEFAULT_ISSUER_ADDRESS, signer)
+    return await contract.getRevocationRoot();
+}
+
+const getVerificationData = async (signer, address) => {
+    const contract = await ethers.getContractAt("ComplianceProxy", DEFAULT_ISSUER_ADDRESS, signer)
+    return await contract.getVerificationData(address);
+}
+
 describe('SDI tests', () => {
     let contract
     let userKeypair
@@ -99,13 +115,13 @@ describe('SDI tests', () => {
 
     let provider;
 
-    let verifierContract, frontendContract;
+    let verifierContract;
 
     before(async () => {
         provider = new ethers.providers.JsonRpcProvider('http://localhost:8547'); // Unencrypted rpc url
         const signer = new ethers.Wallet(DEFAULT_PK, provider);
         mainSigner = signer;
-        contract = await ethers.getContractAt('ComplianceProxy', DEFAULT_PROXY_CONTRACT_ADDRESS, signer);
+        contract = await ethers.getContractAt('ComplianceProxy', DEFAULT_ISSUER_ADDRESS, signer);
 
         // Construct user signer
         userSigner = ethers.Wallet.createRandom().connect(provider);
@@ -121,25 +137,21 @@ describe('SDI tests', () => {
         expect(res.events[0].args.success).to.be.true
         verificationId = res.events[0].args.data;
 
-        // Deploy verifier and verifier frontend
+        // Deploy verifier
         const verifierFactory = await ethers.getContractFactory("PlonkVerifier", signer);
         verifierContract = await verifierFactory.deploy();
         await verifierContract.deployed();
-        const frontendFactory = await ethers.getContractFactory("SdiFrontend", signer);
-        frontendContract = await frontendFactory.deploy(verifierContract.address);
-        await frontendContract.deployed();
     });
 
     it('Should construct and verify correct proof', async () => {
-        const expectedIssuer = await frontendContract.issuer();
-        const allowedIssuers = [BigInt(expectedIssuer).toString(), "0", "0", "0", "0"];
-        const currentTimestamp = Date.now(); // should be `block.timestamp`
+        const allowedIssuers = [BigInt(DEFAULT_ISSUER_ADDRESS).toString(), "0", "0", "0", "0"];
+        const currentTimestamp = Date.now();
 
         const credentialHash = await recoverCredentialHash(provider, verificationId);
         const issuanceProof = await getIssuanceProofInput(provider, credentialHash);
         const nonRevocationProof = await getNonRevocationProofInput(provider, credentialHash);
 
-        const verificationData = await frontendContract.getVerificationData(userSigner.address);
+        const verificationData = await getVerificationData(userSigner, userSigner.address);
         const index = verificationData.length - 1;
         const encodedIssuer = BigInt(verificationData[index].issuerAddress);
 
@@ -209,15 +221,14 @@ describe('SDI tests', () => {
         })
         await convertTx.wait();
 
-        const expectedIssuer = await frontendContract.issuer();
-        const allowedIssuers = [BigInt(expectedIssuer).toString(), "0", "0", "0", "0"];
+        const allowedIssuers = [BigInt(DEFAULT_ISSUER_ADDRESS).toString(), "0", "0", "0", "0"];
         const currentTimestamp = Date.now(); // should be `block.timestamp`
 
         const credentialHash = await recoverCredentialHash(provider, verificationId);
         const issuanceProof = await getIssuanceProofInput(provider, credentialHash);
         const nonRevocationProof = await getNonRevocationProofInput(provider, credentialHash);
 
-        const verificationData = await frontendContract.getVerificationData(userSigner.address);
+        const verificationData = await getVerificationData(userSigner, userSigner.address);
         const index = verificationData.length - 1;
         const encodedIssuer = BigInt(verificationData[index].issuerAddress);
 

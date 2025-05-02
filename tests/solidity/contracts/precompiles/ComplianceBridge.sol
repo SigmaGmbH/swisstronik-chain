@@ -61,9 +61,9 @@ interface IComplianceBridge {
         address issuerAddress
     ) external returns (bytes memory);
 
-    function getRevocationTreeRoot() external returns (bytes memory);
+    function getRevocationTreeRoot() external view returns (bytes memory);
 
-    function getIssuanceTreeRoot() external returns (bytes memory);
+    function getIssuanceTreeRoot() external view returns (bytes memory);
 
     function revokeVerification(bytes memory verificationId) external;
 
