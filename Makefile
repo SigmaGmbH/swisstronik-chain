@@ -114,10 +114,10 @@ build_checker: go.sum
 ###############################################################################
 
 build-cli: go.sum
-	go build -mod=mod $(BUILD_FLAGS) -tags osusergo,netgo,nosgx -o build/$(BINARY_NAME) ./cmd/swisstronikd
+	go build -mod=mod $(BUILD_FLAGS) -tags osusergo,netgo,nosgx,ledger -o build/$(BINARY_NAME) ./cmd/swisstronikd
 
 build-cli-linux-static: go.sum
-	CGO_ENABLED=1  go build -mod=mod $(BUILD_FLAGS_STATIC) -tags osusergo,netgo,nosgx -o build/$(BINARY_NAME) ./cmd/swisstronikd
+	CGO_ENABLED=1  go build -mod=mod $(BUILD_FLAGS_STATIC) -tags osusergo,netgo,nosgx,ledger -o build/$(BINARY_NAME) ./cmd/swisstronikd
 
 build-linux:
 	GOOS=linux GOARCH=$(if $(findstring aarch64,$(shell uname -m)) || $(findstring arm64,$(shell uname -m)),arm64,amd64) $(MAKE) build
