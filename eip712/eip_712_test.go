@@ -111,6 +111,83 @@ func (suite *EIP712TestSuite) makeCoins(denom string, amount math.Int) sdk.Coins
 	)
 }
 
+func (suite *EIP712TestSuite) TestDebug() {
+	suite.SetupTest()
+	signModes := []signing.SignMode{
+		signing.SignMode_SIGN_MODE_DIRECT,
+		signing.SignMode_SIGN_MODE_LEGACY_AMINO_JSON,
+	}
+	params := EIP712TestParams{
+		fee: txtypes.Fee{
+			Amount:   suite.makeCoins(suite.denom, math.NewInt(2000)),
+			GasLimit: 20000,
+		},
+		address:       suite.createTestAddress(),
+		accountNumber: 25,
+		sequence:      78,
+		memo:          "",
+	}
+
+	msgs := []sdk.Msg{
+		banktypes.NewMsgSend(
+			suite.createTestAddress(),
+			suite.createTestAddress(),
+			suite.makeCoins(suite.denom, math.NewInt(1)),
+		),
+	}
+
+	privKey, pubKey := suite.createTestKeyPair()
+
+	txBuilder := suite.clientCtx.TxConfig.NewTxBuilder()
+
+	txBuilder.SetGasLimit(params.fee.GasLimit)
+	txBuilder.SetFeeAmount(params.fee.Amount)
+
+	err := txBuilder.SetMsgs(msgs...)
+	suite.Require().NoError(err)
+
+	txBuilder.SetMemo(params.memo)
+
+	// Prepare signature field with empty signatures
+	txSigData := signing.SingleSignatureData{
+		SignMode:  signModes[0],
+		Signature: nil,
+	}
+	txSig := signing.SignatureV2{
+		PubKey:   pubKey,
+		Data:     &txSigData,
+		Sequence: params.sequence,
+	}
+
+	err = txBuilder.SetSignatures([]signing.SignatureV2{txSig}...)
+	suite.Require().NoError(err)
+
+	chainID := utils.TestnetChainID + "-1"
+
+	signerData := authsigning.SignerData{
+		ChainID:       chainID,
+		AccountNumber: params.accountNumber,
+		Sequence:      params.sequence,
+		PubKey:        pubKey,
+		Address:       sdk.MustBech32ifyAddressBytes(config.Bech32Prefix, pubKey.Bytes()),
+	}
+
+	bz, err := suite.clientCtx.TxConfig.SignModeHandler().GetSignBytes(
+		signModes[0],
+		signerData,
+		txBuilder.GetTx(),
+	)
+	suite.Require().NoError(err)
+
+	suite.verifyEIP712SignatureVerification(true, *privKey, *pubKey, bz)
+
+	//// Verify payload flattening only if the payload is in valid JSON format
+	//if signMode == signing.SignMode_SIGN_MODE_LEGACY_AMINO_JSON {
+	//	suite.verifySignDocFlattening(bz)
+	//	suite.verifyBasicTypedData(bz)
+	//}
+}
+
 func (suite *EIP712TestSuite) TestEIP712() {
 	suite.SetupTest()
 
