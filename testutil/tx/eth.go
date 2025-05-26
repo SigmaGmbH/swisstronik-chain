@@ -1,6 +1,22 @@
+// Copyright 2022 Evmos Foundation
+// This file is part of the Evmos Network packages.
+//
+// Evmos is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// The Evmos packages are distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with the Evmos packages. If not, see https://github.com/evmos/evmos/blob/main/LICENSE
 package tx
 
 import (
+	"encoding/json"
 	"math/big"
 
 	errorsmod "cosmossdk.io/errors"
@@ -12,9 +28,11 @@ import (
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
 	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 
 	"swisstronik/app"
+	"swisstronik/server/config"
 	"swisstronik/utils"
 	evmtypes "swisstronik/x/evm/types"
 )
@@ -41,7 +59,7 @@ func PrepareEthTx(
 		}
 
 		if priv != nil {
-			err := msg.Sign(signer, NewTestSigner(priv))
+			err := msg.Sign(signer, NewSigner(priv))
 			if err != nil {
 				return nil, err
 			}
@@ -109,17 +127,58 @@ func CreateEthTx(
 		GasTipCap: big.NewInt(1),
 		Accesses:  &ethtypes.AccessList{},
 	}
-	msgEthereumTx := evmtypes.NewTxFromArgs(evmTxParams, nil, nil)
+	msgEthereumTx := evmtypes.NewTx(
+		evmTxParams.ChainID,
+		evmTxParams.Nonce,
+		evmTxParams.To,
+		evmTxParams.Amount,
+		evmTxParams.GasLimit,
+		evmTxParams.GasPrice,
+		evmTxParams.GasFeeCap,
+		evmTxParams.GasTipCap,
+		evmTxParams.Input,
+		evmTxParams.Accesses,
+		nil,
+		nil)
 	msgEthereumTx.From = fromAddr.String()
 
 	// If we are creating multiple eth Tx's with different senders, we need to sign here rather than later.
 	if privKey != nil {
 		signer := ethtypes.LatestSignerForChainID(app.EvmKeeper.ChainID())
-		err := msgEthereumTx.Sign(signer, NewTestSigner(privKey))
+		err := msgEthereumTx.Sign(signer, NewSigner(privKey))
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	return msgEthereumTx, nil
+}
+
+// GasLimit estimates the gas limit for the provided parameters. To achieve
+// this, need to provide the corresponding QueryClient to call the
+// `eth_estimateGas` rpc method. If not provided, returns a default value
+func GasLimit(ctx sdk.Context, from common.Address, data evmtypes.HexString, queryClientEvm evmtypes.QueryClient) (uint64, error) {
+	// default gas limit (used if no queryClientEvm is provided)
+	gas := uint64(100000000000)
+
+	if queryClientEvm != nil {
+		args, err := json.Marshal(&evmtypes.TransactionArgs{
+			From: &from,
+			Data: (*hexutil.Bytes)(&data),
+		})
+		if err != nil {
+			return gas, err
+		}
+
+		goCtx := sdk.WrapSDKContext(ctx)
+		res, err := queryClientEvm.EstimateGas(goCtx, &evmtypes.EthCallRequest{
+			Args:   args,
+			GasCap: config.DefaultGasCap,
+		})
+		if err != nil {
+			return gas, err
+		}
+		gas = res.Gas
+	}
+	return gas, nil
 }
