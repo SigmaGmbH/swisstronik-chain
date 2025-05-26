@@ -1,18 +1,19 @@
-// Copyright 2021 Evmos Foundation
-// This file is part of Evmos' Ethermint library.
+// Copyright 2022 Evmos Foundation
+// This file is part of the Evmos Network packages.
 //
-// The Ethermint library is free software: you can redistribute it and/or modify
+// Evmos is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The Ethermint library is distributed in the hope that it will be useful,
+// The Evmos packages are distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the Ethermint library. If not, see https://github.com/evmos/ethermint/blob/main/LICENSE
+// along with the Evmos packages. If not, see https://github.com/evmos/evmos/blob/main/LICENSE
+
 package ethsecp256k1
 
 import (
@@ -27,6 +28,7 @@ import (
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	errortypes "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/ethereum/go-ethereum/crypto"
+	"swisstronik/eip712"
 )
 
 const (
@@ -223,7 +225,29 @@ func (pubKey *PubKey) UnmarshalAminoJSON(bz []byte) error {
 //
 // CONTRACT: The signature should be in [R || S] format.
 func (pubKey PubKey) VerifySignature(msg, sig []byte) bool {
-	return pubKey.verifySignatureECDSA(msg, sig)
+	return pubKey.verifySignatureECDSA(msg, sig) || pubKey.verifySignatureAsEIP712(msg, sig)
+}
+
+// Verifies the signature as an EIP-712 signature by first converting the message payload
+// to EIP-712 object bytes, then performing ECDSA verification on the hash. This is to support
+// signing a Cosmos payload using EIP-712.
+func (pubKey PubKey) verifySignatureAsEIP712(msg, sig []byte) bool {
+	eip712Bytes, err := eip712.GetEIP712BytesForMsg(msg)
+	if err != nil {
+		return false
+	}
+
+	if pubKey.verifySignatureECDSA(eip712Bytes, sig) {
+		return true
+	}
+
+	// Try verifying the signature using the legacy EIP-712 encoding
+	legacyEIP712Bytes, err := eip712.LegacyGetEIP712BytesForMsg(msg)
+	if err != nil {
+		return false
+	}
+
+	return pubKey.verifySignatureECDSA(legacyEIP712Bytes, sig)
 }
 
 // Perform standard ECDSA signature verification for the given raw bytes and signature.
