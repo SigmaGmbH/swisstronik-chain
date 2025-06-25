@@ -61,6 +61,9 @@ func NewAnteHandler(options HandlerOptions) (sdk.AnteHandler, error) {
 				case "/ethermint.types.v1.ExtensionOptionDynamicFeeTx":
 					// cosmos-sdk tx with dynamic fee extension
 					anteHandler = NewCosmosAnteHandler(options)
+				case "/ethermint.types.v1.ExtensionOptionsWeb3Tx":
+					// handle as normal Cosmos SDK tx, except signature is checked for EIP712 representation
+					anteHandler = newLegacyCosmosAnteHandlerEip712(options)
 				default:
 					return ctx, errorsmod.Wrapf(
 						errortypes.ErrUnknownExtensionOptions,
